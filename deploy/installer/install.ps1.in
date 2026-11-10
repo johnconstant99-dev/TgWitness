@@ -131,7 +131,7 @@ function Check-Python([string]$Python) {
     Invoke-Checked $Python @('-I', '-c', $Code)
 }
 
-$Lock = $null
+$InstallLock = $null
 $Stage = $null
 $TemporaryFiles = New-Object 'System.Collections.Generic.List[string]'
 $SavedEnvironment = @{}
@@ -165,7 +165,7 @@ try {
     }
     $LockPath = Join-Path $InstallRoot '.install.lock'
     Assert-OrdinaryPath $LockPath
-    try { $Lock = New-Object IO.FileStream($LockPath, [IO.FileMode]::OpenOrCreate, [IO.FileAccess]::ReadWrite, [IO.FileShare]::None) }
+    try { $InstallLock = New-Object IO.FileStream($LockPath, [IO.FileMode]::OpenOrCreate, [IO.FileAccess]::ReadWrite, [IO.FileShare]::None) }
     catch { throw 'Another installation is running, or the installation lock cannot be opened.' }
     Assert-ManagedLauncher
     $Versions = Join-Path $InstallRoot 'versions'
@@ -190,19 +190,19 @@ try {
         $UvZip = Join-Path $Stage 'uv.zip'
         $UvExe = Join-Path $Stage 'uv.exe'
         $Wheel = Join-Path $Stage $WheelName
-        $Lock = Join-Path $Stage 'requirements.lock'
+        $RequirementsLock = Join-Path $Stage 'requirements.lock'
         $WheelSignature = Join-Path $Stage 'wheel.sig'
         $LockSignature = Join-Path $Stage 'requirements.sig'
-        foreach ($File in @($UvZip, $UvExe, $Wheel, $Lock, $WheelSignature, $LockSignature)) { $TemporaryFiles.Add($File) }
+        foreach ($File in @($UvZip, $UvExe, $Wheel, $RequirementsLock, $WheelSignature, $LockSignature)) { $TemporaryFiles.Add($File) }
         $ProgressPreference = 'SilentlyContinue'
         [Net.ServicePointManager]::SecurityProtocol = $OldTls -bor [Net.SecurityProtocolType]::Tls12
         Write-Host "Installing TgWitness $Version ($Release)"
         Download-Checked "$ReleaseUrl/$WheelName" $Wheel $WheelHash
-        Download-Checked "$ReleaseUrl/requirements.lock" $Lock $LockHash
+        Download-Checked "$ReleaseUrl/requirements.lock" $RequirementsLock $LockHash
         Download-Checked "$ReleaseUrl/$WheelName.sig" $WheelSignature '@@WHEEL_SIGNATURE_SHA256@@'
         Download-Checked "$ReleaseUrl/requirements.lock.sig" $LockSignature '@@LOCK_SIGNATURE_SHA256@@'
         Verify-ReleaseSignature $Wheel $WheelSignature
-        Verify-ReleaseSignature $Lock $LockSignature
+        Verify-ReleaseSignature $RequirementsLock $LockSignature
         Write-Host 'Release signatures verified. Key SHA-256: @@SIGNING_KEY_SHA256@@'
         Download-Checked "https://github.com/astral-sh/uv/releases/download/$UvVersion/uv-$UvTarget.zip" $UvZip $UvHash
         Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -231,7 +231,7 @@ try {
         $Venv = Join-Path $VersionPath '.venv'
         Invoke-Checked $UvExe @('--no-config', 'venv', '--managed-python', '--python', '3.12', $Venv)
         $Python = Join-Path $Venv 'Scripts\python.exe'
-        Invoke-Checked $UvExe @('--no-config', 'pip', 'install', '--python', $Python, '--require-hashes', '-r', $Lock)
+        Invoke-Checked $UvExe @('--no-config', 'pip', 'install', '--python', $Python, '--require-hashes', '-r', $RequirementsLock)
         Invoke-Checked $UvExe @('--no-config', 'pip', 'install', '--python', $Python, '--no-deps', $Wheel)
         Check-Python $Python
         $CompleteData = @{release=$Release; revision=$Revision; version=$Version; wheel_sha256=$WheelHash; lock_sha256=$LockHash}
@@ -286,7 +286,7 @@ endlocal & exit /b %TGWITNESS_EXIT%
         try { if (Test-Path -LiteralPath $File -PathType Leaf) { Remove-Item -LiteralPath $File -Force } } catch { }
     }
     if ($Stage) { try { [IO.Directory]::Delete($Stage, $false) } catch { } }
-    if ($Lock) { $Lock.Dispose() }
+    if ($InstallLock) { $InstallLock.Dispose() }
 }
 if ($ExitCode -eq 0 -and -not $NoStart -and $env:TGWITNESS_NO_SETUP -ne '1') {
     $PanelPython = Join-Path $Selected.FullName '.venv\Scripts\python.exe'

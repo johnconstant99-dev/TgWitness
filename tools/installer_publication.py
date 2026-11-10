@@ -17,6 +17,9 @@ ORIGIN = "https://get.destroy.tools"
 RELEASE = re.compile(r"[0-9a-f]{12}-[0-9a-f]{12}")
 NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.+-]{0,150}")
 MAX_BYTES = 64 * 1024 * 1024
+LEGACY_UNSIGNED_MANIFESTS = frozenset({"051a09a06fba-20f7d0ddea89", "535017bfedb2-9f9f7a01dd37",
+                                       "6b83079612e0-a057e9d88e4a", "b910ad9b46c8-6747f96f9833",
+                                       "ef2a2e62f82e-309d51e552b3"})
 
 
 class NoRedirects(HTTPRedirectHandler):
@@ -59,6 +62,14 @@ def validate_manifest(raw, release_id, public, *, allow_test=False):
                 or entry.get("url") != f"{origin}/releases/{release_id}/{name}"):
             raise ValueError("Invalid installer artifact")
     return manifest
+
+
+def verify_manifest(raw, signature, release_id, public):
+    if signature is None:
+        if release_id not in LEGACY_UNSIGNED_MANIFESTS:
+            raise ValueError("Installer manifest signature is missing: " + release_id)
+        return
+    serialization.load_pem_public_key(public).verify(signature, raw, padding.PKCS1v15(), hashes.SHA256())
 
 
 def verify_release(raw, release_id, read, public, *, allow_test=False):
@@ -132,8 +143,10 @@ def index(site, public):
     for release in releases:
         if not release.is_dir() or release.is_symlink():
             raise ValueError("Invalid release directory")
-        verify_release((release / "manifest.json").read_bytes(), release.name,
-                       lambda name: (release / name).read_bytes(), public)
+        raw = (release / "manifest.json").read_bytes()
+        signature = release / "manifest.json.sig"
+        verify_manifest(raw, signature.read_bytes() if signature.is_file() else None, release.name, public)
+        verify_release(raw, release.name, lambda name: (release / name).read_bytes(), public)
         ids.append(release.name)
     raw = (json.dumps({"schema": "tgwitness-installer-archive-v1", "releases": ids}, indent=2) + "\n").encode()
     release_ids(raw)
@@ -142,19 +155,25 @@ def index(site, public):
 
 def retain(site, public):
     ids = release_ids(fetch("releases.json", 128 * 1024))
+    manifests = []
     for release_id in ids:
-        release = site / "releases" / release_id
         prefix = "releases/" + release_id + "/"
         raw = fetch(prefix + "manifest.json", 128 * 1024)
-        files = verify_release(raw, release_id, lambda name: fetch(prefix + name), public)
-        files["manifest.json"] = raw
         try:
             signature = fetch(prefix + "manifest.json.sig", 4096)
         except HTTPError as exc:
             if exc.code != 404:
                 raise
-        else:
-            serialization.load_pem_public_key(public).verify(signature, raw, padding.PKCS1v15(), hashes.SHA256())
+            signature = None
+        verify_manifest(raw, signature, release_id, public)
+        validate_manifest(raw, release_id, public)
+        manifests.append((release_id, raw, signature))
+    for release_id, raw, signature in manifests:
+        release = site / "releases" / release_id
+        prefix = "releases/" + release_id + "/"
+        files = verify_release(raw, release_id, lambda name: fetch(prefix + name), public)
+        files["manifest.json"] = raw
+        if signature is not None:
             files["manifest.json.sig"] = signature
         for name in tuple(files):
             if name not in {"manifest.json", "manifest.json.sig"}:

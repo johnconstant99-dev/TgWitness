@@ -11,22 +11,30 @@ def update_digest_record(raw_bytes, now=None):
                         "meaning": "Digest of serialized update bytes; capture matching requires exact byte correspondence."}}
 
 
+def peer_fields(peer):
+    for kind, field in (("user", "user_id"), ("chat", "chat_id"), ("channel", "channel_id")):
+        raw = getattr(peer, field, None)
+        if isinstance(raw, int) and not isinstance(raw, bool):
+            chat_id = raw if kind == "user" else -raw if kind == "chat" else -1000000000000 - raw
+            return {"peer_user_id": raw if kind == "user" else None, "peer_type": kind, "peer_id": raw,
+                    "chat_id": chat_id}
+    return {"peer_user_id": None}
+
+
 def peer_settings_record(update, now=None):
     settings = getattr(update, "settings", None)
     if settings is None or not getattr(settings, "need_contacts_exception", False):
         return None
-    peer = getattr(update, "peer", None)
-    user_id = getattr(peer, "user_id", None)
     return {"kind": "forensics.peer_settings_observed",
-            "payload": {"peer_user_id": user_id, "observed_at": time.time() if now is None else now,
+            "payload": {**peer_fields(getattr(update, "peer", None)),
+                        "observed_at": time.time() if now is None else now,
                         "need_contacts_exception": True,
                         "meaning": "Observed peer-settings flag, recorded as Telegram delivered it."}}
 
 
 def outbox_read_record(update, now=None):
-    peer = getattr(update, "peer", None)
     return {"kind": "forensics.outbox_read_watermark",
-            "payload": {"peer_user_id": getattr(peer, "user_id", None), "max_id": getattr(update, "max_id", None),
+            "payload": {**peer_fields(getattr(update, "peer", None)), "max_id": getattr(update, "max_id", None),
                         "observed_at": time.time() if now is None else now,
                         "meaning": "Observed outgoing read watermark; it does not identify the person using the account."}}
 

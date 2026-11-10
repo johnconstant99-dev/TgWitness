@@ -279,6 +279,9 @@ def register(app, ctx):
     router.post("/api/account/sessions/end-others", dependencies=[Depends(authenticate)])(
         routes_accounts.end_other_account_sessions
     )
+    router.post("/api/account/sessions/only", dependencies=[Depends(authenticate)])(
+        routes_accounts.make_only_account_session
+    )
     router.post("/api/account/password", dependencies=[Depends(authenticate)])(
         routes_accounts.change_account_password
     )

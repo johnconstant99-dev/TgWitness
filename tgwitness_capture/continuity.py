@@ -7,7 +7,8 @@ from .format import decode
 
 CHANNEL_TYPES = {"private_supergroup", "public_supergroup", "private_channel", "public_channel"}
 CHAT_TYPES = CHANNEL_TYPES | {"personal_chat", "private_group", "saved_messages", "bot_chat"}
-FORMATS = {1: "tgwitness-trusted-continuity-v1", 2: "tgwitness-trusted-continuity-v2"}
+FORMATS = {1: "tgwitness-trusted-continuity-v1", 2: "tgwitness-trusted-continuity-v2",
+           3: "tgwitness-trusted-continuity-v3"}
 MAX_MESSAGES = 200000
 RICH_DEPTH = 64
 CHAT_STYLE = ('body{font:16px system-ui;background:#101923;color:#ecf1f6;max-width:880px;margin:32px auto;padding:0 16px}'
@@ -122,7 +123,7 @@ def timestamp(message):
         return None
 
 
-def analyze(chat, visual=(), time_gap_seconds=86400, version=2):
+def analyze(chat, visual=(), time_gap_seconds=86400, version=3):
     text = (lambda message: text_of(message.get("text"))) if version == 1 else message_text
     messages = sorted(chat["messages"], key=lambda item: item["id"])
     by_id = {message["id"]: message for message in messages}
@@ -145,9 +146,11 @@ def analyze(chat, visual=(), time_gap_seconds=86400, version=2):
                              "cause": "outside_export_or_unavailable"})
         previous = message
     matched = 0
+    relevant = 0
     for observation in visual:
         if observation["chat_id"] != chat["id"]:
             continue
+        relevant += 1
         mid = observation["message_id"]
         message = by_id.get(mid)
         kind = "visual_id_outside_export" if message is None else (
@@ -158,7 +161,7 @@ def analyze(chat, visual=(), time_gap_seconds=86400, version=2):
     return {"format": FORMATS[version], "chat_id": chat["id"], "chat_type": chat["type"],
             "messages": len(messages), "id_intervals_applicable": chat["type"] in CHANNEL_TYPES,
             "scope": "IDs between the first and last exported message; export filters unknown",
-            "visual_comparison": "operator_annotated" if visual else "unavailable_no_annotated_frames",
+            "visual_comparison": "operator_annotated" if (relevant if version > 2 else visual) else "unavailable_no_annotated_frames",
             "operator_matches": matched, "findings": findings, "limits": LIMITS}
 
 

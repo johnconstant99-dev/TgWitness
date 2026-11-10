@@ -267,6 +267,12 @@ token acceptance automatically or revoke sessions to work around restrictions.
 operator's request and records `account.all_other_sessions_terminated` with the session
 counts before and after. Telegram accepts it from a session signed in for 24 hours.
 
+**Make this the only session** does the same for a key created by signing in from this
+workspace, then turns on a two-step password if the account has none. The panel shows that
+password once; TgWitness does not keep it. The journal records `session.exclusive_from`. If
+Telegram later lists another session, the journal records `session.exclusive_ended` and the
+panel raises an alert. The verifier prints both.
+
 ### Telethon `.session`
 
 | | |

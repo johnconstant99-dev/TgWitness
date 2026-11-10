@@ -1,5 +1,6 @@
 (() => {
   const t = (text, vars) => (typeof tr === "function" ? tr(text, vars) : text);
+  const active = new Set();
 
   function open({title, message, danger, confirmText, field, expected, choices, choicesLabel}) {
     return new Promise(resolve => {
@@ -69,6 +70,8 @@
         else if (field?.required) accept.disabled = !value();
       };
       let result = null;
+      const dismiss = () => { result = null; if (dialog.open) dialog.close(); };
+      active.add(dismiss);
       input?.addEventListener("input", ready);
       cancel.addEventListener("click", () => dialog.close());
       form.addEventListener("submit", event => {
@@ -76,6 +79,7 @@
         result = input ? value() : choices ? (boxes || []).filter(box => box.checked).map(box => box.value) : true;
       });
       dialog.addEventListener("close", () => {
+        active.delete(dismiss);
         if (input) input.value = "";
         dialog.remove();
         if (expected !== undefined) resolve(result === expected);
@@ -97,5 +101,6 @@
     typed: (message, expected, options = {}) => open({...options, message, danger: true, expected,
       field: {label: options.label || t("Type the name to confirm"), placeholder: expected, maxLength: 300}}),
     choose: (message, options = {}) => open({...options, message, choices: options.choices || []}),
+    closeAll: () => { for (const dismiss of [...active]) dismiss(); },
   };
 })();

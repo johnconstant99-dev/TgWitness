@@ -94,11 +94,29 @@ def lists(store):
     return store.get_setting(LISTS, None) or []
 
 
-def find(store, list_id):
+class OutOfScope(Exception):
+    pass
+
+
+def scoped(found, chats, change=True):
+    if chats is not None:
+        if not set(found["chat_ids"]) <= set(chats):
+            raise KeyError(found["id"])
+        if change and not found["chat_ids"]:
+            raise OutOfScope()
+    return found
+
+
+def chosen(body, chats):
+    if chats is not None and (not body.chat_ids or not set(body.chat_ids) <= set(chats)):
+        raise OutOfScope()
+
+
+def find(store, list_id, chats=None):
     found = next((item for item in lists(store) if item["id"] == list_id), None)
     if found is None:
         raise KeyError(list_id)
-    return found
+    return scoped(found, chats, change=False)
 
 
 def visible(store, chats):
@@ -106,8 +124,9 @@ def visible(store, chats):
             if chats is None or not item["chat_ids"] or set(item["chat_ids"]) <= set(chats)]
 
 
-def add_list(store, body, actor):
+def add_list(store, body, actor, chats=None):
     available(store)
+    chosen(body, chats)
     with store.transaction():
         current = lists(store)
         if len(current) >= MAX_LISTS:
@@ -119,13 +138,15 @@ def add_list(store, body, actor):
     return entry
 
 
-def update_list(store, list_id, body, actor):
+def update_list(store, list_id, body, actor, chats=None):
     available(store)
     with store.transaction():
         current = lists(store)
         found = next((item for item in current if item["id"] == list_id), None)
         if found is None:
             raise KeyError(list_id)
+        scoped(found, chats)
+        chosen(body, chats)
         before = {key: found[key] for key in body.model_dump()}
         found.update(body.model_dump())
         store.set_setting(LISTS, current)
@@ -133,21 +154,22 @@ def update_list(store, list_id, body, actor):
     return found
 
 
-def remove_list(store, list_id, actor):
+def remove_list(store, list_id, actor, chats=None):
     with store.transaction():
-        found = find(store, list_id)
+        found = scoped(find(store, list_id), chats)
         store.set_setting(LISTS, [item for item in lists(store) if item["id"] != list_id])
         store.append("watchlist.list_changed", {"list": found, "actor": actor, "action": "removed"})
     return {"removed": list_id}
 
 
-def add_entries(store, list_id, bodies, actor):
+def add_entries(store, list_id, bodies, actor, chats=None):
     available(store)
     with store.transaction():
         current = lists(store)
         found = next((item for item in current if item["id"] == list_id), None)
         if found is None:
             raise KeyError(list_id)
+        scoped(found, chats)
         known = {(entry["kind"], entry["value"]) for entry in found["entries"]}
         added = []
         for body in bodies:
@@ -166,12 +188,13 @@ def add_entries(store, list_id, bodies, actor):
     return {"added": added, "skipped": len(bodies) - len(added)}
 
 
-def remove_entry(store, list_id, entry_id, actor):
+def remove_entry(store, list_id, entry_id, actor, chats=None):
     with store.transaction():
         current = lists(store)
         found = next((item for item in current if item["id"] == list_id), None)
         if found is None:
             raise KeyError(list_id)
+        scoped(found, chats)
         entry = next((item for item in found["entries"] if item["id"] == entry_id), None)
         if entry is None:
             raise KeyError(entry_id)
@@ -294,7 +317,8 @@ def scan(store, since=None, limit=BATCH, chats=None):
     head = (store.stats()["head"] or {}).get("seq", 0)
     start = store.get_setting(CURSOR, 0) if since is None else since
     if not active:
-        store.set_setting(CURSOR, head)
+        if since is None and chats is None:
+            store.set_setting(CURSOR, head)
         return {"scanned": 0, "hits": 0, "cursor": head}
     kinds = ",".join(TEXT_KINDS + DERIVED_KINDS)
     events = sorted(store.events(kind=kinds, after=start, limit=limit), key=lambda event: event["seq"])
@@ -323,20 +347,24 @@ def scan(store, since=None, limit=BATCH, chats=None):
                     payload["excerpt"] = excerpt(texts, entry)
                 store.append("watchlist.hit", payload, chat, event.get("message_id"))
                 hits += 1
-    if since is None:
+    if since is None and chats is None:
         store.set_setting(CURSOR, max(cursor, start) if events else head)
     return {"scanned": len(events), "hits": hits, "cursor": max(cursor, start) if events else head}
 
 
 def rescan(store, list_id=None, chats=None):
-    with store.transaction():
-        store.set_setting(CURSOR, 0)
+    since = None if chats is None else 0
+    if chats is None:
+        with store.transaction():
+            store.set_setting(CURSOR, 0)
     total = {"scanned": 0, "hits": 0, "cursor": 0}
     while True:
-        result = scan(store, limit=BATCH, chats=chats)
+        result = scan(store, since=since, limit=BATCH, chats=chats)
         total["scanned"] += result["scanned"]
         total["hits"] += result["hits"]
         total["cursor"] = result["cursor"]
+        if since is not None:
+            since = result["cursor"]
         if result["scanned"] < BATCH:
             return total
 
@@ -374,15 +402,27 @@ def statistics(store, chats=None):
 
 
 def alert_lines(store, start, cursor, words, say, limit=20):
-    found = []
-    for event in reversed(store.events_of(["watchlist.hit"], limit=limit + 1, after=start, before=cursor + 1)):
-        payload = event.get("payload") or {}
-        line = say(words, "Watchlist {list}: {kind} {value}", list=payload.get("list", ""),
-                   kind=payload.get("kind", ""), value=payload.get("value", ""))
-        if payload.get("excerpt"):
-            line += " — " + payload["excerpt"]
-        found.append(line)
-    return found[:limit]
+    from .alerts import alert_settings
+    text = alert_settings(store)["include_text"]
+    alerting = {item["id"] for item in lists(store) if item.get("alert", True)}
+    found, before = [], cursor + 1
+    while len(found) <= limit:
+        events = store.events_of(["watchlist.hit"], limit=BATCH, after=start, before=before)
+        for event in events:
+            payload = event.get("payload") or {}
+            if payload.get("list_id") not in alerting:
+                continue
+            line = say(words, "Watchlist {list}: {kind} {value}", list=payload.get("list", ""),
+                       kind=payload.get("kind", ""), value=payload.get("value", ""))
+            if text and payload.get("excerpt"):
+                line += " — " + payload["excerpt"]
+            found.append(line)
+            if len(found) > limit:
+                break
+        if len(events) < BATCH:
+            break
+        before = events[-1]["seq"]
+    return list(reversed(found))[:limit]
 
 
 def owner_of(request):
@@ -401,6 +441,8 @@ def register(app, authenticate, require_live, visible_chats):
             return await asyncio.to_thread(function, *args)
         except KeyError:
             raise HTTPException(404, "List or entry not found.") from None
+        except OutOfScope:
+            raise HTTPException(403, "This chat is not open to this access.") from None
         except ValueError as exc:
             raise HTTPException(409, str(exc)) from None
 
@@ -413,22 +455,22 @@ def register(app, authenticate, require_live, visible_chats):
     @app.post("/api/watchlists", dependencies=[Depends(authenticate)])
     async def list_add(request: Request, body: Listing):
         require_live()
-        return await call(add_list, app.state.store, body, owner_of(request))
+        return await call(add_list, app.state.store, body, owner_of(request), visible_chats(request))
 
     @app.put("/api/watchlists/{list_id}", dependencies=[Depends(authenticate)])
     async def list_edit(request: Request, list_id: str, body: Listing):
         require_live()
-        return await call(update_list, app.state.store, list_id, body, owner_of(request))
+        return await call(update_list, app.state.store, list_id, body, owner_of(request), visible_chats(request))
 
     @app.delete("/api/watchlists/{list_id}", dependencies=[Depends(authenticate)])
     async def list_remove(request: Request, list_id: str):
         require_live()
-        return await call(remove_list, app.state.store, list_id, owner_of(request))
+        return await call(remove_list, app.state.store, list_id, owner_of(request), visible_chats(request))
 
     @app.post("/api/watchlists/{list_id}/entries", dependencies=[Depends(authenticate)])
     async def entries_add(request: Request, list_id: str, body: Entry):
         require_live()
-        return await call(add_entries, app.state.store, list_id, [body], owner_of(request))
+        return await call(add_entries, app.state.store, list_id, [body], owner_of(request), visible_chats(request))
 
     @app.post("/api/watchlists/{list_id}/import", dependencies=[Depends(authenticate)])
     async def entries_import(request: Request, list_id: str, body: Import):
@@ -436,19 +478,20 @@ def register(app, authenticate, require_live, visible_chats):
         parsed, errors = parse_import(body)
         if not parsed:
             raise HTTPException(422, "No usable entries in the text." if not errors else errors[0]["error"])
-        result = await call(add_entries, app.state.store, list_id, parsed, owner_of(request))
+        result = await call(add_entries, app.state.store, list_id, parsed, owner_of(request), visible_chats(request))
         return {**result, "errors": errors}
 
     @app.get("/api/watchlists/{list_id}/export", dependencies=[Depends(authenticate)])
-    async def entries_export(list_id: str):
-        found = await call(find, app.state.store, list_id)
+    async def entries_export(request: Request, list_id: str):
+        found = await call(find, app.state.store, list_id, visible_chats(request))
         return Response(export_text(found), media_type="text/csv; charset=utf-8",
                         headers={"Content-Disposition": 'attachment; filename="watchlist-' + list_id + '.csv"'})
 
     @app.delete("/api/watchlists/{list_id}/entries/{entry_id}", dependencies=[Depends(authenticate)])
     async def entry_remove(request: Request, list_id: str, entry_id: str):
         require_live()
-        return await call(remove_entry, app.state.store, list_id, entry_id, owner_of(request))
+        return await call(remove_entry, app.state.store, list_id, entry_id, owner_of(request),
+                          visible_chats(request))
 
     @app.get("/api/watchlists/hits", dependencies=[Depends(authenticate)])
     async def hit_list(request: Request, list_id: str | None = None, entry_id: str | None = None, limit: int = 500):

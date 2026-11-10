@@ -78,7 +78,7 @@ def create_sealed_app(root, output, session):
                 except Exception:
                     recorder.settings["enabled"] = False
                     recorder.official.stop_requested = True
-                    recorder.video.abort()
+                    recorder.video.abort("SealedSupervisorFailed")
                     await recorder.official.close()
                     durable_write(output / "result.json", b'{"phase":"failed"}', exclusive=True)
 

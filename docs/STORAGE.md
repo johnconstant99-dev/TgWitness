@@ -137,7 +137,9 @@ python -m tgwitness.storage recover \
 For S3, `--credentials` points to a private JSON file with `access_key` and
 `secret_key`; the signed recovery file supplies the destination settings.
 The command uses a direct external connection and downloads the pinned helper
-when an rclone remote needs it. It refuses an existing output directory.
+when an rclone remote needs it. It refuses an existing output directory unless
+that directory holds an interrupted recovery from the same signed recovery file;
+running the command again keeps the verified files and continues with the rest.
 
 Recovered original bytes are written to `recovered-attachments/media/`, named by
 their SHA-256. `recovery-log.jsonl` is an unsigned record of recovery operations.

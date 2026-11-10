@@ -39,6 +39,8 @@ SEGMENT_EVENTS = 5000
 LOOP_SECONDS = 30
 KEY_DERIVATION = "v2"
 LEGACY_DERIVATION = "v1"
+MAX_RESTORE_OBJECT = 64 * 1024**3
+RESTORE_RESERVE = 64 * 1024**2
 
 
 class ReplicaSettings(BaseModel):
@@ -291,11 +293,21 @@ def outbox(store, path):
         return
     folder = store.root / "replica-outbox"
     folder.mkdir(exist_ok=True, mode=0o700)
-    target = folder / (time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()) + "-" + Path(path).name)
+    target = folder / (time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()) + "-" + os.urandom(8).hex()
+                       + "-" + Path(path).name)
     try:
         os.link(path, target)
+    except FileExistsError:
+        raise
     except OSError:
-        shutil.copy2(path, target)
+        with open(path, "rb") as source, open(target, "xb") as copy:
+            try:
+                shutil.copyfileobj(source, copy)
+            except BaseException:
+                copy.close()
+                target.unlink(missing_ok=True)
+                raise
+        shutil.copystat(path, target)
 
 
 def client(settings, secrets, network):
@@ -404,7 +416,7 @@ async def sync(store, vault, network):
             sent.set("journal_seq", events[-1]["seq"])
 
         unavailable = None
-        for seq, digest in store.media_saved_after(sent.get("media_seq")):
+        for seq, digest in store.media_saved_after(sent.get("stored_media_seq")):
             if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
                 raise ValueError("Invalid preserved media hash")
             name = base + "/media/" + hmac.new(key, digest.encode(), hashlib.sha256).hexdigest()[:40] + ".tgwr"
@@ -418,7 +430,7 @@ async def sync(store, vault, network):
 
                     unavailable = unavailable or exc
             if not unavailable:
-                sent.set("media_seq", seq)
+                sent.set("stored_media_seq", seq)
 
         folder = store.root / "checkpoints"
         for path in sorted([*folder.glob("checkpoint-*.json"), *(folder / "anchors").glob("*")]) if folder.is_dir() else []:
@@ -546,19 +558,30 @@ def restore_path(out, base, name):
 
 async def restore_objects(s3, keyinfo, key, base, out, recipient_key=None):
     segments, counts = [], {"journal": 0, "media": 0, "checkpoints": 0, "exports": 0}
-    async for name, _ in s3.list(base + "/"):
+    async for name, size in s3.list(base + "/"):
         if not name.endswith(".tgwr") or name == base + "/connection-test.tgwr" \
                 or name.startswith(base + "/storage/"):
             continue
         kind, target = restore_path(out, base, name)
+        if not isinstance(size, int) or size < 0 or size > MAX_RESTORE_OBJECT:
+            raise ValueError("Backup object exceeds the restore size limit: " + name)
+        if shutil.disk_usage(out).free < 2 * size + RESTORE_RESERVE:
+            raise ValueError("Not enough free space to restore backup object: " + name)
         target.parent.mkdir(parents=True, exist_ok=True)
         digest = hashlib.sha256()
         with TemporaryDirectory(prefix=".object-", dir=out) as scratch:
             part, clear = Path(scratch) / "encrypted", Path(scratch) / "clear"
+            received = 0
             with part.open("wb") as handle:
                 async def sink(chunk):
+                    nonlocal received
+                    received += len(chunk)
+                    if received > size:
+                        raise ValueError("Backup object exceeds its listed size: " + name)
                     handle.write(chunk)
                 await s3.get(name, sink)
+            if received != size:
+                raise ValueError("Backup object differs from its listed size: " + name)
             with part.open("rb") as encrypted, clear.open("wb") as plain:
                 for piece in decrypt(key, name, encrypted.read, recipient_key):
                     plain.write(piece)

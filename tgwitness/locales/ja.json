@@ -8496,5 +8496,12 @@
   "Running from a source folder instead? Use python start.py, or Start.cmd on Windows. Open the panel address printed in the terminal.": "ソースフォルダから実行する場合は、Pythonの「start.py」またはWindowsの場合は「Start.cmd」を実行してください。ターミナルに表示されたパネルのアドレスを開いてください。",
   "For your own groups, start your own panel with tgwitness and a separate data directory. Demo data cannot be converted into a real investigation.": "ご自身のグループでは、tgwitnessと別のデータディレクトリを使用して独自のパネルを立ち上げてください。デモデータは実際の調査には転用できません。",
   "Open official client and observation settings ↗": "公式クライアントを開き、監視設定を開く ↗",
-  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "このレコーダーは、公式のTelegram Webクライアントを備えています。パネルを開いてログインし、チャットを選択し、レコーダーのコントロールトークンを使用してペースを設定し、セッションを終了してください。"
+  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "このレコーダーは、公式のTelegram Webクライアントを備えています。パネルを開いてログインし、チャットを選択し、レコーダーのコントロールトークンを使用してペースを設定し、セッションを終了してください。",
+  "Telegram sent a sign-in code for this account during observation.": "観測中に Telegram がこのアカウントのログインコードを送信しました。",
+  "Telegram reported a new sign-in to this account during observation.": "観測中に Telegram がこのアカウントへの新しいログインを通知しました。",
+  "Make this the only session": "これを唯一のセッションにする",
+  "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "このアカウントの他のすべてのセッションを終了し、2段階認証パスワードがなければ設定しますか？以後、他の場所からのログインにはそのパスワードが必要になります。",
+  "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "TgWitness が設定した2段階認証パスワードです。今すぐ保存してください。表示は一度だけで、TgWitness は保持しません。",
+  "This is now the only session of this account.": "これがこのアカウントの唯一のセッションになりました。",
+  "Another session signed in after this session was made the only one.": "このセッションを唯一にした後、別のセッションがログインしました。"
 }

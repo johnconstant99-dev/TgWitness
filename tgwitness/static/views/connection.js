@@ -1,7 +1,7 @@
 export function createConnectionView({root, tr, json, state, refreshStatus, askConfirm}) {
   const get = id => root.querySelector('#' + id);
   const el = (tag, text, cls) => { const n = document.createElement(tag); if(text)n.textContent=text; if(cls)n.className=cls; return n; };
-  let generation=0, draftRevision=0, timer=null, data=null, draft=null, plan=null, mode='warp', visible=false, pending=null, touched=false;
+  let generation=0, draftRevision=0, loads=0, timer=null, data=null, draft=null, plan=null, mode='warp', visible=false, pending=null, touched=false;
   const regions=(()=>{try{return new Intl.DisplayNames([document.documentElement.lang||'en'],{type:'region'});}catch{return null;}})();
   const country=code=>{try{return code&&regions?regions.of(code):code;}catch{return code;}};
   const labels = {direct:tr('Direct'),vpn:tr('VPN'),proxy:tr('My proxy'),mtproxy:tr('Public MTProto'),warp:tr('WARP')};
@@ -89,11 +89,13 @@ export function createConnectionView({root, tr, json, state, refreshStatus, askC
   }
   async function load(){
     if(!visible||!state.me?.admin||state.status?.demo)return;
-    const stamp=generation;
+    clearTimeout(timer);timer=null;
+    const stamp=generation,serial=++loads,stale=()=>stamp!==generation||serial!==loads||!visible;
     try{
       const result=await json('connection',undefined,{root:true});
+      if(stale())return;
       const current=state.profile==='default'?result:await json('connection');
-      if(stamp!==generation||!visible)return;
+      if(stale())return;
       data=result;
       const group=get('connect-group'),selected=group.value;
       group.replaceChildren(...result.groups.map(g=>{const o=el('option',g.label);o.value=g.id;return o;}));group.value=selected||result.groups[0]?.id||'';
@@ -109,7 +111,7 @@ export function createConnectionView({root, tr, json, state, refreshStatus, askC
       for(const button of root.querySelectorAll('[data-connect-mode="warp"],[data-connect-mode="vpn"]'))button.disabled=!result.supported;
       if(showJob(result.job))timer=setTimeout(load,1200);
       else if(result.job.state==='applied')await refreshStatus();
-    }catch(error){if(stamp===generation&&visible){status(error.message,true);timer=setTimeout(load,5000);}}
+    }catch(error){if(!stale()){status(error.message,true);timer=setTimeout(load,5000);}}
   }
   async function action(button, fn){
     const stamp=generation;button.disabled=true;

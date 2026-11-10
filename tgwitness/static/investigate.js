@@ -77,11 +77,11 @@
   const open = () => drawer && !drawer.hidden;
   const thumbnails = new Map();
   const analysisState = {chat: null, zone: null, data: null};
-  let toggle = null, drawer = null, current = null, data = null, timer = null, owner = '', editing = null;
+  let toggle = null, drawer = null, current = null, data = null, timer = null, owner = '', editing = null, refreshes = 0;
   let modules = null, homeList = null, shieldInfo = null, homeTab = 'documents', sessionTab = 'timeline';
   let wide = false, accountInfo = null, plans = null, plan = null, planTab = 'work';
   let accountDraft = {profile: {}, privacy: {}, global: {}, errors: {}}, avatarUrl = null, accountReport = null;
-  let cover = null, presence = null, watchPattern = null, watchlists = null, watchHits = null;
+  let cover = null, presence = null, watchPattern = null, watchlists = null, watchHits = null, appearanceSaves = Promise.resolve();
   const ENTRY_KINDS = [['term', 'Word or phrase'], ['regex', 'Pattern'], ['wallet', 'Wallet'], ['username', 'Username'],
     ['telegram_id', 'Telegram ID'], ['domain', 'Domain'], ['phone', 'Phone'], ['url', 'Link']];
   const AUTHORITY_ORDER = ['undercover_operation', 'chis', 'directed_surveillance', 'court_order', 'prosecutor_approval', 'other'];
@@ -390,7 +390,9 @@
   }
 
   async function refresh() {
-    const result = await json(path(current.id));
+    const id = current.id, mark = ++refreshes;
+    const result = await json(path(id));
+    if (mark !== refreshes || current?.id !== id) return;
     current = {...result.session, fixed: result.fixed}; data = result.document;
     renderSession();
   }
@@ -400,11 +402,13 @@
   }
 
   async function document_(suffix, recording = 1) {
-    const response = await api(path(current.id, 'document.' + suffix) + (recording > 1 ? '?recording=' + recording : ''));
+    const id = current.id;
+    const response = await api(path(id, 'document.' + suffix) + (recording > 1 ? '?recording=' + recording : ''));
     const page = suffix === 'html' || suffix === 'slides';
     const types = {md: 'text/markdown', vtt: 'text/vtt', srt: 'application/x-subrip', json: 'application/json'};
     const blob = new Blob([await response.text()], {type: page ? 'text/html' : types[suffix] || 'application/octet-stream'});
-    const name = 'tgwitness-documentation-' + current.id.slice(0, 8) + (recording > 1 ? '-recording-' + recording : '')
+    if (current?.id !== id) return;
+    const name = 'tgwitness-documentation-' + id.slice(0, 8) + (recording > 1 ? '-recording-' + recording : '')
       + (suffix === 'slides' ? '-slides.html' : '.' + suffix);
     if (!page) return saveBlob(blob, name);
     const url = URL.createObjectURL(blob), opened = window.open(url, '_blank');
@@ -825,10 +829,14 @@
       select.value = String(saved[name]); selects[name] = select;
       form.append(el('label', '', tr(label), select));
     }
-    const save = async () => {
+    const save = () => {
+      const id = current.id, session = key();
       const body = Object.fromEntries(Object.entries(selects).map(([k, s]) => [k, k === 'offset_minutes' ? Number(s.value)
         : s.value === 'true' ? true : s.value === 'false' ? false : s.value]));
-      current.appearance = await api(path(current.id, 'appearance'), body, {method: 'PUT'}).then(r => r.json());
+      const write = appearanceSaves.then(() => key() === session
+        ? api(path(id, 'appearance'), body, {method: 'PUT'}).then(r => r.json()) : null);
+      appearanceSaves = write.catch(() => {});
+      return write.then(saved => {if (saved && current?.id === id && key() === session) current.appearance = saved;});
     };
     const lock = () => {
       for (const name of ['limits', 'references']) selects[name].disabled = preset.value === 'court';
@@ -1997,13 +2005,19 @@
   }
 
   async function sendStep(step) {
+    const id = plan.id, chat = plan.chat_id, session = key();
+    let revision = plan.revision;
+    const same = () => plan?.id === id && plan.chat_id === chat && plan.revision === revision && key() === session;
     if (!await askConfirm(tr('Send this message to {chat} from the account now?', {chat: plan.chat_title}) + ' “' + short(step.text, 240) + '”')) return;
+    if (!same()) return;
     const rid = step.request_id || requestId();
-    if (step.request_id !== rid) await planCall(['steps', step.id], {...stepBody(step), request_id: rid}, 'PUT');
-    const result = await json('interactions', {request_id: rid, action: 'send', chat_id: plan.chat_id, text: step.text});
+    if (step.request_id !== rid) {
+      revision = (await planCall(['steps', step.id], {...stepBody(step), request_id: rid}, 'PUT')).revision;
+      if (!same()) return;
+    }
+    const result = await json('interactions', {request_id: rid, action: 'send', chat_id: chat, text: step.text});
     toast(result.status === 'queued' ? tr('Queued. The account sends it at a safe pace; the plan updates when it appears.')
       : result.status === 'succeeded' ? tr('Sent. The plan marks it when the message is saved.') : tr('Status: {status}', {status: result.status}));
-    const id = plan.id;
     setTimeout(() => {if (plan?.id === id && homeTab === 'plans' && open() && !typing()) openPlan(id).catch(() => {});}, 3000);
   }
 

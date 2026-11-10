@@ -337,6 +337,7 @@ async def chat_export_download(
     )
     if not path:
         raise HTTPException(404, "No finished chat export is available to download.")
+    filename = collector.export_state["filename"]
     entry = ctx.prepared_chat_exports.get(export_id)
     if entry is None:
         entry = await asyncio.to_thread(
@@ -351,9 +352,23 @@ async def chat_export_download(
             chat_ids=[(collector.export_state or {}).get("chat_id")],
         )
         ctx.prepared_chat_exports[export_id] = entry
+    if not entry.get("cache_warning"):
+        try:
+            copy = await build_file(
+                lambda: export_history.download_copy(ctx.app.state.store, entry["id"])[0]
+            )
+        except ValueError:
+            ctx.prepared_chat_exports.pop(export_id, None)
+        else:
+            return TemporaryDownload(
+                copy,
+                filename=filename,
+                media_type="application/zip",
+                headers=export_history.headers(entry),
+            )
     return FileResponse(
         path,
-        filename=collector.export_state["filename"],
+        filename=filename,
         media_type="application/zip",
         headers=export_history.headers(entry),
     )

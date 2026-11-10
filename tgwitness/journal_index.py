@@ -8,6 +8,7 @@ TEXT_KINDS = ("message.new", "message.snapshot", "message.edited", "message.reco
 GONE_KINDS = ("message.deleted", "message.missing_on_recheck")
 CHAT_KINDS = TEXT_KINDS + GONE_KINDS + ("media.saved",)
 MEDIA_KINDS = ("media.saved", "actor.avatar_saved")
+STORED_MEDIA_KINDS = MEDIA_KINDS + ("secret_chat.file",)
 NUL_PAYLOAD = "instr(payload,'\\u0000')>0"
 READ_GROUPS = {
     "state": ("message_state_index", "chat_state_index", "known_chat_index"),

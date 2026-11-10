@@ -619,6 +619,21 @@ class AccessControl:
             session["requests"] += 1
             return self.principal(session)
 
+    def current(self, wanted, address):
+        now = time.time()
+        with self.lock:
+            if secrets.compare_digest(wanted, digest(self.vault.token)):
+                return Principal(True, "Main administrator (panel token)")
+            session = self.sessions.get(wanted)
+            if session is None or session["expires"] <= now:
+                return None
+            if session["owner"] != "admin":
+                grant = self.grant(session["owner"])
+                if grant is None:
+                    return None
+                self.refuse(grant, address, now, signing_in=False)
+            return self.principal(session)
+
     def end(self, session_id, reason):
         with self.lock:
             found = next((s for s in self.sessions.values() if s["id"] == session_id), None)

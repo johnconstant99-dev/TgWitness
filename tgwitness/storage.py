@@ -621,84 +621,94 @@ class Storage:
     async def restore(self, digest):
         async with self.lock:
             self.busy = True
-            receipts = Receipts(self.store.root)
-            backend = None
             try:
-                receipt = receipts.get(digest)
-                if not receipt:
-                    raise ValueError("No saved storage receipt for this file.")
-                if receipt["destination"] != self.destination():
-                    raise ValueError("Restore the original destination settings before recovering this file.")
-                path = safe_file(self.store.root, digest)
-                if path.is_file() and file_hash(path) == digest:
-                    receipts.evict(digest, False)
-                    return path
-                if path.exists():
-                    raise ValueError("A local file has different bytes. Keep it separately for review before restoring the verified copy.")
-                reserve = self.reserve_bytes()
-                self.require_space(2 * receipt["cipher_bytes"] + receipt["bytes"], reserve)
-                backend = self.backend()
-                with tempfile.TemporaryDirectory(prefix="storage-", dir=self.store.root) as folder:
-                    ciphertext, packed, restored = [Path(folder) / s for s in ("cipher", "packed", "restored")]
-                    seen = 0
-                    with ciphertext.open("wb") as out:
-                        async def sink(chunk):
-                            nonlocal seen
-                            seen += len(chunk)
-                            if seen > receipt["cipher_bytes"]:
-                                raise ValueError("The remote object exceeds its recorded size.")
-                            self.require_space(len(chunk), reserve)
-                            out.write(chunk)
-                        await backend.get(receipt["object"], sink)
-                    if file_hash(ciphertext) != receipt["cipher_sha256"] or seen != receipt["cipher_bytes"]:
-                        raise ValueError("The remote object differs from its saved checksum.")
-                    try:
-                        with ciphertext.open("rb") as inp, packed.open("wb") as out:
-                            for chunk in replica.decrypt(self.key(), receipt["object"], inp.read):
-                                self.require_space(len(chunk), reserve)
-                                out.write(chunk)
-                                await asyncio.sleep(0)
-                    except InvalidTag:
-                        raise ValueError("The storage key does not unlock this file. Import its original recovery file.") from None
-                    unpack = gzip.open if receipt["compressed"] else open
-                    total = 0
-                    with unpack(packed, "rb") as inp, restored.open("wb") as out:
-                        while chunk := inp.read(1024 * 1024):
-                            total += len(chunk)
-                            if total > receipt["bytes"]:
-                                raise ValueError("Recovered file exceeds its recorded size.")
-                            self.require_space(len(chunk), reserve)
-                            out.write(chunk)
-                    if total != receipt["bytes"] or file_hash(restored) != digest:
-                        raise ValueError("Recovered file does not match its signed journal hash.")
-                    path.parent.mkdir(exist_ok=True, mode=0o700)
-                    safe_file(self.store.root, digest)
-                    restored.replace(path)
-                receipts.evict(digest, False)
-                self.save_refreshed(backend)
-                self.store.append("storage.restored", {"sha256": digest, "bytes": receipt["bytes"]})
-                return path
+                return await self.restore_locked(digest)
             finally:
                 self.busy = False
-                receipts.close()
-                self.save_refreshed(backend)
 
-    async def restore_all(self):
-        saved = settings(self.store)
-        if saved["enabled"]:
-            self.store.set_setting("storage", {**saved, "enabled": False})
-            self.store.append("storage.paused", {"reason": "restore_requested"})
+    async def restore_locked(self, digest):
         receipts = Receipts(self.store.root)
+        backend = None
         try:
-            pending = [r["sha256"] for r in receipts.rows() if r["evicted"]]
+            receipt = receipts.get(digest)
+            if not receipt:
+                raise ValueError("No saved storage receipt for this file.")
+            if receipt["destination"] != self.destination():
+                raise ValueError("Restore the original destination settings before recovering this file.")
+            path = safe_file(self.store.root, digest)
+            if path.is_file() and file_hash(path) == digest:
+                receipts.evict(digest, False)
+                return path
+            if path.exists():
+                raise ValueError("A local file has different bytes. Keep it separately for review before restoring the verified copy.")
+            reserve = self.reserve_bytes()
+            self.require_space(2 * receipt["cipher_bytes"] + receipt["bytes"], reserve)
+            backend = self.backend()
+            with tempfile.TemporaryDirectory(prefix="storage-", dir=self.store.root) as folder:
+                ciphertext, packed, restored = [Path(folder) / s for s in ("cipher", "packed", "restored")]
+                seen = 0
+                with ciphertext.open("wb") as out:
+                    async def sink(chunk):
+                        nonlocal seen
+                        seen += len(chunk)
+                        if seen > receipt["cipher_bytes"]:
+                            raise ValueError("The remote object exceeds its recorded size.")
+                        self.require_space(len(chunk), reserve)
+                        out.write(chunk)
+                    await backend.get(receipt["object"], sink)
+                if file_hash(ciphertext) != receipt["cipher_sha256"] or seen != receipt["cipher_bytes"]:
+                    raise ValueError("The remote object differs from its saved checksum.")
+                try:
+                    with ciphertext.open("rb") as inp, packed.open("wb") as out:
+                        for chunk in replica.decrypt(self.key(), receipt["object"], inp.read):
+                            self.require_space(len(chunk), reserve)
+                            out.write(chunk)
+                            await asyncio.sleep(0)
+                except InvalidTag:
+                    raise ValueError("The storage key does not unlock this file. Import its original recovery file.") from None
+                unpack = gzip.open if receipt["compressed"] else open
+                total = 0
+                with unpack(packed, "rb") as inp, restored.open("wb") as out:
+                    while chunk := inp.read(1024 * 1024):
+                        total += len(chunk)
+                        if total > receipt["bytes"]:
+                            raise ValueError("Recovered file exceeds its recorded size.")
+                        self.require_space(len(chunk), reserve)
+                        out.write(chunk)
+                if total != receipt["bytes"] or file_hash(restored) != digest:
+                    raise ValueError("Recovered file does not match its signed journal hash.")
+                path.parent.mkdir(exist_ok=True, mode=0o700)
+                safe_file(self.store.root, digest)
+                restored.replace(path)
+            receipts.evict(digest, False)
+            self.save_refreshed(backend)
+            self.store.append("storage.restored", {"sha256": digest, "bytes": receipt["bytes"]})
+            return path
         finally:
             receipts.close()
-        self.store.set_setting("storage_last", {"at": utcnow(), "operation": "restore", "files": 0, "pending": len(pending), "error": None})
-        for index, digest in enumerate(pending):
-            await self.restore(digest)
-            self.store.set_setting("storage_last", {"at": utcnow(), "operation": "restore", "files": index + 1,
-                                                    "pending": len(pending) - index - 1, "error": None})
-        return {"restored": len(pending)}
+            self.save_refreshed(backend)
+
+    async def restore_all(self):
+        async with self.lock:
+            self.busy = True
+            try:
+                saved = settings(self.store)
+                if saved["enabled"]:
+                    self.store.set_setting("storage", {**saved, "enabled": False})
+                    self.store.append("storage.paused", {"reason": "restore_requested"})
+                receipts = Receipts(self.store.root)
+                try:
+                    pending = [r["sha256"] for r in receipts.rows() if r["evicted"]]
+                finally:
+                    receipts.close()
+                self.store.set_setting("storage_last", {"at": utcnow(), "operation": "restore", "files": 0, "pending": len(pending), "error": None})
+                for index, digest in enumerate(pending):
+                    await self.restore_locked(digest)
+                    self.store.set_setting("storage_last", {"at": utcnow(), "operation": "restore", "files": index + 1,
+                                                            "pending": len(pending) - index - 1, "error": None})
+                return {"restored": len(pending)}
+            finally:
+                self.busy = False
 
     def require_local_media(self):
         receipts = Receipts(self.store.root)
@@ -795,8 +805,11 @@ async def recover_directory(value, trusted_fingerprint, credentials, output, ins
     from .network import NetworkConfig
     from .security import owner_only
     validate_recovery(value, trusted_fingerprint)
+    retained = output / "storage-recovery.json"
     if output.exists() or replica.filesystem_link(output):
-        raise ValueError("Choose a new, empty output directory. Existing folders are never replaced.")
+        if (replica.filesystem_link(output) or not output.is_dir() or replica.filesystem_link(retained)
+                or not retained.is_file() or retained.read_bytes() != canonical(value)):
+            raise ValueError("Choose a new, empty output directory. Existing folders are never replaced.")
     if value["settings"]["backend"] == "rclone":
         parse_config(credentials)
         vault_data = {"storage": {"key": value["key"], "config": credentials}}
@@ -808,8 +821,6 @@ async def recover_directory(value, trusted_fingerprint, credentials, output, ins
         except (ValueError, TypeError):
             raise ValueError('Supply an S3 JSON credentials file with "access_key" and "secret_key".') from None
         vault_data = {"storage": {"key": value["key"]}, "replica": config}
-    output.mkdir(parents=True, mode=0o700)
-    owner_only(output)
 
     class RecoveryStore:
         root = output
@@ -837,12 +848,15 @@ async def recover_directory(value, trusted_fingerprint, credentials, output, ins
     manager = Storage(RecoveryStore(), RecoveryVault(), lambda: NetworkConfig(kind="direct"))
     if any(row["destination"] != manager.destination() for row in value["objects"]):
         raise ValueError("The supplied credentials/configuration describes a different remote. Use the original remote configuration.")
+    if not output.exists():
+        output.mkdir(parents=True, mode=0o700)
+        owner_only(output)
+        private_write(retained, canonical(value))
     receipts = Receipts(output)
     try:
         receipts.import_all([{**row, "evicted": True} for row in value["objects"]])
     finally:
         receipts.close()
-    private_write(output / "storage-recovery.json", canonical(value))
     if value["settings"]["backend"] == "rclone" and install_helper:
         await asyncio.to_thread(install, output)
     return await manager.restore_all()

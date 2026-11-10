@@ -8535,5 +8535,12 @@
   "Running from a source folder instead? Use python start.py, or Start.cmd on Windows. Open the panel address printed in the terminal.": "آیا می‌خواهید از یک پوشهٔ منبع اجرا کنید؟ از python start.py یا Start.cmd در ویندوز استفاده کنید. آدرس پنل را که در ترمینال چاپ شده باز کنید.",
   "For your own groups, start your own panel with tgwitness and a separate data directory. Demo data cannot be converted into a real investigation.": "برای گروه‌های خود، پنل خود را با tgwitness و یک دایرکتوری داده جداگانه راه‌اندازی کنید. داده‌های نمایشی را نمی‌توان به یک تحقیق واقعی تبدیل کرد.",
   "Open official client and observation settings ↗": "کلاینت رسمی را باز کنید و تنظیمات مشاهده را باز کنید ↗",
-  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "این ضبط‌کننده دارای کلاینت وب رسمی تلگرام است. پنل آن را باز کنید تا وارد شوید، یک چت را انتخاب کنید، سرعت را تنظیم کرده و با استفاده از توکن کنترل ضبط‌کننده جلسه را پایان دهید."
+  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "این ضبط‌کننده دارای کلاینت وب رسمی تلگرام است. پنل آن را باز کنید تا وارد شوید، یک چت را انتخاب کنید، سرعت را تنظیم کرده و با استفاده از توکن کنترل ضبط‌کننده جلسه را پایان دهید.",
+  "Telegram sent a sign-in code for this account during observation.": "تلگرام هنگام پایش یک کد ورود برای این حساب فرستاد.",
+  "Telegram reported a new sign-in to this account during observation.": "تلگرام هنگام پایش یک ورود تازه به این حساب گزارش کرد.",
+  "Make this the only session": "این را تنها نشست کن",
+  "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "همهٔ نشست‌های دیگر این حساب پایان یابد و اگر گذرواژهٔ تأیید دومرحله‌ای ندارد، روشن شود؟ پس از آن ورود از هر جای دیگر به این گذرواژه نیاز دارد.",
+  "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "گذرواژهٔ تأیید دومرحله‌ای که TgWitness تنظیم کرد. همین حالا ذخیره‌اش کنید: فقط یک بار نمایش داده می‌شود و TgWitness آن را نگه نمی‌دارد.",
+  "This is now the only session of this account.": "اکنون این تنها نشست این حساب است.",
+  "Another session signed in after this session was made the only one.": "پس از اینکه این نشست تنها نشست شد، نشست دیگری وارد شد."
 }

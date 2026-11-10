@@ -1,5 +1,6 @@
 import asyncio
 import hashlib
+import json
 import logging
 import secrets
 import shutil
@@ -10,6 +11,7 @@ from telethon.tl import types
 from telethon.tl.tlobject import TLObject
 
 from .monitoring import capture_settings
+from .store import canonical
 from .workers import complete_in_thread
 
 try:
@@ -29,6 +31,7 @@ QUIET = {"DecryptedMessageActionRequestKey", "DecryptedMessageActionAcceptKey", 
          "DecryptedMessageActionResend"}
 UNAVAILABLE = ("Pseudo-secret needs the optional package kiaro-telethon-secret-chat. "
                "Install TgWitness with the secret-chats extra and restart the panel.")
+SAME = ("direction", "seq_no", "text", "ttl", "reply_to_random_id", "entities", "media")
 
 
 def available():
@@ -78,6 +81,29 @@ def decode(value):
     if isinstance(value, list):
         return [decode(v) for v in value]
     return value
+
+
+def running():
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return False
+    return True
+
+
+def fingerprint(payload):
+    return hashlib.sha256(canonical({key: (payload or {}).get(key) for key in SAME})).hexdigest()
+
+
+def same(payload, earlier):
+    return all(canonical(payload[key]) == canonical(earlier.get(key)) for key in SAME if key in payload)
+
+
+def slot(entries, name, mark, field=None):
+    existing = entries.get(name)
+    if existing is not None and field:
+        existing = existing.get(field)
+    return name if existing is None or fingerprint(existing) == mark else name + ":" + mark
 
 
 def display(value, field=None):
@@ -150,7 +176,7 @@ class SecretChats:
 
     def hold(self, name, payload):
         held = self.collector.vault.read(HELD) or {}
-        held[name] = payload
+        held[slot(held, name, fingerprint(payload))] = payload
         self.collector.vault.save(HELD, held)
 
     def release(self, name):
@@ -159,14 +185,16 @@ class SecretChats:
             self.collector.vault.save(HELD, held)
 
     def write_held(self):
+        kept = 0
         for name, payload in list((self.collector.vault.read(HELD) or {}).items()):
-            if not self.recorded("message", payload.get("secret_chat_id"), payload.get("random_id")):
-                try:
-                    self.note("message", payload)
-                except Exception:
-                    LOG.exception("A held secret-chat message could not be written")
-                    continue
+            try:
+                self.write_message(payload)
+            except Exception:
+                LOG.exception("A held secret-chat message could not be written")
+                kept += 1
+                continue
             self.release(name)
+        return kept
 
     def peer(self, chat_id):
         try:
@@ -231,6 +259,27 @@ class SecretChats:
         with self.store.lock:
             return self.store.db.execute(query + " LIMIT 1", values).fetchone() is not None
 
+    def earlier(self, kind, chat_id, random_id):
+        with self.store.lock:
+            return [(row[0], json.loads(row[1])) for row in self.store.db.execute(
+                "SELECT seq, payload FROM events WHERE kind=? AND json_extract(payload,'$.secret_chat_id')=?"
+                " AND json_extract(payload,'$.random_id')=? ORDER BY seq", ("secret_chat." + kind, chat_id, random_id))]
+
+    def matching(self, payload):
+        earlier = self.earlier("message", payload.get("secret_chat_id"), payload.get("random_id"))
+        return next((seq for seq, saved in earlier if same(payload, saved)), None), earlier
+
+    def write_message(self, payload):
+        found, earlier = self.matching(payload)
+        if found is None:
+            if earlier:
+                payload = {**payload, "same_random_id_as": [seq for seq, _ in earlier]}
+            found = self.note("message", payload)["seq"]
+        return found
+
+    def has_file(self, chat_id, random_id, message):
+        return any(saved.get("message_event") in (None, message) for _, saved in self.earlier("file", chat_id, random_id))
+
     def on_ChatRequested(self, event):
         accept = settings(self.store)["accept_incoming"]
         if not self.recorded("requested", event.chat_id):
@@ -252,32 +301,34 @@ class SecretChats:
                              "journal_copy": "kept; the journal is append-only"})
 
     def on_MessageReceived(self, event):
-        key = (event.chat_id, event.random_id)
-        recorded = key in self.seen or self.recorded("message", event.chat_id, event.random_id)
         payload = {"secret_chat_id": event.chat_id, "peer_user_id": self.peer(event.chat_id), "direction": "in",
                    "random_id": event.random_id, "seq_no": event.seq_no, "text": event.text, "ttl": event.ttl,
                    "reply_to_random_id": event.reply_to,
                    "entities": plain(event.entities) if event.entities else None,
                    "media": plain(event.media) if event.media is not None else None}
+        mark = fingerprint(payload)
+        key = (event.chat_id, event.random_id, mark)
+        name = str(event.chat_id) + ":" + str(event.random_id)
         item = None
-        if event.media_reference is not None and not self.recorded("file", event.chat_id, event.random_id):
-            item = {"secret_chat_id": event.chat_id, "random_id": event.random_id,
-                    "reference": event.media_reference.to_dict(), "message": payload}
+        if event.media_reference is not None and not self.has_file(event.chat_id, event.random_id,
+                                                                    self.matching(payload)[0]):
             pending = self.collector.vault.read(PENDING) or {}
-            name = str(event.chat_id) + ":" + str(event.random_id)
-            item = pending.get(name) or encode(item)
+            name = slot(pending, name, mark, "message")
+            item = pending.get(name) or encode({"secret_chat_id": event.chat_id, "random_id": event.random_id,
+                                                "reference": event.media_reference.to_dict(), "message": payload})
             pending[name] = item
             self.collector.vault.save(PENDING, pending)
-        if not recorded:
-            name = str(event.chat_id) + ":" + str(event.random_id)
-            if item is None:
-                try:
-                    self.note("message", payload)
-                except Exception:
+        try:
+            if key not in self.seen:
+                self.write_message(payload)
+        except Exception:
+            try:
+                if item is None:
                     self.hold(name, payload)
-                    raise
-            else:
-                self.note("message", payload)
+            finally:
+                if running():
+                    self.resume_files()
+            raise
         if len(self.seen) >= 4096:
             self.seen.clear()
         self.seen.add(key)
@@ -310,7 +361,7 @@ class SecretChats:
     def resume_files(self):
         self.file_wakeup.set()
         if self.manager is not None and (self.file_worker is None or self.file_worker.done()):
-            if self.collector.vault.read(PENDING):
+            if self.collector.vault.read(PENDING) or self.collector.vault.read(HELD):
                 self.file_worker = self.spawn(self.drain_files())
         return self.file_worker
 
@@ -327,11 +378,17 @@ class SecretChats:
 
     async def next_file(self):
         self.file_wakeup.clear()
+        held = self.write_held()
         pending = self.collector.vault.read(PENDING) or {}
-        if not pending:
+        if not pending and not held:
             return False
-        name, item = min(pending.items(), key=lambda row: row[1].get("retry_at", 0))
-        delay = min(300, max(0, item.get("retry_at", 0) - time.time()))
+        if pending:
+            name, item = min(pending.items(), key=lambda row: row[1].get("retry_at", 0))
+            delay = min(300, max(0, item.get("retry_at", 0) - time.time()))
+        else:
+            name, delay = None, 30
+        if held and delay:
+            delay = min(delay, 30)
         if delay:
             try:
                 await asyncio.wait_for(self.file_wakeup.wait(), delay)
@@ -340,7 +397,7 @@ class SecretChats:
             return True
         self.downloads[name] = asyncio.current_task()
         try:
-            await self.save_file(decode(item))
+            await self.save_file(decode(item), name)
         except asyncio.CancelledError:
             raise
         except Exception:
@@ -367,15 +424,14 @@ class SecretChats:
             return "not enough free disk space"
         return None
 
-    async def save_file(self, item):
-        name = str(item["secret_chat_id"]) + ":" + str(item["random_id"])
+    async def save_file(self, item, name=None):
+        name = name or str(item["secret_chat_id"]) + ":" + str(item["random_id"])
         media_root = self.store.root / "media"
         media_root.mkdir(exist_ok=True)
         temporary = media_root / (".secret-" + secrets.token_hex(8))
         try:
-            if item.get("message") and not self.recorded("message", item["secret_chat_id"], item["random_id"]):
-                self.note("message", item["message"])
-            if self.recorded("file", item["secret_chat_id"], item["random_id"]):
+            message = self.write_message(item["message"]) if item.get("message") else None
+            if self.has_file(item["secret_chat_id"], item["random_id"], message):
                 pending = self.collector.vault.read(PENDING) or {}
                 if pending.pop(name, None) is not None:
                     self.collector.vault.save(PENDING, pending)
@@ -390,6 +446,7 @@ class SecretChats:
             await self.manager.save_file(reference, temporary)
             digest, size, repaired = await complete_in_thread(retain_file, temporary, media_root)
             self.note("file", {"secret_chat_id": item["secret_chat_id"], "random_id": item["random_id"],
+                               **({"message_event": message} if message else {}),
                                "media_sha256": digest, "size": size,
                                **({"cache_repair": repaired} if repaired else {}),
                                "meaning": "Decrypted by TgWitness and stored by its SHA-256; the message record describes it."})
@@ -436,6 +493,10 @@ class SecretChats:
 
     async def accept(self, chat_id, automatic=False):
         manager = self.require()
+        if automatic and not settings(self.store)["accept_incoming"]:
+            self.note("accept_failed", {"secret_chat_id": chat_id, "automatic": True,
+                                        "reason": "accept_incoming turned off"})
+            return None
         try:
             chat = await self.acting(manager.accept, chat_id)
         except Exception as exc:

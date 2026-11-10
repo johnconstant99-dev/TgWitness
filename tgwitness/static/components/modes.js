@@ -269,8 +269,14 @@ export function createModes({node, tr, json, may, status, query, go, toast}) {
     render();
   }
 
+  function reset() {
+    wizardRun++; request++; selected = null;
+    if (dialog.open) dialog.close();
+    if (wizard.open) wizard.close();
+  }
+
   function sync(sessionKey) {
-    if (sessionKey !== key) { key = sessionKey; data = null; selected = null; render(); void load(); return; }
+    if (sessionKey !== key) { reset(); key = sessionKey; data = null; render(); void load(); return; }
     if (Date.now() - loadedAt > 60000) void load();
   }
 
@@ -391,6 +397,6 @@ export function createModes({node, tr, json, may, status, query, go, toast}) {
   switcher.addEventListener('click', () => show());
   dialog.addEventListener('close', () => { selected = null; });
 
-  return {sync, refresh: () => load(), show, open, openWizard, mode: () => data?.mode ?? null, locked: isLocked,
+  return {sync, reset, refresh: () => load(), show, open, openWizard, mode: () => data?.mode ?? null, locked: isLocked,
     lockedExtra: name => !!EXTRA_FEATURES[name] && isLocked(EXTRA_FEATURES[name])};
 }

@@ -531,7 +531,34 @@ class SystemOperations:
                     raise
             return await self.perform_operation(call, *args)
 
-    def queue_action(self, run_at, body):
+    def action_authority(self, request, credential, body):
+        from ..access import digest
+
+        access = self.app.state.access
+        wanted = digest(credential.credentials) if credential else ""
+        address = self.client_address(request)
+
+        def authorized():
+            try:
+                principal = access.current(wanted, address)
+                if principal is None:
+                    raise Refused("This session has already ended.")
+                access_check(
+                    principal, self.profile_id, POLICY["POST /api/interactions"], {}
+                )
+                allowed = principal.chats(self.profile_id)
+                if allowed is not None and body.action == "open":
+                    raise Refused(
+                        "This access opens only chosen chats; this part of the workspace is closed to it."
+                    )
+                if allowed is not None and body.chat_id not in allowed:
+                    raise Refused("This chat is not open to this access.")
+            except Refused as exc:
+                raise ValueError(str(exc)) from None
+
+        return authorized
+
+    def queue_action(self, run_at, body, authorized=None):
 
         async def run():
             store = self.app.state.store
@@ -542,7 +569,10 @@ class SystemOperations:
                 if wait <= 0:
                     try:
                         await self.operation(
-                            interactions.run_queued, self.app.state.collector, body
+                            interactions.run_queued,
+                            self.app.state.collector,
+                            body,
+                            authorized,
                         )
                     except HTTPException as exc:
                         interactions.abandon(store, str(exc.detail), body.request_id)

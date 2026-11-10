@@ -5,6 +5,8 @@ import io
 import json
 import os
 import re
+import shutil
+import stat
 import tempfile
 import urllib.request
 import uuid
@@ -515,5 +517,8 @@ def cleanup_exports(root):
     for item in directory.iterdir():
         if not item.name.startswith(("tgwitness-export-", "tgwitness-handover-")):
             continue
-        if item.is_file() and not item.is_symlink() and item.suffix in (".zip", ".jsonl", ".csv", ".html", ".json", ".tgwpw"):
+        if item.is_file() and not item.is_symlink() and item.suffix in (".zip", ".jsonl", ".csv", ".html", ".json", ".pdf", ".tgwpw"):
             item.unlink()
+        elif (re.fullmatch(r"tgwitness-export-chat-[A-Za-z0-9_-]{24}-media", item.name) and not item.is_symlink()
+              and item.is_dir() and not getattr(item.lstat(), "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT):
+            shutil.rmtree(item, ignore_errors=True)

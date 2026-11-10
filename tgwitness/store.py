@@ -12,7 +12,7 @@ from . import keyboard
 from . import message_content
 from . import continuity
 from .fulltext import FullText
-from .journal_index import CHAT_KINDS, MEDIA_KINDS, TEXT_KINDS, JournalIndex, migrate_media, nul_text, search_text
+from .journal_index import CHAT_KINDS, MEDIA_KINDS, STORED_MEDIA_KINDS, TEXT_KINDS, JournalIndex, migrate_media, nul_text, search_text
 from .journal_index import GONE_KINDS as GONE_KINDS
 from .journal_index import NUL_PAYLOAD
 from .people import observed_names
@@ -387,8 +387,9 @@ class Store:
     def media_saved_after(self, seq):
         with self.lock:
             return [(r[0], r[1]) for r in self.db.execute(
-                "SELECT seq, json_extract(payload,'$.media_sha256') FROM events WHERE kind IN (?,?) AND seq>?"
-                " ORDER BY seq", (*MEDIA_KINDS, seq)) if r[1]]
+                "SELECT seq, json_extract(payload,'$.media_sha256') FROM events WHERE kind IN ("
+                + ",".join("?" * len(STORED_MEDIA_KINDS)) + ") AND seq>? ORDER BY seq",
+                (*STORED_MEDIA_KINDS, seq)) if r[1]]
 
     def media_in_chats(self, sha256, chat_ids):
         marks = ",".join("?" * len(chat_ids))

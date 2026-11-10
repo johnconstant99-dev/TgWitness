@@ -8613,5 +8613,12 @@
   "Running from a source folder instead? Use python start.py, or Start.cmd on Windows. Open the panel address printed in the terminal.": "Chcesz uruchomić narzędzie z folderu źródłowego? Użyj polecenia python start.py lub Start.cmd w systemie Windows. Otwórz adres panelu wyświetlony w terminalu.",
   "For your own groups, start your own panel with tgwitness and a separate data directory. Demo data cannot be converted into a real investigation.": "W przypadku własnych grup należy uruchomić własny panel z wykorzystaniem tgwitness i oddzielnego katalogu danych. Dane demonstracyjne nie mogą zostać wykorzystane w prawdziwym dochodzeniu.",
   "Open official client and observation settings ↗": "Otwórz oficjalną aplikację i przejdź do ustawień obserwacji ↗",
-  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "Ten rejestrator jest powiązany z oficjalnym klientem Telegram Web. Otwórz jego panel, aby się zalogować, wybierz czat, ustaw tempo i zakończ sesję, korzystając z tokenu sterującego rejestratora."
+  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "Ten rejestrator jest powiązany z oficjalnym klientem Telegram Web. Otwórz jego panel, aby się zalogować, wybierz czat, ustaw tempo i zakończ sesję, korzystając z tokenu sterującego rejestratora.",
+  "Telegram sent a sign-in code for this account during observation.": "Telegram wysłał kod logowania do tego konta podczas obserwacji.",
+  "Telegram reported a new sign-in to this account during observation.": "Telegram zgłosił nowe logowanie na to konto podczas obserwacji.",
+  "Make this the only session": "Ustaw jako jedyną sesję",
+  "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "Zakończyć wszystkie inne sesje tego konta i włączyć hasło weryfikacji dwuetapowej, jeśli go nie ma? Potem logowanie w innym miejscu będzie wymagać tego hasła.",
+  "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "Hasło weryfikacji dwuetapowej ustawione przez TgWitness. Zapisz je teraz: jest pokazywane tylko raz, a TgWitness go nie przechowuje.",
+  "This is now the only session of this account.": "To jest teraz jedyna sesja tego konta.",
+  "Another session signed in after this session was made the only one.": "Inna sesja zalogowała się po ustawieniu tej sesji jako jedynej."
 }

@@ -75,6 +75,20 @@ def checks(report):
     return {c["check"]: c for c in report.get("checks") or []}
 
 
+def tdx_attested(found):
+    return all(found.get(c, {}).get("status") in ("pass", "review")
+               for c in ("tdx_binding", "tdx_quote", "tdx_compose_hash", "tdx_compose", "tdx_identity"))
+
+
+def register_match(os_image, quote, key):
+    computed = os_image.get(key)
+    if computed is None:
+        return None
+    if key == "mrtd" and "mrtd_order" in os_image and os_image["mrtd_order"] is None:
+        return False
+    return computed == quote.get(key)
+
+
 def time_stamp(data, url, session=None):
     query = timestamp_request(data)
     response = (session or requests).post(url, data=query, timeout=30, headers={
@@ -145,6 +159,10 @@ def check(base, expected_fingerprint=None):
             raise SealError("the seal is signed by verifier key " + key + ", not the expected one")
         found.append(("verifier", "signature valid, key " + key + (" (as expected)" if expected_fingerprint else
                                                                     "; compare it with the verifier's published key")))
+    elif expected_fingerprint:
+        raise SealError("the seal carries no verifier signature, so it is not signed by the expected key")
+    elif statement.get("public_key") or sealed.get("fingerprint"):
+        raise SealError("the seal names a verifier key but carries no signature")
     else:
         found.append(("verifier", "not signed by a verifier key"))
     for stamp in statement.get("time_stamps") or []:
@@ -161,8 +179,15 @@ def check(base, expected_fingerprint=None):
         found.append(("certificate reference", info["certificate_reference"]))
         found.extend(("time stamp warning", warning) for warning in info["warnings"])
     pdf = base.with_suffix(".pdf")
-    if pdf.exists() and sealed.get("signature"):
-        content, pdf_seal, info = read_pdf_seal(pdf.read_bytes())
+    if pdf.exists():
+        document = pdf.read_bytes()
+        if not sealed.get("signature") and b"/ByteRange" not in document:
+            found.append(("pdf", pdf.name + " carries no signature; the seal covers the JSON report only"))
+            return found
+        try:
+            content, pdf_seal, info = read_pdf_seal(document)
+        except (InvalidSignature, ValueError, KeyError, IndexError, StopIteration) as exc:
+            raise SealError(pdf.name + ": " + (str(exc) or type(exc).__name__)) from None
         signed = pdf_seal["statement"]
         try:
             Ed25519PublicKey.from_public_bytes(base64.b64decode(signed["public_key"], validate=True)).verify(
@@ -171,10 +196,11 @@ def check(base, expected_fingerprint=None):
             raise SealError("the PDF's seal is not signed by its key") from None
         if signed.get("content_sha256") != content or signed.get("report_sha256") != statement["report_sha256"]:
             raise SealError(pdf.name + " is not a signed rendering of the sealed report")
-        if signed["public_key"] != statement["public_key"]:
+        if sealed.get("signature") and signed["public_key"] != statement["public_key"]:
             raise SealError(pdf.name + " is signed by another verifier key")
-        found.append(("pdf", pdf.name + " signed by the same verifier key, document certificate "
-                      + info["certificate_sha256"][:16] + "…, covering the whole file"))
+        found.append(("pdf", pdf.name + (" signed by the same verifier key" if sealed.get("signature") else
+                                         " signed by verifier key " + fingerprint(signed["public_key"]))
+                      + ", document certificate " + info["certificate_sha256"][:16] + "…, covering the whole file"))
     return found
 
 
@@ -234,17 +260,20 @@ def verdict_text(report):
     os_image = attestation.get("os_image") or {}
     intel = attestation.get("intel") or {}
     commit = (report.get("deployment") or {}).get("commit")
-    parts = []
-    if found.get("tdx_quote", {}).get("status") in ("pass", "review"):
+    quoted = all(found.get(c, {}).get("status") in ("pass", "review") for c in ("tdx_quote", "tdx_binding"))
+    attested = tdx_attested(found)
+    parts = [] if quoted else ["The attestation did not verify"]
+    if quoted:
         parts.append("The collector answered from a genuine Intel TDX confidential VM" + (
             ", rated " + intel["status"] + " by Intel" if intel.get("status") else ""))
-    if found.get("tdx_compose", {}).get("status") == "pass":
+    if attested and found.get("tdx_compose", {}).get("status") == "pass":
         parts.append("it runs TgWitness commit " + short(commit, 12) + " and nothing else")
-    if found.get("tdx_os", {}).get("status") == "pass":
+    if quoted and found.get("tdx_os", {}).get("status") == "pass":
         parts.append("its firmware, kernel and command line are the published " + str(os_image.get("image")))
     if statement.get("fingerprint"):
-        parts.append("its evidence is signed by key " + short(statement["fingerprint"], 16) + ", made inside the CVM")
-    text = "; ".join(parts) + "." if parts else "The attestation did not verify."
+        parts.append(("its evidence is signed by key " + short(statement["fingerprint"], 16) + ", made inside the CVM")
+                     if attested else "the collector statement names evidence key " + short(statement["fingerprint"], 16))
+    text = "; ".join(parts) + "."
     worst = report.get("result")
     if worst in ("review", "incomplete"):
         text += " Some checks need review or were unavailable; they are listed below."
@@ -295,17 +324,16 @@ def html_report(report, sealed=None):
                "<th>High-assurance server</th><th>This deployment: Intel TDX</th></tr>")
     out += ["<tr><td>" + "</td><td>".join(esc(c) for c in row) + "</td></tr>" for row in COMPARISON]
     out.append("</table></section>")
-    registers = [("MRTD", "firmware", quote.get("mrtd"), os_image.get("mrtd")),
-                 ("RTMR0", "firmware configuration, memory, ACPI tables", quote.get("rtmr0"), os_image.get("rtmr0")),
-                 ("RTMR1", "kernel", quote.get("rtmr1"), os_image.get("rtmr1")),
-                 ("RTMR2", "command line and initrd", quote.get("rtmr2"), os_image.get("rtmr2")),
-                 ("RTMR3", "app-compose and dstack events", quote.get("rtmr3"), None)]
+    registers = [("MRTD", "firmware", "mrtd"), ("RTMR0", "firmware configuration, memory, ACPI tables", "rtmr0"),
+                 ("RTMR1", "kernel", "rtmr1"), ("RTMR2", "command line and initrd", "rtmr2"),
+                 ("RTMR3", "app-compose and dstack events", "rtmr3")]
     out.append("<section><h2><span class=n>05</span>Measurements</h2><p class=lead>Registers the CPU signed in the "
                "quote, against the values computed from the published image.</p><table><tr><th>Register</th>"
                "<th>Measures</th><th>In the quote</th><th>Computed</th></tr>")
-    for name, what, quoted, computed in registers:
-        match = "—" if computed is None else ("<span class='pill s-pass'>EQUAL</span>" if computed == quoted
-                                              else "<span class='pill s-fail'>DIFFERENT</span>")
+    for name, what, key in registers:
+        quoted, equal = quote.get(key), None if key == "rtmr3" else register_match(os_image, quote, key)
+        match = "—" if equal is None else ("<span class='pill s-pass'>EQUAL</span>" if equal
+                                           else "<span class='pill s-fail'>DIFFERENT</span>")
         out.append("<tr><td><b>" + name + "</b></td><td>" + esc(what) + "</td><td class=mono>" + esc(quoted) + "</td><td>"
                    + match + "</td></tr>")
     out.append("</table>")
@@ -436,9 +464,8 @@ def pdf_report(report, sealed=None, vault=None):
     lay.section("Measurements", "Registers the CPU signed, against values computed from the published image.")
     rows = []
     for name, key in (("MRTD", "mrtd"), ("RTMR0", "rtmr0"), ("RTMR1", "rtmr1"), ("RTMR2", "rtmr2"), ("RTMR3", "rtmr3")):
-        computed = os_image.get(key)
-        rows.append([name, Mono(quote.get(key) or "—"), "—" if computed is None else "equal" if computed == quote.get(key)
-                     else "DIFFERENT"])
+        equal = register_match(os_image, quote, key)
+        rows.append([name, Mono(quote.get(key) or "—"), "—" if equal is None else "equal" if equal else "DIFFERENT"])
     lay.grid(["Register", "In the quote", "Computed"], rows, widths=(16, 94, 20))
     lay.section("Certified by")
     lay.grid(["Statement", "Vouched for by", "Checked"], [

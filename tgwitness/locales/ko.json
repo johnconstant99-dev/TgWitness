@@ -8496,5 +8496,12 @@
   "Running from a source folder instead? Use python start.py, or Start.cmd on Windows. Open the panel address printed in the terminal.": "소스 폴더에서 직접 실행하시겠습니까? Python의 경우 `start.py`를, Windows의 경우 `Start.cmd`를 실행하세요. 터미널에 표시된 패널 주소를 열어주세요.",
   "For your own groups, start your own panel with tgwitness and a separate data directory. Demo data cannot be converted into a real investigation.": "자신만의 그룹을 운영하려면 tgwitness와 별도의 데이터 디렉터리를 사용하여 자체 패널을 시작하십시오. 데모 데이터는 실제 수사에 활용할 수 없습니다.",
   "Open official client and observation settings ↗": "공식 클라이언트를 열고 관찰 설정 열기 ↗",
-  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "이 레코더는 공식 텔레그램 웹 클라이언트를 기반으로 합니다. 패널을 열어 로그인하고, 채팅을 선택한 후, 레코더 제어 토큰을 사용하여 속도를 설정하고 세션을 종료하세요."
+  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "이 레코더는 공식 텔레그램 웹 클라이언트를 기반으로 합니다. 패널을 열어 로그인하고, 채팅을 선택한 후, 레코더 제어 토큰을 사용하여 속도를 설정하고 세션을 종료하세요.",
+  "Telegram sent a sign-in code for this account during observation.": "관찰 중 Telegram이 이 계정의 로그인 코드를 보냈습니다.",
+  "Telegram reported a new sign-in to this account during observation.": "관찰 중 Telegram이 이 계정의 새 로그인을 알렸습니다.",
+  "Make this the only session": "이 세션만 남기기",
+  "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "이 계정의 다른 모든 세션을 종료하고, 2단계 인증 비밀번호가 없으면 설정할까요? 이후 다른 곳에서 로그인하려면 그 비밀번호가 필요합니다.",
+  "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "TgWitness가 설정한 2단계 인증 비밀번호입니다. 지금 저장하세요. 한 번만 표시되며 TgWitness는 보관하지 않습니다.",
+  "This is now the only session of this account.": "이제 이 계정의 유일한 세션입니다.",
+  "Another session signed in after this session was made the only one.": "이 세션만 남긴 뒤 다른 세션이 로그인했습니다."
 }

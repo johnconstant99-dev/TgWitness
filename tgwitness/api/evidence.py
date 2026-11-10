@@ -306,6 +306,8 @@ async def set_alerts(
             422, "Add at least one destination before turning notifications on."
         )
     settings = body.model_dump(exclude={"urls", "add_urls"})
+    if "watchlists" not in body.model_fields_set:
+        settings["watchlists"] = alerts.alert_settings(store)["watchlists"]
     vault.save("alerts", {"urls": urls})
     with store.transaction():
         store.set_setting("alerts", settings)

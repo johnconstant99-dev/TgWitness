@@ -8691,5 +8691,12 @@
   "Running from a source folder instead? Use python start.py, or Start.cmd on Windows. Open the panel address printed in the terminal.": "هل تريد تشغيلها من مجلد المصدر بدلاً من ذلك؟ استخدم الأمر python start.py، أو Start.cmd في نظام Windows. افتح عنوان اللوحة المطبوع في المحطة الطرفية.",
   "For your own groups, start your own panel with tgwitness and a separate data directory. Demo data cannot be converted into a real investigation.": "بالنسبة لمجموعاتك الخاصة، قم بإنشاء لوحة خاصة بك باستخدام tgwitness ودليل بيانات منفصل. لا يمكن تحويل البيانات التجريبية إلى تحقيق حقيقي.",
   "Open official client and observation settings ↗": "افتح التطبيق الرسمي واضبط إعدادات المراقبة ↗",
-  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "يعمل هذا المسجل مع عميل Telegram Web الرسمي. افتح لوحة التحكم الخاصة به لتسجيل الدخول، واختر محادثة، واضبط السرعة، وأنهِ الجلسة، باستخدام رمز التحكم في المسجل."
+  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "يعمل هذا المسجل مع عميل Telegram Web الرسمي. افتح لوحة التحكم الخاصة به لتسجيل الدخول، واختر محادثة، واضبط السرعة، وأنهِ الجلسة، باستخدام رمز التحكم في المسجل.",
+  "Telegram sent a sign-in code for this account during observation.": "أرسل تيليجرام رمز تسجيل دخول لهذا الحساب أثناء المراقبة.",
+  "Telegram reported a new sign-in to this account during observation.": "أبلغ تيليجرام عن تسجيل دخول جديد إلى هذا الحساب أثناء المراقبة.",
+  "Make this the only session": "اجعل هذه الجلسة الوحيدة",
+  "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "إنهاء كل الجلسات الأخرى لهذا الحساب وتفعيل كلمة مرور التحقق بخطوتين إن لم تكن مفعّلة؟ بعد ذلك يتطلب تسجيل الدخول من أي مكان آخر كلمة المرور هذه.",
+  "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "كلمة مرور التحقق بخطوتين التي عيّنها TgWitness. احفظها الآن: تُعرض مرة واحدة فقط ولا يحتفظ بها TgWitness.",
+  "This is now the only session of this account.": "هذه الآن الجلسة الوحيدة لهذا الحساب.",
+  "Another session signed in after this session was made the only one.": "سُجّل الدخول في جلسة أخرى بعد جعل هذه الجلسة الوحيدة."
 }

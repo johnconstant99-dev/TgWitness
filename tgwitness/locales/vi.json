@@ -8496,5 +8496,12 @@
   "Running from a source folder instead? Use python start.py, or Start.cmd on Windows. Open the panel address printed in the terminal.": "Muốn chạy từ thư mục nguồn? Sử dụng lệnh `python start.py` hoặc `Start.cmd` trên Windows. Mở địa chỉ bảng điều khiển được hiển thị trong cửa sổ terminal.",
   "For your own groups, start your own panel with tgwitness and a separate data directory. Demo data cannot be converted into a real investigation.": "Đối với các nhóm của riêng bạn, hãy tạo bảng điều khiển riêng bằng tgwitness và một thư mục dữ liệu riêng biệt. Dữ liệu demo không thể được chuyển đổi thành một cuộc điều tra thực tế.",
   "Open official client and observation settings ↗": "Mở ứng dụng chính thức và cài đặt quan sát ↗",
-  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "Trình ghi này sử dụng ứng dụng Telegram Web chính thức. Mở bảng điều khiển của ứng dụng để đăng nhập, chọn một cuộc trò chuyện, thiết lập tốc độ và kết thúc phiên làm việc bằng cách sử dụng mã điều khiển của trình ghi."
+  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "Trình ghi này sử dụng ứng dụng Telegram Web chính thức. Mở bảng điều khiển của ứng dụng để đăng nhập, chọn một cuộc trò chuyện, thiết lập tốc độ và kết thúc phiên làm việc bằng cách sử dụng mã điều khiển của trình ghi.",
+  "Telegram sent a sign-in code for this account during observation.": "Trong lúc quan sát, Telegram đã gửi mã đăng nhập cho tài khoản này.",
+  "Telegram reported a new sign-in to this account during observation.": "Trong lúc quan sát, Telegram đã báo một lần đăng nhập mới vào tài khoản này.",
+  "Make this the only session": "Chỉ giữ phiên này",
+  "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "Kết thúc mọi phiên khác của tài khoản này và bật mật khẩu xác minh hai bước nếu chưa có? Sau đó, đăng nhập ở nơi khác sẽ cần mật khẩu này.",
+  "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "Mật khẩu xác minh hai bước do TgWitness đặt. Hãy lưu ngay: mật khẩu chỉ hiển thị một lần và TgWitness không giữ lại.",
+  "This is now the only session of this account.": "Đây giờ là phiên duy nhất của tài khoản này.",
+  "Another session signed in after this session was made the only one.": "Một phiên khác đã đăng nhập sau khi phiên này được đặt là duy nhất."
 }

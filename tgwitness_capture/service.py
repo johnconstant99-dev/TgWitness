@@ -153,6 +153,7 @@ class Recorder:
                                 "settings": self.settings.copy(), "startup_capture": "disabled",
                                 "poll_seconds": config.poll_seconds, "snapshot_seconds": config.snapshot_seconds,
                                 "pending_files_present": any(self.journal.pending.iterdir())})
+            self.video.recover()
         except BaseException:
             self.journal.close()
             raise
@@ -307,8 +308,12 @@ class Recorder:
             except Exception as exc:
                 self.settings["enabled"] = False
                 self.last_error = "RecorderStopped:" + type(exc).__name__
-                await asyncio.to_thread(self.video.abort)
+                await asyncio.to_thread(self.video.abort, self.last_error)
                 if self.official:
+                    try:
+                        await self.official.pause(self.last_error)
+                    except Exception:
+                        pass
                     self.official.stop_requested = True
                     self.official.phase = "stopped"
             await asyncio.sleep(min(self.config.poll_seconds, 1))

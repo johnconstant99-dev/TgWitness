@@ -78,14 +78,28 @@ class UnreadableHistory(ValueError):
 
 
 SESSIONS_EVERY = 15 * 60
+SESSIONS_OBSERVING_EVERY = 120
 SECURITY_LOG_EVERY = 60
 SECURITY_LOG_USER = 777000
+SECURITY_EVENT_MEANING = ("Security notice from Telegram (user 777000). "
+                          "login_code: an SMS code was requested for this account. "
+                          "new_login: a new session was authorized. "
+                          "2fa_changed: two-step verification was changed. "
+                          "during_observation: Telegram sent the notice after this observation run began.")
+SECURITY_BASELINE_MEANING = ("Security notices from Telegram (user 777000) that were already present when this "
+                             "workspace first read the security log. Telegram sent them before observation began; "
+                             "later records list only notices with a higher message ID.")
 SESSIONS_MEANING = ("Signed-in sessions of this account as Telegram lists them. 'current' is this workspace's session; "
                     "its address is stored as a SHA-256 digest with Telegram's country and region.")
 SESSION_REVOKED_EXTERNALLY_MEANING = (
     "Telegram's session list no longer shows this workspace as the current session. "
     "auth.resetAuthorizations removes all other sessions from Telegram's list instantly "
     "while the existing TCP connection continues to work until the next reconnect.")
+ONLY_SESSION_MEANING = ("All other sessions of this account were ended from this workspace and two-step "
+                        "verification is on, so a new sign-in needs the two-step password. Telegram's sign-in "
+                        "notices (777000) and its session list keep being recorded.")
+ONLY_SESSION_ENDED_MEANING = ("Telegram's session list shows a session other than this workspace's after this "
+                              "session was made the only one.")
 
 
 def sessions_snapshot(authorizations):
@@ -97,6 +111,29 @@ def sessions_snapshot(authorizations):
     return {"current": {**entry(current), "ip_sha256": hashlib.sha256((current.ip or "").encode()).hexdigest()}
             if current else None,
             "others": sorted((entry(a) for a in authorizations if not a.current), key=lambda e: e["hash"])}
+
+
+def security_notice(message):
+    text = message.message or ""
+    kind = ("login_code" if "Login code:" in text else
+            "new_login" if "logged in" in text.lower() or "new login" in text.lower() else
+            "2fa_changed" if "Two-Step Verification" in text else
+            "oauth_login" if "via @" in text or "logged in on" in text.lower() else
+            "security_notice")
+    if kind == "login_code":
+        text = re.sub(r"\b\d{5,6}\b", "•••••", text)
+    return {"event_kind": kind, "message_id": message.id, "sent_at": date_string(message.date), "text": text}
+
+
+def update_chat(update):
+    with suppress(Exception):
+        peer = getattr(getattr(update, "message", None), "peer_id", None) or getattr(update, "peer", None)
+        if peer is None and getattr(update, "channel_id", None) is not None:
+            peer = types.PeerChannel(update.channel_id)
+        if peer is None and getattr(update, "chat_id", None) is not None:
+            peer = types.PeerChat(update.chat_id)
+        return utils.get_peer_id(peer) if peer is not None else None
+    return None
 
 
 DELETION_BATCH_MEANING = (
@@ -443,8 +480,11 @@ class Collector:
         self.foreground = 0
         self.key_locks = {}
         self.sessions_checked_at = -SESSIONS_EVERY
+        self.sessions_checking = 0
+        self.session_revoked = None
         self.security_log_checked_at = -SECURITY_LOG_EVERY
         self.security_log_last_id = 0
+        self.observed_since = None
         self.pending_login_method = None
         self.people = {}
         self.profile_requests = {}
@@ -541,6 +581,7 @@ class Collector:
             "source_status": self.source_status_view(),
             "last_update_at": self.last_update_at,
             "updates_diverted": self.updates_diverted if self.running else None,
+            "session_revoked": self.session_revoked if self.running else None,
             "max_handler_ms": round(self.max_handler_ms, 2),
             "rpc_backoff_until": self.store.get_setting("rpc_backoff_until", 0),
             "rpc_backoff": self.store.get_setting("rpc_backoff", None),
@@ -903,6 +944,7 @@ class Collector:
             self.store.append("connection.restored", {
                 "reason": "updates_resumed", "diverted_since": diverted["since"],
                 "completeness": "updates Telegram sent to the other session in between may be missing"})
+            self.recheck_wakeup.set()
         elif (probe and probe["suspect_at"] is not None and not diverted and self.updates_seen == probe["seen"]
               and now - probe["suspect_at"] >= UPDATES_GRACE_SECONDS):
             self.updates_diverted = {"since": utcnow(), "seen": probe["seen"]}
@@ -910,6 +952,7 @@ class Collector:
                 "reason": "updates_diverted", "telegram_pts_before": probe["pts"], "telegram_pts": probe["server_pts"],
                 "silent_since": probe["since"], "meaning": UPDATES_DIVERTED_MEANING,
                 "completeness": "updates in this period may be missing"})
+            self.recheck_wakeup.set()
         client = self.client
         if (probe and now - probe["checked_at"] < UPDATES_CHECK_SECONDS
                 or time.time() < self.store.get_setting("rpc_backoff_until", 0)
@@ -2033,23 +2076,34 @@ class Collector:
     async def check_sessions(self, client=None):
         client = client or self.client
         await asyncio.sleep(0)
+        self.sessions_checking += 1
         try:
             result = await asyncio.wait_for(client(functions.account.GetAuthorizationsRequest()), 30)
         except AUTHORIZATION_ERRORS:
             previous = self.store.get_setting("sessions_seen", None)
             if previous and previous.get("current") is not None:
+                self.session_revoked = self.session_revoked or {"since": utcnow()}
                 self.store.set_setting("sessions_seen", {**previous, "current": None})
                 self.store.append("coverage.gap", {
                     "reason": "session_revoked_externally",
                     "meaning": SESSION_REVOKED_EXTERNALLY_MEANING,
                     "completeness": "records after this point were captured on a ghost session"})
             return None
+        except FLOOD_ERRORS as exc:
+            self.sessions_checked_at = max(self.sessions_checked_at, time.monotonic() + exc.seconds)
+            return None
         except Exception:
             return None
+        finally:
+            self.sessions_checking -= 1
         snapshot = sessions_snapshot(result.authorizations)
         previous = self.store.get_setting("sessions_seen", None)
         had_current = previous is not None and previous.get("current") is not None
         lost_current = had_current and snapshot["current"] is None
+        if snapshot["current"] is not None:
+            self.session_revoked = None
+        elif lost_current:
+            self.session_revoked = self.session_revoked or {"since": utcnow()}
         if previous != snapshot:
             known = {s["hash"] for s in (previous or {}).get("others", [])}
             now = {s["hash"] for s in snapshot["others"]}
@@ -2057,6 +2111,13 @@ class Collector:
             self.store.append("account.sessions", {
                 **snapshot, "added": sorted(now - known) if previous else None,
                 "removed": sorted(known - now) if previous else None, "meaning": SESSIONS_MEANING})
+        only = self.store.get_setting("only_session", None)
+        if only and snapshot["others"]:
+            with self.store.transaction():
+                self.store.set_setting("only_session", None)
+                self.store.append("session.exclusive_ended", {
+                    "since": only.get("since"), "others": snapshot["others"],
+                    "meaning": ONLY_SESSION_ENDED_MEANING})
         if lost_current:
             self.store.append("coverage.gap", {
                 "reason": "session_revoked_externally",
@@ -2064,45 +2125,48 @@ class Collector:
                 "completeness": "records after this point were captured on a ghost session"})
         return snapshot
 
-    async def poll_security_log(self):
+    async def poll_security_log(self, trigger="periodic"):
         client = self.client
         if not client or not client.is_connected():
-            return
+            return False
+        last = self.store.get_setting("security_log_last_id", None)
+        self.security_log_last_id = last or 0
         try:
             messages = await asyncio.wait_for(
-                client.get_messages(SECURITY_LOG_USER, limit=20, min_id=self.security_log_last_id), 15)
+                client.get_messages(SECURITY_LOG_USER, limit=20, min_id=last or 0), 15)
         except asyncio.CancelledError:
             raise
         except Exception:
-            return
-        new_messages = [m for m in (messages or []) if getattr(m, "id", 0) > self.security_log_last_id
-                        and getattr(m, "message", None)]
-        if not new_messages:
-            return
-        self.security_log_last_id = max(m.id for m in new_messages)
-        for m in sorted(new_messages, key=lambda x: x.id):
-            text = m.message or ""
-            kind = ("login_code" if "Login code:" in text else
-                    "new_login" if "logged in" in text.lower() or "new login" in text.lower() else
-                    "2fa_changed" if "Two-Step Verification" in text else
-                    "oauth_login" if "via @" in text or "logged in on" in text.lower() else
-                    "security_notice")
-            if kind == "login_code":
-                text = re.sub(r"\b\d{5,6}\b", "•••••", text)
-            self.store.append("account.security_event", {
-                "source": "telegram_777000", "event_kind": kind,
-                "message_id": m.id, "sent_at": date_string(m.date), "text": text,
-                "meaning": ("Security notice from Telegram (user 777000). "
-                            "login_code: an SMS code was requested for this account. "
-                            "new_login: a new session was authorized. "
-                            "2fa_changed: two-step verification was changed.")})
+            return False
+        messages = sorted((m for m in messages or [] if getattr(m, "id", 0) > (last or 0)), key=lambda m: m.id)
+        if last is not None and not messages:
+            return False
+        newest = max([last or 0, *(m.id for m in messages)])
+        notices = [(m, security_notice(m)) for m in messages if getattr(m, "message", None)]
+        with self.store.transaction():
+            self.store.set_setting("security_log_last_id", newest)
+            if last is None:
+                self.store.append("session.security_baseline", {
+                    "trigger": trigger, "last_security_event_id": newest,
+                    "notices_before_observation": [notice for _, notice in notices],
+                    "meaning": SECURITY_BASELINE_MEANING})
+            else:
+                for m, notice in notices:
+                    self.store.append("account.security_event", {
+                        "source": "telegram_777000", **notice,
+                        "during_observation": bool(self.observed_since and m.date and m.date >= self.observed_since),
+                        "meaning": SECURITY_EVENT_MEANING})
+        self.security_log_last_id = newest
+        return last is None
 
     async def _snapshot_session_state(self, trigger):
         client = self.client
         if not client or not client.is_connected():
             return
+        counted = None
         try:
             snapshot = await self.check_sessions(client)
+            counted = len(snapshot["others"]) if snapshot else None
             account = self.store.get_setting("account", {}) or {}
             key_origin = account.get("key_origin", "unknown")
             if key_origin == "imported" and trigger == "observation_start":
@@ -2142,11 +2206,12 @@ class Collector:
         except Exception:
             pass
         try:
-            await self.poll_security_log()
-            self.store.append("session.security_baseline", {
-                "trigger": trigger,
-                "last_security_event_id": self.security_log_last_id,
-                "meaning": "Security log (Telegram 777000) polled at this point."})
+            if not await self.poll_security_log(trigger):
+                self.store.append("session.security_baseline", {
+                    "trigger": trigger,
+                    "last_security_event_id": self.security_log_last_id,
+                    "other_sessions": counted,
+                    "meaning": "Security log (Telegram 777000) polled at this point."})
         except asyncio.CancelledError:
             raise
         except Exception:
@@ -2198,6 +2263,26 @@ class Collector:
             "sessions_before": others_before, "sessions_after": others_after,
             "initiated_by": "this workspace"})
         return {"terminated": others_before, "remaining_others": others_after}
+
+    async def make_only_session(self):
+        await self.restore()
+        if (self.store.get_setting("account", None) or {}).get("key_origin") != "created":
+            raise ValueError("This session key was imported, so copies of it can exist outside Telegram's session "
+                             "list. Sign in again from this workspace first.")
+        ended = await self.terminate_all_other_sessions()
+        if ended["remaining_others"]:
+            raise ValueError("Telegram still lists " + str(ended["remaining_others"]) + " other session(s). "
+                             "Try again in a minute.")
+        state = await asyncio.wait_for(self.client(functions.account.GetPasswordRequest()), 30)
+        password = None if state.has_password else secrets.token_urlsafe(18)
+        if password:
+            await self.change_password(None, password)
+        record = {"other_sessions_ended": ended["terminated"],
+                  "two_step": "set_now" if password else "already_on", "meaning": ONLY_SESSION_MEANING}
+        with self.store.transaction():
+            self.store.set_setting("only_session", {"since": utcnow()})
+            self.store.append("session.exclusive_from", record)
+        return {"other_sessions_ended": ended["terminated"], "two_step": record["two_step"], "password": password}
 
     async def change_password(self, current_password, new_password, hint=""):
         await self.restore()
@@ -2289,6 +2374,7 @@ class Collector:
         if scope_settings(self.store)["mode"] == "selected" and not self.store.targets(True):
             raise ValueError("Select at least one group or channel first.")
         await self.cancel_login()
+        self.observed_since = datetime.now(timezone.utc)
         self.buffered, self.buffering, self.buffer_overflow = [], True, False
         self.updates_probe = self.updates_diverted = None
         self.buffer_limit = self.param("startup_buffer")
@@ -2474,14 +2560,15 @@ class Collector:
                     "meaning": "collector liveness"})
                 from .people import refresh_one
                 await refresh_one(self)
-                if time.monotonic() - self.sessions_checked_at > SESSIONS_EVERY:
-                    self.sessions_checked_at = time.monotonic()
-                    await self.check_sessions()
             if checkpoint_at is None or now - checkpoint_at >= self.param("checkpoint_minutes") * 60 - 1:
                 checkpoint_at = now
                 retain_checkpoint(self.store, self.vault)
             if self.running and self.client.is_connected():
                 await self.watch_updates()
+                if (time.monotonic() - self.sessions_checked_at >= SESSIONS_OBSERVING_EVERY and not self.sessions_checking
+                        and time.time() >= self.store.get_setting("rpc_backoff_until", 0)):
+                    self.sessions_checked_at = time.monotonic()
+                    await self.check_sessions()
                 if now - self.security_log_checked_at >= SECURITY_LOG_EVERY:
                     self.security_log_checked_at = now
                     await self.poll_security_log()
@@ -2551,6 +2638,22 @@ class Collector:
             await self.avatar_history.close()
             if self.client and not (self.export_busy() or self.export_claim):
                 await self.client.disconnect()
+
+    async def live_failure(self, exc, context, client, chat_ids):
+        await self.failure(exc, context, client=client)
+        if not self.running or client is not self.client:
+            return
+        if chat_ids is None:
+            self.recheck_wakeup.set()
+            return
+        try:
+            chat_ids = [chat_id for chat_id in chat_ids if chat_id is not None and self.selected(chat_id)]
+            if chat_ids:
+                last = self.store.get_setting("recheck_last", {})
+                last.update((str(chat_id), 0) for chat_id in chat_ids)
+                self.store.set_setting("recheck_last", last)
+        except Exception:
+            self.recheck_wakeup.set()
 
     async def capture_message(self, message, kind, chat_id, update=None, source=None, history_run_id=None,
                               acquisition=None, sender=None):
@@ -2696,7 +2799,7 @@ class Collector:
                 return
             await self.capture_message(event.message, "message.new", event.chat_id, update, source)
         except Exception as exc:
-            await self.failure(exc, "message.new", client=client)
+            await self.live_failure(exc, "message.new", client, [getattr(event, "chat_id", None)])
 
     async def on_edit(self, event):
         client = self.client
@@ -2713,7 +2816,7 @@ class Collector:
             await self.capture_message(event.message, "message.edited", event.chat_id,
                                        getattr(event, "original_update", None))
         except Exception as exc:
-            await self.failure(exc, "message.edited", client=client)
+            await self.live_failure(exc, "message.edited", client, [getattr(event, "chat_id", None)])
 
     def record_deletion(self, chat_id, message_id, raw, resolution=None, batch=None):
         state = self.store.message_state(chat_id, message_id)
@@ -2763,25 +2866,28 @@ class Collector:
                         by_chat.setdefault(chat_id, []).append(message_id)
                     else:
                         unobserved.append(message_id)
-                for chat_id, ids in by_chat.items():
-                    batch = self.deletion_batch(chat_id, ids, raw)
-                    for message_id in ids:
-                        self.record_deletion(chat_id, message_id, raw, {
-                            "method": "chat of the previously saved message with this ID",
-                            "basis": "private chats and ordinary groups share one account-wide message ID sequence"},
-                            batch=batch)
-                for ids, scope in ((unknown, "account-level update; no saved message has these IDs"),
-                                   (unobserved, "account-level update; these IDs belong to saved messages of chats "
-                                                "that are not observed now")):
-                    if ids:
-                        self.store.append("deletion.unscoped", {"message_ids": ids, "scope": scope, "deleted_by": None,
-                                                                "raw": raw})
+                with self.store.transaction():
+                    for chat_id, ids in by_chat.items():
+                        batch = self.deletion_batch(chat_id, ids, raw)
+                        for message_id in ids:
+                            self.record_deletion(chat_id, message_id, raw, {
+                                "method": "chat of the previously saved message with this ID",
+                                "basis": "private chats and ordinary groups share one account-wide message ID sequence"},
+                                batch=batch)
+                    for ids, scope in ((unknown, "account-level update; no saved message has these IDs"),
+                                       (unobserved, "account-level update; these IDs belong to saved messages of chats "
+                                                    "that are not observed now")):
+                        if ids:
+                            self.store.append("deletion.unscoped", {"message_ids": ids, "scope": scope,
+                                                                    "deleted_by": None, "raw": raw})
             elif await self.covers(event.chat_id):
-                batch = self.deletion_batch(event.chat_id, list(event.deleted_ids), raw)
-                for message_id in event.deleted_ids:
-                    self.record_deletion(event.chat_id, message_id, raw, batch=batch)
+                with self.store.transaction():
+                    batch = self.deletion_batch(event.chat_id, list(event.deleted_ids), raw)
+                    for message_id in event.deleted_ids:
+                        self.record_deletion(event.chat_id, message_id, raw, batch=batch)
         except Exception as exc:
-            await self.failure(exc, "message.deleted", client=client)
+            chat_id = getattr(event, "chat_id", None)
+            await self.live_failure(exc, "message.deleted", client, None if chat_id is None else [chat_id])
 
     async def check_access(self, chat_id, update):
         try:
@@ -2898,7 +3004,7 @@ class Collector:
                     "admin_id": getattr(call, "admin_id", None), "participant_id": getattr(call, "participant_id", None),
                     "raw": plain(update), "meaning": "Telegram delivered a phone call update to this session."})
         except Exception as exc:
-            await self.failure(exc, "raw.update", client=client)
+            await self.live_failure(exc, "raw.update", client, [update_chat(update)])
 
     async def presence_loop(self):
         from .presence_watch import loop

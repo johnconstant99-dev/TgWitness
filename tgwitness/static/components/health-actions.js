@@ -35,7 +35,8 @@ export function createHealthActions({node, tr, health, close, context}) {
     const ids = unconfirmed(status), wide = (status.scope?.mode || "selected") !== "selected";
     if (!ids.length || !(await window.TgWitnessDialogs.confirm(tr(wide
       ? "Exclude {n} unconfirmed sources? Collection for these chats will stop; saved evidence stays."
-      : "Pause {n} unconfirmed sources? Collection for these chats will stop; saved evidence stays.", {n: ids.length})))) return;
+      : "Pause {n} unconfirmed sources? Collection for these chats will stop; saved evidence stays.", {n: ids.length}))) ||
+      session !== getSession()) return;
     const view = await sourceView(session);
     if (view) {view.filterTargets("unconfirmed"); await view.runSourceAction(ids, wide ? "exclude" : "pause", {confirmed: true});}
   });
@@ -49,7 +50,8 @@ export function createHealthActions({node, tr, health, close, context}) {
     if (session === getSession()) toast(tr("Attachment downloads enabled."));
   });
   add("media", "clear-queue", "Clear waiting queue", async (status, profile, session) => {
-    if (!(await window.TgWitnessDialogs.confirm(tr("Cancel the waiting attachment jobs shown now? Running downloads and saved files stay. Cancelled jobs will not be retried automatically.")))) return;
+    if (!(await window.TgWitnessDialogs.confirm(tr("Cancel the waiting attachment jobs shown now? Running downloads and saved files stay. Cancelled jobs will not be retried automatically."))) ||
+      session !== getSession()) return;
     const result = await json("media/queue/clear", {through_seq: status.stats.head?.seq || 0}, {profile});
     if (session === getSession()) toast(tr("Cancelled {n} waiting attachment jobs.", {n: result.cancelled}));
   });

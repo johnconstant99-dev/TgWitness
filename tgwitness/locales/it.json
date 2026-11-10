@@ -8535,5 +8535,12 @@
   "Running from a source folder instead? Use python start.py, or Start.cmd on Windows. Open the panel address printed in the terminal.": "Preferisci eseguirlo da una cartella sorgente? Usa python start.py oppure Start.cmd su Windows. Apri l'indirizzo del pannello visualizzato nel terminale.",
   "For your own groups, start your own panel with tgwitness and a separate data directory. Demo data cannot be converted into a real investigation.": "Per i propri gruppi, creare un pannello personalizzato con tgwitness e una directory dati separata. I dati di dimostrazione non possono essere convertiti in un'indagine reale.",
   "Open official client and observation settings ↗": "Apri il client ufficiale e le impostazioni di monitoraggio ↗",
-  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "Questo registratore è integrato nel client Web ufficiale di Telegram. Apri il pannello per effettuare l'accesso, seleziona una chat, imposta la velocità e termina la sessione utilizzando il token di controllo del registratore."
+  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "Questo registratore è integrato nel client Web ufficiale di Telegram. Apri il pannello per effettuare l'accesso, seleziona una chat, imposta la velocità e termina la sessione utilizzando il token di controllo del registratore.",
+  "Telegram sent a sign-in code for this account during observation.": "Telegram ha inviato un codice di accesso per questo account durante l'osservazione.",
+  "Telegram reported a new sign-in to this account during observation.": "Telegram ha segnalato un nuovo accesso a questo account durante l'osservazione.",
+  "Make this the only session": "Rendila l'unica sessione",
+  "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "Terminare tutte le altre sessioni di questo account e attivare una password di verifica in due passaggi se manca? Dopo, ogni accesso da altrove richiederà quella password.",
+  "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "Password di verifica in due passaggi impostata da TgWitness. Salvala ora: viene mostrata una sola volta e TgWitness non la conserva.",
+  "This is now the only session of this account.": "Questa è ora l'unica sessione dell'account.",
+  "Another session signed in after this session was made the only one.": "Un'altra sessione ha effettuato l'accesso dopo che questa è diventata l'unica."
 }

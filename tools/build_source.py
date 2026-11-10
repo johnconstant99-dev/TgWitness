@@ -176,6 +176,7 @@ def main():
             digest = hashlib.file_digest(stream, "sha256").hexdigest()
         checksum = staged.with_suffix(".zip.sha256")
         checksum.write_bytes((digest + "  " + target.name + "\n").encode("utf-8"))
+        target.with_suffix(".zip.sha256").unlink(missing_ok=True)
         staged.replace(target)
         checksum.replace(target.with_suffix(".zip.sha256"))
     print("Public source archive:", target)

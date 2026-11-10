@@ -8535,5 +8535,12 @@
   "Running from a source folder instead? Use python start.py, or Start.cmd on Windows. Open the panel address printed in the terminal.": "کیا آپ اس کے بجائے ماخذ فولڈر سے چلا رہے ہیں؟ ونڈوز پر python start.py یا Start.cmd استعمال کریں۔ ٹرمینل میں دکھائے گئے پینل کے پتہ کو کھولیں۔",
   "For your own groups, start your own panel with tgwitness and a separate data directory. Demo data cannot be converted into a real investigation.": "اپنے گروپس کے لیے، tgwitness کے ساتھ اپنا پینل شروع کریں اور ایک الگ ڈیٹا ڈائریکٹری بنائیں۔ ڈیمو ڈیٹا کو حقیقی تفتیش میں تبدیل نہیں کیا جا سکتا۔",
   "Open official client and observation settings ↗": "سرکاری کلائنٹ اور مشاہداتی ترتیبات کھولیں ↗",
-  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "یہ ریکارڈر سرکاری ٹیلیگرام ویب کلائنٹ کا مالک ہے۔ اس کا پینل کھولیں، لاگ ان کریں، ایک چیٹ منتخب کریں، رفتار طے کریں اور ریکارڈر کنٹرول ٹوکن استعمال کرکے سیشن ختم کریں۔"
+  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "یہ ریکارڈر سرکاری ٹیلیگرام ویب کلائنٹ کا مالک ہے۔ اس کا پینل کھولیں، لاگ ان کریں، ایک چیٹ منتخب کریں، رفتار طے کریں اور ریکارڈر کنٹرول ٹوکن استعمال کرکے سیشن ختم کریں۔",
+  "Telegram sent a sign-in code for this account during observation.": "نگرانی کے دوران Telegram نے اس اکاؤنٹ کے لیے سائن اِن کوڈ بھیجا۔",
+  "Telegram reported a new sign-in to this account during observation.": "نگرانی کے دوران Telegram نے اس اکاؤنٹ میں نئے سائن اِن کی اطلاع دی۔",
+  "Make this the only session": "اسے واحد سیشن بنائیں",
+  "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "اس اکاؤنٹ کے باقی تمام سیشن ختم کریں اور اگر دو مرحلہ پاس ورڈ نہیں ہے تو اسے آن کریں؟ اس کے بعد کہیں اور سائن اِن کے لیے یہی پاس ورڈ درکار ہوگا۔",
+  "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "TgWitness کا مقرر کردہ دو مرحلہ پاس ورڈ۔ اسے ابھی محفوظ کریں: یہ صرف ایک بار دکھایا جاتا ہے اور TgWitness اسے نہیں رکھتا۔",
+  "This is now the only session of this account.": "اب یہ اس اکاؤنٹ کا واحد سیشن ہے۔",
+  "Another session signed in after this session was made the only one.": "اس سیشن کو واحد بنانے کے بعد ایک اور سیشن نے سائن اِن کیا۔"
 }

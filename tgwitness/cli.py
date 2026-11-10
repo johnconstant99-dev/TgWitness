@@ -450,7 +450,18 @@ def export(archive, args):
         raise
     if partial:
         stream.close()
-        partial.replace(target)
+        try:
+            os.link(partial, target)
+        except FileExistsError:
+            raise Failure("The output file exists. Choose a new name.", EXIT_USAGE) from None
+        except OSError:
+            try:
+                open(target, "x").close()
+            except FileExistsError:
+                raise Failure("The output file exists. Choose a new name.", EXIT_USAGE) from None
+            partial.replace(target)
+        else:
+            partial.unlink()
     else:
         stream.flush()
     summary = {**summary, "output": str(target) if target else "stdout", "format": "jsonl"}

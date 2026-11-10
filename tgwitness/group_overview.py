@@ -10,7 +10,8 @@ from .verify import LIVENESS_GAP_SECONDS, MESSAGE_KINDS, Coverage, parse_time
 WINDOW_DAYS = 7
 CHATS_SHOWN = 200
 STATE_KINDS = ("observation.started", "observation.stopped", "process.started", "process.stopped",
-               "coverage.gap", "connection.restored", "collector.heartbeat", "parameters.changed")
+               "coverage.gap", "connection.restored", "collector.heartbeat", "parameters.changed",
+               "account.authorized")
 OPENING = ("observation.started", "observation.stopped", "process.started", "process.stopped")
 
 

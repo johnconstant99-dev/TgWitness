@@ -8496,5 +8496,12 @@
   "Running from a source folder instead? Use python start.py, or Start.cmd on Windows. Open the panel address printed in the terminal.": "想直接从源文件夹运行吗？请在 Linux 系统中使用 `python start.py`，在 Windows 系统中使用 `Start.cmd`。打开终端中显示的面板地址。",
   "For your own groups, start your own panel with tgwitness and a separate data directory. Demo data cannot be converted into a real investigation.": "对于您自己的群组，请使用 tgwitness 并创建一个独立的数据目录来启动您自己的面板。演示数据无法用于实际调查。",
   "Open official client and observation settings ↗": "打开官方客户端并进入观察设置 ↗",
-  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "该录制工具基于官方 Telegram 网页客户端。打开其面板进行登录，选择一个聊天窗口，设置录制速度并结束会话，使用录制控制令牌进行操作。"
+  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "该录制工具基于官方 Telegram 网页客户端。打开其面板进行登录，选择一个聊天窗口，设置录制速度并结束会话，使用录制控制令牌进行操作。",
+  "Telegram sent a sign-in code for this account during observation.": "观察期间，Telegram 为此账号发送了登录码。",
+  "Telegram reported a new sign-in to this account during observation.": "观察期间，Telegram 报告了此账号的新登录。",
+  "Make this the only session": "设为唯一会话",
+  "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "结束此账号的所有其他会话，并在未设置时开启两步验证密码？之后在其他地方登录都需要这个密码。",
+  "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "TgWitness 设置的两步验证密码。请立即保存：只显示一次，TgWitness 不会保留。",
+  "This is now the only session of this account.": "现在这是此账号唯一的会话。",
+  "Another session signed in after this session was made the only one.": "此会话设为唯一后，有另一个会话登录。"
 }

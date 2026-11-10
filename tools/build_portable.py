@@ -156,7 +156,11 @@ def write_release(stage, target):
     if len(shipped) != len(names) or len(names) != len(files) or any(release_problem(name) for name in shipped):
         partial.unlink()
         raise SystemExit("Portable ZIP failed its content check: " + str(target.name))
+    checksum = target.with_name(target.name + ".sha256.part")
+    checksum.write_text(sha256(partial) + "  " + target.name + "\n", encoding="ascii")
+    target.with_suffix(".zip.sha256").unlink(missing_ok=True)
     partial.replace(target)
+    checksum.replace(target.with_suffix(".zip.sha256"))
 
 
 def embedded_runtime(arch, cache, supplied=None):
@@ -219,9 +223,13 @@ def main():
 
     print("Installing TgWitness and pinned dependencies", flush=True)
     site_packages = stage / "python/Lib/site-packages"
-    for packages in (["--require-hashes", "-r", str(ROOT / "deploy/requirements.lock")], ["--no-deps", str(ROOT)]):
+    build_tools = build / "build-tools"
+    build_environment = dict(os.environ, PYTHONPATH=str(build_tools))
+    for target, packages in ((build_tools, ["--require-hashes", "-r", str(ROOT / "deploy/build.lock")]),
+                             (site_packages, ["--require-hashes", "-r", str(ROOT / "deploy/requirements.lock")]),
+                             (site_packages, ["--no-deps", "--no-build-isolation", str(ROOT)])):
         subprocess.run([sys.executable, "-m", "pip", "install", "--disable-pip-version-check", "--no-warn-script-location",
-                        "--no-compile", "--target", str(site_packages), *packages], check=True, cwd=ROOT)
+                        "--no-compile", "--target", str(target), *packages], check=True, cwd=ROOT, env=build_environment)
     shutil.rmtree(site_packages / "bin", ignore_errors=True)
     clean_app_install_metadata(site_packages)
 
@@ -258,7 +266,6 @@ def main():
     write_release(stage, target)
     shutil.rmtree(build, ignore_errors=True)
     digest = sha256(target)
-    target.with_suffix(".zip.sha256").write_text(digest + "  " + target.name + "\n", encoding="ascii")
     print("Portable package:", target)
     print("Size:", round(target.stat().st_size / 1024**2, 1), "MiB | SHA-256:", digest)
 

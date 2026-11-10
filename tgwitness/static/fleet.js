@@ -52,7 +52,7 @@
     if (writing.has(id) || groupActions.has(id) || !editable()) return;
     const marker = {}, revision = state.workspaceRevision;
     writing.set(id, marker); const serial = ++loadSerial; groupControls(id);
-    try { return await work(serial); }
+    try { return await work(serial, () => revision === state.workspaceRevision); }
     finally {
       if (writing.get(id) === marker) writing.delete(id);
       if (revision === state.workspaceRevision) groupControls(id);
@@ -257,16 +257,17 @@
         trn("{n} workspace kept its IP mode while observing.", "{n} workspaces kept their IP mode while observing.", skipped) : ""));
     })));
     const rename = node("button", "quiet small", tr("Rename")); rename.type = "button";
-    rename.addEventListener("click", () => busy(rename, () => writeGroup(group.id, async serial => {
+    rename.addEventListener("click", () => busy(rename, () => writeGroup(group.id, async (serial, current) => {
       const label = ((await window.TgWitnessDialogs.prompt(tr("New name for this group:"), {title: tr("Rename"), value: group.label, maxLength: 80})) || "").trim();
-      if (!label || label === group.label) return;
+      if (!label || label === group.label || !current()) return;
       const result = await json("profile-groups/" + group.id, {label, template: group.template, sections: group.sections},
                                {root: true, method: "PATCH"});
       await acceptWrite(result, serial); fillSelects(); decorate();
     })));
     const remove = node("button", "quiet small danger-text", tr("Delete group")); remove.type = "button";
-    remove.addEventListener("click", () => busy(remove, () => writeGroup(group.id, async serial => {
-      if (!(await window.TgWitnessDialogs.confirm(tr("Delete the group \"{name}\"? Its workspaces stay and lose only the grouping.", {name: group.label}), {danger: true, confirmText: tr("Delete")}))) return;
+    remove.addEventListener("click", () => busy(remove, () => writeGroup(group.id, async (serial, current) => {
+      if (!(await window.TgWitnessDialogs.confirm(tr("Delete the group \"{name}\"? Its workspaces stay and lose only the grouping.", {name: group.label}), {danger: true, confirmText: tr("Delete")})) ||
+          !current()) return;
       const result = await json("profile-groups/" + group.id, undefined, {root: true, method: "DELETE"});
       await acceptWrite(result, serial); fillSelects(); decorate();
     })));
@@ -629,7 +630,9 @@
   $("fleet-import-start").addEventListener("click", () => busy(null, run));
   $("fleet-group-new").addEventListener("click", () => busy(null, async () => {
     if (!editable() || creating) return;
-    const label = ((await window.TgWitnessDialogs.prompt(tr("Name of the new group:"), {title: tr("New group"), maxLength: 80})) || "").trim(); if (!label) return;
+    const revision = state.workspaceRevision;
+    const label = ((await window.TgWitnessDialogs.prompt(tr("Name of the new group:"), {title: tr("New group"), maxLength: 80})) || "").trim();
+    if (!label || revision !== state.workspaceRevision) return;
     const marker = {}, serial = ++loadSerial;
     creating = marker; $("fleet-group-new").disabled = true;
     try {

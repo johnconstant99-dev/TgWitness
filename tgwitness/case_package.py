@@ -101,19 +101,36 @@ def referenced(model):
     return list(dict.fromkeys(found))
 
 
-def collect_files(model, supplied, media_root):
-    files, total = {}, 0
+OMISSIONS = {"unavailable": "File not available when the package was prepared",
+             "file_limit": "File exceeds the per-file package limit",
+             "changed": "Available bytes do not match the cited SHA-256",
+             "package_limit": "File exceeds the remaining package size limit"}
+
+
+def collect(model, supplied, media_root):
+    files, missing, total = {}, [], 0
     for sha256 in referenced(model):
-        data = supplied.get(sha256)
+        data, reason = supplied.get(sha256), "unavailable"
         if data is None and media_root is not None:
             path = Path(media_root) / sha256
-            if path.is_file() and not path.is_symlink() and path.stat().st_size <= MAX_FILE:
-                data = path.read_bytes()
-        if data is None or hashlib.sha256(data).hexdigest() != sha256 or total + len(data) > MAX_TOTAL:
+            if path.is_file() and not path.is_symlink():
+                if path.stat().st_size <= MAX_FILE:
+                    data = path.read_bytes()
+                else:
+                    reason = "file_limit"
+        if data is not None:
+            reason = ("changed" if hashlib.sha256(data).hexdigest() != sha256
+                      else "package_limit" if total + len(data) > MAX_TOTAL else None)
+        if reason is not None:
+            missing.append({"sha256": sha256, "reason": reason})
             continue
         total += len(data)
         files[sha256] = data
-    return files
+    return files, missing
+
+
+def collect_files(model, supplied, media_root):
+    return collect(model, supplied, media_root)[0]
 
 
 def marked(text, *values):
@@ -129,10 +146,18 @@ COURT_FILES = (
     ("court/exhibits.html", "Exhibit index"), ("court/request-annex.html", "Annex for official requests"))
 
 
-def verification_html(result, fixed, say, stamps=None, documents=()):
+def verification_html(result, fixed, say, stamps=None, documents=(), files=None):
     e, icon = documentation.e, documentation.icon
     head = result.get("journal_head") or {}
     receipts = sorted(name.split("/", 1)[1] for name in stamps or {} if name.endswith((".tsr", ".ots")))
+    included, missing = files if files is not None else (None, [])
+    cited = () if included is None else (
+        ("image", say("Cited files"),
+         marked(say("{included} of {cited} cited files are included.", included=included,
+                    cited=included + len(missing)))
+         + "".join("<br>" + marked(say("Not included: {sha256} ({reason}).", sha256=item["sha256"],
+                                       reason=say(OMISSIONS[item["reason"]])), item["sha256"])
+                   for item in missing), "wide" if missing else "ok wide"),)
     facts = (
         ("key", say("Signature"), marked(say("Valid for the workspace key with fingerprint {fingerprint}.",
                                              fingerprint=result["fingerprint"]), result["fingerprint"]), "ok wide"),
@@ -140,6 +165,7 @@ def verification_html(result, fixed, say, stamps=None, documents=()):
         ("list", say("Contents"), marked(say("{steps} steps, {notes} notes, {conclusions} conclusions.",
                                              steps=result["steps"], notes=result["notes"],
                                              conclusions=result["conclusions"])), ""),
+        *cited,
         ("shield", say("Statement SHA-256"), marked(fixed["statement_sha256"], fixed["statement_sha256"]) + " · "
          + marked(say("Recorded in journal record #{seq} when the document was fixed.", seq=fixed["event_seq"])), "wide"),
         ("book", say("Journal head at fixing"), marked(say("Record #{seq}, SHA-256 {hash}", seq=head.get("seq"),
@@ -160,9 +186,14 @@ def verification_html(result, fixed, say, stamps=None, documents=()):
             '<div class="pass"><div class="badge">' + icon("check") + "</div><div><b>"
             + e(say("Checked when the package was prepared: the signature and content are valid.")) + "</b><span>"
             + e(say("Repeat the check yourself with the steps below before relying on it.")) + '</span></div></div>'
-            '<div class="grid">' + "".join('<div class="fact ' + style + '"'
+            + ('<div class="caution">' + icon("alert") + "<span>"
+               + e(say("{n} cited files are not included in this package; each is listed under Cited files.",
+                       n=len(missing))) + "</span></div>" if missing else "")
+            + '<div class="grid">' + "".join('<div class="fact ' + style + '"'
                                            + (' data-check="timestamps" data-status="'
                                               + ("unverified" if receipts else "absent") + '"' if name == "timer" else "")
+                                           + (' data-check="files" data-status="'
+                                              + ("incomplete" if missing else "complete") + '"' if name == "image" else "")
                                            + '><div class="name">' + icon(name, "icon s")
                                            + e(label) + '</div><div class="value">' + value + "</div></div>"
                                            for name, label, value, style in facts) + "</div>"
@@ -248,7 +279,7 @@ def build(session, say, supplied, media_root, directory=None, checkpoints=None, 
     model, signed = fixed["model"], fixed["signed"]
     exported = canonical({"document": model, "signed": signed})
     result = verify(json.loads(exported))
-    files = collect_files(model, supplied, media_root)
+    files, missing = collect(model, supplied, media_root)
     stamps = timestamps(checkpoints, fixed["event_seq"])
     images = {sha256: "data:" + kind(data)[0] + ";base64," + base64.b64encode(data).decode("ascii")
               for sha256, data in files.items() if kind(data)[0].startswith("image/")}
@@ -260,6 +291,9 @@ def build(session, say, supplied, media_root, directory=None, checkpoints=None, 
                "verification.html": verification_html(result, fixed, say, stamps).encode("utf-8"), **stamps}
     for sha256, data in files.items():
         payload["files/" + sha256 + "." + kind(data)[1]] = data
+    if missing:
+        payload["files-not-included.json"] = json.dumps(
+            [{**item, "description": OMISSIONS[item["reason"]]} for item in missing], indent=2).encode("utf-8")
     for index, _ in enumerate(model.get("recordings") or [], 1):
         for fmt in ("vtt", "srt"):
             text = documentation.subtitles(model, say, documentation.appearance_of(session), fmt, index)
@@ -288,7 +322,8 @@ def build(session, say, supplied, media_root, directory=None, checkpoints=None, 
         payload["court/undercover-record.json"] = json.dumps(activity, ensure_ascii=False, indent=2).encode("utf-8")
         payload["court/undercover-record.html"] = undercover.render_html(activity, session["title"], say).encode("utf-8")
         documents = COURT_FILES + (("court/undercover-record.html", "Undercover activity record"),)
-    payload["verification.html"] = verification_html(result, fixed, say, stamps, documents).encode("utf-8")
+    payload["verification.html"] = verification_html(result, fixed, say, stamps, documents,
+                                                     (len(files), missing)).encode("utf-8")
     hashes = {"data/" + name: hashlib.sha256(value).hexdigest() for name, value in payload.items()}
     receipts = sorted(name.split("/", 1)[1] for name in stamps if name.endswith((".tsr", ".ots")))
     payload["court/certification.html"] = court.certification_html(session, model, fixed, result["fingerprint"], hashes, say,

@@ -8613,5 +8613,12 @@
   "Running from a source folder instead? Use python start.py, or Start.cmd on Windows. Open the panel address printed in the terminal.": "Хочете запустити програму з папки з вихідним кодом? Використовуйте команду python start.py або Start.cmd у Windows. Відкрийте панель за адресою, що відображається в терміналі.",
   "For your own groups, start your own panel with tgwitness and a separate data directory. Demo data cannot be converted into a real investigation.": "Для власних груп створіть власну панель за допомогою tgwitness та окремого каталогу даних. Демонстраційні дані не можна використовувати для реального розслідування.",
   "Open official client and observation settings ↗": "Відкрийте офіційний клієнт і налаштування спостереження ↗",
-  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "Цей записник належить офіційному веб-клієнту Telegram. Відкрийте його панель, щоб увійти в систему, виберіть чат, встановіть швидкість запису та завершіть сеанс за допомогою маркера керування записником."
+  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "Цей записник належить офіційному веб-клієнту Telegram. Відкрийте його панель, щоб увійти в систему, виберіть чат, встановіть швидкість запису та завершіть сеанс за допомогою маркера керування записником.",
+  "Telegram sent a sign-in code for this account during observation.": "Під час спостереження Telegram надіслав код входу для цього акаунта.",
+  "Telegram reported a new sign-in to this account during observation.": "Під час спостереження Telegram повідомив про новий вхід у цей акаунт.",
+  "Make this the only session": "Залишити лише цю сесію",
+  "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "Завершити всі інші сесії акаунта й увімкнути пароль двоступеневої аутентифікації, якщо його немає? Після цього для входу з іншого пристрою знадобиться цей пароль.",
+  "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "Пароль двоступеневої аутентифікації, заданий TgWitness. Збережіть його зараз: він показується один раз, TgWitness його не зберігає.",
+  "This is now the only session of this account.": "Тепер це єдина сесія акаунта.",
+  "Another session signed in after this session was made the only one.": "Після того як ця сесія стала єдиною, увійшла інша сесія."
 }

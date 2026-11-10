@@ -22,6 +22,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from . import __version__, cloud_attestation, cloud_cli, cloud_report, tdx
 from .assurance import (ADDRESS_SIGNED, BEACON, BEACON_SERVER, QUICK_HOST, redact_user_data, start_binding,
                         user_data_hashes)
+from .attestation_report import tdx_attested
 from .cloud_attestation import (TDX_OK as TDX_OK, hex_id as hex_id, image_loader as image_loader,
                                 intel_check as intel_check, intel_collateral as intel_collateral,
                                 os_image_check as os_image_check)
@@ -1948,7 +1949,8 @@ def verify(args, provider=None, cloudflare=None, fetch=collector_statement, beac
             if reference_error and check == "tdx_compose":
                 status, detail = "fail", reference_error
             report.add(check, status, title, detail, TDX_SOURCE)
-        attested = any(c["check"] == "tdx_compose" and c["status"] == "pass" for c in report.checks)
+        measured = {c["check"]: c for c in report.checks if c["source"] == TDX_SOURCE}
+        attested = tdx_attested(measured) and measured["tdx_compose"]["status"] == "pass"
         for c in report.checks:
             if c["check"] == "tunnel" and record.get("beacon") and attested:
                 c.update(status="pass", source=TDX_SOURCE, title="The quick tunnel's connector runs inside the attested CVM",
@@ -1973,9 +1975,8 @@ def verify(args, provider=None, cloudflare=None, fetch=collector_statement, beac
     assurance = {"runtime_measurements": "collector-self-report", "independent_runtime_attestation": "not-performed",
                  "key_nonexportability": "not-established", "source_authenticity": "not-established"}
     if phala:
+        attested = tdx_attested({c["check"]: c for c in report.checks if c["source"] == TDX_SOURCE})
         found = {c["check"]: c["status"] for c in report.checks if c["source"] == TDX_SOURCE}
-        attested = all(found.get(c) in ("pass", "review")
-                       for c in ("tdx_binding", "tdx_quote", "tdx_compose_hash", "tdx_compose", "tdx_identity"))
         tcb_ok = found.get("tdx_quote") == "pass"
         assurance = {"runtime_measurements": "intel-tdx-quote",
                      "independent_runtime_attestation": "intel-tdx" if attested else "failed",

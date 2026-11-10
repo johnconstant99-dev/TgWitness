@@ -617,7 +617,7 @@ function lock() {
   resetChatExportTools();
   resetReportSettings();
   window.dispatchEvent(new Event("tgwitness:lock"));
-  $("quick-dialog").close();
+  $("quick-dialog").close();window.TgWitnessDialogs?.closeAll();modesUI?.reset();
   $("workspace").inert=false;
   resetInteractions();
   const token=state.token,qrCancelled=cancelQR();
@@ -1097,6 +1097,7 @@ function collectorLines(name,p){
     const facts=[tr("Collector heartbeat: {time}",{time:when(p.last_heartbeat)}),tr("Last event received: {time}",{time:when(p.last_event_at)})];
     if(p.reason==="journal_write_failures")return [p.error,...facts];
     if(p.reason==="live")return [tr("Events arrive. A quiet chat without new messages is not a fault."),...facts];
+    if(p.reason==="session_revoked")return [tr("The session was ended from another device or by Telegram."),...facts];
     if(p.reason==="updates_diverted")return [tr("Updates are going to another session: Telegram's update counter grows, but nothing reaches this one. Another client probably uses the same session key."),...facts];
     if(p.reason==="no_heartbeat")return [tr("No collector heartbeat yet."),...facts];
     if(p.reason==="stale")return [tr("No collector heartbeat for longer than expected; the collector may not be responding."),...facts];
@@ -1492,7 +1493,7 @@ async function switchProfile(id,options={}){
   window.TgWitnessAnalysis?.clear();
   window.TgWitnessServices?.clear();
   window.TgWitnessIndependentCapture?.clear();
-  quickDialog.close();
+  quickDialog.close();window.TgWitnessDialogs?.closeAll();modesUI?.reset();
   const revision=++state.workspaceRevision;
   settingsHub?.reset();
   viewHost?.resetSession();state.permissionsStamp=null;
@@ -3405,11 +3406,13 @@ function renderEvidenceBadge(){
 }
 
 async function loadAssurance(){
-  if(state.assurance===undefined&&state.status){
-    const r=state.status.assurance?await fetch("/api/assurance").catch(()=>null):null;
-    state.assurance=r?.ok?(await r.json()).statement:null;
+  const owner=state.workspaceRevision+":"+state.profile;
+  if(state.assuranceOwner!==owner&&state.status){
+    const statement=state.status.assurance?await json("assurance").then(r=>r.statement,()=>null):null;
+    if(owner!==state.workspaceRevision+":"+state.profile)return;
+    state.assurance=statement;state.assuranceOwner=owner;
   }
-  const s=state.assurance,on=!!s;
+  const s=state.assuranceOwner===owner?state.assurance:null,on=!!s;
   if(state.view!=='witness')return;
   show("alerts-host",on);show("cloud-active",on);
   if(!on){$("extra-cloud-badge").className="extra-badge";extraBadge("cloud",false,"","Off");renderServerHealth(null);return;}
@@ -4545,6 +4548,15 @@ async function showAccountSessions(){
     }));
     box.append(all);
   }
+  const only=node("button","quiet danger",tr("Make this the only session"));only.type="button";
+  only.addEventListener("click",e=>busy(e.currentTarget,async()=>{
+    if(!(await askConfirm(tr("End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password."),{danger:true,confirmText:tr("Make this the only session")})))return;
+    if(!owner.current())return;
+    const done=await json("account/sessions/only",{},{profile:owner.profile,token:owner.token});
+    if(done.password)await window.TgWitnessDialogs.prompt(done.password,{title:tr("Two-step password"),label:tr("Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it."),required:false});
+    toast(tr("This is now the only session of this account."));await showAccountSessions();
+  }));
+  box.append(only);
   for(const s of [...r.sessions].sort((a,b)=>Number(b.current)-Number(a.current)||String(b.active_at).localeCompare(String(a.active_at)))){
     const row=node("div","account-session"+(s.current?" current":""));
     row.append(node("span","account-session-device",[s.device_model,[s.app_name,s.app_version].filter(Boolean).join(" ")].filter(Boolean).join(" · ")+

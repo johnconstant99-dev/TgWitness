@@ -8574,5 +8574,12 @@
   "Running from a source folder instead? Use python start.py, or Start.cmd on Windows. Open the panel address printed in the terminal.": "מעדיפים להריץ מתוך תיקיית המקור? השתמשו ב-python start.py, או ב-Start.cmd ב-Windows. פתחו את כתובת הפאנל המוצגת במסוף.",
   "For your own groups, start your own panel with tgwitness and a separate data directory. Demo data cannot be converted into a real investigation.": "עבור הקבוצות שלכם, צרו לוח משלך באמצעות tgwitness ותיקיית נתונים נפרדת. לא ניתן להמיר נתוני הדגמה לחקירה אמיתית.",
   "Open official client and observation settings ↗": "פתח את הלקוח הרשמי והגדר את הגדרות המעקב ↗",
-  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "מקליט זה פועל בלקוח האינטרנט הרשמי של טלגרם. פתח את הלוח שלו כדי להתחבר, בחר צ'אט, קבע את הקצב וסיים את ההקלטה באמצעות אסימון השליטה במקליט."
+  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "מקליט זה פועל בלקוח האינטרנט הרשמי של טלגרם. פתח את הלוח שלו כדי להתחבר, בחר צ'אט, קבע את הקצב וסיים את ההקלטה באמצעות אסימון השליטה במקליט.",
+  "Telegram sent a sign-in code for this account during observation.": "טלגרם שלחה קוד כניסה לחשבון הזה במהלך התצפית.",
+  "Telegram reported a new sign-in to this account during observation.": "טלגרם דיווחה על כניסה חדשה לחשבון הזה במהלך התצפית.",
+  "Make this the only session": "להפוך לסשן היחיד",
+  "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "לסיים את כל הסשנים האחרים של החשבון ולהפעיל סיסמת אימות דו-שלבי אם אין? לאחר מכן כל כניסה ממקום אחר תדרוש את הסיסמה הזו.",
+  "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "סיסמת אימות דו-שלבי שהגדיר TgWitness. שמרו אותה עכשיו: היא מוצגת פעם אחת בלבד ו-TgWitness לא שומר אותה.",
+  "This is now the only session of this account.": "זה עכשיו הסשן היחיד של החשבון.",
+  "Another session signed in after this session was made the only one.": "סשן אחר נכנס לאחר שהסשן הזה הוגדר כיחיד."
 }

@@ -354,6 +354,9 @@ class Run:
         path = directory / "work.sqlite3"
         if linked(path):
             raise ValueError("Export index must not be a link.")
+        for stale in (directory / "chunks").glob("*.part"):
+            if re.fullmatch(r"\d+(?:\.[0-9a-f]{16})?\.part", stale.name):
+                stale.unlink(missing_ok=True)
         self.db = sqlite3.connect(path, check_same_thread=False)
         self.db.row_factory = sqlite3.Row
         self.db.executescript("DROP TABLE IF EXISTS tasks; DROP TABLE IF EXISTS eligible; "
@@ -463,7 +466,7 @@ class Run:
             self.db.execute("UPDATE tasks SET phase='running' WHERE low=?", (task["low"],))
             self.db.commit()
             path = directory / "chunks" / (str(task["low"]) + ".jsonl")
-            temporary = path.with_suffix(".part")
+            temporary = path.with_name(str(task["low"]) + "." + secrets.token_hex(8) + ".part")
             worker["current_range"] = [task["low"], task["high"]]
             def waiting(seconds):
                 worker.update(state="waiting", wait_until=time.time() + seconds)
@@ -518,6 +521,8 @@ class Run:
                     transport.invalidate()
                 raise
             except Exception as exc:
+                with suppress(OSError):
+                    temporary.unlink(missing_ok=True)
                 self.db.execute("UPDATE tasks SET phase='pending' WHERE low=?", (task["low"],))
                 self.db.commit()
                 if isinstance(exc, OSError) and (exc.filename is not None or exc.errno in {

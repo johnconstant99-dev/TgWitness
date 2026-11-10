@@ -96,7 +96,8 @@ class Journal:
         records = self.events()
         self.head = check_events(records, self.public_key, self.observer_id)
         self.seq = len(records)
-        self.last_shutdown_clean = not records or records[-1]["kind"] == "service.stopped"
+        lifecycle = [r for r in records if r["kind"] in ("service.started", "service.stopped")]
+        self.last_shutdown_clean = not lifecycle or lifecycle[-1]["kind"] == "service.stopped"
 
     def events(self, limit=None):
         with self.lock:

@@ -376,12 +376,14 @@ async def execute(collector, body, queue=None, operator=None):
     return await perform(collector, body, account, prepared, saved, selected, operator=operator)
 
 
-async def run_queued(collector, body):
+async def run_queued(collector, body, authorized=None):
     store = collector.store
     pending = store.get_setting(ACTION + body.request_id, None)
     if not pending or pending.get("result"):
         return None
     try:
+        if authorized is not None:
+            authorized()
         permitted(collector)
         prepared, saved, selected = prepare(collector, body, pending.get("account_id"), fresh=False)
         await collector.restore()

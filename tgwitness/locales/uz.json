@@ -8535,5 +8535,12 @@
   "Running from a source folder instead? Use python start.py, or Start.cmd on Windows. Open the panel address printed in the terminal.": "Manba papkadan ishga tushirmoqchimisiz? Windowsda python start.py yoki Start.cmd ni ishlating. Terminalda chop etilgan panel manzilini oching.",
   "For your own groups, start your own panel with tgwitness and a separate data directory. Demo data cannot be converted into a real investigation.": "O'zingizning guruhlaringiz uchun tgwitness bilan alohida ma'lumotlar katalogiga ega o'z panelingizni ishga tushiring. Demo ma'lumotlarini haqiqiy tergovga aylantirib bo'lmaydi.",
   "Open official client and observation settings ↗": "Rasmiy ilovani oching va kuzatuv sozlamalarini oching ↗",
-  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "Ushbu yozuvchi rasmiy Telegram veb-klientiga tegishli. Uning panelini oching, tizimga kiring, suhbatni tanlang, yozuv tezligini sozlang va yozuvni yakunlang, yozuvchi boshqaruv tokenidan foydalanib."
+  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "Ushbu yozuvchi rasmiy Telegram veb-klientiga tegishli. Uning panelini oching, tizimga kiring, suhbatni tanlang, yozuv tezligini sozlang va yozuvni yakunlang, yozuvchi boshqaruv tokenidan foydalanib.",
+  "Telegram sent a sign-in code for this account during observation.": "Kuzatuv paytida Telegram bu akkaunt uchun kirish kodini yubordi.",
+  "Telegram reported a new sign-in to this account during observation.": "Kuzatuv paytida Telegram bu akkauntga yangi kirish haqida xabar berdi.",
+  "Make this the only session": "Faqat shu seansni qoldirish",
+  "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "Bu akkauntning boshqa barcha seanslari tugatilsinmi va ikki bosqichli tasdiqlash paroli bo'lmasa yoqilsinmi? Shundan keyin boshqa joydan kirish uchun shu parol kerak bo'ladi.",
+  "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "TgWitness o'rnatgan ikki bosqichli tasdiqlash paroli. Hozir saqlang: u faqat bir marta ko'rsatiladi va TgWitness uni saqlamaydi.",
+  "This is now the only session of this account.": "Endi bu akkauntning yagona seansi.",
+  "Another session signed in after this session was made the only one.": "Bu seans yagona qilinganidan keyin boshqa seans kirdi."
 }

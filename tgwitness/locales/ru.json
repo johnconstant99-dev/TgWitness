@@ -8583,5 +8583,12 @@
   "Running from a source folder instead? Use python start.py, or Start.cmd on Windows. Open the panel address printed in the terminal.": "Хотите запустить программу из исходной папки? Используйте команду python start.py или Start.cmd в Windows. Откройте панель по адресу, выведенному в терминале.",
   "For your own groups, start your own panel with tgwitness and a separate data directory. Demo data cannot be converted into a real investigation.": "Для ваших собственных групп создайте собственную панель с помощью tgwitness и отдельного каталога данных. Демонстрационные данные не могут быть использованы в реальном расследовании.",
   "Open official client and observation settings ↗": "Открыть официальный клиент и настройки наблюдения ↗",
-  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "Этот рекордер управляет официальным Telegram Web. Откройте его панель для входа, выбора чата, темпа и завершения сессии, используйте токен управления рекордером."
+  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "Этот рекордер управляет официальным Telegram Web. Откройте его панель для входа, выбора чата, темпа и завершения сессии, используйте токен управления рекордером.",
+  "Telegram sent a sign-in code for this account during observation.": "Во время наблюдения Telegram прислал код входа для этого аккаунта.",
+  "Telegram reported a new sign-in to this account during observation.": "Во время наблюдения Telegram сообщил о новом входе в этот аккаунт.",
+  "Make this the only session": "Оставить только этот сеанс",
+  "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "Завершить все другие сеансы аккаунта и включить облачный пароль (2FA), если его нет? После этого для входа на другом устройстве понадобится этот пароль.",
+  "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "Облачный пароль (2FA), заданный TgWitness. Сохраните его сейчас: он показывается один раз, TgWitness его не хранит.",
+  "This is now the only session of this account.": "Теперь это единственный сеанс аккаунта.",
+  "Another session signed in after this session was made the only one.": "После того как этот сеанс стал единственным, вошёл другой сеанс."
 }

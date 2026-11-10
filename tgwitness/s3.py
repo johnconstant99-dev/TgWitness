@@ -1,5 +1,6 @@
 import hashlib
 import hmac
+import ipaddress
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
@@ -13,6 +14,22 @@ EMPTY_SHA256 = hashlib.sha256(b"").hexdigest()
 def canonical_query(query):
     pairs = sorted((quote(k, safe="-_.~"), quote(v, safe="-_.~")) for k, v in parse_qsl(query, keep_blank_values=True))
     return "&".join(k + "=" + v for k, v in pairs)
+
+
+def endpoint_allowed(endpoint):
+    parts = urlsplit(endpoint)
+    if parts.scheme == "https":
+        return True
+    host = (parts.hostname or "").lower().rstrip(".")
+    if parts.scheme != "http" or not host:
+        return False
+    if host == "localhost" or host.endswith(".localhost"):
+        return True
+    try:
+        address = ipaddress.ip_address(host)
+        return address.is_loopback or address.is_private
+    except ValueError:
+        return False
 
 
 def sign(method, url, headers, payload_hash, access_key, secret_key, region, now=None, service="s3"):
@@ -53,6 +70,8 @@ class S3:
         return base + "/" + path + ("?" + query if query else "")
 
     async def call(self, method, url, headers=None, body=b"", length=None, payload_hash=EMPTY_SHA256, sink=None):
+        if not endpoint_allowed(self.endpoint):
+            raise ValueError("Enter the storage endpoint as https://host (no path or credentials).")
         signed = sign(method, url, headers or {}, payload_hash, self.access_key, self.secret_key, self.region)
         return await request(method, url, self.network, signed, body, length, sink, timeout=120)
 

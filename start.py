@@ -6,12 +6,14 @@ import sys
 if sys.version_info < (3, 11):
     raise SystemExit("Install Python 3.11 or newer.")
 
+import hashlib
 import venv
 import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 VERSION = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
+INPUTS = ("pyproject.toml", "deploy/build.lock", "deploy/requirements.lock")
 VENV_HINT = ("On Debian/Ubuntu install the venv package for this Python, for example "
              "'sudo apt install python3-venv', delete the .venv folder and run the launcher again.")
 
@@ -21,6 +23,13 @@ def step(command, failure):
         subprocess.run(command, check=True, cwd=ROOT)
     except (subprocess.CalledProcessError, OSError):
         raise SystemExit("\n" + failure) from None
+
+
+def readiness():
+    digest = hashlib.sha256()
+    for name in INPUTS:
+        digest.update(name.encode() + b"\0" + (ROOT / name).read_bytes().replace(b"\r\n", b"\n") + b"\0")
+    return VERSION.strip() + " " + digest.hexdigest()
 
 
 def main():
@@ -42,16 +51,19 @@ def main():
         except (subprocess.CalledProcessError, OSError) as exc:
             raise SystemExit("\nCould not create the private Python environment (.venv): " + str(exc)
                              + "\n" + VENV_HINT) from None
-    if not marker.exists() or marker.read_text(encoding="utf-8") != VERSION or setup:
+    ready = readiness()
+    if not marker.exists() or marker.read_text(encoding="utf-8") != ready or setup:
 
         step([str(python), "-m", "ensurepip", "--upgrade"], "Could not set up pip in .venv. " + VENV_HINT)
         print("Installing TgWitness dependencies…", flush=True)
         failed = ("Installing dependencies failed (details above). Check the Internet connection or proxy "
                   "(pip honours HTTPS_PROXY) and run the launcher again.")
-        step([str(python), "-m", "pip", "install", "--disable-pip-version-check", "--require-hashes",
-              "-r", str(ROOT / "deploy/requirements.lock")], failed)
-        step([str(python), "-m", "pip", "install", "--disable-pip-version-check", "--no-deps", "-e", str(ROOT)], failed)
-        marker.write_text(VERSION, encoding="utf-8")
+        for lock in ("deploy/build.lock", "deploy/requirements.lock"):
+            step([str(python), "-m", "pip", "install", "--disable-pip-version-check", "--require-hashes",
+                  "-r", str(ROOT / lock)], failed)
+        step([str(python), "-m", "pip", "install", "--disable-pip-version-check", "--no-deps", "--no-build-isolation",
+              "-e", str(ROOT)], failed)
+        marker.write_text(ready, encoding="utf-8")
     if not setup:
         raise SystemExit(serve([str(python), "-m", "tgwitness", *sys.argv[1:]]))
 

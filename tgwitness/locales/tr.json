@@ -8535,5 +8535,12 @@
   "Running from a source folder instead? Use python start.py, or Start.cmd on Windows. Open the panel address printed in the terminal.": "Bunun yerine bir kaynak klasörden mi çalıştırıyorsunuz? Python'da start.py komutunu veya Windows'ta Start.cmd dosyasını kullanın. Terminalde görüntülenen panel adresini açın.",
   "For your own groups, start your own panel with tgwitness and a separate data directory. Demo data cannot be converted into a real investigation.": "Kendi gruplarınız için, tgwitness ve ayrı bir veri dizini kullanarak kendi panelinizi başlatın. Demo verileri gerçek bir soruşturmaya dönüştürülemez.",
   "Open official client and observation settings ↗": "Resmi istemciyi açın ve gözlem ayarlarına gidin ↗",
-  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "Bu kayıt aracı, resmi Telegram Web istemcisine aittir. Paneli açarak oturum açın, bir sohbet seçin, hızı ayarlayın ve kayıt aracı kontrol simgesini kullanarak oturumu sonlandırın."
+  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "Bu kayıt aracı, resmi Telegram Web istemcisine aittir. Paneli açarak oturum açın, bir sohbet seçin, hızı ayarlayın ve kayıt aracı kontrol simgesini kullanarak oturumu sonlandırın.",
+  "Telegram sent a sign-in code for this account during observation.": "Telegram gözlem sırasında bu hesap için bir giriş kodu gönderdi.",
+  "Telegram reported a new sign-in to this account during observation.": "Telegram gözlem sırasında bu hesaba yeni bir giriş bildirdi.",
+  "Make this the only session": "Tek oturum yap",
+  "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "Bu hesabın diğer tüm oturumları kapatılsın ve yoksa iki adımlı doğrulama parolası açılsın mı? Bundan sonra başka bir yerden giriş için bu parola gerekir.",
+  "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "TgWitness'ın belirlediği iki adımlı doğrulama parolası. Şimdi kaydedin: yalnızca bir kez gösterilir ve TgWitness saklamaz.",
+  "This is now the only session of this account.": "Bu artık hesabın tek oturumu.",
+  "Another session signed in after this session was made the only one.": "Bu oturum tek oturum yapıldıktan sonra başka bir oturum giriş yaptı."
 }

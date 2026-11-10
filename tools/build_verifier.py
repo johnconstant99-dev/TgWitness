@@ -71,9 +71,9 @@ def main():
         (stage / "python" / (tag + "._pth")).write_text(
             tag + ".zip\n.\nLib\\site-packages\nimport site\n", encoding="ascii")
         subprocess.run([sys.executable, "-m", "pip", "install", "--disable-pip-version-check",
-                        "--only-binary=:all:", "--no-compile", "--no-warn-script-location",
+                        "--only-binary=:all:", "--no-compile", "--no-warn-script-location", "--require-hashes",
                         "--target", str(stage / "python/Lib/site-packages"),
-                        "-c", str(ROOT / "deploy/constraints.txt"), "cryptography"], check=True)
+                        "-r", str(ROOT / "deploy/installer.lock")], check=True)
         shutil.copyfile(ROOT / "tgwitness/verify.py", stage / "verify.py")
         subprocess.run([str(stage / "python/python.exe"), "-I", "-B", "-X", "utf8", "-c",
                         "import sys; sys.path.insert(0, sys.argv[1]); "
@@ -125,8 +125,11 @@ def main():
         with zipfile.ZipFile(partial, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
             for path in shipped:
                 archive.write(path, name + "/" + path.relative_to(stage).as_posix())
+        checksum = output.with_name(output.name + ".sha256.part")
+        checksum.write_text(sha256(partial) + "  " + output.name + "\n", encoding="ascii")
+        output.with_suffix(".zip.sha256").unlink(missing_ok=True)
         partial.replace(output)
-        output.with_suffix(".zip.sha256").write_text(sha256(output) + "  " + output.name + "\n", encoding="ascii")
+        checksum.replace(output.with_suffix(".zip.sha256"))
         print("Portable verifier:", output)
         print("MiB:", round(output.stat().st_size / 1024**2, 1))
         print("SHA-256:", sha256(output))

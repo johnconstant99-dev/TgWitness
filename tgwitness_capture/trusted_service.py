@@ -66,6 +66,7 @@ class TrustedRecorder:
                                 "source_tree_sha256": source_hash, "measurement": "self-reported; not a TEE attestation",
                                 "previous_shutdown_clean": self.journal.last_shutdown_clean,
                                 "assurance": "local signatures; external checkpoint retention required", "limits": LIMITS})
+            self.video.recover()
         except BaseException:
             self.journal.close()
             raise
@@ -146,7 +147,7 @@ class TrustedRecorder:
         try:
             await asyncio.to_thread(self.runtime.stop)
         finally:
-            self.video.abort()
+            self.video.abort(reason)
         self.event("stopped", {"reason": reason, "logout": "not_confirmed"})
         return self.status()
 

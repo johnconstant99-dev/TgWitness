@@ -650,6 +650,10 @@ async def end_other_account_sessions(*, ctx=Depends(current_context)):
     return await ctx.operation(ctx.app.state.collector.terminate_all_other_sessions)
 
 
+async def make_only_account_session(*, ctx=Depends(current_context)):
+    return await ctx.operation(ctx.app.state.collector.make_only_session)
+
+
 async def change_account_password(
     body: AccountPassword, *, ctx=Depends(current_context)
 ):

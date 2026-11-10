@@ -8496,5 +8496,12 @@
   "Running from a source folder instead? Use python start.py, or Start.cmd on Windows. Open the panel address printed in the terminal.": "若要從來源資料夾執行，請在終端機中輸入 `python start.py`（Windows 系統則使用 `Start.cmd`）。開啟終端機中顯示的面板網址。",
   "For your own groups, start your own panel with tgwitness and a separate data directory. Demo data cannot be converted into a real investigation.": "若要處理您自己的群組，請使用 tgwitness 並建立獨立的資料目錄來啟動專屬面板。示範資料無法轉為實際調查使用。",
   "Open official client and observation settings ↗": "開啟官方客戶端並進入觀察設定 ↗",
-  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "此錄製工具內建官方 Telegram 網頁版客戶端。請開啟其控制面板以登入，選取一個聊天室，設定錄製速度，並使用錄製控制代幣來結束本次錄製。"
+  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "此錄製工具內建官方 Telegram 網頁版客戶端。請開啟其控制面板以登入，選取一個聊天室，設定錄製速度，並使用錄製控制代幣來結束本次錄製。",
+  "Telegram sent a sign-in code for this account during observation.": "觀察期間，Telegram 為此帳號傳送了登入碼。",
+  "Telegram reported a new sign-in to this account during observation.": "觀察期間，Telegram 回報了此帳號的新登入。",
+  "Make this the only session": "設為唯一的工作階段",
+  "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "結束此帳號的所有其他工作階段，並在尚未設定時開啟兩步驟驗證密碼？之後在其他地方登入都需要這組密碼。",
+  "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "TgWitness 設定的兩步驟驗證密碼。請立即保存：只會顯示一次，TgWitness 不會保留。",
+  "This is now the only session of this account.": "現在這是此帳號唯一的工作階段。",
+  "Another session signed in after this session was made the only one.": "此工作階段設為唯一後，另有工作階段登入。"
 }

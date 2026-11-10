@@ -8496,5 +8496,12 @@
   "Running from a source folder instead? Use python start.py, or Start.cmd on Windows. Open the panel address printed in the terminal.": "Mahu menjalankannya daripada folder sumber sebaliknya? Gunakan python start.py, atau Start.cmd pada Windows. Buka alamat panel yang dicetak di terminal.",
   "For your own groups, start your own panel with tgwitness and a separate data directory. Demo data cannot be converted into a real investigation.": "Untuk kumpulan anda sendiri, mulakan panel anda sendiri dengan tgwitness dan direktori data berasingan. Data demo tidak boleh ditukar menjadi siasatan sebenar.",
   "Open official client and observation settings ↗": "Buka klien rasmi dan tetapan pemerhatian ↗",
-  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "Perakam ini memiliki klien Web Telegram rasmi. Buka panelnya untuk log masuk, pilih sembang, tetapkan kelajuan dan tamatkan sesi menggunakan token kawalan perakam."
+  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "Perakam ini memiliki klien Web Telegram rasmi. Buka panelnya untuk log masuk, pilih sembang, tetapkan kelajuan dan tamatkan sesi menggunakan token kawalan perakam.",
+  "Telegram sent a sign-in code for this account during observation.": "Telegram menghantar kod log masuk untuk akaun ini semasa pemerhatian.",
+  "Telegram reported a new sign-in to this account during observation.": "Telegram melaporkan log masuk baharu ke akaun ini semasa pemerhatian.",
+  "Make this the only session": "Jadikan satu-satunya sesi",
+  "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "Tamatkan semua sesi lain akaun ini dan hidupkan kata laluan pengesahan dua langkah jika belum ada? Selepas itu, log masuk dari tempat lain memerlukan kata laluan itu.",
+  "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "Kata laluan pengesahan dua langkah yang ditetapkan oleh TgWitness. Simpan sekarang: ia dipaparkan sekali sahaja dan TgWitness tidak menyimpannya.",
+  "This is now the only session of this account.": "Ini kini satu-satunya sesi akaun ini.",
+  "Another session signed in after this session was made the only one.": "Sesi lain log masuk selepas sesi ini dijadikan satu-satunya."
 }

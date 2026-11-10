@@ -32,10 +32,8 @@ def official_report(events, expected=None):
         settings = event["payload"].get("settings")
         if isinstance(settings, dict):
             route = route_binding(settings)
-    if not starts:
-        if expected_options is not None:
-            raise ValueError("No recorded interval confirms the expected settings")
-        reasons.append("observation_not_started")
+    if not starts and expected_options is not None:
+        raise ValueError("No recorded interval confirms the expected settings")
     for event in starts:
         payload = event["payload"]
         settings = payload.get("settings")
@@ -51,48 +49,70 @@ def official_report(events, expected=None):
             raise ValueError("Official-client settings differ from the independently expected settings")
         if expected is not None and payload.get("source") != expected["source"]:
             raise ValueError("Official-client source differs from the independently expected source")
-    finished = [e for e in events if e["kind"] == "official.finished"]
-    if len(finished) != 1:
-        reasons.append("procedure_not_finished")
-    elif finished[0]["payload"].get("logout_confirmed") is not True:
-        reasons.append("logout_unconfirmed")
-    interruptions = [e for e in events if e["kind"] in {"official.stopped", "capture.failed", "capture.partial", "video.interrupted"}]
-    if interruptions:
-        reasons.append("observation_interrupted")
-    sessions = {}
+    procedures = []
     for event in events:
-        if event["kind"] == "video.started":
-            capture_id = event["payload"].get("capture_id")
-            if not isinstance(capture_id, str) or capture_id in sessions:
-                raise ValueError("Invalid video session")
-            sessions[capture_id] = {"indices": [], "stopped": False}
-        elif event["kind"] == "video.segment":
-            session = sessions.get(event["payload"].get("capture_id"))
-            index = event["payload"].get("segment_index")
-            if (session is None or session["stopped"] or type(index) is not int
-                    or index != len(session["indices"]) or not event["artifacts"]
-                    or not any(a["role"] == "screen_video_segment" for a in event["artifacts"])):
-                raise ValueError("Video segment order or artifact binding is invalid")
-            session["indices"].append(index)
-        elif event["kind"] in {"video.stopped", "video.interrupted"}:
-            session = sessions.get(event["payload"].get("capture_id"))
-            if session is None or session["stopped"]:
-                raise ValueError("Video end without an open start")
-            if (event["kind"] != "video.stopped" or event["payload"].get("clean_exit") is not True
-                    or event["payload"].get("requested_stop") is not True
-                    or event["payload"].get("unsealed_segments") != []):
-                if "video_coverage_incomplete" not in reasons:
-                    reasons.append("video_coverage_incomplete")
-            session["stopped"] = True
-    required_video = any(e["payload"]["settings"].get("require_video") for e in starts)
-    if required_video and (len(sessions) < len(starts) or any(not s["indices"] or not s["stopped"] for s in sessions.values())):
-        if "video_coverage_incomplete" not in reasons:
-            reasons.append("video_coverage_incomplete")
-    if not any(e["kind"] == "capture.saved" for e in events):
-        reasons.append("no_saved_observation")
+        if event["kind"] == "official.opened" or (event["kind"] == "official.started"
+                                                  and (not procedures or procedures[-1]["finished"])):
+            procedures.append({"seq": event["seq"], "opened": event["kind"] == "official.opened",
+                               "finished": False, "events": []})
+        if procedures:
+            procedures[-1]["events"].append(event)
+            if event["kind"] == "official.finished":
+                procedures[-1]["finished"] = True
+    interruption_kinds = {"official.stopped", "capture.failed", "capture.partial", "video.interrupted"}
+    interruptions = [e for p in procedures for e in p["events"] if e["kind"] in interruption_kinds]
+    sessions = {}
+    for number, procedure in enumerate(procedures):
+        for event in procedure["events"]:
+            if event["kind"] == "video.started":
+                capture_id = event["payload"].get("capture_id")
+                if not isinstance(capture_id, str) or capture_id in sessions:
+                    raise ValueError("Invalid video session")
+                sessions[capture_id] = {"indices": [], "stopped": False, "clean": False, "procedure": number}
+            elif event["kind"] == "video.segment":
+                session = sessions.get(event["payload"].get("capture_id"))
+                index = event["payload"].get("segment_index")
+                if (session is None or session["stopped"] or type(index) is not int
+                        or index != len(session["indices"]) or not event["artifacts"]
+                        or not any(a["role"] == "screen_video_segment" for a in event["artifacts"])):
+                    raise ValueError("Video segment order or artifact binding is invalid")
+                session["indices"].append(index)
+            elif event["kind"] in {"video.stopped", "video.interrupted"}:
+                session = sessions.get(event["payload"].get("capture_id"))
+                if session is None or session["stopped"]:
+                    raise ValueError("Video end without an open start")
+                session["clean"] = (event["kind"] == "video.stopped" and event["payload"].get("clean_exit") is True
+                                    and event["payload"].get("requested_stop") is True
+                                    and event["payload"].get("unsealed_segments") == [])
+                session["stopped"] = True
     beacons = records(events)
-    if any(e["payload"]["settings"].get("drand") for e in starts) and not beacons:
-        reasons.append("no_public_beacon")
+    results = []
+    for number, procedure in enumerate(procedures):
+        own = procedure["events"]
+        own_starts = [e for e in own if e["kind"] == "official.started"]
+        found = [] if procedure["opened"] else ["procedure_not_opened"]
+        if not own_starts:
+            found.append("observation_not_started")
+        finished = [e for e in own if e["kind"] == "official.finished"]
+        if len(finished) != 1:
+            found.append("procedure_not_finished")
+        elif finished[0]["payload"].get("logout_confirmed") is not True:
+            found.append("logout_unconfirmed")
+        if any(e["kind"] in interruption_kinds for e in own):
+            found.append("observation_interrupted")
+        own_sessions = [s for s in sessions.values() if s["procedure"] == number]
+        required_video = any(e["payload"]["settings"].get("require_video") for e in own_starts)
+        if (any(s["stopped"] and not s["clean"] for s in own_sessions)
+                or (required_video and (len(own_sessions) < len(own_starts)
+                                        or any(not s["indices"] or not s["stopped"] for s in own_sessions)))):
+            found.append("video_coverage_incomplete")
+        if not any(e["kind"] == "capture.saved" for e in own):
+            found.append("no_saved_observation")
+        if any(e["payload"]["settings"].get("drand") for e in own_starts) and not records(own):
+            found.append("no_public_beacon")
+        results.append({"first_seq": procedure["seq"], "opened": procedure["opened"],
+                        "procedure_status": "INCOMPLETE" if found else "PASS", "reasons": found})
+        reasons.extend(reason for reason in found if reason not in reasons)
     return {"mode": starts[0]["payload"]["settings"]["mode"] if starts else None,
             "egress": route[0] if route else None,
             "ip_exposure": ("runner or host public IP exposed" if route and route[0] == "direct" else
@@ -100,6 +120,7 @@ def official_report(events, expected=None):
             "settings_checked": expected_options is not None, "intervals": len(starts),
             "video_segments": sum(len(s["indices"]) for s in sessions.values()),
             "procedure_status": "INCOMPLETE" if reasons else "PASS", "reasons": reasons,
+            "procedures": results,
             "interruptions": [{"seq": e["seq"], "kind": e["kind"], "at": e["recorded_at"]} for e in interruptions],
             "environment_status": "INCOMPLETE", "cloudflare_status": "INCOMPLETE",
             "drand_status": "INCOMPLETE", "drand_rounds": beacons,

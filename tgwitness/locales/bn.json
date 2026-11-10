@@ -8535,5 +8535,12 @@
   "Running from a source folder instead? Use python start.py, or Start.cmd on Windows. Open the panel address printed in the terminal.": "উৎস ফোল্ডার থেকে চালানোর পরিবর্তে? Windows-এ python start.py অথবা Start.cmd ব্যবহার করুন। টার্মিনালে মুদ্রিত প্যানেল ঠিকানা খুলুন।",
   "For your own groups, start your own panel with tgwitness and a separate data directory. Demo data cannot be converted into a real investigation.": "আপনার নিজস্ব গ্রুপগুলির জন্য tgwitness এবং একটি পৃথক ডেটা ডিরেক্টরি সহ আপনার নিজস্ব প্যানেল শুরু করুন। ডেমো ডেটা বাস্তব তদন্তে রূপান্তর করা যায় না।",
   "Open official client and observation settings ↗": "অফিসিয়াল ক্লায়েন্ট এবং পর্যবেক্ষণ সেটিংস খুলুন ↗",
-  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "এই রেকর্ডারটি অফিসিয়াল টেলিগ্রাম ওয়েব ক্লায়েন্টের মালিক। এর প্যানেল খুলে লগইন করুন, একটি চ্যাট নির্বাচন করুন, রেকর্ডার কন্ট্রোল টোকেন ব্যবহার করে গতি নির্ধারণ করুন এবং সেশন শেষ করুন।"
+  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "এই রেকর্ডারটি অফিসিয়াল টেলিগ্রাম ওয়েব ক্লায়েন্টের মালিক। এর প্যানেল খুলে লগইন করুন, একটি চ্যাট নির্বাচন করুন, রেকর্ডার কন্ট্রোল টোকেন ব্যবহার করে গতি নির্ধারণ করুন এবং সেশন শেষ করুন।",
+  "Telegram sent a sign-in code for this account during observation.": "পর্যবেক্ষণের সময় Telegram এই অ্যাকাউন্টের জন্য একটি সাইন-ইন কোড পাঠিয়েছে।",
+  "Telegram reported a new sign-in to this account during observation.": "পর্যবেক্ষণের সময় Telegram এই অ্যাকাউন্টে একটি নতুন সাইন-ইন জানিয়েছে।",
+  "Make this the only session": "এটিকে একমাত্র সেশন করুন",
+  "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "এই অ্যাকাউন্টের অন্য সব সেশন শেষ করে, না থাকলে দুই-ধাপের পাসওয়ার্ড চালু করবেন? এরপর অন্য কোথাও সাইন ইন করতে সেই পাসওয়ার্ড লাগবে।",
+  "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "TgWitness দুই-ধাপের পাসওয়ার্ড সেট করেছে। এখনই সংরক্ষণ করুন: এটি শুধু একবার দেখানো হয় এবং TgWitness এটি রাখে না।",
+  "This is now the only session of this account.": "এটি এখন এই অ্যাকাউন্টের একমাত্র সেশন।",
+  "Another session signed in after this session was made the only one.": "এই সেশনটিকে একমাত্র করার পর আরেকটি সেশন সাইন ইন করেছে।"
 }

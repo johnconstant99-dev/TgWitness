@@ -24,7 +24,7 @@ export function createSecretChats(context) {
       const item = chat(id);
       item.peer = item.peer || p.peer_user_id || null;
       item.last = record.observed_at || item.last;
-      if (record.kind === "secret_chat.file") item.files.set(p.random_id, p);
+      if (record.kind === "secret_chat.file") item.files.set(p.message_event ? "e" + p.message_event : "r" + p.random_id, p);
       else if (record.kind === "secret_chat.action" && p.action === "DeleteMessages")
         for (const randomId of p.details?.random_ids || []) item.deleted.add(randomId);
       if (["secret_chat.message", "secret_chat.action", "secret_chat.ready", "secret_chat.closed", "secret_chat.requested",
@@ -84,7 +84,7 @@ export function createSecretChats(context) {
     row.append(head);
     if (p.text) row.append(node("p", "", p.text));
     if (p.media) row.append(node("p", "hint", tr("Attachment") + " · " + String(p.media._ || "").replace("DecryptedMessageMedia", "")));
-    const file = item.files.get(p.random_id);
+    const file = item.files.get("e" + record.seq) || item.files.get("r" + p.random_id);
     if (file) {
       const save = node("button", "text-link", tr("Save file") + " · " + humanSize(file.size));
       save.type = "button";

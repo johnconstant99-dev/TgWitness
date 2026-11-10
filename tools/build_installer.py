@@ -166,8 +166,8 @@ def main():
     revision = git("rev-parse", "HEAD")
     if not re.fullmatch(r"[0-9a-f]{40}", revision):
         raise ValueError("Expected a committed source revision")
-    if git("status", "--porcelain", "--", "tgwitness", "tgwitness_capture", "pyproject.toml", "README.md", "deploy/mcp.lock"):
-        raise ValueError("Commit application and dependency changes before building a published installer")
+    if git("status", "--porcelain", "--untracked-files=all"):
+        raise ValueError("Commit every repository change before building a published installer")
     version = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
     if args.output.is_symlink():
         raise ValueError("Choose an ordinary output directory")

@@ -144,9 +144,13 @@ def main(argv, cloud):
         elif args.command == "check-report":
             base = Path(args.report)
             base = base.with_suffix("") if base.suffix in (".json", ".md", ".html", ".pdf") else base
+            unsigned = False
             for label, text in attestation_report.check(base, args.verifier_fingerprint):
-                print("[PASS] " + label + ": " + text)
-            print("The seal holds: " + str(base.with_suffix(".json")) + " is the report that was sealed.")
+                bare = "not signed" in text or "no signature" in text
+                unsigned = unsigned or bare
+                print(("[UNSIGNED] " if bare else "[PASS] ") + label + ": " + text)
+            print("The seal holds: " + str(base.with_suffix(".json")) + " is the report that was sealed."
+                  + (" Parts marked UNSIGNED carry no verifier signature." if unsigned else ""))
         else:
             report = cloud.verify(args)
             text = cloud.render(report)

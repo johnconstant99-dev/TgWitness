@@ -7,6 +7,12 @@ from .common import (
     sys,
     unicodedata,
 )
+from .coverage import (
+    SESSION_NOTES,
+    source_counts,
+)
+WINDOW_WORDS = {"updates_diverted": "Updates went to another session",
+                "session_revoked_externally": "Session revoked externally"}
 KINDS = {"evidence": "Evidence archive", "chat": "Chat export", "account": "Account export",
          "account_disclosure": "Account disclosure", "witness": "Witness journal",
          "dossier": "People profiles", "proof": "Public proof", "report": "Sealed report",
@@ -290,6 +296,26 @@ class Console:
         for gap in gaps:
             self.say("    " + str(gap["from"]) + " → " + str(gap["to"]))
             self.say("    " + self.t("Reason") + ": " + self.coverage_reason(str(gap["reason"])))
+        for window in coverage.get("session_windows") or []:
+            self.check("warn", WINDOW_WORDS.get(window["reason"], str(window["reason"])),
+                       str(window["from"]) + " → " + str(window["to"])
+                       + (" · " + self.t("open at the last record") if window.get("not_resumed_by_last_record") else ""))
+        session = coverage.get("session") or {}
+        for item in session.get("sessions_at_start") or []:
+            self.check("warn" if item.get("others") else "none", "Other sessions at start",
+                       ("?" if item.get("others") is None else self.number(item["others"])) + " · " + str(item["at"]))
+        if session.get("sessions_added"):
+            self.check("warn", "Sessions added during observation",
+                       self.number(sum(item["added"] for item in session["sessions_added"]))
+                       + " · " + str(session["sessions_added"][0]["at"]))
+        groups, other, unlabelled, captures, sealed = source_counts(coverage)
+        parts = [self.t(label) + " " + self.number(sum(count for _, count in found)) for label, found in groups]
+        parts += [name + " " + self.number(count) for name, count in other]
+        parts += [self.t("no source label") + " " + self.number(unlabelled)] if unlabelled else []
+        parts += [self.t("inside a sealed run") + " " + self.number(sealed)] if sealed else []
+        parts += [self.t("recorder captures") + " " + self.number(captures)] if captures else []
+        if parts:
+            self.check("none", "Records by source", " · ".join(parts))
         for chat in coverage["unobserved_ids"]:
             if chat["not_observed"]:
                 self.check("warn", "Numbers not observed", str(chat.get("title") or chat["chat_id"]) + ": "
@@ -307,7 +333,8 @@ class Console:
         mapping = {"observation restarted": "Observation started", "observation paused by the operator": "Paused",
                    "collector process stopped": "Stopped", "collector process ended without an orderly stop": "Interrupted",
                    "collector error: capture may be incomplete": "Error", "connection to Telegram closed": "Disconnected",
-                   "connection to Telegram lost": "Disconnected", "observation could not resume after a restart": "Interrupted"}
+                   "connection to Telegram lost": "Disconnected", "observation could not resume after a restart": "Interrupted",
+                   **{SESSION_NOTES[reason]: word for reason, word in WINDOW_WORDS.items()}}
         if text in mapping:
             return self.t(mapping[text])
         if text.startswith("no capture heartbeat for "):

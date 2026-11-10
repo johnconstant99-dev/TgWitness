@@ -3,6 +3,7 @@ import hashlib
 import re
 import socket
 import threading
+import time
 from contextlib import contextmanager, suppress
 from contextvars import ContextVar
 from datetime import datetime, timedelta, timezone
@@ -23,7 +24,8 @@ EXCERPT_CHARS = 120
 CHANGES = {"message.deleted": "deleted", "message.edited": "edited", "message.missing_on_recheck": "missing"}
 PROBLEM_KINDS = ("storage.low", "storage.ok", "coverage.gap", "collector.error", "connection.retry_failed",
                  "source.access_unconfirmed", "export.failed", "chat_export.interrupted", "replica.completed",
-                 "anchor.completed", "profile.unavailable", "host.state", "storage.completed")
+                 "anchor.completed", "profile.unavailable", "host.state", "storage.completed", "account.security_event",
+                 "session.exclusive_ended")
 COMPLETION_KINDS = ("account_export.completed", "chat_export.completed", "snapshot.completed", "storage.completed")
 
 CHANGE_SCAN = 5000
@@ -39,6 +41,8 @@ OWN_SOCKET = DIRECT_SOCKET - {"mailto", "mailtos"}
 def own_socket(url):
     return url.split("://", 1)[0].lower() in OWN_SOCKET
 _send_lock = threading.Lock()
+RESPONSE_BYTES = 1024 * 1024
+DELIVERY_SECONDS = 60
 
 
 class AlertSettings(BaseModel):
@@ -247,8 +251,9 @@ def _install_guard():
 @contextmanager
 def _routed(proxy):
     import requests
-    original = requests.Session.merge_environment_settings
-    token = _guard.set({"on": False, "allowed": set(), "refused": None, "pinned": {}})
+    original, original_send = requests.Session.merge_environment_settings, requests.Session.send
+    token = _guard.set({"on": False, "allowed": set(), "refused": None, "pinned": {},
+                        "deadline": time.monotonic() + DELIVERY_SECONDS})
 
     def merge(self, url, proxies, stream, verify, cert):
         guard = _guard.get()
@@ -264,11 +269,32 @@ def _routed(proxy):
         settings = original(self, url, {}, stream, verify, cert)
         settings["proxies"] = {"http": proxy, "https": proxy} if proxy else {}
         return settings
-    requests.Session.merge_environment_settings = merge
+
+    def send(self, request, **kwargs):
+        guard = _guard.get()
+        if guard is None:
+            return original_send(self, request, **kwargs)
+        left = guard["deadline"] - time.monotonic()
+        if left <= 0:
+            raise requests.exceptions.ConnectionError("The notification service did not answer in time.")
+        response = original_send(self, request, **{**kwargs, "stream": True,
+                                                   "timeout": (min(10, left), min(30, left))})
+        try:
+            body = bytearray()
+            for chunk in response.iter_content(65536):
+                body += chunk
+                if len(body) > RESPONSE_BYTES or time.monotonic() > guard["deadline"]:
+                    raise requests.exceptions.ConnectionError(
+                        "The notification service answered with too much data or too slowly.")
+            response._content, response._content_consumed = bytes(body), True
+        finally:
+            response.close()
+        return response
+    requests.Session.merge_environment_settings, requests.Session.send = merge, send
     try:
         yield
     finally:
-        requests.Session.merge_environment_settings = original
+        requests.Session.merge_environment_settings, requests.Session.send = original, original_send
         _guard.reset(token)
 
 
@@ -374,6 +400,13 @@ def problem_line(event, titles, words):
                   error=p.get("error_type") or "?")
     if kind == "host.state":
         return host_line(p, words)
+    if kind == "session.exclusive_ended":
+        return tr(words, "Another session signed in after this session was made the only one.")
+    if kind == "account.security_event" and p.get("during_observation") is True:
+        if p.get("event_kind") == "login_code":
+            return tr(words, "Telegram sent a sign-in code for this account during observation.")
+        if p.get("event_kind") == "new_login":
+            return tr(words, "Telegram reported a new sign-in to this account during observation.")
     return None
 
 
@@ -522,6 +555,7 @@ def notice_destination(event, level):
         "export.failed": ("exports", "exports"), "chat_export.interrupted": ("exports", "exports"),
         "replica.completed": ("replica", "replica"), "anchor.completed": ("timestamps", "timestamps"),
         "profile.unavailable": ("accounts", "accounts"), "host.state": ("server", "server"),
+        "account.security_event": ("connection", "connection"), "session.exclusive_ended": ("connection", "connection"),
     }.get(kind, ("collection", None))
     if kind == "coverage.gap" and p.get("reason") == "authorization_required":
         category, part = "connection", "connection"

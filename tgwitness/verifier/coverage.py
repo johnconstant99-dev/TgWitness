@@ -11,6 +11,12 @@ INTERRUPTIONS = {"transport_disconnected": "connection to Telegram lost",
 SESSION_NOTES = {"updates_diverted": "Telegram's update counter grew while no update reached this session",
                  "session_revoked_externally": "this session left Telegram's session list while its connection kept working",
                  "concurrent_sessions_at_start": "other sessions were signed in when observation started"}
+SESSION_WINDOWS = ("updates_diverted", "session_revoked_externally")
+SOURCE_KINDS = ("message.new", "message.snapshot", "message.recovered", "message.edited")
+SOURCE_GROUPS = (("live observation", ("live_update", "update_recovery")),
+                 ("history reads", ("history_snapshot", "baseline_snapshot", "new_chat_snapshot", "history_acquisition",
+                                    "recheck")),
+                 ("panel actions", ("panel_action", "panel_button_check")))
 KEY_ORIGINS = {"created": "created by signing in from this workspace", "imported": "imported from an existing session"}
 LOGIN_METHODS = {"qr": "QR code", "phone_code": "phone code", "session_import": "session import"}
 ACCOUNT_LOSS = {"account_banned": "account banned", "account_deleted": "account deleted",
@@ -42,8 +48,12 @@ class Coverage:
         self.first = self.last = None
         self.allowed = LIVENESS_GAP_SECONDS
         self.session = {}
+        self.held, self.windows, self.sources, self.sealed_run = {}, [], {}, False
 
     def open(self, at):
+        if self.held:
+            self.alive = at
+            return
         if self.closed_at is not None:
             self.gaps.append({"from": self.closed_at, "to": at, "reason": self.close_reason})
             self.closed_at = None
@@ -53,6 +63,17 @@ class Coverage:
         if self.observing:
             self.periods.append({"from": self.start, "to": at})
             self.observing, self.closed_at, self.close_reason = False, at, reason
+
+    def hold(self, reason, at):
+        self.close(at, SESSION_NOTES[reason])
+        self.held.setdefault(reason, at)
+
+    def release(self, reason, at, resume=False):
+        since = self.held.pop(reason, None)
+        if since is not None:
+            self.windows.append({"from": since, "to": at, "reason": reason})
+            if resume and self.active:
+                self.open(at)
 
     def add(self, event):
         at, kind, payload, chat_id = event["observed_at"], event["kind"], event["payload"], event["chat_id"]
@@ -74,17 +95,21 @@ class Coverage:
             self.allowed = max(self.allowed, 3 * changed)
         if kind == "observation.started":
             self.close(self.alive, "observation restarted")
+            self.release("updates_diverted", at)
             self.open(at)
             self.active, self.run_id = True, payload.get("run_id")
         elif kind == "observation.stopped":
             self.close(at, "observation paused by the operator" if payload.get("reason") == "operator"
                        else "observation stopped: " + str(payload.get("reason") or "unknown"))
+            self.release("updates_diverted", at)
             self.active = False
         elif kind == "process.stopped":
             self.close(at, "collector process stopped")
+            self.release("updates_diverted", at)
             self.active = False
         elif kind == "process.started":
             self.close(self.alive, "collector process ended without an orderly stop")
+            self.release("updates_diverted", at)
             self.active = False
         elif kind == "collector.error":
             self.close(self.alive, "collector error: capture may be incomplete")
@@ -94,6 +119,10 @@ class Coverage:
                 self.active = False
         elif kind == "connection.closed" and payload.get("role") in (None, "current"):
             self.close(at, "connection to Telegram closed")
+        elif kind == "connection.restored" and payload.get("reason") == "updates_resumed":
+            self.release("updates_diverted", at, resume=True)
+        elif kind == "account.authorized":
+            self.release("session_revoked_externally", at, resume=True)
         elif kind == "coverage.gap":
             reason = payload.get("reason")
             if chat_id is None and reason in INTERRUPTIONS:
@@ -101,6 +130,8 @@ class Coverage:
                 self.close(at, INTERRUPTIONS[reason] + (": " + cause if cause else ""))
                 if reason != "transport_disconnected":
                     self.active = False
+            elif chat_id is None and reason in SESSION_WINDOWS:
+                self.hold(reason, at)
             else:
                 self.notes.append({"at": at, "chat_id": chat_id, "reason": reason})
         elif heartbeat:
@@ -119,6 +150,14 @@ class Coverage:
         if kind in MESSAGE_KINDS and numbered_per_chat(chat_id) and isinstance(event["message_id"], int):
             self.ids.setdefault(chat_id, set()).add(event["message_id"])
         self.session_event(at, kind, payload)
+        if kind in SOURCE_KINDS or kind == "capture.opened":
+            source = "recorder_capture" if kind == "capture.opened" else payload.get("source")
+            source = source if isinstance(source, str) else "unlabelled"
+            self.sources[source] = self.sources.get(source, 0) + 1
+            if self.sealed_run and kind in SOURCE_KINDS:
+                self.sources["inside_sealed_run"] = self.sources.get("inside_sealed_run", 0) + 1
+        elif kind in ("sealed.started", "sealed.finished"):
+            self.sealed_run = kind == "sealed.started"
         self.sequences.add(event, MESSAGE_KINDS)
 
     def session_event(self, at, kind, payload):
@@ -138,6 +177,21 @@ class Coverage:
             s.setdefault("password_changes", []).append({"at": at, "operation": payload.get("operation")})
         elif kind == "account.phone_call":
             s["phone_calls"] = s.get("phone_calls", 0) + 1
+        elif kind == "session.exclusive_from":
+            s.setdefault("only_session", []).append({"from": at, "ended": payload.get("other_sessions_ended"),
+                                                    "two_step": payload.get("two_step")})
+        elif kind == "session.exclusive_ended" and s.get("only_session"):
+            s["only_session"][-1]["until"] = at
+        elif kind == "session.security_baseline" and payload.get("trigger") == "observation_start" \
+                and payload.get("other_sessions") == 0 and type(payload.get("other_sessions")) is int:
+            s.setdefault("sessions_at_start", []).append({"at": at, "others": 0})
+        elif kind == "coverage.gap" and payload.get("reason") == "concurrent_sessions_at_start":
+            count = payload.get("concurrent_sessions")
+            if type(count) is not int:
+                count = len(payload["sessions"]) if isinstance(payload.get("sessions"), list) else None
+            s.setdefault("sessions_at_start", []).append({"at": at, "others": count})
+        elif kind == "account.sessions" and self.active and isinstance(payload.get("added"), list) and payload["added"]:
+            s.setdefault("sessions_added", []).append({"at": at, "added": len(payload["added"])})
 
     def result(self, ranges_per_chat=50):
         periods = [dict(p) for p in self.periods]
@@ -149,6 +203,9 @@ class Coverage:
         if not self.observing and self.closed_at is not None:
             gaps.append({"from": self.closed_at, "to": self.last, "reason": self.close_reason,
                          "not_resumed_by_last_record": True})
+        windows = [dict(w) for w in self.windows] + [
+            {"from": since, "to": self.last, "reason": reason, "not_resumed_by_last_record": True}
+            for reason, since in self.held.items()]
         unobserved = []
         for chat_id, ids in sorted(self.ids.items()):
             ordered = sorted(ids)
@@ -158,11 +215,15 @@ class Coverage:
                                "not_observed": sum(high - low + 1 for low, high in holes),
                                "ranges": [{"low": low, "high": high} for low, high in holes[:ranges_per_chat]],
                                "ranges_total": len(holes)})
-        return {"continuous": periods, "gaps": gaps, "notes": self.notes[:200], "notes_total": len(self.notes),
+        return {"continuous": periods, "gaps": gaps, "session_windows": sorted(windows, key=lambda w: w["from"]),
+                "record_sources": dict(sorted(self.sources.items())),
+                "notes": self.notes[:200], "notes_total": len(self.notes),
                 "unobserved_ids": unobserved, "gap_summary": self.sequences.result(self.titles), "first_record": self.first, "last_record": self.last,
                 "meaning": "Observation intervals follow connected capture heartbeats from the same run, within three "
                            "heartbeat intervals (at least three minutes). Each interval ends at its last capture "
-                           "confirmation or recorded stop. Message-number gaps describe the observed numbering range.",
+                           "confirmation or recorded stop. Session windows, while Telegram's update counter grew "
+                           "without updates reaching this session or while Telegram no longer listed it, are gaps. "
+                           "Message-number gaps describe the observed numbering range.",
                 **({"session": self.session} if self.session else {})}
 
 
@@ -361,10 +422,26 @@ def session_lines(coverage):
         lines.append("Telegram session key: " + KEY_ORIGINS.get(s["key_origin"], str(s["key_origin"]))
                      + (" by " + LOGIN_METHODS.get(s["login_method"], str(s["login_method"])) if s.get("login_method") else "")
                      + " at " + str(s.get("authorized_at")))
+    windows = coverage.get("session_windows")
     for reason, label in SESSION_NOTES.items():
+        if (windows is not None and reason in SESSION_WINDOWS
+                or reason == "concurrent_sessions_at_start" and s.get("sessions_at_start")):
+            continue
         found = [n["at"] for n in coverage.get("notes") or [] if n.get("reason") == reason and n.get("chat_id") is None]
         if found:
             lines.append("Session: " + label + " (" + str(len(found)) + "x, first " + found[0] + ")")
+    for window in windows or []:
+        lines.append("Session window from " + window["from"] + " to " + window["to"] + ": "
+                     + SESSION_NOTES.get(window["reason"], str(window["reason"]))
+                     + (", not resumed by the last record" if window.get("not_resumed_by_last_record") else ""))
+    for item in s.get("sessions_at_start") or []:
+        lines.append("Other sessions signed in at observation start: "
+                     + ("count not recorded" if item.get("others") is None else str(item["others"])) + " (" + item["at"] + ")")
+    added = s.get("sessions_added") or []
+    if added:
+        lines.append("Sessions added to Telegram's session list during observation: "
+                     + str(sum(item["added"] for item in added)) + " in " + str(len(added)) + " record(s), first "
+                     + added[0]["at"])
     if s.get("security_events"):
         lines.append("Telegram security notices (777000): " + ", ".join(
             name + " " + str(count) for name, count in sorted(s["security_events"].items())))
@@ -373,8 +450,37 @@ def session_lines(coverage):
                      + (" (" + str(item["ended"]) + " signed in before)" if isinstance(item.get("ended"), int) else ""))
     for item in s.get("password_changes") or []:
         lines.append("Two-step password " + str(item.get("operation") or "set or changed") + " from this workspace at " + item["at"])
+    for item in s.get("only_session") or []:
+        lines.append("Only session of the account from " + item["from"]
+                     + (" until another session appeared at " + item["until"] if item.get("until") else "")
+                     + ": other sessions ended" + (" (" + str(item["ended"]) + ")" if isinstance(item.get("ended"), int) else "")
+                     + ", two-step password " + ("set from this workspace" if item.get("two_step") == "set_now"
+                                                  else "already on"))
     if s.get("phone_calls"):
         lines.append("Phone call updates delivered to this session: " + str(s["phone_calls"]))
+    return lines
+
+
+def source_counts(coverage):
+    sources = dict(coverage.get("record_sources") or {})
+    groups = [(label, [(name, sources.pop(name)) for name in names if name in sources]) for label, names in SOURCE_GROUPS]
+    captures, unlabelled = sources.pop("recorder_capture", 0), sources.pop("unlabelled", 0)
+    sealed = sources.pop("inside_sealed_run", 0)
+    return [(label, found) for label, found in groups if found], sorted(sources.items()), unlabelled, captures, sealed
+
+
+def source_lines(coverage):
+    groups, other, unlabelled, captures, sealed = source_counts(coverage)
+    parts = [label + " " + str(sum(count for _, count in found)) + " ("
+             + ", ".join(name + " " + str(count) for name, count in found) + ")" for label, found in groups]
+    parts += ["source " + name + " " + str(count) for name, count in other]
+    if unlabelled:
+        parts.append("no source label " + str(unlabelled))
+    lines = ["Message records by source: " + "; ".join(parts)] if parts else []
+    if sealed:
+        lines.append("Message records between sealed.started and sealed.finished (sealed run): " + str(sealed))
+    if captures:
+        lines.append("Recorder captures linked into this journal: " + str(captures))
     return lines
 
 
@@ -387,6 +493,7 @@ def coverage_lines(coverage):
              for p in coverage["continuous"]]
     lines += ["Gap from " + g["from"] + " to " + g["to"] + ": " + str(g["reason"]) for g in coverage["gaps"]]
     lines += session_lines(coverage)
+    lines += source_lines(coverage)
     for chat in coverage["unobserved_ids"]:
         if chat["not_observed"]:
             lines.append("Chat " + (chat["title"] or str(chat["chat_id"])) + ": IDs " + str(chat["observed_from"])

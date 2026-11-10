@@ -36,6 +36,7 @@ from ..scope import scope_settings
 from ..scope import unexclude
 from ..store import canonical
 from ..workers import complete_in_thread
+from .access import bearer
 from .dependencies import current_context
 from fastapi import Depends
 from fastapi import HTTPException
@@ -475,8 +476,13 @@ async def interaction_action(
         "owner": principal.owner,
         "admin": bool(principal.admin),
     }
+    authorized = ctx.action_authority(request, await bearer(request), body)
     return await ctx.operation(
-        interactions.execute, ctx.app.state.collector, body, ctx.queue_action, operator
+        interactions.execute,
+        ctx.app.state.collector,
+        body,
+        lambda run_at, queued: ctx.queue_action(run_at, queued, authorized),
+        operator,
     )
 
 

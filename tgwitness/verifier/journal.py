@@ -37,7 +37,8 @@ def verify_events(events, public_key):
                        "backwards_seconds": (previous_time - observed).total_seconds(), "reason": "regression"}
         if anomaly is not None and len(chronology["samples"]) < 100:
             chronology["samples"].append(anomaly)
-        previous_time, previous_at = observed, event["observed_at"]
+        if observed is not None:
+            previous_time, previous_at = observed, event["observed_at"]
         if event["kind"] == "media.hashed":
             payload = event["payload"]
             validate_server_hashes(payload.get("server_hashes"))

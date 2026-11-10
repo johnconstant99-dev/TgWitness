@@ -8496,5 +8496,12 @@
   "Running from a source folder instead? Use python start.py, or Start.cmd on Windows. Open the panel address printed in the terminal.": "ต้องการเรียกใช้จากโฟลเดอร์ต้นทางแทนหรือไม่? ใช้คำสั่ง python start.py หรือ Start.cmd บน Windows เปิดที่อยู่ของแผงที่แสดงในเทอร์มินัล",
   "For your own groups, start your own panel with tgwitness and a separate data directory. Demo data cannot be converted into a real investigation.": "สำหรับกลุ่มของคุณเอง ให้สร้างแผงควบคุมของคุณเองโดยใช้ tgwitness และไดเรกทอรีข้อมูลแยกต่างหาก ข้อมูลตัวอย่างไม่สามารถแปลงเป็นการสอบสวนจริงได้",
   "Open official client and observation settings ↗": "เปิดแอปอย่างเป็นทางการและตั้งค่าการสังเกต ↗",
-  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "เครื่องบันทึกนี้ใช้ไคลเอนต์ Telegram Web อย่างเป็นทางการ. เปิดแผงควบคุมเพื่อเข้าสู่ระบบ, เลือกการสนทนา, ตั้งความเร็ว และสิ้นสุดเซสชัน โดยใช้โทเค็นควบคุมของเครื่องบันทึก."
+  "This recorder owns the official Telegram Web client. Open its panel to log in, select a chat, set the pace and finish the session, using the recorder control token.": "เครื่องบันทึกนี้ใช้ไคลเอนต์ Telegram Web อย่างเป็นทางการ. เปิดแผงควบคุมเพื่อเข้าสู่ระบบ, เลือกการสนทนา, ตั้งความเร็ว และสิ้นสุดเซสชัน โดยใช้โทเค็นควบคุมของเครื่องบันทึก.",
+  "Telegram sent a sign-in code for this account during observation.": "ระหว่างการเฝ้าดู Telegram ส่งรหัสเข้าสู่ระบบสำหรับบัญชีนี้",
+  "Telegram reported a new sign-in to this account during observation.": "ระหว่างการเฝ้าดู Telegram แจ้งการเข้าสู่ระบบใหม่ของบัญชีนี้",
+  "Make this the only session": "ให้เหลือเซสชันนี้เพียงเซสชันเดียว",
+  "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "ยุติเซสชันอื่นทั้งหมดของบัญชีนี้ และเปิดรหัสผ่านยืนยันสองขั้นตอนหากยังไม่มีหรือไม่? หลังจากนั้น การเข้าสู่ระบบจากที่อื่นต้องใช้รหัสผ่านนี้",
+  "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "รหัสผ่านยืนยันสองขั้นตอนที่ TgWitness ตั้งไว้ บันทึกไว้ตอนนี้: จะแสดงเพียงครั้งเดียวและ TgWitness ไม่เก็บไว้",
+  "This is now the only session of this account.": "ตอนนี้นี่คือเซสชันเดียวของบัญชีนี้",
+  "Another session signed in after this session was made the only one.": "มีเซสชันอื่นเข้าสู่ระบบหลังจากที่ตั้งให้เซสชันนี้เป็นเซสชันเดียว"
 }
