@@ -139,20 +139,14 @@ key fingerprint through another channel and they can check it themselves:
 python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --tsa-ca TSA-ROOT.pem --require evidence
 ```
 
-The verifier checks signatures, the journal chain, the file manifest and attachments
-against your trusted inputs. The minimum for evidence is the fingerprint plus time from
-a third party covering the last record, here an evidence-mode RFC 3161 timestamp checked
-against the authority's root certificate; a checkpoint is signed with your own key, so
-it is not enough on its own.
+The verifier checks the signatures, the journal chain, the file list and the attachments.
+For evidence it needs your key fingerprint and a third-party time stamp covering the last
+record, such as an RFC 3161 time stamp checked against the authority's root certificate.
 
-**Where the messages come from.** Telegram delivers messages to every client,
-official apps included, through an MTProto session rather than with per-message
-signatures. The session key is negotiated against Telegram's pinned server key, and
-every update arrives encrypted and integrity-checked under it. TgWitness receives
-messages through that authenticated session and signs each observation into the
+**Where the messages come from.** TgWitness receives them from Telegram over the
+account's encrypted MTProto session, as the official apps do, and signs each one into the
 journal as it arrives. [GitHub Actions capture](docs/SEALED-ACTIONS.md) and
-[Phala Intel TDX](docs/HIGH-ASSURANCE.md) add attestation of the collector that
-received and signed them.
+[Phala Intel TDX](docs/HIGH-ASSURANCE.md) also attest the collector that received them.
 
 <picture>
   <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/casework-chain-mobile-static.svg">
