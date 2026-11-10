@@ -24,6 +24,8 @@
 
 ## Unreleased
 
+- Add `verify.py --bitcoin-source URL`: OpenTimestamps proofs are checked against block headers from your own node's Esplora API instead of the two public explorers.
+- Verifier, panel and documentation state what each check establishes: the line for an archive without checked external time names the options that add it, and the witness condition refers to the custodian's key-control record.
 - The website's reference pages, guides and homepage are translated in all 24 site languages; about 450 text blocks per language were still shown in English after the 0.9.2 documentation update. Translated with DeepL; markup, links and code are checked unchanged.
 - Interface translations: short panel labels were translated again with DeepL using interface context, and the Russian labels were reviewed one by one. Fixes include "Observe" and "Observing" read as "comply" or "note" in several languages, "Off-site copy" read as "off-site text", "Follow new lines" read as "insert new lines", and Russian button labels in the imperative.
 

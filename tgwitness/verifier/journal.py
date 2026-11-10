@@ -48,9 +48,9 @@ def verify_events(events, public_key):
         previous = calculated
     result = {"events": count, "head_hash": previous, "fingerprint": fingerprint(public_key)}
     if chronology["regressions"] or chronology["unparseable"]:
-        chronology["meaning"] = ("Observation times are collector-supplied. These anomalies do not invalidate "
-                                 "signatures; chronological claims rest on independent time evidence such as a "
-                                 "timestamp or a witness record.")
+        chronology["meaning"] = ("Observation times come from the collector's clock; the hash chain fixes the order of "
+                                 "the records, and timestamps, drand rounds and witness records fix them in time. "
+                                 "These entries do not affect the signatures.")
         result["chronology"] = chronology
     return result
 

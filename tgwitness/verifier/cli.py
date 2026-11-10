@@ -36,7 +36,7 @@ from .languages import VERIFIER_LANGUAGES
 from .outside import outside_lines
 from .presentation import producer_line
 from .reports import REPORT_JSON, verify_report, verify_selection
-from .timestamps import ATTESTATION_RECORDS, tdx_lines, verify_collector_attestation
+from .timestamps import ATTESTATION_RECORDS, tdx_lines, use_bitcoin_sources, verify_collector_attestation
 from .witness import ASSURANCE_TIERS, assurance, assurance_line, channel_head_time, check_channel, cross_check_witness, verify_dossier, verify_history_report, verify_public_proof, verify_witness
 from .witness import (
     CONDITION_LABELS,
@@ -158,6 +158,8 @@ def interactive_verify(args):
     for name in ("require_witness", "check_drand", "check_bitcoin", "strict", "board", "no_color"):
         if getattr(args, name):
             command.append("--" + name.replace("_", "-"))
+    for url in args.bitcoin_source or ():
+        command += ["--bitcoin-source", url]
     transcript, code = Transcript(sys.stdout), 0
     with redirect_stdout(transcript):
         print(say("unsigned"))
@@ -222,6 +224,9 @@ def verification_parser():
                         help="Compare the drand rounds in the journal with drand relays (needs internet)")
     parser.add_argument("--check-bitcoin", action="store_true",
                         help="Evaluate OTS proofs against block headers agreed by two HTTPS explorers (needs internet)")
+    parser.add_argument("--bitcoin-source", action="append", metavar="URL",
+                        help="Esplora API of your own Bitcoin node or explorer, used instead of the two public explorers; "
+                             "repeat to require agreement. Implies --check-bitcoin")
     parser.add_argument("--require", choices=EVIDENCE_PROFILES[1:],
                         help="Exit 2 unless the minimum evidence conditions (evidence), or the minimum and an "
                              "attested collection run (attested), are met")
@@ -255,6 +260,12 @@ def verification_arguments(parser, argv):
     if bool(args.sealed_attestation) != bool(args.sealed_policy):
         parser.error("--sealed-attestation and --sealed-policy must be supplied together")
     args.implied_checks = set()
+    if args.bitcoin_source:
+        try:
+            use_bitcoin_sources(args.bitcoin_source)
+        except ValueError as exc:
+            parser.error(str(exc))
+        args.check_bitcoin = True
     if args.require_tier and ASSURANCE_TIERS.index(args.require_tier) >= ASSURANCE_TIERS.index("fresh") and not args.check_drand:
         args.check_drand = True
         args.implied_checks.add("check_drand")
@@ -289,7 +300,8 @@ def verification_interactive(args, parser):
 def verification_comparison(args, parser, mode):
     unsupported = ["--" + name.replace("_", "-") for name in
                    ("checkpoint", "tsa_ca", "witness", "witness_fingerprint", "require_witness", "channel",
-                    "evidence", "check_drand", "check_bitcoin", "require_tier", "sealed_attestation", "board") if getattr(args, name)]
+                    "evidence", "check_drand", "check_bitcoin", "bitcoin_source", "require_tier", "sealed_attestation", "board")
+                   if getattr(args, name)]
     if unsupported:
         parser.error(", ".join(unsupported) + " cannot be used with --compare; verify the evidence archive separately")
     try:

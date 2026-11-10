@@ -432,7 +432,21 @@ def ots_summary(proof, digest, *, commitments=False):
             **({"commitments": bitcoin} if commitments else {})}
 
 
-BITCOIN_SOURCES = ("https://blockstream.info/api", "https://mempool.space/api")
+PUBLIC_BITCOIN_SOURCES = ("https://blockstream.info/api", "https://mempool.space/api")
+BITCOIN_SOURCES = PUBLIC_BITCOIN_SOURCES
+
+
+def use_bitcoin_sources(urls):
+    from urllib.parse import urlsplit
+    global BITCOIN_SOURCES
+    clean = []
+    for url in urls:
+        parts = urlsplit(url.strip())
+        if parts.scheme not in ("http", "https") or not parts.hostname or parts.username or parts.password \
+                or parts.query or parts.fragment:
+            raise ValueError("--bitcoin-source needs an http(s) Esplora API address without credentials: " + url)
+        clean.append(url.strip().rstrip("/"))
+    BITCOIN_SOURCES = tuple(dict.fromkeys(clean)) or PUBLIC_BITCOIN_SOURCES
 
 
 def bitcoin_fetcher():
@@ -472,7 +486,7 @@ def bitcoin_fetcher():
             except (OSError, UnicodeError):
                 raise CheckUnavailable("Bitcoin header sources are unreachable") from None
         if len(set(found)) != 1:
-            raise ValueError("Independent Bitcoin header sources disagree")
+            raise ValueError("Bitcoin header sources disagree")
         cache[height] = found[0]
         return found[0]
     return fetch
@@ -495,8 +509,10 @@ def confirm_ots(proof, digest, fetch=None):
         confirmed.append({"height": item["height"],
                           "time": datetime.fromtimestamp(int.from_bytes(header[68:72], "little"), timezone.utc).isoformat()})
     if confirmed:
+        agreed = ("two HTTPS explorers" if BITCOIN_SOURCES == PUBLIC_BITCOIN_SOURCES
+                  else "the supplied source" if len(BITCOIN_SOURCES) == 1 else str(len(BITCOIN_SOURCES)) + " supplied sources")
         summary.update(status="confirmed", time=min(c["time"] for c in confirmed), blocks=confirmed,
-                       verification="proof evaluated; headers with 6 confirmations agreed by two HTTPS explorers",
+                       verification="proof evaluated; headers with 6 confirmations agreed by " + agreed,
                        sources=list(BITCOIN_SOURCES))
     elif unreachable:
         summary["check"] = "unavailable"

@@ -21,6 +21,6 @@ The [site integration](../../tools/site_validation.py) copies the public files.
 Private validation checks compare page figures
 with the signed measurements and validate the pinned signature.
 
-Measurements apply to their recorded workload and revision. A report signature
-establishes integrity; it is not independent attestation or GDPR certification.
+Measurements apply to their recorded workload and revision; the report signature
+binds them to the audit key.
 Private captures, accounts, credentials and operational backups are excluded.

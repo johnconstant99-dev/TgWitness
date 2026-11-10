@@ -8457,7 +8457,7 @@
 "With the collector fingerprint, the witness journal export and its public channel (--channel https://t.me/s/…), a recipient can meet the minimum when Telegram dated a witness post at the export head.": "通过收集器的指纹、证人日志导出及其公共频道（--channel https://t.me/s/…），收件人可以满足Telegram在导出头中为证人帖子标注日期时的最低要求。",
 "Integrity only: turn on Evidence mode or connect a witness bot that posts to a public channel.": "仅限完整性验证：开启“证据模式”或连接一个会向公共频道发布信息的见证机器人。",
 "Minimum for evidence: all three required conditions. The rest strengthens the record.": "证据的最低要求：必须满足所有三个必要条件。其余条件可增强记录的完整性。",
-"A second key retained the journal head. Who controls that key is a custody fact the verifier cannot check.": "第二把密钥保留了日志头。谁控制这把密钥是一个保管事实，验证者无法核查。",
+"A second key retained the journal head. Who holds that key is shown by the custodian's key-control record, kept with its fingerprint.": "第二把密钥用于保存日志头。谁持有该密钥由保管人的密钥控制记录显示，该记录与其指纹一同保存。",
 "Minimum for evidence: integrity, the signer key, and external time from a third party covering the last record: a validated RFC 3161 timestamp, a Bitcoin proof, a witness post read from t.me or an attested collection run.": "证据的最低要求：完整性、签名者密钥，以及来自第三方且涵盖最后一条记录的外部时间戳：一个经过验证的RFC 3161时间戳、一个Bitcoin证明、从t.me读取的见证帖，或一次经过认证的集合运行。",
 "A witness archive with a key other than the collector key shows that a second key retained the journal head.": "一个使用与收集器密钥不同的密钥创建的证人存档显示，第二个密钥保留了日志头。",
 "A checkpoint the recipient received earlier, through another channel, shows that the records up to it were not changed afterwards.": "收件人此前通过另一个渠道收到的检查点表明，截至该检查点的记录此后未被修改。",

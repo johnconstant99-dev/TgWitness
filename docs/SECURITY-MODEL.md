@@ -162,11 +162,10 @@ RFC 3161 and OpenTimestamps receipts, and witness posts whose dates the verifier
 from Telegram, bind the journal prefix they cover to a time set by a third party.
 A checked GitHub attestation also carries the verified time of its signature, which
 binds the whole archive to an external time.
-A checkpoint is signed with the collector key and binds the records up to it only if
-the recipient obtained it before the archive, through another channel. A witness shows
-that a second key retained the journal head; who controls that key is a custody fact
-the verifier cannot check. The collector could create both alone, so they are
-supporting checks.
+A checkpoint is signed with the collector key and binds the records up to it from the
+moment the recipient obtained it, through another channel. A witness shows that a second
+key retained the journal head; the custodian's key-control record shows who holds that
+key. Both are supporting checks; the minimum is third-party time.
 [GitHub Actions capture](SEALED-ACTIONS.md) or an
 [Intel TDX deployment](HIGH-ASSURANCE.md#confidential-vm-on-phala-cloud-intel-tdx)
 add workflow provenance or hardware measurements of the collection environment.

@@ -425,7 +425,7 @@ ROLE_LABELS = {"required": "Required conditions", "supporting": "Supporting reco
 CONDITION_SCOPE = {"integrity": "The archive is unchanged since the collector signed it.",
                    "signer": "The signing key is the collector key the recipient retained.",
                    "external_time": "A third party confirms that the covered records existed by the stated time.",
-                   "head_binding": "A second key retained the journal head. Who controls that key is a custody fact this verifier cannot check.",
+                   "head_binding": "A second key retained the journal head. Who holds that key is shown by the custodian's key-control record, kept with its fingerprint.",
                    "checkpoint": "Records up to the checkpoint match a journal state signed with the collector key. "
                                  "They are bound only if the recipient obtained it before this archive, through another channel.",
                    "environment": "The signing key was created inside the attested collection run."}
@@ -511,8 +511,8 @@ def forgery_lines(result):
     if ladder.get("sealed", {}).get("status") == "pass":
         lines.append("The collector key was created inside an attested Intel TDX VM: signing elsewhere needs a break of Intel TDX.")
     if not lines:
-        lines.append("Only the collector key binds this journal: its holder could produce a different journal from the start. "
-                     "External time or a witness ties it to a moment.")
+        lines.append("No external time was checked in this run: use --tsa-ca or --check-bitcoin for the archive's "
+                     "timestamps, or add a witness.")
     cp = result.get("checkpoint_drand_anchor") or {}
     if isinstance(cp.get("round"), int):
         from .outside import drand_time

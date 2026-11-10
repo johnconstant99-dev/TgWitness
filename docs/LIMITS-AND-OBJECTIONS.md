@@ -159,9 +159,9 @@ a record and the next stamp. In evidence mode that interval is the stamping sche
   received it before the archive, through another channel
   ([manifest and checkpoints](EVIDENCE.md#manifest-and-checkpoints)).
 - A witness can run next to the collector: "same host — independent process and
-  key, but the same operator" ([witness](WITNESS.md)). The verifier checks only that
-  the witness key differs from the collector key: "Who controls that key is a custody
-  fact this verifier cannot check" (`CONDITION_SCOPE` in
+  key, but the same operator" ([witness](WITNESS.md)). The verifier checks that the
+  witness key differs from the collector key; "Who holds that key is shown by the
+  custodian's key-control record, kept with its fingerprint" (`CONDITION_SCOPE` in
   [`tgwitness/verifier/witness.py`](../tgwitness/verifier/witness.py)).
 - Both are supporting checks; the minimum for evidence is third-party time.
 - For `--channel`, only an `https://t.me/s/…` or `https://telegram.me/s/…` page read

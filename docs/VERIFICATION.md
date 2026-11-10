@@ -98,7 +98,6 @@ password-protected ZIP archive; `tgwitness verify` confirmed its integrity.
 **Verify output (excerpt):**
 
 ```
-ASSURANCE: self_attested — only the collector's own key vouches for this record
 events: 389  files_checked: 35  sha256sums: 34
 Report seal verified: report.html, language en.
 JSON report seal verified: report.json.
@@ -209,8 +208,8 @@ as `755f78f6`, whose tree matched the tested PR head. This was not a TEE.
   Docker's embedded UDP resolver were blocked.
 - A scoped read-only provider token could read health/connections and could not
   read the connector enrollment token. Signed provider observations included
-  explicit unavailable samples. The witness ran on the operator's host, so this
-  demonstrates recording and retention, not independent third-party custody.
+  explicit unavailable samples. The witness ran on the operator's host; the test
+  covers recording and retention.
 - Official Desktop reached its unauthenticated welcome screen. Guarded keyboard
   input was rejected during capture. Three H.264 display segments decoded and
   their clock overlay was inspected. The 18-event preflight archive verified

@@ -49,7 +49,7 @@
     <div class="v-audit-proof">
       <div><p class="v-eyebrow">SIGNED AUDIT / ENGLISH</p><h3>Check the numbers.</h3><p>The English report includes the measured results, open findings and a reproducible signature check.</p></div>
       <div class="v-proof-links"><a href="@@REPO_URL@@/blob/@@BRANCH@@/website/validation/audit/REPORT.md">Read the report ↗</a><a href="@@ROOT@@validation/audit/PROOF.json" download>Signed statement ↓</a><a href="@@ROOT@@validation/audit/MEASUREMENTS.csv" download>Measurements CSV ↓</a><a href="@@ROOT@@validation/audit/VERIFY.py" download>Python verifier ↓</a><a href="@@ROOT@@validation/audit/SHA256SUMS.txt" download>File checksums ↓</a></div>
-      <p class="v-proof-scope">The signature protects the report against alteration. It does not independently attest the measurements or certify GDPR compliance. The report records the completed audit at 19:08 UTC; the infrastructure snapshot above was taken earlier.</p>
+      <p class="v-proof-scope">The signature binds the report and its measurements to the audit key; a change to any signed file fails VERIFY.py. The report records the completed audit at 19:08 UTC; the infrastructure snapshot above was taken earlier.</p>
     </div>
     <details class="v-details"><summary>@@PROVENANCE@@</summary><p>@@PROVENANCE_NOTE@@</p><ul class="v-provenance">@@PROVENANCE_ROWS@@</ul></details>
     <p class="v-final-note">@@FOOTER@@</p>

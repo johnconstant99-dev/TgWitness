@@ -3649,7 +3649,7 @@
   "With the collector fingerprint, the witness journal export and its public channel (--channel https://t.me/s/…), a recipient can meet the minimum when Telegram dated a witness post at the export head.",
   "Integrity only: turn on Evidence mode or connect a witness bot that posts to a public channel.",
   "Minimum for evidence: all three required conditions. The rest strengthens the record.",
-  "A second key retained the journal head. Who controls that key is a custody fact the verifier cannot check.",
+  "A second key retained the journal head. Who holds that key is shown by the custodian's key-control record, kept with its fingerprint.",
   "Minimum for evidence: integrity, the signer key, and external time from a third party covering the last record: a validated RFC 3161 timestamp, a Bitcoin proof, a witness post read from t.me or an attested collection run.",
   "A witness archive with a key other than the collector key shows that a second key retained the journal head.",
   "A checkpoint the recipient received earlier, through another channel, shows that the records up to it were not changed afterwards.",

@@ -931,7 +931,7 @@
         <div><strong>Required · Integrity</strong><p>verify.py checks every signature, the record chain and all file hashes.</p></div>
         <div><strong>Required · Signer key</strong><p>The recipient compares the collector fingerprint with a copy received separately.</p></div>
         <div><strong>Required · External time</strong><p>A third party dates the last exported record: a verified RFC 3161 or OpenTimestamps receipt, a witness post read from t.me, a witness Bitcoin seal or a checked GitHub attestation.</p></div>
-        <div><strong>Supporting · Witness with its own key</strong><p>A second key retained the journal head. Who controls that key is a custody fact the verifier cannot check.</p></div>
+        <div><strong>Supporting · Witness with its own key</strong><p>A second key retained the journal head. Who holds that key is shown by the custodian's key-control record, kept with its fingerprint.</p></div>
         <div><strong>Supporting · Retained checkpoint</strong><p>A checkpoint the recipient received earlier, through another channel, shows that the records up to it were not changed afterwards.</p></div>
         <div><strong>Supporting · Attested collection run</strong><p>A GitHub Actions run or an Intel TDX deployment shows that the signing key was created inside the attested collection run.</p></div>
       </div>

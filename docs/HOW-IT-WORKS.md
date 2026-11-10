@@ -155,8 +155,9 @@ flowchart LR
 The witness records rollback, a different head at the same count, changed keys,
 invalid answers and missing responses. To confirm that every earlier record is
 unchanged, compare the export with retained checkpoints. A witness on another host avoids sharing the collector's host outage;
-a separate operator gives additional independence. The verifier sees only a second key;
-who controls it is a custody fact it cannot check. Telegram dates each post in a public
+a separate operator gives additional independence. The verifier checks that the witness
+key differs from the collector key; the custodian's key-control record shows who holds it.
+Telegram dates each post in a public
 channel, and `verify.py --channel https://t.me/s/…` reads those dates as external time.
 
 The witness attests to the collector's reported journal state. Use a controlled
