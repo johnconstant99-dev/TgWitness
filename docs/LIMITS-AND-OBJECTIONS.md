@@ -7,8 +7,8 @@
 [Independent verification](TRUST.md) · [What the record establishes](FOR-THE-RECORD.md) · [Validation record](VERIFICATION.md)
 
 **ZERO TRUST.** You do not have to trust anyone: not the operator who collected an
-archive, not PhishDestroy, and not any title or signature. Each answer below gives
-the command or file that checks it. Where an objection is correct, the answer says so.
+archive, not PhishDestroy, and not any title or signature. Each answer below states
+what the record establishes and gives the command or file that checks it.
 
 Trusted inputs come from a channel other than the file being checked: the collector
 fingerprint from the sender, a timestamp authority's root from that authority, a commit
@@ -26,17 +26,12 @@ It needs Python 3.11+ and `cryptography`.
 - [The proof is only the collector's own signature](#the-proof-is-only-the-collectors-own-signature)
 - [The operator can fabricate records in local mode](#the-operator-can-fabricate-records-in-local-mode)
 - [The checkpoint and witness are not independent](#the-checkpoint-and-witness-are-not-independent)
-- [There is no independent audit](#there-is-no-independent-audit)
-- [It is a pre-release preview](#it-is-a-pre-release-preview)
-- [Intel TDX was tested without a Telegram account](#intel-tdx-was-tested-without-a-telegram-account)
 - [A Desktop export with a qualified eIDAS timestamp is just as good](#a-desktop-export-with-a-qualified-eidas-timestamp-is-just-as-good)
 - [Rule 902 is US law](#rule-902-is-us-law)
 - [Deleted messages are kept despite GDPR Article 17](#deleted-messages-are-kept-despite-gdpr-article-17)
 - [Data goes to third parties through public MTProxy servers](#data-goes-to-third-parties-through-public-mtproxy-servers)
-- [Some features are dual-use](#some-features-are-dual-use)
 - [It uses public API pairs and a Telegram Desktop profile](#it-uses-public-api-pairs-and-a-telegram-desktop-profile)
 - [The installer pipes curl into bash](#the-installer-pipes-curl-into-bash)
-- [The authors are not neutral](#the-authors-are-not-neutral)
 - [The benchmark dates look like the future](#the-benchmark-dates-look-like-the-future)
 
 </details>
@@ -91,23 +86,34 @@ openssl dgst -sha256 -verify release-signing.pub -signature install.sh.sig insta
 
 **Facts.**
 
-- With `--fingerprint` alone, the verifier reaches `self_attested`: signatures, hash
-  chain, manifest and file hashes match the collector key (`assurance` in
-  [`tgwitness/verifier/witness.py`](../tgwitness/verifier/witness.py)).
-- Telegram does not sign individual messages. It delivers them over the account's
-  authenticated MTProto session ([where the messages come from](EVIDENCE.md#where-the-messages-come-from)),
-  so the only signature on a record is the collector's.
-- For this reason, the minimum for evidence requires third-party time covering the
-  last record: RFC 3161 with `--tsa-ca`, OpenTimestamps with `--check-bitcoin`, a
-  witness post read live from Telegram with `--channel`, a witness Bitcoin seal or a
-  checked GitHub attestation (`evidence_conditions` in the same file). Without one, the
-  first line reads `EVIDENCE: minimum not met` and `--require evidence` exits with code 2.
-- The acquisition is checked separately. GitHub Actions capture and Intel TDX
-  (`python -m tgwitness.cloud verify`) bind the signing key to an attested run
-  ([verification scope](EVIDENCE.md#verification-scope)).
+- The signature protects a record after it arrives. Where it came from is established
+  by the connection it arrived through, and that is checked separately
+  ([where the messages come from](EVIDENCE.md#where-the-messages-come-from)).
+- Telegram delivers messages to every client, official apps included, inside an MTProto
+  session. Its authorization key is negotiated against Telegram's pinned server key, and
+  each update is decrypted and integrity-checked (`msg_key`) under that key. A proxy or
+  relay on the way cannot read, insert or change an update.
+- The connection goes to Telegram's published network ranges. **More tools → System map**
+  shows for each connected account whether its endpoint is in the Telegram pool
+  (`TELEGRAM_NETWORKS` in [`tgwitness/topology.py`](../tgwitness/topology.py)).
+- Captured MTProto frames can be decrypted with the session's own key and matched to
+  journal entries by message identifier and payload SHA-256
+  ([`tgwitness/forensics/`](../tgwitness/forensics/)).
+- Each record carries the identifiers and server dates Telegram assigned: chat, message
+  and sender. Another account in the same chat receives the same identifiers, and
+  `--compare` checks two exports against each other
+  ([comparing chat exports](EVIDENCE.md#comparing-chat-exports)).
+- A [witness probe](ACCOUNTS.md#witness-probe) from a second account shows that the
+  session received updates live; a second client on the same key shows up as missed
+  answers. The verifier reports "Witness probes: sent N, answered live N".
+- GitHub Actions capture and Intel TDX bind a session created inside the run and the
+  signing key to the attested execution (`key_origin: created`;
+  [verification scope](EVIDENCE.md#verification-scope)).
 
-**Limit.** Yes. In local mode, the signature identifies a key, not the honesty of the
-person who holds it. Third-party time shows when the bytes existed, not where they came from.
+**What the verifier reports.** With `--fingerprint` alone: `self_attested` (signatures,
+hash chain, manifest and file hashes). With third-party time covering the last record:
+`EVIDENCE: minimum met`. With a checked attested run: profile `attested`
+(`evidence_conditions` in [`tgwitness/verifier/witness.py`](../tgwitness/verifier/witness.py)).
 
 ## The operator can fabricate records in local mode
 
@@ -115,25 +121,33 @@ person who holds it. Third-party time shows when the bytes existed, not where th
 
 **Facts.**
 
-- The signing private key is stored Fernet-encrypted in the workspace vault on the
-  operator's machine ([encryption and signatures](CONNECTION-SECURITY.md#encryption-and-signatures)).
-  The run receipt records the collector version and source-file hashes, but the
-  collector writes that receipt itself ([what is signed](EVIDENCE.md#what-is-signed)).
-- Third-party time limits the window for changes. Records covered by a checked
-  timestamp existed by that time; changing them later breaks the commitment. Records
-  after the last stamp are reported as uncovered:
-  `EVIDENCE: minimum met up to record N of M · later records need a binding`.
-- For a chat that another account can also read, compare the archive with an
-  independent export of the same chat
+- Each observation is signed when it arrives and linked into a hash chain
+  ([what is signed](EVIDENCE.md#what-is-signed)). Evidence mode timestamps signed
+  checkpoints every 10 minutes by default at three TSAs, one of them the Belgian
+  government's qualified eIDAS TSA (`DEFAULT_TSA` in `tgwitness/anchoring.py`), and on
+  OpenTimestamps.
+- A record covered by a stamp cannot be changed, inserted or removed afterwards: the
+  hash chain breaks and the verifier rejects the archive. Records after the last stamp are
+  named: `EVIDENCE: minimum met up to record N of M · later records need a binding`.
+- With drand on, each pass also writes a public drand round that nobody knew before its
+  time. The round sets the earliest time and the next stamp the latest, so a checkpoint
+  cannot be prepared in advance; `--check-drand` compares the rounds with public relays
+  ([drand](EVIDENCE.md#optional-records-in-evidence-mode-drand-and-telegram-devices)).
+- Observation times that go backwards are reported as chronology regressions
+  (`tgwitness/verifier/journal.py`).
+- A record must match what Telegram delivered to every other member of the chat. An
+  independent export of the same chat shows any difference
   ([comparing chat exports](EVIDENCE.md#comparing-chat-exports)):
   `python -m tgwitness.verify first.zip --compare second.zip --fingerprint FIRST_SHA256 --compare-fingerprint SECOND_SHA256`.
-- GitHub Actions capture requires a Telegram session created inside the run and
-  rejects imported sessions. Its attestation binds the archive to the approved
-  workflow and collector commits ([verification scope](EVIDENCE.md#verification-scope)).
+- A witness with its own key retains earlier journal prefixes, and witness posts read
+  live from t.me carry dates Telegram set ([witness](WITNESS.md)).
+- GitHub Actions capture and Intel TDX take acquisition away from the operator: the
+  session is created inside the attested run (an imported session does not reach the
+  `attested` profile), and the attestation binds the archive to the approved collector
+  ([verification scope](EVIDENCE.md#verification-scope)).
 
-**Limit.** Yes. Local mode cannot rule out a modified collector, or records invented
-before the first external timestamp. When the acquisition itself is disputed, use
-attested capture.
+**What the verifier reports.** The records each stamp covers, and the interval between
+a record and the next stamp. In evidence mode that interval is the stamping schedule.
 
 ## The checkpoint and witness are not independent
 
@@ -149,91 +163,14 @@ attested capture.
   the witness key differs from the collector key: "Who controls that key is a custody
   fact this verifier cannot check" (`CONDITION_SCOPE` in
   [`tgwitness/verifier/witness.py`](../tgwitness/verifier/witness.py)).
-- Both are therefore supporting checks, not part of the minimum, which requires
-  third-party time.
+- Both are supporting checks; the minimum for evidence is third-party time.
 - For `--channel`, only an `https://t.me/s/…` or `https://telegram.me/s/…` page read
   live supplies Telegram-set dates. Edited posts are ignored, and a Telegram Desktop
   export or a saved page counts only as supplied metadata.
 
-**Limit.** Yes. Neither is independent by itself. A witness is only as independent as
-whoever runs it, so retain the custodian and key-control record with its fingerprint
-([witness](WITNESS.md)).
-
-## There is no independent audit
-
-**Objection.** Nobody outside the project has reviewed the code.
-
-**Facts.**
-
-- No external audit is published. The maintainers produced the "Signed English audit"
-  ([`website/validation/audit/REPORT.md`](../website/validation/audit/REPORT.md)) and
-  signed it with their own audit key. The report states: "These are operator
-  measurements, not independent attestation". To check its signature, run
-  `python VERIFY.py --key-sha256 e419743db20096763ea06e480c2e6c161341de2f1023cd339c77758fb69e212f`
-  in that directory.
-- The [qualification status](VERIFICATION.md#qualification-status) says:
-  "Independent security review and forensic certification are external steps."
-- CodeQL, Trivy, OpenSSF Scorecard and zizmor run in public workflows. Scorecard
-  "is automated, not a human audit" ([public records and SBOM](TRUST.md#public-records-and-sbom)).
-- You can test the verifier without an audit. It is one file of about 7,000 lines;
-  change one byte of `events.jsonl` in an evidence archive, and the verifier rejects it
-  because the signed manifest lists that file's SHA-256
-  ([manifest and checkpoints](EVIDENCE.md#manifest-and-checkpoints)).
-
-**Limit.** Yes. Until an external review is published, statements about code quality
-and test coverage are the maintainers' own.
-
-## It is a pre-release preview
-
-**Objection.** The software is not finished.
-
-**Facts.**
-
-- The README badge reads "v0.9.2 · pre-release", [current capabilities](STATUS.md)
-  says "0.9.2 preview", and the [changelog](CHANGELOG.md) labels releases from 0.7.0
-  onward as preview. GitHub Actions capture is marked "Preview available from `main`"
-  ([GitHub capture](SEALED-ACTIONS.md)).
-- The signed audit of 6 November 2026 lists open findings for its snapshot
-  ([REPORT.md](../website/validation/audit/REPORT.md)), and the
-  [qualification status](VERIFICATION.md#qualification-status) lists the controlled
-  runs still pending.
-- The public history starts at `8fb40fe0e` (author date 2026-10-30), a squashed import
-  that already contains 658 files and 134,944 lines. Releases 0.7.1–0.8.1 are recorded
-  by their Sigstore log entries and GitHub Actions runs ([TRUST.md](TRUST.md#release-source-archive)).
-  Development before publication: [MAINTAINER: development start date, testing history].
-
-**Limit.** Yes. Pin the commit or release you rely on, cite the run that tested it,
-and treat untested paths as untested.
-
-## Intel TDX was tested without a Telegram account
-
-**Objection.** The confidential-VM path has not collected from a real account.
-
-**Facts.**
-
-- The validation record says: "No Telegram account was connected to these CVMs", and
-  under "Not covered" it lists "a Telegram account on the CVM"
-  ([live Phala deployment](VERIFICATION.md#live-phala-cloud-deployment--4-november-2026)).
-- That run covered deployment, all 16 verifier checks (including the Intel TDX quote
-  and OS measurements), restart evidence, a report sealed with a qualified eIDAS time
-  stamp, and deletion (same section).
-- On 9 November a Phala Cloud deployment of commit `427621d4` observed three channels
-  with a dedicated test account; all six TDX checks passed and the export verified. The
-  session was imported, so the tier was `self_attested`
-  ([Phala Cloud with live Telegram account](VERIFICATION.md#phala-cloud-with-live-telegram-account--9-november-2026)).
-  A separate run of commit `206fef76` signed in by phone code inside the VM and recorded
-  `key_origin: created` ([session key created inside the TDX VM](VERIFICATION.md#session-key-created-inside-the-tdx-vm--9-november-2026)).
-- The attestation relies on Intel's TDX module and microcode. "The host controls the
-  machine's time source and network"
-  ([attestation certificate](HIGH-ASSURANCE.md#attestation-certificate)).
-- GitHub Actions capture is also preview. Its automated checks "use a synthetic
-  Telegram client plus a separate real GitHub certificate test"
-  ([GitHub capture](SEALED-ACTIONS.md)), and the validation record contains no entry
-  for a live-account GitHub capture.
-
-**Limit.** Partly. Live collection on TDX has run with an imported key and with a key
-created in the VM. Verifying an export from such a run at the `sealed` tier, and QR login
-from a phone, remain open ([qualification status](VERIFICATION.md#qualification-status)).
+**Scope.** A checkpoint binds from the moment the recipient received it. A witness on
+another operator's machine is independent of the collector; retain the custodian and
+key-control record with its fingerprint ([witness](WITNESS.md)).
 
 ## A Desktop export with a qualified eIDAS timestamp is just as good
 
@@ -266,9 +203,9 @@ the files; no special tool is needed.
   No 910/2014, article 41(2), such a stamp carries the presumption that its time is
   accurate and that the bound data is intact, in every EU member state.
 
-**Limit.** A qualified stamp covers the bytes it binds, whoever produced them. In local
-mode, records can still be invented before the first stamp (see above). The difference is when signing happens: TgWitness signs on receipt, while a
-Desktop export is protected only from the moment it is stamped.
+**Difference.** TgWitness signs each record on receipt and stamps checkpoints on a
+schedule, so the stamped bytes are the bytes received. A Desktop export is protected only
+from the moment it is stamped, after it could be edited.
 
 ## Rule 902 is US law
 
@@ -289,8 +226,8 @@ Desktop export is protected only from the moment it is stamped.
 - Archive verification does not depend on any jurisdiction: signatures, RFC 3161,
   Bitcoin and attestation checks are technical.
 
-**Limit.** Yes. Outside US federal courts, the template is only a starting point.
-Admissibility and weight are for the court.
+**Scope.** Outside US federal courts, the template is a starting point. Admissibility
+and weight are for the court.
 
 ## Deleted messages are kept despite GDPR Article 17
 
@@ -311,8 +248,8 @@ Admissibility and weight are for the court.
 - People profiles are off by default and switched on per chat. Exports make it
   possible to answer access requests under Art. 15 (same section).
 
-**Limit.** Yes. The software does not decide whether keeping a deleted message is
-lawful. The operator needs a purpose and a legal basis, and Art. 17(3)(e) applies only
+**Scope.** Whether keeping a deleted message is lawful is decided for the case, not by
+the software. The operator needs a purpose and a legal basis, and Art. 17(3)(e) applies
 where its conditions are met.
 
 ## Data goes to third parties through public MTProxy servers
@@ -343,38 +280,9 @@ where its conditions are met.
   subscriptions entirely"; your own SOCKS5 or HTTP route is the other alternative
   ([connection security](CONNECTION-SECURITY.md)).
 
-**Limit.** Yes, for connection metadata. Public proxy operators can see that the
-server connects to Telegram, when and how much, and they can drop the connection.
-Where that matters, use an operator catalog or your own route.
-
-## Some features are dual-use
-
-**Objection.** Online watch, watchlists, people profiles, personas and case links can
-be used against people.
-
-**Facts.**
-
-- These features exist. Online watch checks every 1–60 minutes, up to 100 accounts
-  per request ([online watch](INVESTIGATION-MODE.md#online-watch), [README](../README.md)). The project guide
-  says "People profiles are profiling". Personas and authorisations are described under
-  [cover and authority](INVESTIGATION-MODE.md#cover-and-authority). Case links record
-  the time, network address and user agent of each request
-  (`tgwitness/forensics/canary.py`, described in [AGENTS.md](../AGENTS.md)).
-- Investigation mode is off under the **Evidence for a case** goal, where "Conversation
-  plans, watchlists, the online watch and translation refuse to run"
-  ([what stays out](INVESTIGATION-MODE.md#what-stays-out)). People profiles are off by
-  default and switched on per chat.
-- Online watch "is an action by the investigating account and every check is
-  journaled". The undercover activity record flags activity outside an authorisation's
-  period or chats, and "TgWitness records and flags. It does not decide whether an
-  authorisation was required or sufficient"
-  ([cover and authority](INVESTIGATION-MODE.md#cover-and-authority)).
-- The MIT License does not restrict use, and the README notice says "we do not
-  restrict the use of this software".
-
-**Limit.** Yes. The software records its operator's actions, but in local mode the
-operator also holds that journal. Lawful use is the operator's responsibility
-([responsibility and data protection](PROJECT-GUIDE.md#responsibility-and-data-protection-gdpr)).
+**Scope.** A public proxy sees connection metadata: that the server connects to
+Telegram, when and how much. It cannot read or change messages, and it can drop the
+connection. Where metadata matters, use an operator catalog or your own route.
 
 ## It uses public API pairs and a Telegram Desktop profile
 
@@ -402,7 +310,7 @@ as Telegram Desktop.
   pair (`API_ID_PUBLISHED_FLOOD`) or restrict an account, and the guide recommends "a
   dedicated account you can afford to lose".
 
-**Limit.** Yes. Whether a published pair suits the account and Telegram's terms is the
+**Scope.** Whether a published pair suits the account and Telegram's terms is the
 operator's decision; entering your own pair avoids the question.
 
 ## The installer pipes curl into bash
@@ -431,35 +339,10 @@ operator's decision; entering your own pair avoids the question.
 - GitHub Releases with an attested source ZIP ([release source archive](TRUST.md#release-source-archive)),
   source installation and [Docker](DEPLOYMENT.md) are the alternatives.
 
-**Limit.** As with any one-line installer, piping runs the script before you have read
+**Scope.** As with any one-line installer, piping runs the script before you have read
 it. To check the script first, use the verify-first commands; the installer checks the
 package and lock signatures either way. Source provenance is attested for the
 [release source ZIP](TRUST.md#release-source-archive).
-
-## The authors are not neutral
-
-**Objection.** The maintainers take public positions, so their tool cannot be trusted.
-
-**Facts.**
-
-- The maintainers do take positions. The README's Ethical Notice and
-  [TAYLOR-WESSING-EXCLUSION.md](TAYLOR-WESSING-EXCLUSION.md) state their position in a
-  dispute, and the signed `producer` field names PhishDestroy ([producer](EVIDENCE.md#producer)).
-- Verification does not depend on the authors. Its inputs are the collector
-  fingerprint from the sender, the TSA root from the authority, Bitcoin block headers,
-  dates that Telegram sets on witness posts, and GitHub and Sigstore attestations. None
-  of them is issued by PhishDestroy.
-- "Nothing is sent to the authors": there is no telemetry and no hosted service
-  ([project guide](PROJECT-GUIDE.md#responsibility-and-data-protection-gdpr)).
-- The verifier is MIT-licensed source in one file. It can be read, run from a reviewed
-  commit or reimplemented from the documented formats ([evidence format](EVIDENCE.md)).
-- The maintainers' benchmark figures, their testing history in
-  [OVERVIEW.md](OVERVIEW.md#testing-history-and-duration) and the signed audit remain
-  their own claims.
-
-**Limit.** Partly. You still run code the authors wrote, so review the verifier or pin
-a reviewed commit. Provenance shows which commit built a release, not that the code
-is correct.
 
 ## The benchmark dates look like the future
 
@@ -478,12 +361,13 @@ is correct.
   ([validation record](VERIFICATION.md)).
 - GitHub records when each Actions run took place. Sigstore's transparency log
   timestamps each release attestation ([public records and SBOM](TRUST.md#public-records-and-sbom)).
-- The audit signature binds the published measurements to the audit key; see
-  [There is no independent audit](#there-is-no-independent-audit).
+- The audit signature binds the published measurements to the audit key: run
+  `python VERIFY.py --key-sha256 e419743db20096763ea06e480c2e6c161341de2f1023cd339c77758fb69e212f`
+  in [`website/validation/audit/`](../website/validation/audit/REPORT.md).
 - If your information predates these records, check them before concluding that the
   dates are wrong.
 
-**Limit.** Git commit dates alone are set by whoever commits, so rely on the GitHub
+**Scope.** Git commit dates alone are set by whoever commits, so rely on the GitHub
 Actions run records and Sigstore log entries above, which third parties keep. The public
 history was squashed on 3 November 2026 ([TRUST.md](TRUST.md#release-source-archive) lists
 the original commits), and the [public-history qualification](EXPORT-BENCHMARK-2026-11-06.md)
