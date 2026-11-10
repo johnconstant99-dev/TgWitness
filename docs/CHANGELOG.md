@@ -7,6 +7,7 @@
 <details>
 <summary>On this page</summary>
 
+- [Unreleased](#unreleased)
 - [0.9.2 preview · 10 November 2026](#092-preview--10-november-2026)
 - [0.9.1 preview · 5 November 2026](#091-preview--5-november-2026)
 - [0.9.0 preview · 4 November 2026](#090-preview--4-november-2026)
@@ -20,6 +21,11 @@
 - [0.5.0 · 26 October 2026](#050--26-october-2026)
 
 </details>
+
+## Unreleased
+
+- The website's reference pages, guides and homepage are translated in all 24 site languages; about 450 text blocks per language were still shown in English after the 0.9.2 documentation update. Translated with DeepL; markup, links and code are checked unchanged.
+- Interface translations: short panel labels were translated again with DeepL using interface context, and the Russian labels were reviewed one by one. Fixes include "Observe" and "Observing" read as "comply" or "note" in several languages, "Off-site copy" read as "off-site text", "Follow new lines" read as "insert new lines", and Russian button labels in the imperative.
 
 ## 0.9.2 preview · 10 November 2026
 
