@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · إشعار مشروع TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">السجل المصدر</a> · <a href="../../NOTICE">الإشعار الأصلي</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">السجل المصدر</a> · <a href="../../NOTICE">الإشعار الأصلي</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">ملف GDPR: 106 أيام</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ إشعار أخلاقي واستمرارية تاريخية</h2>
 <p>لقد علمنا أن بعض مكاتب المحاماة — وتحديدًا <strong>الدكتور توبياس شيلينسكي</strong> <strong>والدكتور باتريك فنسنت زورهايد</strong> — لا تولي أي أهمية للرياضيات والنزاهة التقنية والحقائق الموضوعية.</p>
 <p>إن الترويج لعدم الامتثال للائحة العامة لحماية البيانات (GDPR) للشركات في حين الفشل في التعامل الأساسي مع البيانات لا يُعد خبرة قانونية. وتوقيع أحد النخبة على ادعاء مزور لا يخفي عدم الكفاءة الفنية.</p>

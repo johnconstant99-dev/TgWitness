@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · הודעת פרויקט TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">תיעוד המקור</a> · <a href="../../NOTICE">הודעה מקורית</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">תיעוד המקור</a> · <a href="../../NOTICE">הודעה מקורית</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">תיק ה-GDPR של 106 הימים</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ הודעה אתית והמשכיות היסטורית</h2>
 <p>נודע לנו כי עבור משרדי עורכי דין מסוימים — ובפרט <strong>ד&quot;ר טוביאס שלנסקי</strong> וד<strong>&quot;ר פטריק וינסנט צורהיידה</strong> — מתמטיקה, יושרה טכנית ועובדות אובייקטיביות אינן רלוונטיות.</p>
 <p>לשווק לחברות אי-עמידה ב-GDPR תוך כישלון בטיפול בסיסי בנתונים אינו מהווה מומחיות משפטית. חתימה של אישיות בכירה על טענה מזויפת אינה מסתירה חוסר יכולת טכנית.</p>

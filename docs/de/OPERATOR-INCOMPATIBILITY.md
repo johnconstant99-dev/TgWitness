@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · Hinweis zum TgWitness-Projekt</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Quelldatensatz</a> · <a href="../../NOTICE">Ursprünglicher HINWEIS</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Quelldatensatz</a> · <a href="../../NOTICE">Ursprünglicher HINWEIS</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">Die DSGVO-Akte: 106 Tage</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Ethischer Hinweis &amp; historische Kontinuität</h2>
 <p>Wir haben erfahren, dass für bestimmte Anwaltskanzleien – insbesondere für <strong>Dr. Tobias Schelinski</strong> und <strong>Dr. Patrick Vincent Zurheide</strong> – Mathematik, technische Integrität und objektive Fakten keine Rolle spielen.</p>
 <p>Unternehmen die Nichteinhaltung der DSGVO zu verkaufen, während man selbst bei der grundlegenden Datenverarbeitung versagt, ist keine juristische Fachkompetenz. Eine Unterschrift einer hochrangigen Persönlichkeit unter einer gefälschten Behauptung kann technische Inkompetenz nicht verschleiern.</p>

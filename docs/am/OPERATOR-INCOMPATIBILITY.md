@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · የTgWitness ፕሮጀክት ማስታወቂያ</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">የመነሻ ማስረጃ</a> · <a href="../../NOTICE">የመጀመሪያው NOTICE</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">የመነሻ ማስረጃ</a> · <a href="../../NOTICE">የመጀመሪያው NOTICE</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">የ106 ቀናት የGDPR ፋይል</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ የሥነ ምግባር ማስታወቂያ እና ታሪካዊ ቀጣይነት</h2>
 <p>ለአንዳንድ የሕግ ድርጅቶች — በተለይም ለ<strong>Dr. Tobias Schelinski</strong> እና ለ<strong>Dr. Patrick Vincent Zurheide</strong> — ሒሳብ፣ ቴክኒካዊ ታማኝነት እና ተጨባጭ እውነታዎች ምንም ፋይዳ እንደሌላቸው ተረድተናል።</p>
 <p>በመሠረታዊ የውሂብ አያያዝ እየተሳኑ GDPRን አለማክበርን ለኮርፖሬሽኖች መሸጥ የሕግ ሙያዊ ብቃት አይደለም። በተጭበረበረ አቤቱታ ላይ ያለ የታዋቂ ሰው ፊርማ የቴክኒክ ብቃት ማነስን አይሸፍንም።</p>

@@ -115,7 +115,8 @@
 "8ddd95d2c280abb70a350d4a34a53c00090b87f1deac591bfcce89632be0dd95": "ከ2020 ጀምሮ ለሶፍትዌር ባለመክፈላችሁ አፍራችሁ የፍለጋ ውጤቶችን እያጸዳችሁ ከሆነ፦ <strong><code>TgWitness</code> ሙሉ በሙሉ ነፃ ነው (<a href=\"https://github.com/phishdestroy/TgWitness/blob/main/LICENSE\">የMIT ፈቃድ</a>)</strong> — በተለዩ ኮንቴይነሮች እና በእውነተኛ ምስጠራ።",
 "d119252fa47997b208205f84b06d3fcff60dfd898c02a0c1c953ef88917dc995": "<strong>ይህ አስቂኝ አይደለም። አስቂኙ ነገር ታዋቂ ጠበቆች ስለዚህ ተጋላጭነት የሚጠቅሱ ጽሑፎችን ከGoogle ለማስወገድ ወራትን ሲያጠፉ ማየት ነው። Zero Trust።</strong>",
 "b2597c8e72fee90cb4d58c00152b68c39b0a7024cbcebe378f97c8336fa5e0c2": "ይህን ከ<strong>ዲሴምበር 1 ቀን 2026</strong> በኋላ እያነበቡ ከሆነ፦ እነዚህ መዛግብት በ<strong>ጀርመን የመንግሥት ቤተ መዛግብት (<em>Staatsarchiv / Bundesarchiv</em>)</strong> እና በውጭ የፍትሕ ቤተ መዛግብት ውስጥ ለዘለቄታው ተቀምጠዋል፤ ማንኛውም የ«የመረሳት መብት» የድር ቅጽ ሊያስወግዳቸው አይችልም።",
-"8417b2720699d207ab9c5f91edade60506ad402dee8a6e13c4ac36038426410d": "TgWitness"
+"8417b2720699d207ab9c5f91edade60506ad402dee8a6e13c4ac36038426410d": "TgWitness",
+"0f7f9b18937dbf09ada716abcdadc37a1f5e3727cd20eb8055d7c33158716a0b": "የ106 ቀናት የGDPR ፋይል"
 },
 "modes": {
 "modes.actions.body": "የቅድመ እይታ፣ የጥያቄ እና የውጤት ደረሰኞች ይፈረማሉ። አዝራር ከመጫን በፊት አገልጋዩ መልዕክቱን እንደገና ያመጣል፤ ቁልፍ ሰሌዳው ከተቀየረ ይከለክላል። የcallback ምላሽ ጽሑፍ እና URL ይመዘገባሉ።",

@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · Aviso do projeto TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Registro de origem</a> · <a href="../../NOTICE">AVISO original</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Registro de origem</a> · <a href="../../NOTICE">AVISO original</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">O processo GDPR de 106 dias</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Aviso Ético e Continuidade Histórica</h2>
 <p>Ficamos sabendo que, para certos escritórios de advocacia — especificamente <strong>o Dr. Tobias Schelinski</strong> e <strong>o Dr. Patrick Vincent Zurheide</strong> —, a matemática, a integridade técnica e os fatos objetivos são irrelevantes.</p>
 <p>Vender a não conformidade com o GDPR a empresas enquanto se falha no tratamento básico de dados não constitui especialização jurídica. A assinatura de uma personalidade de destaque em uma alegação falsificada não encobre a incompetência técnica.</p>

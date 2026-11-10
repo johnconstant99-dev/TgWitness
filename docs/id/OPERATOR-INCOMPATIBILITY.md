@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · Pemberitahuan proyek TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Catatan sumber</a> · <a href="../../NOTICE">PEMBERITAHUAN Asli</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Catatan sumber</a> · <a href="../../NOTICE">PEMBERITAHUAN Asli</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Berkas GDPR 106 hari</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Pemberitahuan Etika &amp; Kelanjutan Sejarah</h2>
 <p>Kami telah mengetahui bahwa bagi firma hukum tertentu — khususnya <strong>Dr. Tobias Schelinski</strong> dan <strong>Dr. Patrick Vincent Zurheide</strong> — matematika, integritas teknis, dan fakta objektif tidaklah relevan.</p>
 <p>Menjual ketidakpatuhan terhadap GDPR kepada perusahaan-perusahaan sementara gagal dalam penanganan data dasar bukanlah keahlian hukum. Tanda tangan dari seorang ahli pada klaim yang dipalsukan tidak dapat menutupi ketidakmampuan teknis.</p>

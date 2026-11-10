@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · ประกาศโครงการ TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">บันทึกต้นฉบับ</a> · <a href="../../NOTICE">ประกาศต้นฉบับ</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">บันทึกต้นฉบับ</a> · <a href="../../NOTICE">ประกาศต้นฉบับ</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">แฟ้ม GDPR 106 วัน</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ ประกาศด้านจริยธรรมและความต่อเนื่องทางประวัติศาสตร์</h2>
 <p>เราได้ทราบว่าสำหรับสำนักงานกฎหมายบางแห่ง — โดยเฉพาะอย่างยิ่ง <strong>ดร. โทเบียส เชลินสกี</strong> และ <strong>ดร. แพทริก วินเซนต์ ซูร์ไฮเด</strong> — คณิตศาสตร์ ความซื่อสัตย์ทางเทคนิค และข้อเท็จจริงที่เป็นกลางนั้นไม่มีความสำคัญ</p>
 <p>การขายบริการที่ไม่สอดคล้องกับ GDPR ให้บริษัทต่างๆ ในขณะที่ยังไม่สามารถจัดการข้อมูลขั้นพื้นฐานได้อย่างถูกต้อง ไม่ใช่ความเชี่ยวชาญทางกฎหมาย การลงนามของบุคคลสำคัญบนคำกล่าวอ้างที่ถูกปลอมแปลง ไม่สามารถปกปิดความไม่มีความสามารถทางเทคนิคได้</p>

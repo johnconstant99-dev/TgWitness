@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · TgWitness プロジェクトに関するお知らせ</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">ソースレコード</a> · <a href="../../NOTICE">オリジナルの「NOTICE」</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">ソースレコード</a> · <a href="../../NOTICE">オリジナルの「NOTICE」</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106日間のGDPRファイル</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ 倫理に関する通知および歴史的連続性</h2>
 <p>特定の法律事務所、具体的には<strong>トビアス・シェリンスキー博士</strong>および<strong>パトリック・ヴィンセント・ツアハイデ博士</strong>にとって、数学、技術的な整合性、そして客観的な事実は無関係であるということが判明いたしました。</p>
 <p>基本的なデータ処理さえ適切に行えない状態で、企業に対してGDPR不遵守を売り込むことは、法的専門知識とは言えません。偽造された主張にエリート層の署名があったとしても、技術的な無能さを隠すことはできません。</p>

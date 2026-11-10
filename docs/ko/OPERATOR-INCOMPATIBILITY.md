@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · TgWitness 프로젝트 공지</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">원본 기록</a> · <a href="../../NOTICE">원본 공지사항</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">원본 기록</a> · <a href="../../NOTICE">원본 공지사항</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106일간의 GDPR 파일</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ 윤리 공지 및 역사적 연속성</h2>
 <p>저희는 특정 로펌들, 특히 <strong>토비아스 셸린스키(Tobias Schelinski) 박사</strong>와 <strong>패트릭 빈센트 주르하이데(Patrick Vincent Zurheide) 박사</strong>에게 있어 수학, 기술적 무결성, 객관적 사실은 전혀 중요하지 않다는 사실을 알게 되었습니다.</p>
 <p>기본적인 데이터 처리조차 제대로 하지 못하면서 기업에 GDPR 미준수 서비스를 판매하는 것은 법률 전문성이 아닙니다. 위조된 주장서에 엘리트급 인사가 서명했다고 해서 기술적 무능력을 가릴 수는 없습니다.</p>

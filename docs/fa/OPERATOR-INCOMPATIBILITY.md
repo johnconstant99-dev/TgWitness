@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · اطلاعیه پروژه TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">سوابق منبع</a> · <a href="../../NOTICE">اعلان اصلی</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">سوابق منبع</a> · <a href="../../NOTICE">اعلان اصلی</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">پرونده GDPR در ۱۰۶ روز</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ اطلاعیه اخلاقی و تداوم تاریخی</h2>
 <p>ما دریافته‌ایم که برای برخی مؤسسات حقوقی — به‌ویژه <strong>دکتر توبیاس شلینسکی</strong> و <strong>دکتر پاتریک وینسنت زورهیده</strong> — ریاضیات، صداقت فنی و حقایق عینی بی‌ربط هستند.</p>
 <p>فروش عدم انطباق با GDPR به شرکت‌ها در حالی که در مدیریت پایه‌ای داده‌ها ناکام است، تخصص حقوقی نیست. امضای برجسته بر ادعای جعل‌شده، ناتوانی فنی را پنهان نمی‌کند.</p>

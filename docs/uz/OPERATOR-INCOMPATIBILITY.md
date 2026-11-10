@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · TgWitness loyihasi bildirishnomas</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Manba yozuvi</a> · <a href="../../NOTICE">Asl E&#x27;LON</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Manba yozuvi</a> · <a href="../../NOTICE">Asl E&#x27;LON</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106 kunlik GDPR fayli</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Axloqiy ogohlantirish va tarixiy uzluksizlik</h2>
 <p>Biz bilib oldikki, ayrim yuridik firmalar — xususan <strong>Dr Tobias Schelinski</strong> va <strong>Dr Patrick Vincent Zurheide</strong> — uchun matematika, texnik yaxlitlik va ob&#x27;ektiv faktlar ahamiyatsizdir.</p>
 <p>GDPR talablariga rioya qilmaslikni korporatsiyalarga sotish va asosiy ma&#x27;lumotlarni boshqarishda muvaffaqiyatsiz bo&#x27;lish huquqiy ekspertiza hisoblanmaydi. Soxtalashtirilgan da&#x27;voga elita imzo texnik malakatsizlikni yashira olmaydi.</p>

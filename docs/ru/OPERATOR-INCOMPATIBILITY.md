@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · Уведомление проекта TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Исходная запись</a> · <a href="../../NOTICE">Оригинальное УВЕДОМЛЕНИЕ</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Исходная запись</a> · <a href="../../NOTICE">Оригинальное УВЕДОМЛЕНИЕ</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Разбор GDPR-файла: 106 дней</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Уведомление о несовместимости и историческая преемственность</h2>
 <p>Мы убедились, что для юридической фирмы — и конкретно для <strong>Dr. Tobias Schelinski</strong> и <strong>Dr. Patrick Vincent Zurheide</strong> — математика, техническая добросовестность и объективные факты не имеют значения.</p>
 <p>Продавать корпорациям несоблюдение GDPR как платную услугу, проваливая базовую обработку данных — это не юридическая экспертиза. Элитная подпись под фальсификацией не скрывает технической некомпетентности.</p>

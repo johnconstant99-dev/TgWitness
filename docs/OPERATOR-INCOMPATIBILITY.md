@@ -6,7 +6,7 @@
 
 **PhishDestroy · TgWitness project notice**
 
-[Source record](https://phishdestroy.io/steam_dossier/taylor_wessing) · [Original NOTICE](../NOTICE)
+[Source record](https://phishdestroy.io/steam_dossier/taylor_wessing) · [Original NOTICE](../NOTICE) · [The 106-day GDPR file](TAYLOR-WESSING-GDPR-FILE.md)
 
 ## ⚖️ Ethical Notice & Historical Continuity
 

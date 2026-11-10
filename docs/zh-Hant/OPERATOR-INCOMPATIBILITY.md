@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · TgWitness 專案公告</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">原始記錄</a> · <a href="../../NOTICE">原始「聲明」</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">原始記錄</a> · <a href="../../NOTICE">原始「聲明」</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106 天的 GDPR 檔案</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ 道德聲明與歷史延續性</h2>
 <p>我們獲悉，對於某些律師事務所——具體而言是<strong>托拜厄斯·謝林斯基博士</strong>（Dr. Tobias Schelinski）與<strong>派翠克·文森特·祖爾海德博士</strong>（Dr. Patrick Vincent Zurheide）——而言，數學、技術完整性及客觀事實皆無關緊要。</p>
 <p>向企業兜售不符合《一般資料保護規範》（GDPR）的服務，卻連基本的資料處理都做不好，這並非法律專業能力。在偽造的主張上加上精英級的簽名，也無法掩蓋技術上的無能。</p>

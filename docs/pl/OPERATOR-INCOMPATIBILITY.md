@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · Komunikat dotyczący projektu TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Zapis źródłowy</a> · <a href="../../NOTICE">Oryginalna INFORMACJA</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Zapis źródłowy</a> · <a href="../../NOTICE">Oryginalna INFORMACJA</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Akta RODO: 106 dni</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Informacja dotycząca etyki i ciągłości historycznej</h2>
 <p>Dowiedzieliśmy się, że dla niektórych kancelarii prawnych — a konkretnie dla <strong>dr. Tobiasa Schelinskiego</strong> i <strong>dr. Patricka Vincenta Zurheide</strong> — matematyka, rzetelność techniczna i obiektywne fakty nie mają żadnego znaczenia.</p>
 <p>Sprzedaż usług związanych z niezgodnością z RODO przedsiębiorstwom przy jednoczesnym nieprzestrzeganiu podstawowych zasad przetwarzania danych nie stanowi wykazania się wiedzą prawniczą. Podpis elitarnego eksperta na sfałszowanym oświadczeniu nie maskuje niekompetencji technicznej.</p>

@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · TgWitness প্রকল্প বিজ্ঞপ্তি</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">উৎস রেকর্ড</a> · <a href="../../NOTICE">মূল বিজ্ঞপ্তি</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">উৎস রেকর্ড</a> · <a href="../../NOTICE">মূল বিজ্ঞপ্তি</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">১০৬ দিনের GDPR ফাইল</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ নৈতিক বিজ্ঞপ্তি ও ঐতিহাসিক ধারাবাহিকতা</h2>
 <p>আমরা জানতে পেরেছি যে কিছু নির্দিষ্ট আইন ফার্মের—বিশেষ করে <strong>ডঃ টোবিয়াস শেলিনস্কি</strong> এবং <strong>ডঃ প্যাট্রিক ভিনসেন্ট জুরহেইডের</strong>—ক্ষেত্রে গণিত, প্রযুক্তিগত সততা এবং বস্তুনিষ্ঠ তথ্য প্রাসঙ্গিক নয়।</p>
 <p>বেসিক ডেটা হ্যান্ডলিংয়ে ব্যর্থ হয়ে কর্পোরেশনগুলোকে GDPR অ-অনুপালন বিক্রি করা কোনো আইনি দক্ষতা নয়। একটি জাল দাবিতে অভিজাত স্বাক্ষর প্রযুক্তিগত অদক্ষতাকে আড়াল করতে পারে না।</p>

@@ -71,7 +71,7 @@ def document(ethical, *, wiki=False):
 
 **PhishDestroy · TgWitness project notice**
 
-[Source record]({SOURCE}) · [Original NOTICE]({root}NOTICE)
+[Source record]({SOURCE}) · [Original NOTICE]({root}NOTICE) · [The 106-day GDPR file]({prefix}TAYLOR-WESSING-GDPR-FILE.md)
 
 {ethical}
 

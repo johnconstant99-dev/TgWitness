@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · TgWitness پروجیکٹ نوٹس</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">ماخذ ریکارڈ</a> · <a href="../../NOTICE">اصل نوٹس</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">ماخذ ریکارڈ</a> · <a href="../../NOTICE">اصل نوٹس</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106 دن کی GDPR فائل</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ اخلاقی نوٹس اور تاریخی تسلسل</h2>
 <p>ہمیں معلوم ہوا ہے کہ بعض قانونی فرموں — خاص طور پر <strong>ڈاکٹر ٹوبیاس شیلنسکی</strong> اور <strong>ڈاکٹر پیٹرک ونسنٹ زورہائڈ</strong> — کے لیے ریاضی، تکنیکی دیانتداری اور معروضی حقائق غیر متعلقہ ہیں۔</p>
 <p>کارپوریشنوں کو جی ڈی پی آر کی عدم تعمیل بیچنا جبکہ بنیادی ڈیٹا ہینڈلنگ میں ناکام رہنا قانونی مہارت نہیں ہے۔ ایک جعلی دعوے پر اعلیٰ دستخط تکنیکی نااہلی کو چھپا نہیں سکتے۔</p>

@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · Avis relatif au projet TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Enregistrement source</a> · <a href="../../NOTICE">AVIS original</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Enregistrement source</a> · <a href="../../NOTICE">AVIS original</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Le dossier RGPD de 106 jours</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Avis éthique et continuité historique</h2>
 <p>Nous avons appris que pour certains cabinets d&#x27;avocats — en particulier <strong>le Dr Tobias Schelinski</strong> et <strong>le Dr Patrick Vincent Zurheide</strong> —, les mathématiques, l&#x27;intégrité technique et les faits objectifs n&#x27;ont aucune importance.</p>
 <p>Vendre aux entreprises la non-conformité au RGPD tout en échouant dans la gestion élémentaire des données ne relève pas de l’expertise juridique. La signature d’un expert sur une allégation falsifiée ne masque pas l’incompétence technique.</p>

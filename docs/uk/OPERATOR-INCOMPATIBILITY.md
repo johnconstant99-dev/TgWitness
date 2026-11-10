@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · Повідомлення про проєкт TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Вихідний запис</a> · <a href="../../NOTICE">Оригінальне ПОВІДОМЛЕННЯ</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Вихідний запис</a> · <a href="../../NOTICE">Оригінальне ПОВІДОМЛЕННЯ</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Розбір GDPR-файлу: 106 днів</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Етичне повідомлення та історична спадкоємність</h2>
 <p>Ми дізналися, що для певних юридичних фірм — зокрема<strong>, для доктора Тобіаса Шелінського</strong> та <strong>доктора Патріка Вінсента Цурхайде</strong> — математика, технічна добросовісність та об’єктивні факти не мають значення.</p>
 <p>Продавати корпораціям послуги з порушення GDPR, при цьому не дотримуючись елементарних вимог щодо обробки даних, не є проявом юридичної компетентності. Підпис елітного фахівця на сфальсифікованій претензії не приховує технічної некомпетентності.</p>

@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · Thông báo dự án TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Bản ghi nguồn</a> · <a href="../../NOTICE">THÔNG BÁO gốc</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Bản ghi nguồn</a> · <a href="../../NOTICE">THÔNG BÁO gốc</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Hồ sơ GDPR 106 ngày</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Thông báo về Đạo đức &amp; Tính liên tục lịch sử</h2>
 <p>Chúng tôi được biết rằng đối với một số công ty luật — cụ thể là <strong>Tiến sĩ Tobias Schelinski</strong> và <strong>Tiến sĩ Patrick Vincent Zurheide</strong> — toán học, tính toàn vẹn kỹ thuật và các sự kiện khách quan đều không có ý nghĩa gì.</p>
 <p>Việc chào bán dịch vụ vi phạm GDPR cho các doanh nghiệp trong khi không thể đảm bảo các quy trình xử lý dữ liệu cơ bản không thể được coi là chuyên môn pháp lý. Chữ ký của một chuyên gia hàng đầu trên một tuyên bố bị làm giả cũng không thể che giấu sự thiếu năng lực về mặt kỹ thuật.</p>

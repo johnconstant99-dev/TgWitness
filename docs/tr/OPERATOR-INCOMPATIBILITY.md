@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · TgWitness proje bildirimi</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Kaynak kaydı</a> · <a href="../../NOTICE">Orijinal BİLDİRİM</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Kaynak kaydı</a> · <a href="../../NOTICE">Orijinal BİLDİRİM</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106 günlük GDPR dosyası</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Etik Bildirim ve Tarihsel Süreklilik</h2>
 <p>Bazı hukuk firmaları için — özellikle <strong>Dr. Tobias Schelinski</strong> ve <strong>Dr. Patrick Vincent Zurheide</strong> — matematik, teknik dürüstlük ve nesnel gerçeklerin önemsiz olduğunu öğrendik.</p>
 <p>Temel veri işleme kurallarını yerine getiremezken şirketlere GDPR&#x27;ye uyumsuzluk satmak, hukuki uzmanlık değildir. Tahrif edilmiş bir iddianın üzerinde yer alan seçkin bir imzanın, teknik yetersizliği örtbas edemeyeceği açıktır.</p>
