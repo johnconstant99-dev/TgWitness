@@ -14,6 +14,7 @@ def main():
     args = parser.parse_args()
     fonts = {600: instantiateVariableFont(TTFont(args.font), {"wght": 600}, inplace=True)}
     entries = (
+        ("live", "Watch live demo", "Live demo"),
         ("demo", "Explore the demo", "Demo"),
         ("download", "Get TgWitness", "Download"),
         ("handbook", "Read the handbook", "Handbook"),
@@ -35,7 +36,7 @@ def main():
                 width = 170 if narrow else 360
             title = mobile if narrow else desktop
             d = Drawing(fonts, width, height, desktop)
-            fill = "#16364e" if name == "demo" else "#0d1d2e"
+            fill = "#164338" if name == "live" else "#16364e" if name == "demo" else "#0d1d2e"
             d.add(f'<rect x=".75" y=".75" width="{width-1.5}" height="{height-1.5}" '
                   f'rx="9" fill="{fill}" stroke="#39546a" stroke-width="1.5"/>')
             size = 14 if narrow else 16

@@ -2,18 +2,16 @@
   <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/casework-hero-mobile-static.svg">
   <source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/casework-hero-static.svg">
   <source media="(max-width: 640px)" srcset="docs/assets/presentation/casework-hero-mobile.svg">
-  <img src="docs/assets/presentation/casework-hero.svg" width="1440" alt="TgWitness — Follow the trail. Preserve the evidence. A hash-linked, signed journal, a separately retained checkpoint and a verifiable evidence archive.">
+  <img src="docs/assets/presentation/casework-hero.svg" width="1200" alt="TgWitness — Messages change. Keep the evidence. Capture conversations, preserve observed edits and deletions, and share a record others can verify.">
 </picture>
 
 <p align="center">
-  <a href="https://phishdestroy.github.io/TgWitness/demo/"><picture><source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-nav-demo-mobile.svg"><img src="docs/assets/presentation/readme-nav-demo.svg" width="32%" alt="Explore the interactive demo"></picture></a>
+  <a href="https://tgwitness-demo.destroy.tools/"><picture><source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-nav-live-mobile.svg"><img src="docs/assets/presentation/readme-nav-live.svg" width="32%" alt="Watch the live capture demo"></picture></a>
   <a href="#quick-start"><picture><source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-nav-download-mobile.svg"><img src="docs/assets/presentation/readme-nav-download.svg" width="32%" alt="Download and start TgWitness"></picture></a>
   <a href="https://github.com/phishdestroy/TgWitness/wiki"><picture><source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-nav-handbook-mobile.svg"><img src="docs/assets/presentation/readme-nav-handbook.svg" width="32%" alt="Read the investigation handbook"></picture></a>
 </p>
 
-<p align="center"><strong>Self-hosted workspace for Telegram investigations.</strong><br>Save chats, keep edits and deletions, see who's connected to whom<br>and hand over signed exports anyone can check.</p>
-
-<p align="center"><strong>ZERO TRUST.</strong> TgWitness takes no side: the same checks apply to the operator, to PhishDestroy and to anyone else.<br>Only what a third party or the math confirms counts. <a href="docs/LIMITS-AND-OBJECTIONS.md">Limits and objections</a></p>
+<p align="center"><strong>Your Telegram investigation, from the first capture to a verified handoff.</strong><br>Save conversations, connect the findings and keep a record others can check.</p>
 
 <p align="center">
   <a href="docs/CHANGELOG.md"><img src="docs/assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · pre-release"></a>
@@ -21,6 +19,26 @@
   <img src="docs/assets/presentation/identity-meta-languages.svg" width="279" height="30" alt="25 interface languages · 26 guide languages">
   <a href="LICENSE"><img src="docs/assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a>
 </p>
+
+<a name="what-tgwitness-does"></a>
+
+## Why TgWitness
+
+- **[Keep the history as it changes](docs/COLLECTION.md).** Capture messages, observed edits and deletion notices. Earlier captured versions stay in your journal.
+- **[Share an archive others can verify](docs/wiki/Exports-and-Verification.md).** Signed, hash-linked records, preserved files and an offline verifier travel together.
+- **[Turn conversations into a case](docs/INVESTIGATION-MODE.md).** Search saved chats, follow subjects and watchlist matches, and connect findings on a Case Board with journal references.
+- **[Choose what to collect](docs/COLLECTION-MODES.md).** Export accessible history or follow selected chats. Each account has its own workspace, journal and signing key.
+- **[Add independent checks](docs/EVIDENCE.md).** Retained checkpoints, external timestamps and optional GitHub Actions or Intel TDX capture provide additional checks on the recorded evidence.
+- **[Run it on your infrastructure](docs/SECURITY-MODEL.md).** Self-hosted, with encrypted session storage, a localhost panel by default and no telemetry.
+
+> **3,598,381 records · 48 verified archives.** A documented public-history run on 6 November 2026. [Read the measurements, setup and verification results →](docs/EXPORT-BENCHMARK-2026-11-06.md)
+
+<p align="center"><strong>ZERO TRUST.</strong> TgWitness takes no side: the same checks apply to the operator, to PhishDestroy and to anyone else.<br>Only what a third party or the math confirms counts. <a href="docs/LIMITS-AND-OBJECTIONS.md">Limits and objections</a></p>
+
+## See it in action
+
+- **[Watch live capture ↗](https://tgwitness-demo.destroy.tools/)** — a public, read-only view of incoming messages, masked edits and deletion notices.
+- **[Explore the interactive workspace ↗](https://phishdestroy.github.io/TgWitness/demo/)** — open a fictional case, compare captured versions and explore exports. No Telegram login needed.
 
 <a name="screenshots"></a>
 
@@ -34,21 +52,6 @@
 </a>
 
 <p align="center"><sub>Explore the actual interface with fictional records. Click the workspace to try it.</sub></p>
-
-## What TgWitness does
-
-<table>
-<tr>
-<td width="33%" valign="top"><b><a href="docs/COLLECTION.md">Every edit and deletion kept</a></b><br><sub>Each version of a message is saved, and its text stays after a deletion notice.</sub></td>
-<td width="33%" valign="top"><b><a href="docs/wiki/Exports-and-Verification.md">Proof anyone can check</a></b><br><sub>Signed, hash-chained records. The recipient verifies the archive offline with one command.</sub></td>
-<td width="33%" valign="top"><b><a href="docs/EVIDENCE.md#where-the-messages-come-from">Origin you can show</a></b><br><sub>Received over the account's authenticated MTProto session and signed on arrival; GitHub Actions and Intel TDX add attestation.</sub></td>
-</tr>
-<tr>
-<td width="33%" valign="top"><b><a href="docs/EXPORT-BENCHMARK-2026-11-06.md">Measured at scale</a></b><br><sub>48 verified archives with 3,598,381 records; eight accounts acquired 768,007 history records at 687.5 records/s.</sub></td>
-<td width="33%" valign="top"><b><a href="docs/INVESTIGATION-MODE.md">Built for investigations</a></b><br><sub>Watchlists over text, QR codes and OCR, wallet checks, subject cards, Case Board and a court package.</sub></td>
-<td width="33%" valign="top"><b><a href="docs/SECURITY-MODEL.md">Yours to run</a></b><br><sub>Self-hosted with no telemetry. Sessions live in an encrypted vault; the panel listens on localhost.</sub></td>
-</tr>
-</table>
 
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-divider-static.svg"><img src="docs/assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
