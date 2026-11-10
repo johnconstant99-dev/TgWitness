@@ -73,6 +73,8 @@ if (record) {
   let playing = !motionPreference.matches;
   let visible = true;
   let timer;
+  const duration = 4200;
+  record.style.setProperty('--record-duration', `${duration}ms`);
   function showStage(next) {
     stage = next;
     record.dataset.stage = String(stage);
@@ -95,7 +97,7 @@ if (record) {
     toggle.textContent = active ? T('Pause') + ' Ⅱ' : T('Play') + ' ▷';
     record.classList.toggle('is-playing', active && visible && !document.hidden);
     if (active && visible && !document.hidden) {
-      timer = setTimeout(() => { showStage((stage + 1) % steps.length); syncMotion(); }, 3200);
+      timer = setTimeout(() => { showStage((stage + 1) % steps.length); syncMotion(); }, duration);
     }
   }
   controls.hidden = false;
@@ -175,7 +177,7 @@ if ('IntersectionObserver' in window && !motionPreference.matches) {
       reveal.unobserve(entry.target);
     });
   }, {threshold: .2});
-  document.querySelectorAll('.section-heading, .principles article, .bundle, .closing').forEach(element => reveal.observe(element));
+  document.querySelectorAll('.section-heading, .principles article, .bundle, .closing, .live-showcase, .speed-stats li').forEach(element => reveal.observe(element));
 }
 
 

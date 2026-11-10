@@ -6524,7 +6524,13 @@
 "8ddd95d2c280abb70a350d4a34a53c00090b87f1deac591bfcce89632be0dd95": "Caso o senhor apague resultados de pesquisa por se sentir constrangido por não ter pago por software desde 2020: o <strong><code>TgWitness</code> é totalmente gratuito (<a href=\"https://github.com/phishdestroy/TgWitness/blob/main/LICENSE\">Licença MIT</a>)</strong> — com contêineres isolados e criptografia real.",
 "d119252fa47997b208205f84b06d3fcff60dfd898c02a0c1c953ef88917dc995": "<strong>Isso não tem graça. O que é engraçado é ver advogados de elite passarem meses tentando excluir menções a essa vulnerabilidade do Google. Zero Trust.</strong>",
 "b2597c8e72fee90cb4d58c00152b68c39b0a7024cbcebe378f97c8336fa5e0c2": "Caso leia isto após <strong>1º de dezembro de 2026</strong>: esses registros estão permanentemente arquivados nos <strong>Arquivos Estaduais da Alemanha (<em>Staatsarchiv / Bundesarchiv</em>)</strong> e em arquivos judiciais estrangeiros, onde nenhum formulário online de “Direito ao Esquecimento” poderá excluí-los.",
-"0f7f9b18937dbf09ada716abcdadc37a1f5e3727cd20eb8055d7c33158716a0b": "O processo GDPR de 106 dias"
+"0f7f9b18937dbf09ada716abcdadc37a1f5e3727cd20eb8055d7c33158716a0b": "O processo GDPR de 106 dias",
+"0748955a50498f2793cb32ce1cd05dfc2af3a66e20dffc4d9e015a4eed1c7896": "Demo ao vivo <span aria-hidden=\"true\">↗</span>",
+"f738d12b15df05cb084462c3af96fe689f2625f0c0c0eb26cd1c80a14f0730ca": "Ver demo ao vivo <span aria-hidden=\"true\">↗</span>",
+"ad85afa400c3646f7a6627817862765d75f36adaf0ab9115fa8f707a2bfa2233": "Veja a captura ao vivo ou explore um caso fictício. Não é preciso entrar no Telegram.",
+"e40ce6f8acd187d30d5bcb52c590e1e4c32ef5413875e3593f899585fb5062cd": "<span class=\"live-indicator\" aria-hidden=\"true\"></span> DEMO AO VIVO",
+"6b828b1f9dd88b61fc2b1ea1e9af93105b7eae63952a7ad58ae80866e703e4ab": "Veja a captura em tempo real.",
+"7beb4441d36927ae577a4e8d15efee21866e22fc85d7a34244a53760243137ba": "Acompanhe novas mensagens, edições ocultas e avisos de exclusão na demonstração pública somente para leitura."
 },
 "modes": {
 "modes.actions.body": "Os recibos de pré-visualização, solicitação e resultado são assinados. Antes de um botão ser pressionado, o servidor busca a mensagem novamente e rejeita um teclado alterado. O texto e as URLs de retorno de chamada permanecem como contexto registrado.",

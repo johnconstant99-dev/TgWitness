@@ -6380,7 +6380,13 @@
 "8ddd95d2c280abb70a350d4a34a53c00090b87f1deac591bfcce89632be0dd95": "Si vous supprimez les résultats de recherche parce que vous avez honte de ne pas avoir payé de logiciel depuis 2020 : <strong><code>TgWitness</code> est entièrement gratuit (<a href=\"https://github.com/phishdestroy/TgWitness/blob/main/LICENSE\">licence MIT</a>)</strong> — avec des conteneurs isolés et un véritable chiffrement.",
 "d119252fa47997b208205f84b06d3fcff60dfd898c02a0c1c953ef88917dc995": "<strong>Ce n’est pas drôle. Ce qui est drôle, c’est de voir des avocats d’élite passer des mois à essayer de faire supprimer de Google toute mention de cette faille de sécurité. Zero Trust.</strong>",
 "b2597c8e72fee90cb4d58c00152b68c39b0a7024cbcebe378f97c8336fa5e0c2": "Si vous lisez ceci après <strong>le 1er décembre 2026</strong> : ces documents sont déposés de manière permanente aux <strong>Archives d&#x27;État allemandes (<em>Staatsarchiv / Bundesarchiv</em>)</strong> et dans des archives judiciaires étrangères, où aucun formulaire en ligne relevant du « droit à l&#x27;oubli » ne peut les supprimer.",
-"0f7f9b18937dbf09ada716abcdadc37a1f5e3727cd20eb8055d7c33158716a0b": "Le dossier RGPD de 106 jours"
+"0f7f9b18937dbf09ada716abcdadc37a1f5e3727cd20eb8055d7c33158716a0b": "Le dossier RGPD de 106 jours",
+"0748955a50498f2793cb32ce1cd05dfc2af3a66e20dffc4d9e015a4eed1c7896": "Démo en direct <span aria-hidden=\"true\">↗</span>",
+"f738d12b15df05cb084462c3af96fe689f2625f0c0c0eb26cd1c80a14f0730ca": "Voir la démo en direct <span aria-hidden=\"true\">↗</span>",
+"ad85afa400c3646f7a6627817862765d75f36adaf0ab9115fa8f707a2bfa2233": "Suivez la capture en direct ou explorez un cas fictif. Aucune connexion à Telegram requise.",
+"e40ce6f8acd187d30d5bcb52c590e1e4c32ef5413875e3593f899585fb5062cd": "<span class=\"live-indicator\" aria-hidden=\"true\"></span> DÉMO EN DIRECT",
+"6b828b1f9dd88b61fc2b1ea1e9af93105b7eae63952a7ad58ae80866e703e4ab": "Observez la capture en direct.",
+"7beb4441d36927ae577a4e8d15efee21866e22fc85d7a34244a53760243137ba": "Suivez les nouveaux messages, les modifications masquées et les avis de suppression dans la démonstration publique en lecture seule."
 },
 "modes": {
 "modes.actions.body": "Les accusés de réception d’aperçu, de requête et de résultat sont signés. Avant qu’un bouton ne soit enfoncé, le serveur récupère à nouveau le message et rejette toute modification apportée au clavier. Le texte et les URL des rappels renvoyés restent enregistrés dans le contexte.",

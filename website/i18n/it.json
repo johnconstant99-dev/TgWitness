@@ -6380,7 +6380,13 @@
 "8ddd95d2c280abb70a350d4a34a53c00090b87f1deac591bfcce89632be0dd95": "Se cancellate i risultati di ricerca perché vi vergognate di non aver pagato il software dal 2020: <strong><code>TgWitness</code> è completamente gratuito (<a href=\"https://github.com/phishdestroy/TgWitness/blob/main/LICENSE\">licenza MIT</a>)</strong> — con container isolati e crittografia reale.",
 "d119252fa47997b208205f84b06d3fcff60dfd898c02a0c1c953ef88917dc995": "<strong>La questione non è affatto divertente. Ciò che è divertente è osservare avvocati d’élite che trascorrono mesi nel tentativo di eliminare da Google ogni riferimento a questa vulnerabilità. Zero Trust.</strong>",
 "b2597c8e72fee90cb4d58c00152b68c39b0a7024cbcebe378f97c8336fa5e0c2": "Se leggerete questo testo dopo <strong>il 1° dicembre 2026</strong>: questi documenti sono depositati in via permanente presso gli <strong>Archivi di Stato tedeschi (<em>Staatsarchiv / Bundesarchiv</em>)</strong> e presso archivi giudiziari esteri, dove nessun modulo web relativo al «diritto all’oblio» potrà cancellarli.",
-"0f7f9b18937dbf09ada716abcdadc37a1f5e3727cd20eb8055d7c33158716a0b": "Il fascicolo GDPR di 106 giorni"
+"0f7f9b18937dbf09ada716abcdadc37a1f5e3727cd20eb8055d7c33158716a0b": "Il fascicolo GDPR di 106 giorni",
+"0748955a50498f2793cb32ce1cd05dfc2af3a66e20dffc4d9e015a4eed1c7896": "Demo dal vivo <span aria-hidden=\"true\">↗</span>",
+"f738d12b15df05cb084462c3af96fe689f2625f0c0c0eb26cd1c80a14f0730ca": "Guarda la demo dal vivo <span aria-hidden=\"true\">↗</span>",
+"ad85afa400c3646f7a6627817862765d75f36adaf0ab9115fa8f707a2bfa2233": "Segui la cattura dal vivo o esplora un caso fittizio. Non serve accedere a Telegram.",
+"e40ce6f8acd187d30d5bcb52c590e1e4c32ef5413875e3593f899585fb5062cd": "<span class=\"live-indicator\" aria-hidden=\"true\"></span> DEMO DAL VIVO",
+"6b828b1f9dd88b61fc2b1ea1e9af93105b7eae63952a7ad58ae80866e703e4ab": "Guarda la cattura in tempo reale.",
+"7beb4441d36927ae577a4e8d15efee21866e22fc85d7a34244a53760243137ba": "Segui nuovi messaggi, modifiche mascherate e avvisi di eliminazione nella dimostrazione pubblica di sola lettura."
 },
 "modes": {
 "modes.actions.body": "Le conferme di anteprima, di richiesta e di risultato sono firmate. Prima che venga premuto un pulsante, il server recupera nuovamente il messaggio e rifiuta eventuali modifiche apportate tramite tastiera. Il testo e gli URL restituiti dalla callback rimangono registrati nel contesto.",

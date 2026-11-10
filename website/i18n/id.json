@@ -6524,7 +6524,13 @@
 "8ddd95d2c280abb70a350d4a34a53c00090b87f1deac591bfcce89632be0dd95": "Jika Anda menghapus hasil pencarian karena malu karena belum membayar perangkat lunak sejak tahun 2020: <strong><code>TgWitness</code> sepenuhnya gratis (<a href=\"https://github.com/phishdestroy/TgWitness/blob/main/LICENSE\">Lisensi MIT</a>)</strong> — dengan kontainer terisolasi dan enkripsi yang sesungguhnya.",
 "d119252fa47997b208205f84b06d3fcff60dfd898c02a0c1c953ef88917dc995": "<strong>Ini tidak lucu. Yang lucu adalah melihat para pengacara elit menghabiskan berbulan-bulan berusaha menghapus penyebutan kerentanan ini dari Google. Zero Trust.</strong>",
 "b2597c8e72fee90cb4d58c00152b68c39b0a7024cbcebe378f97c8336fa5e0c2": "Jika Anda membaca ini setelah <strong>1 Desember 2026</strong>: catatan-catatan ini telah disimpan secara permanen di <strong>Arsip Negara Jerman (<em>Staatsarchiv / Bundesarchiv</em>)</strong> dan arsip peradilan asing, di mana formulir web &quot;Hak untuk Dilupakan&quot; tidak dapat menghapusnya.",
-"0f7f9b18937dbf09ada716abcdadc37a1f5e3727cd20eb8055d7c33158716a0b": "Berkas GDPR 106 hari"
+"0f7f9b18937dbf09ada716abcdadc37a1f5e3727cd20eb8055d7c33158716a0b": "Berkas GDPR 106 hari",
+"0748955a50498f2793cb32ce1cd05dfc2af3a66e20dffc4d9e015a4eed1c7896": "Demo langsung <span aria-hidden=\"true\">↗</span>",
+"f738d12b15df05cb084462c3af96fe689f2625f0c0c0eb26cd1c80a14f0730ca": "Lihat demo langsung <span aria-hidden=\"true\">↗</span>",
+"ad85afa400c3646f7a6627817862765d75f36adaf0ab9115fa8f707a2bfa2233": "Saksikan perekaman langsung atau jelajahi kasus fiktif. Tidak perlu masuk ke Telegram.",
+"e40ce6f8acd187d30d5bcb52c590e1e4c32ef5413875e3593f899585fb5062cd": "<span class=\"live-indicator\" aria-hidden=\"true\"></span> DEMO LANGSUNG",
+"6b828b1f9dd88b61fc2b1ea1e9af93105b7eae63952a7ad58ae80866e703e4ab": "Lihat perekaman secara langsung.",
+"7beb4441d36927ae577a4e8d15efee21866e22fc85d7a34244a53760243137ba": "Ikuti pesan masuk, suntingan yang disamarkan, dan pemberitahuan penghapusan dalam demo publik hanya baca."
 },
 "modes": {
 "modes.actions.body": "Tanda terima pratinjau, permintaan, dan hasil ditandatangani. Sebelum tombol ditekan, server mengambil pesan tersebut kembali dan menolak perubahan yang dilakukan melalui keyboard. Teks dan URL callback yang dikembalikan tetap menjadi konteks yang tercatat.",
