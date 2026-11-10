@@ -50,6 +50,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>Developed and tested for about six months: the collector, the signed journal and the verifier first, then the panel and the add-on modules. This repository was created on 29 October 2026 for publication, so its age is not the age of the project.</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-divider-static.svg"><img src="docs/assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

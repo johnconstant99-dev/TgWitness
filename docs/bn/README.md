@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>প্রায় ছয় মাস ধরে তৈরি ও পরীক্ষা করা হয়েছে: প্রথমে কালেক্টর, স্বাক্ষরিত জার্নাল এবং যাচাইকারী, তারপর প্যানেল এবং অ্যাড-অন মডিউলগুলো। এই রিপোজিটরিটি প্রকাশের জন্য ২৯ অক্টোবর ২০২৬-এ তৈরি করা হয়েছিল, তাই এর বয়স প্রকল্পের বয়স নয়।</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

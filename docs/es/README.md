@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>Se ha desarrollado y probado durante unos seis meses: primero el recopilador, el registro firmado y el verificador; después, el panel y los módulos complementarios. Este repositorio se creó el 29 de octubre de 2026 con fines de publicación, por lo que su antigüedad no coincide con la del proyecto.</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

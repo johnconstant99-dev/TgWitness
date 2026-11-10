@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>Dikembangkan dan diuji selama sekitar enam bulan: pertama-tama pengumpul, jurnal yang telah ditandatangani, dan verifikator, kemudian panel serta modul tambahan. Repositori ini dibuat pada 29 Oktober 2026 untuk dipublikasikan, sehingga usianya tidak sama dengan usia proyek.</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

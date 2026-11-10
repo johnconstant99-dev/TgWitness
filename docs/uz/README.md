@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>Taxminan olti oy davomida ishlab chiqilib sinovdan o'tkazildi: avvalo yig'uvchi, imzolangan jurnal va tekshiruvchi, keyin esa panel va qo'shimcha modullar. Ushbu ombor 2026-yil 29-oktabrda nashr etish uchun yaratilgan, shuning uchun uning yoshi loyihaning yoshi emas.</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

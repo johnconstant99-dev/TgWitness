@@ -67,7 +67,7 @@ def main():
         with sync_playwright() as playwright:
             browser = playwright.chromium.launch()
             for mobile in (False, True):
-                for theme in ("dark", "light"):
+                for theme in ("dark",):
                     page = browser.new_page(
                         viewport={"width": 390 if mobile else 1440, "height": 900},
                         device_scale_factor=2 if mobile else 1,

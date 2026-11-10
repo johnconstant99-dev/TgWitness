@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>開發與測試歷時約六個月：首先是收集器、簽名日誌和驗證器，接著是控制面板與附加模組。此儲存庫於 2026 年 10 月 29 日建立以供發布，因此其建立時間不代表專案的開發時間。</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

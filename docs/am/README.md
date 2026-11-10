@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>ለስድስት ወራት ያህል ሲገነባና ሲሞከር ቆይቷል፤ መጀመሪያ ሰብሳቢው፣ የተፈረመው መዝገብ እና አረጋጋጩ፣ ከዚያም ፓነሉ እና ተጨማሪ ሞጁሎቹ። ይህ ማከማቻ ለሕትመት 29 ኦክቶበር 2026 ተፈጥሯል፤ ስለዚህ የማከማቻው ዕድሜ የፕሮጀክቱ ዕድሜ አይደለም።</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

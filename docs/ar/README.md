@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>تم تطويرها واختبارها لمدة ستة أشهر تقريبًا: أولًا المجمع والسجل الموقّع والمُحقق، ثم اللوحة والوحدات الإضافية. تم إنشاء هذا المستودع في 29 أكتوبر 2026 للنشر، لذا فإن عمره لا يمثل عمر المشروع.</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

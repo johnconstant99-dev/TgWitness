@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>Yaklaşık altı ay boyunca geliştirildi ve test edildi: önce toplayıcı, imzalanmış günlük ve doğrulayıcı, ardından panel ve eklenti modülleri. Bu depo, yayınlanmak üzere 29 Ekim 2026 tarihinde oluşturuldu; dolayısıyla yaşı, projenin yaşı değildir.</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>Розробка та тестування тривали близько шести місяців: спочатку колектор, підписаний журнал і верифікатор, потім панель та додаткові модулі. Цей репозиторій було створено 29 жовтня 2026 року для публікації, тому його вік не збігається з віком проєкту.</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

@@ -33,6 +33,7 @@ It needs Python 3.11+ and `cryptography`.
 - [It uses public API pairs and a Telegram Desktop profile](#it-uses-public-api-pairs-and-a-telegram-desktop-profile)
 - [The installer pipes curl into bash](#the-installer-pipes-curl-into-bash)
 - [The benchmark dates look like the future](#the-benchmark-dates-look-like-the-future)
+- [The project is only two weeks old](#the-project-is-only-two-weeks-old)
 
 </details>
 
@@ -373,3 +374,23 @@ history was squashed on 3 November 2026 ([TRUST.md](TRUST.md#release-source-arch
 the original commits), and the [public-history qualification](EXPORT-BENCHMARK-2026-11-06.md)
 names the exact base and candidate commits it ran. Detailed operational records stay
 private ([validation record](VERIFICATION.md)).
+
+## The project is only two weeks old
+
+**Objection.** The repository was created at the end of October 2026, so the software is
+two weeks old.
+
+**Facts.**
+
+- TgWitness has been developed and tested for about six months. The collector, the signed
+  journal and the verifier came first; the web panel and the add-on modules were built on
+  them later ([testing history](OVERVIEW.md#testing-history-and-duration)).
+- This repository was created new on 29 October 2026 for publication and began with the
+  existing code: its first commit, `8fb40fe0e` "Initial version", already contains 658 files
+  and 134,944 lines. Check: `git show --shortstat 8fb40fe0e`.
+- The [changelog](CHANGELOG.md) starts at version 0.5.0, dated 26 October 2026, before the
+  repository was created. Sigstore log entries and GitHub Actions run records for the
+  0.7.1–0.8.1 releases name the original commits ([TRUST.md](TRUST.md#release-source-archive)).
+
+**Scope.** The repository's creation date and commit count describe this repository, not
+the age of the software in it.

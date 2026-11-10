@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>开发和测试历时约六个月：首先是收集器、签名日志和验证器，随后是控制面板和附加模块。此代码库于2026年10月29日创建以供发布，因此其创建时间不代表项目的开发时长。</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

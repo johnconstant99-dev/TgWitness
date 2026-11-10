@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>Desenvolvido e testado por cerca de seis meses: primeiro o coletor, o diário assinado e o verificador; depois, o painel e os módulos complementares. Este repositório foi criado em 29 de outubro de 2026 para publicação, portanto, sua idade não corresponde à idade do projeto.</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>
