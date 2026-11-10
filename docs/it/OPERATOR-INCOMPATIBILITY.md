@@ -22,5 +22,5 @@
 </blockquote>
 <p>Per rispettare rigorosamente la Licenza MIT, non limitiamo l’uso di questo software. Tuttavia, sia chiaro: i contratti di consulenza aziendale, le intimidazioni legali e le richieste di cancellazione digitale non possono sovrascrivere la storia, riscrivere la genealogia o nascondere la verità.</p>
 <p><a href="../../LICENSE">Licenza MIT</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">La nostra posizione su Taylor Wessing</a> · <a href="../HOW-IT-WORKS.md">Modello probatorio</a></p>
-<p><a href="../../README.md">Progetto</a> · <a href="../README.md">Documentazione</a> · <a href="../wiki/Home.md">Wiki</a></p>
+<p><a href="README.md">Progetto</a> · <a href="README.md">Documentazione</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

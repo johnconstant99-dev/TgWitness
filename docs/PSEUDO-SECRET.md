@@ -3,7 +3,7 @@
 # Secret Chats: installation and recording
 
 The published application includes the Secret Chat backend, collector integration,
-API routes and **Sources → Pseudo-secret** interface. Install the optional
+API routes and **More tools → Sources → Pseudo-secret** interface. Install the optional
 `secret-chats` protocol dependency in the environment running TgWitness, then enable
 the module for the chosen account. Both the module and automatic incoming acceptance
 are off by default.
@@ -42,7 +42,7 @@ describes the package above.
 
 ## Use the interface
 
-Open **Sources → Pseudo-secret**, enable the module for the account and connect it.
+Open **More tools → Sources → Pseudo-secret**, enable the module for the account and connect it.
 Incoming requests wait for acceptance unless automatic acceptance is enabled.
 Starting, accepting, sending and closing use the account's interaction permissions
 and read-only protection.

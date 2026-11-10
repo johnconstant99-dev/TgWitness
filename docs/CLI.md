@@ -24,7 +24,7 @@ Progress, hints and errors go to stderr. Exit codes are stable:
 ## Two ways to read
 
 **Through the panel (`--url`).** The command uses the same scoped archive API as
-MCP. Create a connection in **Integrations → MCP**: choose workspaces and chats,
+MCP. Create a connection in **More tools → Integrations → MCP**: choose workspaces and chats,
 tools and an expiry, then copy the token once. The connection is read-only, limited
 to those chats, rate-limited to 60 requests per minute and can be revoked or
 rotated at any time. Panel login tokens and Telegram credentials do not work here.

@@ -303,14 +303,16 @@ and the planned live measurements.
 | [Several accounts](docs/ACCOUNTS.md#multiple-accounts) | Separate workspaces, each with its own Telegram session, journal and signing key |
 | [Batch import](docs/ACCOUNTS.md#bulk-import-and-account-groups) | Drop in a pile of session files, sort accounts into groups with shared settings |
 | [MTProxy pool](docs/wiki/Proxies.md#pool-dashboard-and-custom-sources) | Ping, countries, filters, your own lists |
-| [Existing sessions](docs/ACCOUNTS.md) | TData, Telethon, Pyrogram, StringSession, auth key; optional independent QR authorization from an imported donor |
+| [Existing sessions](docs/ACCOUNTS.md) | TData, Telethon, Pyrogram, StringSession, auth key or a `key:DC` line; optional independent QR authorization from an imported donor |
+| [Account security](docs/ACCOUNTS.md#create-an-independent-authorization) | Alerts for new sessions, ending other sessions, an only-session mode that also sets a two-step password, and a [witness probe](docs/ACCOUNTS.md#witness-probe) that notices when live updates stop reaching this session |
+| [Resumable chat export](docs/EXPORT_HASHES.md#restricted-github-capture-and-single-chat-export) | A stopped export keeps a signed partial copy: resume it, start over or download what was saved |
 | [Proxies](docs/CONNECTION-SECURITY.md#ip-modes) | SOCKS5, HTTP CONNECT or MTProxy per workspace. **Hide IP** never falls back to direct |
 | [Search and AI](docs/ANALYSIS.md) | Local search, optional AI with sources you can check |
 | [Full-text search](docs/SEARCH.md) | Word forms, exact phrases, domains, @usernames and Chinese without spaces, best matches first (**Preview**) |
 | [MCP](docs/MCP.md) | Read-only access for MCP clients, limited to the chats you pick |
 | [Command line](docs/CLI.md) | `search`, `context`, `messages`, `stats` and JSON Lines `export` with `--json` for scripts and agents, locally or with a scoped token (**Preview**) |
 | [OCR and transcription](docs/MEDIA-ANALYSIS.md) | Runs locally, originals stay untouched |
-| [Independent capture](docs/OPTIONAL-CAPTURE.md) | Optional browser/AyuGram recorders in Extras (preview, off by default) |
+| [Independent capture](docs/OPTIONAL-CAPTURE.md) | Optional browser/AyuGram recorders under **More tools → Extras** (preview, off by default) |
 | [Trusted Live](docs/TRUSTED-LIVE.md) | Official Desktop/Web session, guarded video and native-export continuity analysis (preview; live qualification pending) |
 | [Sealed official Web](docs/OFFICIAL-WITNESS.md) | Fresh official browser on GitHub Actions, restricted controls, signed video and independently expected source/settings |
 | [Webhooks](docs/WEBHOOKS.md) | Signed outgoing events with retries, n8n example included |
@@ -481,7 +483,7 @@ To strictly comply with the MIT License, we do not restrict the use of this soft
 <details>
 <summary><strong>Read the project overview in your language</strong></summary>
 
-**English** · [Русский](docs/ru/README.md) · [Українська](docs/uk/README.md) · [Español](docs/es/README.md) · [Português (Brasil)](docs/pt/README.md) · [Türkçe](docs/tr/README.md) · [العربية](docs/ar/README.md) · [فارسی](docs/fa/README.md) · [اردو](docs/ur/README.md) · [हिन्दी](docs/hi/README.md) · [Bahasa Indonesia](docs/id/README.md) · [Tiếng Việt](docs/vi/README.md) · [简体中文](docs/zh/README.md)
+**English** · [Русский](docs/ru/README.md) · [Українська](docs/uk/README.md) · [Español](docs/es/README.md) · [Português (Brasil)](docs/pt/README.md) · [Türkçe](docs/tr/README.md) · [العربية](docs/ar/README.md) · [فارسی](docs/fa/README.md) · [اردو](docs/ur/README.md) · [हिन्दी](docs/hi/README.md) · [Bahasa Indonesia](docs/id/README.md) · [Tiếng Việt](docs/vi/README.md) · [简体中文](docs/zh/README.md) · [繁體中文](docs/zh-Hant/README.md) · [Français](docs/fr/README.md) · [Deutsch](docs/de/README.md) · [Italiano](docs/it/README.md) · [Polski](docs/pl/README.md) · [O‘zbekcha](docs/uz/README.md) · [한국어](docs/ko/README.md) · [日本語](docs/ja/README.md) · [Bahasa Melayu](docs/ms/README.md) · [ไทย](docs/th/README.md) · [עברית](docs/he/README.md) · [বাংলা](docs/bn/README.md) · [አማርኛ](docs/am/README.md)
 
 </details>
 

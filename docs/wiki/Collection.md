@@ -33,7 +33,7 @@ It records what the connected account gets. Chats the account can't open and stu
 | Telegram folder | Everything in one folder |
 | Whole account | A dedicated account, new chats included |
 
-Pick the scope in **Sources**, then chat types, exclusions and whether to keep your own
+Pick the scope in **More tools → Sources → Scope**, then chat types, exclusions and whether to keep your own
 outgoing messages. Broad scopes pull in private chats and bots, make sure you want that.
 
 Event types are separate switches: messages, edits, deletions, reactions, joins/leaves.
@@ -64,7 +64,7 @@ Keep test material away from real case stuff.
 | Coverage gap | A recorded break or uncertainty |
 
 Rechecks catch some of what was missed, never all in-between edits or deletions. Priority
-chats get rechecked more often, see **Parameters** and the [collection reference](../COLLECTION.md).
+chats get rechecked more often, see **More tools → Sources → Recording → Recheck** and the [collection reference](../COLLECTION.md).
 
 ## Pause, lock and restart
 
@@ -74,7 +74,7 @@ and download queues.
 
 ## Load older messages
 
-**Sources → Load full history** pulls the history of enabled sources, with pause/resume and
+**More tools → Sources → Chats in scope → Load full history** pulls the history of enabled sources, with pause/resume and
 a signed progress report. Attachments finish separately. See [history acquisition](../HISTORY.md).
 
 **Next:** [Investigations](Investigations.md) · [Exports](Exports-and-Verification.md) · [Collection reference](../COLLECTION.md)

@@ -22,7 +22,7 @@ maintained privately; these workflows do not run or attest that private suite.
 | [`pages.yml`](pages.yml) | Public website build and configured Pages deployment |
 | [`release.yml`](release.yml) | Release source/wheel/portable/container publication, immutable version guard and download checksums |
 | [`installer.yml`](installer.yml) | Signed installer artifacts and configured immutable-download publication |
-| [`installer-acceptance.yml`](installer-acceptance.yml) | Signed artifact authentication and installed-wheel smoke on Linux/Windows |
+| [`installer-acceptance.yml`](installer-acceptance.yml) | Signed artifact authentication and installed-wheel smoke on Linux/Windows; on installer pull requests, two runs of `install.sh` and `install.ps1` against a local test site |
 | [`sealed-checks.yml`](sealed-checks.yml) | Sealed image build, imports and release caller/collector pin guard |
 | [`optional-capture.yml`](optional-capture.yml) | Capture image builds, installed recorder smoke and image vulnerability audits |
 | [`provenance.yml`](provenance.yml) | Public source archive, dependency SBOM and hosted build attestations |

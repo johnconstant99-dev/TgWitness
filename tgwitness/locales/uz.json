@@ -809,7 +809,7 @@
   "Links and Mini Apps reveal your device": "Ulanishlar va Mini ilovalar sizning qurilmangizni oshkor qiladi",
   "Links and “Log in” buttons": "Havolalar va \"Kirish\" tugmalari",
   "Live messages + history snapshots": "Jonli xabarlar + tarix snopshotlari",
-  "Liveness record every": "Liveness har bir yozuvni qayd etadi",
+  "Liveness record every": "Faollik yozuvi har",
   "Load a closed, consistent schema 7/8 file directly. The optional Telethon-only CLI converter also accepts files up to 64 MiB.": "Yopiq, izchil schema 7/8 faylini to'g'ridan-to'g'ri yuklang. Ixtiyoriy, faqat Telethon uchun CLI konvertori shuningdek 64 MiB gacha bo'lgan fayllarni ham qabul qiladi.",
   "Load a schema 2/3 production user session. The panel detects its contents; renaming a file is not conversion.": "Schema 2/3 ishlab chiqarish foydalanuvchi sessiyasini yuklang. Panel uning mazmunini aniqlaydi; fayl nomini o'zgartirish konversiya hisoblanmaydi.",
   "Load chats": "Suhbatlarni yuklash",

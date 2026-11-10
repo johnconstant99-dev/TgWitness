@@ -157,11 +157,11 @@ Three different credentials are involved:
 | Account authorization | The Telegram account | Created by phone/QR login or brought in as a session |
 
 If Telegram must be reached through a proxy, set it first under
-**Account → Settings → Connection settings → Change connection route**.
+**More tools → Account → Settings → Connection settings → Change connection route**.
 
 ## Phone number
 
-1. Open **Account**, tab **Phone**, and enter the number in international format,
+1. Open **More tools → Account**, tab **Phone**, and enter the number in international format,
    for example `+44 7700 900123`. Spaces and dashes are removed automatically.
 2. Press **Continue**. API ID + Hash can stay empty.
 3. Enter the code Telegram sends, usually to the Telegram app; Telegram decides whether to send SMS.
@@ -211,6 +211,11 @@ the direct mode. Phone and interactive QR login create separate authorizations.
 The warning heading stays visible in the import form; its full explanation opens
 automatically when files or a key/session string are supplied. It can be collapsed
 after reading, so the file picker and connection controls remain usable on a phone.
+
+An [attested deployment](HIGH-ASSURANCE.md) (Phala Cloud, Intel TDX) does not collect on
+an imported key. There, **Files** connects only with **Create an independent
+authorization** selected; bulk import and the **Auth key** tab are refused. Phone and QR
+login work as usual.
 
 - Files are converted **in memory** on your TgWitness server. Uploads are not stored,
   ZIPs are not extracted to disk and no external service is contacted.
@@ -264,7 +269,7 @@ not imply a blanket 24-hour reading ban. Export can separately return
 `TAKEOUT_INIT_DELAY_*`. TgWitness retains server-requested pauses and does not retry
 token acceptance automatically or revoke sessions to work around restrictions.
 
-**Account security → Sessions of this account → End all other sessions** calls `auth.resetAuthorizations` on the
+**More tools → Account → Account security → Sessions of this account → End all other sessions** calls `auth.resetAuthorizations` on the
 operator's request and records `account.all_other_sessions_terminated` with the session
 counts before and after. Telegram accepts it from a session signed in for 24 hours.
 
@@ -297,7 +302,7 @@ device, application and country from that snapshot.
 
 ### Witness probe
 
-**Account security → Witness probe** checks whether another client receives this account's
+**More tools → Account → Account security → Witness probe** checks whether another client receives this account's
 updates. Add a second workspace signed in with a different Telegram account and its own
 session key, create a private group with both accounts, then choose that group as **Probe
 chat** and the second workspace as **Witness workspace** and turn the probe on. Both accounts
@@ -482,7 +487,7 @@ file. Bulk lists (a JSON array of accounts) are not accepted.
 ## Multiple accounts
 
 Press **+** beside the account selector, or open
-**Account → Settings → Connection settings → Workspaces**, enter a label and
+**More tools → Account → Settings → Connection settings → Workspaces**, enter a label and
 sign in.
 
 - Any number of workspaces, including the main one. Each has its own session, proxy
@@ -522,7 +527,7 @@ and [the MTProxy pool dashboard](wiki/Proxies.md#pool-dashboard-and-custom-sourc
 
 ## Sign out
 
-**Account → Sign out of Telegram** (with observation paused) asks Telegram to end the
+**More tools → Account → Sign out of Telegram** (with observation paused) asks Telegram to end the
 session, so it also disappears from the account's **Settings → Devices**, and removes the
 session from the workspace vault. The journal, sources, settings and signing key stay, and
 the journal records the sign-out. The workspace still belongs to its account: only that
@@ -554,7 +559,7 @@ here and the panel says so; end it in Telegram under **Settings → Devices**.
 | *Auth Key HEX must contain all 512 hexadecimal characters* | The key is truncated or contains `…`. |
 | Account ID does not match the imported account | The file's user ID differs from what Telegram reports; the file is for another account. |
 | Account already belongs to another workspace | Open that workspace instead of adding the account twice. |
-| Connected, but a private group is missing from the chat list in **Sources** | Check membership. The picker inspects the first 1,000 dialogs; raise the limit under **Parameters**. |
+| Connected, but a private group is missing from the chat list in **More tools → Sources** | Check membership. The picker inspects the first 1,000 dialogs; raise the limit under **More tools → Parameters**. |
 | Proxy connection fails | Check the route and IP mode. Automatic MTProxy tries another working entry. Hide the address waits; Direct as a last resort can connect directly after its configured delay. See [routing modes](CONNECTION-SECURITY.md#ip-modes). |
 
 See also: [connection and security](CONNECTION-SECURITY.md) for proxies and encryption,

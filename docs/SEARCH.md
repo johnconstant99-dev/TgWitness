@@ -122,7 +122,7 @@ the mode or rebuild the index.
 
 ## Ask the archive and MCP
 
-**Ask the archive** retrieves its sources from this index when it is complete: the
+**More tools → Ask the archive** retrieves its sources from this index when it is complete: the
 best matches across the selected chats, with a saved text counted once. Up to 24
 sources are sent; long texts are cut around their match and marked as truncated.
 Questions about recent changes, saved versions of one message, and searches while

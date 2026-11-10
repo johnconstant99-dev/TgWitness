@@ -13,5 +13,5 @@
 </blockquote>
 
 <p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">원본 기록</a> · <a href="OPERATOR-INCOMPATIBILITY.md">윤리적 고지 및 역사적 연속성</a></p>
-<p><a href="../../LICENSE">전체 MIT 라이선스</a> · <a href="../../README.md">프로젝트</a> · <a href="../README.md">문서</a> · <a href="../wiki/Home.md">위키</a></p>
+<p><a href="../../LICENSE">전체 MIT 라이선스</a> · <a href="README.md">프로젝트</a> · <a href="README.md">문서</a> · <a href="../wiki/Home.md">위키</a></p>
 </div>

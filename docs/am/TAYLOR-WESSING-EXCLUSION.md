@@ -13,5 +13,5 @@
 </blockquote>
 
 <p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">የመነሻ ማስረጃ</a> · <a href="OPERATOR-INCOMPATIBILITY.md">የሥነ ምግባር ማስታወቂያ እና ታሪካዊ ቀጣይነት</a></p>
-<p><a href="../../LICENSE">ሙሉው የMIT ፈቃድ</a> · <a href="../../README.md">ፕሮጀክት</a> · <a href="../README.md">ሰነዶች</a> · <a href="../wiki/Home.md">ዊኪ</a></p>
+<p><a href="../../LICENSE">ሙሉው የMIT ፈቃድ</a> · <a href="README.md">ፕሮጀክት</a> · <a href="README.md">ሰነዶች</a> · <a href="../wiki/Home.md">ዊኪ</a></p>
 </div>

@@ -1,360 +1,406 @@
-[English](../../README.md) · [Русский](../ru/README.md) · [Українська](../uk/README.md) · [Español](../es/README.md) · [Português (Brasil)](../pt/README.md) · [Türkçe](../tr/README.md) · [العربية](../ar/README.md) · [فارسی](../fa/README.md) · [اردو](../ur/README.md) · [हिन्दी](../hi/README.md) · [Bahasa Indonesia](../id/README.md) · [Tiếng Việt](../vi/README.md) · **简体中文**
-
-![TgWitness — preserve the record, verify the evidence](../assets/presentation/casework-hero-static.svg)
-
-<p align="center">
-  <strong>您的 Telegram 观察工作区。</strong><br>
-  保存捕获的对话记录，了解变化情况，并分享经过数字签名的历史记录。<br>
-  在您自己的计算机或服务器上运行，使用您自己的账户。
-</p>
-
-<p align="center">
-  <img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-243a52?logo=python&amp;logoColor=white">
-  <img alt="FastAPI + Telethon" src="https://img.shields.io/badge/FastAPI-Telethon-243a52?logo=fastapi&amp;logoColor=white">
-  <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-243a52?logo=docker&amp;logoColor=white">
-  <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-243a52">
-  <img alt="Version: 0.9.1" src="https://img.shields.io/badge/version-0.9.1-243a52">
-</p>
-
-<p align="center">
-  <a href="#快速入门">快速入门</a> ·
-  <a href="#功能">功能</a> ·
-  <a href="#连接-telegram-账户">账户</a> ·
-  <a href="#证据与验证">证据</a> ·
-  <a href="#部署">部署</a> ·
-  <a href="../README.md">文档</a>
-</p>
-
-> [!TIP]
-> **连接前请先探索。**运行 `scripts\Demo.cmd` 或 `sh start.sh --demo` 以打开包含虚构对话的工作区。无需 Telegram 账号。
-
-**初次访问？**[开始 →](QUICKSTART.md) · [维基 →](../wiki/Home.md) · [选择指南 →](../README.md) · [获取帮助 →](../../.github/SUPPORT.md) · [查看已测试内容 →](../VERIFICATION.md)
-
-> [!WARNING]
-> **请使用一个可以承受丢失风险的专用 Telegram 账号。**我们强烈建议不要关联个人或重要账号，也不要在这些账号上生成 API ID / API 哈希凭证。Telegram 可能会限制或永久封禁账号。[请阅读账号指南](../ACCOUNTS.md)。
-
-## 功能
-
-- **带有历史记录的对话。**在对话上下文中阅读已保存的消息、比较已捕获的编辑内容，并查看删除通知。
-- **按您的方式进行监控。**您可以选择单个聊天、Telegram 文件夹或整个账号。每个账号都有独立的工作区和设置。
-- **可供验证的导出文件。**包括经过签名的 ZIP 文件、原始记录、完整保留的附件以及离线 HTML 报告。可选密码保护功能，便于交接。
-- **专为日常使用而设计。**支持浅色和深色主题、25种语言、搜索功能、Ctrl/Cmd+K导航，以及直接在聊天界面执行操作。
-
-<details>
-<summary>所有功能与技术细节</summary>
-
-- **您的连接路径。****在“账户”→“代理设置**”中，可从内置的公共 MTProxy 列表中选择，从源头刷新列表，或粘贴您自己的 Telegram 代理链接。手动配置 SOCKS5/HTTP/MTProxy 以及运营商目录功能依然可用。公共列表已下载并经过筛选，但目前尚无账户通过列表中的服务器建立连接。 [公共列表的工作原理](../CONNECTION-SECURITY.md#public-proxies-supplied-by-your-installation)。
-
-- **记录您的账户实际所见内容。涵盖**您所选群组和频道中的新消息、编辑、删除通知、点赞、成员动态以及覆盖缺口。
-- **可选择特定聊天、Telegram 文件夹或整个账户。** 选择要记录的类型——频道、群组、私聊、机器人——新聊天一出现即被添加。排除项、自己的发送消息和编辑操作、与对应聊天匹配的私聊中被删除的内容、优先级重新检查以及按类型（[集合](../COLLECTION.md#observation-scope-chosen-chats-a-folder-or-the-whole-account)）设置的附件限制。
-- **调查模式。**一键即可创建专用账户，该账户将加入团队并与机器人进行交互： 该账户所见所发的一切均被记录，机器人消息下的按钮（链接、网页应用、可复制文本）会被保留，仅通过按钮进行的编辑将生成新版本，且每个新聊天或机器人都会立即保存其个人资料（描述、命令、成员）以及此前可见的消息（[调查模式](../COLLECTION.md#investigation-mode-joining-teams-and-talking-to-bots)）。 控制面板中的**《专用账户指南**》（`/dedicated-account.html`）解释了为何不得使用主账户、TgWitness为何通过公共应用哈希/应用 ID 对运行，以及为何 API 对本身并不能授予对您账户的访问权限（附有 Telegram 文档链接），并列出了创建额外账户的方法。
-- **可直接在聊天界面中操作。**发送消息和回复、点击机器人回调/文本按钮，或预览 Telegram 邀请并加入。所选账户将执行相应操作；请求、邀请预览以及机器人弹窗/URL 响应将记录在其签名日志中（[面板迷你客户端](../COLLECTION.md#act-from-the-panel)）。
-- **可明确说明的覆盖范围。**报告和验证工具应注明“从 X 到 Y 期间持续监测”，并列出监测缺口及其原因，以及从未被监测到的消息 ID——切勿将其表述为已被删除。
-- **用户档案，按聊天室选择是否加入。** 姓名和用户名历史记录、Telegram标记、头像的SHA-256和pHash值、活动记录、谁回复了谁以及被提及的钱包、手机号、用户名和链接——仅基于保存的记录构建，每个事实均指向其日志记录，并导出为单独的签名文件（[证据模型](../EVIDENCE.md#people-profiles)）。
-- **独立见证机制。**一个拥有独立密钥和机器人的独立进程会获取已签名的日志头，将其发布到 Telegram 频道，并在收集器未响应时发出报告；验证者会根据该日志头核对导出数据。间隔时间、超时设置、发布哪些检查结果以及帖子内容均可通过选项或 JSON 配置文件（[witness](../WITNESS.md)）进行配置。 已针对本地 Bot API 服务器进行测试，尚未在真实机器人和频道上测试。
-- **控制面板中的采集设置。**采集限制与频率、复核、下载、用户资料、通知及导出等功能均位于**“参数**”页面，其中包含各设置的范围及默认值；每次更改都会记录在经过数字签名的日志中（[设置与参数](#设置与参数)）。
-- **编辑和删除操作均保留上下文记录。**每次编辑都会生成一个独立版本，并与前一个版本并列显示；删除通知绝不会抹去已记录的内容。
-- **经过签名且可验证的导出文件。**每个事件均采用哈希链（SHA-256）并经过签名（Ed25519）。签名的 ZIP 包包含 JSONL、CSV、离线 HTML 报告、原始媒体文件以及一个独立验证程序。
-- **受密码保护的导出文件。** 可选地将任何导出内容打包为 WinZip AES-256 ZIP 格式，该格式可被 7-Zip 和 WinRAR 读取；其中的签名内容保持不变。在 libarchive（Windows `tar`）中逐字节打开了一个测试压缩包，输入错误密码时会被拒绝（[证据模型](../EVIDENCE.md#investigation-handoff)）。
-- **通知。** 问题（磁盘空间不足、账户已注销、收集器、复制或时间戳错误）、被监视聊天群组中的变化以及每日摘要，将通过 [Apprise](https://github.com/caronc/apprise) 发送至 Matrix、Telegram、Discord、Slack、ntfy、电子邮件及许多其他服务——除非您开启摘要功能，否则不包含消息正文——并在面板中列出。 已针对本地端点测试过消息发送功能；各服务本身尚未经过测试。
-- **支持 25 种界面语言。**控制面板和完整文档使用相同的语言，包括德语、法语、日语和希伯来语。Telegram 内容和日志记录始终按保存时的原样显示。
-- **浅色和深色主题。**默认遵循系统设置；每个浏览器的选择都会被记住。
-- **支持键盘导航。**按 **Ctrl+K**（Mac：**⌘K**）或选择**“转到…”**以查找章节。使用方向键和 Enter 键打开该章节；按 Escape 键关闭菜单。
-- **多账户支持。**可创建任意数量的隔离工作区，每个工作区均拥有独立的 Telegram 会话、日志、签名密钥、代理路由及数据捕获策略。
-- **灵活的登录方式。**手机号码 + 验证码 + 双因素认证（2FA）、二维码、Telethon/Pyrogram `.session`、Telegram Desktop TData ZIP、Telethon StringSession，或包含其 DC ID 的完整认证密钥。
-- **按账户设置代理。**支持 SOCKS5 和 HTTP CONNECT，已通过本地测试代理验证，并支持实验性的 MTProxy，但尚未在真实服务器上进行测试。代理连接失败时，系统绝不会默认回退到直接连接。
-- **设计上即为私有。**在您的计算机或服务器上运行。内置 Web 界面，无需 Node.js，无需托管服务，不进行遥测数据收集。会话、API 凭据和代理密钥均存储在加密保险库中。
-- **运行简便。**Windows 系统双击即可运行，Linux/macOS 系统运行一个脚本，或使用 Docker Compose（可选自动 HTTPS）。测试结果及其范围见[验证记录](../VERIFICATION.md)。
-
-</details>
-
-## 快速入门
-
-| 平台 | 如何开始 | 需求 |
-| --- | --- | --- |
-| **Windows，无需安装任何软件** | 从[“发布](../../../../releases)”页面下载`TgWitness-<version>-windows-amd64-portable.zip`，解压后双击**`TgWitness.cmd`** | 无；Python 已捆绑其中 |
-| Windows 版，源代码编译 | 双击**`Start.cmd`** | Python 3.11 及以上版本；若未安装，系统将自动为您提供并安装 |
-| Linux / macOS | `sh start.sh` | 需 Python 3.11 及以上版本，并支持 `venv`；若缺少相关组件，脚本会打印适用于您系统的安装命令 |
-| Docker，任意操作系统 | 双击**`scripts\Docker.cmd`**或运行`sh scripts/docker-start.sh` | 配备 Compose 2.20+ 的 Docker Engine/Desktop |
-
-1. 打开 **http://127.0.0.1:8787**。
-2. 粘贴控制面板访问令牌：
-   - 便携版或源代码安装：`data/live/panel-token.txt` 中的内容
-   - Docker：由 `scripts\Docker.cmd`/`scripts/docker-start.sh` 或 `docker compose exec tgwitness cat /data/panel-token.txt` 生成
-3. 添加您的 Telegram 账号，选择要监控的聊天群组，然后点击**“开始监控**”。
-
-首次源代码启动会创建一个私有 `.venv`，并安装固定依赖项（需要互联网连接）。Docker 辅助程序会构建镜像，等待控制面板运行正常后，输出其地址和令牌。`python start.py --check`（或便携包中的 `TgWitness-Check.cmd`）可在不触及 Telegram 的情况下提供就绪报告。
-
-> **只是想看看？**请运行 **`scripts\Demo.cmd`** 或 `sh start.sh --demo`。一个虚构的日志将直接在浏览器中打开；未关联任何 Telegram 账号，数据独立存储在 `data/demo` 中。
-
-<details>
-<summary><strong>工作区内部：聊天、历史记录和导出功能</strong></summary>
+<p align="right"><sub><a href="../../README.md">English</a> · <a href="#languages">其他语言</a></sub></p>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="../assets/chats-dark.png">
-  <img src="../assets/chats.png" alt="TgWitness chats view with synthetic demo data: deleted and edited messages highlighted">
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-hero-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-hero-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/casework-hero-mobile.svg">
+  <img src="../assets/presentation/casework-hero.svg" width="1440" alt="TgWitness — 追踪线索，保全证据。哈希链接的签名日志、单独保存的检查点，以及可验证的证据存档。">
 </picture>
 
-### 观察记录
+<table>
+<tr>
+<td width="33%" align="center"><a href="https://phishdestroy.github.io/TgWitness/demo/?lang=zh"><b>浏览演示&nbsp;↗</b></a><br><sub>真实界面，虚构记录</sub></td>
+<td width="33%" align="center"><a href="#quick-start"><b>下载并启动&nbsp;↓</b></a><br><sub>一条命令，适用于 Linux、macOS 和 Windows</sub></td>
+<td width="33%" align="center"><a href="https://github.com/phishdestroy/TgWitness/wiki"><b>阅读手册&nbsp;↗</b></a><br><sub>分步讲解的调查指南</sub></td>
+</tr>
+</table>
 
-![Journal with fictional demo data](../assets/workspace.png)
+<p align="center"><strong>自托管的 Telegram 调查工作区。</strong><br>保存聊天，留存编辑和删除，查看谁与谁有关联，<br>并交付任何人都能核验的签名导出文件。</p>
 
-### 签名导出文件
+<p align="center"><strong>零信任。</strong>TgWitness 不偏袒任何一方：同样的检查适用于操作员、PhishDestroy 以及其他任何人。<br>只有第三方或数学能够证实的内容才算数。<a href="../LIMITS-AND-OBJECTIONS.md">局限与异议</a></p>
 
-![Export records and verify signatures](../assets/exports.png)
+<p align="center">
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · 预发布版"></a>
+  <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
+  <sub><a href="../VERIFICATION.md">已测试的环境</a> · 25 种界面语言 · 26 种指南语言</sub>
+</p>
+
+<a name="screenshots"></a>
+
+<a href="https://phishdestroy.github.io/TgWitness/demo/?lang=zh">
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-workspace-mobile-dark-still.webp">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-workspace-dark-still.webp">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-workspace-mobile-dark.webp">
+  <img src="../assets/presentation/readme-workspace-dark.webp" width="1440" alt="TgWitness 演示动画：已捕获的消息、保存的版本，以及删除后仍保留的内容。虚构的演示记录。">
+</picture>
+</a>
+
+<p align="center"><sub>用虚构记录体验真实界面。点击工作区即可试用。</sub></p>
+
+## TgWitness 能做什么
+
+<table>
+<tr>
+<td width="33%" valign="top"><b><a href="../COLLECTION.md">每次编辑和删除都有留存</a></b><br><sub>消息的每个版本都会保存，收到删除通知后其文本依然保留。</sub></td>
+<td width="33%" valign="top"><b><a href="../wiki/Exports-and-Verification.md">人人可核验的证明</a></b><br><sub>签名的哈希链式记录。接收方只需一条命令即可离线验证存档。</sub></td>
+<td width="33%" valign="top"><b><a href="../EVIDENCE.md#where-the-messages-come-from">可以证明的来源</a></b><br><sub>通过账户经过认证的 MTProto 会话接收，到达时即签名；GitHub Actions 和 Intel TDX 还会附加证明。</sub></td>
+</tr>
+<tr>
+<td width="33%" valign="top"><b><a href="../EXPORT-BENCHMARK-2026-11-06.md">大规模实测</a></b><br><sub>48 个已验证存档，共 3,598,381 条记录；八个账户以 687.5 条记录/秒的速度获取了 768,007 条历史记录。</sub></td>
+<td width="33%" valign="top"><b><a href="../INVESTIGATION-MODE.md">专为调查打造</a></b><br><sub>覆盖文本、二维码和 OCR 的监控列表，钱包检查，对象卡片，案件看板和法庭材料包。</sub></td>
+<td width="33%" valign="top"><b><a href="../SECURITY-MODEL.md">由您自己运行</a></b><br><sub>自托管，无遥测。会话保存在加密保险库中；面板监听 localhost。</sub></td>
+</tr>
+</table>
+
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
+
+<a name="quick-start"></a>
+<a name="run-it-on-your-machine"></a>
+
+## 安装
+
+自带 Python。更新时运行相同的命令即可。
+
+**Linux / macOS**
+
+```sh
+curl -fsSL https://get.destroy.tools/install.sh | bash
+```
+
+**Windows · PowerShell 或 CMD**
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm https://get.destroy.tools/install.ps1 | iex"
+```
+
+<sub>Ubuntu 服务器：以 root 身份运行。桌面系统：以普通用户身份运行。`-ExecutionPolicy Bypass` 仅作用于这一个 PowerShell 进程。</sub>
+
+签名构建来自公开的 [Installer 工作流](../../.github/workflows/installer.yml)，安装程序会在安装前检查每个软件包的 SHA-256 和 RSA 签名。
+
+[先验证脚本](../INSTALLATION.md#verify-before-running) · [首次设置](../SETTINGS.md) · [发行版](https://github.com/phishdestroy/TgWitness/releases) · [Docker](DEPLOYMENT.md)
+
+<details>
+<summary><strong>安装程序与您的数据如何受到保护</strong></summary>
+
+`get.destroy.tools` 是本项目的下载站点。公开的 [Installer 工作流](../../.github/workflows/installer.yml)针对确切的 `main` 修订版本，从 [`deploy/installer/`](../../deploy/installer/README.md) 构建该站点，在 Linux 和 Windows 安装测试通过后发布，并使用 [`release-signing.pub`](../../deploy/installer/release-signing.pub) 中的发布密钥为安装脚本和应用程序包签名。安装程序在安装前会检查软件包及依赖锁定文件的 SHA-256 和 RSA 签名。如需先检查脚本本身，请将脚本连同签名一起下载，然后运行[先验证命令](../INSTALLATION.md#verify-before-running)。构建失败时，原有下载内容保持不变；重新运行安装程序即可更新已安装的面板。GitHub [发行版](https://github.com/phishdestroy/TgWitness/releases)、源代码和 [Docker](DEPLOYMENT.md) 是另外几种安装方式。
+
+**您的会话与数据。** TgWitness 运行在您的计算机或服务器上，面板默认监听 localhost。Telegram 会话、代理凭据和访问令牌哈希存储在每个工作区的加密保险库中，还可选用[外部主密钥](../SECURITY-MODEL.md#external-master-key)。应用程序没有遥测功能。它会连接 Telegram 以及设置中所用的服务：公共 MTProxy 列表、您的代理、S3 存储、见证机器人、时间戳机构、AI 服务商和 webhook。[系统图](../SYSTEM-MAP.md)列出了应用程序进程建立的连接。请使用[专用 Telegram 账户](https://phishdestroy.github.io/TgWitness/zh/docs/dedicated-account/)进行观察。
+
+版本徽章描述的是此源代码树。可安装的构建列在[发行版](https://github.com/phishdestroy/TgWitness/releases)中；合并到 `main` 的功能会随下一个版本进入这些下载。
+
+[设置与面板访问](../INSTALLATION.md) ·
+[签名与 SHA-256](https://get.destroy.tools/#verification) ·
+[更新](../INSTALLATION.md#update-an-existing-installation) ·
+[当前功能与鉴定状态](../STATUS.md) ·
+[选择采集方法](../COLLECTION-MODES.md)
 
 </details>
 
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
-![Section divider](../assets/presentation/divider.svg)
+<a name="how-it-works"></a>
 
-## 连接 Telegram 账户
+## 他人可以核验的记录
 
-> [!CAUTION]
-> 仅连接那些即使丢失也无妨的专用账号。Telegram 可能会在无法预料的情况下永久封禁账号；请参阅本页顶部的警告。面板中的《**专用账号指南**》（侧边栏或 `/dedicated-account.html`）解释了原因以及如何获取专用账号。
-
-可通过手机、二维码或现有会话登录——无需 API ID 或哈希值。
-
-**为何要内置 API 池？**众所周知，在 [my.telegram.org](https://my.telegram.org) 上创建自己的 API ID 会导致账号受限，而 Telegram 并未公布明确的限制标准——许多研究人员因此失去了他们的主账号。 Telegram 官方的[“获取 API ID](https://core.telegram.org/api/obtaining_api_id)”页面指出，使用非官方 API 客户端的账户会被自动列入监控名单，并将被错误封禁的用户引导至 recover@telegram.org。因此，TgWitness 预置了其他开源客户端已使用的公共 API 对，您无需自行创建。 如果您已有自己的 API ID，请在**“API ID + Hash**”栏中输入，系统将自动使用该 ID。
-
-当未输入、导入或工作区中尚未保存任何密钥对时，TgWitness 会从密钥池中的 50 对密钥中随机选择一对；若 Telegram 拒绝其中一对，则继续尝试下一对。成功登录的密钥对将与该账户绑定。 密钥对用于标识应用程序；您仍需单独授权您的 Telegram 账户。控制面板访问令牌用于打开 TgWitness，与 Telegram 登录是分开的。
-
-| 您拥有什么 | 使用方法 |
-| --- | --- |
-| 可访问该账户的电话号码 | **“手机**”选项卡：输入来自 Telegram 的代码，如果启用了双因素认证，则需输入双因素认证密码 |
-| 已登录的 Telegram 应用 | **二维码**选项卡：设置 → 设备 → 链接桌面设备 |
-| Telethon（架构 7/8）或 Pyrogram（架构 2/3）`.session` | **“文件”**选项卡 |
-| `name.session` + `name.json` 配对 | **在“文件**”选项卡中，同时选中两项；JSON 文件中包含 API ID/哈希值 |
-| Telegram Desktop `tdata`文件夹 | 仅 ZIP 文件：`key_datas` 和 `D877F783D5D3EF8Cs`，然后**选择“文件”**；若已设置，请输入本地密码 |
-| Telethon StringSession，`.txt` 或 `.tgwitness-session` | **“文件**”选项卡、*通行码或会话文本* |
-| 包含会话或认证密钥的账户 JSON 文件 | **“文件”**选项卡 |
-| 完整授权密钥（512 个十六进制字符）+ DC ID | **“密钥”**选项卡；可选的“用户 ID”将与 Telegram 进行比对 |
-
-不支持：TDLib 存储、Pyrogram 会话字符串、机器人令牌、多账户 TData 以及批量账户列表。文件会在您的服务器内存中进行转换，并在保存前与 Telegram 进行验证。[账户指南](../ACCOUNTS.md)分步详细说明了所有格式要求：如何获取 API 凭据、如何识别文件、JSON 字段、限制条件及错误信息。
-
-登录后，打开**“来源”**（您的聊天记录会自动加载），添加所需的群组，选择要捕获的内容（例如*消息、编辑和删除操作*），然后开始监控。请保持该进程持续运行：**“暂停监控**”会停止数据收集，“**锁定**”仅关闭浏览器访问权限。
-
-## 屏幕截图
-
-| 编辑对比 | 来源与截图政策 |
-| --- | --- |
-| ![Detail drawer comparing a previous and a newly observed message version](../assets/detail.png) | ![Selected chats and per-account monitoring settings](../assets/sources.png) |
-| **签名导出文件** | **登录** |
-| ![Export page with the signed archive and other formats](../assets/exports.png) | ![Account page with phone sign-in](../assets/connection.png) |
-| **日志** | **深色主题** |
-| ![Journal with observed messages, edits, deletion notices and coverage events](../assets/workspace.png) | ![Journal in the dark theme](../assets/workspace-dark.png) |
-
-所有截图均使用合成演示数据。[qr-login.png](../assets/qr-login.png) 中的二维码编码的是测试传输中生成的虚构令牌。
-
-
-![Section divider](../assets/presentation/divider.svg)
-
-## 工作原理
-
-```mermaid
-flowchart LR
-    A[Authorize an account] --> B[Select sources and event types]
-    B --> C[Start observation]
-    C --> D[Append signed records]
-    D --> E[Review versions and gaps]
-    E --> F[Export and verify]
-```
-
-每个工作区都属于一个 Telegram 账号。收集器接收该账号客户端发来的更新，应用已保存的捕获策略，并将观察结果追加到一个仅追加的日志中。
-
-| 观察 | 保存的内容 | 边界 |
-| --- | --- | --- |
-| 新消息 | 文本、发送者 ID、回复引用、元数据、观察时间 | 仅针对选定来源推送更新 |
-| 编辑 | 独立内容版本 | 离线期间丢失的中间版本无法恢复 |
-| 删除 | 消息 ID 以及此前捕获的所有内容 | Telegram 通常不会显示删除者及删除时间 |
-| 评论 | 若提供相关数据，将显示统计数据及近期身份信息 | 这是一份快照，并非完整的变更日志 |
-| 会员 | 服务公告和参与者更新 | 并非每次加入/退出操作都能保证成功送达 |
-| 附件 | 可选的基于内容的文件，附带 SHA-256 校验值 | 文件可能在下载前消失；结果会被记录下来 |
-| 覆盖范围 | 启动、停止、断开连接、心跳检测、策略变更 | 在线状态并不等同于完全捕获的证明 |
-| 历史快照 | 最新可见消息，除非在**参数中**提高上限，否则最多 500 条，并明确标注 | 无法还原遗漏的编辑或删除操作 |
-
-了解策略、附件队列和重启的[收集机制](../COLLECTION.md)。
-
-## 设置与参数
-
-所有操作均通过控制面板按工作区进行，无需编辑代码或配置文件。每次范围、策略或参数的变更都会连同变更前后的数值一起记录在已签名的日志中，且每次观察开始时都会注明当时生效的数值。
-
-| 位置 | 您的设置 |
-| --- | --- |
-| **来源** | 监控范围（指定聊天群、Telegram文件夹、整个账号）、数据源类型、排除项、自定义操作、需保留的变更类型、附件类型及各类型大小限制（1–2,000 MiB）、优先级聊天群及其他聊天群的重新检查间隔 （任意分钟数，0 表示关闭）、历史记录快照、通知 |
-| **导出** | 受密码保护的下载、证据模式（间隔、时间戳权威机构和日历）、异地 S3 副本（间隔、Object Lock 保留策略和模式） |
-| **Witness** | 只读见证令牌；见证人自身的选项通过现成的命令显示 |
-| **参数** | 聊天列表大小与刷新、心跳和检查点间隔、启动缓冲区、重新检查如何分发请求（首次延迟、每轮处理的聊天数量、暂停时间、已恢复和重新请求的消息）、磁盘预留空间、下载超时、速度与重试、用户个人资料的搜索条件（包括自定义正则表达式）、通知大小与频率、快照、 ZIP 及浏览器下载限制、面板操作超时、Telegram 客户端超时与重试 |
-
-参数值显示其取值范围和默认值；已修改的参数会标注出来，可逐个或一次性恢复。这些设置将在下次使用时生效；Telegram 客户端的超时和重试设置将在下次连接时生效。当压缩包大小超过 4 GiB 且需要验证时（[操作](../OPERATIONS.md#panel-layout)），需添加 `verify.py --max-gib N`。
-
-
-![Section divider](../assets/presentation/divider.svg)
-
-## 证据与验证
-
-| 导出 | 目录 | 完整性 |
-| --- | --- | --- |
-| **签名 ZIP 文件** | JSONL、CSV、HTML 报告、覆盖范围、媒体、清单、验证器 | 签名事件以及每个文件的签名清单，其中注明了生成者。请将此用于交接。 |
-| JSONL | 包含哈希值和签名的原始记录 | 按事件生成的 Ed25519 签名和哈希链 |
-| CSV / HTML | 适用于电子表格的表格 / 可离线阅读的报告 | 仅包含在已签名的 ZIP 文件中 |
-| 检查点 JSON | 日志长度与头部哈希值 | 单独签名；请将其保存在收集器之外 |
-| 运行收据 JSON | 代码哈希值、依赖项版本、适用范围、配置 | 单独签署的流程声明 |
-| 人物资料 JSON | 一个聊天群的成员资料及记录引用 | 签名声明；已核对记录哈希值与 ZIP 文件是否一致 |
-| Witness 日志 ZIP 文件 | 已获取的证人信息、未回复的答复、频道帖子 | 由见证人本人密钥签名 |
-
-过滤器仅影响浏览；导出文件始终包含截至固定序列号的完整日志。请使用可信的验证器副本，以及独立保存的密钥指纹和检查点来验证存档：
+无需账户，也无需安装即可核验。公开的示例自带验证器：
 
 ```sh
-python -m pip install cryptography
-python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 --checkpoint tgwitness-checkpoint.json
-# with an independent witness and its channel (Telegram Desktop export)
-python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 \
-    --witness witness.zip --witness-fingerprint WITNESS_SHA256 --channel result.json
+curl -LO https://phishdestroy.github.io/TgWitness/demo/downloads/tgwitness-demo.zip
+unzip -o tgwitness-demo.zip verify.py        # 验证器就包含在存档中
+python verify.py tgwitness-demo.zip          # Python 3.11+，只需要 `cryptography`
 ```
 
-验证器会输出已签名的生成者、连续观察时段、观察间隙以及从未被观察到的消息 ID；如果日志与见证者所见到的任何主节点存在差异，则验证失败。
+它会输出签名记录、最新记录的哈希值和签名者指纹，并以 `0` 退出。示例为虚构内容；同一个验证器适用于任何真实导出。
 
-使用可信密钥验证日志签名、哈希链和附件，并独立保存检查点。结合所选模式的采集范围、采集时间段、外部时间凭证及采集环境验证结果进行审查。
-
-[时间戳流程](../TIMESTAMP.md) · [证据模型](../EVIDENCE.md) · [调查移交](../EVIDENCE.md#investigation-handoff)
-
-## 部署
-
-> [!NOTE]
-> 测试结果及其范围见[验证记录](../VERIFICATION.md)。
-
-**使用 Docker 的本地或单服务器部署：**
+导出包含消息、文件和验证器。通过另一个渠道把您的密钥指纹发给接收方，对方即可自行核验：
 
 ```sh
-docker compose up -d --build --wait
-docker compose exec tgwitness cat /data/panel-token.txt
+python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --tsa-ca TSA-ROOT.pem --require evidence
 ```
 
-该容器以非 root 用户身份运行，采用只读文件系统，仅发布至 `127.0.0.1:8787`，并将所有数据存储在命名卷中。
+验证器会检查签名、日志链、文件清单和附件。若要达到证据级别，它还需要您的密钥指纹，以及覆盖最后一条记录的第三方时间戳，例如对照时间戳机构根证书校验的 RFC 3161 时间戳。
 
-**支持自动 HTTPS（Caddy）的公共服务器：**将 `deploy/env.example` 复制到 `.env`，配置 `TGWITNESS_DOMAIN`，将 DNS 指向该服务器，开放 TCP 80/443 端口并运行
+**消息从何而来。** TgWitness 像官方应用一样，通过账户的加密 MTProto 会话从 Telegram 接收消息，并在每条消息到达时将其签名写入日志。[GitHub Actions 捕获](../SEALED-ACTIONS.md)和 [Phala Intel TDX](../HIGH-ASSURANCE.md) 还会为接收这些消息的收集器提供证明。
 
-```sh
-docker compose -f compose.yaml -f deploy/compose/compose.https.yaml up -d --build --wait
-```
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-chain-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-chain-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/casework-chain-mobile.svg">
+  <img src="../assets/presentation/casework-chain.svg" width="1200" alt="新消息、保存的编辑和删除观察记录构成一条相互链接的签名日志。用经独立渠道确认可信的密钥对其进行验证。">
+</picture>
 
-**Windows 系统无需安装任何软件：**每个版本附带的便携式 ZIP 文件中已包含官方嵌入式 Python 运行时及所有依赖项。数据保存在其 `data` 文件夹中；如需更新，请解压新版本并将该文件夹复制过去。
+[存档验证](../wiki/Exports-and-Verification.md) · [证据格式](../EVIDENCE.md) · [独立见证人](../WITNESS.md) · [外部时间戳](../TIMESTAMP.md) · [检查项与测试规模](../VERIFICATION.md)
 
-**不使用 Docker 时：**[deploy/](../../deploy/README.md) 目录下包含 systemd、Windows 登录任务和 launchd 模板。更新、备份、备用端口以及 GHCR 镜像（待发布工作流发布后）的相关内容详见[部署](DEPLOYMENT.md)部分。
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
-### 命令行
+## 从一段对话到一个案件
 
-```text
-python start.py [--demo] [--setup-only] [--check [--json]] [--host HOST] [--port PORT] [--data-dir DIR]
-```
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-features-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-features-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-features-mobile.svg">
+  <img src="../assets/presentation/readme-features.svg" width="1200" alt="三个动画工作流程：将聊天导出为 HTML 和 JSON，在已记录的聊天中查找共享链接，以及在收到删除通知后保留已捕获的版本。">
+</picture>
 
-| 任务 | 命令（在项目环境中执行） |
+<table>
+<tr>
+<td width="33%" align="center"><a href="../wiki/Chat-Export.md"><b>聊天导出&nbsp;↗</b></a><br><sub>把一个聊天导出为签名的 HTML 和 JSON</sub></td>
+<td width="33%" align="center"><a href="../INVESTIGATION.md"><b>调查&nbsp;↗</b></a><br><sub>在已记录的聊天中追踪线索</sub></td>
+<td width="33%" align="center"><a href="../COLLECTION.md"><b>保存的版本&nbsp;↗</b></a><br><sub>编辑和删除通知都会保留</sub></td>
+</tr>
+</table>
+
+两种用法：一次性[导出您的账户](../ACCOUNT-EXPORT.md)，或者[跟进一项调查](../INVESTIGATION.md)并持续保存变化。可以选择几个聊天、一个 Telegram 文件夹或整个账户。每个账户都有自己的工作区、会话和签名密钥。
+
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
+
+## 了解更多
+
+<details>
+<summary><strong>导出实测 · 2026 年 11 月 6 日</strong> · 56,329 条消息，两个存档均已通过验证</summary>
+
+**两次全新运行共导出 56,329 条消息。** 两个签名存档均已使用固定的收集器密钥通过验证。
+
+[![实测采集速度与完整导出速度](../../website/validation/performance.svg)](https://phishdestroy.github.io/TgWitness/zh/docs/validation/)
+
+| 运行 | 消息数 | 采集时间 | 采集速度 | 完整导出 | 端到端速度 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 服务器 A | 27,030 | 189.043 秒 | **142.983 条消息/秒** | 211.647 秒 | 127.713 条消息/秒 |
+| 服务器 B | 29,299 | 182.513 秒 | **160.531 条消息/秒** | 206.650 秒 | 141.781 条消息/秒 |
+
+通过 WARP 传输文本和元数据，每台服务器两个账户，不含附件，也没有复用的记录。测量基于修订版本 [`92e539af`](https://github.com/phishdestroy/TgWitness/commit/92e539af40d8368d198ff5e040f1d876f2c1310e)。每次公布的运行都列出了源代码修订版本、工作负载、耗时和验证结果：[工作负载、耗时与验证](../EXPORT-BENCHMARK-2026-11-06.md)。对 `main` 的更改会运行公开的 [CI 工作流](../../.github/workflows/README.md)，其中包括 Linux 和 Windows 安装程序测试以及独立验证器的构建。
+
+[**浏览演示 →**](https://phishdestroy.github.io/TgWitness/demo/?lang=zh) ·
+[**测量数据、日期与方法 →**](https://phishdestroy.github.io/TgWitness/zh/docs/validation/) ·
+[下载虚构的示例导出](https://phishdestroy.github.io/TgWitness/demo/downloads/tgwitness-demo.zip) ·
+[签名的英文审计报告](../../website/validation/audit/REPORT.md)
+
+</details>
+
+<a name="start-simple"></a>
+
+<details>
+<summary><strong>从简单开始，看清每条路径。</strong> · 首次启动与系统图</summary>
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-start-map-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-start-map-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-start-map-mobile.svg">
+  <img src="../assets/presentation/readme-start-map.svg" width="1200" alt="首次启动提供“仅下载”“关注聊天”和“案件的证据”三个选项，并只显示相应的部分。系统图把面板、收集器、Telegram、日志、见证人和外部服务连接起来，并附有网络观测记录。数值均为虚构。">
+</picture>
+
+首次启动只问一个问题：**仅下载**、**关注聊天**还是**案件的证据**。答案决定目标和界面级别，面板只显示该任务所需的部分。随后分五个阶段完成连接、Telegram 登录和聊天选择。连接检查会自动运行，只有检查失败时才会出现路由选项。专家工具只需拨动一个开关即可打开。
+
+**系统图**展示安装如何连接 Telegram 和外部服务：面板访问、每个账户的路由和 Telegram 目标、日志与见证人路径，以及最新的网络观测记录。缺失的观测记录会标注为缺失。
+
+[首次设置](../SETTINGS.md) · [系统图](../SYSTEM-MAP.md)
+
+</details>
+
+<details>
+<summary><strong>覆盖调查的其余环节</strong> · 对象卡片、监控列表、钱包、在线状态监测、法庭文件</summary>
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-capabilities-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-capabilities-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-capabilities-mobile.svg">
+  <img src="../assets/presentation/readme-capabilities.svg" width="1200" alt="按 Telegram ID 追踪名称和用户名。用签名回执记录受支持的机器人交互。搜索已存档的消息并连接只读 MCP 客户端。部署收集器：屏蔽 SSH，保留服务商记录以供审查。借助日志引用逐步记录一段对话。交付带有法庭模板的 BagIt 案件包。示意性工作流程。">
+</picture>
+
+<table>
+<tr>
+<td width="50%" align="center"><a href="../INVESTIGATION.md#4-connect-observations-across-chats"><b>人物与档案&nbsp;↗</b></a><br><sub>按 Telegram ID 追踪名称和用户名</sub></td>
+<td width="50%" align="center"><a href="../COLLECTION.md#act-from-the-panel"><b>机器人调查&nbsp;↗</b></a><br><sub>带签名回执的机器人交互</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><a href="https://phishdestroy.github.io/TgWitness/zh/docs/archive/"><b>存档搜索、AI 与 MCP&nbsp;↗</b></a><br><sub>搜索存档，连接只读客户端</sub></td>
+<td width="50%" align="center"><a href="../HIGH-ASSURANCE.md"><b>密封云部署&nbsp;↗</b></a><br><sub>运行在 Intel TDX 中的收集器</sub></td>
+</tr>
+</table>
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-documentation-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-documentation-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-documentation-mobile.svg">
+  <img src="../assets/presentation/readme-documentation.svg" width="1200" alt="三个动画步骤：对象卡片的后续快照记录了一次改名；对话计划的目标随日志记录逐一完成；付款二维码被解码为校验和有效的钱包地址，并触发监控列表命中。数值均为虚构。">
+</picture>
+
+**记录对话。** 在**文档**抽屉中为某个聊天开始记录后，每一步都会自动写入：面板操作、回复及回复前的延迟、编辑、删除通知、备注和 AI 草稿。每一步都会引用对应的日志记录及其 SHA-256。定稿时，文档会被签名，声明哈希会写入日志。
+
+| | |
 | --- | --- |
-| 无需启动的就绪性检查 | `python start.py --check` |
-| 将 Telethon SQLite 会话转换为离线模式 | `python -m tgwitness.sessions account.session --out account.tgwitness-session` |
-| 将大型导出数据流式传输到磁盘 | `python -m tgwitness.download --token-file data/live/panel-token.txt --out evidence.zip` |
-| 验证导出的存档文件 | `python tgwitness/verify.py tgwitness-evidence.zip --fingerprint SHA256` |
-| 验证大于 4 GiB 的归档文件 | `python tgwitness/verify.py big-evidence.zip --fingerprint SHA256 --max-gib 16` |
-| 通过配置文件运行独立见证节点 | `python -m tgwitness.witness run --config witness.json` |
+| [对象卡片](../INVESTIGATION-MODE.md#subject-cards) | 机器人、个人、频道或群组的资料快照，带有 Telegram 的 BOT、VERIFIED、SCAM 和 FAKE 标签；后续快照会列出变化之处 |
+| [对话计划](../INVESTIGATION-MODE.md#conversation-plans) | 针对付款路径、基础设施或相关人员的目标，预先准备的消息，回复时间，按小时统计的活跃度，以及对方的写作风格 |
+| [翻译](../INVESTIGATION-MODE.md#machine-translation) | 显示在原文下方，并注明语言、模型和日志记录 |
+| [监控列表](../INVESTIGATION-MODE.md#watchlists) | 关键词、模式、钱包、@用户名、ID、域名、电话和链接，可在文本、编辑、隐藏的链接目标、机器人按钮、二维码和 OCR 中匹配 |
+| [在线状态监测](../INVESTIGATION-MODE.md#online-watch) | 每 1–60 分钟检查一次，每次请求最多 100 个账户，并按小时和星期几给出规律 |
+| [二维码与钱包](../INVESTIGATION-MODE.md#codes-in-images) | 付款二维码；按 EIP-55 校验的 EVM 地址、原始格式的 TON 地址、XRP Ledger 校验和，以及包含链、金额和代币的付款链接 |
+| [客户端痕迹](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-can-and-cannot-show) | 圆形视频和语音消息中的编码器痕迹；对比上传时间与发送时间，可以揭穿预先录制的“实时”证明 |
+| [掩护身份与授权](../INVESTIGATION-MODE.md#cover-and-authority) | 人设、授权，以及卧底活动记录，后者会标记授权聊天范围或授权期限之外的消息 |
+| [账户控制](../INVESTIGATION-MODE.md#account-control) | 编辑资料和隐私设置并留下修改前后的记录，进行暴露检查，每次操作后立即离线 |
+| [法庭文件](../INVESTIGATION-MODE.md#documents-for-court) | BagIt 案件包，附 Rule 902(13)/(14) 认证模板、证物索引、请求附件以及屏幕录像的 WebVTT/SRT 字幕 |
 
-辅助命令 `python -m tgwitness…` 必须在 `.venv` 内运行（Windows 系统中为 `.venv\Scripts\python.exe`，其他系统中为 `.venv/bin/python`）。
+标记为 18+、暴力或个人数据的内容保留在法庭副本中，以 AES-256-GCM 密封；密钥单独传递。
 
-| 变量 | 目的 |
+[导出设置](../EXPORT_HASHES.md)涵盖常规 API 与 Takeout 获取方式、先获取消息历史再获取附件、下载文件或使用服务器哈希，以及兼容 Telegram Desktop 的 JSON/HTML 视图。[分布式聊天导出](../DISTRIBUTED-EXPORT.md#history-acquisition)为公开历史提供需手动启用的 Takeout 路径、每 100 条消息一个签名检查点，以及使用同一账户在区间内恢复；其[性能设计](../FAST-ACQUISITION.md)列出了已测试的获取行为和计划中的实测。
+
+</details>
+
+<details>
+<summary><strong>其他功能</strong> · 历史记录、账户、代理、AI、集成</summary>
+
+| | |
 | --- | --- |
-| `TGWITNESS_HOST`, `TGWITNESS_PORT` | 监听地址和端口（默认 `127.0.0.1:8787`） |
-| `TGWITNESS_DATA` | 数据目录（默认 `data/live`） |
-| `TGWITNESS_TOKEN` | 使用固定的面板令牌代替生成的令牌（至少 24 个字符） |
-| `TGWITNESS_VAULT_KEY_FILE` | 新安装所需的外部保险库主密钥 |
-| `TGWITNESS_DOMAIN`, `TGWITNESS_IMAGE` | Docker HTTPS 主机名及已发布的镜像（参见 `deploy/env.example`） |
-| `TGWITNESS_WITNESS_*` | 独立见证人：收集器、令牌、频道、`_INTERVAL`、`_TIMEOUT`、`_POST`（全部、变更、问题）、`_TITLE`、`_CONFIG`（[见证人](../WITNESS.md#options)） |
+| [加载更早的消息](../HISTORY.md) | 拉取所选聊天的历史消息，可随时暂停和继续 |
+| [多个账户](../ACCOUNTS.md#multiple-accounts) | 相互独立的工作区，各有自己的 Telegram 会话、日志和签名密钥 |
+| [批量导入](../ACCOUNTS.md#bulk-import-and-account-groups) | 一次放入大量会话文件，把账户分组并共享设置 |
+| [MTProxy 池](../wiki/Proxies.md#pool-dashboard-and-custom-sources) | Ping 延迟、国家、筛选条件、自定义列表 |
+| [已有会话](../ACCOUNTS.md) | TData、Telethon、Pyrogram、StringSession、auth key 或 `key:DC` 行；可选通过导入的供体账户进行独立的二维码授权 |
+| [账户安全](../ACCOUNTS.md#create-an-independent-authorization) | 新会话提醒、终止其他会话、同时设置两步验证密码的唯一会话模式，以及[见证探针](../ACCOUNTS.md#witness-probe)：实时更新不再到达此会话时会被察觉 |
+| [可续传的聊天导出](../EXPORT_HASHES.md#restricted-github-capture-and-single-chat-export) | 中断的导出会保留一份签名的部分副本：可以继续、重新开始或下载已保存的内容 |
+| [代理](../CONNECTION-SECURITY.md#ip-modes) | 每个工作区可使用 SOCKS5、HTTP CONNECT 或 MTProxy。**隐藏 IP** 绝不会回退到直连 |
+| [搜索与 AI](../ANALYSIS.md) | 本地搜索，可选的 AI 并附可核查的来源 |
+| [全文搜索](../SEARCH.md) | 词形变化、精确短语、域名、@用户名以及无空格的中文，最佳匹配优先（**预览版**） |
+| [MCP](../MCP.md) | 为 MCP 客户端提供只读访问，仅限您选择的聊天 |
+| [命令行](../CLI.md) | `search`、`context`、`messages`、`stats` 以及 JSON Lines 格式的 `export`，配合 `--json` 供脚本和智能体使用，可在本地运行或使用限定范围的令牌（**预览版**） |
+| [OCR 与转录](../MEDIA-ANALYSIS.md) | 在本地运行，原始文件保持不变 |
+| [独立捕获](../OPTIONAL-CAPTURE.md) | 可选的浏览器/AyuGram 记录器，位于**更多工具 → 扩展功能**下（预览，默认关闭） |
+| [Trusted Live](../TRUSTED-LIVE.md) | 官方 Desktop/Web 会话、受保护的视频录制以及原生导出连续性分析（预览；实测鉴定待完成） |
+| [密封的官方 Web](../OFFICIAL-WITNESS.md) | 在 GitHub Actions 上运行全新的官方浏览器，控制受限，视频经过签名，来源和设置有独立给出的预期值 |
+| [Webhooks](../WEBHOOKS.md) | 带重试的签名外发事件，附 n8n 示例 |
+| [共享访问](../ACCESS.md) | 只向他人开放选定的聊天，并设置有效期和 IP 限制 |
+| [缺失的消息编号](../EVIDENCE.md#missing-message-numbers-gap_summary) | Telegram 已分配但从未观察到的编号，按频道和整个账户统计，体现在覆盖率、报告和 MCP 中（**预览版**） |
+| [聊天状态快照](../COLLECTION.md) | 定期对标题、简介、置顶消息、管理员和礼物进行签名快照，并列出变化（**预览版**） |
+| [系统图](../SYSTEM-MAP.md) | 实时展示面板访问、账户路由、Telegram 目标和外部服务，并显示最多 2,000 条网络观测记录中的最新 200 条 |
 
+</details>
 
-![Section divider](../assets/presentation/divider.svg)
+<details>
+<summary><strong>选择记录的信任基础</strong> · 本地、经审计的云、GitHub Actions 或 Intel TDX</summary>
 
-## 责任与数据保护（GDPR）
+可以在本地运行，加上经审计的云端部署，或者在**配备 Intel TDX 的 Phala Cloud 机密虚拟机**中采集。每种方式都会保留签名日志；额外的检查针对的是采集时所在的环境。
 
-TgWitness 是一款工具。无论由谁运行，该运行者均决定收集哪些信息、为何收集以及保存多长时间，并对此承担责任——根据欧盟/英国《通用数据保护条例》（GDPR），通常作为该个人数据的*控制者*。 Telegram 消息中包含从未同意被记录之人的个人数据：姓名、用户名、ID、照片、电话号码、观点。本节内容不构成法律建议；请查阅适用于您的法律法规以及 Telegram 的服务条款。
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-assurance-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-assurance-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/casework-assurance-mobile.svg">
+  <img src="../assets/presentation/casework-assurance.svg" width="1200" alt="三种部署选择：本地日志验证；带服务商和访问记录的经审计虚拟机；Phala Intel TDX，包括已验证的 quote、经度量的操作系统和应用程序，以及绑定的收集器密钥。">
+</picture>
 
-- **须具备合法依据和处理目的。**防范欺诈、网络与信息安全以及抗辩法律索赔通常被视为合法利益（《通用数据保护条例》（GDPR）第 6(1)(f) 条、第 47 和 49 条说明；关于法律索赔，参见第 9(2)(f) 条）。 请针对每个案例分别书面说明处理目的。公共机构应依据其自身的法律依据开展工作。
-- **仅收集达到目的所需的最小数据量。**从选定的聊天开始。文件夹模式和整个账户模式会记录私人聊天和第三方消息：请仅在专用账户上使用这些模式；控制面板会要求确认，而经过签名的日志会记录该操作。关闭不需要的事件类型、附件类型和自身操作，并排除特定聊天。
-- **用户画像功能**默认处于关闭状态，需针对每个聊天窗口单独开启。请仅将其用于特定调查，切勿据此对个人做出自动化决策（第 22 条），并在调查结束后将其关闭或删除该聊天窗口——此操作将删除相关数据。 对大量人员进行系统性监控通常需要进行数据保护影响评估（第 35 条）。
-- **确保安全。** 会话、凭据和密钥均存储在加密保险库中；请将数据目录放置在加密磁盘上，为导出文件设置密码（AES-256 ZIP），确保控制面板通过 HTTPS 访问，并仅向见证节点提供只读令牌。除非您启用摘要功能（该功能会将文本发送至通知服务），否则通知中不会包含任何消息正文。
-- **数据保留与删除。**该日志采用“仅追加”模式，以确保其完整性可被验证；若要删除单条记录，将导致签名链断裂。请按工作区规划数据保留期限，并在使用目的结束时删除整个工作区（账户 → 删除）或其数据目录。 处于 S3 Object Lock 状态的异地副本在保留期限届满前无法删除——请据此选择保留期限。删除权存在例外情况，例如为确立或抗辩法律主张（第 17 条第 3 款第 e 项）。
-- **记录了来自民众的请求。**通过聊天记录导出和个人资料文件，可以查明系统中存储了关于某人的哪些信息（第 15 条）。
-- **任何数据均不会发送给作者。**TgWitness 不包含遥测功能，也没有托管服务；数据仅通过您配置的路径（Telegram、时间戳服务、S3 复制、通知、见证）离开您的设备。
+TDX 验证器会对照固定的 Intel 根证书和吊销数据检查 quote，将其绑定到签名的收集器声明和新生成的挑战值，并把经度量的操作系统和应用程序与独立确定的预期输入进行比较。报告会分别列出每一项结果，因此可以把经度量的环境、收集器身份、捕获记录和覆盖范围放在一起审查。
 
-## 安全与项目状态
+**带 GitHub 来源证明的捕获**（预览）。在 GitHub 托管的运行器上，使用固定版本的 TgWitness 和全新的 Telegram 会话采集聊天，然后下载加密存档及其 GitHub 证明。验证器会检查获批的工作流和收集器版本、存档摘要、日志和附件。在面板的**导出**中同样可以使用。[打开捕获页面](https://phishdestroy.github.io/TgWitness/zh/docs/capture/) · [使用说明](../SEALED-ACTIONS.md)
 
+如需实时观察、获取历史或一次性导出，请选择合适的[采集方法](../COLLECTION-MODES.md)。所连接的账户能够访问的私有云聊天均可采集。发布的应用程序还包含 [Secret Chat 集成](../PSEUDO-SECRET.md)：安装可选的协议依赖并按账户启用后，即可记录在该账户中创建或接受的聊天。可用的获取途径见[采集范围](../COLLECTION.md)。
 
-- 该面板默认监听 localhost。如需远程访问，请使用 HTTPS Compose 配置文件或 SSH 隧道；切勿暴露明文 HTTP 连接。
-- Telegram 会话、API 凭据、代理凭据和签名密钥均存储在采用 Fernet 加密的保险库中。默认情况下，其密钥位于同一数据目录中；若要使用外部主密钥，请设置 `TGWITNESS_VAULT_KEY_FILE`。 本地消息内容和媒体文件不会由 TgWitness 进行加密；请将数据目录保存在加密磁盘或卷上。已签名的 ZIP 导出文件可选地进行密码加密。
-- 数据文件、会话、令牌、密钥和导出文件均未包含在 Git 和 Docker 构建中。
-- 请按照 [SECURITY.md](../../.github/SECURITY.md) 中的说明私下报告漏洞。
+[Phala / Intel TDX 与经审计的部署](../HIGH-ASSURANCE.md) ·
+[Phala 线上实测鉴定](../VERIFICATION.md#live-phala-cloud-deployment--4-november-2026) ·
+[信任边界](../SECURITY-MODEL.md)
 
-### 已测试内容
+</details>
 
-TgWitness **0.6.1** 可在搭载 Python 3.12 的 Windows 11 系统上运行。截至 2026 年 10 月 29 日的状态：
+<a name="manifesto"></a>
 
-| 区域 | 测试方法 |
+<details>
+<summary><strong>核验捕获过程与保存的记录</strong> · 接收方验证的内容与 Export Clinic</summary>
+
+<picture>
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-manifesto-mobile.svg">
+  <img src="../assets/presentation/readme-manifesto.svg" width="1200" alt="捕获对话，验证记录。保存消息、编辑和文件，检查签名和检查点，并审查捕获过程。">
+</picture>
+
+TgWitness 记录投递到所连接 Telegram 账户的内容，包括聊天、消息和发送者标识符、已捕获的版本以及采集元数据。存档把这些记录、保留的附件和验证数据集中在一起，供审查使用。
+
+| 检查项 | 接收方验证的内容 |
 | --- | --- |
-| 消息、编辑、删除、附件、重启后的重新检查、FloodWait 暂停 | 使用**真实 Telegram 账号于** 2026 年 10 月 27 日至 29 日完成：9,968 条签名记录，每条签名及哈希链均已验证（[实时测试](../VERIFICATION.md#live-telegram-test-whole-account--29-october-2026)） |
-| 监控整个账号及历史快照 | 于 2026 年 10 月 29 日使用**真实账号**完成：来自 2 个群组或频道、3 个私人聊天以及机器人的消息 |
-| 在**“聊天”**界面中点击消息按钮 | 已使用**真实账号**完成一次 |
-| 使用 Telethon/Pyrogram 会话文件和 Telegram Desktop TData 登录 | 已使用**一个真实账号**完成 |
-| 手机、二维码和认证密钥登录，新聊天室及其历史消息将纳入监控范围，发送消息，通过邀请加入，点赞，成员资格，用户个人资料，同时管理多个账户，数据导出以及验证器 | 使用合成 Telegram 客户端进行自动化测试 |
-| SOCKS5/HTTP 代理、witness 机器人、Proof 监控器、通知、S3 备份、RFC 3161 及 OpenTimestamps | 针对本地测试服务器的自动化测试 |
-| 公开的 MTProxy 列表 | 已下载并筛选（10月29日共118台服务器）；目前尚未通过这些服务器建立连接 |
-| 当前测试及其范围 | [尚待验证的事项](../VERIFICATION.md#remaining-qualification) |
+| 签名日志与清单 | 对照预期的签名密钥，验证记录签名、哈希链和交付的文件。 |
+| 单独保存的检查点 | 对照先前记录的长度和最新记录的哈希值验证日志。 |
+| 独立见证人 | 对照另一方见证人保存的检查点验证日志。 |
+| GitHub Actions 捕获 | 对照存档的证明、获批的托管工作流和收集器版本验证存档。 |
 
-详情：[验证记录](../VERIFICATION.md)、[发布状态](../internal/RELEASE.md)及[就绪情况](../internal/READINESS.md)。
+[Export Clinic](https://phishdestroy.github.io/TgWitness/docs/export-clinic/) 将一段 Telegram 对话与经过刻意篡改的 Desktop 导出文件并排展示。您可以对比各个版本、查看改动之处，并按步骤了解签名 TgWitness 存档的采集与验证过程。
 
+[验证步骤](../wiki/Exports-and-Verification.md) ·
+[GitHub 捕获](../SEALED-ACTIONS.md) ·
+[技术信任模型](../SECURITY-MODEL.md)
 
-![Section divider](../assets/presentation/divider.svg)
+</details>
 
-## 开发
+<a name="operations"></a>
 
-```sh
-python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\Activate.ps1
-python -m pip install -c deploy/constraints.txt -e ".[dev]"
-python -m ruff check .                                 # source checks
-python -m playwright install chromium
-python tools/build_portable.py                         # Windows portable ZIP (Windows + Python 3.12)
-python tools/build_source.py                          # source ZIP with SHA-256 manifest
-python tools/build_site.py                             # static project site in dist/site
-```
+<details>
+<summary><strong>让调查持续运转</strong> · 通知、存储与恢复</summary>
 
-浏览器检查使用模拟数据。当前的构建和发布任务定义在 `.github/workflows/` 中。提交拉取请求前，请阅读 [CONTRIBUTING.md](../../.github/CONTRIBUTING.md)。
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-services-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-services-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-services-mobile.svg">
+  <img src="../assets/presentation/readme-services.svg" width="1200" alt="动画工作流程：Apprise 发送已配置的提醒；异地副本在上传到兼容 S3 的存储之前加密。">
+</picture>
 
-## 文档
+[通知](../OPERATIONS.md#notifications) · [加密的异地副本](../wiki/Off-site-Copy.md) · [备份与恢复](../wiki/Backup-and-Recovery.md) · [故障排除](../OPERATIONS.md)
 
-| 指南 | 涵盖内容 |
+<table>
+<tr>
+<td width="33%" align="center"><a href="https://phishdestroy.github.io/TgWitness/zh/docs/start/"><b>设置指南&nbsp;↗</b></a><br><sub>从安装到第一个聊天</sub></td>
+<td width="33%" align="center"><a href="https://phishdestroy.github.io/TgWitness/zh/docs/dedicated-account/"><b>准备账户&nbsp;↗</b></a><br><sub>专用的 Telegram 账户</sub></td>
+<td width="33%" align="center"><a href="DEPLOYMENT.md"><b>Docker 与服务器&nbsp;↗</b></a><br><sub>HTTPS、重启与更新</sub></td>
+</tr>
+</table>
+
+</details>
+
+<a name="repository-map"></a>
+
+<details>
+<summary><strong>浏览代码仓库</strong> · 代码、文档和工具的位置</summary>
+
+| 目录 | 从这里开始 |
 | --- | --- |
-| [快速入门](QUICKSTART.md) | 首次启动、账户连接及首次导出 |
-| [账户与会话格式](../ACCOUNTS.md) | 登录输入、转换、多账户 |
-| [数据收集原理](../COLLECTION.md) | 捕获策略、版本、附件、缺失信息 |
-| [连接与安全](../CONNECTION-SECURITY.md) | 代理、加密和密钥 |
-| [操作指南](../OPERATIONS.md) | 日常工作流程、备份、恢复、容量 |
-| [部署](DEPLOYMENT.md)与[服务模板](../../deploy/README.md) | 服务器、容器、HTTPS、更新 |
-| [证据模型](../EVIDENCE.md)与[时间戳](../TIMESTAMP.md) | 完整性、覆盖范围、人物档案、信任与交接 |
-| [独立见证者](../WITNESS.md) | 只读见证令牌、Docker 配置文件、频道帖子、交叉核对 |
-| [架构](../ARCHITECTURE.md)与[产品模型](../PRODUCT.md) | 内部实现与设计决策 |
-| [验证](../VERIFICATION.md)与[就绪状态](../internal/READINESS.md) | 已执行的检查项及待完成工作 |
-| [更新日志](../CHANGELOG.md) | 版本历史 |
-| [网站与发布](../internal/PUBLISHING.md) | 本地网站预览、GitHub Pages、首篇发布 |
+| [docs/](../README.md) | 设置、调查工作流程和技术参考 |
+| [tgwitness/](../../tgwitness/README.md) | 主应用程序、收集器、日志和 Web 面板 |
+| [tgwitness_capture/](../../tgwitness_capture/README.md) | 独立记录器及其验证代码 |
+| [addons/](../../addons/README.md) | 可选捕获功能的安装、配置和测试 |
+| [deploy/](../../deploy/README.md) | 安装程序、容器和后台服务 |
+| [examples/](../../examples/README.md) | 账户导出和密封捕获的配置 |
+| [integrations/](../../integrations/README.md) | 签名 webhook 和 n8n 接收端 |
+| [.agents/](../../.agents/README.md) | 通过 CLI 读取存档的任务说明 |
+| [scripts/](../../scripts/README.md) | 启动器和 CI 工具 |
+| [tools/](../../tools/README.md) | 构建、检查和打包 |
+| [website/](../../website/README.md) | 公开网站、翻译版指南和交互式演示 |
+| [.github/](../../.github/AUTOMATION.md) | 工作流、贡献指南和支持 |
 
+[完整项目指南](../PROJECT-GUIDE.md) ·
+[参与贡献](../../.github/CONTRIBUTING.md) · [获取帮助](../../.github/SUPPORT.md)
 
-![Section divider](../assets/presentation/divider.svg)
+</details>
 
-## 许可协议
+<details>
+<summary><strong>⚖️ 道德声明与历史延续性</strong></summary>
 
-[MIT License](../../LICENSE)
+作者立场声明和操作员声明的中文版本：
 
-## 此文件夹中的指南
+[许可与架构不兼容声明](TAYLOR-WESSING-EXCLUSION.md) · [操作员声明](OPERATOR-INCOMPATIBILITY.md) · [MIT 许可证](../../LICENSE) · [原始 NOTICE](../../NOTICE)
 
-| 文件 | 内容 |
-| --- | --- |
-| [DEPLOYMENT.md](DEPLOYMENT.md) | 部署与运维 |
-| [QUICKSTART.md](QUICKSTART.md) | TgWitness 快速入门 |
+</details>
 
-[许可与架构不兼容声明](TAYLOR-WESSING-EXCLUSION.md) · [MIT License](../../LICENSE)
+<a name="languages"></a>
+
+<details>
+<summary><strong>用您的语言阅读项目概览</strong></summary>
+
+[English](../../README.md) · [Русский](../ru/README.md) · [Українська](../uk/README.md) · [Español](../es/README.md) · [Português (Brasil)](../pt/README.md) · [Türkçe](../tr/README.md) · [العربية](../ar/README.md) · [فارسی](../fa/README.md) · [اردو](../ur/README.md) · [हिन्दी](../hi/README.md) · [Bahasa Indonesia](../id/README.md) · [Tiếng Việt](../vi/README.md) · **简体中文** · [繁體中文](../zh-Hant/README.md) · [Français](../fr/README.md) · [Deutsch](../de/README.md) · [Italiano](../it/README.md) · [Polski](../pl/README.md) · [O‘zbekcha](../uz/README.md) · [한국어](../ko/README.md) · [日本語](../ja/README.md) · [Bahasa Melayu](../ms/README.md) · [ไทย](../th/README.md) · [עברית](../he/README.md) · [বাংলা](../bn/README.md) · [አማርኛ](../am/README.md)
+
+</details>
+
+<p align="center">
+  <a href="../README.md"><b>技术文档</b></a> ·
+  <a href="https://github.com/phishdestroy/TgWitness/wiki"><b>调查手册</b></a> ·
+  <a href="https://github.com/phishdestroy"><b>由 PhishDestroy 打造</b></a> ·
+  <a href="../../.github/CONTRIBUTING.md"><b>参与贡献</b></a> ·
+  <a href="../../.github/SUPPORT.md"><b>获取帮助</b></a> ·
+  <a href="../../.github/SECURITY.md"><b>报告漏洞</b></a>
+</p>
+
+[机器可读的项目索引](../../llms.txt) · [完整文本手册](https://phishdestroy.github.io/TgWitness/llms-full.txt) · [面向智能体的仓库规则](../../AGENTS.md)

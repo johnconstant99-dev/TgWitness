@@ -4,7 +4,7 @@
 
 # TgWitness verification
 
-**Updated 9 November 2026.** Results are tied to the revision, environment and
+**Updated 10 November 2026.** Results are tied to the revision, environment and
 workload recorded for each run. [Current capabilities](STATUS.md) describes the
 available workflows; this page records what has actually been checked.
 
@@ -29,6 +29,7 @@ snapshots; current implementation and qualification are recorded separately.
 
 | Latest evidence | Result | Scope |
 | --- | --- | --- |
+| Account security and exports · 10 Nov | Witness probe caught a second client on the same key; killed chat exports resumed; TDX quote checked offline | RunPod pod, three test accounts; revisions `6c7171228` to `196a5bcd1` |
 | Phala / Intel TDX with live account · 9 Nov | All 6 TDX checks passed; live Telegram collection; export verified | CVM `cvm_mjbvBdjM`; commit `427621d4`; session imported; self-attested tier |
 | drand checkpoint + verify · 9 Nov | drand round 33818717 in a signed checkpoint, confirmed via Cloudflare relay | RunPod collector; `--check-drand`; lower time bound for the checkpoint |
 | session.fingerprint in journal · 9 Nov | `auth_key_id` logged at `session.fingerprint` on observation start | Verifier can match session file after revocation |
@@ -55,6 +56,7 @@ snapshots; current implementation and qualification are recorded separately.
 - [drand checkpoint anchoring and verify · 9 November 2026](#drand-checkpoint-anchoring-and-verify--9-november-2026)
 - [Parallel session and session integrity tests · 9 November 2026](#parallel-session-and-session-integrity-tests--9-november-2026)
 - [Session key created inside the TDX VM · 9 November 2026](#session-key-created-inside-the-tdx-vm--9-november-2026)
+- [Account security and interrupted exports · 10 November 2026](#account-security-and-interrupted-exports--10-november-2026)
 - [Qualification status](#qualification-status)
 
 </details>
@@ -535,6 +537,34 @@ session read the code from Telegram 777000 and passed it straight to the VM.
 | External time on two evidence passes | FreeTSA and Sectigo RFC 3161 replies; four OTS calendars pending at the end of the run |
 | Second session on the same account | Worked at the same time as the VM session |
 | Secret Chats in the VM | Unavailable: the Phala installer installs the hash lock without the `secret-chats` extra |
+
+## Account security and interrupted exports · 10 November 2026
+
+A RunPod Linux pod (8 vCPU, 16 GB) ran the panel on loopback with three workspaces and
+dedicated test accounts: one imported as an auth key and DC line, one from an Account JSON
+and one signed in from its own workspace. Revisions `6c7171228`, `4d6206a52` and
+`196a5bcd1`; the chat exports below were read with observation paused, as the panel requires.
+
+| Check | Result |
+| --- | --- |
+| Auth key and DC line import | Recognised as **Auth key HEX and DC**; signed in within 4 s |
+| Independent sign-in from a workspace | `key_origin: created` after 19 s |
+| **Make this the only session** on a key minutes old | Telegram refused (`FRESH_RESET_AUTHORISATION_FORBIDDEN`); the panel named the 24-hour limit and the automatic option stayed on |
+| Witness probe | Answers arrived as live updates after 0.9–5.0 s. Workspaces with an imported key start in Read-only and record `probe.skipped` until it is turned off |
+| A second client on the same session key for 5.5 min | 3 of 4 probe answers did not reach the collector live and were found in history (`coverage.gap`, `probe_ack_missed_live`); intake stayed marked as failed until the next live answer (`connection.restored`) |
+| New sign-in with a login code | `account.sessions` listed it under `added` 65 s after Telegram's creation time; ended from **Sessions of this account** |
+| Chat export stopped with `kill -9` after 80,000 messages | The signed partial copy survived; the next export resumed it with two sessions in `acquisition.sessions`; **Start over** discarded it |
+| Crash in the files stage of a 106-message chat | Resumed from the signed checkpoint added in #193: 106 messages carried over, 19 files reused, 23 downloaded; `verify.py` exit 0 |
+| Attachment reuse | 42 of 42 files reused from observation media and earlier exports |
+| Set-aside cleanup | A copy set aside nine days earlier was removed at startup; newer copies stayed |
+| TSA revocation data | OCSP for the Belgian and Sectigo signing certificates and the FreeTSA CRL stored next to the replies |
+| Phala TDX deployment from the panel | Commit `6c7171228`, 2.5 min, all six checks passed, TCB UpToDate; `verify.py` checked the journal's TDX quote offline with Intel's collateral; CVM deleted afterwards |
+
+The verifier summarised the probing workspace as "Witness probes: sent 32, answered live
+28, answer missed live 4; slowest live answer 5.0 s", and the witness workspace as "seen 50,
+seen live 49, answered 50". Not checked in this run: alert delivery to an outside
+destination, which was not configured, and the automatic only-session run, which Telegram
+allows 24 hours after the key was created.
 
 <a name="remaining-qualification"></a>
 

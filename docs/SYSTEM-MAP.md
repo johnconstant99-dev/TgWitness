@@ -1,6 +1,6 @@
 # System map
 
-Open **Workspace → System map** to inspect the current installation. The page is
+Open **More tools → System map** (Expert level) to inspect the current installation. The page is
 available to the main administrator. It refreshes every five seconds while visible;
 hidden tabs pause reads. Failed reads retain the last snapshot with a stale indicator.
 

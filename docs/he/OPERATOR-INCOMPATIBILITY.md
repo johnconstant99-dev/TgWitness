@@ -22,5 +22,5 @@
 </blockquote>
 <p>כדי לעמוד בקפדנות ברישיון ה-MIT, איננו מגבילים את השימוש בתוכנה זו. עם זאת, הבה נבהיר: שכר טרחה של חברות, איומים משפטיים ודרישות למחיקה דיגיטלית אינם יכולים לעקוף את ההיסטוריה, לשכתב את השושלת או להסתיר את האמת.</p>
 <p><a href="../../LICENSE">רישיון MIT</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">עמדתנו בנוגע ל-Taylor Wessing</a> · <a href="../HOW-IT-WORKS.md">מודל הראיות</a></p>
-<p><a href="../../README.md">פרויקט</a> · <a href="../README.md">תיעוד</a> · <a href="../wiki/Home.md">ויקי</a></p>
+<p><a href="README.md">פרויקט</a> · <a href="README.md">תיעוד</a> · <a href="../wiki/Home.md">ויקי</a></p>
 </div>

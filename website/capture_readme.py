@@ -26,14 +26,18 @@ def capture(page, mobile):
         )
     else:
         page.evaluate("scrollTo(0, 0)")
-    page.wait_for_timeout(350)
-    clip = {"x": 14, "y": 0, "width": 362, "height": 720} if mobile else None
+    page.wait_for_timeout(1200)
+    clip = {"x": 0, "y": 0, "width": 390, "height": 720} if mobile else None
     return Image.open(BytesIO(page.screenshot(clip=clip))).convert("RGB")
 
 
+def choose_filter(page, name):
+    # The message filters sit in a collapsed "Filters" menu; choose one without opening it.
+    page.locator(f'#chat-status [data-chat-filter="{name}"]').evaluate("button => button.click()")
+    page.wait_for_timeout(600)
+
+
 def save_sequence(name, states):
-
-
     frames, durations = [], []
     for index, frame in enumerate(states):
         frames.append(frame)
@@ -44,7 +48,7 @@ def save_sequence(name, states):
             durations.append(80)
     target = OUT / f"{name}.webp"
     frames[0].save(target, save_all=True, append_images=frames[1:], duration=durations,
-                   loop=0, quality=86, method=6, minimize_size=True)
+                   loop=0, quality=86, method=6, kmax=1)
 
     states[1].save(OUT / f"{name}-still.webp", quality=91, method=6)
     with Image.open(target) as result:
@@ -81,16 +85,16 @@ def main():
 
                     page.route("**/*", local_only)
                     page.goto(f"http://127.0.0.1:{server.server_port}/demo/?lang=en", wait_until="networkidle")
-                    page.locator('[data-view="chats"]').click()
+                    page.locator('[data-view="chats"]').evaluate("item => item.click()")
                     page.locator("button.pill-edited").first.wait_for()
-                    assert "Fictional records" in page.locator("body").inner_text()
+                    assert "Fictional messages" in page.locator("body").inner_text()
                     states = [capture(page, mobile)]
-                    page.locator(".chat-filters").get_by_role("button", name="Edited", exact=True).click()
+                    choose_filter(page, "edited")
                     page.locator("button.pill-edited").first.click()
-                    assert "16:00 UTC" in page.locator(".versions").inner_text()
-                    assert "17:30 UTC" in page.locator(".versions").inner_text()
+                    versions = page.locator(".versions").inner_text()
+                    assert "Saved versions" in versions and "Edit 1" in versions
                     states.append(capture(page, mobile))
-                    page.locator(".chat-filters").get_by_role("button", name="Deleted", exact=True).click()
+                    choose_filter(page, "deleted")
                     assert page.locator("#chat-feed .pill-deleted").count() == 2
                     states.append(capture(page, mobile))
                     save_sequence("readme-workspace-" + ("mobile-" if mobile else "") + theme, states)

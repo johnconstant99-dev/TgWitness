@@ -1,360 +1,482 @@
-[English](../../README.md) · [Русский](../ru/README.md) · [Українська](../uk/README.md) · [Español](../es/README.md) · [Português (Brasil)](../pt/README.md) · **Türkçe** · [العربية](../ar/README.md) · [فارسی](../fa/README.md) · [اردو](../ur/README.md) · [हिन्दी](../hi/README.md) · [Bahasa Indonesia](../id/README.md) · [Tiếng Việt](../vi/README.md) · [简体中文](../zh/README.md)
-
-![TgWitness — preserve the record, verify the evidence](../assets/presentation/casework-hero-static.svg)
-
-<p align="center">
-  <strong>Telegram gözlem çalışma alanınız.</strong><br>
-  Kaydedilen sohbetleri saklayın, nelerin değiştiğini anlayın ve imzalanmış bir geçmişi paylaşın.<br>
-  Kendi bilgisayarınızda veya sunucunuzda. Kendi hesaplarınızla.
-</p>
-
-<p align="center">
-  <img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-243a52?logo=python&amp;logoColor=white">
-  <img alt="FastAPI + Telethon" src="https://img.shields.io/badge/FastAPI-Telethon-243a52?logo=fastapi&amp;logoColor=white">
-  <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-243a52?logo=docker&amp;logoColor=white">
-  <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-243a52">
-  <img alt="Version: 0.9.1" src="https://img.shields.io/badge/version-0.9.1-243a52">
-</p>
-
-<p align="center">
-  <a href="#hızlı-başlangıç">Hızlı başlangıç</a> ·
-  <a href="#özellikler">Özellikler</a> ·
-  <a href="#bir-telegram-hesabı-bağlayın">Hesaplar</a> ·
-  <a href="#kanıt-ve-doğrulama">Kanıtlar</a> ·
-  <a href="#dağıtım">Dağıtım</a> ·
-  <a href="../README.md">Belgeler</a>
-</p>
-
-> [!TIP]
-> **Bağlanmadan önce keşfedin.** `scripts\Demo.cmd` veya `sh start.sh --demo` komutunu çalıştırarak kurgusal sohbetlerin bulunduğu bir çalışma alanını açın. Telegram hesabı gerekmez.
-
-**Buraya ilk kez mi geldiniz?** [Başlayın →](QUICKSTART.md) · [Wiki →](../wiki/Home.md) · [Bir kılavuz seçin →](../README.md) · [Yardım alın →](../../.github/SUPPORT.md) · [Test edilmiş olanları görün →](../VERIFICATION.md)
-
-> [!WARNING]
-> **Kaybetmeyi göze alabileceğiniz, bu amaç için ayrılmış bir Telegram hesabı kullanın.** Kişisel veya değerli hesapları bağlamamanızı ya da bu hesaplarda API kimliği / API hash kimlik bilgileri oluşturmamanızı şiddetle tavsiye ederiz. Telegram, hesapları kısıtlayabilir veya kalıcı olarak engelleyebilir. [Hesap kılavuzunu okuyun](../ACCOUNTS.md).
-
-## Özellikler
-
-- **Geçmişi olan sohbetler.** Kaydedilmiş mesajları okuyun, yakalanan düzenlemeleri karşılaştırın ve silme bildirimlerini sohbet bağlamında görüntüleyin.
-- **Kendi şartlarınıza göre gözlem yapın.** Tek tek sohbetleri, bir Telegram klasörünü veya tüm hesabı seçin. Her hesabın kendi çalışma alanı ve ayarları vardır.
-- **Doğrulayabileceğiniz dışa aktarımlar.** İmzalı bir ZIP dosyası, orijinal kayıtlar, korunmuş ekler ve çevrimdışı bir HTML raporu. Devir için isteğe bağlı şifre koruması.
-- **Günlük kullanım için tasarlanmıştır.** Açık ve koyu temalar, 25 dil desteği, arama, Ctrl/Cmd+K ile gezinme ve Sohbetler'den doğrudan eylemler.
-
-<details>
-<summary>Tüm özellikler ve teknik ayrıntılar</summary>
-
-- **Bağlantı yolunuz.** **Hesap → Proxy ayarları** altında, paketlenmiş genel MTProxy listelerinden seçim yapın, bunları kaynaklarından yenileyin veya kendi Telegram proxy bağlantınızı yapıştırın. Manuel SOCKS5/HTTP/MTProxy ve operatör kataloğu hâlâ kullanılabilir durumdadır. Genel listeler indirilmiş ve filtrelenmiştir, ancak henüz listelenen bir sunucu üzerinden bağlanan hesap bulunmamaktadır. [Genel listeler nasıl çalışır](../CONNECTION-SECURITY.md#public-proxies-supplied-by-your-installation)?
-
-- **Hesaplarınızın gerçekte neler gördüğünü gösteren bir günlük.** Seçtiğiniz gruplar ve kanallardan gelen yeni mesajlar, düzenlemeler, silme bildirimleri, tepkiler, üyelik etkinlikleri ve kapsama boşlukları.
-- **Seçilen sohbetler, bir Telegram klasörü veya tüm hesap.** Kaydedilecek türleri seçin — kanallar, gruplar, özel sohbetler, botlar — ve yeni sohbetler ortaya çıkar çıkmaz eklenir. Hariç tutulanlar, kendi gönderdiğiniz mesajlar ve düzenlemeler, ilgili sohbetle eşleşen özel sohbetlerdeki silme işlemleri, öncelikli yeniden kontroller ve tür ([koleksiyon](../COLLECTION.md#observation-scope-chosen-chats-a-folder-or-the-whole-account)) başına ek sınırları.
-- **Soruşturma modu.** Tek bir düğmeyle, ekiplere katılan ve botlarla iletişim kuran özel bir hesap oluşturulur: gördüğü ve gönderdiği her şey kaydedilir, bot mesajlarının altındaki düğmeler (bağlantılar, web uygulamaları, kopyalanacak metinler) saklanır ve yalnızca düğmeyle yapılan düzenlemeler yeni sürümler haline gelir; ayrıca her yeni sohbet veya botun profili (açıklama, komutlar, üyeler) ve daha önce görünür olan mesajları anında kaydedilir ([soruşturma modu](../COLLECTION.md#investigation-mode-joining-teams-and-talking-to-bots)). Paneldeki **Özel hesap kılavuzu** (`/dedicated-account.html`), ana hesabın neden kullanılmaması gerektiğini, TgWitness'in neden halka açık uygulama hash/uygulama kimliği çiftleri aracılığıyla çalıştığını ve bir API çiftinin tek başına hesabınıza erişim izni vermediğini (Telegram belgelerine bağlantılarla birlikte) açıklar ve ek bir hesap oluşturmanın yollarını listeler.
-- **Sohbetlerden doğrudan işlem yapın.** Mesajlar ve yanıtlar gönderin, bot geri arama/metin düğmelerine basın veya bir Telegram davetini önizleyin ve katılın. Seçilen hesap eylemi gerçekleştirir; istekler, davet önizlemeleri ve bot açılır penceresi/URL yanıtları, imzalanmış günlüğüne ([panel mini istemcisi](../COLLECTION.md#act-from-the-panel)) kaydedilir.
-- **Belirtilebilecek kapsama alanı.** Raporlar ve doğrulayıcı, "X'ten Y'ye kadar sürekli olarak gözlemlendi" ifadesini kullanır; gözlemlenmemiş mesaj kimlik numaralarını ve nedenlerini içeren boşlukları listeler — bunları asla silinmiş olarak sunmaz.
-- **Kişi profilleri, sohbet başına katılım seçeneği.** İsim ve kullanıcı adı geçmişi, Telegram bayrakları, avatar SHA-256 ve pHash, etkinlik, kimin kime yanıt verdiği ve bahsedilen cüzdanlar, telefonlar, kullanıcı adları ve bağlantılar — yalnızca kaydedilmiş kayıtlardan oluşturulur; her bir bilgi, günlük kaydına işaret eder ve ayrı bir imzalı dosya olarak dışa aktarılır ([kanıt modeli](../EVIDENCE.md#people-profiles)).
-- **Bağımsız tanık.** Kendi anahtarı ve botu olan ayrı bir işlem, imzalanmış günlük başlığını alır, bunu bir Telegram kanalına gönderir ve toplayıcı yanıt vermediğinde bildirimde bulunur; doğrulayıcı, dışa aktarımları bununla karşılaştırarak kontrol eder. Aralık, zaman aşımı, hangi kontrollerin yayınlanacağı ve gönderilerin içeriği seçenekler veya bir JSON yapılandırma dosyası ([witness](../WITNESS.md)) aracılığıyla belirlenir. Yerel bir Bot API sunucusu üzerinde test edilmiştir; henüz gerçek bir bot ve kanal ile test edilmemiştir.
-- **Paneldeki toplama ayarları.** Toplama sınırları ve hızı, yeniden kontroller, indirmeler, kullanıcı profilleri, bildirimler ve dışa aktarmalar, aralıkları ve varsayılan değerleriyle birlikte **Parametreler** sayfasında bulunur; her değişiklik imzalı günlüğe kaydedilir ([ayarlar ve parametreler](#ayarlar-ve-parametreler)).
-- **Bağlam içinde yapılan düzenlemeler ve silme işlemleri.** Her düzenleme, bir önceki sürümün yanında gösterilen ayrı bir sürümdür; silme bildirimi, daha önce kaydedilmiş içeriği asla silmez.
-- **İmzalı, doğrulanabilir dışa aktarımlar.** Her olay, hash zincirine eklenir (SHA-256) ve imzalanır (Ed25519). İmzalı ZIP dosyası, JSONL, CSV, çevrimdışı HTML raporu, korunmuş medya dosyaları ve bağımsız bir doğrulayıcı içerir.
-- **Şifre korumalı dışa aktarımlar.** İsteğe bağlı olarak herhangi bir dışa aktarmayı, 7-Zip ve WinRAR tarafından okunabilen WinZip AES-256 ZIP formatına koyabilirsiniz; içindeki imzalı içerik değişmeden kalır. Bir test arşivi libarchive'da (Windows `tar`) bayt bayt açıldı ve yanlış şifre reddedildi ([kanıt modeli](../EVIDENCE.md#investigation-handoff)).
-- **Bildirimler.** Sorunlar (düşük disk alanı, oturumu kapatılmış hesap, toplayıcı, kopyalama veya zaman damgası hataları), gözlemlenen sohbetlerdeki değişiklikler ve günlük özet, [Apprise](https://github.com/caronc/apprise) aracılığıyla Matrix, Telegram, Discord, Slack, ntfy, e-posta ve diğer birçok hizmete gönderilir — alıntıları etkinleştirmediğiniz sürece mesaj metni içermez — ve panelde listelenir. Teslimat, yerel bir uç noktaya karşı test edilmiştir; hizmetlerin kendisi henüz test edilmemiştir.
-- **25 arayüz dili.** Panel ve tam dokümantasyon, Almanca, Fransızca, Japonca ve İbranice dahil olmak üzere aynı dilleri paylaşmaktadır. Telegram içeriği ve günlük kayıtları her zaman kaydedildiği şekilde aynen görüntülenir.
-- **Açık ve koyu tema.** Varsayılan olarak sistem ayarlarını takip eder; seçim, tarayıcı başına kaydedilir.
-- **Klavyeyle kolay gezinme.** Bir bölümü bulmak için **Ctrl+K** (Mac: **⌘K**) tuşlarına basın veya **"Git..." seçeneğini** seçin. Bölümü açmak için ok tuşlarını ve Enter tuşunu kullanın; Escape tuşu menüyü kapatır.
-- **Birden fazla hesap.** Her biri kendi Telegram oturumu, günlüğü, imzalama anahtarı, proxy rotası ve yakalama politikasına sahip, sınırsız sayıda izole çalışma alanı.
-- **Esnek oturum açma.** Telefon + kod + 2FA, QR kodu, Telethon/Pyrogram `.session`, Telegram Desktop TData ZIP, Telethon StringSession veya DC kimliği içeren tam bir Oturum Açma Anahtarı.
-- **Hesap başına proxy'ler.** SOCKS5 ve HTTP CONNECT, yerel test proxy'leri üzerinde test edilmiştir; deneysel MTProxy ise henüz gerçek bir sunucu üzerinde test edilmemiştir. Başarısız olan bir proxy, hiçbir zaman sessizce doğrudan bağlantıya geri dönmez.
-- **Tasarım gereği gizlidir.** Bilgisayarınızda veya sunucunuzda çalışır. Web kullanıcı arayüzü pakete dahildir; Node.js, barındırma hizmeti veya telemetri yoktur. Oturumlar, API kimlik bilgileri ve proxy gizli bilgileri şifreli bir kasada saklanır.
-- **Çalıştırması kolaydır.** Windows'ta çift tıklama, Linux/macOS'ta tek bir komut dosyası veya isteğe bağlı otomatik HTTPS özelliğine sahip Docker Compose ile **çalıştırabilirsiniz**. Test sonuçları ve sınırları: [doğrulama kaydı](../VERIFICATION.md).
-
-</details>
-
-## Hızlı başlangıç
-
-| Platform | Nasıl başlanır | Gereksinimler |
-| --- | --- | --- |
-| **Windows, hiçbir şey yüklenmemiş** | `TgWitness-<version>-windows-amd64-portable.zip` dosyasını [Sürümler](../../../../releases) bölümünden indirin, dosyayı açın ve **`TgWitness.cmd`** dosyasına çift tıklayın | Yok; Python pakete dahildir |
-| Windows, kaynak koddan derleme | **`Start.cmd`** öğesine çift tıklayın | Python 3.11+; eksikse sizin için sunulur ve kurulur |
-| Linux / macOS | `sh start.sh` | `venv` ile Python 3.11+; komut dosyası, eksikse sisteminiz için kurulum komutunu görüntüler |
-| Docker, herhangi bir işletim sistemi | **`scripts\Docker.cmd`** öğesine çift tıklayın veya `sh scripts/docker-start.sh` öğesini çalıştırın | Compose 2.20+ ile Docker Engine/Desktop |
-
-1. **http://127.0.0.1:8787** dosyasını açın.
-2. Panel erişim jetonunu yapıştırın:
-   - taşınabilir veya kaynak kodu yüklemesi: `data/live/panel-token.txt` içeriği
-   - Docker: `scripts\Docker.cmd`/`scripts/docker-start.sh` veya `docker compose exec tgwitness cat /data/panel-token.txt` tarafından basılmıştır
-3. Telegram hesabınızı ekleyin, gözlemlemek istediğiniz sohbetleri seçin ve "**Gözlemi başlat" düğmesine** basın.
-
-İlk kaynak başlatma işlemi, özel bir `.venv` oluşturur ve sabitlenmiş bağımlılıkları yükler (İnternet erişimi gereklidir). Docker yardımcı programları görüntüyü oluşturur, panelin çalışır duruma gelmesini bekler ve adresini ile jetonunu görüntüler. `python start.py --check` (veya taşınabilir paketteki `TgWitness-Check.cmd`), Telegram'a dokunmadan bir hazırlık raporu sunar.
-
-> **Sadece bakmak mı istiyorsunuz?** **`scripts\Demo.cmd`** veya `sh start.sh --demo` komutunu çalıştırın. Tarayıcıda doğrudan kurgusal bir günlük açılır; herhangi bir Telegram hesabı bağlı değildir ve veriler `data/demo` içinde ayrı olarak depolanır.
-
-<details>
-<summary><strong>Çalışma alanında neler var: sohbetler, geçmiş ve dışa aktarma işlemleri</strong></summary>
+<p align="right"><sub><a href="../../README.md">English</a> · <a href="#languages">Diğer diller</a></sub></p>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="../assets/chats-dark.png">
-  <img src="../assets/chats.png" alt="TgWitness chats view with synthetic demo data: deleted and edited messages highlighted">
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-hero-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-hero-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/casework-hero-mobile.svg">
+  <img src="../assets/presentation/casework-hero.svg" width="1440" alt="TgWitness — İzi sürün. Delilleri koruyun. Hash ile birbirine bağlanmış imzalı bir günlük, ayrı saklanan bir kontrol noktası ve doğrulanabilir bir delil arşivi.">
 </picture>
 
-### Gözlem geçmişi
+<table>
+<tr>
+<td width="33%" align="center"><a href="https://phishdestroy.github.io/TgWitness/demo/?lang=tr"><b>Demoyu keşfedin&nbsp;↗</b></a><br><sub>Kurgusal kayıtlarla gerçek arayüz</sub></td>
+<td width="33%" align="center"><a href="#quick-start"><b>İndirin ve başlatın&nbsp;↓</b></a><br><sub>Linux, macOS ve Windows için tek komut</sub></td>
+<td width="33%" align="center"><a href="https://github.com/phishdestroy/TgWitness/wiki"><b>El kitabını okuyun&nbsp;↗</b></a><br><sub>Adım adım araştırma kılavuzları</sub></td>
+</tr>
+</table>
 
-![Journal with fictional demo data](../assets/workspace.png)
+<p align="center"><strong>Telegram araştırmaları için kendi sunucunuzda barındırdığınız çalışma alanı.</strong><br>Sohbetleri kaydedin, düzenlemeleri ve silmeleri saklayın, kimin kiminle bağlantılı olduğunu görün<br>ve herkesin kontrol edebileceği imzalı dışa aktarımlar teslim edin.</p>
 
-### İmzalı dışa aktarımlar
+<p align="center"><strong>SIFIR GÜVEN.</strong> TgWitness taraf tutmaz: aynı kontroller operatöre, PhishDestroy'a ve diğer herkese uygulanır.<br>Yalnızca üçüncü bir tarafın veya matematiğin doğruladığı şey geçerlidir. <a href="../LIMITS-AND-OBJECTIONS.md">Sınırlar ve itirazlar</a></p>
 
-![Export records and verify signatures](../assets/exports.png)
+<p align="center">
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · ön sürüm"></a>
+  <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
+  <sub><a href="../VERIFICATION.md">Test edilen ortamlar</a> · 25 arayüz dili · 26 kılavuz dili</sub>
+</p>
+
+<a name="screenshots"></a>
+
+<a href="https://phishdestroy.github.io/TgWitness/demo/?lang=tr">
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-workspace-mobile-dark-still.webp">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-workspace-dark-still.webp">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-workspace-mobile-dark.webp">
+  <img src="../assets/presentation/readme-workspace-dark.webp" width="1440" alt="TgWitness demosu iş başında: yakalanan mesajlar, kaydedilen sürümler ve silindikten sonra korunan içerik. Kurgusal gösterim kayıtları.">
+</picture>
+</a>
+
+<p align="center"><sub>Gerçek arayüzü kurgusal kayıtlarla keşfedin. Denemek için çalışma alanına tıklayın.</sub></p>
+
+## TgWitness ne yapar
+
+<table>
+<tr>
+<td width="33%" valign="top"><b><a href="../COLLECTION.md">Her düzenleme ve silme saklanır</a></b><br><sub>Bir mesajın her sürümü kaydedilir ve metni silme bildiriminden sonra da kalır.</sub></td>
+<td width="33%" valign="top"><b><a href="../wiki/Exports-and-Verification.md">Herkesin kontrol edebileceği kanıt</a></b><br><sub>İmzalı, hash zinciriyle bağlı kayıtlar. Alıcı arşivi tek komutla çevrimdışı doğrular.</sub></td>
+<td width="33%" valign="top"><b><a href="../EVIDENCE.md#where-the-messages-come-from">Gösterilebilir köken</a></b><br><sub>Mesajlar hesabın kimliği doğrulanmış MTProto oturumu üzerinden alınır ve gelir gelmez imzalanır; GitHub Actions ve Intel TDX tasdik ekler.</sub></td>
+</tr>
+<tr>
+<td width="33%" valign="top"><b><a href="../EXPORT-BENCHMARK-2026-11-06.md">Büyük ölçekte ölçüldü</a></b><br><sub>3.598.381 kayıt içeren 48 doğrulanmış arşiv; sekiz hesap 768.007 geçmiş kaydını 687,5 kayıt/sn hızla edindi.</sub></td>
+<td width="33%" valign="top"><b><a href="../INVESTIGATION-MODE.md">Araştırmalar için tasarlandı</a></b><br><sub>Metin, QR kodları ve OCR üzerinde izleme listeleri, cüzdan kontrolleri, profil kartları, Vaka Panosu ve bir mahkeme paketi.</sub></td>
+<td width="33%" valign="top"><b><a href="../SECURITY-MODEL.md">Kontrol sizde</a></b><br><sub>Kendi sunucunuzda, telemetri olmadan. Oturumlar şifreli bir kasada saklanır; panel localhost'u dinler.</sub></td>
+</tr>
+</table>
+
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
+
+<a name="quick-start"></a>
+<a name="run-it-on-your-machine"></a>
+
+## Kurulum
+
+Python dahil. Güncellemek için de aynı komutları kullanın.
+
+**Linux / macOS**
+
+```sh
+curl -fsSL https://get.destroy.tools/install.sh | bash
+```
+
+**Windows · PowerShell veya CMD**
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm https://get.destroy.tools/install.ps1 | iex"
+```
+
+<sub>Ubuntu sunucu: root olarak çalıştırın. Masaüstü: normal kullanıcınızla çalıştırın. `-ExecutionPolicy Bypass` yalnızca bu PowerShell işlemi için geçerlidir.</sub>
+
+İmzalı derlemeler herkese açık [Installer iş akışından](../../.github/workflows/installer.yml) gelir; yükleyici kurulumdan önce her paketin SHA-256 değerini ve RSA imzasını kontrol eder.
+
+[Önce betiği doğrulayın](../INSTALLATION.md#verify-before-running) · [İlk kurulum](../SETTINGS.md) · [Sürümler](https://github.com/phishdestroy/TgWitness/releases) · [Docker](DEPLOYMENT.md)
+
+<details>
+<summary><strong>Yükleyici ve verileriniz nasıl korunur</strong></summary>
+
+`get.destroy.tools` projenin indirme sitesidir. Herkese açık
+[Installer iş akışı](../../.github/workflows/installer.yml) bu siteyi `main` dalının tam o revizyonu için
+[`deploy/installer/`](../../deploy/installer/README.md) içeriğinden oluşturur,
+Linux ve Windows kurulum testleri geçtikten sonra yayımlar ve yükleyici
+betiklerini ve uygulama paketlerini
+[`release-signing.pub`](../../deploy/installer/release-signing.pub) içindeki sürüm anahtarıyla imzalar. Yükleyici kurulumdan önce
+paketin ve bağımlılık kilit dosyasının SHA-256 değerini ve RSA imzasını kontrol eder.
+Önce betiğin kendisini kontrol etmek için betiği imzasıyla birlikte indirin ve
+[önce doğrulama komutlarını](../INSTALLATION.md#verify-before-running) çalıştırın. Başarısız bir derleme
+önceki indirmeyi korur; yüklü paneller yükleyiciyi yeniden çalıştırdığınızda güncellenir.
+GitHub [Sürümleri](https://github.com/phishdestroy/TgWitness/releases), kaynak kod ve
+[Docker](DEPLOYMENT.md) diğer kurulum yollarıdır.
+
+**Oturumlarınız ve verileriniz.** TgWitness kendi bilgisayarınızda veya sunucunuzda çalışır ve panel
+varsayılan olarak localhost'u dinler. Telegram oturumları, proxy kimlik bilgileri ve erişim belirteci
+hash'leri her çalışma alanının şifreli kasasında, isteğe bağlı bir
+[harici ana anahtarla](../SECURITY-MODEL.md#external-master-key) saklanır. Uygulamada
+telemetri yoktur. Telegram'a ve ayarlarının kullandığı hizmetlere bağlanır:
+herkese açık MTProxy listeleri, proxy'leriniz, S3 depolama, bir tanık botu, zaman damgası
+otoriteleri, yapay zekâ sağlayıcıları ve webhook'lar. [Sistem haritası](../SYSTEM-MAP.md),
+uygulama sürecinin kurduğu bağlantıları listeler.
+[Ayrı bir Telegram hesabıyla](https://phishdestroy.github.io/TgWitness/tr/docs/dedicated-account/) gözlem yapın.
+
+Sürüm rozeti bu kaynak ağacını tanımlar. Kurulabilir derlemeler
+[Sürümler](https://github.com/phishdestroy/TgWitness/releases) altında listelenir;
+`main` dalına birleştirilen bir özellik bu indirmelere bir sonraki sürümle ulaşır.
+
+[Kurulum ve panel erişimi](../INSTALLATION.md) ·
+[İmzalar ve SHA-256](https://get.destroy.tools/#verification) ·
+[Güncelleme](../INSTALLATION.md#update-an-existing-installation) ·
+[Mevcut yetenekler ve yeterlilik doğrulaması](../STATUS.md) ·
+[Bir toplama yöntemi seçin](../COLLECTION-MODES.md)
 
 </details>
 
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
-![Section divider](../assets/presentation/divider.svg)
+<a name="how-it-works"></a>
 
-## Bir Telegram hesabı bağlayın
+## Başkasının kontrol edebileceği bir kayıt
 
-> [!CAUTION]
-> Yalnızca kaybetmeyi göze alabileceğiniz özel hesapları bağlayın. Telegram, hesapları kalıcı ve öngörülemez bir şekilde yasaklayabilir; bu sayfanın üst kısmındaki uyarıya bakın. Paneldeki **Özel hesap kılavuzu** (yan çubuk veya `/dedicated-account.html`), neden ve nasıl bir hesap almanız gerektiğini açıklamaktadır.
-
-Telefon, QR kodu veya mevcut bir oturumla giriş yapın — API kimliği veya hash gerekmez.
-
-**Neden yerleşik bir API havuzu?** [my.telegram.org](https://my.telegram.org)'da kendi API kimliğinizi oluşturmanın hesapların kısıtlanmasına yol açtığı bilinmektedir ve Telegram net sınırlar yayınlamamaktadır — birçok araştırmacı bu şekilde ana hesaplarını kaybetmiştir. Telegram'ın kendi [API Kimliği Alma](https://core.telegram.org/api/obtaining_api_id) sayfasında, resmi olmayan API istemcileri kullanan hesapların otomatik olarak gözetim altına alındığı ve haksız yere yasaklanan kullanıcıların recover@telegram.org adresine yönlendirildiği belirtilmektedir. Bu nedenle TgWitness, diğer açık kaynak istemciler tarafından halihazırda kullanılan genel API çiftlerini sunar; böylece siz hiç API kimliği oluşturmak zorunda kalmazsınız. Kendi API kimliğiniz varsa, bunu **“API Kimliği + Hash**” alanına girin; bu kimlik kullanılır.
-
-Çalışma alanında herhangi bir çift girilmediğinde, içe aktarılmadığında veya önceden kaydedilmediğinde, TgWitness havuzdaki 50 çiftten birini seçer ve Telegram bir çifti reddederse bir sonrakine geçer. Oturum açan çift, o hesapla kalır. Bir çift, uygulamayı tanımlar; Telegram hesabınızı yine de ayrı olarak yetkilendirirsiniz. Panel erişim jetonu TgWitness'i açar ve Telegram oturum açma işleminden ayrıdır.
-
-| Elinizde olanlar | Nasıl kullanılır? |
-| --- | --- |
-| Hesaba erişim sağlayan telefon numarası | **Telefon** sekmesi: Telegram'dan kod, ardından etkinleştirilmişse 2FA şifresi |
-| Zaten oturum açılmış bir Telegram uygulaması | **QR kodu** sekmesi: Ayarlar → Cihazlar → Masaüstü Cihazını Bağla |
-| Telethon (şema 7/8) veya Pyrogram (şema 2/3) `.session` | **Dosyalar** sekmesi |
-| `name.session` + `name.json` çifti | **Dosyalar** sekmesinden her ikisini de seçin; JSON dosyası API kimliğini/hash değerini sağlar |
-| Telegram Desktop `tdata` klasörü | Yalnızca ZIP dosyası `key_datas` ve `D877F783D5D3EF8Cs`, ardından **Dosyalar**; ayarlanmışsa yerel şifre |
-| Telethon StringSession, `.txt` veya `.tgwitness-session` | **Dosyalar** sekmesi veya *Şifre veya oturum metni* |
-| Oturum veya Oturum Açma Anahtarı içeren hesap JSON'u | **Dosyalar** sekmesi |
-| Tam Yetki Anahtarı (512 onaltılık karakter) + DC Kimliği | **Oturum açma anahtarı** sekmesi; isteğe bağlı Kullanıcı Kimliği, Telegram ile karşılaştırılarak doğrulanır |
-
-Desteklenmeyen özellikler: TDLib depolama, Pyrogram oturum dizeleri, bot jetonları, çoklu hesap TData ve toplu hesap listeleri. Dosyalar, sunucunuzdaki bellekte dönüştürülür ve kaydedilmeden önce Telegram ile kontrol edilir. [Hesap kılavuzu](../ACCOUNTS.md), her formatı adım adım açıklar: API kimlik bilgilerinin nasıl alınacağı, bir dosyanın nasıl tanınacağı, JSON alanları, sınırlar ve hata mesajları.
-
-Giriş yaptıktan sonra, **Kaynaklar'ı** açın (sohbetleriniz otomatik olarak yüklenir), ihtiyacınız olan grupları ekleyin, neyin kaydedileceğini seçin (örneğin *Mesajlar, düzenlemeler ve silme işlemleri*) ve gözlemi başlatın. Süreci devam ettirin: **Gözlemi duraklatmak** veri toplama işlemini durdurur, **Kilitle seçeneği** **ise** yalnızca tarayıcı erişimini kapatır.
-
-## Ekran görüntüleri
-
-| Düzenleme karşılaştırması | Kaynaklar ve veri toplama politikası |
-| --- | --- |
-| ![Detail drawer comparing a previous and a newly observed message version](../assets/detail.png) | ![Selected chats and per-account monitoring settings](../assets/sources.png) |
-| **İmzalı dışa aktarımlar** | **Giriş** |
-| ![Export page with the signed archive and other formats](../assets/exports.png) | ![Account page with phone sign-in](../assets/connection.png) |
-| **Dergi** | **Koyu tema** |
-| ![Journal with observed messages, edits, deletion notices and coverage events](../assets/workspace.png) | ![Journal in the dark theme](../assets/workspace-dark.png) |
-
-Tüm ekran görüntülerinde sentetik örnek veriler kullanılmıştır. [qr-login.png](../assets/qr-login.png) dosyasındaki QR kodu, test aktarımından alınan hayali bir jetonu kodlamaktadır.
-
-
-![Section divider](../assets/presentation/divider.svg)
-
-## Nasıl çalışır?
-
-```mermaid
-flowchart LR
-    A[Authorize an account] --> B[Select sources and event types]
-    B --> C[Start observation]
-    C --> D[Append signed records]
-    D --> E[Review versions and gaps]
-    E --> F[Export and verify]
-```
-
-Her çalışma alanı bir Telegram hesabına aittir. Toplayıcı, o hesabın istemcisinden gelen güncellemeleri kabul eder, kaydedilmiş yakalama politikasını uygular ve gözlemleri yalnızca ekleme yapılabilen bir günlüğe ekler.
-
-| Gözlem | Neler saklanır? | Sınır |
-| --- | --- | --- |
-| Yeni mesaj | Metin, gönderen kimliği, yanıt referansı, meta veriler, gözlem zamanı | Yalnızca seçilen kaynaklar için güncellemeler gönderilir |
-| Düzenle | Ayrı bir içerik sürümü | Çevrimdışıyken kaçırılan ara sürümler kurtarılamaz |
-| Silme | Mesaj kimliği ve daha önce kaydedilen tüm veriler | Telegram genellikle kimin ne zaman sildiğini belirtmez |
-| Tepkiler | Verildiğinde sayılar ve son kimlikler | Tam bir değişiklik günlüğü değil, bir anlık durum görüntüsü |
-| Üyelik | Hizmet mesajları ve katılımcı güncellemeleri | Her katılım/ayrılma işleminin ulaşacağı garanti edilmez |
-| Ek | SHA-256 ile doğrulanmış isteğe bağlı içerik adresli dosya | Dosyalar indirilmeden önce kaybolabilir; sonuçlar kaydedilir |
-| Kapsam | Başlatma, durdurma, bağlantı kesme, durum sinyalleri, politika değişiklikleri | Canlılık, tam yakalamanın kanıtı değildir |
-| Geçmiş anlık görüntüsü | En son görünen mesajlar, **Parametreler** bölümünde aksi belirtilmedikçe en fazla 500 adet, açıkça etiketlenmiş | Kaçırılan düzenlemeler veya silme işlemleri geri yüklenemez |
-
-Politikalar, ek kuyrukları ve yeniden başlatmalar için [veri toplama işleminin nasıl çalıştığını](../COLLECTION.md) okuyun.
-
-## Ayarlar ve parametreler
-
-Her şey, kod veya yapılandırma dosyalarını düzenlemeye gerek kalmadan, çalışma alanı bazında panel üzerinden değiştirilir. Kapsam, politika veya parametrelerdeki her değişiklik, önceki ve sonraki değerlerle birlikte imzalı günlüğe kaydedilir ve her gözlem başlangıcında geçerli olan değerler belirtilir.
-
-| Nerede | Yaptığınız ayarlar |
-| --- | --- |
-| **Kaynaklar** | Kapsam (seçilen sohbetler, bir Telegram klasörü, tüm hesap), kaynak türleri, hariç tutulanlar, kendi eylemler, hangi değişikliklerin saklanacağı, ek türleri ve tür başına boyut (1–2.000 MiB), öncelikli ve diğer sohbetler için yeniden kontrol aralığı (istediğiniz dakika sayısı, 0 = kapalı), geçmiş anlık görüntüleri, bildirimler |
-| **Dışa aktarımlar** | Şifre korumalı indirmeler, kanıt modu (aralık, zaman damgası yetkilileri ve takvimler), site dışı S3 kopyası (aralık, Object Lock saklama süresi ve modu) |
-| **Witness** | Salt okunur tanık jetonları; tanığın kendi seçenekleri hazır komutlarla gösterilir |
-| **Parametreler** | Sohbet listesi boyutu ve yenilenme, kalp atışı ve kontrol noktası aralıkları, başlangıç tamponu, yeniden kontrollerinin istekleri nasıl dağıttığı (ilk gecikme, geçiş başına sohbet sayısı, duraklama, kurtarılan ve yeniden istenen mesajlar), disk ayırma, indirme zaman aşımı, hız ve yeniden deneme sayısı, kullanıcı profillerinin aradığı unsurlar (kendi düzenli ifadeleriniz dahil), bildirim boyutu ve sıklığı, anlık görüntü, ZIP ve tarayıcı indirme sınırları, panel eylemi zaman aşımı, Telegram istemcisi zaman aşımları ve yeniden denemeler |
-
-**Parametrelerdeki** değerler, aralıklarını ve varsayılan ayarlarını gösterir; değiştirilenler işaretlenir ve tek tek veya toplu olarak geri yüklenebilir. Bu ayarlar bir sonraki kullanımdan itibaren geçerli olur; Telegram istemcisindeki zaman aşımları ve yeniden denemeler bir sonraki bağlantıdan itibaren geçerlidir. 4 GiB'nin üzerindeki ZIP sınırları, arşivin doğrulanması sırasında `verify.py --max-gib N` gerektirir ([işlemler](../OPERATIONS.md#panel-layout)).
-
-
-![Section divider](../assets/presentation/divider.svg)
-
-## Kanıt ve doğrulama
-
-| Dışa aktarma | İçindekiler | Bütünlük |
-| --- | --- | --- |
-| **İmzalı ZIP** | JSONL, CSV, HTML raporu, kapsama alanı, medya, manifest, doğrulayıcı | İmzalı olaylar ve her dosyanın, üreticinin adını belirten imzalı bir manifestosu. Bunu devir teslim için kullanın. |
-| JSONL | Hash değerleri ve imzaları içeren orijinal kayıtlar | Olay başına Ed25519 imzaları ve hash zinciri |
-| CSV / HTML | Hesap tablosu uyumlu tablo / çevrimdışı okunabilir rapor | Yalnızca imzalı ZIP dosyasının içinde yer almaktadır |
-| Kontrol Noktası JSON | Dergi uzunluğu ve başlık hash değeri | Ayrı olarak imzalanmıştır; toplayıcının dışında tutun |
-| Çalıştırma makbuzu JSON | Kod hash'leri, bağımlılık sürümleri, kapsam, ayarlar | Ayrı olarak imzalanmış süreç beyanı |
-| Kişi profilleri JSON | Kayıt referanslarını içeren bir sohbetin profilleri | İmzalı beyan; kayıt hash değerleri ZIP dosyasıyla karşılaştırılarak kontrol edilmiştir |
-| Witness günlüğü ZIP dosyası | Toplanan tanıklar, cevaplanmamış sorular, kanal gönderileri | Tanığın kendi anahtarıyla imzalanmıştır |
-
-Filtreler yalnızca taramayı etkiler; dışa aktarımlar her zaman sabit bir sıra numarasına kadar günlüğün tamamını içerir. Bir arşivi, güvenilir bir doğrulayıcı kopyası ve bağımsız olarak saklanan anahtar parmak izi ve kontrol noktası ile doğrulayın:
+Hesap açmadan ve kurulum yapmadan kontrol edin. Yayımlanan örnek kendi doğrulayıcısını içerir:
 
 ```sh
-python -m pip install cryptography
-python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 --checkpoint tgwitness-checkpoint.json
-# with an independent witness and its channel (Telegram Desktop export)
-python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 \
-    --witness witness.zip --witness-fingerprint WITNESS_SHA256 --channel result.json
+curl -LO https://phishdestroy.github.io/TgWitness/demo/downloads/tgwitness-demo.zip
+unzip -o tgwitness-demo.zip verify.py        # doğrulayıcı arşivin içinde gelir
+python verify.py tgwitness-demo.zip          # Python 3.11+, yalnızca `cryptography` gerekir
 ```
 
-Doğrulayıcı, imzalanmış üreticiyi, sürekli gözlem dönemlerini, boşlukları ve hiç gözlemlenmemiş mesaj kimliklerini yazdırır; günlük, tanığın gördüğü herhangi bir başlık ile farklılık gösteriyorsa işlem başarısız olur.
+İmzalı kayıtları, en yeni kaydın hash değerini ve imzalayanın parmak izini yazdırır ve `0` koduyla çıkar.
+Örnek kurgusaldır; aynı doğrulayıcı her gerçek dışa aktarımda çalışır.
 
-Günlük imzalarını, hash zincirini ve ekleri güvenilir bir anahtarla doğrulayın; kontrol noktalarını ayrı bir yerde saklayın. Seçilen modun toplama kapsamını ve zaman aralıklarını, harici zaman kayıtlarını ve toplama ortamı için mevcut doğrulama sonuçlarını birlikte inceleyin.
-
-[zaman damgası prosedürü](../TIMESTAMP.md) · [Kanıt model](../EVIDENCE.md) · [soruşturma devri](../EVIDENCE.md#investigation-handoff)
-
-## Dağıtım
-
-> [!NOTE]
-> Test sonuçları ve sınırları: [doğrulama kaydı](../VERIFICATION.md).
-
-**Docker ile yerel veya tek sunucu:**
+Bir dışa aktarım mesajları, dosyaları ve doğrulayıcıyı içerir. Anahtar parmak izinizi alıcıya
+başka bir kanaldan gönderin; alıcı kontrolü kendisi yapabilir:
 
 ```sh
-docker compose up -d --build --wait
-docker compose exec tgwitness cat /data/panel-token.txt
+python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --tsa-ca TSA-ROOT.pem --require evidence
 ```
 
-Konteyner, salt okunur bir dosya sistemiyle root olmayan bir kullanıcı olarak çalışır, yalnızca `127.0.0.1:8787` adresine yayın yapar ve tüm verileri adlandırılmış bir birimde tutar.
+Doğrulayıcı imzaları, günlük zincirini, dosya listesini ve ekleri kontrol eder.
+Delil düzeyi için anahtar parmak izinize ve son kaydı kapsayan bir üçüncü taraf zaman damgasına ihtiyaç duyar;
+örneğin otoritenin kök sertifikasına göre kontrol edilmiş bir RFC 3161 zaman damgası.
 
-**Otomatik HTTPS (Caddy) özellikli genel sunucu:** `deploy/env.example`'yi `.env`'ye kopyalayın, `TGWITNESS_DOMAIN`'yi ayarlayın, DNS'yi sunucuya yönlendirin, TCP 80/443 bağlantı noktalarını açın ve çalıştırın
+**Mesajlar nereden gelir.** TgWitness mesajları, resmî uygulamalar gibi hesabın şifreli
+MTProto oturumu üzerinden Telegram'dan alır ve her birini geldiği anda
+günlüğe imzalayarak yazar. [GitHub Actions yakalaması](../SEALED-ACTIONS.md) ve
+[Phala Intel TDX](../HIGH-ASSURANCE.md) mesajları alan toplayıcıyı ayrıca tasdik eder.
 
-```sh
-docker compose -f compose.yaml -f deploy/compose/compose.https.yaml up -d --build --wait
-```
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-chain-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-chain-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/casework-chain-mobile.svg">
+  <img src="../assets/presentation/casework-chain.svg" width="1200" alt="Yeni mesajlar, kaydedilen düzenlemeler ve silme gözlemleri birbirine bağlı, imzalı bir günlük oluşturur. Bağımsız olarak güvenilen bir anahtarla doğrulayın.">
+</picture>
 
-**Hiçbir şey yüklemeden Windows'ta çalıştırma:** Her sürüme ekli taşınabilir ZIP dosyası, resmi gömülü Python çalışma ortamını ve tüm bağımlılıkları içerir. Veriler `data` klasöründe kalır; güncellemek için yeni sürümü açın ve bu klasörü kopyalayın.
+[Arşiv doğrulama](../wiki/Exports-and-Verification.md) · [Delil biçimi](../EVIDENCE.md) · [Bağımsız tanık](../WITNESS.md) · [Harici zaman damgaları](../TIMESTAMP.md) · [Kontroller ve test edilen ölçek](../VERIFICATION.md)
 
-**Docker kullanılmadan:** systemd, Windows oturum açma görevi ve launchd şablonları [deploy/](../../deploy/README.md) dizininde bulunur. Güncellemeler, yedeklemeler, alternatif bağlantı noktaları ve GHCR görüntüleri (sürüm iş akışı bunları yayınladığında) [dağıtım](DEPLOYMENT.md) bölümünde ele alınmaktadır.
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
-### Komut satırı
+## Bir konuşmadan bir davaya
 
-```text
-python start.py [--demo] [--setup-only] [--check [--json]] [--host HOST] [--port PORT] [--data-dir DIR]
-```
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-features-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-features-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-features-mobile.svg">
+  <img src="../assets/presentation/readme-features.svg" width="1200" alt="Üç animasyonlu iş akışı: bir sohbeti HTML ve JSON olarak dışa aktarma, kaydedilmiş sohbetlerde paylaşılan bir bağlantıyı bulma ve bir silme bildiriminden sonra yakalanan sürümleri koruma.">
+</picture>
 
-| Görev | Komut (proje ortamından) |
+<table>
+<tr>
+<td width="33%" align="center"><a href="../wiki/Chat-Export.md"><b>Sohbet dışa aktarımı&nbsp;↗</b></a><br><sub>Tek sohbet, imzalı HTML ve JSON olarak</sub></td>
+<td width="33%" align="center"><a href="../INVESTIGATION.md"><b>Araştırma&nbsp;↗</b></a><br><sub>Kaydedilmiş sohbetlerde bir ipucunu takip edin</sub></td>
+<td width="33%" align="center"><a href="../COLLECTION.md"><b>Kaydedilen sürümler&nbsp;↗</b></a><br><sub>Düzenlemeler ve silme bildirimleri saklanır</sub></td>
+</tr>
+</table>
+
+İki kullanım yolu var: [hesabınızı bir kez dışa aktarın](../ACCOUNT-EXPORT.md) ya da
+[bir araştırmayı takip edin](../INVESTIGATION.md) ve değişiklikleri kaydetmeye devam edin.
+Birkaç sohbet, bir Telegram klasörü veya hesabın tamamını seçin. Her hesabın kendi
+çalışma alanı, oturumu ve imza anahtarı olur.
+
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
+
+## Daha fazlasını keşfedin
+
+<details>
+<summary><strong>Ölçülen dışa aktarımlar · 6 Kasım 2026</strong> · 56.329 mesaj, iki arşiv de doğrulandı</summary>
+
+**İki yeni çalıştırmada 56.329 mesaj dışa aktarıldı.** İmzalı iki arşiv de sabitlenmiş toplayıcı anahtarlarıyla doğrulamayı geçti.
+
+[![Ölçülen toplama ve tam dışa aktarma hızı](../../website/validation/performance.svg)](https://phishdestroy.github.io/TgWitness/tr/docs/validation/)
+
+| Çalıştırma | Mesaj | Toplama süresi | Toplama hızı | Tam dışa aktarma | Uçtan uca hız |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Sunucu A | 27.030 | 189,043 sn | **142,983 mesaj/sn** | 211,647 sn | 127,713 mesaj/sn |
+| Sunucu B | 29.299 | 182,513 sn | **160,531 mesaj/sn** | 206,650 sn | 141,781 mesaj/sn |
+
+WARP üzerinden metin ve meta veriler, sunucu başına iki hesap, ek dosya veya yeniden kullanılan kayıt yok.
+[`92e539af`](https://github.com/phishdestroy/TgWitness/commit/92e539af40d8368d198ff5e040f1d876f2c1310e) revizyonunda ölçüldü.
+Yayımlanan her çalıştırma kaynak revizyonunu, iş yükünü, süreleri ve doğrulama sonucunu listeler:
+[iş yükü, süreler ve doğrulama](../EXPORT-BENCHMARK-2026-11-06.md). `main` dalındaki değişiklikler
+herkese açık [CI iş akışlarından](../../.github/workflows/README.md) geçer; buna Linux ve Windows
+yükleyici testleri ile bağımsız doğrulayıcı derlemesi de dahildir.
+
+[**Demoyu keşfedin →**](https://phishdestroy.github.io/TgWitness/demo/?lang=tr) ·
+[**Ölçümler, tarihler ve yöntem →**](https://phishdestroy.github.io/TgWitness/tr/docs/validation/) ·
+[Kurgusal bir örnek dışa aktarımı indirin](https://phishdestroy.github.io/TgWitness/demo/downloads/tgwitness-demo.zip) ·
+[İmzalı İngilizce denetim raporu](../../website/validation/audit/REPORT.md)
+
+</details>
+
+<a name="start-simple"></a>
+
+<details>
+<summary><strong>Basit başlayın. Tüm rotaları görün.</strong> · ilk başlatma ve sistem haritası</summary>
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-start-map-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-start-map-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-start-map-mobile.svg">
+  <img src="../assets/presentation/readme-start-map.svg" width="1200" alt="İlk başlatma Sadece indir, Sohbetleri izle veya Bir davaya ilişkin deliller seçeneklerini sunar ve yalnızca ilgili bölümleri gösterir. Sistem haritası paneli, toplayıcıyı, Telegram'ı, günlüğü, tanığı ve dış hizmetleri ağ gözlemleriyle birlikte birbirine bağlar. Kurgusal değerler.">
+</picture>
+
+İlk başlatmada tek bir soru sorulur: **Sadece indir**, **Sohbetleri izle** veya
+**Bir davaya ilişkin deliller**. Yanıt, amacı ve arayüz düzeyini belirler; böylece
+panel yalnızca o görevin gerektirdiği bölümleri gösterir. Bağlantı, Telegram'da oturum açma ve
+sohbet seçimi beş aşamada gelir. Bağlantı kontrolü kendiliğinden çalışır;
+rota seçenekleri yalnızca kontrol başarısız olursa açılır. Uzman araçları tek bir anahtarla açılır.
+
+**Sistem haritası**, kurulumun Telegram'a ve dış hizmetlere nasıl ulaştığını gösterir:
+panel erişimi, her hesabın rotası ve Telegram hedefi, günlük ve
+tanık yolu ile en son ağ gözlemleri. Eksik bir gözlem
+eksik olarak etiketlenir.
+
+[İlk kurulum](../SETTINGS.md) · [Sistem haritası](../SYSTEM-MAP.md)
+
+</details>
+
+<details>
+<summary><strong>Araştırmanın geri kalanı için tasarlandı</strong> · profil kartları, izleme listeleri, cüzdanlar, çevrimiçi takip, mahkeme belgeleri</summary>
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-capabilities-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-capabilities-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-capabilities-mobile.svg">
+  <img src="../assets/presentation/readme-capabilities.svg" width="1200" alt="Adları ve kullanıcı adlarını Telegram ID'sine göre takip edin. Desteklenen bot etkileşimlerini imzalı makbuzlarla kaydedin. Arşivlenmiş mesajlarda arama yapın ve salt okunur MCP istemcilerini bağlayın. SSH'si maskelenmiş bir toplayıcıyı, incelenmek üzere sağlayıcı kayıtlarıyla birlikte dağıtın. Bir konuşmayı günlük referanslarıyla adım adım belgeleyin. Mahkeme şablonları içeren bir BagIt dava paketi teslim edin. Örnek iş akışları.">
+</picture>
+
+<table>
+<tr>
+<td width="50%" align="center"><a href="../INVESTIGATION.md#4-connect-observations-across-chats"><b>Kişiler ve profil dosyaları&nbsp;↗</b></a><br><sub>Telegram ID'sine göre takip edilen adlar ve kullanıcı adları</sub></td>
+<td width="50%" align="center"><a href="../COLLECTION.md#act-from-the-panel"><b>Bot araştırması&nbsp;↗</b></a><br><sub>İmzalı makbuzlarla bot etkileşimleri</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><a href="https://phishdestroy.github.io/TgWitness/tr/docs/archive/"><b>Arşiv araması, yapay zekâ ve MCP&nbsp;↗</b></a><br><sub>Arşivde arayın, salt okunur istemcileri bağlayın</sub></td>
+<td width="50%" align="center"><a href="../HIGH-ASSURANCE.md"><b>Mühürlü bulut dağıtımı&nbsp;↗</b></a><br><sub>Intel TDX içinde bir toplayıcı</sub></td>
+</tr>
+</table>
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-documentation-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-documentation-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-documentation-mobile.svg">
+  <img src="../assets/presentation/readme-documentation.svg" width="1200" alt="Üç animasyonlu adım: sonraki anlık görüntüsü bir ad değişikliğini kaydeden bir profil kartı, amaçları günlük kayıtlarıyla kapanan bir konuşma planı ve sağlama toplamı geçerli bir cüzdana çözülüp izleme listesinde eşleşme tetikleyen bir ödeme QR kodu. Kurgusal değerler.">
+</picture>
+
+**Konuşmayı belgeleyin.** **Belgeler** çekmecesinde bir sohbet için tutanak başlatın;
+her adım kendiliğinden yazılır: panel eylemleri, öncesindeki bekleme süresiyle yanıtlar,
+düzenlemeler, silme bildirimleri, notlar ve yapay zekâ taslakları. Her adım kendi günlük
+kaydına ve SHA-256 değerine atıf yapar. Belge kesinleştirildiğinde imzalanır ve beyan hash'i
+günlüğe yazılır.
+
+| | |
 | --- | --- |
-| Başlatmadan hazırlık kontrolü | `python start.py --check` |
-| Bir Telethon SQLite oturumunu çevrimdışı hale getirme | `python -m tgwitness.sessions account.session --out account.tgwitness-session` |
-| Büyük boyutlu bir dışa aktarım dosyasını diske aktarın | `python -m tgwitness.download --token-file data/live/panel-token.txt --out evidence.zip` |
-| Dışa aktarılan arşivi doğrulama | `python tgwitness/verify.py tgwitness-evidence.zip --fingerprint SHA256` |
-| 4 GiB'nin üzerindeki bir arşivi doğrulayın | `python tgwitness/verify.py big-evidence.zip --fingerprint SHA256 --max-gib 16` |
-| Bir yapılandırma dosyasından bağımsız bir tanık çalıştırma | `python -m tgwitness.witness run --config witness.json` |
+| [Profil kartları](../INVESTIGATION-MODE.md#subject-cards) | Telegram'ın BOT, VERIFIED, SCAM ve FAKE etiketleriyle bir botun, kişinin, kanalın veya grubun profil anlık görüntüleri; sonraki bir anlık görüntü nelerin değiştiğini listeler |
+| [Konuşma planları](../INVESTIGATION-MODE.md#conversation-plans) | Ödeme yolu, altyapı veya kişilere yönelik amaçlar, hazırlanmış mesajlar, yanıt süreleri, saate göre etkinlik ve karşı tarafın yazım üslubu |
+| [Çeviri](../INVESTIGATION-MODE.md#machine-translation) | Dilleri, modeli ve günlük kaydıyla birlikte orijinalin altında gösterilir |
+| [İzleme listeleri](../INVESTIGATION-MODE.md#watchlists) | Kelimeler, kalıplar, cüzdanlar, @kullanıcı adları, ID'ler, alan adları, telefonlar ve bağlantılar; metinde, düzenlemelerde, gizli bağlantı hedeflerinde, bot düğmelerinde, QR kodlarında ve OCR'da eşleştirilir |
+| [Çevrimiçi takip](../INVESTIGATION-MODE.md#online-watch) | 1–60 dakikada bir kontrol, istek başına en fazla 100 hesap, saate ve haftanın gününe göre örüntü |
+| [Kodlar ve cüzdanlar](../INVESTIGATION-MODE.md#codes-in-images) | Ödeme QR kodları; EIP-55'e göre kontrol edilen EVM adresleri, ham biçimde TON, XRP Ledger sağlama toplamları, zincir, tutar ve token içeren ödeme bağlantıları |
+| [İstemci izleri](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-can-and-cannot-show) | Yuvarlak videolarda ve sesli mesajlarda kodlayıcı izleri; yükleme zamanının gönderme zamanıyla karşılaştırılması önceden kaydedilmiş “canlı” kanıtları ortaya çıkarır |
+| [Gizli kimlik ve yetki](../INVESTIGATION-MODE.md#cover-and-authority) | Kurgusal kimlikler, yetkilendirmeler ve yetkili sohbetlerin veya dönemin dışındaki mesajları işaretleyen bir gizli faaliyet kaydı |
+| [Hesap denetimi](../INVESTIGATION-MODE.md#account-control) | Önce/sonra kayıtlarıyla profil ve gizlilik düzenleme, ifşa kontrolü ve her işlemden hemen sonra çevrimdışına geçme |
+| [Mahkeme belgeleri](../INVESTIGATION-MODE.md#documents-for-court) | Rule 902(13)/(14) sertifikasyon şablonu, delil dizini, talep eki ve ekran kayıtları için WebVTT/SRT altyazıları içeren BagIt dava paketi |
 
-Yardımcı `python -m tgwitness…` komutları, `.venv` (Windows'ta `.venv\Scripts\python.exe`, diğer platformlarda `.venv/bin/python`) içinde çalıştırılmalıdır.
+18+, şiddet veya kişisel veri olarak işaretlenen içerik, AES-256-GCM ile mühürlenmiş olarak
+mahkeme kopyasında kalır; anahtarlar ayrı iletilir.
 
-| Değişken | Amaç |
+[Dışa aktarma ayarları](../EXPORT_HASHES.md) normal API ve Takeout ile edinimi,
+eklerden önce mesaj geçmişini, dosya indirmelerini veya sunucu hash'lerini ve uyumlu
+Telegram Desktop JSON/HTML görünümlerini kapsar. [Dağıtık sohbet dışa aktarımı](../DISTRIBUTED-EXPORT.md#history-acquisition)
+herkese açık geçmiş için isteğe bağlı bir Takeout yolu, her 100 mesajda bir imzalı kontrol noktaları
+ve aynı hesapla bir aralık içinde kurtarma sunar; bunun
+[performans tasarımı](../FAST-ACQUISITION.md) test edilen edinim davranışını
+ve planlanan canlı ölçümleri listeler.
+
+</details>
+
+<details>
+<summary><strong>Diğer her şey</strong> · geçmiş, hesaplar, proxy'ler, yapay zekâ, entegrasyonlar</summary>
+
+| | |
 | --- | --- |
-| `TGWITNESS_HOST`, `TGWITNESS_PORT` | Dinleme adresi ve bağlantı noktası (varsayılan `127.0.0.1:8787`) |
-| `TGWITNESS_DATA` | Veri dizini (varsayılan `data/live`) |
-| `TGWITNESS_TOKEN` | Oluşturulan token yerine sabit panel tokeni (en az 24 karakter) |
-| `TGWITNESS_VAULT_KEY_FILE` | Yeni kurulumlar için harici kasa ana anahtarı |
-| `TGWITNESS_DOMAIN`, `TGWITNESS_IMAGE` | Docker HTTPS ana bilgisayar adı ve yayınlanan görüntü (`deploy/env.example` adresine bakın) |
-| `TGWITNESS_WITNESS_*` | Bağımsız tanık: toplayıcı, jetonlar, kanal, `_INTERVAL`, `_TIMEOUT`, `_POST` (tümü, değişiklikler, sorunlar), `_TITLE`, `_CONFIG` ([tanık](../WITNESS.md#options)) |
+| [Eski mesajları yükleyin](../HISTORY.md) | Seçili sohbetlerin geçmişini çekin; istediğiniz zaman duraklatıp sürdürün |
+| [Birkaç hesap](../ACCOUNTS.md#multiple-accounts) | Her biri kendi Telegram oturumuna, günlüğüne ve imza anahtarına sahip ayrı çalışma alanları |
+| [Toplu içe aktarma](../ACCOUNTS.md#bulk-import-and-account-groups) | Bir yığın oturum dosyasını bırakın, hesapları ortak ayarlara sahip gruplara ayırın |
+| [MTProxy havuzu](../wiki/Proxies.md#pool-dashboard-and-custom-sources) | Ping, ülkeler, filtreler, kendi listeleriniz |
+| [Mevcut oturumlar](../ACCOUNTS.md) | TData, Telethon, Pyrogram, StringSession, auth key veya bir `key:DC` satırı; içe aktarılan bir donörden isteğe bağlı bağımsız QR yetkilendirmesi |
+| [Hesap güvenliği](../ACCOUNTS.md#create-an-independent-authorization) | Yeni oturum uyarıları, diğer oturumları sonlandırma, iki adımlı doğrulama parolası da belirleyen tek oturum modu ve canlı güncellemeler bu oturuma ulaşmayı bıraktığında bunu fark eden bir [tanık yoklaması](../ACCOUNTS.md#witness-probe) |
+| [Devam ettirilebilir sohbet dışa aktarımı](../EXPORT_HASHES.md#restricted-github-capture-and-single-chat-export) | Durdurulan bir dışa aktarım imzalı kısmi bir kopya tutar: sürdürün, baştan başlayın veya kaydedileni indirin |
+| [Proxy'ler](../CONNECTION-SECURITY.md#ip-modes) | Çalışma alanı başına SOCKS5, HTTP CONNECT veya MTProxy. **IP Gizleme** asla doğrudan bağlantıya geri dönmez |
+| [Arama ve yapay zekâ](../ANALYSIS.md) | Yerel arama, kontrol edebileceğiniz kaynaklarla isteğe bağlı yapay zekâ |
+| [Tam metin arama](../SEARCH.md) | Kelime biçimleri, tam ifadeler, alan adları, @kullanıcı adları ve boşluksuz Çince; en iyi eşleşmeler önce (**önizleme sürümü**) |
+| [MCP](../MCP.md) | MCP istemcileri için seçtiğiniz sohbetlerle sınırlı salt okunur erişim |
+| [Komut satırı](../CLI.md) | Betikler ve ajanlar için `--json` ile `search`, `context`, `messages`, `stats` ve JSON Lines `export`; yerel olarak veya kapsamı sınırlı bir belirteçle (**önizleme sürümü**) |
+| [OCR ve transkripsiyon](../MEDIA-ANALYSIS.md) | Yerel olarak çalışır, orijinallere dokunulmaz |
+| [Bağımsız yakalama](../OPTIONAL-CAPTURE.md) | **Diğer araçlar → Ekstralar** altında isteğe bağlı tarayıcı/AyuGram kaydedicileri (önizleme, varsayılan olarak kapalı) |
+| [Trusted Live](../TRUSTED-LIVE.md) | Resmî Desktop/Web oturumu, korumalı video ve Telegram'ın kendi dışa aktarımıyla süreklilik analizi (önizleme; canlı yeterlilik doğrulaması bekleniyor) |
+| [Mühürlü resmî Web](../OFFICIAL-WITNESS.md) | GitHub Actions üzerinde yeni başlatılmış resmî tarayıcı, kısıtlı kontroller, imzalı video ve bağımsız olarak beklenen kaynak/ayarlar |
+| [Webhook'lar](../WEBHOOKS.md) | Yeniden denemeli imzalı giden olaylar, n8n örneği dahil |
+| [Paylaşılan erişim](../ACCESS.md) | Birine yalnızca seçili sohbetleri verin; süre sonu ve IP sınırlarıyla |
+| [Eksik mesaj numaraları](../EVIDENCE.md#missing-message-numbers-gap_summary) | Telegram'ın atadığı ancak hiç gözlemlenmemiş numaralar; kanal başına ve tüm hesap için, kapsamda, raporlarda ve MCP'de (**önizleme sürümü**) |
+| [Sohbet durumu anlık görüntüleri](../COLLECTION.md) | Başlık, açıklama, sabitlenmiş mesajlar, yöneticiler ve hediyelerin, değişenleri gösteren periyodik imzalı anlık görüntüleri (**önizleme sürümü**) |
+| [Sistem haritası](../SYSTEM-MAP.md) | Panel erişimi, hesap rotaları, Telegram hedefleri ve dış hizmetlerin canlı haritası; en fazla 2.000 ağ gözleminden en son 200'üyle |
 
+</details>
 
-![Section divider](../assets/presentation/divider.svg)
+<details>
+<summary><strong>Kaydı neyin desteklediğini seçin</strong> · yerel, denetlenmiş bulut, GitHub Actions veya Intel TDX</summary>
 
-## Sorumluluk ve veri koruma (GDPR)
+Yerel olarak çalıştırın, denetlenmiş bir bulut dağıtımı ekleyin veya **Intel TDX'li bir Phala Cloud
+gizli VM'si** içinde toplayın. Her seçenek imzalı günlüğü korur; ek
+kontroller, toplamanın yapıldığı ortamı ele alır.
 
-TgWitness bir araçtır. Bu aracı kim işletirse, neyin, neden ve ne kadar süreyle toplanacağına o karar verir ve bundan sorumludur — AB/Birleşik Krallık GDPR kapsamında genellikle söz konusu kişisel verilerin *sorumlusu* olarak. Telegram mesajları, kayıt edilmeyi hiçbir zaman kabul etmemiş kişilerin kişisel verilerini içerir: isimler, kullanıcı adları, kimlik numaraları, fotoğraflar, telefon numaraları, görüşler. Bu bölüm hukuki tavsiye niteliğinde değildir; sizin için geçerli olan yasaları ve Telegram’ın kullanım koşullarını kontrol edin.
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-assurance-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-assurance-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/casework-assurance-mobile.svg">
+  <img src="../assets/presentation/casework-assurance.svg" width="1200" alt="Üç dağıtım seçeneği: yerel günlük doğrulaması; sağlayıcı ve erişim kayıtlarına sahip denetlenmiş bir VM; doğrulanmış quote, ölçülmüş işletim sistemi ve uygulama ile bağlı bir toplayıcı anahtarı içeren Phala Intel TDX.">
+</picture>
 
-- **Yasal bir dayanak ve amaç belirleyin.** Dolandırıcılığın önlenmesi, ağ ve bilgi güvenliği ile yasal taleplerin savunulması, genellikle meşru menfaatler olarak kabul edilir (GDPR Madde 6(1)(f), Gerekçe 47 ve 49; yasal talepler için Madde 9(2)(f)). Amacı her vaka için ayrı ayrı yazın. Kamu kurumları kendi yasal dayanakları çerçevesinde çalışır.
-- **Amacınız gerektirdiği kadar az veri toplayın.** Seçtiğiniz sohbetlerle başlayın. Klasör ve tüm hesap modları, özel sohbetleri ve üçüncü tarafların mesajlarını kaydeder: bunları yalnızca bu amaç için ayrılmış hesaplarda kullanın; panel onay ister ve imzalı günlük bunu kaydeder. İhtiyacınız olmayan olay türlerini, ek türlerini ve kendi eylemlerinizi devre dışı bırakın ve sohbetleri hariç tutun.
-- **Kişi profilleri, profil oluşturma işlevi görür.** Varsayılan olarak kapalıdır ve sohbet bazında etkinleştirilir. Bunları belirli bir soruşturma için kullanın, kişilerle ilgili otomatik kararları bunlara dayandırmayın (Madde 22) ve işiniz bittiğinde bunları kapatın veya sohbeti silin — bu işlem profilleri siler. Çok sayıda kişinin sistematik olarak izlenmesi genellikle bir veri koruma etki değerlendirmesi yapılmasını gerektirir (Madde 35).
-- **Güvenliğini sağlayın.** Oturumlar, kimlik bilgileri ve anahtarlar şifrelenmiş bir kasada bulunur; veri dizinini şifrelenmiş bir diske yerleştirin, dışa aktarımlara bir şifre atayın (AES-256 ZIP), paneli HTTPS arkasında tutun ve tanığa yalnızca okunur token verin. Özetler özelliğini etkinleştirmediğiniz sürece bildirimler mesaj metni içermez; bu özellik etkinleştirildiğinde metin bildirim hizmetine gönderilir.
-- **Saklama ve silme.** Günlüğün bütünlüğünün kanıtlanabilmesi için sadece ekleme yapılabilir; imza zincirini bozmadan tek tek kayıtlar silinemez. Çalışma alanı başına saklama planı yapın ve amaç sona erdiğinde tüm çalışma alanını (Hesaplar → Sil) veya veri dizinini silin. S3 Object Lock kapsamındaki dış kopyalar, saklama tarihinden önce silinemez — süreyi buna göre seçin. Silme hakkının istisnaları vardır; örneğin, yasal taleplerin oluşturulması veya savunulması için (Madde 17(3)(e)).
-- **Kayıt altına alınan kişilerin talepleri.** Sohbet dökümleri ve profil dosyaları, bir kişi hakkında hangi bilgilerin tutulduğunu bulmayı mümkün kılar (Madde 15).
-- **Yazarlara hiçbir bilgi gönderilmez.** TgWitness'te telemetri veya barındırılan hizmet yoktur; veriler yalnızca sizin yapılandırdığınız yollar üzerinden (Telegram, zaman damgası hizmetleri, S3 kopyalama, bildirimler, tanık) makinenizden dışarı çıkar.
+TDX doğrulayıcısı quote'u Intel'in sabitlenmiş köküne ve iptal verilerine göre kontrol eder,
+onu imzalı bir toplayıcı beyanına ve yeni bir sınamaya bağlar ve ölçülen
+işletim sistemi ile uygulamayı bağımsız olarak beklenen girdilerle karşılaştırır. Rapor
+her sonucu ayrı ayrı listeler; böylece ölçülen ortam, toplayıcı kimliği, yakalama
+kayıtları ve kapsam birlikte incelenebilir.
 
-## Güvenlik ve proje durumu
+**GitHub köken bilgisiyle yakalama** (önizleme). Bir sohbeti sabitlenmiş bir TgWitness sürümü ve yeni bir Telegram oturumuyla
+GitHub tarafından barındırılan bir runner üzerinde toplayın, ardından şifreli
+arşivi GitHub tasdikiyle birlikte indirin. Doğrulayıcı onaylı iş akışını ve
+toplayıcı sürümünü, arşiv özetini, günlüğü ve ekleri kontrol eder. Paneldeki
+**Dışa aktarımlar** bölümünde de bulunur.
+[Yakalama sayfasını açın](https://phishdestroy.github.io/TgWitness/tr/docs/capture/) · [Talimatlar](../SEALED-ACTIONS.md)
 
+Canlı gözlem, geçmiş veya tek seferlik bir dışa aktarım için bir
+[toplama yöntemi](../COLLECTION-MODES.md) seçin. Özel bulut sohbetleri, bağlı hesap
+bunlara erişebiliyorsa kullanılabilir. Yayımlanan uygulama ayrıca
+[Gizli Sohbet entegrasyonunu](../PSEUDO-SECRET.md) içerir: isteğe bağlı protokol bağımlılığını kurun
+ve orada oluşturulan veya kabul edilen sohbetleri kaydetmek için hesap bazında etkinleştirin.
+Kullanılabilir edinim yolları için [toplama kapsamına](../COLLECTION.md) bakın.
 
-- Panel varsayılan olarak localhost üzerinde dinleme modundadır. Uzaktan erişim için HTTPS Compose profilini veya bir SSH tünelini kullanın; asla düz HTTP bağlantısını açık bırakmayın.
-- Telegram oturumları, API kimlik bilgileri, proxy kimlik bilgileri ve imzalama anahtarı, Fernet ile şifrelenmiş bir kasada saklanır. Varsayılan olarak anahtar aynı veri dizininde bulunur; harici bir ana anahtar kullanmak için `TGWITNESS_VAULT_KEY_FILE` ayarını yapın. Yerel mesaj içeriği ve medya dosyaları TgWitness tarafından şifrelenmez; veri dizinini şifrelenmiş bir disk veya birimde saklayın. İmzalı ZIP dışa aktarımları isteğe bağlı olarak parola ile şifrelenebilir.
-- Veri dosyaları, oturumlar, token'lar, anahtarlar ve dışa aktarımlar git ve Docker derlemelerinden hariç tutulmuştur.
-- [SECURITY.md](../../.github/SECURITY.md) dosyasında açıklandığı şekilde güvenlik açıklarını gizli olarak bildirin.
+[Phala / Intel TDX ve denetlenmiş dağıtımlar](../HIGH-ASSURANCE.md) ·
+[Canlı Phala yeterlilik doğrulaması](../VERIFICATION.md#live-phala-cloud-deployment--4-november-2026) ·
+[Güven sınırları](../SECURITY-MODEL.md)
 
-### Neler test edildi
+</details>
 
-TgWitness **0.6.1,** Python 3.12 ile Windows 11 üzerinde çalışır. 29 Ekim 2026 itibarıyla durum:
+<a name="manifesto"></a>
 
-| Alan | Nasıl test edildi? |
+<details>
+<summary><strong>Yakalamayı ve saklanan kaydı kontrol edin</strong> · alıcının neyi doğruladığı ve Export Clinic</summary>
+
+<picture>
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-manifesto-mobile.svg">
+  <img src="../assets/presentation/readme-manifesto.svg" width="1200" alt="Konuşmayı yakalayın. Kaydı doğrulayın. Mesajları, düzenlemeleri ve dosyaları kaydedin, imzaları ve kontrol noktalarını kontrol edin ve yakalama sürecini inceleyin.">
+</picture>
+
+TgWitness, bağlı Telegram hesabına iletilen içeriği sohbet, mesaj ve gönderen
+tanımlayıcıları, yakalanan sürümler ve toplama meta verileriyle birlikte kaydeder.
+Arşiv bu kayıtları, korunan ekleri ve doğrulama verilerini inceleme için
+bir araya getirir.
+
+| Kontrol | Alıcının doğruladığı |
 | --- | --- |
-| Mesajlar, düzenlemeler, silme işlemleri, ekler, yeniden başlatma sonrası yeniden kontroller, FloodWait duraklamaları | 27–29 Ekim 2026 tarihleri arasında **gerçek bir Telegram hesabı** kullanılarak gerçekleştirildi: 9.968 imzalı kayıt, her imza ve hash zinciri doğrulandı ([canlı test](../VERIFICATION.md#live-telegram-test-whole-account--29-october-2026)) |
-| Hesabın tamamını gözlemleme ve geçmiş anlık görüntüleri | 29 Ekim 2026 tarihinde **gerçek bir** hesapla gerçekleştirilmiştir: 2 grup veya kanaldan gelen mesajlar ile 3 özel sohbet ve bot |
-| **Sohbetler**'den bir mesaj düğmesine basma | **Gerçek bir hesap**la bir kez yapıldı |
-| Telethon/Pyrogram oturum dosyaları ve Telegram Desktop TData ile oturum açma | **Tek bir gerçek** hesapla tamamlandı |
-| Telefon, QR kodu ve Oturum Açma Anahtarı ile oturum açma, önceki mesajlarıyla birlikte kapsam içine alınan yeni sohbetler, mesaj gönderme, davetle katılma, tepkiler, üyelik, kullanıcı profilleri, aynı anda birden fazla hesap, dışa aktarma ve doğrulayıcı | Sentetik Telegram istemcileriyle otomatik testler |
-| SOCKS5/HTTP proxy'leri, witness bot, Proof monitörü, bildirimler, S3 kopyası, RFC 3161 ve OpenTimestamps | Yerel test sunucularına yönelik otomatik testler |
-| Halka açık MTProxy listeleri | İndirildi ve filtrelendi (29 Ekim itibarıyla 118 sunucu); henüz bu sunucular üzerinden bağlantı kurulamadı |
-| Güncel testler ve sınırları | [Tamamlanması gereken doğrulamalar](../VERIFICATION.md#remaining-qualification) |
+| İmzalı günlük ve manifest | Kayıt imzaları, hash zinciri ve teslim edilen dosyalar, beklenen imza anahtarına göre. |
+| Ayrı saklanan kontrol noktası | Günlük, önceden kaydedilmiş bir uzunluğa ve en yeni kaydın hash değerine göre. |
+| Bağımsız tanık | Günlük, ayrı bir tanığın sakladığı kontrol noktalarına göre. |
+| GitHub Actions yakalaması | Arşiv; tasdikine, onaylı barındırılan iş akışına ve toplayıcı sürümüne göre. |
 
-Ayrıntılar: [doğrulama kaydı](../VERIFICATION.md), [sürüm durumu](../internal/RELEASE.md) ve kullanıma [hazırlık durumu](../internal/READINESS.md).
+[Export Clinic](https://phishdestroy.github.io/TgWitness/docs/export-clinic/)
+bir Telegram konuşmasını kasıtlı olarak değiştirilmiş Desktop dışa aktarma dosyalarının yanında gösterir.
+Sürümleri karşılaştırın, değişiklikleri inceleyin ve imzalı bir TgWitness arşivi için
+toplama ve doğrulama adımlarını izleyin.
 
+[Doğrulama adımları](../wiki/Exports-and-Verification.md) ·
+[GitHub yakalaması](../SEALED-ACTIONS.md) ·
+[Teknik güven modeli](../SECURITY-MODEL.md)
 
-![Section divider](../assets/presentation/divider.svg)
+</details>
 
-## Geliştirme
+<a name="operations"></a>
 
-```sh
-python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\Activate.ps1
-python -m pip install -c deploy/constraints.txt -e ".[dev]"
-python -m ruff check .                                 # source checks
-python -m playwright install chromium
-python tools/build_portable.py                         # Windows portable ZIP (Windows + Python 3.12)
-python tools/build_source.py                          # source ZIP with SHA-256 manifest
-python tools/build_site.py                             # static project site in dist/site
-```
+<details>
+<summary><strong>Araştırmayı sürdürün</strong> · bildirimler, depolama ve kurtarma</summary>
 
-Tarayıcı kontrolleri sentetik veriler kullanır. Güncel derleme ve yayın işleri `.github/workflows/` altında tanımlıdır. Pull request açmadan önce [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) dosyasını okuyun.
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-services-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-services-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-services-mobile.svg">
+  <img src="../assets/presentation/readme-services.svg" width="1200" alt="Animasyonlu iş akışları: Apprise yapılandırılmış uyarıları gönderir; site dışı kopyalar S3 uyumlu depolamaya yüklenmeden önce şifrelenir.">
+</picture>
 
-## Belgeler
+[Bildirimler](../OPERATIONS.md#notifications) · [Şifreli site dışı kopya](../wiki/Off-site-Copy.md) · [Yedekleme ve kurtarma](../wiki/Backup-and-Recovery.md) · [Sorun giderme](../OPERATIONS.md)
 
-| Kılavuz | İçindekiler |
+<table>
+<tr>
+<td width="33%" align="center"><a href="https://phishdestroy.github.io/TgWitness/tr/docs/start/"><b>Kurulum kılavuzu&nbsp;↗</b></a><br><sub>Kurulumdan ilk sohbete</sub></td>
+<td width="33%" align="center"><a href="https://phishdestroy.github.io/TgWitness/tr/docs/dedicated-account/"><b>Hesabınızı hazırlayın&nbsp;↗</b></a><br><sub>Ayrı bir Telegram hesabı</sub></td>
+<td width="33%" align="center"><a href="DEPLOYMENT.md"><b>Docker ve sunucular&nbsp;↗</b></a><br><sub>HTTPS, yeniden başlatmalar ve güncellemeler</sub></td>
+</tr>
+</table>
+
+</details>
+
+<a name="repository-map"></a>
+
+<details>
+<summary><strong>Depoyu keşfedin</strong> · kod, belgeler ve araçlar nerede</summary>
+
+| Dizin | Buradan başlayın |
 | --- | --- |
-| [Hızlı başlangıç](QUICKSTART.md) | İlk başlatma, hesap bağlantısı ve ilk dışa aktarma |
-| [Hesaplar ve oturum biçimleri](../ACCOUNTS.md) | Giriş bilgileri, dönüştürme, birden fazla hesap |
-| [Veri toplama nasıl çalışır?](../COLLECTION.md) | Politikalar, sürümler, ekler ve eksiklikleri kaydetme |
-| [Bağlantı ve güvenlik](../CONNECTION-SECURITY.md) | Proxy'ler, şifreleme ve anahtarlar |
-| [Operasyonlar](../OPERATIONS.md) | Günlük iş akışı, yedekleme, geri yükleme, kapasite |
-| [Dağıtım](DEPLOYMENT.md) ve [hizmet şablonları](../../deploy/README.md) | Sunucular, kapsayıcılar, HTTPS, güncellemeler |
-| [Kanıt modeli](../EVIDENCE.md) ve [zaman damgaları](../TIMESTAMP.md) | Bütünlük, kapsama alanı, kişi profilleri, güven ve devretme |
-| [Bağımsız tanık](../WITNESS.md) | Salt okunur tanık jetonları, Docker profili, kanal gönderileri, çapraz kontroller |
-| [Mimari](../ARCHITECTURE.md) ve [ürün modeli](../PRODUCT.md) | İç yapısı ve tasarım kararları |
-| [Doğrulama](../VERIFICATION.md) ve [hazırlık](../internal/READINESS.md) | Gerçekleştirilen kontroller ve kalan işler |
-| [Değişiklik günlüğü](../CHANGELOG.md) | Sürüm geçmişi |
-| [Web sitesi ve yayıncılık](../internal/PUBLISHING.md) | Yerel web sitesi önizlemesi, GitHub Pages, ilk yayın |
+| [docs/](../README.md) | Kurulum, araştırma iş akışları ve teknik başvuru |
+| [tgwitness/](../../tgwitness/README.md) | Ana uygulama, toplayıcı, günlük ve web paneli |
+| [tgwitness_capture/](../../tgwitness_capture/README.md) | Bağımsız kaydediciler ve doğrulama kodları |
+| [addons/](../../addons/README.md) | İsteğe bağlı yakalamanın kurulumu, yapılandırması ve testleri |
+| [deploy/](../../deploy/README.md) | Yükleyiciler, konteynerler ve arka plan hizmetleri |
+| [examples/](../../examples/README.md) | Hesap dışa aktarma ve mühürlü yakalama yapılandırmaları |
+| [integrations/](../../integrations/README.md) | İmzalı webhook'lar ve bir n8n alıcısı |
+| [.agents/](../../.agents/README.md) | Arşivi CLI üzerinden okumak için görev talimatları |
+| [scripts/](../../scripts/README.md) | Başlatıcılar ve CI yardımcı araçları |
+| [tools/](../../tools/README.md) | Derlemeler, kontroller ve paketleme |
+| [website/](../../website/README.md) | Herkese açık site, çevrilmiş kılavuzlar ve etkileşimli demo |
+| [.github/](../../.github/AUTOMATION.md) | İş akışları, katkı yönergeleri ve destek |
 
+[Eksiksiz proje kılavuzu](../PROJECT-GUIDE.md) ·
+[Katkıda bulunma](../../.github/CONTRIBUTING.md) · [Yardım alın](../../.github/SUPPORT.md)
 
-![Section divider](../assets/presentation/divider.svg)
+</details>
 
-## Lisans
+<details>
+<summary><strong>⚖️ Etik Bildirim ve Tarihsel Süreklilik</strong></summary>
 
-[MIT License](../../LICENSE)
+Yazarların tutumu ve operatör bildirimi, bu dilde:
 
-## Bu klasördeki kılavuzlar
+[Lisans ve Mimari Uyumsuzluk Bildirimi](TAYLOR-WESSING-EXCLUSION.md) · [Operatör bildirimi](OPERATOR-INCOMPATIBILITY.md) · [MIT Lisansı](../../LICENSE) · [Orijinal NOTICE](../../NOTICE)
 
-| Dosya | İçerik |
-| --- | --- |
-| [DEPLOYMENT.md](DEPLOYMENT.md) | Dağıtım ve işletim |
-| [QUICKSTART.md](QUICKSTART.md) | TgWitness hızlı başlangıç |
+</details>
 
-[Lisans ve Mimari Uyumsuzluk Bildirimi](TAYLOR-WESSING-EXCLUSION.md) · [MIT License](../../LICENSE)
+<a name="languages"></a>
+
+<details>
+<summary><strong>Proje tanıtımını kendi dilinizde okuyun</strong></summary>
+
+[English](../../README.md) · [Русский](../ru/README.md) · [Українська](../uk/README.md) · [Español](../es/README.md) · [Português (Brasil)](../pt/README.md) · **Türkçe** · [العربية](../ar/README.md) · [فارسی](../fa/README.md) · [اردو](../ur/README.md) · [हिन्दी](../hi/README.md) · [Bahasa Indonesia](../id/README.md) · [Tiếng Việt](../vi/README.md) · [简体中文](../zh/README.md) · [繁體中文](../zh-Hant/README.md) · [Français](../fr/README.md) · [Deutsch](../de/README.md) · [Italiano](../it/README.md) · [Polski](../pl/README.md) · [O‘zbekcha](../uz/README.md) · [한국어](../ko/README.md) · [日本語](../ja/README.md) · [Bahasa Melayu](../ms/README.md) · [ไทย](../th/README.md) · [עברית](../he/README.md) · [বাংলা](../bn/README.md) · [አማርኛ](../am/README.md)
+
+</details>
+
+<p align="center">
+  <a href="../README.md"><b>Teknik belgeler</b></a> ·
+  <a href="https://github.com/phishdestroy/TgWitness/wiki"><b>Araştırma el kitabı</b></a> ·
+  <a href="https://github.com/phishdestroy"><b>PhishDestroy tarafından geliştirildi</b></a> ·
+  <a href="../../.github/CONTRIBUTING.md"><b>Katkıda bulunun</b></a> ·
+  <a href="../../.github/SUPPORT.md"><b>Yardım alın</b></a> ·
+  <a href="../../.github/SECURITY.md"><b>Güvenlik açığı bildirin</b></a>
+</p>
+
+[Makine tarafından okunabilir proje dizini](../../llms.txt) · [Eksiksiz metin el kitabı](https://phishdestroy.github.io/TgWitness/llms-full.txt) · [Ajanlar için depo kuralları](../../AGENTS.md)

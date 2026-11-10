@@ -1,360 +1,482 @@
-[English](../../README.md) · [Русский](../ru/README.md) · [Українська](../uk/README.md) · [Español](../es/README.md) · [Português (Brasil)](../pt/README.md) · [Türkçe](../tr/README.md) · **العربية** · [فارسی](../fa/README.md) · [اردو](../ur/README.md) · [हिन्दी](../hi/README.md) · [Bahasa Indonesia](../id/README.md) · [Tiếng Việt](../vi/README.md) · [简体中文](../zh/README.md)
-
-![TgWitness — preserve the record, verify the evidence](../assets/presentation/casework-hero-static.svg)
-
-<p align="center">
-  <strong>مساحة عمل المراقبة الخاصة بك على Telegram.</strong><br>
-  احتفظ بالمحادثات التي تم التقاطها، وافهم ما الذي تغير، وشارك سجلاً موقّعاً.<br>
-  على جهاز الكمبيوتر أو الخادم الخاص بك. باستخدام حساباتك الخاصة.
-</p>
-
-<p align="center">
-  <img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-243a52?logo=python&amp;logoColor=white">
-  <img alt="FastAPI + Telethon" src="https://img.shields.io/badge/FastAPI-Telethon-243a52?logo=fastapi&amp;logoColor=white">
-  <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-243a52?logo=docker&amp;logoColor=white">
-  <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-243a52">
-  <img alt="Version: 0.9.1" src="https://img.shields.io/badge/version-0.9.1-243a52">
-</p>
-
-<p align="center">
-  <a href="#البداية-السريعة">البداية السريعة</a> ·
-  <a href="#الميزات">الميزات</a> ·
-  <a href="#ربط-حساب-telegram">الحسابات</a> ·
-  <a href="#الأدلة-والتحقق">الأدلة</a> ·
-  <a href="#النشر">النشر</a> ·
-  <a href="../README.md">التوثيق</a>
-</p>
-
-> [!TIP]
-> **استكشف قبل الاتصال.** قم بتشغيل `scripts\Demo.cmd` أو `sh start.sh --demo` لفتح مساحة عمل تحتوي على محادثات خيالية. لا حاجة إلى حساب Telegram.
-
-**هل أنت جديد هنا؟** [ابدأ →](QUICKSTART.md) · [ويكي →](../wiki/Home.md) · [اختر دليلاً →](../README.md) · [احصل على المساعدة →](../../.github/SUPPORT.md) · [اطلع على ما تم اختباره →](../VERIFICATION.md)
-
-> [!WARNING]
-> **استخدم حساب Telegram مخصصًا لا تمانع في فقدانه.** ننصح بشدة بعدم ربط حسابات شخصية أو ذات قيمة، أو إنشاء بيانات اعتماد API ID / API hash عليها. قد يقوم Telegram بتقييد الحسابات أو حظرها نهائيًا. [اقرأ دليل الحساب](../ACCOUNTS.md).
-
-## الميزات
-
-- **محادثات ذات سجل تاريخي.** اقرأ الرسائل المحفوظة، وقارن التعديلات التي تم تسجيلها، واطلع على إشعارات الحذف في سياق المحادثة.
-- **راقب وفقًا لشروطك.** اختر الدردشات الفردية، أو مجلد Telegram، أو الحساب بأكمله. لكل حساب مساحة عمل وإعدادات خاصة به.
-- **ملفات تصدير يمكنك التحقق منها.** ملف ZIP موقّع، وسجلات أصلية، ومرفقات محفوظة، وتقرير HTML يمكن قراءته دون اتصال بالإنترنت. حماية اختيارية بكلمة مرور عند التسليم.
-- **مصممة للاستخدام اليومي.** سمات فاتحة وداكنة، و25 لغة، ووظيفة البحث، والتنقل باستخدام Ctrl/Cmd+K، وإجراء الإجراءات مباشرةً من «الدردشات».
-
-<details>
-<summary>جميع الإمكانيات والتفاصيل الفنية</summary>
-
-- **مسار الاتصال الخاص بك.** ضمن **«الحساب» → «إعدادات البروكسي**»، اختر من قوائم MTProxy العامة المجمعة، أو قم بتحديثها من مصادرها، أو الصق رابط بروكسي Telegram الخاص بك. لا يزال البروكسي اليدوي SOCKS5/HTTP/MTProxy ودليل المشغلين متاحين. يتم تنزيل القوائم العامة وتصفيتها، ولكن لم يتم توصيل أي حساب عبر خادم مدرج في القائمة حتى الآن. [كيف تعمل القوائم العامة](../CONNECTION-SECURITY.md#public-proxies-supplied-by-your-installation).
-
-- **مجلة لما تراه حساباتك فعليًّا.** الرسائل الجديدة، والتعديلات، وإشعارات الحذف، وردود الفعل، وأحداث العضوية، والثغرات في التغطية من المجموعات والقنوات التي تختارها.
-- **المحادثات المختارة، أو مجلد Telegram، أو الحساب بأكمله.** اختر الأنواع المراد تسجيلها — القنوات، المجموعات، المحادثات الخاصة، الروبوتات — وتُضاف المحادثات الجديدة فور ظهورها. الاستثناءات، الرسائل الصادرة الخاصة بك والتعديلات، عمليات الحذف في المحادثات الخاصة المطابقة لمحادثتها، عمليات إعادة الفحص ذات الأولوية وحدود المرفقات لكل نوع ([مجموعة](../COLLECTION.md#observation-scope-chosen-chats-a-folder-or-the-whole-account)).
-- **وضع التحقيق.** زر واحد يُعد حسابًا مخصصًا ينضم إلى الفرق ويتواصل مع الروبوتات: يتم تسجيل كل ما يراه ويرسله، ويتم الاحتفاظ بالأزرار الموجودة أسفل رسائل الروبوتات (الروابط، وتطبيقات الويب، والنصوص المراد نسخها)، وتصبح التعديلات التي تتم عبر الأزرار فقط إصدارات جديدة، ويحصل كل دردشة أو روبوت جديد على ملفه الشخصي (الوصف، والأوامر، والأعضاء) ويتم حفظ الرسائل المرئية السابقة دفعة واحدة ([وضع التحقيق](../COLLECTION.md#investigation-mode-joining-teams-and-talking-to-bots)). يشرح **دليل الحساب المخصص** في اللوحة (`/dedicated-account.html`) لماذا يجب عدم استخدام الحساب الرئيسي، ولماذا يعمل TgWitness من خلال أزواج هاش التطبيق/معرف التطبيق العامة، ولماذا لا يمنح زوج واجهة برمجة التطبيقات (API) بحد ذاته حق الوصول إلى حسابك (مع روابط إلى وثائق Telegram)، ويقدم قائمة بطرق إنشاء حساب إضافي.
-- **تفاعل مباشرةً من خلال الدردشات.** أرسل الرسائل والردود، واضغط على أزرار الرد من البوت أو إرسال الرسائل النصية، أو قم بمعاينة دعوة Telegram وانضم إليها. يقوم الحساب المحدد بتنفيذ الإجراء؛ وتدخل الطلبات ومعاينات الدعوات وردود البوت المنبثقة/عناوين URL إلى سجله الموقّع ([العميل المصغر للوحة](../COLLECTION.md#act-from-the-panel)).
-- **تغطية يمكنك الإشارة إليها.** تشير التقارير والمُحقق إلى «مراقبة مستمرة من X إلى Y»، مع سرد الثغرات وأسبابها ومعرّفات الرسائل التي لم يتم رصدها مطلقًا — دون الإشارة إليها على أنها محذوفة.
-- **ملفات تعريف الأشخاص، الاشتراك الاختياري لكل محادثة.** سجل الأسماء وأسماء المستخدمين، علامات Telegram، SHA-256 وpHash للصورة الرمزية، النشاط، من يرد على من والمحافظ والهواتف وأسماء المستخدمين والروابط المذكورة — يتم إنشاؤها فقط من السجلات المحفوظة، حيث تشير كل حقيقة إلى سجلها في المجلة، ويتم تصديرها كملف منفصل موقّع ([نموذج الأدلة](../EVIDENCE.md#people-profiles)).
-- **شاهد مستقل.** تقوم عملية منفصلة، لها مفتاحها الخاص وروبوتها الخاص، بجلب رأس المجلة الموقّع، ونشره على قناة Telegram، والإبلاغ عندما لا يرد المجمع؛ ويقوم المُثبِت بمقارنة الصادرات به. الفاصل الزمني، ومدة الانتظار، والعمليات التي يتم نشرها، وصياغة المنشورات هي خيارات أو ملف تكوين JSON ([شاهد](../WITNESS.md)). تم الاختبار على خادم Bot API محلي، ولم يتم بعد اختباره مع بوت وقناة حقيقيين.
-- **إعدادات التجميع في لوحة التحكم.** توجد حدود وسرعة التجميع، وعمليات إعادة التحقق، وعمليات التنزيل، وملفات تعريف الأشخاص، والإشعارات، وعمليات التصدير في صفحة **«المعلمات»** مع نطاقاتها وقيمها الافتراضية؛ ويتم تسجيل كل تغيير في السجل الموقّع ([الإعدادات والمعلمات](#الإعدادات-والمعلمات)).
-- **التعديلات والحذف في سياقها.** كل تعديل يمثل إصدارًا منفصلاً يظهر بجانب الإصدار السابق؛ ولا يؤدي إشعار الحذف أبدًا إلى محو المحتوى الذي تم تسجيله بالفعل.
-- **ملفات تصدير موقعة وقابلة للتحقق.** يتم ربط كل حدث بسلسلة هاش (SHA-256) وتوقيعه (Ed25519). تحتوي حزمة ZIP الموقعة على ملفات JSONL و CSV وتقرير HTML غير متصل بالإنترنت ووسائط محفوظة وأداة تحقق مستقلة.
-- **عمليات تصدير محمية بكلمة مرور.** يمكنك اختيارياً وضع أي ملف تصدير في ملف ZIP مضغوط بـ WinZip AES-256، وهو التنسيق الذي يقرأه كل من 7-Zip و WinRAR؛ وتبقى المحتويات الموقعة بداخله دون تغيير. تم فتح أرشيف تجريبي بايتًا بايتًا في libarchive (Windows `tar`) وتم رفض كلمة مرور خاطئة ([نموذج إثبات](../EVIDENCE.md#investigation-handoff)).
-- **الإشعارات.** المشاكل (مساحة القرص المنخفضة، الحساب الذي تم تسجيل الخروج منه، أخطاء المجمع أو النسخ أو الطابع الزمني)، التغييرات في الدردشات التي تمت مراقبتها والملخص اليومي، يتم إرسالها عبر [Apprise](https://github.com/caronc/apprise) إلى Matrix و Telegram و Discord و Slack و ntfy والبريد الإلكتروني والعديد من الخدمات الأخرى — بدون نص الرسالة ما لم تقم بتشغيل ميزة المقتطفات — ويتم سردها في اللوحة. يتم اختبار التسليم على نقطة نهاية محلية؛ ولم يتم اختبار الخدمات نفسها بعد.
-- **25 لغة للواجهة.** تشترك لوحة التحكم والوثائق الكاملة في نفس اللغات، بما في ذلك الألمانية والفرنسية واليابانية والعبرية. يتم عرض محتوى Telegram وسجلات السجل دائمًا بالضبط كما تم حفظها.
-- **مظهر فاتح ومظهر داكن.** يتبع إعدادات النظام بشكل افتراضي؛ ويتم حفظ الاختيار لكل متصفح على حدة.
-- **تنقل سهل باستخدام لوحة المفاتيح.** اضغط على **Ctrl+K** (Mac: **⌘K**) أو اختر **«الانتقال إلى...»** للعثور على قسم ما. استخدم مفاتيح الأسهم ومفتاح Enter لفتحه؛ ويؤدي الضغط على مفتاح Escape إلى إغلاق القائمة.
-- **حسابات متعددة.** أي عدد من مساحات العمل المنفصلة، لكل منها جلسة Telegram خاصة بها، ومجلة، ومفتاح توقيع، ومسار وكيل، وسياسة التقاط.
-- **طرق تسجيل دخول مرنة.** الهاتف + الرمز + المصادقة الثنائية (2FA)، رمز الاستجابة السريعة (QR)، Telethon/Pyrogram `.session`، ملف ZIP لـ TData على Telegram Desktop، Telethon StringSession، أو مفتاح مصادقة كامل مع معرّف DC الخاص به.
-- **بروكسيات لكل حساب.** SOCKS5 وHTTP CONNECT، تم اختبارهما على بروكسيات اختبار محلية، وMTProxy التجريبي، الذي لم يتم اختباره بعد مع خادم حقيقي. لا يعود البروكسي الفاشل أبدًا بصمت إلى الاتصال المباشر.
-- **مصممة لتكون خاصة بطبيعتها.** تعمل على جهاز الكمبيوتر أو الخادم الخاص بك. واجهة مستخدم ويب مدمجة، بدون Node.js، بدون خدمة مستضافة، بدون قياس عن بُعد. يتم تخزين الجلسات وبيانات اعتماد واجهة برمجة التطبيقات (API) وأسرار البروكسي في خزينة مشفرة.
-- **سهلة التشغيل.** انقر نقرًا مزدوجًا على نظام Windows، أو استخدم برنامج نصي واحد على أنظمة Linux/macOS، أو استخدم Docker Compose مع HTTPS التلقائي الاختياري. نتائج الاختبارات وحدودها: [سجل التحقق](../VERIFICATION.md).
-
-</details>
-
-## البداية السريعة
-
-| المنصة | كيف تبدأ | المتطلبات |
-| --- | --- | --- |
-| **نظام Windows، لم يتم تثبيت أي برامج** | قم بتنزيل `TgWitness-<version>-windows-amd64-portable.zip` من [قسم الإصدارات](../../../../releases)، ثم قم بفك الضغط، وانقر نقرًا مزدوجًا على **`TgWitness.cmd`** | لا شيء؛ لغة Python مدمجة |
-| Windows، من المصدر | انقر نقرًا مزدوجًا على **`Start.cmd`** | Python 3.11+؛ يتم توفيره وتثبيته لك في حالة عدم توفره |
-| Linux / macOS | `sh start.sh` | Python 3.11+ مع `venv`؛ يقوم البرنامج النصي بطباعة أمر التثبيت الخاص بنظامك في حالة عدم وجوده |
-| Docker، أي نظام تشغيل | انقر نقرًا مزدوجًا على **`scripts\Docker.cmd`** أو قم بتشغيل `sh scripts/docker-start.sh` | محرك Docker/Desktop مع Compose 2.20+ |
-
-1. افتح **http://127.0.0.1:8787**.
-2. الصق رمز الوصول الخاص باللوحة:
-   - التثبيت المحمول أو من المصدر: محتويات `data/live/panel-token.txt`
-   - Docker: تم طباعته بواسطة `scripts\Docker.cmd`/`scripts/docker-start.sh`، أو `docker compose exec tgwitness cat /data/panel-token.txt`
-3. أضف حساب Telegram الخاص بك، واختر الدردشات التي تريد مراقبةها، ثم اضغط على **«بدء المراقبة**».
-
-يؤدي التشغيل الأول للمصدر إلى إنشاء صورة خاصة `.venv` وتثبيت التبعيات المثبتة (يتطلب اتصالاً بالإنترنت). تقوم أدوات Docker المساعدة بإنشاء الصورة، والانتظار حتى تصبح اللوحة في حالة جيدة، ثم طباعة عنوانها ورمزها. `python start.py --check` (أو `TgWitness-Check.cmd` في الحزمة المحمولة) تقدم تقريرًا عن الجاهزية دون الحاجة إلى استخدام Telegram.
-
-> **هل تريد فقط إلقاء نظرة؟** قم بتشغيل **`scripts\Demo.cmd`** أو `sh start.sh --demo`. ستفتح مجلة خيالية مباشرةً في المتصفح؛ ولا يتم ربط أي حساب Telegram بها، وتُخزَّن البيانات بشكل منفصل في `data/demo`.
-
-<details>
-<summary><strong>داخل مساحة العمل: المحادثات، والسجل، وعمليات التصدير</strong></summary>
+<p align="right"><sub><a href="../../README.md">English</a> · <a href="#languages">لغات أخرى</a></sub></p>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="../assets/chats-dark.png">
-  <img src="../assets/chats.png" alt="TgWitness chats view with synthetic demo data: deleted and edited messages highlighted">
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-hero-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-hero-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/casework-hero-mobile.svg">
+  <img src="../assets/presentation/casework-hero.svg" width="1440" alt="TgWitness — تتبّع الأثر. احفظ الأدلة. سجل موقّع مترابط بالتجزئات، ونقطة تحقق محفوظة بشكل منفصل، وأرشيف أدلة قابل للتحقق.">
 </picture>
 
-### سجل المراقبة
+<table>
+<tr>
+<td width="33%" align="center"><a href="https://phishdestroy.github.io/TgWitness/demo/?lang=ar"><b>استكشف العرض التجريبي&nbsp;↗</b></a><br><sub>الواجهة الحقيقية مع قيود وهمية</sub></td>
+<td width="33%" align="center"><a href="#quick-start"><b>نزّل وابدأ&nbsp;↓</b></a><br><sub>أمر واحد لأنظمة Linux وmacOS وWindows</sub></td>
+<td width="33%" align="center"><a href="https://github.com/phishdestroy/TgWitness/wiki"><b>اقرأ الدليل&nbsp;↗</b></a><br><sub>أدلة التحقيق خطوة بخطوة</sub></td>
+</tr>
+</table>
 
-![Journal with fictional demo data](../assets/workspace.png)
+<p align="center"><strong>مساحة عمل ذاتية الاستضافة للتحقيقات في Telegram.</strong><br>احفظ المحادثات، واحتفظ بالتعديلات وعمليات الحذف، واعرف من يرتبط بمن<br>وسلّم ملفات تصدير موقّعة يستطيع أي شخص التحقق منها.</p>
 
-### التصدير الموقّع
+<p align="center"><strong>الثقة الصفرية.</strong> لا ينحاز TgWitness إلى أي طرف: تنطبق الفحوص نفسها على المشغّل وعلى PhishDestroy وعلى أي شخص آخر.<br>لا يُعتدّ إلا بما يؤكده طرف ثالث أو تؤكده الرياضيات. <a href="../LIMITS-AND-OBJECTIONS.md">الحدود والاعتراضات</a></p>
 
-![Export records and verify signatures](../assets/exports.png)
+<p align="center">
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · إصدار تمهيدي"></a>
+  <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
+  <sub><a href="../VERIFICATION.md">البيئات المختبَرة</a> · 25 لغة للواجهة · 26 لغة للأدلة</sub>
+</p>
+
+<a name="screenshots"></a>
+
+<a href="https://phishdestroy.github.io/TgWitness/demo/?lang=ar">
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-workspace-mobile-dark-still.webp">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-workspace-dark-still.webp">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-workspace-mobile-dark.webp">
+  <img src="../assets/presentation/readme-workspace-dark.webp" width="1440" alt="العرض التجريبي لـ TgWitness أثناء العمل: رسائل ملتقطة، ونسخ محفوظة، ومحتوى يبقى بعد الحذف. قيود عرض وهمية.">
+</picture>
+</a>
+
+<p align="center"><sub>استكشف الواجهة الفعلية مع قيود وهمية. انقر على مساحة العمل لتجربتها.</sub></p>
+
+## ما الذي يفعله TgWitness
+
+<table>
+<tr>
+<td width="33%" valign="top"><b><a href="../COLLECTION.md">كل تعديل وحذف محفوظ</a></b><br><sub>تُحفظ كل نسخة من الرسالة، ويبقى نصها بعد إشعار الحذف.</sub></td>
+<td width="33%" valign="top"><b><a href="../wiki/Exports-and-Verification.md">دليل يستطيع أي شخص فحصه</a></b><br><sub>قيود موقّعة ومتسلسلة بالتجزئة. يتحقق المستلم من الأرشيف دون اتصال بالإنترنت بأمر واحد.</sub></td>
+<td width="33%" valign="top"><b><a href="../EVIDENCE.md#where-the-messages-come-from">مصدر يمكنك عرضه</a></b><br><sub>تُستلم الرسائل عبر جلسة MTProto المصادَق عليها للحساب وتُوقَّع فور وصولها؛ ويضيف GitHub Actions وIntel TDX التصديق.</sub></td>
+</tr>
+<tr>
+<td width="33%" valign="top"><b><a href="../EXPORT-BENCHMARK-2026-11-06.md">مُقاس على نطاق واسع</a></b><br><sub>48 أرشيفًا متحققًا منه تضم 3,598,381 قيدًا؛ وجلبت ثمانية حسابات 768,007 قيدًا من تاريخ المحادثات بمعدل 687.5 قيد/ث.</sub></td>
+<td width="33%" valign="top"><b><a href="../INVESTIGATION-MODE.md">مصمَّم للتحقيقات</a></b><br><sub>قوائم مراقبة تشمل النص ورموز QR وOCR، وفحص المحافظ، وبطاقات الكيانات، ولوحة القضية، وحزمة للمحكمة.</sub></td>
+<td width="33%" valign="top"><b><a href="../SECURITY-MODEL.md">تشغّله بنفسك</a></b><br><sub>استضافة ذاتية بلا قياس عن بُعد. تُحفظ الجلسات في خزنة مشفّرة؛ وتستمع اللوحة على localhost.</sub></td>
+</tr>
+</table>
+
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
+
+<a name="quick-start"></a>
+<a name="run-it-on-your-machine"></a>
+
+## التثبيت
+
+يتضمن المثبّت Python. استخدم الأوامر نفسها للتحديث.
+
+**Linux / macOS**
+
+```sh
+curl -fsSL https://get.destroy.tools/install.sh | bash
+```
+
+**Windows · PowerShell أو CMD**
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm https://get.destroy.tools/install.ps1 | iex"
+```
+
+<sub>على خادم Ubuntu: شغّل الأمر بصفتك root. على سطح المكتب: شغّله بصفتك مستخدمًا عاديًا. يسري `-ExecutionPolicy Bypass` على عملية PowerShell هذه فقط.</sub>
+
+تأتي حزم البناء الموقّعة من [سير عمل المثبّت](../../.github/workflows/installer.yml) العلني، ويتحقق المثبّت من SHA-256 وتوقيع RSA لكل حزمة قبل تثبيتها.
+
+[تحقّق من السكربت أولًا](../INSTALLATION.md#verify-before-running) · [الإعداد الأول](../SETTINGS.md) · [الإصدارات](https://github.com/phishdestroy/TgWitness/releases) · [Docker](DEPLOYMENT.md)
+
+<details>
+<summary><strong>كيف يُحمى المثبّت وبياناتك</strong></summary>
+
+موقع التنزيل الخاص بالمشروع هو `get.destroy.tools`. يبنيه
+[سير عمل المثبّت](../../.github/workflows/installer.yml) العلني من
+[`deploy/installer/`](../../deploy/installer/README.md) لمراجعة `main` المحددة بالضبط،
+وينشره بعد نجاح اختبارات التثبيت على Linux وWindows، ويوقّع
+سكربتات المثبّت وحزم التطبيق بمفتاح الإصدار الموجود في
+[`release-signing.pub`](../../deploy/installer/release-signing.pub). يتحقق المثبّت
+من SHA-256 وتوقيع RSA للحزمة ولملف قفل التبعيات قبل التثبيت.
+وللتحقق من السكربت نفسه أولًا، نزّله مع توقيعه ونفّذ
+[أوامر التحقق المسبق](../INSTALLATION.md#verify-before-running). إذا فشل البناء
+يبقى التنزيل السابق متاحًا؛ وتتحدّث اللوحات المثبّتة عند إعادة تشغيل المثبّت.
+وتتوفر طرق أخرى للتثبيت: [إصدارات GitHub](https://github.com/phishdestroy/TgWitness/releases) والشيفرة المصدرية
+و[Docker](DEPLOYMENT.md).
+
+**جلساتك وبياناتك.** يعمل TgWitness على حاسوبك أو خادمك، وتستمع اللوحة
+على localhost افتراضيًا. تُخزَّن جلسات Telegram وبيانات اعتماد البروكسي وتجزئات رموز الوصول
+في الخزنة المشفّرة لكل مساحة عمل، مع إمكانية استخدام
+[مفتاح رئيسي خارجي](../SECURITY-MODEL.md#external-master-key). لا يتضمن التطبيق
+أي قياس عن بُعد. يتصل بـ Telegram وبالخدمات التي تستخدمها إعداداته:
+قوائم MTProxy العامة، وخوادم البروكسي الخاصة بك، وتخزين S3، وبوت الشاهد، وجهات الطوابع
+الزمنية، ومزوّدي الذكاء الاصطناعي، وwebhooks. وتسرد [خريطة النظام](../SYSTEM-MAP.md)
+الاتصالات التي تجريها عملية التطبيق.
+استخدم للمراقبة [حساب Telegram مخصّصًا](https://phishdestroy.github.io/TgWitness/ar/docs/dedicated-account/).
+
+تصف شارة الإصدار شجرة المصدر هذه. حزم البناء القابلة للتثبيت مدرجة في صفحة
+[الإصدارات](https://github.com/phishdestroy/TgWitness/releases)؛ والميزة المدمجة في
+`main` تصل إلى هذه التنزيلات مع الإصدار التالي.
+
+[الإعداد والوصول إلى اللوحة](../INSTALLATION.md) ·
+[التوقيعات وSHA-256](https://get.destroy.tools/#verification) ·
+[التحديث](../INSTALLATION.md#update-an-existing-installation) ·
+[القدرات الحالية والتأهيل](../STATUS.md) ·
+[اختر طريقة الجمع](../COLLECTION-MODES.md)
 
 </details>
 
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
-![Section divider](../assets/presentation/divider.svg)
+<a name="how-it-works"></a>
 
-## ربط حساب Telegram
+## قيود يستطيع غيرك التحقق منها
 
-> [!CAUTION]
-> لا تقم بربط سوى الحسابات المخصصة التي يمكنك تحمل خسارتها. قد يقوم Telegram بحظر الحسابات بشكل دائم ودون سابق إنذار؛ انظر التحذير الموجود في أعلى هذه الصفحة. يشرح **دليل الحسابات المخصصة** الموجود في اللوحة (الشريط الجانبي، أو `/dedicated-account.html`) سبب الحاجة إلى حساب مخصص وكيفية الحصول عليه.
-
-تسجيل الدخول عبر الهاتف أو رمز الاستجابة السريعة (QR) أو جلسة عمل قائمة — دون الحاجة إلى معرّف واجهة برمجة التطبيقات (API ID) أو التجزئة (hash).
-
-**لماذا مجموعة واجهات برمجة التطبيقات (API) المدمجة؟** من المعروف أن إنشاء معرّف API خاص بك على [my.telegram.org](https://my.telegram.org) يؤدي إلى تقييد الحسابات، ولا تنشر Telegram حدودًا واضحة — وقد فقد العديد من الباحثين حساباتهم الرئيسية بهذه الطريقة. تنص صفحة [«الحصول على معرّف واجهة برمجة التطبيقات (API ID)»](https://core.telegram.org/api/obtaining_api_id) الخاصة بـ Telegram على أن الحسابات التي تستخدم عملاء واجهة برمجة التطبيقات (API) غير الرسميين تُوضع تلقائيًا تحت المراقبة، وترسل المستخدمين المحظورين خطأً إلى recover@telegram.org. ولذلك، يوفر TgWitness أزواج واجهة برمجة التطبيقات (API) العامة التي تستخدمها بالفعل عملاء مفتوحة المصدر آخرون، بحيث لا تضطر أبدًا إلى إنشاء واحدة. إذا كان لديك معرّف API خاص بك، فأدخله في حقل **«معرّف API + التجزئة**» وسيتم استخدامه بدلاً من ذلك.
-
-عندما لا يتم إدخال أي زوج أو استيراده أو يكون محفوظًا بالفعل في مساحة العمل، يختار TgWitness أحد الأزواج الخمسين الموجودة في المجموعة وينتقل إلى الزوج التالي إذا رفض Telegram أحد الأزواج. ويبقى الزوج الذي قام بتسجيل الدخول مرتبطًا بهذا الحساب. يُعرّف الزوج التطبيق؛ ولا يزال عليك تفويض حساب Telegram الخاص بك بشكل منفصل. يعمل رمز الوصول الخاص باللوحة على فتح TgWitness وهو منفصل عن تسجيل الدخول إلى Telegram.
-
-| ما لديك | كيفية استخدامه |
-| --- | --- |
-| رقم الهاتف الذي يتيح الوصول إلى الحساب | علامة التبويب **«الهاتف**»: الرمز من Telegram، ثم كلمة مرور المصادقة الثنائية (2FA) إذا كانت مفعّلة |
-| تطبيق Telegram مسجل الدخول مسبقًا | علامة التبويب **«رمز الاستجابة السريعة**»: الإعدادات → الأجهزة → ربط جهاز سطح المكتب |
-| Telethon (المخطط 7/8) أو Pyrogram (المخطط 2/3) `.session` | علامة التبويب **«الملفات»** |
-| زوج الصور `name.session` + `name.json` | علامة التبويب **«الملفات**»، حدد كلا الخيارين؛ حيث يوفر ملف JSON معرّف API/التجزئة |
-| مجلد Telegram Desktop `tdata` | ملف ZIP فقط `key_datas` و`D877F783D5D3EF8Cs`، ثم **«الملفات**»؛ رمز المرور المحلي إن تم تعيينه |
-| Telethon StringSession، `.txt` أو `.tgwitness-session` | علامة التبويب **«الملفات»** أو *«رمز المرور» أو نص الجلسة* |
-| ملف JSON للحساب مع مفتاح جلسة أو مفتاح مصادقة | علامة التبويب **«الملفات»** |
-| مفتاح المصادقة الكامل (512 حرفًا سداسي عشري) + معرّف DC | علامة التبويب **«مفتاح المصادقة**»؛ يتم التحقق من معرف المستخدم الاختياري مقابل Telegram |
-
-غير مدعوم: تخزين TDLib، وسلاسل جلسات Pyrogram، ورموز البوت، وTData متعدد الحسابات، وقوائم الحسابات المجمعة. يتم تحويل الملفات في ذاكرة الخادم الخاص بك والتحقق منها مع Telegram قبل حفظها. يشرح [دليل الحسابات](../ACCOUNTS.md) كل تنسيق خطوة بخطوة: كيفية الحصول على بيانات اعتماد API، وكيفية التعرف على الملف، وحقول JSON، والحدود، ورسائل الخطأ.
-
-بعد تسجيل الدخول، افتح **«المصادر»** (سيتم تحميل محادثاتك تلقائيًا)، وأضف المجموعات التي تحتاجها، واختر ما تريد تسجيله (على سبيل المثال*:* *الرسائل، والتعديلات، والحذف*)، وابدأ المراقبة. حافظ على استمرار العملية: **«إيقاف المراقبة** مؤقتًا» يوقف عملية التجميع، بينما **«قفل»** يوقف الوصول عبر المتصفح فقط.
-
-## لقطات شاشة
-
-| مقارنة التعديلات | المصادر وسياسة التقاط البيانات |
-| --- | --- |
-| ![Detail drawer comparing a previous and a newly observed message version](../assets/detail.png) | ![Selected chats and per-account monitoring settings](../assets/sources.png) |
-| **التصدير الموقّع** | **تسجيل الدخول** |
-| ![Export page with the signed archive and other formats](../assets/exports.png) | ![Account page with phone sign-in](../assets/connection.png) |
-| **المجلة** | **السمة الداكنة** |
-| ![Journal with observed messages, edits, deletion notices and coverage events](../assets/workspace.png) | ![Journal in the dark theme](../assets/workspace-dark.png) |
-
-تستخدم جميع لقطات الشاشة بيانات توضيحية اصطناعية. يشفر رمز الاستجابة السريعة (QR) الموجود في [ملف qr-login.png](../assets/qr-login.png) رمزًا افتراضيًا من عملية النقل التجريبية.
-
-
-![Section divider](../assets/presentation/divider.svg)
-
-## كيف تعمل
-
-```mermaid
-flowchart LR
-    A[Authorize an account] --> B[Select sources and event types]
-    B --> C[Start observation]
-    C --> D[Append signed records]
-    D --> E[Review versions and gaps]
-    E --> F[Export and verify]
-```
-
-تنتمي كل مساحة عمل إلى حساب Telegram واحد. يقبل المجمع التحديثات الواردة من عميل ذلك الحساب، ويطبق سياسة التقاط البيانات المحفوظة، ويضيف الملاحظات إلى دفتر ملاحظات قابل للإضافة فقط.
-
-| المراقبة | ما يتم الاحتفاظ به | الحدود |
-| --- | --- | --- |
-| رسالة جديدة | النص، معرّف المرسل، مرجع الرد، البيانات الوصفية، وقت المراقبة | يتم توفير التحديثات فقط للمصادر المختارة |
-| تحرير | نسخة منفصلة من المحتوى | لا يمكن استعادة الإصدارات الوسيطة التي فاتت أثناء عدم الاتصال بالإنترنت |
-| الحذف | معرف الرسالة بالإضافة إلى كل ما تم تسجيله سابقًا | عادةً ما لا يذكر Telegram من قام بالحذف ومتى تم ذلك |
-| ردود الفعل | الأرقام والهويات الحديثة عند توفرها | لمحة عامة، وليست سجل تغييرات كامل |
-| العضوية | رسائل الخدمة وتحديثات المشاركين | ليس من المؤكد وصول كل عملية انضمام/انسحاب |
-| المرفق | ملف اختياري معالج حسب المحتوى باستخدام SHA-256 | قد تختفي الملفات قبل تنزيلها؛ ويتم تسجيل النتائج |
-| التغطية | التشغيل، والإيقاف، وقطع الاتصال، وعمليات التحقق من النشاط، وتغييرات السياسات | الحيوية ليست دليلاً على التقاط كامل |
-| لمحة عن التاريخ | أحدث الرسائل المرئية، بحد أقصى 500 رسالة ما لم يتم رفع هذا الحد في **المعلمات**، مع تسمية صريحة | لا يمكن استعادة التعديلات أو الحذوفات المفقودة |
-
-اقرأ [كيفية عمل عملية التجميع](../COLLECTION.md) فيما يتعلق بالسياسات وقوائم انتظار المرفقات وعمليات إعادة التشغيل.
-
-## الإعدادات والمعلمات
-
-يتم تغيير كل شيء من خلال لوحة التحكم، لكل مساحة عمل، دون الحاجة إلى تعديل الكود أو ملفات التكوين. يتم تسجيل كل تغيير في النطاق أو السياسة أو المعلمة في السجل الموقّع مع القيم قبل التغيير وبعده، كما يتم توثيق القيم السارية عند بدء كل عملية مراقبة.
-
-| أين | ما تقوم بتعيينه |
-| --- | --- |
-| **المصادر** | النطاق (المحادثات المختارة، مجلد Telegram، الحساب بأكمله)، أنواع المصادر، الاستثناءات، الإجراءات الخاصة، التغييرات التي يجب الاحتفاظ بها، أنواع المرفقات وحجم كل نوع (1–2,000 MiB)، فترة إعادة الفحص للمحادثات ذات الأولوية والمحادثات الأخرى (أي عدد من الدقائق، 0 = معطل)، لقطات السجل، الإشعارات |
-| **عمليات التصدير** | التنزيلات المحمية بكلمة مرور، ووضع الأدلة (الفاصل الزمني، وسلطات الطابع الزمني، والتقويمات)، ونسخة S3 خارج الموقع (الفاصل الزمني، والاحتفاظ بـ Object Lock، والوضع) |
-| **Witness** | رموز الشهود للقراءة فقط؛ تُعرض خيارات الشاهد الخاصة بأوامر جاهزة |
-| **المعلمات** | حجم قائمة الدردشات وتحديثها، وفترات النبض ونقاط الفحص، ومخزن بدء التشغيل المؤقت، وكيفية توزيع طلبات إعادة الفحص (التأخير الأول، عدد الدردشات في كل دورة، فترة التوقف المؤقت، الرسائل المستردة والمعاد طلبها)، مساحة القرص الاحتياطية، مهلة التنزيل، السرعة ومحاولات إعادة المحاولة، ما تبحث عنه ملفات تعريف الأشخاص، بما في ذلك التعبيرات العادية الخاصة بك، حجم الإشعارات وتواترها، اللقطة، حدود ملفات ZIP والتنزيل عبر المتصفح، مهلة إجراءات اللوحة، مهلة عميل Telegram والمحاولات المتكررة |
-
-تُظهر القيم المحددة **للمعلمات** نطاقها وقيمتها الافتراضية؛ ويتم تمييز القيم التي تم تغييرها ويمكن استعادتها واحدة تلو الأخرى أو جميعها دفعة واحدة. وتسري هذه القيم اعتبارًا من الاستخدام التالي؛ حيث يتم تطبيق مهلة الانتظار وإعادة المحاولة في تطبيق Telegram اعتبارًا من الاتصال التالي. ويتطلب الحد الأقصى لحجم ملفات ZIP الذي يتجاوز 4 جيجابايت استخدام `verify.py --max-gib N` عند التحقق من الأرشيف ([العمليات](../OPERATIONS.md#panel-layout)).
-
-
-![Section divider](../assets/presentation/divider.svg)
-
-## الأدلة والتحقق
-
-| تصدير | المحتويات | النزاهة |
-| --- | --- | --- |
-| **ملف ZIP موقّع** | JSONL، CSV، تقرير HTML، التغطية، الوسائط، قائمة المحتويات، أداة التحقق | أحداث موقعة بالإضافة إلى قائمة موقعة لكل ملف، تحدد اسم المنتج. استخدم هذا للتسليم. |
-| JSONL | السجلات الأصلية مع التجزئات والتوقيعات | توقيعات Ed25519 لكل حدث وسلسلة التجزئة |
-| CSV / HTML | جدول آمن للاستخدام في جداول البيانات / تقرير قابل للقراءة دون اتصال بالإنترنت | متوفر فقط داخل ملف ZIP الموقّع |
-| ملف JSON الخاص بـ Checkpoint | طول المجلة وتجزئة العنوان | موقعة بشكل منفصل؛ احتفظ بها خارج المجمع |
-| إيصال التشغيل بتنسيق JSON | تجزئات الكود، وإصدارات التبعيات، والنطاق، والإعدادات | بيان الإجراءات الموقع بشكل منفصل |
-| ملفات تعريف الأشخاص بتنسيق JSON | ملفات تعريف إحدى الدردشات مع مراجع السجلات | بيان موقّع؛ تم التحقق من تجزئات السجل مقارنةً بملف ZIP |
-| ملف ZIP لمجلة Witness | عدد الشهود الذين تم استدعاؤهم، والأجوبة التي لم يتم الرد عليها، ومنشورات القناة | موقّع بمفتاح الشاهد نفسه |
-
-تؤثر المرشحات على التصفح فقط؛ حيث تحتوي عمليات التصدير دائمًا على المجلة الكاملة حتى رقم تسلسلي محدد. تحقق من الأرشيف باستخدام نسخة موثوقة من أداة التحقق وبصمة مفتاح ونقطة فحص محفوظة بشكل مستقل:
+تحقّق من ذلك دون حساب أو تثبيت. تحمل العيّنة المنشورة أداة التحقق الخاصة بها:
 
 ```sh
-python -m pip install cryptography
-python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 --checkpoint tgwitness-checkpoint.json
-# with an independent witness and its channel (Telegram Desktop export)
-python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 \
-    --witness witness.zip --witness-fingerprint WITNESS_SHA256 --channel result.json
+curl -LO https://phishdestroy.github.io/TgWitness/demo/downloads/tgwitness-demo.zip
+unzip -o tgwitness-demo.zip verify.py        # أداة التحقق مضمّنة داخل الأرشيف
+python verify.py tgwitness-demo.zip          # Python 3.11+، ولا تحتاج إلا إلى `cryptography`
 ```
 
-يقوم أداة التحقق بطباعة اسم المنتج الموقع، وفترات المراقبة المستمرة، والفجوات، ومعرفات الرسائل التي لم تتم ملاحظتها مطلقًا، ويفشل إذا اختلفت المجلة عن أي رأس شاهده الشاهد.
+تطبع القيود الموقّعة وتجزئة الرأس وبصمة الموقِّع، ثم تنتهي برمز الخروج `0`.
+العيّنة وهمية؛ وتعمل أداة التحقق نفسها على أي تصدير حقيقي.
 
-تحقّق من توقيعات السجل وسلسلة التجزئة والمرفقات باستخدام مفتاح موثوق، واحتفظ بنقاط التحقق بشكل مستقل. راجع نطاق الجمع وفتراته وإيصالات الوقت الخارجية ونتائج التحقق من بيئة الجمع المتاحة للوضع المحدد.
-
-[إجراء الختم الزمني](../TIMESTAMP.md) · [نموذج الأدلة](../EVIDENCE.md) · [تسليم التحقيق](../EVIDENCE.md#investigation-handoff)
-
-## النشر
-
-> [!NOTE]
-> نتائج الاختبارات وحدودها: [سجل التحقق](../VERIFICATION.md).
-
-**خادم محلي أو خادم واحد باستخدام Docker:**
+يحمل ملف التصدير الرسائل والملفات وأداة التحقق. أرسل إلى المستلم بصمة
+مفتاحك عبر قناة أخرى، وسيتمكن من التحقق بنفسه:
 
 ```sh
-docker compose up -d --build --wait
-docker compose exec tgwitness cat /data/panel-token.txt
+python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --tsa-ca TSA-ROOT.pem --require evidence
 ```
 
-تعمل الحاوية كمستخدم غير جذر مع نظام ملفات للقراءة فقط، وتنشر فقط على `127.0.0.1:8787`، وتحتفظ بجميع البيانات في وحدة تخزين مسماة.
+تفحص أداة التحقق التوقيعات وسلسلة السجل وقائمة الملفات والمرفقات.
+وللتحقق على مستوى الأدلة، تحتاج إلى بصمة مفتاحك وإلى طابع زمني من طرف ثالث يغطي آخر
+قيد، مثل طابع زمني وفق RFC 3161 يُتحقق منه مقابل الشهادة الجذرية للجهة المُصدِرة.
 
-**خادم عام مزود ببروتوكول HTTPS التلقائي (Caddy):** انسخ `deploy/env.example` إلى `.env`، واضبط `TGWITNESS_DOMAIN`، ووجه DNS إلى الخادم، وافتح منافذ TCP 80/443 وقم بتشغيل البرنامج
+**من أين تأتي الرسائل.** يستقبلها TgWitness من Telegram عبر
+جلسة MTProto المشفّرة للحساب، كما تفعل التطبيقات الرسمية، ويوقّع كل رسالة منها في
+السجل فور وصولها. ويضيف [الالتقاط عبر GitHub Actions](../SEALED-ACTIONS.md)
+و[Phala Intel TDX](../HIGH-ASSURANCE.md) كذلك تصديقًا على المُجمِّع الذي استقبلها.
 
-```sh
-docker compose -f compose.yaml -f deploy/compose/compose.https.yaml up -d --build --wait
-```
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-chain-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-chain-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/casework-chain-mobile.svg">
+  <img src="../assets/presentation/casework-chain.svg" width="1200" alt="الرسائل الجديدة والتعديلات المحفوظة ورصد عمليات الحذف تشكّل سجلًا موقّعًا مترابطًا. تحقّق منه مقابل مفتاح موثوق بشكل مستقل.">
+</picture>
 
-**نظام Windows دون الحاجة إلى تثبيت أي شيء:** يحتوي ملف ZIP المحمول المرفق مع كل إصدار على بيئة تشغيل Python الرسمية المدمجة وجميع التبعيات. تظل البيانات في مجلدها `data`؛ للتحديث، قم باستخراج الإصدار الجديد ونسخ هذا المجلد إلى المكان المطلوب.
+[التحقق من الأرشيف](../wiki/Exports-and-Verification.md) · [صيغة الأدلة](../EVIDENCE.md) · [الشاهد المستقل](../WITNESS.md) · [الطوابع الزمنية الخارجية](../TIMESTAMP.md) · [الفحوص والنطاق المختبَر](../VERIFICATION.md)
 
-**بدون استخدام Docker:** توجد قوالب systemd ومهمة تسجيل الدخول في Windows و launchd في [مجلد deploy/.](../../deploy/README.md) يتم تناول التحديثات والنسخ الاحتياطية والمنافذ البديلة وصور GHCR (بمجرد نشرها من خلال سير عمل الإصدار) في [قسم النشر](DEPLOYMENT.md).
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
-### سطر الأوامر
+## من المحادثة إلى القضية
 
-```text
-python start.py [--demo] [--setup-only] [--check [--json]] [--host HOST] [--port PORT] [--data-dir DIR]
-```
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-features-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-features-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-features-mobile.svg">
+  <img src="../assets/presentation/readme-features.svg" width="1200" alt="ثلاثة مسارات عمل متحركة: تصدير محادثة إلى HTML وJSON، والعثور على رابط مشترك عبر المحادثات المسجّلة، والاحتفاظ بالنسخ الملتقطة بعد إشعار الحذف.">
+</picture>
 
-| المهمة | الأمر (من بيئة المشروع) |
+<table>
+<tr>
+<td width="33%" align="center"><a href="../wiki/Chat-Export.md"><b>تصدير المحادثة&nbsp;↗</b></a><br><sub>محادثة واحدة إلى HTML وJSON موقّعين</sub></td>
+<td width="33%" align="center"><a href="../INVESTIGATION.md"><b>التحقيق&nbsp;↗</b></a><br><sub>تتبّع خيطًا عبر المحادثات المسجّلة</sub></td>
+<td width="33%" align="center"><a href="../COLLECTION.md"><b>النسخ المحفوظة&nbsp;↗</b></a><br><sub>التعديلات وإشعارات الحذف محفوظة</sub></td>
+</tr>
+</table>
+
+طريقتان للاستخدام: [صدّر حسابك](../ACCOUNT-EXPORT.md) مرة واحدة، أو
+[تابِع تحقيقًا](../INVESTIGATION.md) واستمر في حفظ التغييرات.
+اختر بضع محادثات أو مجلد Telegram أو الحساب بأكمله. لكل حساب
+مساحة عمل وجلسة ومفتاح توقيع خاصة به.
+
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
+
+## استكشف المزيد
+
+<details>
+<summary><strong>عمليات تصدير مُقاسة · 6 نوفمبر 2026</strong> · 56,329 رسالة، وتم التحقق من الأرشيفين كليهما</summary>
+
+**تصدير 56,329 رسالة في تشغيلين جديدين.** اجتاز الأرشيفان الموقّعان التحقق باستخدام مفاتيح مُجمِّع مثبّتة.
+
+[![السرعة المقاسة للجمع وللتصدير الكامل](../../website/validation/performance.svg)](https://phishdestroy.github.io/TgWitness/ar/docs/validation/)
+
+| التشغيل | الرسائل | زمن الجمع | سرعة الجمع | التصدير الكامل | السرعة من البداية إلى النهاية |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| الخادم A | 27,030 | 189.043 ث | **142.983 رسالة/ث** | 211.647 ث | 127.713 رسالة/ث |
+| الخادم B | 29,299 | 182.513 ث | **160.531 رسالة/ث** | 206.650 ث | 141.781 رسالة/ث |
+
+نص وبيانات وصفية عبر WARP، بحسابين لكل خادم، دون مرفقات أو قيود مُعاد استخدامها.
+أُجري القياس على المراجعة [`92e539af`](https://github.com/phishdestroy/TgWitness/commit/92e539af40d8368d198ff5e040f1d876f2c1310e).
+يذكر كل تشغيل منشور مراجعة المصدر وحجم العمل والتوقيتات ونتيجة التحقق:
+[حجم العمل والتوقيتات والتحقق](../EXPORT-BENCHMARK-2026-11-06.md). وتمر التغييرات على `main`
+عبر [مسارات عمل CI](../../.github/workflows/README.md) العلنية، بما فيها اختبارات مثبّت Linux وWindows
+وبناء أداة التحقق المستقلة.
+
+[**استكشف العرض التجريبي →**](https://phishdestroy.github.io/TgWitness/demo/?lang=ar) ·
+[**القياسات والتواريخ والمنهجية →**](https://phishdestroy.github.io/TgWitness/ar/docs/validation/) ·
+[نزّل عيّنة تصدير وهمية](https://phishdestroy.github.io/TgWitness/demo/downloads/tgwitness-demo.zip) ·
+[تدقيق موقّع باللغة الإنجليزية](../../website/validation/audit/REPORT.md)
+
+</details>
+
+<a name="start-simple"></a>
+
+<details>
+<summary><strong>ابدأ ببساطة. واطّلع على كل المسارات.</strong> · التشغيل الأول وخريطة النظام</summary>
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-start-map-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-start-map-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-start-map-mobile.svg">
+  <img src="../assets/presentation/readme-start-map.svg" width="1200" alt="يعرض التشغيل الأول «تنزيل فقط» أو «متابعة المحادثات» أو «الأدلة في القضية» ويُظهر الأقسام المطابقة فقط. تربط خريطة النظام بين اللوحة والمُجمِّع وTelegram والسجل والشاهد والخدمات الخارجية، مع عمليات رصد الشبكة. قيم وهمية.">
+</picture>
+
+يطرح التشغيل الأول سؤالًا واحدًا: **تنزيل فقط** أو **متابعة المحادثات** أو
+**الأدلة في القضية**. تحدد الإجابة الهدف ومستوى الواجهة، فلا تعرض
+اللوحة إلا الأقسام التي تحتاجها تلك المهمة. ثم يأتي الاتصال وتسجيل الدخول إلى Telegram
+واختيار المحادثات في خمس مراحل. يجري فحص الاتصال تلقائيًا، ولا تظهر
+خيارات المسار إلا عند فشله. وتبقى أدوات الخبراء على بُعد مفتاح تبديل واحد.
+
+تُظهر **خريطة النظام** كيف يصل التثبيت إلى Telegram والخدمات
+الخارجية: الوصول إلى اللوحة، ومسار كل حساب ووجهته في Telegram، ومسار السجل
+والشاهد، وأحدث عمليات رصد الشبكة. وإذا غاب رصدٌ ما
+فإنه يُوسَم بأنه غائب.
+
+[الإعداد الأول](../SETTINGS.md) · [خريطة النظام](../SYSTEM-MAP.md)
+
+</details>
+
+<details>
+<summary><strong>مصمَّم لبقية التحقيق</strong> · بطاقات الكيانات، وقوائم المراقبة، والمحافظ، ومراقبة حالة الاتصال، ووثائق المحكمة</summary>
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-capabilities-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-capabilities-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-capabilities-mobile.svg">
+  <img src="../assets/presentation/readme-capabilities.svg" width="1200" alt="تتبّع الأسماء وأسماء المستخدمين حسب معرّف Telegram. سجّل التفاعلات المدعومة مع البوتات بإيصالات موقّعة. ابحث في الرسائل المؤرشفة وصِل عملاء MCP للقراءة فقط. انشر مُجمِّعًا مع حجب SSH وقيود المزوّد للمراجعة. وثّق المحادثة خطوة بخطوة مع مراجع السجل. سلّم حزمة قضية BagIt مع قوالب المحكمة. مسارات عمل توضيحية.">
+</picture>
+
+<table>
+<tr>
+<td width="50%" align="center"><a href="../INVESTIGATION.md#4-connect-observations-across-chats"><b>الأشخاص وملفاتهم&nbsp;↗</b></a><br><sub>تتبّع الأسماء وأسماء المستخدمين حسب معرّف Telegram</sub></td>
+<td width="50%" align="center"><a href="../COLLECTION.md#act-from-the-panel"><b>التحقيق في البوتات&nbsp;↗</b></a><br><sub>التفاعلات مع البوتات بإيصالات موقّعة</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><a href="https://phishdestroy.github.io/TgWitness/ar/docs/archive/"><b>البحث في الأرشيف والذكاء الاصطناعي وMCP&nbsp;↗</b></a><br><sub>ابحث في الأرشيف وصِل عملاء للقراءة فقط</sub></td>
+<td width="50%" align="center"><a href="../HIGH-ASSURANCE.md"><b>نشر سحابي مختوم&nbsp;↗</b></a><br><sub>مُجمِّع داخل Intel TDX</sub></td>
+</tr>
+</table>
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-documentation-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-documentation-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-documentation-mobile.svg">
+  <img src="../assets/presentation/readme-documentation.svg" width="1200" alt="ثلاث خطوات متحركة: بطاقة كيان تسجّل لقطتها اللاحقة تغيير الاسم، وخطة محادثة تُغلق أهدافها بقيود في السجل، ورمز QR للدفع يُفك ترميزه إلى محفظة ذات مجموع تحقق صالح فيُطلق تطابقًا في قائمة المراقبة. قيم وهمية.">
+</picture>
+
+**وثّق المحادثة.** ابدأ توثيق محادثة من درج **التوثيق**
+فتُكتب كل خطوة تلقائيًا: إجراءات اللوحة، والردود مع المهلة التي سبقتها،
+والتعديلات، وإشعارات الحذف، والملاحظات، ومسودات الذكاء الاصطناعي. تشير كل خطوة إلى قيدها في السجل
+وإلى SHA-256 الخاص به. وعند اعتماد المستند يُوقَّع، وتُكتب تجزئة الإفادة
+في السجل.
+
+| | |
 | --- | --- |
-| فحص الجاهزية دون بدء التشغيل | `python start.py --check` |
-| تحويل جلسة Telethon SQLite إلى وضع غير متصل بالإنترنت | `python -m tgwitness.sessions account.session --out account.tgwitness-session` |
-| بث ملف تصدير كبير إلى القرص | `python -m tgwitness.download --token-file data/live/panel-token.txt --out evidence.zip` |
-| التحقق من الأرشيف المُصدَّر | `python tgwitness/verify.py tgwitness-evidence.zip --fingerprint SHA256` |
-| التحقق من أرشيف يزيد حجمه عن 4 جيجابايت | `python tgwitness/verify.py big-evidence.zip --fingerprint SHA256 --max-gib 16` |
-| تشغيل شاهد مستقل من ملف التكوين | `python -m tgwitness.witness run --config witness.json` |
+| [بطاقات الكيانات](../INVESTIGATION-MODE.md#subject-cards) | لقطات لملف بوت أو شخص أو قناة أو مجموعة مع تسميات BOT وVERIFIED وSCAM وFAKE من Telegram؛ وتُدرج اللقطة اللاحقة ما تغيّر |
+| [خطط المحادثة](../INVESTIGATION-MODE.md#conversation-plans) | أهداف تخص مسار الدفع أو البنية التحتية أو الأشخاص، ورسائل مُعدّة، وأوقات الرد، والنشاط حسب الساعة، وأسلوب كتابة الطرف الآخر |
+| [الترجمة](../INVESTIGATION-MODE.md#machine-translation) | تُعرض تحت النص الأصلي مع اللغات والنموذج وقيد السجل |
+| [قوائم المراقبة](../INVESTIGATION-MODE.md#watchlists) | كلمات وأنماط ومحافظ وأسماء مستخدمين (@) ومعرّفات ونطاقات وأرقام هواتف وروابط، تُطابَق في النص والتعديلات ووجهات الروابط المخفية وأزرار البوتات ورموز QR وOCR |
+| [مراقبة حالة الاتصال](../INVESTIGATION-MODE.md#online-watch) | فحص كل 1–60 دقيقة، حتى 100 حساب لكل طلب، مع نمط حسب الساعة ويوم الأسبوع |
+| [الرموز والمحافظ](../INVESTIGATION-MODE.md#codes-in-images) | رموز QR للدفع؛ عناوين EVM يُتحقق منها وفق EIP-55، وعناوين TON بالصيغة الخام، ومجاميع تحقق XRP Ledger، وروابط دفع مع السلسلة والمبلغ والرمز |
+| [آثار العميل](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-can-and-cannot-show) | آثار المُرمِّز في الفيديوهات الدائرية والرسائل الصوتية؛ ومقارنة وقت الرفع بوقت الإرسال تكشف الإثبات «المباشر» المسجّل مسبقًا |
+| [الغطاء والتفويض](../INVESTIGATION-MODE.md#cover-and-authority) | الشخصيات المستعارة، والتفويضات، وتوثيق للنشاط السري يُعلِّم الرسائل الواقعة خارج المحادثات أو الفترة المصرّح بها |
+| [التحكم في الحساب](../INVESTIGATION-MODE.md#account-control) | تعديل الملف الشخصي والخصوصية مع قيود قبل التعديل وبعده، وفحص للانكشاف، والظهور بحالة غير متصل فور كل إجراء |
+| [وثائق للمحكمة](../INVESTIGATION-MODE.md#documents-for-court) | حزمة قضية BagIt مع قالب شهادة وفق Rule 902(13)/(14)، وفهرس للمستندات المقدّمة، وملحق للطلب، ونصوص مصاحبة بصيغة WebVTT/SRT لتسجيلات الشاشة |
 
-يجب تشغيل الأوامر المساعدة `python -m tgwitness…` داخل `.venv` (`.venv\Scripts\python.exe` في نظام Windows، و`.venv/bin/python` في الأنظمة الأخرى).
+يبقى المحتوى الموسوم بـ 18+ أو بالعنف أو بالبيانات الشخصية في نسخة المحكمة، مُحكَمًا
+بتشفير AES-256-GCM؛ وتُنقل المفاتيح بشكل منفصل.
 
-| متغير | الغرض |
+تغطي [إعدادات التصدير](../EXPORT_HASHES.md) الجلب عبر API العادية وعبر Takeout،
+وجلب تاريخ الرسائل قبل المرفقات، وتنزيل الملفات أو تجزئات الخادم، وطرق عرض متوافقة مع
+Telegram Desktop بصيغتي JSON/HTML. ويوفر [التصدير الموزّع للمحادثات](../DISTRIBUTED-EXPORT.md#history-acquisition)
+مسار Takeout اختياريًا لتاريخ المحادثات العامة، ونقاط تحقق موقّعة كل 100 رسالة،
+والاستعادة ضمن نطاق باستخدام الحساب نفسه؛ ويعرض
+[تصميم الأداء](../FAST-ACQUISITION.md) الخاص به سلوك الجلب المختبَر
+والقياسات الحية المخطط لها.
+
+</details>
+
+<details>
+<summary><strong>كل ما عدا ذلك</strong> · تاريخ الرسائل، والحسابات، والبروكسيات، والذكاء الاصطناعي، والتكاملات</summary>
+
+| | |
 | --- | --- |
-| `TGWITNESS_HOST`, `TGWITNESS_PORT` | عنوان الاستماع والمنفذ (الافتراضي `127.0.0.1:8787`) |
-| `TGWITNESS_DATA` | دليل البيانات (`data/live` افتراضيًا) |
-| `TGWITNESS_TOKEN` | رمز لوحة ثابت بدلاً من الرمز الذي تم إنشاؤه (24 حرفًا على الأقل) |
-| `TGWITNESS_VAULT_KEY_FILE` | المفتاح الرئيسي الخارجي للخزينة للتثبيتات الجديدة |
-| `TGWITNESS_DOMAIN`, `TGWITNESS_IMAGE` | اسم مضيف Docker HTTPS والصورة المنشورة (انظر `deploy/env.example`) |
-| `TGWITNESS_WITNESS_*` | الشاهد المستقل: المجمع، الرموز المميزة، القناة، `_INTERVAL`، `_TIMEOUT`، `_POST` (الكل، التغييرات، المشاكل)، `_TITLE`، `_CONFIG` ([الشاهد](../WITNESS.md#options)) |
+| [تحميل الرسائل الأقدم](../HISTORY.md) | جلب التاريخ السابق لمحادثات محددة، مع الإيقاف المؤقت والاستئناف في أي وقت |
+| [عدة حسابات](../ACCOUNTS.md#multiple-accounts) | مساحات عمل منفصلة، لكل منها جلسة Telegram وسجل ومفتاح توقيع خاصة بها |
+| [الاستيراد الدفعي](../ACCOUNTS.md#bulk-import-and-account-groups) | أفلِت مجموعة من ملفات الجلسات دفعة واحدة، ورتّب الحسابات في مجموعات ذات إعدادات مشتركة |
+| [مجموعة خوادم MTProxy](../wiki/Proxies.md#pool-dashboard-and-custom-sources) | زمن الاستجابة، والبلدان، والمرشحات، وقوائمك الخاصة |
+| [الجلسات الموجودة](../ACCOUNTS.md) | جلسات TData أو Telethon أو Pyrogram أو StringSession، أو مفتاح المصادقة، أو سطر `key:DC`؛ مع تفويض مستقل اختياري عبر QR من جلسة مانحة مستوردة |
+| [أمان الحساب](../ACCOUNTS.md#create-an-independent-authorization) | تنبيهات للجلسات الجديدة، وإنهاء الجلسات الأخرى، ووضع الجلسة الوحيدة الذي يضبط أيضًا كلمة مرور للتحقق بخطوتين، و[مسبار الشاهد](../ACCOUNTS.md#witness-probe) الذي يلاحظ توقف وصول التحديثات الحية إلى هذه الجلسة |
+| [تصدير محادثة قابل للاستئناف](../EXPORT_HASHES.md#restricted-github-capture-and-single-chat-export) | يحتفظ التصدير المتوقف بنسخة جزئية موقّعة: استأنفه، أو ابدأ من جديد، أو نزّل ما حُفظ |
+| [البروكسيات](../CONNECTION-SECURITY.md#ip-modes) | بروكسي SOCKS5 أو HTTP CONNECT أو MTProxy لكل مساحة عمل. لا يعود **إخفاء العنوان** أبدًا إلى الاتصال المباشر |
+| [البحث والذكاء الاصطناعي](../ANALYSIS.md) | بحث محلي، وذكاء اصطناعي اختياري مع مصادر يمكنك التحقق منها |
+| [البحث في النص الكامل](../SEARCH.md) | صيغ الكلمات، والعبارات الدقيقة، والنطاقات، وأسماء المستخدمين (@)، والصينية دون مسافات، مع عرض أفضل النتائج أولًا (**إصدار تجريبي**) |
+| [MCP](../MCP.md) | وصول للقراءة فقط لعملاء MCP، يقتصر على المحادثات التي تختارها |
+| [سطر الأوامر](../CLI.md) | الأوامر `search` و`context` و`messages` و`stats` و`export` بصيغة JSON Lines مع `--json` للسكربتات والوكلاء، محليًا أو برمز وصول محدود النطاق (**إصدار تجريبي**) |
+| [التفريغ النصي وOCR](../MEDIA-ANALYSIS.md) | يعمل محليًا، وتبقى الملفات الأصلية دون مساس |
+| [الالتقاط المستقل](../OPTIONAL-CAPTURE.md) | مسجّلات اختيارية للمتصفح وAyuGram ضمن **المزيد من الأدوات → إضافات** (معاينة، معطّلة افتراضيًا) |
+| [Trusted Live](../TRUSTED-LIVE.md) | جلسة Desktop/Web رسمية، وتسجيل فيديو محمي، وتحليل الاستمرارية مقارنةً بالتصدير الأصلي (معاينة؛ التأهيل الحي لم يكتمل بعد) |
+| [الويب الرسمي المختوم](../OFFICIAL-WITNESS.md) | متصفح رسمي جديد على GitHub Actions، وعناصر تحكم مقيّدة، وفيديو موقّع، ومصدر وإعدادات متوقعة بشكل مستقل |
+| [Webhooks](../WEBHOOKS.md) | أحداث صادرة موقّعة مع إعادة المحاولة، ومثال n8n مرفق |
+| [الوصول المشترك](../ACCESS.md) | امنح شخصًا محادثات محددة فقط، مع تاريخ انتهاء وقيود على IP |
+| [أرقام الرسائل المفقودة](../EVIDENCE.md#missing-message-numbers-gap_summary) | أرقام خصّصها Telegram ولم تُرصد قط، لكل قناة وللحساب بأكمله، في التغطية والتقارير وMCP (**إصدار تجريبي**) |
+| [لقطات حالة المحادثة](../COLLECTION.md) | لقطات موقّعة دورية للعنوان والوصف والرسائل المثبّتة والمشرفين والهدايا، مع ما تغيّر (**إصدار تجريبي**) |
+| [خريطة النظام](../SYSTEM-MAP.md) | خريطة حية للوصول إلى اللوحة ومسارات الحسابات ووجهات Telegram والخدمات الخارجية، مع أحدث 200 من أصل ما يصل إلى 2,000 عملية رصد للشبكة |
 
+</details>
 
-![Section divider](../assets/presentation/divider.svg)
+<details>
+<summary><strong>اختر ما يسند السجل</strong> · تشغيل محلي، أو سحابة مدقَّقة، أو GitHub Actions، أو Intel TDX</summary>
 
-## المسؤولية وحماية البيانات (اللائحة العامة لحماية البيانات - GDPR)
+شغّله محليًا، أو أضف نشرًا سحابيًا مدقَّقًا، أو اجمع داخل **آلة افتراضية سرية من Phala Cloud
+مع Intel TDX**. يحافظ كل خيار على السجل الموقّع؛ أما الفحوص الإضافية
+فتتناول البيئة التي جُمع فيها.
 
-TgWitness هي أداة. ومن يديرها هو الذي يقرر ما يتم جمعه، ولماذا، وإلى متى، وهو المسؤول عن ذلك — بموجب اللائحة العامة لحماية البيانات (GDPR) الخاصة بالاتحاد الأوروبي والمملكة المتحدة، عادةً بصفته *المتحكم* في تلك البيانات الشخصية. تحتوي رسائل Telegram على بيانات شخصية لأشخاص لم يوافقوا أبدًا على تسجيلها: الأسماء، وأسماء المستخدمين، وأرقام الهوية، والصور، وأرقام الهواتف، والآراء. لا يُعد هذا القسم مشورة قانونية؛ يرجى مراجعة القانون الذي ينطبق عليك وشروط Telegram.
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-assurance-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-assurance-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/casework-assurance-mobile.svg">
+  <img src="../assets/presentation/casework-assurance.svg" width="1200" alt="ثلاثة خيارات للنشر: تحقق محلي من السجل؛ وآلة افتراضية مدقَّقة مع قيود المزوّد والوصول؛ وPhala Intel TDX مع بيان تصديق متحقق منه، ونظام تشغيل وتطبيق مُقاسَين، ومفتاح مُجمِّع مرتبط بهما.">
+</picture>
 
-- **يجب أن يكون هناك أساس قانوني وغرض.** عادةً ما يُعتمد على منع الاحتيال، وأمن الشبكات والمعلومات، والدفاع عن المطالبات القانونية باعتبارها مصالح مشروعة (المادة 6(1)(و) من اللائحة العامة لحماية البيانات (GDPR)، الفقرتان التفسيريتان 47 و49؛ والمادة 9(2)(و) فيما يتعلق بالمطالبات القانونية). قم بتدوين الغرض لكل حالة على حدة. تعمل السلطات العامة بموجب أسسها القانونية الخاصة.
-- **اجمع أقل قدر ممكن من البيانات بما يتناسب مع الغرض المطلوب.** ابدأ بالدردشات المختارة. يعمل كل من وضع «المجلد» ووضع «الحساب بالكامل» على تسجيل الدردشات الخاصة ورسائل الأطراف الثالثة: استخدمهما فقط على الحسابات المخصصة لهذا الغرض؛ حيث تطلب اللوحة التأكيد وتسجلها المجلة الموقعة. قم بإيقاف تشغيل أنواع الأحداث وأنواع المرفقات والإجراءات الخاصة التي لا تحتاج إليها، واستبعد الدردشات.
-- **تُعد ملفات تعريف الأشخاص بمثابة تحليل للملفات الشخصية.** وهي معطلة افتراضيًا ويتم تفعيلها لكل محادثة على حدة. استخدمها في تحقيقات محددة، ولا تبني عليها قرارات آلية بشأن الأشخاص (المادة 22)، وقم بإيقاف تشغيلها أو إزالة المحادثة عند الانتهاء — مما يؤدي إلى حذفها. عادةً ما تتطلب المراقبة المنهجية لعدد كبير من الأشخاص إجراء تقييم لأثر حماية البيانات (المادة 35).
-- **حافظ على أمانها.** تُخزّن الجلسات وبيانات الاعتماد والمفاتيح في خزينة مشفرة؛ ضع دليل البيانات على قرص مشفر، وقم بتعيين كلمة مرور للتصدير (AES-256 ZIP)، واحرص على أن تكون لوحة التحكم محمية ببروتوكول HTTPS، وامنح الشاهد رمزًا للقراءة فقط. لا تحتوي الإشعارات على نص رسالة ما لم تقم بتشغيل ميزة المقتطفات، والتي ترسل النص إلى خدمة الإشعارات.
-- **الاحتفاظ بالبيانات ومسحها.** المجلة مخصصة للإضافة فقط حتى يمكن إثبات سلامتها؛ ولا يمكن إزالة سجلات فردية دون كسر سلسلة التوقيعات. خطط للاحتفاظ بالبيانات لكل مساحة عمل وقم بحذف مساحة العمل بأكملها (الحسابات → حذف) أو دليل بياناتها عند انتهاء الغرض منها. لا يمكن حذف النسخ الموجودة خارج الموقع والخاضعة لـ S3 Object Lock قبل تاريخ الاحتفاظ بها — اختر المدة وفقًا لذلك. هناك استثناءات لحق الحذف، على سبيل المثال لإقامة دعاوى قانونية أو الدفاع عنها (المادة 17(3)(هـ)).
-- **الطلبات المقدمة من الأشخاص المسجلين.** تتيح ملفات تصدير الدردشات وملفات الملفات الشخصية العثور على المعلومات المحفوظة عن شخص ما (المادة 15).
-- **لا يتم إرسال أي شيء إلى المؤلفين.** لا تحتوي TgWitness على أي نظام قياس عن بُعد ولا خدمة مستضافة؛ ولا تغادر البيانات جهازك إلا عبر المسارات التي تقوم بتكوينها (Telegram، خدمات الطوابع الزمنية، نسخة S3، الإشعارات، الشاهد).
+تتحقق أداة التحقق الخاصة بـ TDX من بيان التصديق مقابل جذر Intel المثبّت وبيانات الإلغاء،
+وتربطه بإفادة موقّعة من المُجمِّع وبتحدٍّ جديد، وتقارن
+نظام التشغيل والتطبيق المُقاسَين بمدخلات متوقعة بشكل مستقل. ويُدرج التقرير
+كل نتيجة على حدة، بحيث يمكن مراجعة البيئة المُقاسة وهوية المُجمِّع وقيود
+الالتقاط والتغطية معًا.
 
-## الأمن وحالة المشروع
+**الالتقاط مع إثبات المنشأ من GitHub** (معاينة). اجمع محادثة على مُشغّل مستضاف لدى GitHub
+مع نسخة مثبّتة من TgWitness وجلسة Telegram جديدة، ثم نزّل الأرشيف
+المشفّر مع تصديق GitHub الخاص به. تتحقق أداة التحقق من سير العمل المعتمد وإصدار
+المُجمِّع، وتجزئة الأرشيف، والسجل والمرفقات. وهو متاح أيضًا
+ضمن **عمليات التصدير** في اللوحة.
+[افتح صفحة الالتقاط](https://phishdestroy.github.io/TgWitness/ar/docs/capture/) · [التعليمات](../SEALED-ACTIONS.md)
 
+للمراقبة الحية أو جلب التاريخ أو التصدير لمرة واحدة، اختر
+[طريقة الجمع](../COLLECTION-MODES.md). وتتوفر المحادثات السحابية الخاصة
+عندما يستطيع الحساب المتصل الوصول إليها. ويتضمن التطبيق المنشور أيضًا
+[تكامل المحادثات السرية](../PSEUDO-SECRET.md): ثبّت تبعية البروتوكول الاختيارية
+وفعّله لكل حساب لتسجيل المحادثات التي تُنشأ أو تُقبل هناك.
+راجع [نطاق الجمع](../COLLECTION.md) لمعرفة مسارات الجلب المتاحة.
 
-- تستمع اللوحة إلى localhost بشكل افتراضي. للوصول عن بُعد، استخدم ملف تعريف HTTPS Compose أو نفق SSH؛ ولا تكشف أبدًا عن بروتوكول HTTP العادي.
-- يتم تخزين جلسات Telegram وبيانات اعتماد واجهة برمجة التطبيقات (API) وبيانات اعتماد الوكيل ومفتاح التوقيع في خزينة مشفرة باستخدام خوارزمية Fernet. بشكل افتراضي، يوجد المفتاح في نفس دليل البيانات؛ قم بتعيين `TGWITNESS_VAULT_KEY_FILE` لاستخدام مفتاح رئيسي خارجي. **لا** يقوم TgWitness بتشفير محتوى الرسائل والوسائط المحلية؛ لذا، احتفظ بدليل البيانات على قرص أو وحدة تخزين مشفرة. يمكن تشفير ملفات ZIP المصدقة بكلمة مرور بشكل اختياري.
-- يتم استبعاد ملفات البيانات والجلسات والرموز المميزة والمفاتيح وعمليات التصدير من إصدارات git و Docker.
-- يرجى الإبلاغ عن الثغرات الأمنية بشكل خاص كما هو موضح في [ملف SECURITY.md](../../.github/SECURITY.md).
+[نشر Phala / Intel TDX والنشر المدقَّق](../HIGH-ASSURANCE.md) ·
+[التأهيل الحي على Phala](../VERIFICATION.md#live-phala-cloud-deployment--4-november-2026) ·
+[حدود الثقة](../SECURITY-MODEL.md)
 
-### ما تم اختباره
+</details>
 
-يعمل TgWitness 0**.6.1** على نظام التشغيل Windows 11 باستخدام Python 3.12. الحالة في 29 أكتوبر 2026:
+<a name="manifesto"></a>
 
-| المجال | كيف تم اختباره |
+<details>
+<summary><strong>افحص الالتقاط والقيود المحفوظة</strong> · ما يتحقق منه المستلم وExport Clinic</summary>
+
+<picture>
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-manifesto-mobile.svg">
+  <img src="../assets/presentation/readme-manifesto.svg" width="1200" alt="التقط المحادثة. تحقّق من القيود. احفظ الرسائل والتعديلات والملفات، وافحص التوقيعات ونقاط التحقق، وراجع عملية الالتقاط.">
+</picture>
+
+يسجّل TgWitness المحتوى الذي يصل إلى حساب Telegram المتصل، مع
+معرّفات المحادثة والرسالة والمرسِل، والنسخ الملتقطة، وبيانات الجمع الوصفية.
+ويجمع الأرشيف هذه القيود والمرفقات المحفوظة وبيانات التحقق
+معًا للمراجعة.
+
+| الفحص | ما يتحقق منه المستلم |
 | --- | --- |
-| الرسائل، والتعديلات، والحذف، والمرفقات، وإعادة الفحص بعد إعادة التشغيل، فترات توقف FloodWait | تم إجراؤها باستخدام **حساب Telegram حقيقي**، في الفترة من 27 إلى 29 أكتوبر 2026: 9,968 سجلًا موقّعًا، تم التحقق من كل توقيع وسلسلة التجزئة ([اختبار مباشر](../VERIFICATION.md#live-telegram-test-whole-account--29-october-2026)) |
-| مراقبة الحساب بأكمله، ولقطات من السجل | تم إجراؤها باستخدام **حساب حقيقي** في 29 أكتوبر 2026: رسائل من مجموعتين أو قناتين و3 محادثات خاصة وروبوتات |
-| الضغط على زر الرسالة من قسم **«الدردشات»** | تم إجراؤها مرة واحدة باستخدام **حساب حقيقي** |
-| تسجيل الدخول باستخدام ملفات جلسات Telethon/Pyrogram وملفات TData الخاصة بـ Telegram Desktop | تم إنجاز ذلك باستخدام **حساب حقيقي واحد** |
-| تسجيل الدخول عبر الهاتف ورمز الاستجابة السريعة (QR) ومفتاح المصادقة، وإدراج المحادثات الجديدة ضمن النطاق مع رسائلها السابقة، وإرسال الرسائل، والانضمام بدعوة، وردود الفعل، والعضوية، وملفات تعريف الأشخاص، وإدارة عدة حسابات في آن واحد، وعمليات التصدير، وأداة التحقق | اختبارات آلية باستخدام عملاء Telegram اصطناعيين |
-| بروكسيات SOCKS5/HTTP، روبوت Witness، أداة مراقبة Proof، الإشعارات، نسخة S3، RFC 3161 و OpenTimestamps | اختبارات آلية على خوادم الاختبار المحلية |
-| قوائم MTProxy العامة | تم تنزيلها وتصفيتها (118 خادمًا في 29 أكتوبر)؛ لم يتم الاتصال عبرها بعد |
-| الاختبارات الحالية وحدودها | [التأهيل المتبقي](../VERIFICATION.md#remaining-qualification) |
+| السجل الموقّع وقائمة المحتويات | تواقيع القيود وسلسلة التجزئة والملفات المسلَّمة مقابل مفتاح التوقيع المتوقع. |
+| نقطة تحقق محفوظة بشكل منفصل | السجل مقابل طول وتجزئة رأس سُجّلا مسبقًا. |
+| الشاهد المستقل | السجل مقابل نقاط التحقق التي يحتفظ بها شاهد منفصل. |
+| الالتقاط عبر GitHub Actions | الأرشيف مقابل تصديقه وسير العمل المستضاف المعتمد وإصدار المُجمِّع. |
 
-التفاصيل: [سجل التحقق،](../VERIFICATION.md) [وحالة الإصدار](../internal/RELEASE.md)، [والجاهزية](../internal/READINESS.md).
+تعرض [Export Clinic](https://phishdestroy.github.io/TgWitness/docs/export-clinic/)
+محادثة Telegram بجانب ملفات تصدير من Desktop عُدّلت عمدًا.
+قارن النسخ، وافحص التغييرات، واتبع خطوات الجمع
+والتحقق الخاصة بأرشيف TgWitness موقّع.
 
+[خطوات التحقق](../wiki/Exports-and-Verification.md) ·
+[الالتقاط عبر GitHub](../SEALED-ACTIONS.md) ·
+[نموذج الثقة التقني](../SECURITY-MODEL.md)
 
-![Section divider](../assets/presentation/divider.svg)
+</details>
 
-## التطوير
+<a name="operations"></a>
 
-```sh
-python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\Activate.ps1
-python -m pip install -c deploy/constraints.txt -e ".[dev]"
-python -m ruff check .                                 # source checks
-python -m playwright install chromium
-python tools/build_portable.py                         # Windows portable ZIP (Windows + Python 3.12)
-python tools/build_source.py                          # source ZIP with SHA-256 manifest
-python tools/build_site.py                             # static project site in dist/site
-```
+<details>
+<summary><strong>حافظ على استمرار التحقيق</strong> · الإشعارات والتخزين والاسترداد</summary>
 
-تستخدم فحوصات المتصفح بيانات اصطناعية. تُعرّف مهام البناء والنشر الحالية في `.github/workflows/`. اقرأ [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) قبل فتح طلب سحب.
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-services-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-services-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-services-mobile.svg">
+  <img src="../assets/presentation/readme-services.svg" width="1200" alt="مسارات عمل متحركة: يرسل Apprise التنبيهات المضبوطة؛ وتُشفَّر النسخ الخارجية قبل رفعها إلى تخزين متوافق مع S3.">
+</picture>
 
-## التوثيق
+[الإشعارات](../OPERATIONS.md#notifications) · [نسخة خارجية مشفّرة](../wiki/Off-site-Copy.md) · [النسخ الاحتياطي والاسترداد](../wiki/Backup-and-Recovery.md) · [استكشاف الأخطاء وإصلاحها](../OPERATIONS.md)
 
-| الدليل | الأغلفة |
+<table>
+<tr>
+<td width="33%" align="center"><a href="https://phishdestroy.github.io/TgWitness/ar/docs/start/"><b>دليل الإعداد&nbsp;↗</b></a><br><sub>من التثبيت إلى أول محادثة</sub></td>
+<td width="33%" align="center"><a href="https://phishdestroy.github.io/TgWitness/ar/docs/dedicated-account/"><b>جهّز حسابك&nbsp;↗</b></a><br><sub>حساب Telegram مخصّص</sub></td>
+<td width="33%" align="center"><a href="DEPLOYMENT.md"><b>Docker والخوادم&nbsp;↗</b></a><br><sub>إعادة التشغيل والتحديثات وHTTPS</sub></td>
+</tr>
+</table>
+
+</details>
+
+<a name="repository-map"></a>
+
+<details>
+<summary><strong>استكشف المستودع</strong> · أين توجد الشيفرة والوثائق والأدوات</summary>
+
+| المجلد | ابدأ من هنا |
 | --- | --- |
-| [البداية السريعة](QUICKSTART.md) | التشغيل الأول، ربط الحساب والتصدير الأول |
-| [الحسابات وتنسيقات الجلسات](../ACCOUNTS.md) | بيانات تسجيل الدخول، والتحويل، والحسابات المتعددة |
-| [كيفية عمل عملية الجمع](../COLLECTION.md) | تسجيل السياسات والإصدارات والمرفقات والثغرات |
-| [الاتصال والأمان](../CONNECTION-SECURITY.md) | الخوادم الوكيلة والتشفير والمفاتيح |
-| [العمليات](../OPERATIONS.md) | سير العمل اليومي، النسخ الاحتياطي، الاستعادة، السعة |
-| [النشر](DEPLOYMENT.md) and [قوالب الخدمات](../../deploy/README.md) | الخوادم، والحاويات، وHTTPS، والتحديثات |
-| [نموذج الأدلة](../EVIDENCE.md) [والطوابع الزمنية](../TIMESTAMP.md) | النزاهة، والتغطية، وملفات تعريف الأشخاص، والثقة، وتسليم المهام |
-| [شاهد مستقل](../WITNESS.md) | رموز الشهود للقراءة فقط، ملف تعريف Docker، منشورات القناة، عمليات التحقق المزدوجة |
-| [البنية](../ARCHITECTURE.md) [ونموذج المنتج](../PRODUCT.md) | التفاصيل الداخلية وقرارات التصميم |
-| [التحقق](../VERIFICATION.md) [والجاهزية](../internal/READINESS.md) | العمليات التي تم تنفيذها والأعمال المتبقية |
-| [سجل التغييرات](../CHANGELOG.md) | سجل الإصدارات |
-| [الموقع الإلكتروني والنشر](../internal/PUBLISHING.md) | معاينة الموقع المحلي، GitHub Pages، أول منشور |
+| [docs/](../README.md) | الإعداد ومسارات عمل التحقيق والمرجع التقني |
+| [tgwitness/](../../tgwitness/README.md) | التطبيق الرئيسي والمُجمِّع والسجل ولوحة الويب |
+| [tgwitness_capture/](../../tgwitness_capture/README.md) | المسجّلات المستقلة وشيفرة التحقق الخاصة بها |
+| [addons/](../../addons/README.md) | تثبيت الالتقاط الاختياري وإعداده واختباراته |
+| [deploy/](../../deploy/README.md) | المثبّتات والحاويات والخدمات الخلفية |
+| [examples/](../../examples/README.md) | إعدادات تصدير الحساب والالتقاط المختوم |
+| [integrations/](../../integrations/README.md) | مستقبِل n8n وwebhooks موقّعة |
+| [.agents/](../../.agents/README.md) | تعليمات مهام لقراءة الأرشيف عبر CLI |
+| [scripts/](../../scripts/README.md) | المشغّلات وأدوات CI المساعدة |
+| [tools/](../../tools/README.md) | البناء والفحوص والتحزيم |
+| [website/](../../website/README.md) | الموقع العام والأدلة المترجمة والعرض التجريبي التفاعلي |
+| [.github/](../../.github/AUTOMATION.md) | مسارات العمل وإرشادات المساهمة والدعم |
 
+[دليل المشروع الكامل](../PROJECT-GUIDE.md) ·
+[المساهمة](../../.github/CONTRIBUTING.md) · [الحصول على المساعدة](../../.github/SUPPORT.md)
 
-![Section divider](../assets/presentation/divider.svg)
+</details>
 
-## الترخيص
+<details>
+<summary><strong>⚖️ إشعار أخلاقي واستمرارية تاريخية</strong></summary>
 
-[MIT License](../../LICENSE)
+موقف المؤلفين وإشعار المشغّل، بهذه اللغة:
 
-## الأدلة في هذا المجلد
+[إشعار عدم التوافق بين الترخيص والبنية](TAYLOR-WESSING-EXCLUSION.md) · [إشعار المشغّل](OPERATOR-INCOMPATIBILITY.md) · [ترخيص MIT](../../LICENSE) · [ملف NOTICE الأصلي](../../NOTICE)
 
-| الملف | المحتوى |
-| --- | --- |
-| [DEPLOYMENT.md](DEPLOYMENT.md) | النشر والتشغيل |
-| [QUICKSTART.md](QUICKSTART.md) | البدء السريع في TgWitness |
+</details>
 
-[إشعار عدم التوافق بين الترخيص والبنية](TAYLOR-WESSING-EXCLUSION.md) · [MIT License](../../LICENSE)
+<a name="languages"></a>
+
+<details>
+<summary><strong>اقرأ نظرة عامة على المشروع بلغتك</strong></summary>
+
+[English](../../README.md) · [Русский](../ru/README.md) · [Українська](../uk/README.md) · [Español](../es/README.md) · [Português (Brasil)](../pt/README.md) · [Türkçe](../tr/README.md) · **العربية** · [فارسی](../fa/README.md) · [اردو](../ur/README.md) · [हिन्दी](../hi/README.md) · [Bahasa Indonesia](../id/README.md) · [Tiếng Việt](../vi/README.md) · [简体中文](../zh/README.md) · [繁體中文](../zh-Hant/README.md) · [Français](../fr/README.md) · [Deutsch](../de/README.md) · [Italiano](../it/README.md) · [Polski](../pl/README.md) · [O‘zbekcha](../uz/README.md) · [한국어](../ko/README.md) · [日本語](../ja/README.md) · [Bahasa Melayu](../ms/README.md) · [ไทย](../th/README.md) · [עברית](../he/README.md) · [বাংলা](../bn/README.md) · [አማርኛ](../am/README.md)
+
+</details>
+
+<p align="center">
+  <a href="../README.md"><b>الوثائق التقنية</b></a> ·
+  <a href="https://github.com/phishdestroy/TgWitness/wiki"><b>دليل التحقيق</b></a> ·
+  <a href="https://github.com/phishdestroy"><b>من تطوير PhishDestroy</b></a> ·
+  <a href="../../.github/CONTRIBUTING.md"><b>ساهم</b></a> ·
+  <a href="../../.github/SUPPORT.md"><b>احصل على المساعدة</b></a> ·
+  <a href="../../.github/SECURITY.md"><b>أبلغ عن ثغرة</b></a>
+</p>
+
+[فهرس المشروع المقروء آليًا](../../llms.txt) · [الدليل النصي الكامل](https://phishdestroy.github.io/TgWitness/llms-full.txt) · [قواعد المستودع للوكلاء](../../AGENTS.md)

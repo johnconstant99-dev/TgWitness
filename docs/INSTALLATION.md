@@ -112,7 +112,7 @@ The [command line](CLI.md) (preview) reads the archive for scripts and agents.
 | Variable | Effect |
 | --- | --- |
 | `TGWITNESS_URL` | Panel address for `tgwitness search`, `context`, `messages`, `stats` and `export`; default `http://127.0.0.1:8787` when a token is set |
-| `TGWITNESS_MCP_TOKEN` | Archive connection token from **Integrations → MCP**, shared with MCP clients; `--token-file` reads it from a file instead |
+| `TGWITNESS_MCP_TOKEN` | Archive connection token from **More tools → Integrations → MCP**, shared with MCP clients; `--token-file` reads it from a file instead |
 | `TGWITNESS_DATA` | Data directory read directly when no `--data-dir`, URL or token is given |
 
 ## Verify before running
@@ -190,11 +190,12 @@ numbered GitHub release. The page's version comes from `pyproject.toml`; its com
 and build ID distinguish updates within the same preview version.
 
 Publication is automatic after that exact commit passes the application and
-security checks and the signed package passes Ubuntu service and Windows
-PowerShell installation tests. While checks are running, or if they fail, the
-same commands continue to install the previous checked build. The build manifest
-shows which commit is currently available; the version number alone may stay the
-same between preview updates.
+security checks and the signed package is authenticated, installed and checked on
+Ubuntu and Windows. Pull requests that change the installer also run `install.sh`
+and `install.ps1` twice against a local copy of the site. While checks are running,
+or if they fail, the same commands continue to install the previous checked build.
+The build manifest shows which commit is currently available; the version number
+alone may stay the same between preview updates.
 
 Use the same installation folder and OS user as before. Back up the complete data
 directory with collection stopped; `tgwitness paths` identifies it. A signed export
@@ -251,7 +252,7 @@ Before that:
 1. Export what you need (**Exports → Download signed ZIP**) and keep the signing key
    fingerprint and checkpoints outside this machine. To keep the workspace itself, copy
    the whole data folder with collection stopped.
-2. Delete servers created under **Extras → Server 24/7** from **Your servers** or with
+2. Delete servers created under **More tools → Extras → Server 24/7** from **Your servers** or with
    `python -m tgwitness.cloud destroy`; the provider bills them until they are deleted.
 3. End each account's session in Telegram under **Settings → Devices**. Deleting the
    files does not sign the session out on Telegram's side.

@@ -1515,7 +1515,7 @@
   "Re-read the chat list every": "Перечитувати список чатів кожні",
   "Folder and whole-account modes: picks up folder changes and chats that appeared while offline.": "Режими «Папка» та «Весь обліковий запис»: відстежує зміни в папці та чати, що з’явилися під час відсутності в мережі.",
   "minutes": "хвилин",
-  "Liveness record every": "Запис активності кожне",
+  "Liveness record every": "Позначка активності кожні",
   "Reports treat silence longer than three of these intervals, and at least three minutes, as a gap.": "У звітах мовчання, що триває довше трьох таких інтервалів і принаймні три хвилини, розглядається як пропуск.",
   "seconds": "секунд",
   "Signed checkpoint every": "Підписаний контрольний пункт кожні",

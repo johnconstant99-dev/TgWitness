@@ -62,7 +62,7 @@ has no login secrets and isn't a backup.
 | `manifest.json` + `manifest.sig` | Signed list of every file |
 | `README.txt` | How to verify, in the report language and English |
 
-Report language, case title/ID, examiner and notes go under **Exports → Report settings**
+Report language, case title/ID, examiner and notes go under **Exports → Build report**
 and get signed in. Every report ends with an Ed25519 seal. Check it by dropping the file
 onto the report in a browser, or with
 `python -m tgwitness.verify report.html --fingerprint TRUSTED_SHA256 --evidence evidence.zip`.

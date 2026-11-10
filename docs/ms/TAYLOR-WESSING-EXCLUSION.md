@@ -13,5 +13,5 @@
 </blockquote>
 
 <p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Rekod sumber</a> · <a href="OPERATOR-INCOMPATIBILITY.md">Notis Etika &amp; Kelangsungan Sejarah</a></p>
-<p><a href="../../LICENSE">Lesen MIT Penuh</a> · <a href="../../README.md">Projek</a> · <a href="../README.md">Dokumentasi</a> · <a href="../wiki/Home.md">Wiki</a></p>
+<p><a href="../../LICENSE">Lesen MIT Penuh</a> · <a href="README.md">Projek</a> · <a href="README.md">Dokumentasi</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

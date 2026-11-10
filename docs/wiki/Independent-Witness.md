@@ -48,7 +48,7 @@ supporting check, not the minimum for evidence.
 
 ## Set up a witness
 
-1. Open **Extras → Independent witness → Configure**.
+1. Open **More tools → Extras → Independent witness → Configure**.
 2. Create a read-only token, save it as `witness-token.txt`.
 3. Pick a Telegram channel or Discord webhook, the interval and the collector address. Download `witness.json` (it pins the collector key).
 4. Put the JSON and token together on the witness host. Telegram: bot token in `bot-token.txt`, bot allowed to post. Discord: webhook URL in `discord-webhook.txt`.

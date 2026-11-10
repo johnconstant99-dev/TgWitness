@@ -10,7 +10,7 @@ reads it without changing anything. Full reference: `docs/CLI.md`.
 
 ## Connect
 
-Through a running panel (normal case), with a token from **Integrations → MCP**:
+Through a running panel (normal case), with a token from **More tools → Integrations → MCP**:
 
 ```sh
 export TGWITNESS_URL=https://panel.example.org   # omit for http://127.0.0.1:8787

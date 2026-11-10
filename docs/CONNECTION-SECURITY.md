@@ -4,7 +4,7 @@
 
 # Connection, proxies and data protection
 
-This document describes TgWitness 0.8.0 behavior and its limits. Authentication,
+This document describes TgWitness 0.9.2 behavior and its limits. Authentication,
 source access, network connectivity and capture completeness are separate states.
 For sign-in steps, file formats, and multiple accounts, start with
 [accounts and session formats](ACCOUNTS.md). For event policies and restart
@@ -12,7 +12,7 @@ behavior, see [how collection works](COLLECTION.md).
 
 ## Guided connection setup
 
-In **Connection**, the administrator can choose **This account**, **An account
+In **More tools → Account → Connection route**, the administrator can choose **This account**, **An account
 group** or **All accounts**, then select a route. **Review selection** lists the
 affected accounts. **Prepare and check** tests the proposed route without changing
 the saved one. **Apply checked connection** checks again, pauses observation if
@@ -147,7 +147,7 @@ MTProto is Telegram's protocol. Telethon is the Python client library TgWitness 
 MTProxy is a Telegram transport proxy; SOCKS5 and HTTP CONNECT provide general
 tunnels. None replaces account authentication.
 
-Save the route for each workspace in **Account → Settings → Connection settings → Change connection route** before
+Save the route for each workspace in **More tools → Account → Settings → Connection settings → Change connection route** before
 signing in. New workspaces default to **Automatic MTProxy · public lists** with **Hide the address**.
 Existing workspaces that explicitly used Direct retain a mode permitting it.
 
@@ -229,7 +229,7 @@ Cloudflare documents the [JSON DNS endpoint](https://developers.cloudflare.com/1
 <details>
 <summary><strong>Automatic pool parameters</strong></summary>
 
-Under **Parameters → Automatic MTProxy**, configure the failure threshold, cooldown,
+Under **More tools → Parameters → Automatic MTProxy**, configure the failure threshold, cooldown,
 planned rotation, proxy sharing and permitted fallback delay.
 
 | Control | Default |

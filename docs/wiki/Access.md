@@ -9,7 +9,7 @@ Limit it to certain workspaces and chats and pick what they can do.
 
 ## Issue a token
 
-1. **Access → Give someone access** (as admin).
+1. **More tools → Access → Give someone access** (as admin, Standard or Expert level).
 2. Name it, pick workspaces, a group or single chats.
 3. Permissions: a reviewer only needs **View**, add **Export** for downloads.
 4. Expiry, session and IP limits if you want.

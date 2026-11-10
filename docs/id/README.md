@@ -1,360 +1,482 @@
-[English](../../README.md) · [Русский](../ru/README.md) · [Українська](../uk/README.md) · [Español](../es/README.md) · [Português (Brasil)](../pt/README.md) · [Türkçe](../tr/README.md) · [العربية](../ar/README.md) · [فارسی](../fa/README.md) · [اردو](../ur/README.md) · [हिन्दी](../hi/README.md) · **Bahasa Indonesia** · [Tiếng Việt](../vi/README.md) · [简体中文](../zh/README.md)
-
-![TgWitness — preserve the record, verify the evidence](../assets/presentation/casework-hero-static.svg)
-
-<p align="center">
-  <strong>Ruang kerja pemantauan Telegram Anda.</strong><br>
-  Simpan percakapan yang direkam, pahami perubahan yang terjadi, dan bagikan riwayat yang telah ditandatangani.<br>
-  Di komputer atau server Anda sendiri. Dengan akun Anda sendiri.
-</p>
-
-<p align="center">
-  <img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-243a52?logo=python&amp;logoColor=white">
-  <img alt="FastAPI + Telethon" src="https://img.shields.io/badge/FastAPI-Telethon-243a52?logo=fastapi&amp;logoColor=white">
-  <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-243a52?logo=docker&amp;logoColor=white">
-  <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-243a52">
-  <img alt="Version: 0.9.1" src="https://img.shields.io/badge/version-0.9.1-243a52">
-</p>
-
-<p align="center">
-  <a href="#panduan-cepat">Panduan cepat</a> ·
-  <a href="#fitur">Fitur</a> ·
-  <a href="#hubungkan-akun-telegram">Akun</a> ·
-  <a href="#bukti-dan-verifikasi">Bukti</a> ·
-  <a href="#penerapan">Penerapan</a> ·
-  <a href="../README.md">Dokumentasi</a>
-</p>
-
-> [!TIP]
-> **Jelajahi terlebih dahulu sebelum terhubung.** Jalankan `scripts\Demo.cmd` atau `sh start.sh --demo` untuk membuka ruang kerja dengan percakapan fiktif. Tidak perlu akun Telegram.
-
-**Baru di sini?** [Mulai →](QUICKSTART.md) · [Wiki →](../wiki/Home.md) · [Pilih panduan →](../README.md) · [Dapatkan bantuan →](../../.github/SUPPORT.md) · [Lihat apa yang sudah diuji →](../VERIFICATION.md)
-
-> [!WARNING]
-> **Gunakan akun Telegram khusus yang tidak menjadi masalah jika hilang.** Kami sangat menyarankan agar Anda tidak menghubungkan akun pribadi atau akun yang berharga, atau membuat kredensial API ID / API hash di akun tersebut. Telegram dapat membatasi atau memblokir akun secara permanen. [Baca panduan akun](../ACCOUNTS.md).
-
-## Fitur
-
-- **Percakapan dengan riwayat.** Baca pesan yang disimpan, bandingkan perubahan yang terekam, dan lihat pemberitahuan penghapusan dalam konteks percakapan.
-- **Pemantauan sesuai keinginan Anda.** Pilih obrolan individu, folder Telegram, atau seluruh akun. Setiap akun memiliki ruang kerja dan pengaturan tersendiri.
-- **Ekspor yang dapat Anda verifikasi.** Berkas ZIP yang ditandatangani, catatan asli, lampiran yang disimpan, dan laporan HTML offline. Perlindungan kata sandi opsional untuk penyerahan.
-- **Dibuat untuk penggunaan sehari-hari.** Tema terang dan gelap, 25 bahasa, fitur pencarian, navigasi dengan Ctrl/Cmd+K, dan tindakan langsung dari Obrolan.
-
-<details>
-<summary>Semua fitur dan detail teknis</summary>
-
-- **Rute koneksi Anda.** Di bawah **Akun → Pengaturan proxy**, pilih dari daftar MTProxy publik yang disertakan, perbarui dari sumbernya, atau tempelkan tautan proxy Telegram Anda sendiri. SOCKS5/HTTP/MTProxy manual dan katalog operator tetap tersedia. Daftar publik telah diunduh dan disaring, tetapi belum ada akun yang terhubung melalui server yang terdaftar. [Cara kerja daftar publik](../CONNECTION-SECURITY.md#public-proxies-supplied-by-your-installation).
-
-- **Jurnal yang mencatat apa yang sebenarnya terlihat di akun Anda.** Pesan baru, pengeditan, pemberitahuan penghapusan, reaksi, peristiwa keanggotaan, dan celah cakupan dari grup dan saluran yang Anda pilih.
-- **Obrolan yang dipilih, folder Telegram, atau seluruh akun.** Pilih jenis yang akan direkam — saluran, grup, obrolan pribadi, bot — dan obrolan baru akan ditambahkan begitu muncul. Pengecualian, pesan keluar dan pengeditan sendiri, penghapusan dalam obrolan pribadi yang disesuaikan dengan obrolannya, pemeriksaan ulang prioritas, dan batas lampiran per jenis ([koleksi](../COLLECTION.md#observation-scope-chosen-chats-a-folder-or-the-whole-account)).
-- **Mode investigasi.** Satu tombol menyiapkan akun khusus yang bergabung dengan tim dan berkomunikasi dengan bot: segala sesuatu yang dilihat dan dikirimnya terekam, tombol di bawah pesan bot (tautan, aplikasi web, teks untuk disalin) disimpan, dan pengeditan yang hanya menggunakan tombol menjadi versi baru, serta setiap obrolan atau bot baru mendapatkan profilnya (deskripsi, perintah, anggota) dan pesan-pesan yang sebelumnya terlihat disimpan sekaligus ([mode investigasi](../COLLECTION.md#investigation-mode-joining-teams-and-talking-to-bots)). **Panduan Akun Khusus** di panel (`/dedicated-account.html`) menjelaskan mengapa akun utama tidak boleh digunakan, mengapa TgWitness beroperasi melalui pasangan hash aplikasi/ID aplikasi publik, dan mengapa pasangan API itu sendiri tidak memberikan akses ke akun Anda (dengan tautan ke dokumentasi Telegram), serta mencantumkan cara-cara untuk membuat akun tambahan.
-- **Lakukan tindakan langsung dari Obrolan.** Kirim pesan dan balasan, tekan tombol panggilan balik/pesan bot, atau lihat pratinjau undangan Telegram dan bergabunglah. Akun yang dipilih akan melakukan tindakan tersebut; permintaan, pratinjau undangan, serta respons popup/URL bot akan masuk ke jurnal yang ditandatangani ([panel mini-klien](../COLLECTION.md#act-from-the-panel)).
-- **Cakupan yang dapat Anda nyatakan.** Laporan dan verifikator menyatakan "teramati secara terus-menerus dari X hingga Y", mencantumkan celah beserta alasannya, serta ID pesan yang tidak pernah teramati — tanpa pernah menyajikannya sebagai pesan yang dihapus.
-- **Profil pengguna, dengan opsi berlangganan per obrolan.** Riwayat nama dan nama pengguna, bendera Telegram, SHA-256 dan pHash avatar, aktivitas, siapa yang membalas siapa serta dompet, nomor telepon, nama pengguna, dan tautan yang disebutkan — dibuat hanya dari catatan yang disimpan, setiap fakta mengarah ke catatan jurnalnya, diekspor sebagai berkas terpisah yang ditandatangani ([model bukti](../EVIDENCE.md#people-profiles)).
-- **Saksi independen.** Sebuah proses terpisah dengan kunci dan botnya sendiri mengambil bagian awal jurnal yang telah ditandatangani, mempostingnya ke saluran Telegram, dan melaporkan jika pengumpul tidak merespons; verifikator memeriksa ekspor berdasarkan data tersebut. Interval, batas waktu, jenis pemeriksaan yang diposting, serta teks postingan dapat diatur melalui opsi atau berkas konfigurasi JSON ([witness](../WITNESS.md)). Telah diuji terhadap server Bot API lokal, belum dengan bot dan saluran yang sebenarnya.
-- **Pengaturan pengumpulan data di panel.** Batas dan kecepatan pengumpulan, pemeriksaan ulang, unduhan, profil pengguna, pemberitahuan, dan ekspor terdapat di halaman **Parameter** beserta rentang dan nilai defaultnya; setiap perubahan dicatat dalam jurnal yang ditandatangani ([pengaturan dan parameter](#pengaturan-dan-parameter)).
-- **Pengeditan dan penghapusan dalam konteks.** Setiap pengeditan ditampilkan sebagai versi terpisah di samping versi sebelumnya; pemberitahuan penghapusan tidak pernah menghapus konten yang telah terekam.
-- **Ekspor yang ditandatangani dan dapat diverifikasi.** Setiap peristiwa dirantai dengan hash (SHA-256) dan ditandatangani (Ed25519). Paket ZIP yang ditandatangani berisi JSONL, CSV, laporan HTML offline, media yang disimpan, dan verifikator mandiri.
-- **Ekspor yang dilindungi kata sandi.** Secara opsional, simpan ekspor apa pun ke dalam ZIP WinZip AES-256, format yang dapat dibaca oleh 7-Zip dan WinRAR; isi yang telah ditandatangani di dalamnya tetap tidak berubah. Arsip uji coba dibuka byte demi byte di libarchive (Windows `tar`) dan kata sandi yang salah ditolak ([model bukti](../EVIDENCE.md#investigation-handoff)).
-- **Pemberitahuan.** Masalah (ruang disk rendah, akun yang sudah logout, kesalahan kolektor, penyalinan, atau cap waktu), perubahan dalam obrolan yang diamati, dan ringkasan harian, dikirim melalui [Apprise](https://github.com/caronc/apprise) ke Matrix, Telegram, Discord, Slack, ntfy, email, dan banyak layanan lainnya — tanpa teks pesan kecuali jika Anda mengaktifkan cuplikan — dan tercantum di panel. Pengiriman telah diuji terhadap titik akhir lokal; layanan-layanan tersebut sendiri belum diuji.
-- **Tersedia dalam 25 bahasa antarmuka.** Panel dan dokumentasi lengkap menggunakan bahasa yang sama, termasuk bahasa Jerman, Prancis, Jepang, dan Ibrani. Konten Telegram dan catatan jurnal selalu ditampilkan persis seperti yang disimpan.
-- **Tema terang dan gelap.** Secara default mengikuti pengaturan sistem; pilihan ini disimpan per browser.
-- **Navigasi yang ramah keyboard.** Tekan **Ctrl+K** (Mac: **⌘K**) atau pilih **"Go to…"** untuk menemukan bagian tertentu. Gunakan tombol panah dan Enter untuk membukanya; tekan Escape untuk menutup menu.
-- **Akun ganda.** Jumlah ruang kerja terisolasi yang tidak terbatas, masing-masing dengan sesi Telegram, jurnal, kunci penandatanganan, rute proxy, dan kebijakan penangkapan data tersendiri.
-- **Metode masuk yang fleksibel.** Nomor telepon + kode + 2FA, kode QR, Telethon/Pyrogram `.session`, Telegram Desktop TData ZIP, Telethon StringSession, atau Kunci Otentikasi lengkap beserta ID DC-nya.
-- **Proksi per akun.** SOCKS5 dan HTTP CONNECT, telah diuji dengan proksi uji lokal, serta MTProxy yang masih dalam tahap percobaan dan belum diuji dengan server sungguhan. Proksi yang gagal tidak akan secara diam-diam beralih ke koneksi langsung.
-- **Dirancang untuk privasi.** Berjalan di komputer atau server Anda. Dilengkapi antarmuka web bawaan, tanpa Node.js, tanpa layanan terhosting, dan tanpa telemetri. Sesi, kredensial API, dan rahasia proxy disimpan dalam brankas terenkripsi.
-- **Mudah dijalankan.** Klik dua kali di Windows, satu skrip di Linux/macOS, atau Docker Compose dengan HTTPS otomatis opsional. Hasil dan batas pengujian: [catatan verifikasi](../VERIFICATION.md).
-
-</details>
-
-## Panduan cepat
-
-| Platform | Cara memulai | Persyaratan |
-| --- | --- | --- |
-| **Windows, belum ada yang terinstal** | Unduh `TgWitness-<version>-windows-amd64-portable.zip` dari [bagian Rilis](../../../../releases), ekstrak, lalu klik dua kali **`TgWitness.cmd`** | Tidak ada; Python sudah disertakan |
-| Windows, dari sumber kode | Klik dua kali **`Start.cmd`** | Python 3.11+; disediakan dan diinstal untuk Anda jika belum terpasang |
-| Linux / macOS | `sh start.sh` | Python 3.11+ dengan `venv`; skrip ini akan menampilkan perintah instalasi untuk sistem Anda jika belum terpasang |
-| Docker, semua sistem operasi | Klik dua kali **`scripts\Docker.cmd`** atau jalankan `sh scripts/docker-start.sh` | Docker Engine/Desktop dengan Compose 2.20+ |
-
-1. Buka **http://127.0.0.1:8787**.
-2. Tempelkan token akses panel:
-   - instalasi portabel atau dari sumber: isi dari `data/live/panel-token.txt`
-   - Docker: dicetak oleh `scripts\Docker.cmd`/`scripts/docker-start.sh`, atau `docker compose exec tgwitness cat /data/panel-token.txt`
-3. Tambahkan akun Telegram Anda, pilih obrolan yang akan dipantau, lalu tekan **Mulai pemantauan**.
-
-Peluncuran sumber pertama akan membuat instance pribadi `.venv` dan menginstal dependensi yang terpasang (diperlukan akses internet). Program bantu Docker akan membangun gambar, menunggu hingga panel dalam kondisi sehat, dan menampilkan alamat serta tokennya. `python start.py --check` (atau `TgWitness-Check.cmd` dalam paket portabel) memberikan laporan kesiapan tanpa perlu membuka Telegram.
-
-> **Hanya ingin melihat-lihat?** Jalankan **`scripts\Demo.cmd`** atau `sh start.sh --demo`. Jurnal fiktif akan terbuka langsung di browser; tidak ada akun Telegram yang terhubung dan datanya disimpan secara terpisah di `data/demo`.
-
-<details>
-<summary><strong>Di dalam ruang kerja: obrolan, riwayat, dan ekspor</strong></summary>
+<p align="right"><sub><a href="../../README.md">English</a> · <a href="#languages">Bahasa lain</a></sub></p>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="../assets/chats-dark.png">
-  <img src="../assets/chats.png" alt="TgWitness chats view with synthetic demo data: deleted and edited messages highlighted">
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-hero-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-hero-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/casework-hero-mobile.svg">
+  <img src="../assets/presentation/casework-hero.svg" width="1440" alt="TgWitness — Telusuri jejaknya. Amankan buktinya. Jurnal bertanda tangan yang terhubung dengan hash, titik pemeriksaan yang disimpan terpisah, dan arsip bukti yang dapat diverifikasi.">
 </picture>
 
-### Riwayat pengamatan
+<table>
+<tr>
+<td width="33%" align="center"><a href="https://phishdestroy.github.io/TgWitness/demo/?lang=id"><b>Jelajahi demo&nbsp;↗</b></a><br><sub>Antarmuka asli dengan catatan fiktif</sub></td>
+<td width="33%" align="center"><a href="#quick-start"><b>Unduh dan mulai&nbsp;↓</b></a><br><sub>Satu perintah untuk Linux, macOS, dan Windows</sub></td>
+<td width="33%" align="center"><a href="https://github.com/phishdestroy/TgWitness/wiki"><b>Baca buku panduan&nbsp;↗</b></a><br><sub>Panduan investigasi langkah demi langkah</sub></td>
+</tr>
+</table>
 
-![Journal with fictional demo data](../assets/workspace.png)
+<p align="center"><strong>Ruang kerja self-hosted untuk investigasi Telegram.</strong><br>Simpan chat, pertahankan suntingan dan penghapusan, lihat siapa terhubung dengan siapa,<br>dan serahkan ekspor bertanda tangan yang dapat diperiksa siapa pun.</p>
 
-### Ekspor yang ditandatangani
+<p align="center"><strong>ZERO TRUST.</strong> TgWitness tidak memihak: pemeriksaan yang sama berlaku bagi operator, PhishDestroy, dan siapa pun.<br>Yang dihitung hanyalah apa yang dikonfirmasi pihak ketiga atau matematika. <a href="../LIMITS-AND-OBJECTIONS.md">Batasan dan keberatan</a></p>
 
-![Export records and verify signatures](../assets/exports.png)
+<p align="center">
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · pra-rilis"></a>
+  <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
+  <sub><a href="../VERIFICATION.md">Lingkungan yang diuji</a> · 25 bahasa antarmuka · 26 bahasa panduan</sub>
+</p>
+
+<a name="screenshots"></a>
+
+<a href="https://phishdestroy.github.io/TgWitness/demo/?lang=id">
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-workspace-mobile-dark-still.webp">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-workspace-dark-still.webp">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-workspace-mobile-dark.webp">
+  <img src="../assets/presentation/readme-workspace-dark.webp" width="1440" alt="Demo TgWitness saat berjalan: pesan yang direkam, versi yang tersimpan, dan konten yang tetap ada setelah dihapus. Catatan demonstrasi fiktif.">
+</picture>
+</a>
+
+<p align="center"><sub>Jelajahi antarmuka sebenarnya dengan catatan fiktif. Klik ruang kerja untuk mencobanya.</sub></p>
+
+## Apa yang dilakukan TgWitness
+
+<table>
+<tr>
+<td width="33%" valign="top"><b><a href="../COLLECTION.md">Setiap suntingan dan penghapusan tersimpan</a></b><br><sub>Setiap versi pesan disimpan, dan teksnya tetap ada setelah pemberitahuan penghapusan.</sub></td>
+<td width="33%" valign="top"><b><a href="../wiki/Exports-and-Verification.md">Bukti yang dapat diperiksa siapa pun</a></b><br><sub>Catatan bertanda tangan yang dirantai dengan hash. Penerima memverifikasi arsip secara offline dengan satu perintah.</sub></td>
+<td width="33%" valign="top"><b><a href="../EVIDENCE.md#where-the-messages-come-from">Asal-usul yang dapat ditunjukkan</a></b><br><sub>Diterima melalui sesi MTProto akun yang terautentikasi dan ditandatangani saat tiba; GitHub Actions dan Intel TDX menambahkan atestasi.</sub></td>
+</tr>
+<tr>
+<td width="33%" valign="top"><b><a href="../EXPORT-BENCHMARK-2026-11-06.md">Terukur dalam skala besar</a></b><br><sub>48 arsip terverifikasi dengan 3.598.381 catatan; delapan akun mengambil 768.007 catatan riwayat dengan kecepatan 687,5 catatan/detik.</sub></td>
+<td width="33%" valign="top"><b><a href="../INVESTIGATION-MODE.md">Dibuat untuk investigasi</a></b><br><sub>Daftar pantauan untuk teks, kode QR, dan OCR, pemeriksaan dompet, kartu subjek, Papan Kasus, dan paket untuk pengadilan.</sub></td>
+<td width="33%" valign="top"><b><a href="../SECURITY-MODEL.md">Di bawah kendali Anda</a></b><br><sub>Self-hosted tanpa telemetri. Sesi tersimpan di brankas terenkripsi; panel mendengarkan di localhost.</sub></td>
+</tr>
+</table>
+
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
+
+<a name="quick-start"></a>
+<a name="run-it-on-your-machine"></a>
+
+## Instalasi
+
+Python sudah disertakan. Gunakan perintah yang sama untuk memperbarui.
+
+**Linux / macOS**
+
+```sh
+curl -fsSL https://get.destroy.tools/install.sh | bash
+```
+
+**Windows · PowerShell atau CMD**
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm https://get.destroy.tools/install.ps1 | iex"
+```
+
+<sub>Server Ubuntu: jalankan sebagai root. Desktop: jalankan sebagai pengguna biasa Anda. `-ExecutionPolicy Bypass` hanya berlaku untuk satu proses PowerShell ini.</sub>
+
+Build bertanda tangan berasal dari [alur kerja Installer](../../.github/workflows/installer.yml) publik, dan penginstal memeriksa SHA-256 serta tanda tangan RSA setiap paket sebelum menginstal.
+
+[Verifikasi skrip terlebih dahulu](../INSTALLATION.md#verify-before-running) · [Penyiapan pertama](../SETTINGS.md) · [Rilis](https://github.com/phishdestroy/TgWitness/releases) · [Docker](DEPLOYMENT.md)
+
+<details>
+<summary><strong>Bagaimana penginstal dan data Anda dilindungi</strong></summary>
+
+`get.destroy.tools` adalah situs unduhan proyek.
+[Alur kerja Installer](../../.github/workflows/installer.yml) publik membangunnya dari
+[`deploy/installer/`](../../deploy/installer/README.md) untuk revisi `main` yang persis,
+menerbitkannya setelah uji instalasi Linux dan Windows lulus, lalu menandatangani
+skrip penginstal dan paket aplikasi dengan kunci rilis di
+[`release-signing.pub`](../../deploy/installer/release-signing.pub). Penginstal memeriksa
+SHA-256 dan tanda tangan RSA paket serta berkas lock dependensi sebelum menginstal.
+Untuk memeriksa skripnya sendiri terlebih dahulu, unduh skrip beserta tanda tangannya lalu jalankan
+[perintah verifikasi-terlebih-dahulu](../INSTALLATION.md#verify-before-running). Jika build gagal,
+unduhan sebelumnya tetap tersedia; panel yang sudah terinstal diperbarui saat Anda menjalankan ulang penginstal.
+[Rilis](https://github.com/phishdestroy/TgWitness/releases) GitHub, kode sumber, dan
+[Docker](DEPLOYMENT.md) adalah cara lain untuk menginstal.
+
+**Sesi dan data Anda.** TgWitness berjalan di komputer atau server Anda, dan secara default panel
+mendengarkan di localhost. Sesi Telegram, kredensial proxy, dan hash token akses
+disimpan di brankas terenkripsi milik setiap ruang kerja, dengan
+[kunci master eksternal](../SECURITY-MODEL.md#external-master-key) opsional. Aplikasi ini
+tidak memiliki telemetri. Aplikasi terhubung ke Telegram dan ke layanan yang digunakan oleh pengaturannya:
+daftar MTProxy publik, proxy Anda, penyimpanan S3, bot saksi, otoritas
+cap waktu, penyedia AI, dan webhook. [Peta sistem](../SYSTEM-MAP.md) mencantumkan
+koneksi yang dibuat oleh proses aplikasi.
+Lakukan observasi dengan [akun Telegram khusus](https://phishdestroy.github.io/TgWitness/id/docs/dedicated-account/).
+
+Lencana versi menggambarkan pohon sumber ini. Build yang dapat diinstal tercantum di
+[Rilis](https://github.com/phishdestroy/TgWitness/releases); fitur yang digabungkan ke
+`main` akan masuk ke unduhan tersebut pada rilis berikutnya.
+
+[Penyiapan & akses panel](../INSTALLATION.md) ·
+[Tanda tangan & SHA-256](https://get.destroy.tools/#verification) ·
+[Pembaruan](../INSTALLATION.md#update-an-existing-installation) ·
+[Kemampuan saat ini dan kualifikasi](../STATUS.md) ·
+[Pilih metode pengumpulan](../COLLECTION-MODES.md)
 
 </details>
 
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
-![Section divider](../assets/presentation/divider.svg)
+<a name="how-it-works"></a>
 
-## Hubungkan akun Telegram
+## Catatan yang dapat diperiksa orang lain
 
-> [!CAUTION]
-> Hanya hubungkan akun khusus yang tidak menjadi masalah jika hilang. Telegram dapat memblokir akun secara permanen dan tanpa pemberitahuan sebelumnya; lihat peringatan di bagian atas halaman ini. **Panduan akun khusus** di panel (di bilah samping, atau `/dedicated-account.html`) menjelaskan alasan dan cara mendapatkannya.
-
-Masuk menggunakan nomor telepon, kode QR, atau sesi yang sudah ada — tidak memerlukan ID API atau hash.
-
-**Mengapa perlu pool API bawaan?** Membuat ID API sendiri di [my.telegram.org](https://my.telegram.org) diketahui dapat menyebabkan akun diblokir, dan Telegram tidak mempublikasikan batasan yang jelas — banyak peneliti telah kehilangan akun utama mereka karena hal ini. Halaman ["Mendapatkan ID API"](https://core.telegram.org/api/obtaining_api_id) milik Telegram sendiri menyatakan bahwa akun yang menggunakan klien API tidak resmi secara otomatis akan diawasi dan pengguna yang diblokir secara keliru akan diarahkan ke recover@telegram.org. Oleh karena itu, TgWitness menyediakan pasangan API publik yang sudah digunakan oleh klien open-source lainnya, sehingga Anda tidak perlu membuatnya sendiri. Jika Anda memiliki ID API sendiri, masukkan di kolom "**API ID + Hash"** dan ID tersebut akan digunakan sebagai gantinya.
-
-Jika tidak ada pasangan yang dimasukkan, diimpor, atau sudah disimpan di ruang kerja, TgWitness akan memilih salah satu dari 50 pasangan yang ada di kumpulan dan beralih ke pasangan berikutnya jika Telegram menolak salah satunya. Pasangan yang telah masuk akan tetap terikat dengan akun tersebut. Pasangan tersebut mengidentifikasi aplikasi; Anda tetap harus mengotorisasi akun Telegram Anda secara terpisah. Token akses panel membuka TgWitness dan terpisah dari proses login Telegram.
-
-| Apa yang Anda miliki | Cara menggunakannya |
-| --- | --- |
-| Nomor telepon yang memiliki akses ke akun tersebut | Tab **Telepon**: kode dari Telegram, lalu kata sandi 2FA jika diaktifkan |
-| Aplikasi Telegram yang sudah masuk | Tab **kode QR**: Pengaturan → Perangkat → Hubungkan Perangkat Desktop |
-| Telethon (skema 7/8) atau Pyrogram (skema 2/3) `.session` | Tab **File** |
-| Pasangan `name.session` + `name.json` | Tab **"Files**", pilih keduanya; berkas JSON menyediakan ID API/hash |
-| Folder Telegram Desktop `tdata` | Hanya ZIP `key_datas` dan `D877F783D5D3EF8Cs`, lalu **File**; kode sandi lokal jika telah ditetapkan |
-| Telethon StringSession, `.txt` atau `.tgwitness-session` | Tab **File** atau *Kode Akses atau teks sesi* |
-| File JSON akun dengan sesi atau Kunci Otentikasi | Tab **File** |
-| Kunci Otorisasi Penuh (512 karakter heksadesimal) + ID DC | Tab **kunci otentikasi**; ID Pengguna (opsional) diverifikasi dengan Telegram |
-
-Tidak didukung: penyimpanan TDLib, string sesi Pyrogram, token bot, TData multi-akun, dan daftar akun massal. Berkas dikonversi di memori server Anda dan diverifikasi dengan Telegram sebelum disimpan. [Panduan akun](../ACCOUNTS.md) menjelaskan setiap format langkah demi langkah: cara mendapatkan kredensial API, cara mengenali berkas, bidang JSON, batasan, dan pesan kesalahan.
-
-Setelah masuk, buka **Sources** (obrolan Anda akan dimuat secara otomatis), tambahkan grup yang Anda butuhkan, pilih apa yang ingin Anda rekam (misalnya *Pesan, pengeditan, & penghapusan*), lalu mulailah pemantauan. Pastikan proses tetap berjalan: **Menjeda pemantauan** akan menghentikan pengumpulan data, sedangkan **Mengunci** hanya akan menutup akses browser.
-
-## Tangkapan layar
-
-| Perbandingan suntingan | Sumber dan kebijakan pengambilan data |
-| --- | --- |
-| ![Detail drawer comparing a previous and a newly observed message version](../assets/detail.png) | ![Selected chats and per-account monitoring settings](../assets/sources.png) |
-| **Ekspor yang ditandatangani** | **Masuk** |
-| ![Export page with the signed archive and other formats](../assets/exports.png) | ![Account page with phone sign-in](../assets/connection.png) |
-| **Jurnal** | **Tema gelap** |
-| ![Journal with observed messages, edits, deletion notices and coverage events](../assets/workspace.png) | ![Journal in the dark theme](../assets/workspace-dark.png) |
-
-Semua tangkapan layar menggunakan data demonstrasi sintetis. Kode QR dalam [berkas qr-login.png](../assets/qr-login.png) berisi token fiktif dari transportasi uji coba.
-
-
-![Section divider](../assets/presentation/divider.svg)
-
-## Cara kerjanya
-
-```mermaid
-flowchart LR
-    A[Authorize an account] --> B[Select sources and event types]
-    B --> C[Start observation]
-    C --> D[Append signed records]
-    D --> E[Review versions and gaps]
-    E --> F[Export and verify]
-```
-
-Setiap ruang kerja terikat pada satu akun Telegram. Pengumpul menerima pembaruan dari klien akun tersebut, menerapkan kebijakan penangkapan yang disimpan, dan menambahkan pengamatan ke jurnal yang hanya dapat ditambahkan.
-
-| Pengamatan | Apa yang disimpan | Batas |
-| --- | --- | --- |
-| Pesan baru | Teks, ID pengirim, referensi balasan, metadata, waktu pengamatan | Hanya pembaruan yang dikirimkan untuk sumber-sumber terpilih |
-| Edit | Versi konten terpisah | Versi-versi antara yang terlewat saat offline tidak dapat dipulihkan |
-| Penghapusan | ID pesan beserta semua data yang telah direkam sebelumnya | Telegram biasanya tidak mencantumkan siapa yang menghapus dan kapan |
-| Tanggapan | Jumlah dan identitas terbaru jika disediakan | Cuplikan, bukan catatan perubahan lengkap |
-| Keanggotaan | Pesan layanan dan pembaruan bagi peserta | Tidak setiap aksi bergabung/keluar dijamin akan terkirim |
-| Lampiran | Berkas opsional yang dialamatkan berdasarkan konten dengan SHA-256 | Berkas dapat hilang sebelum diunduh; hasilnya dicatat |
-| Cakupan | Mulai, berhenti, putus koneksi, sinyal detak jantung, perubahan kebijakan | Keaktifan bukanlah bukti penangkapan yang lengkap |
-| Cuplikan riwayat | Pesan terbaru yang terlihat, hingga 500 kecuali jika ditingkatkan dalam **Parameter**, diberi label secara eksplisit | Tidak dapat memulihkan suntingan atau penghapusan yang terlewat |
-
-Baca [cara kerja pengumpulan data](../COLLECTION.md) terkait kebijakan, antrian lampiran, dan proses restart.
-
-## Pengaturan dan parameter
-
-Semua perubahan dilakukan melalui panel, per ruang kerja, tanpa perlu mengedit kode atau berkas konfigurasi. Setiap perubahan cakupan, kebijakan, atau parameter dicatat dalam jurnal yang ditandatangani beserta nilai sebelum dan sesudahnya, dan setiap awal pengamatan mencantumkan nilai-nilai yang berlaku saat itu.
-
-| Di mana | Apa yang Anda atur |
-| --- | --- |
-| **Sumber** | Cakupan (obrolan yang dipilih, folder Telegram, seluruh akun), jenis sumber, pengecualian, tindakan sendiri, perubahan mana yang akan disimpan, jenis lampiran dan ukuran per jenis (1–2.000 MiB), interval pemeriksaan ulang untuk obrolan prioritas dan obrolan lainnya (berapa menit saja, 0 = nonaktif), cuplikan riwayat, pemberitahuan |
-| **Ekspor** | Unduhan yang dilindungi kata sandi, mode bukti (interval, otoritas cap waktu, dan kalender), salinan S3 di luar lokasi (interval, retensi Object Lock, dan mode) |
-| **Witness** | Token saksi yang hanya dapat dibaca; opsi yang dimiliki saksi ditampilkan dengan perintah siap pakai |
-| **Parameter** | Ukuran daftar obrolan dan penyegaran, interval heartbeat dan checkpoint, buffer saat startup, cara pemeriksaan ulang mendistribusikan permintaan (penundaan awal, jumlah obrolan per putaran, jeda, pesan yang dipulihkan dan diminta ulang), cadangan ruang disk, batas waktu unduhan, kecepatan dan upaya ulang, kriteria yang dicari oleh profil pengguna, termasuk ekspresi reguler Anda sendiri, ukuran dan frekuensi notifikasi, snapshot, batas ZIP dan unduhan browser, batas waktu tindakan panel, batas waktu klien Telegram, dan upaya ulang |
-
-Nilai pada **Parameter** menunjukkan rentang dan nilai defaultnya; nilai yang diubah ditandai dan dapat dikembalikan satu per satu atau sekaligus. Perubahan tersebut berlaku mulai penggunaan berikutnya; batas waktu dan upaya ulang klien Telegram berlaku mulai koneksi berikutnya. Batas ukuran ZIP di atas 4 GiB memerlukan `verify.py --max-gib N` saat arsip diverifikasi ([operasi](../OPERATIONS.md#panel-layout)).
-
-
-![Section divider](../assets/presentation/divider.svg)
-
-## Bukti dan verifikasi
-
-| Ekspor | Daftar Isi | Integritas |
-| --- | --- | --- |
-| **ZIP yang telah ditandatangani** | Laporan JSONL, CSV, HTML, cakupan, media, manifes, verifikator | Peristiwa yang ditandatangani ditambah manifes yang ditandatangani dari setiap berkas, yang mencantumkan nama pembuatnya. Gunakan ini untuk serah terima. |
-| JSONL | Catatan asli dengan hash dan tanda tangan | Tanda tangan Ed25519 per peristiwa dan rantai hash |
-| CSV / HTML | Tabel yang aman untuk spreadsheet / laporan yang dapat dibaca secara offline | Hanya tersedia di dalam file ZIP yang telah ditandatangani |
-| JSON Checkpoint | Panjang jurnal dan hash header | Ditandatangani secara terpisah; simpan di luar kolektor |
-| JSON tanda terima eksekusi | Hash kode, versi dependensi, cakupan, pengaturan | Pernyataan proses yang ditandatangani secara terpisah |
-| Profil pengguna dalam format JSON | Profil satu obrolan dengan referensi catatan | Pernyataan yang ditandatangani; hash rekaman telah diverifikasi dengan berkas ZIP |
-| Jurnal Witness dalam format ZIP | Daftar saksi yang diambil, jawaban yang terlewat, dan postingan saluran | Ditandatangani dengan kunci milik saksi itu sendiri |
-
-Filter hanya memengaruhi penelusuran; ekspor selalu berisi jurnal lengkap hingga nomor urut tertentu. Verifikasi arsip dengan salinan verifier yang tepercaya serta sidik jari kunci dan titik pemeriksaan yang disimpan secara independen:
+Periksa tanpa akun maupun instalasi. Sampel yang dipublikasikan membawa verifikatornya sendiri:
 
 ```sh
-python -m pip install cryptography
-python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 --checkpoint tgwitness-checkpoint.json
-# with an independent witness and its channel (Telegram Desktop export)
-python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 \
-    --witness witness.zip --witness-fingerprint WITNESS_SHA256 --channel result.json
+curl -LO https://phishdestroy.github.io/TgWitness/demo/downloads/tgwitness-demo.zip
+unzip -o tgwitness-demo.zip verify.py        # verifikator disertakan di dalam arsip
+python verify.py tgwitness-demo.zip          # Python 3.11+, hanya butuh `cryptography`
 ```
 
-Verifikator mencetak produsen yang ditandatangani, periode pengamatan berkelanjutan, celah, dan ID pesan yang tidak pernah teramati, serta akan gagal jika jurnal tersebut berbeda dari salah satu head yang dilihat oleh saksi.
+Perintah ini menampilkan catatan bertanda tangan, hash catatan terbaru, dan sidik jari penanda tangan, lalu keluar dengan kode `0`.
+Sampel ini fiktif; verifikator yang sama berjalan pada ekspor nyata apa pun.
 
-Verifikasi tanda tangan jurnal, rantai hash, dan lampiran menggunakan kunci tepercaya, lalu simpan titik pemeriksaan secara terpisah. Tinjau cakupan dan interval pengumpulan, bukti waktu eksternal, serta hasil pemeriksaan lingkungan pengumpulan yang tersedia untuk mode yang dipilih.
-
-[prosedur penandaan waktu](../TIMESTAMP.md) · [model bukti](../EVIDENCE.md) · [serah terima investigasi](../EVIDENCE.md#investigation-handoff)
-
-## Penerapan
-
-> [!NOTE]
-> Hasil dan batas pengujian: [catatan verifikasi](../VERIFICATION.md).
-
-**Server lokal atau tunggal dengan Docker:**
+Ekspor berisi pesan, berkas, dan verifikator. Kirimkan sidik jari kunci Anda kepada penerima
+melalui saluran lain, dan mereka dapat memeriksanya sendiri:
 
 ```sh
-docker compose up -d --build --wait
-docker compose exec tgwitness cat /data/panel-token.txt
+python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --tsa-ca TSA-ROOT.pem --require evidence
 ```
 
-Kontainer ini berjalan sebagai pengguna non-root dengan sistem berkas read-only, hanya mempublikasikan ke `127.0.0.1:8787`, dan menyimpan semua data dalam volume bernama.
+Verifikator memeriksa tanda tangan, rantai jurnal, daftar berkas, dan lampiran.
+Untuk tingkat bukti, verifikator memerlukan sidik jari kunci Anda dan cap waktu pihak ketiga yang mencakup catatan
+terakhir, misalnya cap waktu RFC 3161 yang diperiksa terhadap sertifikat root otoritasnya.
 
-**Server publik dengan HTTPS otomatis (Caddy):** salin `deploy/env.example` ke `.env`, atur `TGWITNESS_DOMAIN`, arahkan DNS ke server, buka port TCP 80/443, dan jalankan
+**Asal pesan.** TgWitness menerimanya dari Telegram melalui sesi MTProto terenkripsi
+milik akun, seperti aplikasi resmi, dan menandatangani setiap pesan ke dalam
+jurnal saat tiba. [Pengambilan melalui GitHub Actions](../SEALED-ACTIONS.md) dan
+[Phala Intel TDX](../HIGH-ASSURANCE.md) juga memberikan atestasi atas pengumpul yang menerimanya.
 
-```sh
-docker compose -f compose.yaml -f deploy/compose/compose.https.yaml up -d --build --wait
-```
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-chain-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-chain-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/casework-chain-mobile.svg">
+  <img src="../assets/presentation/casework-chain.svg" width="1200" alt="Pesan baru, suntingan yang tersimpan, dan pengamatan penghapusan membentuk jurnal bertanda tangan yang saling terhubung. Verifikasi jurnal itu terhadap kunci yang dipercaya secara independen.">
+</picture>
 
-**Windows tanpa perlu menginstal apa pun:** berkas ZIP portabel yang disertakan dalam setiap rilis berisi runtime Python resmi yang tertanam serta semua dependensi. Data tetap berada di foldernya `data`; untuk memperbarui, ekstrak versi baru dan salin folder tersebut ke lokasi yang sama.
+[Verifikasi arsip](../wiki/Exports-and-Verification.md) · [Format bukti](../EVIDENCE.md) · [Saksi independen](../WITNESS.md) · [Cap waktu eksternal](../TIMESTAMP.md) · [Pemeriksaan dan skala yang diuji](../VERIFICATION.md)
 
-**Tanpa Docker:** templat systemd, tugas masuk Windows, dan launchd terdapat di [folder deploy/.](../../deploy/README.md) Pembaruan, pencadangan, port alternatif, dan gambar GHCR (setelah alur kerja rilis menerbitkannya) dibahas dalam [bagian penerapan](DEPLOYMENT.md).
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
-### Baris perintah
+## Dari percakapan menjadi perkara
 
-```text
-python start.py [--demo] [--setup-only] [--check [--json]] [--host HOST] [--port PORT] [--data-dir DIR]
-```
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-features-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-features-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-features-mobile.svg">
+  <img src="../assets/presentation/readme-features.svg" width="1200" alt="Tiga alur kerja animasi: mengekspor chat ke HTML dan JSON, menemukan tautan yang dibagikan di seluruh chat yang direkam, dan mempertahankan versi yang direkam setelah pemberitahuan penghapusan.">
+</picture>
 
-| Tugas | Perintah (dari lingkungan proyek) |
+<table>
+<tr>
+<td width="33%" align="center"><a href="../wiki/Chat-Export.md"><b>Ekspor chat&nbsp;↗</b></a><br><sub>Satu chat menjadi HTML dan JSON bertanda tangan</sub></td>
+<td width="33%" align="center"><a href="../INVESTIGATION.md"><b>Investigasi&nbsp;↗</b></a><br><sub>Ikuti petunjuk di seluruh chat yang direkam</sub></td>
+<td width="33%" align="center"><a href="../COLLECTION.md"><b>Versi tersimpan&nbsp;↗</b></a><br><sub>Suntingan dan pemberitahuan penghapusan tetap tersimpan</sub></td>
+</tr>
+</table>
+
+Dua cara menggunakannya: [ekspor akun Anda](../ACCOUNT-EXPORT.md) sekali, atau
+[ikuti investigasi](../INVESTIGATION.md) dan terus simpan perubahannya.
+Pilih beberapa chat, folder Telegram, atau seluruh akun. Setiap akun mendapat
+ruang kerja, sesi, dan kunci penandatanganan sendiri.
+
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
+
+## Jelajahi lebih lanjut
+
+<details>
+<summary><strong>Ekspor terukur · 6 November 2026</strong> · 56.329 pesan, kedua arsip terverifikasi</summary>
+
+**56.329 pesan diekspor dalam dua putaran baru.** Kedua arsip bertanda tangan lolos verifikasi dengan kunci pengumpul yang di-pin.
+
+[![Kecepatan pengumpulan dan ekspor lengkap yang terukur](../../website/validation/performance.svg)](https://phishdestroy.github.io/TgWitness/id/docs/validation/)
+
+| Putaran | Pesan | Waktu pengumpulan | Kecepatan pengumpulan | Ekspor lengkap | Kecepatan ujung ke ujung |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Server A | 27,030 | 189.043 s | **142.983 pesan/s** | 211.647 s | 127.713 pesan/s |
+| Server B | 29,299 | 182.513 s | **160.531 pesan/s** | 206.650 s | 141.781 pesan/s |
+
+Teks dan metadata melalui WARP, dua akun per server, tanpa lampiran atau catatan yang digunakan ulang.
+Diukur pada revisi [`92e539af`](https://github.com/phishdestroy/TgWitness/commit/92e539af40d8368d198ff5e040f1d876f2c1310e).
+Setiap putaran yang dipublikasikan mencantumkan revisi sumber, beban kerja, waktu, dan hasil verifikasinya:
+[beban kerja, waktu, dan verifikasi](../EXPORT-BENCHMARK-2026-11-06.md). Perubahan pada `main`
+menjalankan [alur kerja CI](../../.github/workflows/README.md) publik, termasuk uji penginstal Linux dan Windows
+serta build verifikator mandiri.
+
+[**Jelajahi demo →**](https://phishdestroy.github.io/TgWitness/demo/?lang=id) ·
+[**Pengukuran, tanggal, dan metode →**](https://phishdestroy.github.io/TgWitness/id/docs/validation/) ·
+[Unduh contoh ekspor fiktif](https://phishdestroy.github.io/TgWitness/demo/downloads/tgwitness-demo.zip) ·
+[Audit berbahasa Inggris bertanda tangan](../../website/validation/audit/REPORT.md)
+
+</details>
+
+<a name="start-simple"></a>
+
+<details>
+<summary><strong>Mulai dengan sederhana. Lihat setiap rute.</strong> · peluncuran pertama dan peta sistem</summary>
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-start-map-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-start-map-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-start-map-mobile.svg">
+  <img src="../assets/presentation/readme-start-map.svg" width="1200" alt="Peluncuran pertama menawarkan “Unduh saja”, “Pantau chat”, atau “Bukti dalam suatu perkara” dan hanya menampilkan bagian yang sesuai. Peta sistem menghubungkan panel, pengumpul, Telegram, jurnal, saksi, dan layanan luar, lengkap dengan pengamatan jaringan. Nilai fiktif.">
+</picture>
+
+Peluncuran pertama hanya mengajukan satu pertanyaan: **Unduh saja**, **Pantau chat**, atau
+**Bukti dalam suatu perkara**. Jawabannya menentukan tujuan dan tingkat antarmuka, sehingga
+panel hanya menampilkan bagian yang dibutuhkan tugas itu. Koneksi, masuk ke Telegram, dan
+pemilihan chat menyusul dalam lima tahap. Pemeriksaan koneksi berjalan sendiri, dan
+opsi rute hanya terbuka jika pemeriksaan itu gagal. Alat ahli hanya berjarak satu sakelar.
+
+**Peta sistem** menunjukkan bagaimana instalasi menjangkau Telegram dan layanan
+luar: akses panel, rute dan tujuan Telegram tiap akun, jalur jurnal dan
+saksi, serta pengamatan jaringan terbaru. Pengamatan yang tidak ada
+diberi label tidak ada.
+
+[Penyiapan pertama](../SETTINGS.md) · [Peta sistem](../SYSTEM-MAP.md)
+
+</details>
+
+<details>
+<summary><strong>Dibuat untuk sisa investigasi</strong> · kartu subjek, daftar pantauan, dompet, pemantauan online, dokumen pengadilan</summary>
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-capabilities-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-capabilities-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-capabilities-mobile.svg">
+  <img src="../assets/presentation/readme-capabilities.svg" width="1200" alt="Lacak nama dan username berdasarkan ID Telegram. Rekam interaksi bot yang didukung dengan tanda terima bertanda tangan. Cari pesan yang diarsipkan dan hubungkan klien MCP baca-saja. Terapkan pengumpul dengan SSH tersamarkan dan catatan penyedia untuk ditinjau. Dokumentasikan percakapan langkah demi langkah dengan referensi jurnal. Serahkan paket perkara BagIt dengan templat pengadilan. Alur kerja ilustratif.">
+</picture>
+
+<table>
+<tr>
+<td width="50%" align="center"><a href="../INVESTIGATION.md#4-connect-observations-across-chats"><b>Orang dan dosir&nbsp;↗</b></a><br><sub>Nama dan username dilacak berdasarkan ID Telegram</sub></td>
+<td width="50%" align="center"><a href="../COLLECTION.md#act-from-the-panel"><b>Investigasi bot&nbsp;↗</b></a><br><sub>Interaksi bot dengan tanda terima bertanda tangan</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><a href="https://phishdestroy.github.io/TgWitness/id/docs/archive/"><b>Pencarian arsip, AI, dan MCP&nbsp;↗</b></a><br><sub>Cari di arsip, hubungkan klien baca-saja</sub></td>
+<td width="50%" align="center"><a href="../HIGH-ASSURANCE.md"><b>Penerapan cloud tersegel&nbsp;↗</b></a><br><sub>Pengumpul di dalam Intel TDX</sub></td>
+</tr>
+</table>
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-documentation-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-documentation-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-documentation-mobile.svg">
+  <img src="../assets/presentation/readme-documentation.svg" width="1200" alt="Tiga langkah animasi: kartu subjek yang snapshot berikutnya mencatat perubahan nama, rencana percakapan yang tujuannya ditutup dengan catatan jurnal, dan kode QR pembayaran yang didekode menjadi dompet dengan checksum valid sehingga memicu kecocokan daftar pantauan. Nilai fiktif.">
+</picture>
+
+**Dokumentasikan percakapan.** Mulai catatan untuk sebuah chat di panel samping **Dokumentasi**
+dan setiap langkah tercatat dengan sendirinya: tindakan panel, balasan beserta jeda sebelum
+balasan itu, suntingan, pemberitahuan penghapusan, anotasi, dan draf AI. Setiap langkah merujuk catatan
+jurnal dan SHA-256-nya. Memfinalisasi dokumen akan menandatanganinya dan menulis hash pernyataan ke
+jurnal.
+
+| | |
 | --- | --- |
-| Pemeriksaan kesiapan tanpa memulai | `python start.py --check` |
-| Mengonversi sesi SQLite Telethon secara offline | `python -m tgwitness.sessions account.session --out account.tgwitness-session` |
-| Mengalirkan ekspor berukuran besar ke disk | `python -m tgwitness.download --token-file data/live/panel-token.txt --out evidence.zip` |
-| Memverifikasi arsip yang diekspor | `python tgwitness/verify.py tgwitness-evidence.zip --fingerprint SHA256` |
-| Memverifikasi arsip berukuran lebih dari 4 GiB | `python tgwitness/verify.py big-evidence.zip --fingerprint SHA256 --max-gib 16` |
-| Jalankan saksi independen dari berkas konfigurasi | `python -m tgwitness.witness run --config witness.json` |
+| [Kartu subjek](../INVESTIGATION-MODE.md#subject-cards) | Snapshot profil bot, orang, kanal, atau grup dengan label BOT, VERIFIED, SCAM, dan FAKE dari Telegram; snapshot berikutnya mencantumkan apa yang berubah |
+| [Rencana percakapan](../INVESTIGATION-MODE.md#conversation-plans) | Tujuan terkait jalur pembayaran, infrastruktur, atau orang, pesan yang telah disiapkan, waktu balasan, aktivitas per jam, dan gaya menulis pihak lawan |
+| [Terjemahan](../INVESTIGATION-MODE.md#machine-translation) | Ditampilkan di bawah teks asli beserta bahasa, model, dan catatan jurnal |
+| [Daftar pantauan](../INVESTIGATION-MODE.md#watchlists) | Kata, pola, dompet, @username, ID, domain, nomor telepon, dan tautan, dicocokkan dalam teks, suntingan, tujuan tautan tersembunyi, tombol bot, kode QR, dan OCR |
+| [Pemantauan online](../INVESTIGATION-MODE.md#online-watch) | Pemeriksaan setiap 1–60 menit, hingga 100 akun per permintaan, dengan pola per jam dan hari dalam seminggu |
+| [Kode dan dompet](../INVESTIGATION-MODE.md#codes-in-images) | Kode QR pembayaran; alamat EVM yang diperiksa terhadap EIP-55, TON dalam bentuk raw, checksum XRP Ledger, tautan pembayaran dengan chain, jumlah, dan token |
+| [Jejak klien](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-can-and-cannot-show) | Jejak encoder pada video bulat dan pesan suara; membandingkan waktu unggah dengan waktu kirim mengungkap bukti “langsung” yang sebenarnya direkam sebelumnya |
+| [Penyamaran dan kewenangan](../INVESTIGATION-MODE.md#cover-and-authority) | Persona, otorisasi, dan catatan aktivitas penyamaran yang menandai pesan di luar chat atau periode yang diotorisasi |
+| [Kontrol akun](../INVESTIGATION-MODE.md#account-control) | Penyuntingan profil dan privasi dengan catatan sebelum/sesudah, pemeriksaan keterpaparan, dan status offline segera setelah setiap tindakan |
+| [Dokumen untuk pengadilan](../INVESTIGATION-MODE.md#documents-for-court) | Paket perkara BagIt dengan templat sertifikasi Rule 902(13)/(14), indeks barang bukti, lampiran permintaan, dan teks WebVTT/SRT untuk rekaman layar |
 
-Perintah tambahan `python -m tgwitness…` harus dijalankan di dalam `.venv` (`.venv\Scripts\python.exe` pada Windows, `.venv/bin/python` di sistem operasi lain).
+Konten yang ditandai 18+, kekerasan, atau data pribadi tetap ada di salinan pengadilan, disegel dengan
+AES-256-GCM; kuncinya dikirim terpisah.
 
-| Variabel | Tujuan |
+[Pengaturan ekspor](../EXPORT_HASHES.md) mencakup pengambilan melalui API biasa dan Takeout,
+riwayat pesan sebelum lampiran, unduhan berkas atau hash server, serta tampilan
+JSON/HTML yang kompatibel dengan Telegram Desktop. [Ekspor chat terdistribusi](../DISTRIBUTED-EXPORT.md#history-acquisition)
+menawarkan jalur Takeout opsional untuk riwayat publik, titik pemeriksaan bertanda tangan setiap 100 pesan,
+serta pemulihan dalam suatu rentang menggunakan akun yang sama;
+[desain kinerjanya](../FAST-ACQUISITION.md) mencantumkan perilaku pengambilan yang telah diuji
+dan pengukuran langsung yang direncanakan.
+
+</details>
+
+<details>
+<summary><strong>Semua yang lain</strong> · riwayat, akun, proxy, AI, integrasi</summary>
+
+| | |
 | --- | --- |
-| `TGWITNESS_HOST`, `TGWITNESS_PORT` | Alamat dan port pendengar (`127.0.0.1:8787` secara default) |
-| `TGWITNESS_DATA` | Direktori data (`data/live` secara default) |
-| `TGWITNESS_TOKEN` | Token panel tetap, bukan yang dihasilkan secara otomatis (minimal 24 karakter) |
-| `TGWITNESS_VAULT_KEY_FILE` | Kunci utama brankas eksternal untuk instalasi baru |
-| `TGWITNESS_DOMAIN`, `TGWITNESS_IMAGE` | Nama host HTTPS Docker dan gambar yang dipublikasikan (lihat `deploy/env.example`) |
-| `TGWITNESS_WITNESS_*` | Saksi independen: pengumpul, token, saluran, `_INTERVAL`, `_TIMEOUT`, `_POST` (semua, perubahan, masalah), `_TITLE`, `_CONFIG` ([saksi](../WITNESS.md#options)) |
+| [Muat pesan lama](../HISTORY.md) | Tarik riwayat lampau dari chat terpilih, jeda dan lanjutkan kapan saja |
+| [Beberapa akun](../ACCOUNTS.md#multiple-accounts) | Ruang kerja terpisah, masing-masing dengan sesi Telegram, jurnal, dan kunci penandatanganan sendiri |
+| [Impor massal](../ACCOUNTS.md#bulk-import-and-account-groups) | Masukkan banyak berkas sesi sekaligus, kelompokkan akun dengan pengaturan bersama |
+| [Pool MTProxy](../wiki/Proxies.md#pool-dashboard-and-custom-sources) | Ping, negara, filter, daftar Anda sendiri |
+| [Sesi yang ada](../ACCOUNTS.md) | TData, Telethon, Pyrogram, StringSession, auth key, atau baris `key:DC`; otorisasi QR independen opsional dari donor yang diimpor |
+| [Keamanan akun](../ACCOUNTS.md#create-an-independent-authorization) | Peringatan sesi baru, mengakhiri sesi lain, mode sesi tunggal yang juga memasang kata sandi dua langkah, dan [probe saksi](../ACCOUNTS.md#witness-probe) yang mendeteksi saat pembaruan langsung berhenti sampai ke sesi ini |
+| [Ekspor chat yang dapat dilanjutkan](../EXPORT_HASHES.md#restricted-github-capture-and-single-chat-export) | Ekspor yang berhenti menyimpan salinan parsial bertanda tangan: lanjutkan, mulai ulang, atau unduh yang sudah tersimpan |
+| [Proxy](../CONNECTION-SECURITY.md#ip-modes) | SOCKS5, HTTP CONNECT, atau MTProxy per ruang kerja. **Sembunyikan IP** tidak pernah beralih ke koneksi langsung |
+| [Pencarian dan AI](../ANALYSIS.md) | Pencarian lokal, AI opsional dengan sumber yang dapat Anda periksa |
+| [Pencarian teks lengkap](../SEARCH.md) | Bentuk kata, frasa persis, domain, @username, dan bahasa Tionghoa tanpa spasi, hasil paling cocok lebih dulu (**Pratinjau**) |
+| [MCP](../MCP.md) | Akses baca-saja untuk klien MCP, terbatas pada chat yang Anda pilih |
+| [Baris perintah](../CLI.md) | `search`, `context`, `messages`, `stats`, dan `export` JSON Lines dengan `--json` untuk skrip dan agen, secara lokal atau dengan token berlingkup terbatas (**Pratinjau**) |
+| [OCR dan transkripsi](../MEDIA-ANALYSIS.md) | Berjalan secara lokal, berkas asli tidak diubah |
+| [Pengambilan independen](../OPTIONAL-CAPTURE.md) | Perekam browser/AyuGram opsional di **Alat lainnya → Tambahan** (pratinjau, nonaktif secara default) |
+| [Trusted Live](../TRUSTED-LIVE.md) | Sesi Desktop/Web resmi, video terlindungi, dan analisis kesinambungan dengan ekspor bawaan (pratinjau; kualifikasi langsung masih tertunda) |
+| [Web resmi tersegel](../OFFICIAL-WITNESS.md) | Browser resmi baru di GitHub Actions, kontrol terbatas, video bertanda tangan, serta sumber/pengaturan yang diharapkan secara independen |
+| [Webhook](../WEBHOOKS.md) | Event keluar bertanda tangan dengan percobaan ulang, termasuk contoh n8n |
+| [Akses bersama](../ACCESS.md) | Berikan seseorang akses hanya ke chat terpilih, dengan masa berlaku dan batasan IP |
+| [Nomor pesan yang hilang](../EVIDENCE.md#missing-message-numbers-gap_summary) | Nomor yang diberikan Telegram tetapi tidak pernah teramati, per kanal dan untuk seluruh akun, di cakupan, laporan, dan MCP (**Pratinjau**) |
+| [Snapshot status chat](../COLLECTION.md) | Snapshot bertanda tangan berkala atas judul, deskripsi, pin, administrator, dan hadiah, beserta apa yang berubah (**Pratinjau**) |
+| [Peta sistem](../SYSTEM-MAP.md) | Peta langsung akses panel, rute akun, tujuan Telegram, dan layanan luar, dengan 200 terbaru dari maksimal 2.000 pengamatan jaringan |
 
+</details>
 
-![Section divider](../assets/presentation/divider.svg)
+<details>
+<summary><strong>Pilih apa yang menopang catatan</strong> · lokal, cloud teraudit, GitHub Actions, atau Intel TDX</summary>
 
-## Tanggung jawab dan perlindungan data (GDPR)
+Jalankan secara lokal, tambahkan penerapan cloud teraudit, atau kumpulkan di dalam **VM konfidensial
+Phala Cloud dengan Intel TDX**. Setiap opsi mempertahankan jurnal bertanda tangan; pemeriksaan
+tambahan menyasar lingkungan tempat jurnal itu dikumpulkan.
 
-TgWitness adalah sebuah alat. Siapa pun yang menjalankannya menentukan apa yang dikumpulkan, mengapa, dan untuk berapa lama, serta bertanggung jawab atas hal tersebut — berdasarkan GDPR UE/Inggris, biasanya sebagai *pengendali* data pribadi tersebut. Pesan Telegram berisi data pribadi orang-orang yang tidak pernah menyetujui untuk direkam: nama, nama pengguna, ID, foto, nomor telepon, serta pendapat. Bagian ini bukan nasihat hukum; periksa undang-undang yang berlaku bagi Anda dan ketentuan Telegram.
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-assurance-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-assurance-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/casework-assurance-mobile.svg">
+  <img src="../assets/presentation/casework-assurance.svg" width="1200" alt="Tiga pilihan penerapan: verifikasi jurnal lokal; VM teraudit dengan catatan penyedia dan akses; Phala Intel TDX dengan quote terverifikasi, OS dan aplikasi terukur, serta kunci pengumpul yang terikat.">
+</picture>
 
-- **Pastikan terdapat dasar hukum dan tujuan yang jelas.** Pencegahan penipuan, keamanan jaringan dan informasi, serta pembelaan terhadap tuntutan hukum umumnya dijadikan sebagai kepentingan sah (GDPR Pasal 6(1)(f), Pertimbangan 47 dan 49; Pasal 9(2)(f) untuk tuntutan hukum). Tuliskan tujuannya untuk setiap kasus. Instansi pemerintah bekerja berdasarkan dasar hukumnya masing-masing.
-- **Kumpulkan data sesedikit mungkin sesuai kebutuhan.** Mulailah dengan obrolan yang dipilih. Mode folder dan mode seluruh akun merekam obrolan pribadi serta pesan dari pihak ketiga: gunakan mode ini hanya pada akun khusus; panel akan meminta konfirmasi dan jurnal yang ditandatangani akan mencatatnya. Nonaktifkan jenis peristiwa, jenis lampiran, dan tindakan Anda sendiri yang tidak diperlukan, serta kecualikan obrolan tertentu.
-- **Profil pengguna bersifat profilasi.** Fitur ini dinonaktifkan secara default dan diaktifkan per obrolan. Gunakan fitur ini untuk penyelidikan tertentu, jangan jadikan fitur ini sebagai dasar pengambilan keputusan otomatis mengenai orang (Pasal 22), dan nonaktifkan atau hapus obrolan tersebut setelah selesai — hal ini akan menghapus profil tersebut. Pemantauan sistematis terhadap banyak orang biasanya memerlukan penilaian dampak perlindungan data (Pasal 35).
-- **Jaga keamanannya.** Sesi, kredensial, dan kunci disimpan dalam brankas terenkripsi; letakkan direktori data pada disk terenkripsi, berikan kata sandi pada ekspor (ZIP AES-256), jaga agar panel tetap di balik HTTPS, dan berikan saksi hanya token baca-saja. Pemberitahuan tidak menyertakan teks pesan kecuali Anda mengaktifkan cuplikan, yang akan mengirimkan teks ke layanan pemberitahuan.
-- **Penyimpanan dan penghapusan.** Jurnal ini bersifat "append-only" sehingga integritasnya dapat dibuktikan; catatan tunggal tidak dapat dihapus tanpa memutus rantai tanda tangan. Rencanakan masa penyimpanan per ruang kerja dan hapus seluruh ruang kerja (Akun → Hapus) atau direktori datanya saat tujuannya telah berakhir. Salinan di luar lokasi yang berada di bawah S3 Object Lock tidak dapat dihapus sebelum tanggal retensinya — tentukan periode retensi sesuai kebutuhan. Hak atas penghapusan memiliki pengecualian, misalnya untuk pembuktian atau pembelaan tuntutan hukum (Pasal 17(3)(e)).
-- **Permintaan dari orang-orang yang tercatat.** Ekspor obrolan dan berkas profil memungkinkan untuk mengetahui informasi apa saja yang disimpan mengenai seseorang (Pasal 15).
-- **Tidak ada data yang dikirimkan kepada pengembang.** TgWitness tidak memiliki fitur telemetri dan tidak menggunakan layanan terhosting; data hanya meninggalkan perangkat Anda melalui jalur yang Anda konfigurasikan (Telegram, layanan cap waktu, salinan S3, notifikasi, saksi).
+Verifikator TDX memeriksa quote terhadap root dan data pencabutan Intel yang di-pin,
+mengikatnya ke pernyataan pengumpul yang ditandatangani dan tantangan baru, lalu membandingkan
+OS dan aplikasi yang terukur dengan input yang diharapkan secara independen. Laporan mencantumkan
+setiap hasil secara terpisah, sehingga lingkungan terukur, identitas pengumpul, catatan
+pengambilan, dan cakupan dapat ditinjau bersama.
 
-## Keamanan dan status proyek
+**Pengambilan dengan provenans GitHub** (pratinjau). Kumpulkan chat di runner yang di-host GitHub
+dengan TgWitness yang di-pin dan sesi Telegram baru, lalu unduh arsip terenkripsi
+beserta atestasi GitHub-nya. Verifikator memeriksa alur kerja yang disetujui dan
+versi pengumpul, digest arsip, jurnal, dan lampiran. Juga tersedia
+di bawah **Ekspor** pada panel.
+[Buka halaman pengambilan](https://phishdestroy.github.io/TgWitness/id/docs/capture/) · [Petunjuk](../SEALED-ACTIONS.md)
 
+Untuk observasi langsung, riwayat, atau ekspor sekali jalan, pilih
+[metode pengumpulan](../COLLECTION-MODES.md). Chat cloud pribadi tersedia
+jika akun yang terhubung dapat mengaksesnya. Aplikasi yang dipublikasikan juga menyertakan
+[integrasi Chat Rahasia](../PSEUDO-SECRET.md): pasang dependensi protokol opsional
+dan aktifkan per akun untuk merekam chat yang dibuat atau diterima di sana.
+Lihat [cakupan pengumpulan](../COLLECTION.md) untuk jalur pengambilan yang tersedia.
 
-- Panel ini secara default mendengarkan pada localhost. Untuk akses jarak jauh, gunakan profil Compose HTTPS atau terowongan SSH; jangan pernah mengekspos HTTP biasa.
-- Sesi Telegram, kredensial API, kredensial proxy, dan kunci penandatanganan disimpan dalam brankas yang dienkripsi dengan Fernet. Secara default, kuncinya berada di direktori data yang sama; atur `TGWITNESS_VAULT_KEY_FILE` untuk kunci utama eksternal. Isi pesan dan media lokal **tidak** dienkripsi oleh TgWitness; simpan direktori data pada disk atau volume yang terenkripsi. Ekspor ZIP yang ditandatangani dapat dienkripsi dengan kata sandi secara opsional.
-- Berkas data, sesi, token, kunci, dan ekspor tidak disertakan dalam git dan build Docker.
-- Laporkan kerentanan secara pribadi sebagaimana dijelaskan dalam berkas [SECURITY.md](../../.github/SECURITY.md).
+[Phala / Intel TDX dan penerapan teraudit](../HIGH-ASSURANCE.md) ·
+[Kualifikasi langsung Phala](../VERIFICATION.md#live-phala-cloud-deployment--4-november-2026) ·
+[Batas kepercayaan](../SECURITY-MODEL.md)
 
-### Apa yang telah diuji
+</details>
 
-TgWitness 0**.6.1** berjalan di Windows 11 dengan Python 3.12. Status per 29 Oktober 2026:
+<a name="manifesto"></a>
 
-| Area | Bagaimana pengujiannya dilakukan |
+<details>
+<summary><strong>Periksa pengambilan dan catatan yang tersimpan</strong> · apa yang diverifikasi penerima dan Export Clinic</summary>
+
+<picture>
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-manifesto-mobile.svg">
+  <img src="../assets/presentation/readme-manifesto.svg" width="1200" alt="Rekam percakapannya. Verifikasi catatannya. Simpan pesan, suntingan, dan berkas, periksa tanda tangan dan titik pemeriksaan, serta tinjau proses pengambilan.">
+</picture>
+
+TgWitness merekam konten yang dikirim ke akun Telegram yang terhubung, beserta
+pengenal chat, pesan, dan pengirim, versi yang direkam, serta metadata pengumpulan.
+Arsip menyatukan catatan tersebut, lampiran yang disimpan, dan data verifikasi
+untuk ditinjau.
+
+| Pemeriksaan | Yang diverifikasi penerima |
 | --- | --- |
-| Pesan, pengeditan, penghapusan, lampiran, pemeriksaan ulang setelah restart, jeda FloodWait | Dilakukan dengan **akun Telegram asli**, 27–29 Oktober 2026: 9.968 catatan yang ditandatangani, setiap tanda tangan dan rantai hash telah diverifikasi ([uji coba langsung](../VERIFICATION.md#live-telegram-test-whole-account--29-october-2026)) |
-| Memantau seluruh akun, serta cuplikan riwayat | Dilakukan dengan **akun asli** pada 29 Oktober 2026: pesan dari 2 grup atau saluran serta 3 obrolan pribadi dan bot |
-| Menekan tombol pesan dari **Obrolan** | Sudah dilakukan sekali dengan **akun asli** |
-| Masuk menggunakan berkas sesi Telethon/Pyrogram dan TData Telegram Desktop | Selesai dengan **satu akun asli** |
-| Masuk melalui nomor telepon, kode QR, dan Kunci Otentikasi, obrolan baru yang ditambahkan ke cakupan beserta pesan-pesan sebelumnya, pengiriman pesan, bergabung melalui undangan, reaksi, keanggotaan, profil pengguna, pengelolaan beberapa akun sekaligus, ekspor, dan verifikator | Pengujian otomatis dengan klien Telegram sintetis |
-| Proksi SOCKS5/HTTP, bot saksi, pemberitahuan, salinan S3, RFC 3161, dan OpenTimestamps | Pengujian otomatis terhadap server uji lokal |
-| Daftar MTProxy publik | Telah diunduh dan disaring (118 server pada 29 Oktober); belum ada koneksi melalui server-server tersebut |
-| Pengujian terkini dan batasnya | [Validasi yang masih diperlukan](../VERIFICATION.md#remaining-qualification) |
+| Jurnal dan manifes bertanda tangan | Tanda tangan catatan, rantai hash, dan berkas yang diserahkan terhadap kunci penandatanganan yang diharapkan. |
+| Titik pemeriksaan yang disimpan terpisah | Jurnal terhadap panjang dan hash catatan terbaru yang dicatat sebelumnya. |
+| Saksi independen | Jurnal terhadap titik pemeriksaan yang disimpan oleh saksi terpisah. |
+| Pengambilan melalui GitHub Actions | Arsip terhadap atestasinya, alur kerja ter-host yang disetujui, dan versi pengumpul. |
 
-Rincian: [catatan verifikasi](../VERIFICATION.md), [status rilis,](../internal/RELEASE.md) dan [kesiapan](../internal/READINESS.md).
+[Export Clinic](https://phishdestroy.github.io/TgWitness/docs/export-clinic/)
+menampilkan percakapan Telegram berdampingan dengan berkas ekspor Desktop yang sengaja diubah.
+Bandingkan versinya, periksa perubahannya, dan ikuti langkah pengumpulan dan
+verifikasi untuk arsip TgWitness bertanda tangan.
 
+[Langkah verifikasi](../wiki/Exports-and-Verification.md) ·
+[Pengambilan GitHub](../SEALED-ACTIONS.md) ·
+[Model kepercayaan teknis](../SECURITY-MODEL.md)
 
-![Section divider](../assets/presentation/divider.svg)
+</details>
 
-## Pengembangan
+<a name="operations"></a>
 
-```sh
-python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\Activate.ps1
-python -m pip install -c deploy/constraints.txt -e ".[dev]"
-python -m ruff check .                                 # source checks
-python -m playwright install chromium
-python tools/build_portable.py                         # Windows portable ZIP (Windows + Python 3.12)
-python tools/build_source.py                          # source ZIP with SHA-256 manifest
-python tools/build_site.py                             # static project site in dist/site
-```
+<details>
+<summary><strong>Jaga investigasi tetap berjalan</strong> · notifikasi, penyimpanan, dan pemulihan</summary>
 
-Pemeriksaan browser menggunakan data sintetis. Proses build dan rilis saat ini ditentukan dalam `.github/workflows/`. Baca [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) sebelum membuka pull request.
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-services-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-services-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-services-mobile.svg">
+  <img src="../assets/presentation/readme-services.svg" width="1200" alt="Alur kerja animasi: Apprise mengirim peringatan yang dikonfigurasi; salinan off-site dienkripsi sebelum diunggah ke penyimpanan yang kompatibel dengan S3.">
+</picture>
 
-## Dokumentasi
+[Notifikasi](../OPERATIONS.md#notifications) · [Salinan off-site terenkripsi](../wiki/Off-site-Copy.md) · [Cadangan dan pemulihan](../wiki/Backup-and-Recovery.md) · [Pemecahan masalah](../OPERATIONS.md)
 
-| Panduan | Mencakup |
+<table>
+<tr>
+<td width="33%" align="center"><a href="https://phishdestroy.github.io/TgWitness/id/docs/start/"><b>Panduan penyiapan&nbsp;↗</b></a><br><sub>Dari instalasi hingga chat pertama</sub></td>
+<td width="33%" align="center"><a href="https://phishdestroy.github.io/TgWitness/id/docs/dedicated-account/"><b>Siapkan akun Anda&nbsp;↗</b></a><br><sub>Akun Telegram khusus</sub></td>
+<td width="33%" align="center"><a href="DEPLOYMENT.md"><b>Docker dan server&nbsp;↗</b></a><br><sub>HTTPS, restart, dan pembaruan</sub></td>
+</tr>
+</table>
+
+</details>
+
+<a name="repository-map"></a>
+
+<details>
+<summary><strong>Jelajahi repositori</strong> · letak kode, dokumen, dan alat</summary>
+
+| Direktori | Mulai di sini |
 | --- | --- |
-| [Panduan cepat](QUICKSTART.md) | Peluncuran pertama, koneksi akun, dan ekspor pertama |
-| [Akun dan format sesi](../ACCOUNTS.md) | Masukan data login, konversi, dan pengelolaan beberapa akun |
-| [Cara kerja pengumpulan data](../COLLECTION.md) | Kebijakan pencatatan, versi, lampiran, dan celah |
-| [Koneksi dan keamanan](../CONNECTION-SECURITY.md) | Proksi, enkripsi, dan kunci |
-| [Operasi](../OPERATIONS.md) | Alur kerja harian, pencadangan, pemulihan, kapasitas |
-| [Penerapan](DEPLOYMENT.md) dan [templat layanan](../../deploy/README.md) | Server, kontainer, HTTPS, pembaruan |
-| [Model bukti](../EVIDENCE.md) dan [cap waktu](../TIMESTAMP.md) | Integritas, cakupan, profil pengguna, kepercayaan, dan serah terima |
-| [Saksi independen](../WITNESS.md) | Token saksi read-only, profil Docker, posting saluran, verifikasi silang |
-| [Arsitektur](../ARCHITECTURE.md) dan [model produk](../PRODUCT.md) | Detail internal dan keputusan desain |
-| [Verifikasi](../VERIFICATION.md) dan [kesiapan](../internal/READINESS.md) | Pemeriksaan yang telah dilakukan dan pekerjaan yang masih harus diselesaikan |
-| [Daftar Perubahan](../CHANGELOG.md) | Riwayat rilis |
-| [Situs web dan penerbitan](../internal/PUBLISHING.md) | Pratinjau situs web lokal, GitHub Pages, publikasi pertama |
+| [docs/](../README.md) | Penyiapan, alur kerja investigasi, dan referensi teknis |
+| [tgwitness/](../../tgwitness/README.md) | Aplikasi utama, pengumpul, jurnal, dan panel web |
+| [tgwitness_capture/](../../tgwitness_capture/README.md) | Perekam independen dan kode verifikasinya |
+| [addons/](../../addons/README.md) | Instalasi, konfigurasi, dan pengujian pengambilan opsional |
+| [deploy/](../../deploy/README.md) | Penginstal, kontainer, dan layanan latar belakang |
+| [examples/](../../examples/README.md) | Konfigurasi ekspor akun dan pengambilan tersegel |
+| [integrations/](../../integrations/README.md) | Webhook bertanda tangan dan penerima n8n |
+| [.agents/](../../.agents/README.md) | Instruksi tugas untuk membaca arsip melalui CLI |
+| [scripts/](../../scripts/README.md) | Peluncur dan utilitas CI |
+| [tools/](../../tools/README.md) | Build, pemeriksaan, dan pengemasan |
+| [website/](../../website/README.md) | Situs publik, panduan terjemahan, dan demo interaktif |
+| [.github/](../../.github/AUTOMATION.md) | Alur kerja, pedoman kontribusi, dan dukungan |
 
+[Panduan proyek lengkap](../PROJECT-GUIDE.md) ·
+[Berkontribusi](../../.github/CONTRIBUTING.md) · [Dapatkan bantuan](../../.github/SUPPORT.md)
 
-![Section divider](../assets/presentation/divider.svg)
+</details>
 
-## Lisensi
+<details>
+<summary><strong>⚖️ Pemberitahuan Etis &amp; Kesinambungan Historis</strong></summary>
 
-[MIT License](../../LICENSE)
+Posisi para penulis dan pemberitahuan untuk operator, dalam bahasa ini:
 
-## Panduan dalam folder ini
+[Pemberitahuan Ketidakcocokan Lisensi dan Arsitektur](TAYLOR-WESSING-EXCLUSION.md) · [Pemberitahuan operator](OPERATOR-INCOMPATIBILITY.md) · [Lisensi MIT](../../LICENSE) · [NOTICE asli](../../NOTICE)
 
-| Berkas | Isi |
-| --- | --- |
-| [DEPLOYMENT.md](DEPLOYMENT.md) | Penerapan dan pengoperasian |
-| [QUICKSTART.md](QUICKSTART.md) | Panduan Memulai TgWitness |
+</details>
 
-[Pemberitahuan Ketidakcocokan Lisensi dan Arsitektur](TAYLOR-WESSING-EXCLUSION.md) · [MIT License](../../LICENSE)
+<a name="languages"></a>
+
+<details>
+<summary><strong>Baca ikhtisar proyek dalam bahasa Anda</strong></summary>
+
+[English](../../README.md) · [Русский](../ru/README.md) · [Українська](../uk/README.md) · [Español](../es/README.md) · [Português (Brasil)](../pt/README.md) · [Türkçe](../tr/README.md) · [العربية](../ar/README.md) · [فارسی](../fa/README.md) · [اردو](../ur/README.md) · [हिन्दी](../hi/README.md) · **Bahasa Indonesia** · [Tiếng Việt](../vi/README.md) · [简体中文](../zh/README.md) · [繁體中文](../zh-Hant/README.md) · [Français](../fr/README.md) · [Deutsch](../de/README.md) · [Italiano](../it/README.md) · [Polski](../pl/README.md) · [O‘zbekcha](../uz/README.md) · [한국어](../ko/README.md) · [日本語](../ja/README.md) · [Bahasa Melayu](../ms/README.md) · [ไทย](../th/README.md) · [עברית](../he/README.md) · [বাংলা](../bn/README.md) · [አማርኛ](../am/README.md)
+
+</details>
+
+<p align="center">
+  <a href="../README.md"><b>Dokumentasi teknis</b></a> ·
+  <a href="https://github.com/phishdestroy/TgWitness/wiki"><b>Buku panduan investigasi</b></a> ·
+  <a href="https://github.com/phishdestroy"><b>Dibuat oleh PhishDestroy</b></a> ·
+  <a href="../../.github/CONTRIBUTING.md"><b>Berkontribusi</b></a> ·
+  <a href="../../.github/SUPPORT.md"><b>Dapatkan bantuan</b></a> ·
+  <a href="../../.github/SECURITY.md"><b>Laporkan kerentanan</b></a>
+</p>
+
+[Indeks proyek yang dapat dibaca mesin](../../llms.txt) · [Buku panduan teks lengkap](https://phishdestroy.github.io/TgWitness/llms-full.txt) · [Aturan repositori untuk agen](../../AGENTS.md)

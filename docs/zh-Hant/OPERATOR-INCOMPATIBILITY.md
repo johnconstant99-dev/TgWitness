@@ -22,5 +22,5 @@
 </blockquote>
 <p>為嚴格遵守 MIT 授權條款，我們不限制本軟體的使用。然而，必須明確指出：企業聘僱、法律威嚇及要求刪除數位資料等行為，皆無法抹去歷史、改寫淵源，亦無法隱瞞真相。</p>
 <p><a href="../../LICENSE">MIT 授權條款</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">我們對 Taylor Wessing 的立場</a> · <a href="../HOW-IT-WORKS.md">證據模型</a></p>
-<p><a href="../../README.md">專案</a> · <a href="../README.md">文件說明</a> · <a href="../wiki/Home.md">維基</a></p>
+<p><a href="README.md">專案</a> · <a href="README.md">文件說明</a> · <a href="../wiki/Home.md">維基</a></p>
 </div>

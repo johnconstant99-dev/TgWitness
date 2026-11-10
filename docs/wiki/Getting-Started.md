@@ -55,6 +55,7 @@ Stop the demo first (same port), then run `Start.cmd`, `sh start.sh` or `TgWitne
 
 | Installation | Panel token |
 | --- | --- |
+| One-line installer | Printed by the installer; `tgwitness open` shows it again |
 | Source or portable, default live directory | `data/live/panel-token.txt` |
 | Source or portable with a custom data directory | `panel-token.txt` inside that directory |
 | Docker | `docker compose exec tgwitness cat /data/panel-token.txt` |

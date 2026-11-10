@@ -457,6 +457,8 @@ async def record_drand(store, network):
         if ahead > 60:
             errors.append(urlsplit(relay).hostname + ": the round is " + str(round(ahead)) + " s ahead of this clock")
             continue
+        store.set_setting("drand_latest", {"round": beacon["round"], "randomness": beacon["randomness"],
+                                           "chain": DRAND_CHAIN})
         event = store.append("beacon.drand", {
             "chain": DRAND_CHAIN, **beacon, "round_time": drand_time(beacon["round"]), "relay": relay,
             "meaning": "Public randomness from drand (League of Entropy). Nobody knew it before round_time, so the "

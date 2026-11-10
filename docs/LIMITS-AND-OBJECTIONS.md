@@ -189,8 +189,8 @@ and test coverage are the maintainers' own.
 
 **Facts.**
 
-- The README badge reads "v0.9.1 · pre-release", [current capabilities](STATUS.md)
-  says "0.9.1 preview", and the [changelog](CHANGELOG.md) labels releases from 0.7.0
+- The README badge reads "v0.9.2 · pre-release", [current capabilities](STATUS.md)
+  says "0.9.2 preview", and the [changelog](CHANGELOG.md) labels releases from 0.7.0
   onward as preview. GitHub Actions capture is marked "Preview available from `main`"
   ([GitHub capture](SEALED-ACTIONS.md)).
 - The signed audit of 6 November 2026 lists open findings for its snapshot
@@ -217,6 +217,12 @@ and treat untested paths as untested.
 - That run covered deployment, all 16 verifier checks (including the Intel TDX quote
   and OS measurements), restart evidence, a report sealed with a qualified eIDAS time
   stamp, and deletion (same section).
+- On 9 November a Phala Cloud deployment of commit `427621d4` observed three channels
+  with a dedicated test account; all six TDX checks passed and the export verified. The
+  session was imported, so the tier was `self_attested`
+  ([Phala Cloud with live Telegram account](VERIFICATION.md#phala-cloud-with-live-telegram-account--9-november-2026)).
+  A separate run of commit `206fef76` signed in by phone code inside the VM and recorded
+  `key_origin: created` ([session key created inside the TDX VM](VERIFICATION.md#session-key-created-inside-the-tdx-vm--9-november-2026)).
 - The attestation relies on Intel's TDX module and microcode. "The host controls the
   machine's time source and network"
   ([attestation certificate](HIGH-ASSURANCE.md#attestation-certificate)).
@@ -225,7 +231,9 @@ and treat untested paths as untested.
   ([GitHub capture](SEALED-ACTIONS.md)), and the validation record contains no entry
   for a live-account GitHub capture.
 
-**Limit.** Yes. TDX collection from a live Telegram account has not been qualified.
+**Limit.** Partly. Live collection on TDX has run with an imported key and with a key
+created in the VM. Verifying an export from such a run at the `sealed` tier, and QR login
+from a phone, remain open ([qualification status](VERIFICATION.md#qualification-status)).
 
 ## A Desktop export with a qualified eIDAS timestamp is just as good
 
@@ -329,7 +337,7 @@ where its conditions are met.
   disabled in every workspace and shows the data it will send before each request
   ([analysis](ANALYSIS.md)). Notifications carry no message text unless excerpts are
   turned on ([project guide](PROJECT-GUIDE.md#responsibility-and-data-protection-gdpr)).
-  **Workspace → System map** lists the connections the process attempts
+  **More tools → System map** lists the connections the process attempts
   ([system map](SYSTEM-MAP.md)).
 - An operator catalog set with `TGWITNESS_PROXY_CATALOG` "disables external
   subscriptions entirely"; your own SOCKS5 or HTTP route is the other alternative

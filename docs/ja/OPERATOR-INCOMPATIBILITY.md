@@ -22,5 +22,5 @@
 </blockquote>
 <p>MITライセンスを厳格に遵守するため、当ソフトウェアの使用を制限することはありません。ただし、明確にしておきますが、企業からの顧問契約、法的威嚇、およびデジタルデータの消去要求は、歴史を覆したり、系譜を書き換えたり、真実を隠蔽したりすることはできません。</p>
 <p><a href="../../LICENSE">MITライセンス</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Taylor Wessing に関する当社の立場</a> · <a href="../HOW-IT-WORKS.md">証拠モデル</a></p>
-<p><a href="../../README.md">プロジェクト</a> · <a href="../README.md">ドキュメント</a> · <a href="../wiki/Home.md">Wiki</a></p>
+<p><a href="README.md">プロジェクト</a> · <a href="README.md">ドキュメント</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

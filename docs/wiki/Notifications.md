@@ -24,7 +24,8 @@ Problem alerts, chat changes and a daily summary, sent wherever you want for eac
 
 ## Set up delivery
 
-1. Open **Extras → Notifications → Configure**.
+1. Open **Settings → Notifications and off-site copy → Notification destinations**, or
+   **More tools → Extras → Notifications → Configure**.
 2. Pick a service under **Add a destination**, or paste Apprise URLs (one per line) under
    **Destinations as Apprise addresses**. Formats: [service catalogue](https://appriseit.com/services/).
 3. Turn on **Send notifications** and choose problems, chat changes and/or a daily summary
@@ -38,7 +39,7 @@ You can have several destinations. The bell in the top bar keeps recent stuff in
 
 | Option | What it is for |
 | --- | --- |
-| Problems | Signed-out account, low disk, failed copy and so on |
+| Problems | Signed-out account, a new session on the account, low disk, failed copy and so on |
 | Chat changes | Changes in observed sources |
 | Daily summary | Once a day overview |
 | Short excerpts | Message text, only if you turn it on |

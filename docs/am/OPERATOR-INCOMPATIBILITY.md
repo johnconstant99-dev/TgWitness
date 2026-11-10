@@ -22,5 +22,5 @@
 </blockquote>
 <p>የMIT ፈቃድን በትክክል ለማክበር፣ የዚህን ሶፍትዌር አጠቃቀም አንገድብም። ይሁን እንጂ አንድ ነገር ግልጽ ይሁን፦ ከኮርፖሬሽኖች የሚከፈሉ የሕግ አገልግሎት ክፍያዎች፣ በሕግ ስም ማስፈራራት እና ዲጂታል መረጃ እንዲጠፋ የሚቀርቡ ጥያቄዎች ታሪክን ሊሽሩ፣ የዘር ሐረግን እንደገና ሊጽፉ ወይም እውነትን ሊደብቁ አይችሉም።</p>
 <p><a href="../../LICENSE">የMIT ፈቃድ</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">በTaylor Wessing ላይ ያለን አቋም</a> · <a href="../HOW-IT-WORKS.md">የማስረጃ ሞዴል</a></p>
-<p><a href="../../README.md">ፕሮጀክት</a> · <a href="../README.md">ሰነዶች</a> · <a href="../wiki/Home.md">ዊኪ</a></p>
+<p><a href="README.md">ፕሮጀክት</a> · <a href="README.md">ሰነዶች</a> · <a href="../wiki/Home.md">ዊኪ</a></p>
 </div>

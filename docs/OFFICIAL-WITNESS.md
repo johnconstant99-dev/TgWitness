@@ -55,7 +55,7 @@ docker compose --project-directory . -f addons/capture/compose.official.yaml --p
 
 Open `http://127.0.0.1:8794` and enter the token locally. Do not paste it into an issue or chat. Capture starts disabled. The browser profile exists only in temporary container storage, the persistent volume contains evidence and recorder keys. Use a different Compose project name and private upstream configuration for each account, for example the Compose option `-p case-one`. Operator independence comes from the outer GitHub attestation or a separate checkpoint witness; local signatures cover the recorded bytes.
 
-The main application's **Extras → Independent capture** can connect to this recorder as a browser recorder. Once its pinned identity is checked, the panel links to the official-client controls and hides incompatible generic browser settings.
+The main application's **More tools → Extras → Independent capture** can connect to this recorder as a browser recorder. Once its pinned identity is checked, the panel links to the official-client controls and hides incompatible generic browser settings.
 
 ## Network and account behavior
 

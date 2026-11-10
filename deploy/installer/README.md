@@ -80,10 +80,12 @@ The release private key must stay outside the checkout and match
 
 ```sh
 python tools/build_installer.py --base-url https://get.destroy.tools --signing-key /private/release-key.pem
-python tools/check_installer.py
-# Linux/macOS: actual runtime and dependency downloads, private temporary install.
-python tools/check_installer.py --install
 ```
+
+The [installer acceptance workflow](../../.github/workflows/installer-acceptance.yml) checks
+that build: it verifies the artifact signatures and source revision, installs the wheel with
+its hash-locked dependencies on Ubuntu and Windows and, for pull requests that change the
+installer, runs `install.sh` and `install.ps1` twice against a local HTTPS origin.
 
 The output is `dist/installer-site/`. Each release path contains a wheel,
 the hash-locked `requirements.lock`, installer copies, SHA-256 sidecars and a manifest linking
@@ -130,9 +132,12 @@ application itself is installed on each user's own machine.
 The [Installer workflow](../../.github/workflows/installer.yml) rebuilds for
 every commit on `main`, including documentation changes. It derives the software
 version from `pyproject.toml`, records the commit, and signs the files. Before
-publication, the exact signed candidate must install and run on clean Ubuntu
-(local access and a temporary HTTPS tunnel) and Windows PowerShell hosts. These
-checks exercise authentication, restart, retained data and repeat installation.
+publication, [installer-acceptance.yml](../../.github/workflows/installer-acceptance.yml)
+authenticates the exact signed candidate, installs its wheel with the hash-locked
+dependencies on clean Ubuntu and Windows runners and runs the readiness check.
+Pull requests that change the installer also run `install.sh` and `install.ps1` twice
+against a local HTTPS copy of the site built with a throwaway test key. Service
+setup, tunnels and bootstrap regressions run outside the public workflows.
 The application **Checks** and **Security audit** workflows must also succeed for
 that same main commit; a triggered **Sealed capture validation** must finish
 successfully too. Missing, queued, skipped or failed required checks do not qualify.
@@ -180,23 +185,22 @@ and publishing path. Installed copies update only when their operator reruns the
 installer; this workflow does not install an unattended updater on their machines.
 
 To exercise the actual public download URLs on disposable Ubuntu and Windows
-hosts, run **First-run installer acceptance** on `main` with **published** enabled:
+hosts, run **Installer artifact and wheel smoke** on `main` with **published** enabled:
 
 ```sh
 gh workflow run installer-acceptance.yml --ref main -f published=true
 ```
 
 This authenticates the public manifest and immutable artifacts against the checked
-repository key and requires the selected main commit. Installation then uses real
-HTTPS package downloads through the published `curl | bash` and `irm | iex`
-commands, with `TGWITNESS_NO_SETUP=1` to keep setup controlled by the test. A concurrent
+repository key and requires the selected main commit. It then installs the published
+wheel with its hash-locked dependencies and runs the readiness check; it does not run
+the `curl | bash` or `irm | iex` commands. A concurrent
 publication or a main commit not published yet is reported as a mismatch, never
 silently tested as if it were the requested build. Test installations contain no
-Telegram accounts. The same Windows check can be run locally after downloading:
+Telegram accounts. To inspect the current publication locally, download it first:
 
 ```sh
 python tools/installer_publication.py download-current --site build/public-installer --revision FULL_COMMIT
-python tools/check_installer_windows.py --site build/public-installer --public
 ```
 
 ## Everyday commands

@@ -7,7 +7,7 @@
 <details>
 <summary>On this page</summary>
 
-- [0.9.2 preview · 9 November 2026](#092-preview--9-november-2026)
+- [0.9.2 preview · 10 November 2026](#092-preview--10-november-2026)
 - [0.9.1 preview · 5 November 2026](#091-preview--5-november-2026)
 - [0.9.0 preview · 4 November 2026](#090-preview--4-november-2026)
 - [0.8.1 preview · 2 November 2026](#081-preview--2-november-2026)
@@ -21,8 +21,25 @@
 
 </details>
 
-## 0.9.2 preview · 9 November 2026
+## 0.9.2 preview · 10 November 2026
 
+- Watch the account's sessions while observing. A new entry in Telegram's session list is recorded under `added` in `account.sessions` and raises an alert with the device, application and country. Security notices from Telegram (777000) are recorded as `account.security_event`, the session key fingerprint as `session.fingerprint`, and other sessions signed in when observation starts or a session ended from elsewhere as coverage gaps. Phone call updates are recorded as `account.phone_call`.
+- **Account security → Sessions of this account** ends one session or all other sessions. For a session key created in this workspace, **Make this the only session** ends every other session and sets a two-step password if the account has none; **Make this the only session when Telegram allows it** runs the same action once Telegram's 24-hour limit has passed. The journal records `session.exclusive_from`, and `session.exclusive_ended` if another session appears later.
+- Add the [witness probe](ACCOUNTS.md#witness-probe): a second workspace with its own account answers probes in a private group. An answer that reaches this session only through history, not as a live update, marks event intake as failed until a later answer arrives live. The verifier counts probes sent, answered live and missed live, and on the witness side the probes it saw and answered.
+- The journal records where the session key came from: `key_origin: "created"` for a phone, QR or independent sign-in, `imported` for a session file. Attested deployments refuse imported keys. With the goal **Evidence for a case**, starting observation first names any other signed-in sessions.
+- Import an auth key and DC as one line, `<512 hex characters>:<DC 1–5>`: pasted, as a text file or in the `session` field of an Account JSON.
+
+- A single-chat export that fails or is cancelled keeps what it has read under a statement signed with the collector key, with a signed checkpoint every 5,000 messages and another before the files stage. The export form offers **Resume export**, **Start over** and **Download partial export**. Partial exports set aside more than seven days ago are removed at startup.
+- Reuse attachments already saved for the same Telegram file instead of downloading them again; reused bytes are hashed before use. Each account runs up to three file reads in parallel.
+
+- `verify.py` checks Intel TDX quotes offline: the quote and quoting-enclave signatures, the PCK chain up to the pinned Intel root, the REPORTDATA binding and, when the archive carries Intel's collateral, the TCB status at the recorded time. Without the provider checks of `python -m tgwitness.cloud verify` the attested run stays partial.
+- Evidence mode stores OCSP or CRL revocation data for each RFC 3161 signing certificate, and `verify.py` checks it against the time stamp.
+- Signed checkpoints carry the latest drand round, fetched through the workspace's outside route so Hide IP, proxies and a turned-off outside route apply. `verify.py --check-drand` confirms it; the round shows the checkpoint was signed no earlier than that time.
+- The verifier output lists session records: sessions added and ended, other sessions at the start, only-session periods and witness probes.
+
+- Count failed sign-ins toward the lockout for every JSON body the panel accepts, not only for an exact `application/json` content type. The disclosure note no longer says that filtering and redaction were checked.
+- Restore 6 November work missing from `main`: the chat export eligibility check with time estimates, the automatic connection route with WARP consent, the route choice for bulk import, and separate `deletion.unscoped` records for unknown messages and messages in chats outside observation.
+- Before publishing the download site, CI checks the signed installer artifact and installs its wheel on Ubuntu and Windows; pull requests that change the installer also run `install.sh` and `install.ps1` twice against a local HTTPS origin. [Verification](VERIFICATION.md) records the 9 and 10 November live runs: parallel clients on one session, session resets, two-step password changes, the witness probe, interrupted chat exports and a Phala TDX deployment; [Timestamps](TIMESTAMP.md) records the live TSA services.
 - The minimum for evidence is now integrity, the confirmed signer key and external time from a third party covering the last exported record: a validated RFC 3161 timestamp, a confirmed OpenTimestamps proof, a witness post read live from t.me, a witness Bitcoin seal or a checked GitHub attestation. A retained checkpoint and a witness with its own key are supporting checks, because the collector could create both alone. `verify.py --channel https://t.me/s/…` reads post dates from Telegram and skips the dates of edited posts; dates from a supplied `result.json` or any other source remain supplied metadata.
 
 - Refresh the pinned Wolfi base images and runtime/MCP dependencies, regenerate root and capture hash locks, and require patched QR reader wheels. Exclude OpenCV 5.0.0.93, which bundles FFmpeg 8.1.1 affected by [CVE-2026-8461](https://github.com/advisories/GHSA-qff7-4q6c-m8h6).

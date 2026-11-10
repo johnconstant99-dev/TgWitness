@@ -1,78 +1,74 @@
-[TgWitness](../../README.md) / [Documentation](../README.md) / [Folder](README.md)
+[TgWitness](../../README.md) / [Documentação](../README.md) / [Pasta](README.md)
 
-![Deployment & recovery](../assets/presentation/chapter-operate.svg)
+![Implantação e recuperação](../assets/presentation/chapter-operate.svg)
 
 [English](../DEPLOYMENT.md) · [Русский](../ru/DEPLOYMENT.md) · [Українська](../uk/DEPLOYMENT.md) · [Español](../es/DEPLOYMENT.md) · **Português (Brasil)** · [Türkçe](../tr/DEPLOYMENT.md) · [العربية](../ar/DEPLOYMENT.md) · [فارسی](../fa/DEPLOYMENT.md) · [اردو](../ur/DEPLOYMENT.md) · [हिन्दी](../hi/DEPLOYMENT.md) · [Bahasa Indonesia](../id/DEPLOYMENT.md) · [Tiếng Việt](../vi/DEPLOYMENT.md) · [简体中文](../zh/DEPLOYMENT.md)
 
-# Implantação e operações
+# Implantação e operação
 
-## Escolha uma opção de instalação
+## Escolher uma instalação
 
-Para o pacote portátil, extraia `TgWitness-<version>-windows-amd64-portable.zip` das versões do GitHub. Para os demais métodos, baixe e extraia o arquivo ZIP com o código-fonte ou clone o repositório e, em seguida, execute o seguinte a partir do diretório do projeto:
+Para o pacote portátil, extraia `TgWitness-<version>-windows-amd64-portable.zip` do GitHub Releases. Para os outros métodos, baixe e extraia o ZIP do código-fonte ou clone o repositório e, em seguida, execute o seguinte a partir do diretório do projeto:
 
-| Instalação | Início | Funciona em segundo plano? |
+| Instalação | Iniciar | Roda em segundo plano? |
 | --- | --- | --- |
 | Pacote portátil para Windows | `TgWitness.cmd` | Não; mantenha a janela aberta. |
-| Versão nativa para Windows | `Start.cmd` | Não; utilize a tarefa opcional de logon para execução em segundo plano. |
-| Versão nativa para Linux/macOS | `sh start.sh` | Não; utilize o systemd/launchd para execução em segundo plano. |
+| Windows nativo | `Start.cmd` | Não; para uso em segundo plano, use a tarefa opcional de logon. |
+| Linux/macOS nativo | `sh start.sh` | Não; para uso em segundo plano, use systemd/launchd. |
 | Docker em qualquer host compatível | `docker compose up -d --build --wait` | Sim, enquanto o daemon do Docker estiver em execução. |
-| Auxiliar do Docker no Windows | `scripts\Docker.cmd` | Sim; o helper aguarda a verificação do estado do servidor web. |
-| Utilitário do Docker no Linux/macOS | `sh scripts/docker-start.sh` | Sim; o helper aguarda a verificação do estado do servidor web. |
+| Script auxiliar do Docker no Windows | `scripts\Docker.cmd` | Sim; o script aguarda o servidor web ficar íntegro. |
+| Script auxiliar do Docker no Linux/macOS | `sh scripts/docker-start.sh` | Sim; o script aguarda o servidor web ficar íntegro. |
 
-A inicialização nativa cria uma imagem privada `.venv` e instala as dependências fixadas. O Docker as compila dentro da imagem, sem a necessidade do Python do host. A configuração inicial requer acesso à Internet. Quando não for encontrado o Python 3.11 ou superior, o `Start.cmd` solicita permissão antes de instalar o Python 3.12 para o usuário atual do Windows (via winget; caso contrário, o instalador do python.org, após verificar a assinatura da Python Software Foundation); ele nunca solicita privilégios de administrador. O Docker e os serviços do sistema operacional continuam sendo pré-requisitos.
+Para um servidor em nuvem que um terceiro precise poder verificar — criado pela API do provedor, sem SSH, acessível apenas por um Cloudflare Tunnel —, consulte [implantação de alta garantia](../HIGH-ASSURANCE.md).
 
-As instalações nativas e portáteis utilizam `data/live` dentro de sua pasta. O Docker utiliza o volume nomeado `tgwitness-data` em `/data`. Trata-se de instalações separadas até que o senhor migre deliberadamente o diretório de dados completo. Não espere que um novo contêiner do Docker identifique contas nativas automaticamente.
+A inicialização nativa cria um `.venv` privado e instala as dependências fixadas. O Docker as instala dentro da imagem, sem exigir Python no host. A configuração inicial precisa de acesso à Internet. Quando nenhum Python 3.11+ é encontrado, o `Start.cmd` pergunta antes de instalar o Python 3.12 para o usuário atual do Windows (via winget ou, caso contrário, pelo instalador do python.org após verificar a assinatura da Python Software Foundation); ele nunca solicita privilégios de administrador. O Docker e os serviços do sistema operacional continuam sendo pré-requisitos.
+
+As instalações nativas e portáteis usam `data/live` dentro da própria pasta. O Docker usa o volume nomeado `tgwitness-data` em `/data`. São instalações separadas até que você migre deliberadamente o diretório de dados completo. Não espere que um contêiner Docker novo descubra automaticamente as contas nativas.
 
 ## Requisitos de instalação
 
-A instalação nativa requer Python 3.11 ou versão posterior com `venv` e `ensurepip`, acesso à Internet para a instalação da primeira dependência e um diretório de projeto com permissão de gravação para `.venv`. O painel incluído no pacote não requer Node.js nem compilação de front-end. Execute o iniciador a partir de sua conta normal do sistema operacional; o TgWitness não exige privilégios de administrador/root.
+A instalação nativa precisa do Python 3.11 ou posterior com `venv` e `ensurepip`, acesso à Internet para a primeira instalação de dependências e um diretório de projeto gravável para `.venv`. O painel incluído não precisa de Node.js nem de build de front-end. Execute o iniciador a partir da sua conta normal do sistema operacional; o TgWitness não exige privilégios de administrador/root.
 
-- **Windows:** `Start.cmd` verifica `py -3`, depois `python`, em seguida as pastas padrão de instalação por usuário e em “Arquivos de Programas”, e requer a versão 3.11 ou posterior. Caso nenhuma opção funcione, é oferecida a instalação automática por usuário descrita acima. `py -3 start.py` também funciona. O pacote portátil não requer Python.
-- **Linux:** `start.sh` verifica `python3.13`, `python3.12`, `python3.11`, `python3` e `python` e exibe o comando de instalação para apt, dnf, pacman, zypper, apk ou Homebrew quando nenhuma opção for adequada. As instalações no Debian/Ubuntu podem exigir o pacote `python3-venv` compatível com o interpretador selecionado. O Python padrão mais antigo de uma distribuição deve ser substituído ou complementado pelo Python 3.11+.
-- **macOS:** instale uma distribuição atual do Python 3.11 ou superior; não presuma que o interpretador fornecido pelo sistema operacional atenda aos requisitos. Utilize `python3 start.py` a partir do diretório do projeto.
-- **Docker:** utilize o Docker Engine/Desktop com o Compose v2.20 ou mais recente. O Docker Desktop deve utilizar contêineres Linux no Windows. O contêiner instala suas próprias dependências do Python; o host não necessita de uma instalação separada do Python.
-
-Utilize armazenamento local persistente para o diretório de dados. Planeje a capacidade com base em mensagens, mídia, crescimento do WAL, exportações e backups; não há uma especificação mínima universal de disco/RAM, baseada em evidências, para todas as cargas de trabalho. Arquiteturas de CPU e versões do Python sem pacotes de dependências compatíveis podem exigir ferramentas de compilação adicionais e sua própria qualificação. “Portátil” não significa suporte universal a sistemas operacionais ou hardware.
-
-O Windows 11/Python 3.12 foi verificado localmente. As definições para Linux/macOS/contêineres e a integração contínua (CI) são fornecidas, mas não foram executadas neste servidor de desenvolvimento. Consulte [o arquivo VERIFICATION.md](../VERIFICATION.md) para obter o escopo exato.
+- **Windows:** o `Start.cmd` verifica `py -3`, depois `python` e, em seguida, as pastas de instalação padrão por usuário e de Program Files, e exige a versão 3.11 ou posterior. Se nenhuma funcionar, ele oferece a instalação automática por usuário descrita acima. `py -3 start.py` também funciona. O pacote portátil dispensa totalmente o Python.
+- **Linux:** o `start.sh` tenta `python3.13`, `python3.12`, `python3.11`, `python3` e `python` e, quando nenhum atende aos requisitos, exibe o comando de instalação para apt, dnf, pacman, zypper, apk ou Homebrew. Instalações no Debian/Ubuntu podem exigir o pacote `python3-venv` correspondente ao interpretador selecionado. Um Python padrão mais antigo da distribuição precisa ser substituído ou complementado pelo Python 3.11+.
+- **macOS:** instale uma distribuição atual do Python 3.11+; não presuma que um interpretador fornecido pelo sistema operacional atende ao requisito. Use `python3 start.py` a partir do diretório do projeto.
+- **Docker:** use o Docker Engine/Desktop com Compose v2.20 ou mais recente. No Windows, o Docker Desktop precisa usar contêineres Linux. O contêiner instala suas próprias dependências Python; o host não precisa de uma instalação separada do Python.
 
 ## Computador local
 
-Utilize `Start.cmd` no Windows ou `sh start.sh` no Linux/macOS. `scripts\Setup.cmd` ou `sh start.sh --setup-only` preparam o ambiente. O iniciador instala as dependências na primeira utilização; as execuções posteriores reutilizam o ambiente. É necessário acesso à Internet para a configuração e a coleta de dados do Telegram, mas a consulta de registros existentes e a criação de exportações funcionam offline.
+Use `Start.cmd` no Windows ou `sh start.sh` no Linux/macOS. `scripts\Setup.cmd` ou `sh start.sh --setup-only` prepara o ambiente. O iniciador instala as dependências no primeiro uso; as execuções seguintes reutilizam o ambiente. O acesso à Internet é necessário para a configuração e a coleta do Telegram, mas consultar registros existentes e criar exportações funciona offline.
 
-Execute `python start.py --check` após a configuração para verificar as dependências locais, o Ed25519, o armazenamento, a configuração de chaves e o endereço de escuta sem iniciar um coletor. Utilize `--json` para obter uma saída estruturada. Passe os parâmetros pretendidos `--data-dir`, `--host` e `--port`. A verificação não instala pacotes, não cria um diário nem se conecta ao Telegram; não se trata de uma qualificação de integridade ou cobertura. A inicialização verifica separadamente os diários existentes. `python start.py --help` também evita a instalação.
+Execute `python start.py --check` após a configuração para inspecionar as dependências locais, o Ed25519, o armazenamento, a configuração de chaves e o endereço de escuta sem iniciar um coletor. Use `--json` para saída estruturada. Passe os `--data-dir`, `--host` e `--port` pretendidos. A verificação não instala pacotes, não cria um diário nem se conecta ao Telegram; ela não é uma qualificação de integridade ou de cobertura. A inicialização verifica separadamente os diários existentes. `python start.py --help` também não instala nada.
 
-Opções:
-
-Após executar o start.py, execute os comandos auxiliares com `.venv\Scripts\python.exe` no Windows ou `.venv/bin/python` no Linux/macOS, ou ative primeiro esse ambiente. Os exemplos `python -m ...` abaixo pressupõem que o ambiente esteja ativo.
+Depois de usar o start.py, execute os comandos auxiliares com `.venv\Scripts\python.exe` no Windows ou `.venv/bin/python` no Linux/macOS, ou ative esse ambiente antes. Os exemplos `python -m ...` abaixo pressupõem que o ambiente está ativo.
 
 ~~~sh
 python -m tgwitness --data-dir /path/to/private/data --host 127.0.0.1 --port 8787
 ~~~
 
-Variáveis de ambiente: TGWITNESS_DATA, TGWITNESS_HOST, TGWITNESS_PORT, TGWITNESS_TOKEN. TGWITNESS_VAULT_KEY_FILE seleciona o modo de chave externa para uma nova instalação; consulte abaixo. TGWITNESS_TOKEN, se fornecido, deve conter pelo menos 24 caracteres; utilize um valor aleatório criptograficamente seguro. Sem ele, o aplicativo gera um token aleatório de 256 bits no arquivo panel-token.txt. A substituição da variável de ambiente não reescreve esse arquivo. Reinicie o sistema para alternar as credenciais.
+Variáveis de ambiente: TGWITNESS_DATA, TGWITNESS_HOST, TGWITNESS_PORT, TGWITNESS_TOKEN. TGWITNESS_VAULT_KEY_FILE seleciona o modo de chave externa para uma nova instalação; veja [Chave mestra externa](../SECURITY-MODEL.md#external-master-key). Se fornecido, TGWITNESS_TOKEN deve ter pelo menos 24 caracteres; use um valor criptograficamente aleatório. Sem ele, o aplicativo gera um token aleatório de 256 bits em panel-token.txt. A substituição pela variável de ambiente não reescreve esse arquivo. Reinicie para trocar as credenciais.
 
-Exatamente um processo pode ser o proprietário de um diretório de dados. Um bloqueio de arquivos do sistema operacional, compatível com várias plataformas, impede gravações simultâneas acidentais. Utilize um worker do Uvicorn. O painel pode gerenciar qualquer número de espaços de trabalho, com diretórios adicionais de espaços de trabalho em profiles/<id>/. Para instâncias de serviço separadas, utilize diretórios e portas distintos. Os arquivos WAL do SQLite devem ser armazenados em um armazenamento persistente local, e não em um sistema de arquivos de rede. Não compartilhe um único volume entre réplicas.
+Exatamente um processo pode ser dono de um diretório de dados. Um bloqueio de arquivo multiplataforma do sistema operacional impede gravações simultâneas acidentais. Use um único worker do Uvicorn. O painel pode gerenciar qualquer número de espaços de trabalho, com diretórios adicionais de espaços de trabalho em profiles/<id>/. Para instâncias de serviço separadas, use diretórios e portas separados. Os arquivos WAL do SQLite devem ficar em armazenamento persistente local, não em um sistema de arquivos de rede. Não compartilhe um volume entre réplicas.
 
 ## Pacote portátil para Windows
 
-Cada versão do GitHub contém `TgWitness-<version>-windows-amd64-portable.zip` e seu `.sha256`. Ela inclui o runtime oficial do Python 3.12, incorporável, proveniente do site python.org (soma de verificação fixada em `tools/build_portable.py`), o TgWitness e suas dependências fixadas, além de três executáveis:
+Cada versão no GitHub Releases traz `TgWitness-<version>-windows-amd64-portable.zip` e o respectivo `.sha256`. Ele contém o runtime embutível oficial do Python 3.12 do python.org (soma de verificação fixada em `tools/build_portable.py`), o TgWitness com suas dependências fixadas e três iniciadores:
 
-| Arquivo | Objetivo |
+| Arquivo | Finalidade |
 | --- | --- |
-| `TgWitness.cmd` | Inicie o painel; opções adicionais são repassadas, por exemplo, `TgWitness.cmd --port 8790` |
-| `TgWitness-Demo.cmd` | Inicie a demonstração sintética em `data\demo` |
-| `TgWitness-Check.cmd` | Execute a verificação de prontidão sem iniciar o sistema |
+| `TgWitness.cmd` | Inicia o painel; opções extras são repassadas, por exemplo `TgWitness.cmd --port 8790` |
+| `TgWitness-Demo.cmd` | Inicia a demonstração sintética em `data\demo` |
+| `TgWitness-Check.cmd` | Executa a verificação de prontidão sem iniciar |
 
-Extraia todo o arquivo compactado para uma pasta com permissão de gravação, como `Documents\TgWitness`; não o execute de dentro do ZIP nem da pasta “Arquivos de Programas”. O ambiente de execução utiliza um caminho de módulo isolado, de modo que outras instalações do Python e `PYTHONPATH` não o afetam. Os dados permanecem na pasta `data` do pacote. Para atualizar, interrompa o TgWitness, extraia a nova versão para uma nova pasta e copie a pasta `data` para lá.
+O dicionário de morfologia russa fixado e os perfis de cor de PDF vêm incluídos para uso offline. O empacotamento permite apenas os caminhos de arquivo conhecidos deles dentro dos diretórios `data` das dependências; arquivos inesperados nesses diretórios fazem o build falhar.
 
-Compile-o você mesmo no Windows de 64 bits com Python 3.12:
+Extraia o arquivo inteiro para uma pasta gravável, como `Documents\TgWitness`; não o execute de dentro do ZIP nem a partir de Program Files. O runtime usa um caminho de módulos isolado, de modo que outras instalações do Python e `PYTHONPATH` não o afetam. Os dados ficam na pasta `data` do pacote. Para atualizar, interrompa o TgWitness, extraia a nova versão em uma nova pasta e copie a pasta `data` para ela.
+
+Compile você mesmo no Windows de 64 bits com Python 3.12:
 
 ~~~sh
 python tools/build_portable.py
 ~~~
-
-O construtor verifica a soma de verificação de tempo de execução, instala as dependências restritas no pacote, executa a verificação de prontidão com o interpretador incorporado e grava o arquivo ZIP e a soma de verificação em `dist/`.
 
 ## Contêiner
 
@@ -80,13 +76,13 @@ O construtor verifica a soma de verificação de tempo de execução, instala as
 docker compose up -d --build --wait
 ```
 
-Isso cria um volume persistente nomeado para /data. A porta da web é mapeada para 127.0.0.1:8787. O processo é executado com o UID 10001, com capacidades restritas, um sistema de arquivos raiz somente leitura e os diretórios /data e /tmp com permissão de gravação. `--wait` verifica a integridade do servidor web antes de retornar; ele não estabelece autorização nem entrega no Telegram. Os auxiliares fornecidos utilizam um tempo limite de prontidão de 180 segundos após a compilação. Os downloads iniciais de dependências podem demorar mais do que isso.
+Isso cria um volume persistente nomeado para /data. A porta web é mapeada para 127.0.0.1:8787. O processo roda como UID 10001 com as capabilities do Linux removidas, sistema de arquivos raiz somente leitura e /data e /tmp graváveis. `--wait` verifica a integridade do servidor web antes de retornar; a autorização do Telegram e a entrega aparecem no painel. Os scripts auxiliares fornecidos usam um tempo limite de prontidão de 180 segundos após o build. Os downloads iniciais de dependências podem levar mais tempo que isso.
 
-Ambos os arquivos Compose básicos utilizam o nome do projeto `tgwitness`; portanto, a extração de uma nova versão para outro diretório não seleciona automaticamente um novo volume de dados. Mantenha apenas uma implantação ativa para esse projeto. Para instalações independentes, utilize um `docker compose -p NAME ...` exclusivo e uma porta de host diferente, e mantenha ambos nas atualizações. Para uma implantação mais antiga que utilize um nome de projeto diferente, continue usando seu nome original com `-p`; `docker compose ls` lista os projetos existentes.
+Os dois arquivos Compose base usam o nome de projeto `tgwitness`, então extrair uma nova versão em outro diretório não seleciona silenciosamente um novo volume de dados. Mantenha apenas uma implantação ativa para esse projeto. Para instalações independentes, use um `docker compose -p NAME ...` exclusivo e uma porta de host diferente, e mantenha ambos nas atualizações. Para uma implantação mais antiga que usa outro nome de projeto, continue usando o nome original com `-p`; `docker compose ls` lista os projetos existentes.
 
-Copie `deploy/env.example` para `.env` e altere `TGWITNESS_PORT` para utilizar uma porta de loopback diferente. Por exemplo, `TGWITNESS_PORT=8788` expõe o painel em `http://127.0.0.1:8788`; o contêiner continua escutando na porta 8787. `.env` é ignorado pelo Git.
+Copie `deploy/env.example` para `.env` e altere `TGWITNESS_PORT` para usar outra porta de loopback. Por exemplo, `TGWITNESS_PORT=8788` expõe o painel em `http://127.0.0.1:8788`; o contêiner continua escutando na 8787. O `.env` é ignorado pelo Git.
 
-Recupere o token inicial:
+Obtenha o token inicial:
 
 ~~~sh
 docker compose exec tgwitness cat /data/panel-token.txt
@@ -101,35 +97,33 @@ docker compose stop
 docker compose up -d --wait
 ```
 
-`restart: unless-stopped` reinicia o coletor após uma falha ou reinicialização do daemon do Docker. Em um servidor Linux, habilite o Docker na inicialização usando o gerenciador de serviços da sua distribuição, geralmente o `sudo systemctl enable --now docker`. No Windows/macOS, habilite a configuração “iniciar ao fazer login” do Docker Desktop. O logout do desktop, o modo de suspensão ou um daemon do Docker parado podem interromper a coleta. Um contêiner explicitamente parado permanece parado até que você o inicie novamente.
+`restart: unless-stopped` reinicia o coletor após uma falha ou um reinício do daemon do Docker. Em um servidor Linux, habilite o Docker na inicialização com o gerenciador de serviços da sua distribuição, geralmente `sudo systemctl enable --now docker`. No Windows/macOS, ative a opção do Docker Desktop de iniciar ao entrar na sessão. Sair da sessão do desktop, a suspensão ou um daemon do Docker parado podem interromper a coleta. Um contêiner parado explicitamente permanece parado até que você o inicie de novo.
 
-O volume /tmp está limitado a 512 MiB na configuração de exemplo. A construção da exportação utiliza, em vez disso, o `temporary-exports/` de cada espaço de trabalho no diretório persistente /data. Reserve espaço nesse local para exportações simultâneas, crescimento do diário/WAL, arquivos de mídia e backups. O iniciador e o Docker utilizam o arquivo deploy/constraints.txt para fixar versões qualificadas de dependências de tempo de execução. Esta não é uma cadeia de suprimentos com bloqueio por hash: a imagem base do Python e os artefatos de pacotes ainda exigem qualificação de versão independente.
+O volume /tmp é limitado a 512 MiB na configuração de exemplo. A montagem das exportações usa, em vez dele, o `temporary-exports/` de cada espaço de trabalho no /data persistente. Reserve espaço ali para exportações simultâneas, crescimento do diário/WAL, mídia e backups. O iniciador usa deploy/constraints.txt para fixar versões qualificadas das dependências de runtime. O Docker e os servidores de alta garantia instalam a partir de deploy/requirements.lock e deploy/build.lock com pip --require-hashes: cada arquivo de pacote precisa corresponder a um SHA-256 registrado no commit, de modo que um arquivo substituído no PyPI ou em um espelho é recusado. A imagem base do Python e os pacotes do sistema operacional ainda exigem qualificação independente da versão.
 
-Não utilize o comando `docker compose down -v`, a menos que pretenda destruir o diário e as chaves. O relatório de integridade do contêiner informa a disponibilidade do servidor web, e não o sucesso da captura do Telegram. Verifique o estado do coletor do painel, o sinal de vida, os erros e os eventos de cobertura.
+Não use docker compose down -v, a menos que pretenda destruir o diário e as chaves. A integridade do contêiner indica a disponibilidade do servidor web, não o sucesso da captura do Telegram. Verifique no painel o estado do coletor, o sinal de vida, os erros e os eventos de cobertura.
 
 ### Perfil de testemunha independente
 
-O serviço opcional `witness` executa uma [testemunha independente](../WITNESS.md) em seu próprio contêiner, com sua própria chave e diário no volume `witness-data` e apenas um token de testemunha somente leitura para o coletor. Crie o token na página **Testemunha** do painel, adicione-o com um token de bot e um canal ao `.env` e, em seguida, inicie o perfil:
+O serviço opcional `witness` executa uma [testemunha independente](../WITNESS.md) em seu próprio contêiner, com chave e diário próprios no volume `witness-data` e apenas um token de testemunha somente leitura para o coletor. Crie o token no painel em **Mais ferramentas → Extras → Testemunha independente**, adicione-o ao `.env` com um token de bot e um canal e, em seguida, inicie o perfil:
 
 ```sh
 docker compose --profile witness up -d          # deploy/compose/compose.image.yaml: same flag
 docker compose logs witness                     # witness key fingerprint
 ```
 
-O serviço acessa o coletor dentro da rede Compose em `http://tgwitness:8787` (`TGWITNESS_WITNESS_COLLECTOR` o substitui; por exemplo, `/profiles/<workspace ID>` para outro espaço de trabalho). Para uma testemunha em um servidor separado, administrado por outra pessoa, utilize `deploy/compose/compose.witness.yaml` nesse local, com `TGWITNESS_WITNESS_COLLECTOR` definido como o endereço HTTPS do coletor; esse arquivo contém apenas a testemunha.
+O serviço acessa o coletor dentro da rede do Compose em `http://tgwitness:8787` (`TGWITNESS_WITNESS_COLLECTOR` substitui esse endereço, por exemplo por `/profiles/<workspace ID>` para outro espaço de trabalho). Para uma testemunha em um servidor separado, operado por outra pessoa, use lá o `deploy/compose/compose.witness.yaml` com `TGWITNESS_WITNESS_COLLECTOR` definido como o endereço HTTPS do coletor; esse arquivo contém apenas a testemunha.
 
-## Instale uma imagem publicada
+## Instalar uma imagem publicada
 
-Isso fica disponível após a conclusão bem-sucedida [do fluxo de trabalho de lançamento](#lançamentos-automatizados-no-github) e da configuração pública do pacote no GHCR. O nome do proprietário do repositório não está codificado de forma rígida nesta árvore de código-fonte. Utilize a imagem exibida no resumo do fluxo de trabalho desse lançamento.
-
-Copie `deploy/env.example` para `.env`. Defina `TGWITNESS_IMAGE` como a versão publicada, utilizando o caminho do repositório **em letras minúsculas**, por exemplo:
+Copie `deploy/env.example` para `.env`. Defina `TGWITNESS_IMAGE` com a versão publicada, usando o caminho do repositório **em minúsculas**, por exemplo:
 
 ```dotenv
-TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.9.1
+TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.9.2
 TGWITNESS_PORT=8787
 ```
 
-Execute este arquivo por conta própria, em vez de `compose.yaml`:
+Execute este arquivo sozinho, em vez de `compose.yaml`:
 
 ```sh
 docker compose --project-directory . -f deploy/compose/compose.image.yaml pull
@@ -137,11 +131,13 @@ docker compose --project-directory . -f deploy/compose/compose.image.yaml up -d 
 docker compose --project-directory . -f deploy/compose/compose.image.yaml exec tgwitness cat /data/panel-token.txt
 ```
 
-Não é necessária nenhuma compilação de código-fonte, Python ou compilador no host. O fluxo de trabalho de lançamento é voltado para contêineres Linux AMD64 e ARM64, incluindo a máquina virtual Linux do Docker Desktop. Utilize uma tag de versão ou `ghcr.io/owner/repository@sha256:...` a partir do resumo do fluxo de trabalho. Não há configuração de tag `latest` móvel nem de atualização automática de aplicativos. As variantes de imagem e de código-fonte utilizam o mesmo volume de dados quando o nome do projeto coincide.
+Não é preciso build do código-fonte, Python nem compilador no host. O fluxo de trabalho de lançamento tem como alvo contêineres Linux AMD64 e ARM64, incluindo a VM Linux do Docker Desktop. Use uma tag de versão ou `ghcr.io/owner/repository@sha256:...` do resumo do fluxo de trabalho. Não há tag móvel `latest` nem atualização automática do aplicativo configurada. As variantes por imagem e por código-fonte usam o mesmo volume de dados quando o nome do projeto coincide.
+
+<a name="automatic-https-on-a-server"></a>
 
 ## HTTPS automático em um servidor
 
-Utilize um servidor com o Docker, um domínio sob seu controle e armazenamento local persistente. Direcione os registros A/AAAA do domínio para o servidor; publique o registro AAAA somente se o IPv6 tiver acesso a ele. Permita o tráfego de entrada nas portas TCP 80 e 443 e o tráfego de saída de DNS/HTTPS para emissão de certificados. Essas portas não devem já estar em uso por outros serviços.
+Use um servidor com Docker, um domínio que você controla e armazenamento local persistente. Aponte os registros A/AAAA do domínio para o servidor; publique AAAA somente se o servidor for acessível por IPv6. Libere a entrada TCP 80 e 443 e a saída DNS/HTTPS para a emissão do certificado. Nenhum outro serviço pode estar ocupando essas portas.
 
 Copie `deploy/env.example` para `.env` e defina um nome de host, sem esquema nem caminho:
 
@@ -149,7 +145,7 @@ Copie `deploy/env.example` para `.env` e defina um nome de host, sem esquema nem
 TGWITNESS_DOMAIN=watch.your-domain.org
 ```
 
-Inicie a compilação do código-fonte com a sobreposição HTTPS:
+Inicie o build a partir do código-fonte com o overlay HTTPS:
 
 ```sh
 docker compose -f compose.yaml -f deploy/compose/compose.https.yaml up -d --build --wait
@@ -160,28 +156,28 @@ docker compose -f compose.yaml -f deploy/compose/compose.https.yaml exec tgwitne
 docker compose --project-directory . -f deploy/compose/compose.image.yaml -f deploy/compose/compose.https.yaml up -d --wait
 ```
 
-Para uma imagem publicada, utilize `deploy/compose/compose.image.yaml` como o primeiro arquivo. Mantenha ambos os argumentos `-f` para comandos posteriores de status, logs, atualização e parada.
+Para uma imagem publicada, use em vez disso `deploy/compose/compose.image.yaml` como primeiro arquivo. Mantenha os dois argumentos `-f` nos comandos posteriores de status, logs, atualização e parada.
 
-O Caddy obtém e renova um certificado, redireciona HTTP para HTTPS e encaminha as solicitações para o coletor na rede privada da Compose. O estado do certificado possui seu próprio volume persistente. A porta direta do host do coletor permanece restrita ao loopback. A configuração do Caddy fornecida não habilita o registro de acesso.
+O Caddy obtém e renova um certificado, redireciona HTTP para HTTPS e encaminha as solicitações ao coletor pela rede privada do Compose. O estado do certificado tem seu próprio volume persistente. A porta direta do coletor no host continua restrita ao loopback. A configuração do Caddy fornecida não ativa o log de acesso.
 
-Abra `https://watch.your-domain.org` e insira o token do painel. A verificação de prontidão não confirma a emissão do certificado nem a acessibilidade externa. Caso o HTTPS não esteja pronto, verifique o DNS, as regras do firewall e:
+Abra `https://watch.your-domain.org` e insira o token do painel. A prontidão do Compose cobre os contêineres; a emissão do certificado e o acesso externo dependem do DNS e do firewall. Se o HTTPS não estiver pronto, verifique o DNS, as regras do firewall e:
 
 ```sh
 docker compose -f compose.yaml -f deploy/compose/compose.https.yaml logs --tail 100 caddy
 ```
 
-A imagem do Caddy fornecida segue a tag `2-alpine`. A ação de “pull” atualiza essa imagem; fixe um resumo testado em sua implantação caso necessite de versões fixas da infraestrutura.
+A imagem do Caddy fornecida acompanha a tag `2-alpine`. Um pull atualiza essa imagem; fixe um digest testado na sua implantação se precisar de versões de infraestrutura fixas.
 
 ## Atualizações e backups
 
-Preserve o nome do projeto Compose e o volume de dados ao longo das atualizações. Primeiro, interrompa o coletor e faça um backup completo. Para a implantação padrão baseada no código-fonte:
+Preserve o nome do projeto Compose e o volume de dados entre as atualizações. Primeiro, interrompa o coletor e faça um backup completo. Para a implantação padrão baseada no código-fonte:
 
 ```sh
 docker compose stop
 docker compose cp tgwitness:/data ../tgwitness-backup-before-update
 ```
 
-Utilize um novo destino de backup a cada vez, fora do repositório, e proteja-o como material de acesso à conta. O caminho de exemplo é meramente ilustrativo; utilize seu local de backup privado. Copie o diretório inteiro, incluindo arquivos ocultos, todas as áreas de trabalho, chaves, diários e arquivos de mídia. Faça backup da chave mestra do cofre externo separadamente, caso esteja configurada. Um arquivo ZIP de evidências não é um backup de aplicativo restaurável. Para HTTPS, preserve também os volumes do Caddy caso precise manter o estado do certificado/conta.
+Use um destino de backup novo a cada vez, fora do repositório, e proteja-o como material de acesso às contas. O caminho de exemplo é ilustrativo; use o seu local privado de backup. Copie o diretório inteiro, incluindo arquivos ocultos, todos os espaços de trabalho, chaves, diários e mídia. Se houver uma chave-mestra externa do cofre configurada, faça backup dela separadamente. Um ZIP de evidências não é um backup restaurável do aplicativo. Com HTTPS, preserve também os volumes do Caddy se precisar manter o estado de certificado/conta dele.
 
 Para uma implantação a partir do código-fonte, obtenha os arquivos da nova versão e execute:
 
@@ -189,66 +185,47 @@ Para uma implantação a partir do código-fonte, obtenha os arquivos da nova ve
 docker compose up -d --build --wait
 ```
 
-Para uma implantação por imagem, altere `TGWITNESS_IMAGE` para a versão desejada e, em seguida, execute:
+Para uma implantação por imagem, altere `TGWITNESS_IMAGE` para a versão desejada e execute:
 
 ```sh
 docker compose --project-directory . -f deploy/compose/compose.image.yaml pull
 docker compose --project-directory . -f deploy/compose/compose.image.yaml up -d --wait
 ```
 
-Utilize também os arquivos Compose da sua instalação para os comandos stop/copy anteriores. Mantenha `.env`, a configuração personalizada e o mesmo nome do projeto. `down` mantém os volumes nomeados; **`down -v`** **os exclui**. Não copie `.venv` entre sistemas operacionais ou versões do Python. Para atualizações nativas, interrompa o TgWitness, faça backup de todo o diretório de dados, substitua os arquivos de origem e execute `python start.py --setup-only` antes de iniciar.
+Use também o(s) arquivo(s) Compose da sua instalação nos comandos de parada/cópia anteriores. Mantenha o `.env`, a configuração personalizada e o mesmo nome de projeto. `down` mantém os volumes nomeados; **`down -v` os exclui**. Não copie `.venv` entre sistemas operacionais ou versões do Python. Para atualizações nativas, interrompa o TgWitness, faça backup do diretório de dados completo, substitua os arquivos do código-fonte e execute `python start.py --setup-only` antes de iniciar.
 
-Verifique o acesso ao painel, a identidade da conta, o status de observação e a cobertura após uma atualização. Após a reinicialização, o TgWitness retoma a posição salva da atualização do Telegram e solicita as atualizações perdidas durante o processo. Uma reversão pode exigir o backup pré-atualização caso uma versão futura altere os formatos de armazenamento.
-
-## Lançamentos automatizados no GitHub
-
-O [fluxo de trabalho de lançamento](../../.github/workflows/release.yml) estará pronto para uso após este projeto ser enviado para um repositório do GitHub com o Actions habilitado. Ele é executado quando um lançamento no GitHub é **publicado**, incluindo um pré-lançamento. Rascunhos e envios de tags, por si só, não publicam pacotes.
-
-1. Defina a versão do pacote e o registro de alterações e, em seguida, publique uma versão marcada com `v`, além da versão exata `pyproject.toml`, como `v0.9.1`.
-2. O fluxo de trabalho valida a tag e executa as verificações compartilhadas para Python no Windows/Linux/macOS, navegador geral/importação de conta/QR, pacote-fonte e Docker. Também é realizada uma instalação nativa nova em todos os três sistemas operacionais utilizando o Python 3.12.
-3. Após a aprovação dessas verificações, ele realiza testes preliminares de uma imagem ARM64 no QEMU, publica imagens AMD64/ARM64 em `ghcr.io/<lowercase-owner>/<lowercase-repository>:<version>` e anexa o ZIP com o código-fonte, a soma de verificação e o pacote Python wheel à versão. Uma tarefa separada no Windows compila e anexa o ZIP portátil e sua soma de verificação.
-4. Após a primeira publicação, abra as configurações do pacote GHCR e defina a visibilidade como **Pública**, caso se pretenda realizar baixas anônimas de imagens. Um repositório de código-fonte público, por si só, não garante um pacote de contêiner público. As políticas da organização devem permitir a publicação do pacote. O fluxo de trabalho utiliza `GITHUB_TOKEN`; nenhuma senha de registro ou credenciais de VPS devem constar no repositório.
-
-O sucesso do fluxo de trabalho remoto ainda não foi comprovado por esta preparação local. A emulação ARM64 é um teste preliminar, não uma qualificação em hardware nativo ou no Telegram em ambiente de produção. Isso automatiza a criação do pacote de lançamento; iniciar um servidor ainda requer o comando `Compose` e seus pré-requisitos de domínio/host. Os servidores existentes não são atualizados nem reiniciados automaticamente quando uma versão é publicada.
+Verifique o acesso ao painel, a identidade da conta, o estado da observação e a cobertura após uma atualização. Após a reinicialização, o TgWitness retoma a partir da posição de atualizações do Telegram salva e solicita as atualizações do Telegram perdidas durante a atualização do aplicativo. Uma reversão pode exigir o backup anterior à atualização se uma versão futura alterar os formatos de armazenamento.
 
 ## Servidor remoto
 
-Mantenha o serviço vinculado ao loopback e utilize um túnel SSH, ou termine a conexão HTTPS em um proxy reverso. O arquivo Compose básico é apenas local; a sobreposição opcional `deploy/compose/compose.https.yaml` fornece o Caddy para um domínio configurado. Evite incluir o token de portador em URLs e nos registros do proxy. Um proxy reverso deve limitar o tamanho das solicitações e as taxas de conexão. Não exponha HTTP simples à Internet.
+Mantenha o serviço vinculado ao loopback e use um túnel SSH, ou encerre o HTTPS em um proxy reverso. O arquivo Compose base é apenas local; o overlay opcional `deploy/compose/compose.https.yaml` fornece o Caddy para um domínio configurado. Mantenha o token bearer fora de URLs e dos logs do proxy. Um proxy reverso deve limitar o tamanho das solicitações e a taxa de conexões. Não exponha HTTP sem criptografia à Internet.
 
-Exemplos para o systemd, uma tarefa de logon no Windows, um agente de usuário no macOS e o Caddy estão disponíveis na pasta [deploy/.](../../deploy/README.md) Verifique e adapte seus caminhos antes da instalação. Trata-se de modelos fornecidos, e não de configurações específicas para plataformas executadas localmente. Nenhum serviço ou tarefa em segundo plano é registrado pelo iniciador padrão.
+Exemplos para systemd, uma tarefa de logon do Windows, um agente de usuário do macOS e o Caddy estão em [deploy/](../../deploy/README.md). Revise e adapte os caminhos antes da instalação. São modelos fornecidos, não qualificações de plataforma executadas localmente. O iniciador normal não registra nenhum serviço ou tarefa em segundo plano.
 
-No Windows, uma execução sem janela `pythonw.exe` armazena os diagnósticos de inicialização/servidor em `logs/server.log`, no diretório de dados (5 MiB por arquivo, dois backups alternados). As execuções no console mantêm o registro do console. O registro de acesso HTTP está desativado em ambos os modos. Proteja os registros junto com o diretório de dados e analise-os antes de compartilhá-los.
+No Windows, uma execução sem janela via `pythonw.exe` grava os diagnósticos de inicialização/servidor em `logs/server.log`, no diretório de dados (5 MiB por arquivo, dois backups rotacionados). As execuções pelo console mantêm o log no console. O log de acesso HTTP fica desativado nos dois modos. Proteja os logs junto com o diretório de dados e revise-os antes de compartilhá-los.
 
 ## Reinício e lacunas
 
-O último estado de observação solicitado é mantido. Se a observação estava ativa, o programa tenta, ao iniciar, se reconectar e retomar as fontes selecionadas. A pausa manual cancela essa intenção. Uma tentativa de reinício malsucedida é registrada e exibida no painel.
+O último estado de observação solicitado é persistido. Se a observação estava ativa, a inicialização tenta se reconectar e retomar as fontes selecionadas. A pausa manual cancela essa intenção. Uma reinicialização com falha é registrada e exibida no painel.
 
-O TgWitness armazena a posição de atualização do Telegram para a conta e para cada canal (pts, qts, seq e data) no cofre do espaço de trabalho e a restaura na próxima inicialização. O cliente então solicita as atualizações perdidas enquanto o processo estava parado, e a verificação periódica recupera as mensagens perdidas e registra aquelas salvas que o Telegram não retorna mais. As conversas são recarregadas na inicialização. A cada inicialização, são registrados o cabeçalho do diário anterior, o limite de conexão offline e a posição de atualização a partir da qual a operação foi retomada. O monitor verifica a conectividade a cada 10 segundos e adiciona um sinal de vida a cada minuto (**Parâmetros → Registrar sinal de vida a cada**). Desconexões e períodos de inatividade são registrados como lacunas de cobertura, juntamente com o motivo. Instantâneos do histórico são armazenados como observações separadas do histórico atual, ao lado dos registros em tempo real.
+O TgWitness armazena a posição de atualizações do Telegram da conta e de cada canal (pts, qts, seq e date) no cofre do espaço de trabalho e a restaura na inicialização seguinte. Em seguida, o cliente solicita as atualizações perdidas enquanto o processo estava parado, e a reverificação periódica recupera mensagens perdidas e registra as salvas que o Telegram não retorna mais. Os diálogos são recarregados na inicialização. Cada inicialização registra o cabeçalho anterior do diário, o limite do período offline e a posição de atualizações a partir da qual retomou. O monitor verifica a conectividade a cada 10 segundos e adiciona um sinal de vida a cada minuto (**Mais ferramentas → Parâmetros → Registro de atividade a cada**). Desconexões e períodos de silêncio são registrados como lacunas de cobertura, com o motivo. Instantâneos do histórico são armazenados como observações separadas do histórico atual, ao lado dos registros ao vivo.
 
-A fila de mídia é armazenada no banco de dados SQLite de cada espaço de trabalho. Uma mensagem e sua tarefa são confirmadas de forma atômica. Tarefas em execução interrompidas são recuperadas para nova tentativa na inicialização. Cada download possui um tempo limite básico de 120 segundos, acrescido do tempo necessário para baixar o arquivo à taxa de 256 KiB/s, dependendo do tamanho, e um limite de 1 a 2.000 MiB por tipo de anexo; o tempo limite, a velocidade e as tentativas de repetição são configurados em **“Parâmetros**”. O coletor ignora arquivos cujo tamanho é desconhecido. A pausa mantém as tarefas na fila. A repetição utiliza o descritor de arquivo original observado, nunca a versão mais recente de uma mensagem editada posteriormente. Falhas temporárias têm um número limitado de tentativas; as pausas do FloodWait de mídia sobrevivem à reinicialização. A recuperação de mídia é separada da recuperação de atualizações do Telegram e não pode recriar arquivos que tenham desaparecido.
+A fila de mídia é armazenada no banco de dados SQLite de cada espaço de trabalho. Uma mensagem e sua tarefa são confirmadas atomicamente. Tarefas em execução interrompidas são recuperadas para nova tentativa na inicialização. Cada download tem um tempo limite base de 120 segundos mais o tempo correspondente ao seu tamanho a 256 KiB/s, e um limite de 1–2000 MiB por tipo de anexo; tempo limite, velocidade e novas tentativas ficam em **Mais ferramentas → Parâmetros**. O coletor ignora arquivos de tamanho desconhecido. A pausa preserva o trabalho na fila. A nova tentativa usa o descritor de arquivo original observado, nunca a versão mais recente de uma mensagem editada depois. Falhas temporárias têm tentativas limitadas; as pausas FloodWait de mídia sobrevivem à reinicialização. A recuperação de mídia é separada da recuperação de atualizações do Telegram e não pode recriar arquivos desaparecidos.
 
 ## Backup, restauração e capacidade
 
-Interrompa o processo antes de copiar **todo** o **diretório de dados**, incluindo vault.key, signing.enc, credentials.enc, arquivos do banco de dados SQLite/WAL, mídia, token, pontos de verificação e todos os subdiretórios de perfis. Restaure a cópia completa enquanto o serviço de destino estiver parado. A falta de chaves do cofre ou a incompatibilidade de chaves de assinatura causam falha na inicialização; não gere novas chaves para forçar o acesso.
+Interrompa o processo antes de copiar o **diretório de dados inteiro**, incluindo vault.key, signing.enc, credentials.enc, os arquivos de banco de dados SQLite/WAL, a mídia, o token, os pontos de verificação e todos os subdiretórios de profiles/. Restaure a cópia completa com o serviço de destino parado. Chaves do cofre ausentes ou divergência da chave de assinatura fazem a inicialização falhar; não gere chaves novas para forçar o acesso.
 
-Mantenha os backups secretos criptografados e com acesso controlado. Os arquivos ZIP de evidências são artefatos portáteis para análise, e não backups de aplicativos ou de sessões do Telegram. Não há exclusão automática por retenção. Planeje espaço em disco para todas as mensagens, metadados brutos, arquivos de mídia, exportações temporárias e backups.
+Mantenha os backups com segredos criptografados e com acesso controlado. Os ZIPs de evidências são artefatos portáteis de revisão, não backups do aplicativo nem de sessões do Telegram. Não há exclusão automática por retenção. Planeje espaço em disco para todas as mensagens, metadados brutos, mídia, exportações temporárias e backups.
 
-Verificação inicial e exportação de registros de fluxo, em vez de carregar o diário inteiro. Uma exportação fixa um instantâneo de leitura enquanto novas gravações no WAL podem continuar; exportações de longa duração podem reter páginas do WAL, portanto a capacidade do disco ainda é importante. Os arquivos ZIP têm limite máximo de 4 GiB descompactados, para corresponder ao padrão do verificador independente; **Parâmetros → “Maior ZIP assinado”** aumenta o limite, e tais arquivos são verificados com `verify.py --max-gib N`. Outros formatos não têm limite de contagem de eventos. Os navegadores compatíveis transmitem blocos de resposta para um arquivo selecionado pelo usuário. Outros navegadores armazenam em buffer no máximo 128 MiB e direcionam transferências maiores para a CLI autenticada:
+A verificação na inicialização e a exportação processam os registros em fluxo, em vez de carregar o diário inteiro. Uma exportação fixa um instantâneo de leitura enquanto novas gravações no WAL podem continuar; exportações longas podem reter páginas do WAL, então a capacidade de disco continua importando. Os ZIPs são limitados a 4 GiB descompactados para corresponder ao padrão do verificador independente; **Mais ferramentas → Parâmetros → Maior arquivo ZIP assinado** aumenta o limite, e esses arquivos são verificados com `verify.py --max-gib N`. Os outros formatos não têm limite de número de eventos. Os navegadores compatíveis transmitem os blocos da resposta para um arquivo escolhido pelo usuário. Outros navegadores armazenam em buffer no máximo 128 MiB e direcionam transferências maiores para a CLI autenticada:
 
 ~~~sh
 python -m tgwitness.download --token-file data/live/panel-token.txt --out evidence.zip
 ~~~
 
-Utilize `--profile ID`, em **Exportações → ID** **do Espaço de Trabalho**, para outro espaço de trabalho; `--format zip|jsonl|csv|html`, `--url https://your-server` para um servidor remoto; ou `--max-mib` para alterar o limite de transferência de 5 GiB. O HTTP simples é permitido apenas para loopback. Os tokens são transmitidos nos cabeçalhos, redirecionamentos são recusados, arquivos existentes não são sobrescritos e downloads incompletos não são publicados como arquivos concluídos. Caso TGWITNESS_TOKEN substitua o token gerado, utilize um arquivo protegido separadamente contendo esse valor ativo: o arquivo panel-token.txt não é reescrito pela substituição. O SHA-256 do comando é apenas uma soma de verificação da transferência; verifique independentemente o ZIP assinado.
+Use `--profile ID` de **Exportações → ID do espaço de trabalho** para outro espaço de trabalho, `--format zip|jsonl|csv|html`, `--url https://your-server` para um servidor remoto ou `--max-mib` para alterar o limite de transferência de 5 GiB. HTTP sem criptografia só é permitido para loopback. Os tokens trafegam em cabeçalhos, redirecionamentos são recusados, arquivos existentes não são sobrescritos e downloads incompletos não são publicados como arquivos concluídos. Se TGWITNESS_TOKEN substituir o token gerado, use um arquivo protegido separadamente contendo esse valor ativo: o panel-token.txt não é reescrito pela substituição. O SHA-256 do comando é apenas uma soma de verificação da transferência; verifique o ZIP assinado de forma independente.
 
-Os arquivos de exportação do servidor permanecem dentro do diretório privado `temporary-exports/` de cada espaço de trabalho. Respostas bem-sucedidas limpam seus arquivos. Exportações interrompidas são removidas na próxima inicialização do espaço de trabalho, com o bloqueio exclusivo da instância mantido. Este diretório faz parte do modelo de ameaças/capacidade de armazenamento; utilize um volume de dados criptografado. Transferências de vários gigabytes em escala de produção ainda exigem qualificação no seu sistema de destino.
-
-O painel exibe mídias em fila/com falha, as mídias pendentes mais antigas, espaço livre em disco, pausas nas solicitações do Telegram e fontes cujo acesso não foi confirmado. Esses diagnósticos não constituem um monitor completo de entrega de ponta a ponta. Os espaços de trabalho compartilham um processo; uma conta com atividade intensa ainda pode afetar os demais. Ainda restam a separação de processos de trabalho, retenção/rotação, recuperação durável de atualizações, ancoragem de pontos de verificação remotos, funções e qualificação completa da implantação.
-
-## Opções de conexão e proteção
-
-As rotas de conexão são específicas para cada espaço de trabalho e devem ser configuradas antes da autorização. SOCKS5/HTTP CONNECT utilizam a dependência fixada python-socks. O MTProxy utiliza o transporte intermediário aleatório experimental do Telethon; segredos TLS ee falsos não são suportados. Não há configuração de fallback direto automático. Esta não é uma rota de rede válida para todo o sistema.
-
-Para novas instalações, a variável TGWITNESS_VAULT_KEY_FILE aponta para um arquivo de chave-mestra aleatória protegido separadamente. Monte-o como somente leitura fora do diretório /data em um contêiner. Preserve os metadados públicos de salt do arquivo vault.external.json para cada espaço de trabalho e a chave-mestra separadamente. Os cofres locais existentes exigem uma migração planejada; definir essa variável não os converte automaticamente. O armazenamento e as exportações de mensagens/mídia não são criptografados pelo aplicativo. Utilize volumes criptografados e armazenamento temporário privado suficiente, quando necessário.
+O painel exibe mídias na fila/com falha, a mídia pendente mais antiga, o espaço livre em disco, as pausas de solicitações do Telegram e as fontes cujo acesso não foi confirmado. Esses diagnósticos não constituem um monitoramento completo de entrega de ponta a ponta. Os espaços de trabalho compartilham um processo; uma conta muito ativa ainda pode afetar as outras. Continuam pendentes processos de trabalho separados, retenção/rotação, recuperação durável de atualizações e qualificação completa da implantação. O acesso ao painel com escopo limitado está documentado em [acesso e permissões](../ACCESS.md); os pontos de verificação independentes são abordados no [guia da testemunha](../WITNESS.md).
 
 Procedimentos detalhados: [conexão/segurança](../CONNECTION-SECURITY.md) e [modos de operação](../OPERATIONS.md).

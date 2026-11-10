@@ -1536,7 +1536,7 @@
   "Re-read the chat list every": "إعادة قراءة قائمة الدردشات كل",
   "Folder and whole-account modes: picks up folder changes and chats that appeared while offline.": "وضع المجلد ووضع الحساب بالكامل: يلتقط التغييرات التي طرأت على المجلد والمحادثات التي ظهرت أثناء عدم الاتصال بالإنترنت.",
   "minutes": "دقائق",
-  "Liveness record every": "تسجيل الحيوية لكل",
+  "Liveness record every": "سجل نشاط المُجمِّع كل",
   "Reports treat silence longer than three of these intervals, and at least three minutes, as a gap.": "تعتبر التقارير الصمت الذي يستمر لأكثر من ثلاثة من هذه الفترات، وبما لا يقل عن ثلاث دقائق، فجوة.",
   "seconds": "ثوانٍ",
   "Signed checkpoint every": "نقطة تفتيش موقعة كل",

@@ -22,5 +22,5 @@
 </blockquote>
 <p>MIT 라이선스를 엄격히 준수하기 위해, 당사는 이 소프트웨어의 사용을 제한하지 않습니다. 그러나 한 가지 분명히 밝히자면, 기업의 고문 계약, 법적 협박, 디지털 삭제 요구는 역사를 무효화하거나, 계보를 재작성하거나, 진실을 은폐할 수 없습니다.</p>
 <p><a href="../../LICENSE">MIT 라이선스</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Taylor Wessing에 대한 당사의 입장</a> · <a href="../HOW-IT-WORKS.md">증거 모델</a></p>
-<p><a href="../../README.md">프로젝트</a> · <a href="../README.md">문서</a> · <a href="../wiki/Home.md">위키</a></p>
+<p><a href="README.md">프로젝트</a> · <a href="README.md">문서</a> · <a href="../wiki/Home.md">위키</a></p>
 </div>

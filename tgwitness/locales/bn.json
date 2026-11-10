@@ -809,7 +809,7 @@
   "Links and Mini Apps reveal your device": "লিংক এবং মিনি অ্যাপস আপনার ডিভাইস প্রকাশ করে",
   "Links and “Log in” buttons": "লিঙ্ক এবং \"লগ ইন\" বোতাম",
   "Live messages + history snapshots": "লাইভ বার্তা + ইতিহাসের স্ন্যাপশট",
-  "Liveness record every": "প্রতিটি লাইভনেস রেকর্ড করুন",
+  "Liveness record every": "সক্রিয়তার রেকর্ড প্রতি",
   "Load a closed, consistent schema 7/8 file directly. The optional Telethon-only CLI converter also accepts files up to 64 MiB.": "একটি বন্ধ, সামঞ্জস্যপূর্ণ স্কিমা 7/8 ফাইল সরাসরি লোড করুন। ঐচ্ছিক Telethon-only CLI কনভার্টার 64 MiB পর্যন্ত ফাইল গ্রহণ করে।",
   "Load a schema 2/3 production user session. The panel detects its contents; renaming a file is not conversion.": "স্কিমা 2/3 প্রোডাকশন ব্যবহারকারী সেশন লোড করুন। প্যানেলটি এর বিষয়বস্তু সনাক্ত করে; ফাইলের নাম পরিবর্তন করা কোনো রূপান্তর নয়।",
   "Load chats": "চ্যাট লোড করুন",

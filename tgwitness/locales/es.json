@@ -1493,7 +1493,7 @@
   "Re-read the chat list every": "Vuelva a leer la lista de chats cada",
   "Folder and whole-account modes: picks up folder changes and chats that appeared while offline.": "Modos de carpeta y de cuenta completa: registra los cambios en las carpetas y los chats que han aparecido mientras estaba desconectado.",
   "minutes": "minutos",
-  "Liveness record every": "El registro de autenticidad captura cada",
+  "Liveness record every": "Registro de actividad cada",
   "Reports treat silence longer than three of these intervals, and at least three minutes, as a gap.": "Los informes consideran como «laguna» cualquier silencio que supere tres de estos intervalos y que dure al menos tres minutos.",
   "seconds": "segundos",
   "Signed checkpoint every": "Punto de control firmado cada",

@@ -56,7 +56,7 @@ External HTTP requests have a separate route and off switch.
 
 [History acquisition](HISTORY.md), [archive search and analysis](ANALYSIS.md),
 [read-only MCP](MCP.md), [local OCR/transcription](MEDIA-ANALYSIS.md) and
-[outgoing webhooks](WEBHOOKS.md) are included in 0.7.1. Analytical reports and recognized text stay separate
+[outgoing webhooks](WEBHOOKS.md) have been included since 0.7.1. Analytical reports and recognized text stay separate
 from captured events.
 
 [Case Board](CASE-BOARD.md) adds source-linked bookmarks, quotes, notes and
@@ -65,16 +65,18 @@ material, sections and one of eight designs for supported HTML/PDF exports.
 
 ## Optional extras
 
-Everyday setup is account → sources → observation. **Extras** is a separate destination
-with a Telegram witness bot and a GitHub capture preview. Each states its availability and requirements before showing
-settings. Choosing a card opens instructions; it does not enroll or start a service.
+Everyday setup is account → sources → observation. **More tools → Extras** is a separate
+destination for independent capture, storage, goal and protection level, notifications,
+evidence and backups, an always-on server, a Telegram witness bot and a code check. Each
+states its availability and requirements before showing settings. Choosing a card opens
+instructions; it does not enroll or start a service.
 
 Bot setup has three steps: create read-only access, choose publication settings, and
 launch on the witness host. Network and publication options, existing connections and
 verification commands are disclosed on demand. Downloaded configuration is distinct
 from a running witness. Switching extras retains the draft; account changes and locking
 clear the temporary token and form. The built-in guide includes launch instructions.
-[GitHub Actions capture](SEALED-ACTIONS.md) launches a pinned collector from your
+[GitHub Actions capture](SEALED-ACTIONS.md), opened from Exports, launches a pinned collector from your
 fork, captures one chat and produces an encrypted handoff with workflow provenance.
 
 ## Protocol and private sources
@@ -179,7 +181,8 @@ Arbitrary high-frequency polling, ignoring FloodWait or assuming linear capacity
 from extra accounts is not a valid sizing model. Default limits are the
 first 1,000 listed dialogs, up to 500 messages per history snapshot,
 1–2,000 MiB per collected file by type, and 4 GiB uncompressed signed ZIP content; each
-is changed per workspace under **Parameters**. Exports have no fixed event-count cap.
+is changed per workspace, file sizes under **More tools → Sources → Recording** and the others under
+**More tools → Parameters**. Exports have no fixed event-count cap.
 Browser fallback is bounded to 128 MiB by default; the streaming CLI has a configurable
 transfer limit, 5 GiB by default.
 
@@ -271,7 +274,7 @@ Before a stable release, qualify:
 6. Clean installation on the intended OS/container matrix and verified backup restore.
 7. Independent review of security, signatures and attribution/evidence claims.
 
-Scoped panel access is described in [access and permissions](ACCESS.md). Version 0.6 supports
+Scoped panel access is described in [access and permissions](ACCESS.md). Since version 0.6, TgWitness supports
 the bounded single-account TData and account-file import described in [ACCOUNTS.md](ACCOUNTS.md).
 Review Telegram API terms before publication. Research references and platform
 findings are in [RESEARCH.md](internal/RESEARCH.md).

@@ -86,7 +86,7 @@ Needs Python 3.11+ from a source checkout, the launcher installs the rest. Open 
 
 When you're ready, stop the demo and run **`Start.cmd`** (Windows) or **`sh start.sh`**.
 Paste the token from `data/live/panel-token.txt` and [connect a dedicated account](#connect-a-telegram-account).
-Portable builds and Docker: [installation guide](QUICKSTART.md#install-and-start).
+The one-line installer, portable builds and Docker: [installation guide](QUICKSTART.md#install-and-start).
 
 ![Section divider](assets/presentation/divider.svg)
 
@@ -283,10 +283,11 @@ with before/after values.
 
 | Where | What |
 | --- | --- |
-| **Sources** | Scope, source types, exclusions, own actions, which changes to keep, attachment types and sizes, recheck intervals, history snapshots, notifications |
-| **Exports** | Password, evidence mode, off-site S3 copy |
-| **Witness** | Read-only witness tokens and ready-made commands |
-| **Parameters** | Everything else: list sizes, intervals, rechecks, disk reserve, download limits, people-profile patterns, notification pace, ZIP limits, Telegram timeouts |
+| **More tools → Sources** | Scope, source types, exclusions, own actions, which changes to keep, attachment types and sizes, recheck intervals |
+| **Exports** | Password for downloads |
+| **Settings** or **More tools → Extras** | Evidence mode, off-site S3 copy, notifications |
+| **More tools → Extras → Independent witness** | Read-only witness tokens and ready-made commands |
+| **More tools → Parameters** | Everything else: list sizes, intervals, rechecks, disk reserve, download limits, people-profile patterns, notification pace, ZIP limits, Telegram timeouts |
 
 Values show their range and default, changed ones are marked and can be reset.
 A ZIP limit over 4 GiB needs `verify.py --max-gib N` ([operations](OPERATIONS.md#panel-layout)).
@@ -344,7 +345,7 @@ Telegram's terms; the points below summarize common practice.
 - **Retention and erasure.** The journal is append-only so that its integrity can be proven;
   single records cannot be removed without breaking the signature chain. Plan retention per
   workspace and delete an added workspace (Accounts → Delete) when the purpose ends. The main
-  workspace cannot be deleted from the panel: sign out of Telegram on the Account page, stop
+  workspace cannot be deleted from the panel: sign out of Telegram on the **More tools → Account** page, stop
   TgWitness and remove its data directory. Off-site copies under S3 Object Lock cannot be deleted before their
   retention date — choose the period accordingly. The right to erasure has exceptions, for
   example for the establishment or defence of legal claims (Art. 17(3)(e)).

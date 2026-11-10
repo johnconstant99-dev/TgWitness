@@ -36,8 +36,8 @@ enabled evidence backup has not yet copied that file, removal also waits for it.
 
 ## When the disk is filling up
 
-Attachment downloads already pause below **Parameters → Attachments → free disk
-space** (1 GiB by default), keeping their queue. Text observations continue. This
+Attachment downloads already pause below **More tools → Parameters → Photos & files →
+Pause downloads below this free disk space** (1 GiB by default), keeping their queue. Text observations continue. This
 does not depend on notification settings. Disabling notifications does not disable
 the download reserve or storage safeguards.
 
@@ -74,7 +74,7 @@ rewritten by storage management. It still needs space for new text observations.
 
 ## Connect a destination
 
-In **Extras → Storage & disk space → Manage storage**, choose the task and destination,
+In **More tools → Extras → Storage & disk space → Manage storage**, choose the task and destination,
 save it, then select **Test upload & download**. The test uploads a small random probe and reads it
 back. It does not use Telegram content.
 

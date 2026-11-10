@@ -1,361 +1,482 @@
-[English](../../README.md) · [Русский](../ru/README.md) · [Українська](../uk/README.md) · [Español](../es/README.md) · [Português (Brasil)](../pt/README.md) · [Türkçe](../tr/README.md) · [العربية](../ar/README.md) · [فارسی](../fa/README.md) · **اردو** · [हिन्दी](../hi/README.md) · [Bahasa Indonesia](../id/README.md) · [Tiếng Việt](../vi/README.md) · [简体中文](../zh/README.md)
-
-![TgWitness — preserve the record, verify the evidence](../assets/presentation/casework-hero-static.svg)
-
-<p align="center">
-  <strong>آپ کا ٹیلیگرام مشاہداتی ورک اسپیس۔</strong><br>
-  <strong>  </strong>
-  محفوظ کردہ گفتگو کو محفوظ کریں، سمجھیں کہ کیا تبدیل ہوا، اور ایک دستخط شدہ تاریخ شیئر کریں۔<br>
-     اپنے کمپیوٹر یا سرور پر۔   اپنے اکاؤنٹس کے ساتھ۔
-</p>
-
-<p align="center">
-  <img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-243a52?logo=python&amp;logoColor=white">
-  <img alt="FastAPI + Telethon" src="https://img.shields.io/badge/FastAPI-Telethon-243a52?logo=fastapi&amp;logoColor=white">
-  <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-243a52?logo=docker&amp;logoColor=white">
-  <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-243a52">
-  <img alt="Version: 0.9.1" src="https://img.shields.io/badge/version-0.9.1-243a52">
-</p>
-
-<p align="center">
-  <a href="#تیز-آغاز">تیز آغاز</a> ·
-  <a href="#خصوصیات">خصوصیات</a> ·
-  <a href="#ٹیلیگرام-اکاؤنٹ-منسلک-کریں">اکاؤنٹس</a> ·
-  <a href="#شواہد-اور-تصدیق">شواہد</a> ·
-  <a href="#نفاذ">نفاذ</a> ·
-  <a href="../README.md">دستاویزات</a>
-</p>
-
-> [!TIP]
-> **جڑنے سے پہلے دریافت کریں۔** `scripts\Demo.cmd` یا `sh start.sh --demo` چلائیں تاکہ فرضی گفتگو کے ساتھ ایک ورک اسپیس کھل جائے۔ ٹیلیگرام اکاؤنٹ کی ضرورت نہیں۔
-
-**یہاں نئے ہیں؟** [شروع کریں →](QUICKSTART.md) · [ویکی →](../wiki/Home.md) · [رہنما منتخب کریں →](../README.md) · [مدد حاصل کریں →](../../.github/SUPPORT.md) · [دیکھیں کہ کیا جانچا گیا ہے →](../VERIFICATION.md)
-
-> [!WARNING]
-> **ایک مخصوص ٹیلیگرام اکاؤنٹ استعمال کریں جسے آپ کھونے کا متحمل ہو سکتے ہیں۔** ہم سختی سے مشورہ دیتے ہیں کہ ذاتی یا قیمتی اکاؤنٹس کو منسلک نہ کریں، یا ان پر API ID/API ہیش کی کریڈینشلز نہ بنائیں۔ ٹیلیگرام اکاؤنٹس کو محدود یا مستقل طور پر بلاک کر سکتا ہے۔ [اکاؤنٹ گائیڈ پڑھ](../ACCOUNTS.md)یں۔
-
-## خصوصیات
-
-- **ایک تاریخ کے ساتھ گفتگو۔** محفوظ شدہ پیغامات پڑھیں، کیپچر کی گئی ترامیم کا موازنہ کریں، اور گفتگو کے سیاق و سباق میں حذف کرنے کے نوٹس دیکھیں۔
-- **اپنی شرائط پر مشاہدہ۔** انفرادی چیٹس، ٹیلیگرام فولڈر، یا پورا اکاؤنٹ منتخب کریں۔ ہر اکاؤنٹ کا اپنا ورک اسپیس اور ترتیبات ہیں۔
-- **ایکسپورٹس جن کی آپ تصدیق کر سکتے ہیں:** ایک دستخط شدہ ZIP، اصل ریکارڈز، محفوظ شدہ منسلکات، اور ایک آف لائن HTML رپورٹ۔ حوالگی کے لیے اختیاری پاس ورڈ تحفظ۔
-- **روزمرہ استعمال کے لیے تیار۔** ہلکے اور گہرے تھیمز، 25 زبانیں، تلاش، Ctrl/Cmd+K نیویگیشن، اور چیٹس سے براہِ راست ایکشنز۔
-
-<details>
-<summary>تمام صلاحیتیں اور تکنیکی تفصیلات</summary>
-
-- **آپ کا کنکشن راستہ۔** **اکاؤنٹ → پراکسی سیٹنگز** کے تحت، بنڈل شدہ عوامی MTProxy فہرستوں میں سے انتخاب کریں، انہیں ان کے ذرائع سے ریفریش کریں، یا اپنا Telegram پراکسی لنک پیسٹ کریں۔ دستی SOCKS5/HTTP/MTProxy اور آپریٹر کیٹلاگ دستیاب ہیں۔ عوامی فہرستیں ڈاؤن لوڈ اور فلٹر کی جاتی ہیں، لیکن ابھی تک کسی اکاؤنٹ کو فہرست شدہ سرور کے ذریعے کنیکٹ نہیں کیا گیا۔ [عوامی فہرستیں کیسے کام کرتی](../CONNECTION-SECURITY.md#public-proxies-supplied-by-your-installation) ہیں۔
-
-- **ایک جریدہ جو آپ کے اکاؤنٹس حقیقتاً کیا دیکھتے ہیں:** نئے پیغامات، ترامیم، حذف کرنے کے نوٹس، ردعمل، رکنیت کے واقعات اور آپ کے منتخب کردہ گروپس اور چینلز کی کوریج میں خلا۔
-- **منتخب کی گئی چیٹس، ایک ٹیلیگرام فولڈر یا پورا اکاؤنٹ۔** ریکارڈ کرنے کے لیے اقسام منتخب کریں — چینلز، گروپس، نجی چیٹس، بوٹس — اور نئی چیٹس نمودار ہوتے ہی شامل ہو جاتی ہیں۔ استثنا، اپنے بھیجے گئے پیغامات اور ترامیم، نجی چیٹس میں حذف شدہ مواد کو متعلقہ چیٹ کے مطابق، ترجیحی دوبارہ جانچ اور ہر قسم ([جمع](../COLLECTION.md#observation-scope-chosen-chats-a-folder-or-the-whole-account)) کے لیے منسلکات کی حدیں۔
-- **تفتیشی موڈ۔** ایک بٹن ایک مخصوص اکاؤنٹ تیار کرتا ہے جو ٹیموں میں شامل ہوتا ہے اور بوٹس سے بات کرتا ہے: جو کچھ بھی یہ دیکھتا اور بھیجتا ہے ریکارڈ ہو جاتا ہے، بوٹ پیغامات کے نیچے موجود بٹن (لِنکس، ویب ایپس، کاپی کے لیے ٹیکسٹ) محفوظ کیے جاتے ہیں اور صرف بٹن کے ذریعے کی جانے والی ترامیم نئے ورژن بن جاتی ہیں، اور ہر نئی چیٹ یا بوٹ کو اپنا پروفائل (تفصیل، کمانڈز، ارکان) ملتا ہے اور پہلے دکھائی دینے والے پیغامات فوری طور پر محفوظ ہو جاتے ہیں ([تحقیقی موڈ](../COLLECTION.md#investigation-mode-joining-teams-and-talking-to-bots))۔ پینل کی **مخصوص اکاؤنٹ گائیڈ** (`/dedicated-account.html`) بتاتی ہے کہ مرکزی اکاؤنٹ کیوں استعمال نہیں کرنا چاہیے، TgWitness عوامی ایپ ہیش/ایپ آئی ڈی جوڑوں کے ذریعے کیوں کام کرتا ہے اور ایک API جوڑا بذاتِ خود آپ کے اکاؤنٹ تک رسائی کیوں فراہم نہیں کرتا (Telegram کی دستاویزات کے لنکس کے ساتھ)، اور اضافی اکاؤنٹ بنانے کے طریقے بھی درج ہیں۔
-- **چٹس سے براہِ راست کارروائی کریں۔** پیغامات بھیجیں اور جوابات دیں، بوٹ کال بیک/ٹیکسٹ بٹنز دبائیں، یا ٹیلیگرام دعوت نامے کا پیش نظارہ کریں اور شامل ہوں۔ منتخب اکاؤنٹ یہ عمل انجام دیتا ہے؛ درخواستیں، دعوت ناموں کا پیش نظارہ اور بوٹ پاپ اپ/URL جوابات اس کے دستخط شدہ جرنل ([پینل منی کلائنٹ](../COLLECTION.md#act-from-the-panel)) میں درج ہوتے ہیں۔
-- **ایسی کوریج جسے آپ بیان کر سکتے ہیں۔** رپورٹس اور ویریفائر کہتے ہیں "مسلسل X سے Y تک مشاہدہ کیا گیا"، خالوں کی فہرست ان کی وجوہات کے ساتھ اور ان میسج IDs کے ساتھ جو کبھی مشاہدہ نہیں ہوئے — انہیں کبھی حذف شدہ کے طور پر پیش نہیں کیا گیا۔
-- **افراد کے پروفائلز، ہر چیٹ کے لیے رضامندی۔** نام اور صارف نام کی تاریخ، ٹیلیگرام کے جھنڈے، اوتار کا SHA-256 اور pHash، سرگرمی، کون کس کو جواب دیتا ہے اور ذکر کیے گئے والیٹس، فونز، صارف نام اور لنکس — صرف محفوظ شدہ ریکارڈز سے تیار، ہر حقیقت اپنے جرنل ریکارڈ کی طرف اشارہ کرتی ہے، ایک الگ دستخط شدہ فائل ([ثبوت ماڈل](../EVIDENCE.md#people-profiles)) کے طور پر برآمد کی گئی۔
-- **آزاد شاہد۔** ایک الگ عمل اپنی مخصوص کلید اور بوٹ کے ساتھ دستخط شدہ جرنل ہیڈ حاصل کرتا ہے، اسے ٹیلیگرام چینل پر پوسٹ کرتا ہے اور جب کلیکٹر جواب نہیں دیتا تو اطلاع دیتا ہے؛ مصدق اس کے خلاف ایکسپورٹس کی جانچ کرتا ہے۔ وقفہ، ٹائم آؤٹ، کون سی چیکس پوسٹ کی جائیں اور پوسٹس کے الفاظ کے اختیارات یا ایک JSON کنفیگ فائل ([witness](../WITNESS.md))۔ مقامی Bot API سرور کے خلاف آزمایا گیا، ابھی تک حقیقی بوٹ اور چینل کے ساتھ نہیں۔
-- **پینل میں کلیکشن کی ترتیبات۔** کلیکشن کی حدیں اور رفتار، دوبارہ چیک، ڈاؤن لوڈز، صارفین کے پروفائلز، نوٹیفیکیشنز اور ایکسپورٹس **پیرامیٹرز** صفحے پر ان کی حدود اور ڈیفالٹ قدروں کے ساتھ موجود ہیں؛ ہر تبدیلی دستخط شدہ جرنل ([ترتیبات اور پیرامیٹرز](#سیٹنگز-اور-پیرامیٹرز)) میں ریکارڈ کی جاتی ہے۔
-- **سیاق و سباق میں ترامیم اور حذف۔** ہر ترمیم ایک الگ ورژن ہے جو پچھلے ورژن کے ساتھ دکھائی جاتی ہے؛ حذف کرنے کا نوٹس کبھی بھی پہلے سے محفوظ شدہ مواد کو مٹا نہیں سکتا۔
-- **دستخط شدہ، قابل تصدیق برآمدات۔** ہر واقعہ SHA-256 سے ہیش چین کیا گیا ہے اور Ed25519 سے دستخط شدہ ہے۔ دستخط شدہ ZIP بنڈلز میں JSONL، CSV، ایک آف لائن HTML رپورٹ، محفوظ شدہ میڈیا اور ایک خود مختار تصدیق کنندہ شامل ہیں۔
-- **پاس ورڈ سے محفوظ شدہ ایکسپورٹس۔** اختیاری طور پر کسی بھی ایکسپورٹ کو WinZip AES-256 ZIP میں محفوظ کریں، یہ وہ فارمیٹ ہے جو 7-Zip اور WinRAR پڑھتے ہیں؛ اندر موجود دستخط شدہ مواد بغیر تبدیلی کے رہتا ہے۔ ایک ٹیسٹ آرکائیو کو libarchive (Windows `tar`) میں بائٹ بہ بائٹ کھولا گیا اور غلط پاس ورڈ مسترد کر دیا گیا ([ثبوت ماڈل](../EVIDENCE.md#investigation-handoff))۔
-- **اطلاعات۔** مسائل (ڈسک کی کم جگہ، سائن آؤٹ شدہ اکاؤنٹ، کلیکٹر، کاپی یا ٹائم اسٹیمپ کی غلطیاں)، مشاہدہ شدہ چیٹس میں تبدیلیاں اور ایک روزانہ کا خلاصہ، جو [Apprise](https://github.com/caronc/apprise) کے ذریعے Matrix، Telegram، Discord، Slack، ntfy، ای میل اور دیگر کئی خدمات کو بھیجا جاتا ہے — جب تک آپ اقتباسات آن نہ کریں پیغام کا متن شامل نہیں ہوتا — اور پینل میں درج کیا جاتا ہے۔ ڈیلیوری کو ایک مقامی اینڈ پوائنٹ کے خلاف آزمایا گیا ہے؛ خود خدمات کا ابھی تک تجربہ نہیں کیا گیا۔
-- **25 انٹرفیس زبانیں۔** پینل اور مکمل دستاویزات میں ایک ہی زبانیں شامل ہیں، جن میں جرمن، فرانسیسی، جاپانی اور عبرانی شامل ہیں۔ ٹیلیگرام کا مواد اور جرنل کے ریکارڈ ہمیشہ بالکل ویسے ہی دکھائے جاتے ہیں جیسے محفوظ کیے گئے ہوں۔
-- **ہلکی اور گہری تھیم۔** بطورِ ڈیفالٹ سسٹم کی ترتیبات کی پیروی کرتی ہے؛ انتخاب ہر براؤزر میں یاد رکھا جاتا ہے۔
-- **کی بورڈ کے موافق نیویگیشن۔** **Ctrl+K** (Mac: **⌘K**) دبائیں یا **Go to…** منتخب کریں تاکہ کوئی سیکشن تلاش کیا جا سکے۔ اسے کھولنے کے لیے تیر کے بٹن اور Enter استعمال کریں؛ Escape مینو بند کر دیتا ہے۔
-- **متعدد اکاؤنٹس۔** کسی بھی تعداد میں الگ الگ ورک اسپیسز، ہر ایک کے اپنے ٹیلیگرام سیشن، جرنل، دستخطی کلید، پروکسی راستہ اور کیپچر پالیسی کے ساتھ۔
-- **لچکدار سائن ان۔** فون + کوڈ + 2FA، QR کوڈ، Telethon/Pyrogram `.session`، Telegram Desktop TData ZIP، Telethon StringSession، یا مکمل Auth Key اپنے DC ID کے ساتھ۔
-- **ہر اکاؤنٹ کے لیے پروکسیز۔** SOCKS5 اور HTTP CONNECT، مقامی ٹیسٹ پروکسیز کے خلاف آزمایا گیا، اور تجرباتی MTProxy، جو ابھی تک کسی حقیقی سرور کے ساتھ آزمایا نہیں گیا۔ ایک ناکام پروکسی خاموشی سے براہِ راست کنکشن پر واپس نہیں جاتی۔
-- **ڈیزائن کے اعتبار سے نجی۔** آپ کے کمپیوٹر یا سرور پر چلتا ہے۔ مربوط ویب UI، Node.js نہیں، کوئی ہوسٹڈ سروس نہیں، کوئی ٹیلی میٹری نہیں۔ سیشنز، API کی تفصیلات اور پروکسی سیکرٹس ایک خفیہ کردہ والٹ میں محفوظ ہیں۔
-- **چلانے میں آسان۔** ونڈوز پر ڈبل کلک کریں، لینکس/macOS پر ایک اسکرپٹ، یا اختیاری خودکار HTTPS کے ساتھ Docker Compose۔ ٹیسٹ کے نتائج اور حدود: [تصدیقی ریکارڈ](../VERIFICATION.md)۔
-
-</details>
-
-## تیز آغاز
-
-| پلیٹ فارم | کیسے شروع کریں | درکار |
-| --- | --- | --- |
-| **ونڈوز، کچھ بھی انسٹال نہیں** | `TgWitness-<version>-windows-amd64-portable.zip` کو [ریلیزز](../../../../releases) سے ڈاؤن لوڈ کریں، نکالیں، پھر **`TgWitness.cmd`** پر ڈبل کلک کریں۔ | کچھ نہیں؛ پائتھن شامل ہے |
-| ونڈوز، ماخذ سے | **`Start.cmd`** پر ڈبل کلک کریں | Python 3.11+؛ اگر دستیاب نہ ہو تو آپ کے لیے فراہم اور انسٹال کیا گیا۔ |
-| لینکس / میک او ایس | `sh start.sh` | Python 3.11+ کے ساتھ `venv`؛ اگر آپ کے سسٹم میں موجود نہ ہو تو یہ اسکرپٹ انسٹال کمانڈ پرنٹ کرتی ہے۔ |
-| ڈاکر، کسی بھی آپریٹنگ سسٹم پر | **`scripts\Docker.cmd`** پر ڈبل کلک کریں یا `sh scripts/docker-start.sh` چلائیں | Docker Engine/Desktop Compose 2.20+ کے ساتھ |
-
-1. **http://127.0.0.1:8787** کھولیں۔
-2. پینل رسائی ٹوکن چسپاں کریں:
-   - پورٹیبل یا سورس انسٹال: `data/live/panel-token.txt` کے مندرجات
-   - Docker: `scripts\Docker.cmd`/`scripts/docker-start.sh` یا `docker compose exec tgwitness cat /data/panel-token.txt` کے ذریعے پرنٹ کیا گیا۔
-3. اپنا ٹیلیگرام اکاؤنٹ شامل کریں، مشاہدہ کے لیے چیٹس منتخب کریں اور **'مشاہدہ شروع کریں**' پر کلک کریں۔
-
-پہلا سورس لانچ ایک نجی `.venv` بناتا ہے اور پن کی گئی ڈیپنڈنسیز انسٹال کرتا ہے (انٹرنیٹ کنکشن ضروری ہے)۔ ڈوکر ہیلپرز امیج بناتے ہیں، پینل کے صحت مند ہونے تک انتظار کرتے ہیں اور اس کا ایڈریس اور ٹوکن پرنٹ کرتے ہیں۔ `python start.py --check` (یا پورٹیبل پیکج میں `TgWitness-Check.cmd`) ٹیلیگرام کو چھوئے بغیر تیاری کی رپورٹ دیتا ہے۔
-
-> **صرف دیکھنا چاہتے ہیں؟** **`scripts\Demo.cmd`** یا `sh start.sh --demo` چلائیں۔ ایک فرضی جریدہ براہِ راست براؤزر میں کھل جائے گا؛ کوئی ٹیلیگرام اکاؤنٹ منسلک نہیں ہے اور ڈیٹا `data/demo` میں علیحدہ محفوظ رہتا ہے۔
-
-<details>
-<summary><strong>ورک اسپیس کے اندر: چیٹس، تاریخ، اور برآمدات</strong></summary>
+<p align="right"><sub><a href="../../README.md">English</a> · <a href="#languages">دیگر زبانیں</a></sub></p>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="../assets/chats-dark.png">
-  <img src="../assets/chats.png" alt="TgWitness chats view with synthetic demo data: deleted and edited messages highlighted">
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-hero-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-hero-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/casework-hero-mobile.svg">
+  <img src="../assets/presentation/casework-hero.svg" width="1440" alt="TgWitness — سراغ کے پیچھے چلیں۔ ثبوت محفوظ کریں۔ ہیش سے جڑا دستخط شدہ جرنل، الگ سے محفوظ کیا گیا چیک پوائنٹ اور قابلِ تصدیق ثبوتی آرکائیو۔">
 </picture>
 
-### مشاہدے کی تاریخ
+<table>
+<tr>
+<td width="33%" align="center"><a href="https://phishdestroy.github.io/TgWitness/demo/?lang=ur"><b>ڈیمو دیکھیں&nbsp;↗</b></a><br><sub>اصل انٹرفیس، فرضی ریکارڈز کے ساتھ</sub></td>
+<td width="33%" align="center"><a href="#quick-start"><b>ڈاؤن لوڈ کریں اور شروع کریں&nbsp;↓</b></a><br><sub>ایک ہی کمانڈ، Linux، macOS اور Windows کے لیے</sub></td>
+<td width="33%" align="center"><a href="https://github.com/phishdestroy/TgWitness/wiki"><b>ہینڈ بک پڑھیں&nbsp;↗</b></a><br><sub>تفتیش کے رہنما، قدم بہ قدم</sub></td>
+</tr>
+</table>
 
-![Journal with fictional demo data](../assets/workspace.png)
+<p align="center"><strong>اپنے سرور پر چلنے والی ورک اسپیس، Telegram پر تفتیش کے لیے۔</strong><br>چیٹس محفوظ کریں، ترامیم اور حذف شدہ پیغامات سنبھال کر رکھیں، دیکھیں کون کس سے جڑا ہے<br>اور دستخط شدہ ایکسپورٹس حوالے کریں جنہیں کوئی بھی جانچ سکتا ہے۔</p>
 
-### دستخط شدہ برآمدات
+<p align="center"><strong>زیرو ٹرسٹ۔</strong> TgWitness کسی کا فریق نہیں بنتا: یہی جانچ آپریٹر، PhishDestroy اور ہر دوسرے فرد پر یکساں لاگو ہوتی ہے۔<br>صرف وہی معتبر ہے جس کی تصدیق کوئی تیسرا فریق یا ریاضی کرے۔ <a href="../LIMITS-AND-OBJECTIONS.md">حدود اور اعتراضات</a></p>
 
-![Export records and verify signatures](../assets/exports.png)
+<p align="center">
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · پری ریلیز"></a>
+  <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
+  <sub><a href="../VERIFICATION.md">آزمائے گئے ماحول</a> · انٹرفیس کی 25 زبانیں · رہنما کی 26 زبانیں</sub>
+</p>
+
+<a name="screenshots"></a>
+
+<a href="https://phishdestroy.github.io/TgWitness/demo/?lang=ur">
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-workspace-mobile-dark-still.webp">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-workspace-dark-still.webp">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-workspace-mobile-dark.webp">
+  <img src="../assets/presentation/readme-workspace-dark.webp" width="1440" alt="TgWitness ڈیمو حرکت میں: کیپچر کیے گئے پیغامات، محفوظ ورژن اور حذف کے بعد باقی رہنے والا مواد۔ فرضی نمائشی ریکارڈز۔">
+</picture>
+</a>
+
+<p align="center"><sub>اصل انٹرفیس کو فرضی ریکارڈز کے ساتھ دیکھیں۔ آزمانے کے لیے ورک اسپیس پر کلک کریں۔</sub></p>
+
+## وہ کام جو TgWitness کرتا ہے
+
+<table>
+<tr>
+<td width="33%" valign="top"><b><a href="../COLLECTION.md">ہر ترمیم اور حذف محفوظ</a></b><br><sub>پیغام کا ہر ورژن محفوظ ہوتا ہے، اور حذف کی اطلاع کے بعد بھی اس کا متن باقی رہتا ہے۔</sub></td>
+<td width="33%" valign="top"><b><a href="../wiki/Exports-and-Verification.md">ایسا ثبوت جسے کوئی بھی جانچ سکے</a></b><br><sub>دستخط شدہ، ہیش چین سے جڑے ریکارڈز۔ وصول کنندہ ایک کمانڈ سے آرکائیو کی آف لائن تصدیق کرتا ہے۔</sub></td>
+<td width="33%" valign="top"><b><a href="../EVIDENCE.md#where-the-messages-come-from">ماخذ جو آپ دکھا سکیں</a></b><br><sub>پیغامات اکاؤنٹ کے مستند MTProto سیشن پر موصول ہوتے ہیں اور پہنچتے ہی ان پر دستخط ہوتے ہیں؛ GitHub Actions اور Intel TDX اٹیسٹیشن شامل کرتے ہیں۔</sub></td>
+</tr>
+<tr>
+<td width="33%" valign="top"><b><a href="../EXPORT-BENCHMARK-2026-11-06.md">بڑے پیمانے پر ناپا گیا</a></b><br><sub>48 تصدیق شدہ آرکائیوز میں 3,598,381 ریکارڈز؛ آٹھ اکاؤنٹس نے 687.5 ریکارڈز فی سیکنڈ کی رفتار سے ہسٹری کے 768,007 ریکارڈز حاصل کیے۔</sub></td>
+<td width="33%" valign="top"><b><a href="../INVESTIGATION-MODE.md">تفتیش کے لیے بنایا گیا</a></b><br><sub>متن، QR کوڈز اور OCR پر واچ لسٹس، والیٹ کی جانچ، سبجیکٹ کارڈز، کیس بورڈ اور عدالتی پیکیج۔</sub></td>
+<td width="33%" valign="top"><b><a href="../SECURITY-MODEL.md">آپ کے اپنے کنٹرول میں</a></b><br><sub>آپ کے اپنے سرور پر، بغیر ٹیلی میٹری کے۔ سیشنز ایک خفیہ کردہ والٹ میں رہتے ہیں؛ پینل localhost پر سنتا ہے۔</sub></td>
+</tr>
+</table>
+
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
+
+<a name="quick-start"></a>
+<a name="run-it-on-your-machine"></a>
+
+## انسٹال کریں
+
+انسٹالر میں Python شامل ہے۔ اپ ڈیٹ کے لیے بھی یہی کمانڈز استعمال کریں۔
+
+**Linux / macOS**
+
+```sh
+curl -fsSL https://get.destroy.tools/install.sh | bash
+```
+
+**Windows · PowerShell یا CMD**
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm https://get.destroy.tools/install.ps1 | iex"
+```
+
+<sub>سرور پر Ubuntu ہو تو root کے طور پر چلائیں۔ ڈیسک ٹاپ پر اپنے عام صارف کے طور پر چلائیں۔ `-ExecutionPolicy Bypass` صرف اسی ایک PowerShell پروسیس پر لاگو ہوتا ہے۔</sub>
+
+دستخط شدہ بلڈز عوامی [انسٹالر ورک فلو](../../.github/workflows/installer.yml) سے آتی ہیں، اور انسٹالر انسٹال کرنے سے پہلے ہر پیکیج کا SHA-256 اور RSA دستخط چیک کرتا ہے۔
+
+[پہلے اسکرپٹ کی تصدیق کریں](../INSTALLATION.md#verify-before-running) · [پہلا سیٹ اپ](../SETTINGS.md) · [ریلیزز](https://github.com/phishdestroy/TgWitness/releases) · [Docker](DEPLOYMENT.md)
+
+<details>
+<summary><strong>انسٹالر اور آپ کا ڈیٹا کیسے محفوظ رہتا ہے</strong></summary>
+
+پروجیکٹ کی ڈاؤن لوڈ سائٹ `get.destroy.tools` ہے۔ عوامی
+[انسٹالر ورک فلو](../../.github/workflows/installer.yml) اسے
+[`deploy/installer/`](../../deploy/installer/README.md) سے `main` کی بالکل اسی ریویژن کے لیے بناتا ہے،
+Linux اور Windows پر انسٹالیشن ٹیسٹ پاس ہونے کے بعد شائع کرتا ہے، اور
+انسٹالر اسکرپٹس اور ایپلیکیشن پیکیجز پر
+[`release-signing.pub`](../../deploy/installer/release-signing.pub) میں موجود ریلیز کلید سے دستخط کرتا ہے۔ انسٹالر
+انسٹال کرنے سے پہلے پیکیج اور ڈیپنڈنسی لاک کا SHA-256 اور RSA دستخط چیک کرتا ہے۔
+خود اسکرپٹ کو پہلے جانچنے کے لیے اسے اس کے دستخط سمیت ڈاؤن لوڈ کریں اور
+[پہلے تصدیق والی کمانڈز](../INSTALLATION.md#verify-before-running) چلائیں۔ بلڈ ناکام ہو جائے
+تو پچھلا ڈاؤن لوڈ برقرار رہتا ہے؛ انسٹال شدہ پینل انسٹالر دوبارہ چلانے پر اپ ڈیٹ ہوتے ہیں۔
+انسٹال کرنے کے دوسرے طریقے GitHub [ریلیزز](https://github.com/phishdestroy/TgWitness/releases)، سورس کوڈ اور
+[Docker](DEPLOYMENT.md) ہیں۔
+
+**آپ کے سیشنز اور ڈیٹا۔** TgWitness آپ کے کمپیوٹر یا سرور پر چلتا ہے، اور پینل
+بطورِ طے شدہ localhost پر سنتا ہے۔ Telegram سیشنز، پراکسی کی اسناد اور ایکسیس ٹوکن
+ہیشز ہر ورک اسپیس کے خفیہ کردہ والٹ میں محفوظ ہوتے ہیں، اور اختیاری طور پر
+[بیرونی ماسٹر کلید](../SECURITY-MODEL.md#external-master-key) بھی استعمال کی جا سکتی ہے۔ ایپلیکیشن
+میں کوئی ٹیلی میٹری نہیں۔ یہ Telegram سے اور ان سروسز سے جڑتی ہے جو اس کی سیٹنگز استعمال کرتی ہیں:
+عوامی MTProxy فہرستیں، آپ کی پراکسیز، S3 اسٹوریج، گواہ بوٹ، ٹائم اسٹیمپ
+اتھارٹیز، AI فراہم کنندگان اور ویب ہُکس۔ [نظام کا نقشہ](../SYSTEM-MAP.md)
+ان کنکشنز کی فہرست دیتا ہے جو ایپلیکیشن کا پروسیس بناتا ہے۔
+مشاہدے کے لیے [مخصوص Telegram اکاؤنٹ](https://phishdestroy.github.io/TgWitness/ur/docs/dedicated-account/) استعمال کریں۔
+
+ورژن بیج اسی سورس ٹری کو بیان کرتا ہے۔ انسٹال ہونے والی بلڈز
+[ریلیزز](https://github.com/phishdestroy/TgWitness/releases) میں درج ہیں؛ `main` میں ضم ہونے والی
+کوئی خصوصیت اگلی ریلیز کے ساتھ ان ڈاؤن لوڈز تک پہنچتی ہے۔
+
+[سیٹ اپ اور پینل تک رسائی](../INSTALLATION.md) ·
+[دستخط اور SHA-256](https://get.destroy.tools/#verification) ·
+[اپ ڈیٹ](../INSTALLATION.md#update-an-existing-installation) ·
+[موجودہ صلاحیتیں اور اہلیت کی جانچ](../STATUS.md) ·
+[جمع کرنے کا طریقہ منتخب کریں](../COLLECTION-MODES.md)
 
 </details>
 
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
-![Section divider](../assets/presentation/divider.svg)
+<a name="how-it-works"></a>
 
-## ٹیلیگرام اکاؤنٹ منسلک کریں
+## ایسا ریکارڈ جسے کوئی اور بھی جانچ سکے
 
-> [!CAUTION]
-> صرف وہ مخصوص اکاؤنٹس منسلک کریں جنہیں آپ کھونے کا متحمل ہو سکتے ہیں۔ ٹیلیگرام اکاؤنٹس کو مستقل اور غیر متوقع طور پر بلاک کر سکتا ہے؛ اس صفحے کے اوپر دی گئی انتباہ دیکھیں۔ پینل کی **مخصوص اکاؤنٹ گائیڈ** (سائیڈبار، یا `/dedicated-account.html`) بتاتی ہے کہ کیوں اور کیسے ایک حاصل کیا جائے۔
-
-فون، QR کوڈ یا موجودہ سیشن کے ذریعے سائن ان کریں — کسی API ID یا ہیش کی ضرورت نہیں۔
-
-**بلٹ ان API پول کیوں؟** [my.telegram.org](https://my.telegram.org) پر اپنا API ID بنانے سے اکاؤنٹس محدود ہو جاتے ہیں، اور Telegram واضح حدیں شائع نہیں کرتا — بہت سے محققین نے اس طرح اپنے مرکزی اکاؤنٹس کھو دیے ہیں۔ Telegram کے اپنے [Obtaining API ID](https://core.telegram.org/api/obtaining_api_id) صفحے کے مطابق غیر سرکاری API کلائنٹس استعمال کرنے والے اکاؤنٹس خودکار طور پر نگرانی میں رکھے جاتے ہیں اور غلط طور پر پابندی لگائے گئے صارفین کو recover@telegram.org پر بھیجا جاتا ہے۔ لہٰذا TgWitness دیگر اوپن سورس کلائنٹس کے استعمال شدہ عوامی API جوڑے فراہم کرتا ہے، تاکہ آپ کو نیا API بنانے کی ضرورت نہ پڑے۔ اگر آپ کے پاس اپنا API ID ہے تو اسے **API ID + Hash** کے تحت درج کریں اور یہی استعمال ہوگا۔
-
-جب ورک اسپیس میں کوئی جوڑا درج، درآمد یا پہلے سے محفوظ نہ ہو، تو TgWitness پول میں موجود 50 جوڑوں میں سے ایک منتخب کرتا ہے اور اگر Telegram اسے مسترد کر دے تو اگلے جوڑے کی طرف بڑھ جاتا ہے۔ جو جوڑا سائن ان کرتا ہے وہ اسی اکاؤنٹ کے ساتھ رہتا ہے۔ ایک جوڑا ایپلیکیشن کی شناخت کرتا ہے؛ آپ پھر بھی اپنے ٹیلیگرام اکاؤنٹ کو علیحدہ طور پر مجاز کرتے ہیں۔ پینل ایکسس ٹوکن TgWitness کو کھولتا ہے اور یہ ٹیلیگرام لاگ ان سے الگ ہے۔
-
-| آپ کے پاس کیا ہے | اسے کیسے استعمال کریں |
-| --- | --- |
-| فون نمبر جس کے ذریعے اکاؤنٹ تک رسائی ممکن ہے | **فون** ٹیب: ٹیلیگرام سے کوڈ، پھر اگر 2FA فعال ہو تو پاس ورڈ |
-| ایک پہلے سے سائن ان شدہ ٹیلیگرام ایپ | **QR کوڈ** ٹیب: ترتیبات → ڈیوائسز → ڈیسک ٹاپ ڈیوائس سے منسلک کریں |
-| Telethon (سکیمہ 7/8) یا Pyrogram (سکیمہ 2/3) `.session` | **فائلز** ٹیب |
-| `name.session` + `name.json` جوڑی | **فائلز** ٹیب میں دونوں کو منتخب کریں؛ JSON API ID/ہیش فراہم کرتا ہے۔ |
-| ٹیلیگرام ڈیسک ٹاپ `tdata` فولڈر | صرف ZIP `key_datas` اور `D877F783D5D3EF8Cs`، پھر **Files**؛ اگر سیٹ کیا گیا ہو تو مقامی پاس کوڈ |
-| Telethon StringSession، `.txt` یا `.tgwitness-session` | **فائلز** ٹیب یا *پاس کوڈ یا سیشن ٹیکسٹ* |
-| اکاؤنٹ JSON سیشن یا آتھ کی کے ساتھ | **فائلز** ٹیب |
-| مکمل آتھ کی (512 ہیکس حروف) + ڈی سی آئی ڈی | **آتھ کی** ٹیب؛ اختیاری یوزر آئی ڈی کو ٹیلیگرام کے خلاف چیک کیا جاتا ہے |
-
-سپورٹ نہیں کیا جاتا: TDLib اسٹوریج، Pyrogram سیشن سٹرنگز، بوٹ ٹوکنز، ملٹی اکاؤنٹ TData اور اکاؤنٹس کی بڑی فہرستیں۔ فائلیں آپ کے سرور کی میموری میں تبدیل کی جاتی ہیں اور محفوظ کرنے سے پہلے ٹیلیگرام کے ساتھ چیک کی جاتی ہیں۔ [اکاؤنٹس گائیڈ](../ACCOUNTS.md) ہر فارمیٹ کے مرحلہ وار وضاحت کرتی ہے: API کی کریڈینشلز کیسے حاصل کریں، فائل کو کیسے پہچانیں، JSON فیلڈز، حدود اور ایرر پیغامات۔
-
-سائن ان کے بعد **Sources** کھولیں (آپ کی چیٹس خود بخود لوڈ ہو جاتی ہیں)، مطلوبہ گروپس شامل کریں، منتخب کریں کہ کیا ریکارڈ کرنا ہے (مثلاً *پیغامات، ترامیم اور حذف شدہ آئٹمز*) اور مشاہدہ شروع کریں۔ عمل کو جاری رکھیں: **مشاہدہ کو معطل کرنے سے** جمع‌آوری رک جاتی ہے، **لاک** صرف براؤزر کی رسائی بند کرتا ہے۔
-
-## اسکرین شاٹس
-
-| موازنہ میں ترمیم | ذرائع اور گرفتاری کی پالیسی |
-| --- | --- |
-| ![Detail drawer comparing a previous and a newly observed message version](../assets/detail.png) | ![Selected chats and per-account monitoring settings](../assets/sources.png) |
-| **دستخط شدہ برآمدات** | **سائن ان** |
-| ![Export page with the signed archive and other formats](../assets/exports.png) | ![Account page with phone sign-in](../assets/connection.png) |
-| **جرنل** | **گہری تھیم** |
-| ![Journal with observed messages, edits, deletion notices and coverage events](../assets/workspace.png) | ![Journal in the dark theme](../assets/workspace-dark.png) |
-
-تمام اسکرین شاٹس میں مصنوعی مظاہرہ ڈیٹا استعمال کیا گیا ہے۔ [qr-login.png](../assets/qr-login.png) میں موجود QR کوڈ ٹیسٹ ٹرانسپورٹ کے ایک فرضی ٹوکن کو انکوڈ کرتا ہے۔
-
-
-![Section divider](../assets/presentation/divider.svg)
-
-## یہ کیسے کام کرتا ہے
-
-```mermaid
-flowchart LR
-    A[Authorize an account] --> B[Select sources and event types]
-    B --> C[Start observation]
-    C --> D[Append signed records]
-    D --> E[Review versions and gaps]
-    E --> F[Export and verify]
-```
-
-ہر ورک اسپیس ایک ٹیلیگرام اکاؤنٹ سے منسلک ہوتا ہے۔ کلیکٹر اس اکاؤنٹ کے کلائنٹ سے اپ ڈیٹس قبول کرتا ہے، محفوظ شدہ کیپچر پالیسی لاگو کرتا ہے اور مشاہدات کو صرف اضافے والی جرنل میں شامل کرتا ہے۔
-
-| مشاہدہ | کیا محفوظ رکھا گیا ہے | حد |
-| --- | --- | --- |
-| نیا پیغام | متن، بھیجنے والے کی شناخت، جواب کا حوالہ، میٹا ڈیٹا، مشاہدے کا وقت | صرف منتخب ذرائع کے لیے اپ ڈیٹس فراہم کیے جاتے ہیں۔ |
-| ترمیم | محتویات کا ایک علیحدہ ورژن | آف لائن رہنے کے دوران رہ جانے والی درمیانی ورژنز بازیافت نہیں کی جا سکتیں |
-| مٹانا | میسج آئی ڈی اور پہلے ریکارڈ کی گئی تمام معلومات | ٹیلیگرام عموماً یہ نہیں بتاتا کہ کس نے اور کب حذف کیا |
-| ردعمل | جب فراہم کیا جائے تو گنتی اور حالیہ شناختیں | ایک اسنیپ شاٹ، مکمل تبدیلیوں کا ریکارڈ نہیں |
-| رکنیت | سروس پیغامات اور شرکاء کی تازہ کاریاں | ہر جوائن/لیو کے پہنچنے کی ضمانت نہیں ہوتی۔ |
-| منسلک | اختیاری مواد پر مبنی فائل SHA-256 کے ساتھ | فائلیں ڈاؤن لوڈ سے پہلے غائب ہو سکتی ہیں؛ نتائج ریکارڈ کیے جاتے ہیں |
-| کوریج | شروع کرنا، روکنا، منقطع کرنا، دل کی دھڑکنیں، پالیسی میں تبدیلیاں | زندہ رہنا مکمل گرفتاری کا ثبوت نہیں ہے |
-| تاریخ کا خلاصہ | تازہ ترین دکھائی دینے والے پیغامات، زیادہ سے زیادہ 500 جب تک **پیرامیٹرز** میں حد بڑھائی نہ جائے، واضح طور پر لیبل کیے گئے | چھوٹی گئی ترامیم یا حذف شدہ مواد کو دوبارہ بحال نہیں کیا جا سکتا۔ |
-
-پالیسیوں، منسلکات کی قطاروں اور دوبارہ آغاز کے لیے [کلیکشن کیسے کام کرتی ہے](../COLLECTION.md) پڑھیں۔
-
-## سیٹنگز اور پیرامیٹرز
-
-پینل میں ہر چیز، ہر ورک اسپیس کے لیے، کوڈ یا کنفیگریشن فائلز میں ترمیم کیے بغیر تبدیل کی جاتی ہے۔ دائرہ کار، پالیسی یا پیرامیٹر کی ہر تبدیلی کو دستخط شدہ جرنل میں پہلے اور بعد کے اقدار کے ساتھ ریکارڈ کیا جاتا ہے، اور ہر مشاہدے کے آغاز میں نافذ العمل اقدار کا ذکر کیا جاتا ہے۔
-
-| جہاں | آپ نے جو سیٹ کیا |
-| --- | --- |
-| **ماخذ** | دائرہ (منتخب چیٹس، ایک ٹیلیگرام فولڈر، پورا اکاؤنٹ)، ماخذ کی اقسام، استثنا، اپنی کاروائیاں، کون سی تبدیلیاں محفوظ کی جائیں، منسلکات کی اقسام اور ہر قسم کا سائز (1–2,000 MiB)، ترجیحی اور دیگر چیٹس کے لیے دوبارہ جانچ کا وقفہ (کسی بھی تعداد میں منٹ، 0 = بند)، ہسٹری کے اسنیپ شاٹس، نوٹیفیکیشنز |
-| **ایکسپورٹس** | پاس ورڈ سے محفوظ شدہ ڈاؤن لوڈز، ثبوت موڈ (وقفہ، ٹائم اسٹیمپ اتھارٹیز اور کیلنڈرز)، آف سائٹ S3 کاپی (وقفہ، آبجیکٹ لاک برقرار رکھنے کی مدت اور موڈ) |
-| **گواہ** | صرف پڑھنے کے قابل وِٹنس ٹوکنز؛ وِٹنس کے اپنے اختیارات تیار کردہ کمانڈز کے ساتھ دکھائے جاتے ہیں۔ |
-| **پیرامیٹرز** | چٹ لسٹ کا سائز اور ریفریش، ہارٹ بیٹ اور چیک پوائنٹ وقفے، اسٹارٹ اپ بفر، ریچیکس کی درخواستوں کی تقسیم کا طریقہ (پہلی تاخیر، فی پاس چیٹس، وقفہ، بازیافت شدہ اور دوبارہ درخواست کیے گئے پیغامات)، ڈسک ریزرو، ڈاؤن لوڈ ٹائم آؤٹ، رفتار اور دوبارہ کوششیں، لوگ پروفائلز میں کیا تلاش کرتے ہیں، بشمول آپ کے اپنے ریگولر ایکسپریشنز، نوٹیفیکیشن کا سائز اور رفتار، اسنیپ شاٹ، ZIP اور براؤزر ڈاؤن لوڈ کی حدیں، پینل ایکشن ٹائم آؤٹ، ٹیلیگرام کلائنٹ ٹائم آؤٹس اور دوبارہ کوششیں |
-
-**پیرامیٹرز** پر موجود اقدار اپنی حد اور ڈیفالٹ دکھاتی ہیں؛ تبدیل شدہ اقدار نشان زد ہیں اور انہیں ایک ایک کر کے یا ایک ساتھ بحال کیا جا سکتا ہے۔ یہ اگلی بار استعمال ہونے پر لاگو ہوتی ہیں؛ ٹیلیگرام کلائنٹ کے ٹائم آؤٹس اور دوبارہ کوششیں اگلے کنکشن سے۔ 4 GiB سے زیادہ کے ZIP آرکائیو کے لیے جب آرکائیو کی تصدیق ہوتی ہے تو `verify.py --max-gib N` درکار ہوتا ہے ([عملیات](../OPERATIONS.md#panel-layout))۔
-
-
-![Section divider](../assets/presentation/divider.svg)
-
-## شواہد اور تصدیق
-
-| ایکسپورٹ | فہرست | سالمیت |
-| --- | --- | --- |
-| **دستخط شدہ ZIP** | JSONL، CSV، HTML رپورٹ، کوریج، میڈیا، مینفیسٹ، ویریفائر | دستخط شدہ واقعات کے ساتھ ہر فائل کا دستخط شدہ مینیفیسٹ، جس میں پروڈیوسر کا نام درج ہے۔ اسے حوالگی کے لیے استعمال کریں۔ |
-| JSONL | اصل ریکارڈز ہیشز اور دستخطوں کے ساتھ | ہر واقعے کے لیے Ed25519 دستخط اور ہیش چین |
-| CSV / HTML | اسپریڈشیٹ محفوظ جدول / آف لائن پڑھنے کے قابل رپورٹ | صرف دستخط شدہ ZIP کے اندر شامل |
-| چیک پوائنٹ JSON | جرنل کی لمبائی اور ہیڈ ہیش | الگ سے دستخط شدہ؛ اسے کلیکٹر کے باہر رکھیں |
-| رن رسید JSON | کوڈ ہیشز، انحصار ورژنز، دائرہ کار، ترتیبات | الگ سے دستخط شدہ عمل کا بیان |
-| افراد کے پروفائلز JSON | ایک چیٹ کے پروفائلز ریکارڈ حوالہ جات کے ساتھ | دستخط شدہ بیان؛ ریکارڈ ہیشز کو ZIP کے خلاف چیک کیا گیا |
-| شہادت جرنل کا زپ | شہادت کے لیے حاصل کردہ سرخیاں، جوابات جو رہ گئے، چینل پوسٹس | گواہ کی اپنی کلید سے دستخط شدہ |
-
-فلٹرز صرف براؤزنگ کو متاثر کرتے ہیں؛ ایکسپورٹس ہمیشہ ایک مقررہ ترتیب نمبر تک مکمل جرنل پر مشتمل ہوتی ہیں۔ ایک آرکائیو کی تصدیق ایک قابلِ اعتماد ویریفائر کی کاپی اور ایک آزادانہ طور پر محفوظ کردہ کلید فنگر پرنٹ اور چیک پوائنٹ کے ساتھ کریں:
+اکاؤنٹ یا انسٹالیشن کے بغیر جانچیں۔ شائع شدہ نمونہ اپنا تصدیقی ٹول ساتھ رکھتا ہے:
 
 ```sh
-python -m pip install cryptography
-python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 --checkpoint tgwitness-checkpoint.json
-# with an independent witness and its channel (Telegram Desktop export)
-python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 \
-    --witness witness.zip --witness-fingerprint WITNESS_SHA256 --channel result.json
+curl -LO https://phishdestroy.github.io/TgWitness/demo/downloads/tgwitness-demo.zip
+unzip -o tgwitness-demo.zip verify.py        # تصدیقی ٹول آرکائیو کے اندر ہی موجود ہے
+python verify.py tgwitness-demo.zip          # Python 3.11+، صرف `cryptography` درکار ہے
 ```
 
-ویریفائر دستخط شدہ پروڈیوسر، مسلسل مشاہداتی ادوار، وقفے اور وہ میسج آئی ڈیز جو کبھی مشاہدہ نہیں ہوئے، پرنٹ کرتا ہے، اور اگر جرنل کسی بھی ہیڈ سے مختلف ہو جو گواہ نے دیکھا ہو تو ناکام ہو جاتا ہے۔
+یہ دستخط شدہ ریکارڈز، ہیڈ ہیش اور دستخط کنندہ کا فنگرپرنٹ دکھاتا ہے اور `0` کے ساتھ ختم ہوتا ہے۔
+نمونہ فرضی ہے؛ یہی تصدیقی ٹول کسی بھی حقیقی ایکسپورٹ پر چلتا ہے۔
 
-معتبر کلید سے جرنل کے دستخط، ہیش چین اور منسلک فائلوں کی تصدیق کریں، اور چیک پوائنٹس الگ محفوظ رکھیں۔ منتخب موڈ کے لیے جمع کرنے کا دائرہ اور زمانی وقفے، بیرونی وقت کی رسیدیں اور جمع کرنے کے ماحول کی دستیاب تصدیقی جانچ کے نتائج ایک ساتھ دیکھیں۔
-
-[ٹائم اسٹیمپ کا طریقہ کار](../TIMESTAMP.md) · [شواہد کا ماڈل](../EVIDENCE.md) · [تحقیقات کی حوالگی](../EVIDENCE.md#investigation-handoff)
-
-## نفاذ
-
-> [!NOTE]
-> ٹیسٹ کے نتائج اور حدود: [تصدیقی ریکارڈ](../VERIFICATION.md)۔
-
-**مقامی یا واحد سرور ڈاکر کے ساتھ:**
+ایکسپورٹ میں پیغامات، فائلیں اور تصدیقی ٹول شامل ہوتے ہیں۔ وصول کنندہ کو اپنی
+کلید کا فنگرپرنٹ کسی دوسرے ذریعے سے بھیجیں، پھر وہ خود اسے جانچ سکتا ہے:
 
 ```sh
-docker compose up -d --build --wait
-docker compose exec tgwitness cat /data/panel-token.txt
+python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --tsa-ca TSA-ROOT.pem --require evidence
 ```
 
-کنٹینر ایک غیر روٹ صارف کے طور پر چلتا ہے، ریڈ-اونلی فائل سسٹم کے ساتھ، صرف `127.0.0.1:8787` پر شائع کرتا ہے اور تمام ڈیٹا کو ایک نامزد والیوم میں محفوظ رکھتا ہے۔
+تصدیقی ٹول دستخط، جرنل چین، فائلوں کی فہرست اور اٹیچمنٹس جانچتا ہے۔
+ثبوت کے درجے کے لیے اسے آپ کی کلید کا فنگرپرنٹ اور آخری ریکارڈ کا احاطہ کرنے والا
+تیسرے فریق کا ٹائم اسٹیمپ درکار ہے، جیسے RFC 3161 ٹائم اسٹیمپ جسے جاری کرنے والی اتھارٹی کے روٹ سرٹیفکیٹ سے جانچا گیا ہو۔
 
-**خودکار HTTPS (Caddy) کے ساتھ عوامی سرور:** `deploy/env.example` کو `.env` میں کاپی کریں، `TGWITNESS_DOMAIN` سیٹ کریں، سرور کی طرف DNS پوائنٹ کریں، TCP پورٹ 80/443 کھولیں اور چلائیں
+**پیغامات کہاں سے آتے ہیں۔** TgWitness انہیں Telegram سے
+اکاؤنٹ کے خفیہ کردہ MTProto سیشن کے ذریعے وصول کرتا ہے، جیسے آفیشل ایپس کرتی ہیں، اور ہر پیغام کو پہنچتے ہی
+دستخط کر کے جرنل میں درج کرتا ہے۔ [کیپچر بذریعہ GitHub Actions](../SEALED-ACTIONS.md) اور
+[Phala Intel TDX](../HIGH-ASSURANCE.md) اس جمع کنندہ کی اٹیسٹیشن بھی کرتے ہیں جس نے انہیں وصول کیا۔
 
-```sh
-docker compose -f compose.yaml -f deploy/compose/compose.https.yaml up -d --build --wait
-```
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-chain-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-chain-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/casework-chain-mobile.svg">
+  <img src="../assets/presentation/casework-chain.svg" width="1200" alt="نئے پیغامات، محفوظ ترامیم اور حذف کے مشاہدات ایک جڑا ہوا دستخط شدہ جرنل بناتے ہیں۔ اسے آزادانہ طور پر قابلِ اعتماد کلید کے مقابل جانچیں۔">
+</picture>
 
-**Windows پر کچھ بھی انسٹال کیے بغیر:** ہر ریلیز کے ساتھ منسلک پورٹیبل ZIP میں سرکاری ایمبیڈڈ Python رن ٹائم اور تمام ڈیپنڈنسیز شامل ہیں۔ ڈیٹا اپنے ``data`` فولڈر میں رہتا ہے؛ اپ ڈیٹ کرنے کے لیے نئے ورژن کو نکالیں اور اس فولڈر کو منتقل کر دیں۔
+[آرکائیو کی تصدیق](../wiki/Exports-and-Verification.md) · [ثبوت کا فارمیٹ](../EVIDENCE.md) · [آزاد گواہ](../WITNESS.md) · [بیرونی ٹائم اسٹیمپس](../TIMESTAMP.md) · [جانچ اور آزمودہ پیمانہ](../VERIFICATION.md)
 
-**بغیر ڈاکر کے:** systemd، Windows logon task اور launchd کے ٹیمپلیٹس [deploy/](../../deploy/README.md) میں موجود ہیں۔ اپ ڈیٹس، بیک اپس، متبادل پورٹس اور GHCR امیجز (جب ریلیز ورک فلو انہیں شائع کرے) [ڈیپلائمنٹ](DEPLOYMENT.md) میں شامل ہیں۔
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
-### کمانڈ لائن
+## گفتگو سے کیس تک
 
-```text
-python start.py [--demo] [--setup-only] [--check [--json]] [--host HOST] [--port PORT] [--data-dir DIR]
-```
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-features-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-features-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-features-mobile.svg">
+  <img src="../assets/presentation/readme-features.svg" width="1200" alt="تین متحرک ورک فلو: ایک چیٹ کو HTML اور JSON میں ایکسپورٹ کرنا، ریکارڈ شدہ چیٹس میں ایک مشترکہ لنک تلاش کرنا، اور حذف کی اطلاع کے بعد کیپچر شدہ ورژن برقرار رکھنا۔">
+</picture>
 
-| ٹاسک | کمانڈ (پروجیکٹ کے ماحول سے) |
+<table>
+<tr>
+<td width="33%" align="center"><a href="../wiki/Chat-Export.md"><b>چیٹ ایکسپورٹ&nbsp;↗</b></a><br><sub>ایک چیٹ، دستخط شدہ HTML اور JSON میں</sub></td>
+<td width="33%" align="center"><a href="../INVESTIGATION.md"><b>تفتیش&nbsp;↗</b></a><br><sub>ریکارڈ شدہ چیٹس میں کسی سراغ کا پیچھا کریں</sub></td>
+<td width="33%" align="center"><a href="../COLLECTION.md"><b>محفوظ ورژن&nbsp;↗</b></a><br><sub>ترامیم اور حذف کی اطلاعات، محفوظ</sub></td>
+</tr>
+</table>
+
+استعمال کے دو طریقے: ایک بار [اپنا اکاؤنٹ ایکسپورٹ کریں](../ACCOUNT-EXPORT.md)، یا
+[کسی تفتیش پر نظر رکھیں](../INVESTIGATION.md) اور تبدیلیاں محفوظ کرتے رہیں۔
+چند چیٹس، ایک Telegram فولڈر یا پورا اکاؤنٹ منتخب کریں۔ ہر اکاؤنٹ کو
+اپنی ورک اسپیس، سیشن اور دستخطی کلید ملتی ہے۔
+
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
+
+## مزید دیکھیں
+
+<details>
+<summary><strong>ناپے گئے ایکسپورٹس · 6 نومبر 2026</strong> · 56,329 پیغامات، دونوں آرکائیوز تصدیق شدہ</summary>
+
+**دو تازہ رنز میں 56,329 پیغامات ایکسپورٹ ہوئے۔** دونوں دستخط شدہ آرکائیوز پن کی گئی جمع کنندہ کلیدوں کے ساتھ تصدیق میں کامیاب رہے۔
+
+[![جمع کرنے اور مکمل ایکسپورٹ کی ناپی گئی رفتار](../../website/validation/performance.svg)](https://phishdestroy.github.io/TgWitness/ur/docs/validation/)
+
+| رن | پیغامات | جمع کرنے کا وقت | جمع کرنے کی رفتار | مکمل ایکسپورٹ | شروع سے آخر تک رفتار |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| سرور A | 27,030 | 189.043 سیکنڈ | **142.983 پیغامات/سیکنڈ** | 211.647 سیکنڈ | 127.713 پیغامات/سیکنڈ |
+| سرور B | 29,299 | 182.513 سیکنڈ | **160.531 پیغامات/سیکنڈ** | 206.650 سیکنڈ | 141.781 پیغامات/سیکنڈ |
+
+متن اور میٹا ڈیٹا، WARP کے ذریعے، فی سرور دو اکاؤنٹس، بغیر اٹیچمنٹس یا دوبارہ استعمال شدہ ریکارڈز کے۔
+ریویژن [`92e539af`](https://github.com/phishdestroy/TgWitness/commit/92e539af40d8368d198ff5e040f1d876f2c1310e) پر ناپا گیا۔
+ہر شائع شدہ رن اپنی سورس ریویژن، ورک لوڈ، اوقات اور تصدیق کا نتیجہ درج کرتا ہے:
+[ورک لوڈ، اوقات اور تصدیق](../EXPORT-BENCHMARK-2026-11-06.md)۔ `main` میں تبدیلیوں پر
+عوامی [CI ورک فلوز](../../.github/workflows/README.md) چلتے ہیں، جن میں Linux اور Windows
+انسٹالر ٹیسٹ اور اسٹینڈ الون تصدیقی ٹول کی بلڈ شامل ہیں۔
+
+[**ڈیمو دیکھیں →**](https://phishdestroy.github.io/TgWitness/demo/?lang=ur) ·
+[**پیمائشیں، تاریخیں اور طریقہ →**](https://phishdestroy.github.io/TgWitness/ur/docs/validation/) ·
+[ایک فرضی نمونہ ایکسپورٹ ڈاؤن لوڈ کریں](https://phishdestroy.github.io/TgWitness/demo/downloads/tgwitness-demo.zip) ·
+[انگریزی میں دستخط شدہ آڈٹ](../../website/validation/audit/REPORT.md)
+
+</details>
+
+<a name="start-simple"></a>
+
+<details>
+<summary><strong>سادگی سے شروع کریں۔ ہر راستہ دیکھیں۔</strong> · پہلا آغاز اور نظام کا نقشہ</summary>
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-start-map-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-start-map-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-start-map-mobile.svg">
+  <img src="../assets/presentation/readme-start-map.svg" width="1200" alt="پہلا آغاز “صرف ڈاؤن لوڈ”، “چیٹس پر نظر رکھیں” یا “کیس کے لیے ثبوت” پیش کرتا ہے اور صرف متعلقہ حصے دکھاتا ہے۔ نظام کا نقشہ پینل، جمع کنندہ، Telegram، جرنل، گواہ اور بیرونی سروسز کو نیٹ ورک مشاہدات کے ساتھ جوڑتا ہے۔ فرضی اقدار۔">
+</picture>
+
+پہلا آغاز ایک ہی سوال پوچھتا ہے: **صرف ڈاؤن لوڈ**، **چیٹس پر نظر رکھیں** یا
+**کیس کے لیے ثبوت**۔ جواب سے ہدف اور انٹرفیس کی سطح طے ہوتی ہے، اس لیے
+پینل صرف وہی حصے دکھاتا ہے جن کی اس کام کو ضرورت ہے۔ اس کے بعد کنکشن، Telegram میں سائن اِن اور
+چیٹ کا انتخاب پانچ مراحل میں آتے ہیں۔ کنکشن کی جانچ خود بخود چلتی ہے، اور
+راستے کے اختیارات صرف اس کے ناکام ہونے پر کھلتے ہیں۔ ماہرانہ ٹولز بس ایک سوئچ کی دوری پر ہیں۔
+
+**نظام کا نقشہ** دکھاتا ہے کہ انسٹالیشن Telegram اور بیرونی
+سروسز تک کیسے پہنچتی ہے: پینل تک رسائی، ہر اکاؤنٹ کا راستہ اور Telegram ہدف، جرنل اور
+گواہ کا راستہ، اور تازہ ترین نیٹ ورک مشاہدات۔ جو مشاہدہ موجود نہ ہو اسے
+غائب کے طور پر نشان زد کیا جاتا ہے۔
+
+[پہلا سیٹ اپ](../SETTINGS.md) · [نظام کا نقشہ](../SYSTEM-MAP.md)
+
+</details>
+
+<details>
+<summary><strong>باقی تفتیش کے لیے بنایا گیا</strong> · سبجیکٹ کارڈز، واچ لسٹس، والیٹس، آن لائن نگرانی، عدالتی دستاویزات</summary>
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-capabilities-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-capabilities-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-capabilities-mobile.svg">
+  <img src="../assets/presentation/readme-capabilities.svg" width="1200" alt="نام اور یوزر نیمز Telegram ID کے ذریعے ٹریک کریں۔ معاون بوٹ تعاملات کو دستخط شدہ رسیدوں کے ساتھ ریکارڈ کریں۔ آرکائیو شدہ پیغامات تلاش کریں اور صرف پڑھنے والے MCP کلائنٹس جوڑیں۔ چھپائے گئے SSH اور جائزے کے لیے فراہم کنندہ کے ریکارڈز کے ساتھ جمع کنندہ تعینات کریں۔ جرنل کے حوالوں کے ساتھ گفتگو کو قدم بہ قدم دستاویزی شکل دیں۔ عدالتی ٹیمپلیٹس کے ساتھ BagIt کیس پیکیج حوالے کریں۔ مثالی ورک فلو۔">
+</picture>
+
+<table>
+<tr>
+<td width="50%" align="center"><a href="../INVESTIGATION.md#4-connect-observations-across-chats"><b>افراد اور ڈوزیئرز&nbsp;↗</b></a><br><sub>نام اور یوزر نیمز، Telegram ID کے ذریعے ٹریک</sub></td>
+<td width="50%" align="center"><a href="../COLLECTION.md#act-from-the-panel"><b>بوٹ کی تفتیش&nbsp;↗</b></a><br><sub>دستخط شدہ رسیدوں کے ساتھ بوٹ تعاملات</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><a href="https://phishdestroy.github.io/TgWitness/ur/docs/archive/"><b>آرکائیو سرچ، AI اور MCP&nbsp;↗</b></a><br><sub>آرکائیو میں تلاش کریں، صرف پڑھنے والے کلائنٹس جوڑیں</sub></td>
+<td width="50%" align="center"><a href="../HIGH-ASSURANCE.md"><b>سیل شدہ کلاؤڈ تعیناتی&nbsp;↗</b></a><br><sub>جمع کنندہ، Intel TDX کے اندر</sub></td>
+</tr>
+</table>
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-documentation-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-documentation-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-documentation-mobile.svg">
+  <img src="../assets/presentation/readme-documentation.svg" width="1200" alt="تین متحرک مراحل: ایک سبجیکٹ کارڈ جس کا بعد والا اسنیپ شاٹ نام کی تبدیلی ریکارڈ کرتا ہے، گفتگو کا ایک منصوبہ جس کے اہداف جرنل ریکارڈز سے بند ہوتے ہیں، اور ادائیگی کا QR کوڈ جو درست چیک سم والے والیٹ میں ڈی کوڈ ہو کر واچ لسٹ میں میچ پیدا کرتا ہے۔ فرضی اقدار۔">
+</picture>
+
+**گفتگو کو دستاویزی شکل دیں۔** **دستاویزات** دراز میں کسی چیٹ کا ریکارڈ شروع کریں
+اور ہر قدم خود لکھا جاتا ہے: پینل کی کارروائیاں، جوابات اور ان سے پہلے کا وقفہ،
+ترامیم، حذف کی اطلاعات، نوٹس اور AI مسودے۔ ہر قدم اپنے جرنل ریکارڈ
+اور SHA-256 کا حوالہ دیتا ہے۔ دستاویز کو حتمی کرنے پر اس پر دستخط ہوتے ہیں اور بیان کا ہیش
+جرنل میں لکھا جاتا ہے۔
+
+| | |
 | --- | --- |
-| شروع کیے بغیر تیاری کی جانچ | `python start.py --check` |
-| ٹیلی تھون SQLite سیشن کو آف لائن میں تبدیل کریں | `python -m tgwitness.sessions account.session --out account.tgwitness-session` |
-| ڈسک پر بڑے ایکسپورٹ کو اسٹریم کریں | `python -m tgwitness.download --token-file data/live/panel-token.txt --out evidence.zip` |
-| ایک برآمد شدہ آرکائیو کی تصدیق کریں | `python tgwitness/verify.py tgwitness-evidence.zip --fingerprint SHA256` |
-| 4 GB سے زیادہ کے آرکائیو کی تصدیق کریں | `python tgwitness/verify.py big-evidence.zip --fingerprint SHA256 --max-gib 16` |
-| کنفیگ فائل سے ایک آزاد وِٹنس چلائیں | `python -m tgwitness.witness run --config witness.json` |
+| [سبجیکٹ کارڈز](../INVESTIGATION-MODE.md#subject-cards) | کسی بوٹ، فرد، چینل یا گروپ کے پروفائل اسنیپ شاٹس، Telegram کے BOT، VERIFIED، SCAM اور FAKE لیبلز کے ساتھ؛ بعد والا اسنیپ شاٹ بتاتا ہے کہ کیا بدلا |
+| [گفتگو کے منصوبے](../INVESTIGATION-MODE.md#conversation-plans) | ادائیگی کے راستے، انفراسٹرکچر یا افراد سے متعلق اہداف، تیار شدہ پیغامات، جواب کے اوقات، گھنٹہ وار سرگرمی اور دوسرے فریق کا اندازِ تحریر |
+| [ترجمہ](../INVESTIGATION-MODE.md#machine-translation) | اصل متن کے نیچے زبانوں، ماڈل اور جرنل ریکارڈ کے ساتھ دکھایا جاتا ہے |
+| [واچ لسٹس](../INVESTIGATION-MODE.md#watchlists) | الفاظ، پیٹرنز، والیٹس، یوزر نیمز (@)، آئی ڈیز، ڈومینز، فون نمبرز اور لنکس، جو متن، ترامیم، چھپے ہوئے لنک اہداف، بوٹ بٹنوں، QR کوڈز اور OCR میں ملائے جاتے ہیں |
+| [آن لائن نگرانی](../INVESTIGATION-MODE.md#online-watch) | ہر 1–60 منٹ پر جانچ، فی درخواست 100 اکاؤنٹس تک، گھنٹے اور ہفتے کے دن کے لحاظ سے پیٹرن کے ساتھ |
+| [کوڈز اور والیٹس](../INVESTIGATION-MODE.md#codes-in-images) | ادائیگی کے QR کوڈز؛ EIP-55 کے مطابق جانچے گئے EVM ایڈریسز، خام شکل میں TON، XRP Ledger چیک سمز، اور چین، رقم اور ٹوکن کے ساتھ ادائیگی کے لنکس |
+| [کلائنٹ کے نشانات](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-can-and-cannot-show) | گول ویڈیوز اور وائس میسجز میں انکوڈر کے نشانات؛ اپ لوڈ کے وقت کا بھیجنے کے وقت سے موازنہ پہلے سے ریکارڈ شدہ “لائیو” ثبوت کو بے نقاب کرتا ہے |
+| [کور اور اختیار](../INVESTIGATION-MODE.md#cover-and-authority) | فرضی شناختیں، اجازت نامے اور خفیہ سرگرمی کا ریکارڈ جو مجاز چیٹس یا مدت سے باہر کے پیغامات کی نشاندہی کرتا ہے |
+| [اکاؤنٹ کنٹرول](../INVESTIGATION-MODE.md#account-control) | پروفائل اور پرائیویسی میں ترمیم، پہلے اور بعد کے ریکارڈز کے ساتھ، ایکسپوژر کی جانچ، اور ہر کارروائی کے فوراً بعد آف لائن ہو جانا |
+| [عدالت کے لیے دستاویزات](../INVESTIGATION-MODE.md#documents-for-court) | کیس کا BagIt پیکیج، ساتھ میں Rule 902(13)/(14) سرٹیفکیشن ٹیمپلیٹ، شواہد کی فہرست، درخواست کا ضمیمہ اور اسکرین ریکارڈنگز کے لیے WebVTT/SRT کیپشنز |
 
-مددگار `python -m tgwitness…` کمانڈز کو `.venv` کے اندر چلانا ضروری ہے (Windows پر `.venv\Scripts\python.exe`، دیگر جگہوں پر `.venv/bin/python`).
+جس مواد پر 18+، تشدد یا ذاتی ڈیٹا کا نشان ہو، وہ عدالتی کاپی میں رہتا ہے اور
+AES-256-GCM سے سیل ہوتا ہے؛ کلیدیں الگ سے منتقل کی جاتی ہیں۔
 
-| متغیر | مقصد |
+[ایکسپورٹ سیٹنگز](../EXPORT_HASHES.md) میں عام API اور Takeout کے ذریعے حصول،
+اٹیچمنٹس سے پہلے پیغامات کی ہسٹری، فائل ڈاؤن لوڈ یا سرور ہیشز، اور
+Telegram Desktop سے مطابقت رکھنے والے JSON/HTML ویوز شامل ہیں۔ [تقسیم شدہ چیٹ ایکسپورٹ](../DISTRIBUTED-EXPORT.md#history-acquisition)
+عوامی ہسٹری کے لیے اختیاری Takeout راستہ، ہر 100 پیغامات پر دستخط شدہ چیک پوائنٹس،
+اور اسی اکاؤنٹ کے ساتھ کسی حد کے اندر بحالی فراہم کرتا ہے؛ اس کا
+[پرفارمنس ڈیزائن](../FAST-ACQUISITION.md) آزمودہ حصول کا طریقۂ کار
+اور منصوبہ بند لائیو پیمائشیں بیان کرتا ہے۔
+
+</details>
+
+<details>
+<summary><strong>باقی سب کچھ</strong> · ہسٹری، اکاؤنٹس، پراکسیز، AI، انٹیگریشنز</summary>
+
+| | |
 | --- | --- |
-| `TGWITNESS_HOST`, `TGWITNESS_PORT` | سننے کا پتہ اور پورٹ (ڈیفالٹ `127.0.0.1:8787`) |
-| `TGWITNESS_DATA` | ڈیٹا ڈائریکٹری (ڈیفالٹ `data/live`) |
-| `TGWITNESS_TOKEN` | پیدا شدہ ٹوکن کی بجائے مقررہ پینل ٹوکن (کم از کم 24 حروف) |
-| `TGWITNESS_VAULT_KEY_FILE` | نئی تنصیبات کے لیے بیرونی والٹ ماسٹر کلید |
-| `TGWITNESS_DOMAIN`, `TGWITNESS_IMAGE` | Docker HTTPS ہوسٹ نیم اور شائع شدہ امیج (دیکھیں `deploy/env.example`) |
-| `TGWITNESS_WITNESS_*` | آزاد شاہد: کلیکٹر، ٹوکنز، چینل، `_INTERVAL`، `_TIMEOUT`، `_POST` (تمام، تبدیلیاں، مسائل)، `_TITLE`، `_CONFIG` ([شاہد](../WITNESS.md#options)) |
+| [پرانے پیغامات لوڈ کریں](../HISTORY.md) | منتخب چیٹس کی پچھلی ہسٹری حاصل کریں، کسی بھی وقت روکیں اور دوبارہ شروع کریں |
+| [متعدد اکاؤنٹس](../ACCOUNTS.md#multiple-accounts) | الگ الگ ورک اسپیسز، ہر ایک کا اپنا Telegram سیشن، جرنل اور دستخطی کلید |
+| [بلک امپورٹ](../ACCOUNTS.md#bulk-import-and-account-groups) | سیشن فائلوں کا ڈھیر ایک ساتھ ڈالیں، اکاؤنٹس کو مشترکہ سیٹنگز والے گروپس میں ترتیب دیں |
+| [MTProxy پول](../wiki/Proxies.md#pool-dashboard-and-custom-sources) | پنگ، ممالک، فلٹرز، آپ کی اپنی فہرستیں |
+| [موجودہ سیشنز](../ACCOUNTS.md) | سیشنز بشکل TData، Telethon، Pyrogram، StringSession، آتھ کی یا `key:DC` لائن؛ امپورٹ کیے گئے ڈونر سے اختیاری آزاد QR اجازت |
+| [اکاؤنٹ کی سیکیورٹی](../ACCOUNTS.md#create-an-independent-authorization) | نئے سیشنز کے الرٹس، دوسرے سیشنز ختم کرنا، صرف ایک سیشن والا موڈ جو دو مرحلہ پاس ورڈ بھی سیٹ کرتا ہے، اور ایک [گواہ پروب](../ACCOUNTS.md#witness-probe) جو محسوس کرتا ہے کہ لائیو اپ ڈیٹس اس سیشن تک پہنچنا کب رک گئیں |
+| [دوبارہ شروع ہونے والا چیٹ ایکسپورٹ](../EXPORT_HASHES.md#restricted-github-capture-and-single-chat-export) | رکا ہوا ایکسپورٹ ایک دستخط شدہ جزوی کاپی رکھتا ہے: اسے جاری رکھیں، نئے سرے سے شروع کریں یا جو محفوظ ہوا وہ ڈاؤن لوڈ کریں |
+| [پراکسیز](../CONNECTION-SECURITY.md#ip-modes) | ہر ورک اسپیس کے لیے SOCKS5، HTTP CONNECT یا MTProxy۔ **پتہ چھپائیں** کبھی براہِ راست کنکشن پر واپس نہیں جاتا |
+| [سرچ اور AI](../ANALYSIS.md) | مقامی سرچ، اختیاری AI ایسے ماخذوں کے ساتھ جنہیں آپ جانچ سکیں |
+| [مکمل متن کی تلاش](../SEARCH.md) | الفاظ کی مختلف شکلیں، عین فقرے، ڈومینز، یوزر نیمز (@) اور بغیر وقفوں کے چینی، بہترین نتائج پہلے (**آزمائشی ورژن**) |
+| [MCP](../MCP.md) | صرف پڑھنے کی رسائی MCP کلائنٹس کے لیے، آپ کی منتخب کردہ چیٹس تک محدود |
+| [کمانڈ لائن](../CLI.md) | کمانڈز `search`، `context`، `messages`، `stats` اور JSON Lines `export`، `--json` کے ساتھ، اسکرپٹس اور ایجنٹس کے لیے، مقامی طور پر یا محدود دائرے والے ٹوکن کے ساتھ (**آزمائشی ورژن**) |
+| [ٹرانسکرپشن اور OCR](../MEDIA-ANALYSIS.md) | مقامی طور پر چلتا ہے، اصل فائلیں جوں کی توں رہتی ہیں |
+| [آزاد کیپچر](../OPTIONAL-CAPTURE.md) | **مزید اوزار → اضافی سہولیات** میں اختیاری براؤزر/AyuGram ریکارڈرز (پیش منظر، بطورِ طے شدہ بند) |
+| [Trusted Live](../TRUSTED-LIVE.md) | آفیشل Desktop/Web سیشن، محفوظ ویڈیو اور ایپ کے اپنے ایکسپورٹ کے ساتھ تسلسل کا تجزیہ (پیش منظر؛ لائیو اہلیت کی جانچ ابھی باقی ہے) |
+| [سیل شدہ آفیشل Web](../OFFICIAL-WITNESS.md) | تازہ آفیشل براؤزر GitHub Actions پر، محدود کنٹرولز، دستخط شدہ ویڈیو اور آزادانہ طور پر متوقع ماخذ/سیٹنگز |
+| [ویب ہُکس](../WEBHOOKS.md) | دوبارہ کوشش کے ساتھ دستخط شدہ آؤٹ گوئنگ ایونٹس، n8n کی مثال شامل |
+| [مشترکہ رسائی](../ACCESS.md) | کسی کو صرف منتخب چیٹس دیں، میعاد اور IP حدود کے ساتھ |
+| [غائب پیغام کے نمبر](../EVIDENCE.md#missing-message-numbers-gap_summary) | وہ نمبر جو Telegram نے دیے مگر کبھی مشاہدے میں نہیں آئے، ہر چینل اور پورے اکاؤنٹ کے لیے، کوریج، رپورٹس اور MCP میں (**آزمائشی ورژن**) |
+| [چیٹ کی حالت کے اسنیپ شاٹس](../COLLECTION.md) | عنوان، تفصیل، پن شدہ پیغامات، ایڈمنسٹریٹرز اور تحائف کے وقفے وقفے سے دستخط شدہ اسنیپ شاٹس، تبدیلیوں سمیت (**آزمائشی ورژن**) |
+| [نظام کا نقشہ](../SYSTEM-MAP.md) | پینل تک رسائی، اکاؤنٹ کے راستوں، Telegram اہداف اور بیرونی سروسز کا لائیو نقشہ، 2,000 تک نیٹ ورک مشاہدات میں سے تازہ ترین 200 کے ساتھ |
 
+</details>
 
-![Section divider](../assets/presentation/divider.svg)
+<details>
+<summary><strong>منتخب کریں کہ ریکارڈ کی پشت پر کیا ہو</strong> · مقامی، آڈٹ شدہ کلاؤڈ، GitHub Actions یا Intel TDX</summary>
 
-## ذمہ داری اور ڈیٹا کی حفاظت (GDPR)
+مقامی طور پر چلائیں، آڈٹ شدہ کلاؤڈ تعیناتی شامل کریں، یا **Intel TDX والی Phala Cloud
+کانفیڈینشل VM** کے اندر جمع کریں۔ ہر آپشن دستخط شدہ جرنل برقرار رکھتا ہے؛ اضافی
+جانچیں اس ماحول سے متعلق ہیں جہاں اسے جمع کیا گیا۔
 
-TgWitness ایک آلہ ہے۔ جو بھی اسے چلاتا ہے وہ فیصلہ کرتا ہے کہ کیا جمع کیا جائے، کیوں اور کتنی دیر کے لیے، اور اس کا ذمہ دار ہوتا ہے — EU/UK GDPR کے تحت عموماً اس ذاتی ڈیٹا کے *کنٹرولر* کے طور پر۔ ٹیلیگرام کے پیغامات میں ایسے افراد کا ذاتی ڈیٹا شامل ہوتا ہے جنہوں نے کبھی ریکارڈ کیے جانے پر رضامندی نہیں دی: نام، صارف نام، شناختی نمبر، تصاویر، فون نمبر، آراء۔ یہ سیکشن قانونی مشورہ نہیں ہے؛ آپ پر لاگو ہونے والا قانون اور ٹیلیگرام کی شرائط و ضوابط چیک کریں۔
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-assurance-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-assurance-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/casework-assurance-mobile.svg">
+  <img src="../assets/presentation/casework-assurance.svg" width="1200" alt="تعیناتی کے تین اختیارات: جرنل کی مقامی تصدیق؛ فراہم کنندہ اور رسائی کے ریکارڈز کے ساتھ آڈٹ شدہ VM؛ اور Phala Intel TDX، تصدیق شدہ کوٹ، ناپے گئے OS اور ایپلیکیشن، اور منسلک جمع کنندہ کلید کے ساتھ۔">
+</picture>
 
-- **قانونی بنیاد اور مقصد رکھیں۔** فراڈ کی روک تھام، نیٹ ورک اور معلوماتی سکیورٹی اور قانونی دعوؤں کا دفاع عام طور پر جائز مفادات کے طور پر استعمال ہوتے ہیں (GDPR آرٹیکل 6(1)(f)، ریسیٹلز 47 اور 49؛ آرٹیکل 9(2)(f) قانونی دعوؤں کے لیے). ہر کیس کے لیے مقصد لکھیں۔ عوامی حکام اپنے قانونی بنیادوں کے تحت کام کرتے ہیں۔
-- **صرف اتنا جمع کریں جتنا مقصد کے لیے ضروری ہو۔** منتخب کردہ چیٹس سے آغاز کریں۔ فولڈر اور پورے اکاؤنٹ کے موڈز نجی چیٹس اور تیسری پارٹی کے پیغامات ریکارڈ کرتے ہیں: انہیں صرف مخصوص اکاؤنٹس پر استعمال کریں؛ پینل تصدیق طلب کرتا ہے اور دستخط شدہ جرنل اسے ریکارڈ کرتا ہے۔ غیر ضروری ایونٹ اقسام، اٹیچمنٹ اقسام اور اپنی کارروائیاں بند کریں، اور چیٹس کو خارج کریں۔
-- **لوگوں کے پروفائلز پروفائلنگ ہیں۔** یہ ڈیفالٹ طور پر بند رہتے ہیں اور ہر چیٹ کے لیے علیحدہ طور پر فعال کیے جاتے ہیں۔ انہیں کسی مخصوص تفتیش کے لیے استعمال کریں، لوگوں کے بارے میں خودکار فیصلے ان کی بنیاد پر نہ کریں (آرٹیکل 22)، اور کام مکمل ہونے پر انہیں بند کر دیں یا چیٹ حذف کر دیں — اس سے وہ حذف ہو جاتے ہیں۔ بہت سے افراد کی منظم نگرانی کے لیے عموماً ڈیٹا پروٹیکشن کے اثرات کا جائزہ (آرٹیکل 35) ضروری ہوتا ہے۔
-- **اسے محفوظ رکھیں۔** سیشنز، کریڈینشلز اور کیز ایک انکرپٹڈ والٹ میں محفوظ ہیں؛ ڈیٹا ڈائریکٹری کو انکرپٹڈ ڈسک پر رکھیں، ایکسپورٹس کو پاس ورڈ (AES-256 ZIP) دیں، پینل کو HTTPS کے پیچھے رکھیں، اور گواہ کو صرف اس کا ریڈ-اونلی ٹوکن دیں۔ نوٹیفیکیشنز میں کوئی پیغاماتی متن شامل نہیں ہوتا جب تک آپ اقتباسات آن نہ کریں، جو نوٹیفیکیشن سروس کو متن بھیجتا ہے۔
-- **محفوظ رکھنے اور مٹانے کا عمل۔** یہ جرنل صرف ضمیمہ پذیر ہے تاکہ اس کی سالمیت ثابت کی جا سکے؛ ایک بھی ریکارڈ دستخطی زنجیر کو توڑے بغیر حذف نہیں کیا جا سکتا۔ ہر ورک اسپیس کے لیے محفوظ رکھنے کا منصوبہ بنائیں اور جب مقصد ختم ہو جائے تو پورے ورک اسپیس (اکاؤنٹس → حذف کریں) یا اس کے ڈیٹا ڈائریکٹری کو حذف کر دیں۔ S3 Object Lock کے تحت آف سائٹ نقول کو ان کی برقرار رکھنے کی تاریخ سے پہلے حذف نہیں کیا جا سکتا — مناسب مدت منتخب کریں۔ حذف کرنے کے حق میں استثنا ہیں، مثال کے طور پر قانونی دعوؤں کے قیام یا دفاع کے لیے (آرٹیکل 17(3)(e)).
-- **لوگوں کی درخواستیں ریکارڈ کی گئی ہیں۔** چیٹ ایکسپورٹس اور پروفائل فائلز اس بات کا امکان پیدا کرتی ہیں کہ کسی شخص کے بارے میں کیا معلومات محفوظ ہیں (آرٹیکل 15)۔
-- **مصنفین کو کچھ بھی بھیجا نہیں جاتا۔** TgWitness میں کوئی ٹیلی میٹری یا ہوسٹڈ سروس نہیں ہے؛ ڈیٹا آپ کی مشین سے صرف آپ کے متعین کردہ راستوں (Telegram، ٹائم اسٹیمپ سروسز، S3 کاپی، نوٹیفیکیشنز، witness) کے ذریعے نکلتا ہے۔
+تصدیقی ٹول TDX کوٹ کو Intel کے پن کیے گئے روٹ اور منسوخی ڈیٹا کے مقابل جانچتا ہے،
+اسے جمع کنندہ کے دستخط شدہ بیان اور ایک تازہ چیلنج سے جوڑتا ہے، اور
+ناپے گئے OS اور ایپلیکیشن کا آزادانہ طور پر متوقع اِن پٹس سے موازنہ کرتا ہے۔ رپورٹ
+ہر نتیجہ الگ درج کرتی ہے، تاکہ ناپا گیا ماحول، جمع کنندہ کی شناخت، کیپچر
+ریکارڈز اور کوریج ایک ساتھ جانچے جا سکیں۔
 
-## سیکیورٹی اور پروجیکٹ کی حیثیت
+**کیپچر، GitHub ماخذ کی سند کے ساتھ** (پیش منظر)۔ GitHub کے ہوسٹ کردہ رنر پر
+پن کیے گئے TgWitness اور تازہ Telegram سیشن کے ساتھ ایک چیٹ جمع کریں، پھر خفیہ کردہ
+آرکائیو اس کی GitHub اٹیسٹیشن سمیت ڈاؤن لوڈ کریں۔ تصدیقی ٹول منظور شدہ ورک فلو اور
+جمع کنندہ کا ورژن، آرکائیو ڈائجسٹ، جرنل اور اٹیچمنٹس جانچتا ہے۔ پینل میں
+**ایکسپورٹس** کے تحت بھی دستیاب ہے۔
+[کیپچر صفحہ کھولیں](https://phishdestroy.github.io/TgWitness/ur/docs/capture/) · [ہدایات](../SEALED-ACTIONS.md)
 
+لائیو مشاہدے، ہسٹری یا ایک بار کے ایکسپورٹ کے لیے
+[جمع کرنے کا طریقہ](../COLLECTION-MODES.md) منتخب کریں۔ نجی کلاؤڈ چیٹس تب دستیاب ہیں
+جب منسلک اکاؤنٹ کو ان تک رسائی ہو۔ شائع شدہ ایپلیکیشن میں
+[سیکرٹ چیٹ انٹیگریشن](../PSEUDO-SECRET.md) بھی شامل ہے: اختیاری پروٹوکول ڈیپنڈنسی انسٹال کریں
+اور وہاں بنائی یا قبول کی گئی چیٹس ریکارڈ کرنے کے لیے اسے ہر اکاؤنٹ کے لیے فعال کریں۔
+دستیاب حصول کے راستوں کے لیے [جمع کرنے کا دائرہ](../COLLECTION.md) دیکھیں۔
 
-- پینل بطورِ ڈیفالٹ لوکل ہوسٹ پر سنتا ہے۔ دور دراز رسائی کے لیے HTTPS Compose پروفائل یا SSH ٹنل استعمال کریں؛ کبھی بھی سادہ HTTP کو ظاہر نہ کریں۔
-- Telegram سیشنز، API کی کریڈینشلز، پروکسی کی کریڈینشلز اور سائننگ کی ایک Fernet-انکرپٹڈ والٹ میں محفوظ کی جاتی ہیں۔ ڈیفالٹ کے طور پر اس کی کلید اسی ڈیٹا ڈائریکٹری میں رکھی جاتی ہے؛ بیرونی ماسٹر کی کے لیے ``TGWITNESS_VAULT_KEY_FILE`` سیٹ کریں۔ مقامی پیغامات کا مواد اور میڈیا TgWitness کے ذریعے خفیہ **نہیں** کیے جاتے؛ ڈیٹا ڈائریکٹری کو ایک خفیہ شدہ ڈسک یا والیوم پر محفوظ رکھیں۔ دستخط شدہ ZIP ایکسپورٹس کو اختیاری طور پر پاس ورڈ کے ذریعے خفیہ کیا جا سکتا ہے۔
-- ڈیٹا فائلز، سیشنز، ٹوکنز، کیز اور ایکسپورٹس کو git اور Docker بلڈز سے خارج کیا گیا ہے۔
-- [SECURITY.md](../../.github/SECURITY.md) میں بیان کردہ طریقہ کار کے مطابق کمزوریوں کی نجی طور پر رپورٹ کریں۔
+[آڈٹ شدہ اور Phala / Intel TDX تعیناتیاں](../HIGH-ASSURANCE.md) ·
+[Phala پر لائیو اہلیت کی جانچ](../VERIFICATION.md#live-phala-cloud-deployment--4-november-2026) ·
+[اعتماد کی حدود](../SECURITY-MODEL.md)
 
-### کیا جانچا گیا ہے
+</details>
 
-TgWitness **0.6.1** ونڈوز 11 پر پائتھن 3.12 کے ساتھ چلتا ہے۔ 29 اکتوبر 2026 کی صورتحال:
+<a name="manifesto"></a>
 
-| علاقہ | اس کا کیسے تجربہ کیا گیا |
+<details>
+<summary><strong>کیپچر اور محفوظ ریکارڈ جانچیں</strong> · وصول کنندہ کیا تصدیق کرتا ہے اور Export Clinic</summary>
+
+<picture>
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-manifesto-mobile.svg">
+  <img src="../assets/presentation/readme-manifesto.svg" width="1200" alt="گفتگو کیپچر کریں۔ ریکارڈ کی تصدیق کریں۔ پیغامات، ترامیم اور فائلیں محفوظ کریں، دستخط اور چیک پوائنٹس جانچیں، اور کیپچر کے عمل کا جائزہ لیں۔">
+</picture>
+
+منسلک Telegram اکاؤنٹ تک پہنچنے والا مواد TgWitness ریکارڈ کرتا ہے، ساتھ میں
+چیٹ، پیغام اور بھیجنے والے کے شناخت کنندگان، کیپچر شدہ ورژن اور جمع کرنے کا میٹا ڈیٹا۔
+آرکائیو ان ریکارڈز، محفوظ اٹیچمنٹس اور تصدیقی ڈیٹا کو
+جائزے کے لیے یکجا کرتا ہے۔
+
+| جانچ | وصول کنندہ کیا تصدیق کرتا ہے |
 | --- | --- |
-| پیغامات، ترامیم، حذف، منسلکات، دوبارہ شروع کرنے کے بعد دوبارہ جانچ، FloodWait وقفے | **ایک حقیقی ٹیلیگرام اکاؤنٹ** کے ساتھ انجام دیا گیا، 27–29 اکتوبر 2026: 9,968 دستخط شدہ ریکارڈز، ہر دستخط اور ہیش چین کی تصدیق ([لائو ٹیسٹ](../VERIFICATION.md#live-telegram-test-whole-account--29-october-2026)) |
-| پورے اکاؤنٹ اور تاریخ کے سنپ شاٹس کا مشاہدہ | 29 اکتوبر 2026 کو **ایک حقیقی اکاؤنٹ** کے ساتھ مکمل: دو گروپس یا چینلز اور تین نجی چیٹس اور بوٹس کے پیغامات |
-| **چٹس** سے میسج بٹن دبانا | **ایک حقیقی اکاؤنٹ** کے ساتھ ایک بار مکمل کیا گیا |
-| Telethon/Pyrogram سیشن فائلز اور Telegram Desktop TData کے ساتھ سائن ان کریں | **ایک حقیقی اکاؤنٹ** کے ساتھ مکمل کیا گیا |
-| فون، QR کوڈ اور Auth Key سے سائن ان، نئے چیٹس کا اپنے سابقہ پیغامات کے ساتھ دائرہ کار میں شامل ہونا، پیغامات بھیجنا، دعوت نامے کے ذریعے شمولیت، ردعمل، رکنیت، لوگوں کے پروفائلز، ایک ساتھ متعدد اکاؤنٹس، ایکسپورٹس اور ویریفائر | مصنوعی ٹیلیگرام کلائنٹس کے ساتھ خودکار ٹیسٹ |
-| SOCKS5/HTTP پراکسیز، ویٹنس بوٹ، پروف مانیٹر، نوٹیفیکیشنز، S3 کاپی، RFC 3161 اور OpenTimestamps | مقامی ٹیسٹ سرورز کے خلاف خودکار ٹیسٹ |
-| پبلک MTProxy فہرستیں | ڈاؤن لوڈ اور فلٹر کیا گیا (29 اکتوبر کو 118 سرورز)؛ ابھی تک ان کے ذریعے کوئی کنکشن نہیں ہوا۔ |
-| موجودہ ٹیسٹ اور ان کی حدود | [باقی تصدیق](../VERIFICATION.md#remaining-qualification) |
+| دستخط شدہ جرنل اور مینی فیسٹ | ریکارڈ کے دستخط، ہیش چین اور فراہم کردہ فائلیں، متوقع دستخطی کلید کے مقابل۔ |
+| الگ سے محفوظ چیک پوائنٹ | جرنل، پہلے سے درج لمبائی اور ہیڈ ہیش کے مقابل۔ |
+| آزاد گواہ | جرنل، ایک الگ گواہ کے پاس محفوظ چیک پوائنٹس کے مقابل۔ |
+| کیپچر بذریعہ GitHub Actions | آرکائیو، اس کی اٹیسٹیشن، منظور شدہ ہوسٹڈ ورک فلو اور جمع کنندہ ورژن کے مقابل۔ |
 
-تفصیلات: [تصدیقی ریکارڈ](../VERIFICATION.md)، [ریلیز کی حیثیت](../internal/RELEASE.md) اور [تیاری](../internal/READINESS.md)۔
+ایک Telegram گفتگو کو جان بوجھ کر بدلی گئی Desktop ایکسپورٹ فائلوں کے ساتھ
+[Export Clinic](https://phishdestroy.github.io/TgWitness/docs/export-clinic/) میں دکھایا جاتا ہے۔
+ورژنز کا موازنہ کریں، تبدیلیوں کا معائنہ کریں، اور دستخط شدہ TgWitness آرکائیو کے لیے
+جمع کرنے اور تصدیق کے مراحل پر عمل کریں۔
 
+[تصدیق کے مراحل](../wiki/Exports-and-Verification.md) ·
+[GitHub کیپچر](../SEALED-ACTIONS.md) ·
+[تکنیکی اعتماد کا ماڈل](../SECURITY-MODEL.md)
 
-![Section divider](../assets/presentation/divider.svg)
+</details>
 
-## ترقی
+<a name="operations"></a>
 
-```sh
-python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\Activate.ps1
-python -m pip install -c deploy/constraints.txt -e ".[dev]"
-python -m ruff check .                                 # source checks
-python -m playwright install chromium
-python tools/build_portable.py                         # Windows portable ZIP (Windows + Python 3.12)
-python tools/build_source.py                          # source ZIP with SHA-256 manifest
-python tools/build_site.py                             # static project site in dist/site
-```
+<details>
+<summary><strong>تفتیش جاری رکھیں</strong> · اطلاعات، اسٹوریج اور بحالی</summary>
 
-براؤزر کی جانچ میں مصنوعی ڈیٹا استعمال ہوتا ہے۔ موجودہ بلڈ اور ریلیز کے کام `.github/workflows/` میں متعین ہیں۔ پل ریکویسٹ کھولنے سے پہلے [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) پڑھیں۔
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-services-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-services-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-services-mobile.svg">
+  <img src="../assets/presentation/readme-services.svg" width="1200" alt="متحرک ورک فلو: Apprise ترتیب دیے گئے الرٹس بھیجتا ہے؛ آف سائٹ کاپیاں S3 سے مطابقت رکھنے والی اسٹوریج پر اپ لوڈ سے پہلے خفیہ کی جاتی ہیں۔">
+</picture>
 
-## دستاویزات
+[اطلاعات](../OPERATIONS.md#notifications) · [خفیہ کردہ آف سائٹ کاپی](../wiki/Off-site-Copy.md) · [بیک اپ اور بحالی](../wiki/Backup-and-Recovery.md) · [مسائل کا حل](../OPERATIONS.md)
 
-| رہنما | شامل ہیں |
+<table>
+<tr>
+<td width="33%" align="center"><a href="https://phishdestroy.github.io/TgWitness/ur/docs/start/"><b>سیٹ اپ گائیڈ&nbsp;↗</b></a><br><sub>انسٹال سے پہلی چیٹ تک</sub></td>
+<td width="33%" align="center"><a href="https://phishdestroy.github.io/TgWitness/ur/docs/dedicated-account/"><b>اپنا اکاؤنٹ تیار کریں&nbsp;↗</b></a><br><sub>ایک مخصوص Telegram اکاؤنٹ</sub></td>
+<td width="33%" align="center"><a href="DEPLOYMENT.md"><b>Docker اور سرورز&nbsp;↗</b></a><br><sub>ری اسٹارٹس، اپ ڈیٹس اور HTTPS</sub></td>
+</tr>
+</table>
+
+</details>
+
+<a name="repository-map"></a>
+
+<details>
+<summary><strong>ریپوزٹری دیکھیں</strong> · کوڈ، دستاویزات اور ٹولز کہاں ہیں</summary>
+
+| ڈائریکٹری | یہاں سے شروع کریں |
 | --- | --- |
-| [تیز آغاز](QUICKSTART.md) | پہلی لانچ، اکاؤنٹ کنکشن اور پہلی برآمد |
-| [اکاؤنٹس اور سیشن فارمیٹس](../ACCOUNTS.md) | سائن ان ان پٹس، کنورژن، متعدد اکاؤنٹس |
-| [جمع کرنے کا طریقہ](../COLLECTION.md) | پالیسیاں، ورژنز، منسلکات، خلا |
-| [کنیکشن اور سیکیورٹی](../CONNECTION-SECURITY.md) | پراکسیز، انکرپشن اور کیز |
-| [عملیات](../OPERATIONS.md) | روزانہ کا کام کرنے کا بہاؤ، بیک اپ، بحالی، گنجائش |
-| [نشر](DEPLOYMENT.md) اور [سروس کے سانچے](../../deploy/README.md) | سرورز، کنٹینرز، HTTPS، اپ ڈیٹس |
-| [شواہد کا ماڈل](../EVIDENCE.md) اور [ٹائم اسٹیمپس](../TIMESTAMP.md) | دیانتداری، کوریج، افراد کے پروفائلز، اعتماد اور حوالگی |
-| [آزاد شاہد](../WITNESS.md) | صرف پڑھنے کے قابل گواہ ٹوکنز، ڈاکر پروفائل، چینل پوسٹس، کراس-چیکس |
-| [آرکیٹیکچر](../ARCHITECTURE.md) اور [پروڈکٹ ماڈل](../PRODUCT.md) | داخلی ساخت اور ڈیزائن کے فیصلے |
-| [تصدیق](../VERIFICATION.md) اور [تیاری](../internal/READINESS.md) | انجام دیے گئے چیکس اور باقی ماندہ کام |
-| [تبدیلیوں کا ریکارڈ](../CHANGELOG.md) | ریلیز کی تاریخ |
-| [ویب سائٹ اور اشاعت](../internal/PUBLISHING.md) | مقامی ویب سائٹ کا پیش نظارہ، گٹ ہب پیجز، پہلی اشاعت |
+| [docs/](../README.md) | سیٹ اپ، تفتیشی ورک فلو اور تکنیکی حوالہ |
+| [tgwitness/](../../tgwitness/README.md) | مرکزی ایپلیکیشن، جمع کنندہ، جرنل اور ویب پینل |
+| [tgwitness_capture/](../../tgwitness_capture/README.md) | آزاد ریکارڈرز اور ان کا تصدیقی کوڈ |
+| [addons/](../../addons/README.md) | اختیاری کیپچر کی انسٹالیشن، کنفیگریشن اور ٹیسٹ |
+| [deploy/](../../deploy/README.md) | انسٹالرز، کنٹینرز اور بیک گراؤنڈ سروسز |
+| [examples/](../../examples/README.md) | اکاؤنٹ ایکسپورٹ اور سیل شدہ کیپچر کی کنفیگریشنز |
+| [integrations/](../../integrations/README.md) | دستخط شدہ ویب ہُکس اور ایک n8n ریسیور |
+| [.agents/](../../.agents/README.md) | آرکائیو کو CLI کے ذریعے پڑھنے کے لیے ٹاسک ہدایات |
+| [scripts/](../../scripts/README.md) | لانچرز اور CI یوٹیلیٹیز |
+| [tools/](../../tools/README.md) | بلڈز، جانچیں اور پیکیجنگ |
+| [website/](../../website/README.md) | عوامی سائٹ، ترجمہ شدہ رہنما اور انٹرایکٹو ڈیمو |
+| [.github/](../../.github/AUTOMATION.md) | ورک فلوز، شراکت کی ہدایات اور سپورٹ |
 
+[مکمل پروجیکٹ گائیڈ](../PROJECT-GUIDE.md) ·
+[شراکت](../../.github/CONTRIBUTING.md) · [مدد حاصل کریں](../../.github/SUPPORT.md)
 
-![Section divider](../assets/presentation/divider.svg)
+</details>
 
-## لائسنس
+<details>
+<summary><strong>⚖️ اخلاقی نوٹس اور تاریخی تسلسل</strong></summary>
 
-[ایم آئی ٹی](../../LICENSE)
+مصنفین کا موقف اور آپریٹر نوٹس، اسی زبان میں:
 
-## اس فولڈر میں رہنما
+[لائسنس اور فنِ تعمیر کی عدم مطابقت کا نوٹس](TAYLOR-WESSING-EXCLUSION.md) · [آپریٹر نوٹس](OPERATOR-INCOMPATIBILITY.md) · [MIT لائسنس](../../LICENSE) · [اصل NOTICE فائل](../../NOTICE)
 
-| فائل | مواد |
-| --- | --- |
-| [DEPLOYMENT.md](DEPLOYMENT.md) | تیناری اور آپریشنز |
-| [QUICKSTART.md](QUICKSTART.md) | TgWitness فوری آغاز |
+</details>
 
-[لائسنس اور فنِ تعمیر کی عدم مطابقت کا نوٹس](TAYLOR-WESSING-EXCLUSION.md) · [MIT License](../../LICENSE)
+<a name="languages"></a>
+
+<details>
+<summary><strong>پروجیکٹ کا جائزہ اپنی زبان میں پڑھیں</strong></summary>
+
+[English](../../README.md) · [Русский](../ru/README.md) · [Українська](../uk/README.md) · [Español](../es/README.md) · [Português (Brasil)](../pt/README.md) · [Türkçe](../tr/README.md) · [العربية](../ar/README.md) · [فارسی](../fa/README.md) · **اردو** · [हिन्दी](../hi/README.md) · [Bahasa Indonesia](../id/README.md) · [Tiếng Việt](../vi/README.md) · [简体中文](../zh/README.md) · [繁體中文](../zh-Hant/README.md) · [Français](../fr/README.md) · [Deutsch](../de/README.md) · [Italiano](../it/README.md) · [Polski](../pl/README.md) · [O‘zbekcha](../uz/README.md) · [한국어](../ko/README.md) · [日本語](../ja/README.md) · [Bahasa Melayu](../ms/README.md) · [ไทย](../th/README.md) · [עברית](../he/README.md) · [বাংলা](../bn/README.md) · [አማርኛ](../am/README.md)
+
+</details>
+
+<p align="center">
+  <a href="../README.md"><b>تکنیکی دستاویزات</b></a> ·
+  <a href="https://github.com/phishdestroy/TgWitness/wiki"><b>تفتیشی ہینڈ بک</b></a> ·
+  <a href="https://github.com/phishdestroy"><b>PhishDestroy کی تیار کردہ</b></a> ·
+  <a href="../../.github/CONTRIBUTING.md"><b>شراکت کریں</b></a> ·
+  <a href="../../.github/SUPPORT.md"><b>مدد حاصل کریں</b></a> ·
+  <a href="../../.github/SECURITY.md"><b>کمزوری رپورٹ کریں</b></a>
+</p>
+
+[مشین کے پڑھنے کے قابل پروجیکٹ انڈیکس](../../llms.txt) · [مکمل متنی ہینڈ بک](https://phishdestroy.github.io/TgWitness/llms-full.txt) · [ایجنٹس کے لیے ریپوزٹری کے قواعد](../../AGENTS.md)

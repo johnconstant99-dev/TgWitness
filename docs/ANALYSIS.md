@@ -7,8 +7,8 @@
 [Workflow guide](https://phishdestroy.github.io/TgWitness/docs/archive/) · [Wiki](wiki/Archive-and-Integrations.md)
 
 Use **Journal** for local search without AI; [full-text search](SEARCH.md) (preview)
-matches word forms, phrases, domains and @usernames. For **Ask the archive**, first enable
-and configure a provider in **Integrations**. The workspace selector chooses the
+matches word forms, phrases, domains and @usernames. For **More tools → Ask the archive**, first enable
+and configure a provider in **More tools → Integrations**. The workspace selector chooses the
 account; the form chooses chats and the observation period. Retrieval runs
 locally. An exact phrase or domain narrows retrieval; a message ID requests saved
 versions. Review the excerpts and open their journal records or context.

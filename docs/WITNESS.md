@@ -50,7 +50,7 @@ flowchart LR
 | Its own Ed25519 key and journal | The collector's vault, signing key or panel token |
 | Its own Telegram bot token | Message content: the head is a record count and a hash |
 
-The token is created in **Extras → Independent witness**, shown once and stored only as a
+The token is created in **More tools → Extras → Independent witness**, shown once and stored only as a
 SHA-256. It opens exactly one endpoint, `GET /api/witness/head`, which returns a freshly
 signed checkpoint plus signed content-free collection counters and operational health.
 It cannot open the panel, read message content or change settings, and the
@@ -96,7 +96,7 @@ You need a Telegram bot (create one with @BotFather), a channel where that bot i
 administrator, and the collector's address reachable from the witness — over HTTPS outside
 a private network (see the HTTPS profile in [deployment](DEPLOYMENT.md)).
 
-Open **Extras → Independent witness → Configure** in the panel. Three steps cover
+Open **More tools → Extras → Independent witness → Configure** in the panel. Three steps cover
 read-only access, your channel and interval, then launching the witness. Publication
 policy, optional HTTP/SOCKS5 proxy and custom Bot API address are under **Advanced settings**. The form
 downloads `witness.json` with this workspace's collector key pinned. Download the newly

@@ -75,7 +75,9 @@ the approved workflow and collector version.
 Each workspace records coverage: when observation ran, gaps after restarts or network
 drops, and their recovery. After a restart, missed updates are requested from the saved
 update position, and rechecks confirm saved messages. The coverage report shows exactly
-which periods the record speaks for.
+which periods the record speaks for. A [witness probe](../ACCOUNTS.md#witness-probe) with a
+second account checks that its answers arrive as live updates and records a gap when one
+shows up only in the chat history.
 
 <a name="can-i-use-a-bot-token-instead-of-a-user-account"></a>
 
@@ -108,7 +110,7 @@ dependency lock before installing.
 
 ## Can several people have separate access permissions?
 
-Yes. Create a token under **Access**, pick workspaces, chats and permissions, add limits
+Yes. Create a token under **More tools → Access**, pick workspaces, chats and permissions, add limits
 if you want. The main panel token stays unrestricted. See [access and permissions](Access.md).
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
@@ -162,7 +164,9 @@ from Telegram's dates on the witness posts, read live from the public t.me page.
 
 ## Which platforms are tested?
 
-CI tests the Linux and Windows installers on changes to `main`. The
+Before each publication from `main`, CI authenticates the signed installer build and
+installs and checks it on Linux and Windows; pull requests that change the installer
+also run `install.sh` and `install.ps1`. The
 [verification record](../VERIFICATION.md) lists live runs per platform and revision.
 
 ## How do I report a problem or contribute?

@@ -22,5 +22,5 @@
 </blockquote>
 <p>Afin de respecter strictement la licence MIT, nous n’imposons aucune restriction quant à l’utilisation de ce logiciel. Toutefois, que cela soit clair : les contrats de services juridiques, les intimidations juridiques et les demandes d’effacement numérique ne peuvent pas effacer l’histoire, réécrire la généalogie des messages ni dissimuler la vérité.</p>
 <p><a href="../../LICENSE">Licence MIT</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Notre position concernant Taylor Wessing</a> · <a href="../HOW-IT-WORKS.md">Modèle de preuve</a></p>
-<p><a href="../../README.md">Projet</a> · <a href="../README.md">Documentation</a> · <a href="../wiki/Home.md">Wiki</a></p>
+<p><a href="README.md">Projet</a> · <a href="README.md">Documentation</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

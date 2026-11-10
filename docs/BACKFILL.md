@@ -4,7 +4,7 @@
 
 # Resumable API backfill
 
-Use **Sources → Full history** on an idle account. Choose Standard API or Takeout,
+Use **Full history** under **More tools → Sources → Chats in scope** on an idle account. Choose Standard API or Takeout,
 one to five attachment workers, Recent Actions collection and saved-version comparison.
 Start, pause, resume and end controls remain in the existing history card. API callers
 can POST these options to `/api/history/start`:

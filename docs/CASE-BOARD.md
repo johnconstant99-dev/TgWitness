@@ -26,7 +26,7 @@ workspace, separately identifiable from the original Telegram observations.
 
 ## Work with a case
 
-Open **Investigation → Case Board** in Standard or Expert mode. The language follows the panel.
+Open **More tools → Case Board** in Standard or Expert mode. The language follows the panel.
 Use **To board** beside a journal record or saved chat message, or focus it and press **B**.
 The bookmark is added to Inbox in one click. Edit its title, labels and note, or move it to a
 collection. A changed card appends a signed revision; removing it preserves the history.

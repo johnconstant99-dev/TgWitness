@@ -4,7 +4,7 @@
 
 # A live showcase of selected public channels
 
-**Access → Public showcase** creates a separate, read-only page using the existing
+**More tools → Access → Public showcase** creates a separate, read-only page using the existing
 access-token system. It reads the installation's saved observations. It does not
 start a collector, sign in to Telegram or acquire a channel for a visitor.
 
@@ -13,7 +13,7 @@ start a collector, sign in to Telegram or acquire a channel for a visitor.
 1. Save a source profile for each public channel you want to show. A channel must
    have a public username in its latest saved profile; groups and private chats
    are not eligible.
-2. Open **Access → Public showcase** (or `/showcase-manage.html`) as the administrator.
+2. Open **More tools → Access → Public showcase** (or `/showcase-manage.html`) as the administrator.
 3. Select channels across up to 16 workspaces, enter the public page title, and
    choose a link lifetime of 1, 7 or 30 days. Internal workspace labels are not
    published. Up to 64 channels can be included.

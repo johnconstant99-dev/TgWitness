@@ -1,360 +1,482 @@
-[English](../../README.md) · [Русский](../ru/README.md) · [Українська](../uk/README.md) · [Español](../es/README.md) · **Português (Brasil)** · [Türkçe](../tr/README.md) · [العربية](../ar/README.md) · [فارسی](../fa/README.md) · [اردو](../ur/README.md) · [हिन्दी](../hi/README.md) · [Bahasa Indonesia](../id/README.md) · [Tiếng Việt](../vi/README.md) · [简体中文](../zh/README.md)
-
-![TgWitness — preserve the record, verify the evidence](../assets/presentation/casework-hero-static.svg)
-
-<p align="center">
-  <strong>Seu espaço de trabalho de observação no Telegram.</strong><br>
-  Preserve conversas capturadas, entenda o que mudou e compartilhe um histórico assinado.<br>
-  No seu próprio computador ou servidor. Com suas próprias contas.
-</p>
-
-<p align="center">
-  <img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-243a52?logo=python&amp;logoColor=white">
-  <img alt="FastAPI + Telethon" src="https://img.shields.io/badge/FastAPI-Telethon-243a52?logo=fastapi&amp;logoColor=white">
-  <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-243a52?logo=docker&amp;logoColor=white">
-  <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-243a52">
-  <img alt="Version: 0.9.1" src="https://img.shields.io/badge/version-0.9.1-243a52">
-</p>
-
-<p align="center">
-  <a href="#introdução-rápida">Introdução rápida</a> ·
-  <a href="#recursos">Recursos</a> ·
-  <a href="#conecte-uma-conta-do-telegram">Contas</a> ·
-  <a href="#evidências-e-verificação">Evidências</a> ·
-  <a href="#implantação">Implantação</a> ·
-  <a href="../README.md">Documentação</a>
-</p>
-
-> [!TIP]
-> **Explore antes de se conectar.** Execute `scripts\Demo.cmd` ou `sh start.sh --demo` para abrir um espaço de trabalho com conversas fictícias. Não é necessária uma conta no Telegram.
-
-**É novo aqui?** [Iniciar →](QUICKSTART.md) · [Wiki →](../wiki/Home.md) · [Escolha um guia →](../README.md) · [Obter ajuda →](../../.github/SUPPORT.md) · [Veja o que já foi testado →](../VERIFICATION.md)
-
-> [!WARNING]
-> **Utilize uma conta dedicada do Telegram que você possa se dar ao luxo de perder.** Recomendamos enfaticamente que não conecte contas pessoais ou valiosas, nem crie credenciais de API ID/API hash nessas contas. O Telegram pode restringir ou banir permanentemente contas. [Leia o guia de contas](../ACCOUNTS.md).
-
-## Recursos
-
-- **Conversas com histórico.** Leia mensagens salvas, compare edições capturadas e visualize avisos de exclusão no contexto da conversa.
-- **Observação nos seus termos.** Escolha conversas individuais, uma pasta do Telegram ou toda a conta. Cada conta possui seu próprio espaço de trabalho e configurações.
-- **Exportações que você pode verificar.** Um arquivo ZIP assinado, registros originais, anexos preservados e um relatório HTML offline. Proteção opcional por senha para transferência.
-- **Feito para uso diário.** Temas claro e escuro, 25 idiomas, pesquisa, navegação com Ctrl/Cmd+K e ações diretamente a partir dos chats.
-
-<details>
-<summary>Todos os recursos e detalhes técnicos</summary>
-
-- **Sua rota de conexão.** Em **Conta → Configurações de proxy**, escolha entre as listas públicas integradas do MTProxy, atualize-as a partir de suas fontes ou cole seu próprio link de proxy do Telegram. As configurações manuais de SOCKS5/HTTP/MTProxy e um catálogo de operadores continuam disponíveis. As listas públicas são baixadas e filtradas, mas nenhuma conta foi conectada por meio de um servidor listado até o momento. [Como funcionam as listas públicas](../CONNECTION-SECURITY.md#public-proxies-supplied-by-your-installation).
-
-- **Um diário do que suas contas realmente veem.** Novas mensagens, edições, avisos de exclusão, reações, eventos relacionados à participação e lacunas de cobertura dos grupos e canais que você selecionar.
-- **Bate-papos selecionados, uma pasta do Telegram ou toda a conta.** Selecione os tipos a serem registrados — canais, grupos, conversas privadas, bots — e novas conversas serão adicionadas assim que surgirem. Exclusões, suas próprias mensagens enviadas e edições, exclusões em conversas privadas correspondentes à respectiva conversa, verificações prioritárias e limites de anexos por tipo ([coleção](../COLLECTION.md#observation-scope-chosen-chats-a-folder-or-the-whole-account)).
-- **Modo de investigação.** Um único botão cria uma conta dedicada que entra em equipes e interage com bots: tudo o que ela visualiza e envia é registrado; os botões abaixo das mensagens dos bots (links, aplicativos web, textos para copiar) são mantidos; as edições feitas exclusivamente por meio de botões tornam-se novas versões; e cada novo chat ou bot tem seu perfil (descrição, comandos, membros) e as mensagens visíveis anteriormente salvas de uma só vez ([modo de investigação](../COLLECTION.md#investigation-mode-joining-teams-and-talking-to-bots)). **O guia “Conta dedicada”** do painel (`/dedicated-account.html`) explica por que a conta principal não deve ser utilizada, por que o TgWitness funciona por meio de pares de hash/ID de aplicativo públicos e por que um par de API, por si só, não concede acesso à sua conta (com links para a documentação do Telegram), além de listar formas de criar uma conta adicional.
-- **Aja diretamente a partir das conversas.** Envie mensagens e respostas, pressione os botões de retorno de chamada/texto do bot ou visualize um convite do Telegram e participe. A conta selecionada executa a ação; solicitações, visualizações de convites e respostas do bot em pop-ups/URLs são registradas em seu diário assinado ([minicliente do painel](../COLLECTION.md#act-from-the-panel)).
-- **Cobertura que o senhor pode declarar.** Os relatórios e o verificador indicam “observado continuamente de X a Y”, listam lacunas com seus motivos e os IDs das mensagens que nunca foram observadas — sem nunca apresentá-las como excluídas.
-- **Perfis de usuários, adesão opcional por chat.** Histórico de nomes e nomes de usuário, sinalizadores do Telegram, SHA-256 e pHash do avatar, atividade, quem responde a quem e carteiras, telefones, nomes de usuário e links mencionados — tudo construído exclusivamente a partir de registros salvos, cada fato apontando para seu registro no diário, exportado como um arquivo assinado separado ([modelo de evidência](../EVIDENCE.md#people-profiles)).
-- **Testemunha independente.** Um processo separado, com sua própria chave e bot, busca o cabeçalho assinado do diário, publica-o em um canal do Telegram e notifica quando o coletor não responde; o verificador compara as exportações com esse cabeçalho. O intervalo, o tempo limite, quais verificações são publicadas e o texto das publicações são opções definidas em um arquivo de configuração JSON ([witness](../WITNESS.md)). Testado em um servidor local da API do Bot, ainda não com um bot e um canal reais.
-- **Configurações de coleta no painel.** Limites e frequência de coleta, novas verificações, downloads, perfis de pessoas, notificações e exportações encontram-se na página **“Parâmetros”,** com seus intervalos e valores padrão; todas as alterações são registradas no diário assinado ([configurações e parâmetros](#configurações-e-parâmetros)).
-- **Edições e exclusões em contexto.** Cada edição é uma versão separada exibida ao lado da anterior; um aviso de exclusão nunca apaga o conteúdo que já foi capturado.
-- **Exportações assinadas e verificáveis.** Cada evento é encadeado por hash (SHA-256) e assinado (Ed25519). O arquivo ZIP assinado contém JSONL, CSV, um relatório HTML offline, mídia preservada e um verificador independente.
-- **Exportações protegidas por senha.** Opcionalmente, é possível compactar qualquer exportação em um arquivo ZIP com criptografia AES-256 do WinZip, formato compatível com o 7-Zip e o WinRAR; o conteúdo assinado no interior permanece inalterado. Um arquivo de teste foi aberto byte a byte no libarchive (Windows `tar`) e uma senha incorreta foi rejeitada ([modelo de evidência](../EVIDENCE.md#investigation-handoff)).
-- **Notificações.** Problemas (espaço em disco insuficiente, conta desconectada, erros no coletor, na cópia ou no carimbo de data/hora), alterações nos chats observados e um resumo diário, enviados por meio [do Apprise](https://github.com/caronc/apprise) para o Matrix, Telegram, Discord, Slack, ntfy, e-mail e muitos outros serviços — sem o texto da mensagem, a menos que você ative os trechos — e listados no painel. A entrega é testada em relação a um endpoint local; os próprios serviços ainda não foram testados.
-- **25 idiomas de interface.** O painel e a documentação completa compartilham os mesmos idiomas, incluindo alemão, francês, japonês e hebraico. O conteúdo do Telegram e os registros do diário são sempre exibidos exatamente como foram salvos.
-- **Tema claro e escuro.** Por padrão, segue a configuração do sistema; a escolha é lembrada por navegador.
-- **Navegação otimizada para teclado.** Pressione **Ctrl+K** (Mac: **⌘K**) ou selecione **“Ir para…”** para localizar uma seção. Use as setas do teclado e a tecla Enter para abri-la; a tecla Escape fecha o menu.
-- **Contas múltiplas.** Qualquer número de espaços de trabalho isolados, cada um com sua própria sessão do Telegram, diário, chave de assinatura, rota de proxy e política de captura.
-- **Login flexível.** Telefone + código + autenticação de duas etapas (2FA), código QR, Telethon/Pyrogram `.session`, arquivo ZIP do TData do Telegram Desktop, Telethon StringSession ou uma chave de autenticação completa com seu ID de DC.
-- **Proxies por conta.** SOCKS5 e HTTP CONNECT, testados com proxies de teste locais, e o MTProxy experimental, ainda não testado com um servidor real. Um proxy com falha nunca recorre silenciosamente a uma conexão direta.
-- **Privacidade incorporada por padrão.** Executa-se no seu computador ou servidor. Interface de usuário web integrada, sem Node.js, sem serviço hospedado, sem telemetria. Sessões, credenciais de API e segredos de proxy são armazenados em um cofre criptografado.
-- **Fácil de executar.** Clique duas vezes no Windows, execute um script no Linux/macOS ou utilize o Docker Compose com HTTPS automático opcional. Resultados e limites dos testes: [registro de verificação](../VERIFICATION.md).
-
-</details>
-
-## Introdução rápida
-
-| Plataforma | Como começar | Requisitos |
-| --- | --- | --- |
-| **Windows, sem nada instalado** | Baixe `TgWitness-<version>-windows-amd64-portable.zip` da [seção “Lançamentos”](../../../../releases), extraia e clique duas vezes em **`TgWitness.cmd`** | Nada; o Python já está incluído |
-| Windows, a partir do código-fonte | Clique duas vezes em **`Start.cmd`** | Python 3.11+; disponibilizado e instalado para você, caso não esteja presente |
-| Linux / macOS | `sh start.sh` | Python 3.11+ com `venv`; o script exibe o comando de instalação para o seu sistema, caso esteja ausente |
-| Docker, qualquer sistema operacional | Clique duas vezes em **`scripts\Docker.cmd`** ou execute `sh scripts/docker-start.sh` | Docker Engine/Desktop com Compose 2.20 ou superior |
-
-1. Abra **http://127.0.0.1:8787**.
-2. Cole o token de acesso ao painel:
-   - instalação portátil ou a partir do código-fonte: o conteúdo de `data/live/panel-token.txt`
-   - Docker: gerado por `scripts\Docker.cmd`/`scripts/docker-start.sh` ou `docker compose exec tgwitness cat /data/panel-token.txt`
-3. Adicione sua conta do Telegram, escolha os chats a serem observados e clique em **“Iniciar observação**”.
-
-A primeira execução do código-fonte cria um `.venv` privado e instala as dependências fixadas (é necessário acesso à Internet). Os auxiliares do Docker compilam a imagem, aguardam até que o painel esteja em bom estado e exibem seu endereço e token. `python start.py --check` (ou `TgWitness-Check.cmd` no pacote portátil) fornece um relatório de prontidão sem acessar o Telegram.
-
-> **Está apenas dando uma olhada?** Execute **`scripts\Demo.cmd`** ou `sh start.sh --demo`. Um diário fictício é aberto diretamente no navegador; nenhuma conta do Telegram está conectada e os dados ficam armazenados separadamente em `data/demo`.
-
-<details>
-<summary><strong>No interior do espaço de trabalho: conversas, histórico e exportações</strong></summary>
+<p align="right"><sub><a href="../../README.md">English</a> · <a href="#languages">Outros idiomas</a></sub></p>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="../assets/chats-dark.png">
-  <img src="../assets/chats.png" alt="TgWitness chats view with synthetic demo data: deleted and edited messages highlighted">
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-hero-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-hero-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/casework-hero-mobile.svg">
+  <img src="../assets/presentation/casework-hero.svg" width="1440" alt="TgWitness — Siga o rastro. Preserve as provas. Um diário assinado e encadeado por hashes, um ponto de verificação guardado à parte e um arquivo de provas verificável.">
 </picture>
 
-### Histórico de observações
+<table>
+<tr>
+<td width="33%" align="center"><a href="https://phishdestroy.github.io/TgWitness/demo/?lang=pt"><b>Explore a demo&nbsp;↗</b></a><br><sub>A interface real com registros fictícios</sub></td>
+<td width="33%" align="center"><a href="#quick-start"><b>Baixe e comece&nbsp;↓</b></a><br><sub>Um único comando para Linux, macOS e Windows</sub></td>
+<td width="33%" align="center"><a href="https://github.com/phishdestroy/TgWitness/wiki"><b>Leia o manual&nbsp;↗</b></a><br><sub>Guias de investigação, passo a passo</sub></td>
+</tr>
+</table>
 
-![Journal with fictional demo data](../assets/workspace.png)
+<p align="center"><strong>Espaço de trabalho auto-hospedado para investigações no Telegram.</strong><br>Salve chats, mantenha edições e exclusões, veja quem está ligado a quem<br>e entregue exportações assinadas que qualquer pessoa pode conferir.</p>
 
-### Exportações assinadas
+<p align="center"><strong>CONFIANÇA ZERO.</strong> O TgWitness não toma partido: as mesmas verificações valem para o operador, para a PhishDestroy e para qualquer outra pessoa.<br>Só conta o que um terceiro ou a matemática confirma. <a href="../LIMITS-AND-OBJECTIONS.md">Limites e objeções</a></p>
 
-![Export records and verify signatures](../assets/exports.png)
+<p align="center">
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · pré-lançamento"></a>
+  <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
+  <sub><a href="../VERIFICATION.md">Ambientes testados</a> · 25 idiomas de interface · 26 idiomas de guias</sub>
+</p>
+
+<a name="screenshots"></a>
+
+<a href="https://phishdestroy.github.io/TgWitness/demo/?lang=pt">
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-workspace-mobile-dark-still.webp">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-workspace-dark-still.webp">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-workspace-mobile-dark.webp">
+  <img src="../assets/presentation/readme-workspace-dark.webp" width="1440" alt="A demo do TgWitness em ação: mensagens capturadas, versões salvas e conteúdo mantido após a exclusão. Registros de demonstração fictícios.">
+</picture>
+</a>
+
+<p align="center"><sub>Explore a interface real com registros fictícios. Clique no espaço de trabalho para experimentar.</sub></p>
+
+## O que o TgWitness faz
+
+<table>
+<tr>
+<td width="33%" valign="top"><b><a href="../COLLECTION.md">Cada edição e exclusão preservada</a></b><br><sub>Cada versão de uma mensagem é salva, e o texto permanece após um aviso de exclusão.</sub></td>
+<td width="33%" valign="top"><b><a href="../wiki/Exports-and-Verification.md">Provas que qualquer pessoa pode conferir</a></b><br><sub>Registros assinados e encadeados por hashes. O destinatário verifica o arquivo offline com um único comando.</sub></td>
+<td width="33%" valign="top"><b><a href="../EVIDENCE.md#where-the-messages-come-from">Uma origem demonstrável</a></b><br><sub>Mensagens recebidas pela sessão MTProto autenticada da conta e assinadas na chegada; GitHub Actions e Intel TDX acrescentam atestado.</sub></td>
+</tr>
+<tr>
+<td width="33%" valign="top"><b><a href="../EXPORT-BENCHMARK-2026-11-06.md">Medido em escala</a></b><br><sub>48 arquivos verificados com 3.598.381 registros; oito contas obtiveram 768.007 registros de histórico a 687,5 registros/s.</sub></td>
+<td width="33%" valign="top"><b><a href="../INVESTIGATION-MODE.md">Feito para investigações</a></b><br><sub>Listas de observação sobre texto, códigos QR e OCR, verificação de carteiras, fichas de alvos, Quadro do Caso e um pacote para o tribunal.</sub></td>
+<td width="33%" valign="top"><b><a href="../SECURITY-MODEL.md">Sob seu controle</a></b><br><sub>Auto-hospedado e sem telemetria. As sessões ficam em um cofre criptografado; o painel escuta em localhost.</sub></td>
+</tr>
+</table>
+
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
+
+<a name="quick-start"></a>
+<a name="run-it-on-your-machine"></a>
+
+## Instalação
+
+Python incluído. Use os mesmos comandos para atualizar.
+
+**Linux / macOS**
+
+```sh
+curl -fsSL https://get.destroy.tools/install.sh | bash
+```
+
+**Windows · PowerShell ou CMD**
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm https://get.destroy.tools/install.ps1 | iex"
+```
+
+<sub>Servidor Ubuntu: execute como root. Desktop: execute com seu usuário normal. `-ExecutionPolicy Bypass` vale apenas para este processo do PowerShell.</sub>
+
+Os builds assinados vêm do [fluxo de trabalho Installer](../../.github/workflows/installer.yml) público, e o instalador confere o SHA-256 e a assinatura RSA de cada pacote antes de instalar.
+
+[Verifique o script primeiro](../INSTALLATION.md#verify-before-running) · [Primeira configuração](../SETTINGS.md) · [Versões](https://github.com/phishdestroy/TgWitness/releases) · [Docker](DEPLOYMENT.md)
+
+<details>
+<summary><strong>Como o instalador e seus dados são protegidos</strong></summary>
+
+`get.destroy.tools` é o site de download do projeto. O
+[fluxo de trabalho Installer](../../.github/workflows/installer.yml) público o gera a partir de
+[`deploy/installer/`](../../deploy/installer/README.md) para a revisão exata de `main`,
+publica-o depois que os testes de instalação no Linux e no Windows passam e assina os
+scripts do instalador e os pacotes do aplicativo com a chave de publicação de versões em
+[`release-signing.pub`](../../deploy/installer/release-signing.pub). O instalador confere
+o SHA-256 e a assinatura RSA do pacote e do arquivo de bloqueio de dependências antes de instalar.
+Para conferir o próprio script antes, baixe-o junto com a assinatura e execute os
+[comandos de verificação prévia](../INSTALLATION.md#verify-before-running). Um build que falha
+mantém o download anterior; os painéis instalados são atualizados quando você executa o instalador de novo.
+As [versões](https://github.com/phishdestroy/TgWitness/releases) do GitHub, o código-fonte e o
+[Docker](DEPLOYMENT.md) são as outras formas de instalar.
+
+**Suas sessões e dados.** O TgWitness roda no seu computador ou servidor, e o painel
+escuta em localhost por padrão. Sessões do Telegram, credenciais de proxy e hashes de tokens
+de acesso ficam no cofre criptografado de cada espaço de trabalho, com uma
+[chave mestra externa](../SECURITY-MODEL.md#external-master-key) opcional. O aplicativo
+não tem telemetria. Ele se conecta ao Telegram e aos serviços que suas configurações usam:
+listas públicas de MTProxy, seus proxies, armazenamento S3, um bot testemunha, autoridades
+de carimbo do tempo, provedores de IA e webhooks. O [Mapa do sistema](../SYSTEM-MAP.md) lista
+as conexões que o processo do aplicativo faz.
+Observe com uma [conta dedicada do Telegram](https://phishdestroy.github.io/TgWitness/pt/docs/dedicated-account/).
+
+O selo de versão descreve esta árvore de código-fonte. Os builds instaláveis aparecem em
+[Versões](https://github.com/phishdestroy/TgWitness/releases); um recurso mesclado em
+`main` chega a esses downloads na próxima versão.
+
+[Instalação e acesso ao painel](../INSTALLATION.md) ·
+[Assinaturas e SHA-256](https://get.destroy.tools/#verification) ·
+[Atualização](../INSTALLATION.md#update-an-existing-installation) ·
+[Recursos atuais e qualificação](../STATUS.md) ·
+[Escolha um método de coleta](../COLLECTION-MODES.md)
 
 </details>
 
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
-![Section divider](../assets/presentation/divider.svg)
+<a name="how-it-works"></a>
 
-## Conecte uma conta do Telegram
+## Um registro que outra pessoa pode conferir
 
-> [!CAUTION]
-> Conecte apenas contas dedicadas que o(a) senhor(a) possa se dar ao luxo de perder. O Telegram pode banir contas permanentemente e de forma imprevisível; consulte o aviso no topo desta página. O **guia de contas dedicadas** do painel (barra lateral ou `/dedicated-account.html`) explica por que e como obter uma.
-
-Faça login por telefone, código QR ou uma sessão existente — não é necessário ID de API nem hash.
-
-**Por que um conjunto de APIs integrado?** Sabe-se que a criação de seu próprio ID de API em [my.telegram.org](https://my.telegram.org) pode levar à restrição de contas, e o Telegram não publica limites claros — muitos pesquisadores perderam suas contas principais dessa forma. A própria página [“Obter ID de API”](https://core.telegram.org/api/obtaining_api_id) do Telegram informa que contas que utilizam clientes de API não oficiais são automaticamente colocadas sob observação e encaminha usuários banidos indevidamente para recover@telegram.org. O TgWitness, portanto, fornece pares de API públicos já utilizados por outros clientes de código aberto, para que o senhor nunca precise criar um. Caso possua seu próprio ID de API, insira-o no campo **“ID de API + Hash”** e ele será utilizado em seu lugar.
-
-Quando nenhum par é inserido, importado ou já está salvo no espaço de trabalho, o TgWitness seleciona um dos 50 pares do banco e passa para o próximo caso o Telegram recuse um. O par que efetuou o login permanece vinculado àquela conta. Um par identifica o aplicativo; o usuário ainda precisa autorizar sua conta do Telegram separadamente. O token de acesso do painel abre o TgWitness e é independente do login no Telegram.
-
-| O que o senhor possui | Como utilizá-lo |
-| --- | --- |
-| Número de telefone com acesso à conta | Guia **“Telefone**”: código do Telegram e, em seguida, senha de autenticação de duas etapas (2FA), se ativada |
-| Um aplicativo do Telegram no qual já se está conectado | Guia **“Código QR**”: Configurações → Dispositivos → Vincular dispositivo de desktop |
-| Telethon (esquema 7/8) ou Pyrogram (esquema 2/3) `.session` | Guia **“Arquivos”** |
-| Par de imagens: `name.session` + `name.json` | Na guia **“Arquivos”**, selecione ambos; o arquivo JSON fornece o ID/hash da API |
-| Pasta do Telegram Desktop `tdata` | Apenas ZIP `key_datas` e `D877F783D5D3EF8Cs`, em seguida, **“Arquivos”**; senha local, se definida |
-| Telethon StringSession, `.txt` ou `.tgwitness-session` | Guia **“Arquivos”**, *“Senha”* ou *texto da sessão* |
-| Arquivo JSON da conta com uma sessão ou chave de autenticação | Guia **“Arquivos”** |
-| Chave de autenticação completa (512 caracteres hexadecimais) + ID do DC | Guia **“Chave de autenticação**”; o ID de usuário opcional é verificado no Telegram |
-
-Não suportado: armazenamento TDLib, strings de sessão do Pyrogram, tokens de bot, TData com múltiplas contas e listas de contas em massa. Os arquivos são convertidos na memória do seu servidor e verificados com o Telegram antes de serem salvos. O [guia de contas](../ACCOUNTS.md) explica cada formato passo a passo: como obter credenciais da API, como reconhecer um arquivo, campos JSON, limites e mensagens de erro.
-
-Após o login, abra **“Fontes”** (seus chats são carregados automaticamente), adicione os grupos necessários, escolha o que deseja capturar (por exemplo*,* *mensagens, edições e exclusões*) e inicie a observação. Mantenha o processo em execução: **a opção “Pausar observação”** interrompe a coleta, enquanto **“Bloquear”** apenas interrompe o acesso pelo navegador.
-
-## Capturas de tela
-
-| Comparação de edições | Fontes e política de captura |
-| --- | --- |
-| ![Detail drawer comparing a previous and a newly observed message version](../assets/detail.png) | ![Selected chats and per-account monitoring settings](../assets/sources.png) |
-| **Exportações assinadas** | **Faça login** |
-| ![Export page with the signed archive and other formats](../assets/exports.png) | ![Account page with phone sign-in](../assets/connection.png) |
-| **Diário** | **Tema escuro** |
-| ![Journal with observed messages, edits, deletion notices and coverage events](../assets/workspace.png) | ![Journal in the dark theme](../assets/workspace-dark.png) |
-
-Todas as capturas de tela utilizam dados sintéticos de demonstração. O código QR no [arquivo qr-login.png](../assets/qr-login.png) codifica um token fictício proveniente do transporte de teste.
-
-
-![Section divider](../assets/presentation/divider.svg)
-
-## Como funciona
-
-```mermaid
-flowchart LR
-    A[Authorize an account] --> B[Select sources and event types]
-    B --> C[Start observation]
-    C --> D[Append signed records]
-    D --> E[Review versions and gaps]
-    E --> F[Export and verify]
-```
-
-Cada espaço de trabalho pertence a uma conta do Telegram. O coletor aceita atualizações do cliente dessa conta, aplica a política de captura salva e acrescenta as observações a um diário no qual só é possível fazer acréscimos.
-
-| Observação | O que é preservado | Limites |
-| --- | --- | --- |
-| Nova mensagem | Texto, ID do remetente, referência da resposta, metadados, hora da observação | Apenas atualizações fornecidas para fontes selecionadas |
-| Editar | Uma versão separada do conteúdo | As versões intermediárias perdidas enquanto o sistema estava offline não podem ser recuperadas |
-| Exclusão | ID da mensagem, além de tudo o que foi capturado anteriormente | O Telegram geralmente não informa quem excluiu a mensagem nem quando isso ocorreu |
-| Reações | Contagens e identidades recentes, quando fornecidas | Um instantâneo, não um registro completo de alterações |
-| Afiliação | Mensagens de serviço e atualizações para os participantes | Não é garantido que todas as entradas/saídas sejam recebidas |
-| Anexo | Arquivo opcional com endereçamento por conteúdo e SHA-256 | Os arquivos podem desaparecer antes do download; os resultados são registrados |
-| Cobertura | Inicializações, paradas, desconexões, sinais de vida, alterações de política | A ativação não constitui prova de captura completa |
-| Instantâneo do histórico | Últimas mensagens visíveis, até 500, a menos que esse número seja aumentado nos **Parâmetros**, explicitamente identificadas | Não é possível reconstruir edições ou exclusões perdidas |
-
-Saiba [como funciona a coleta de dados](../COLLECTION.md) para políticas, filas de anexos e reinicializações.
-
-## Configurações e parâmetros
-
-Todas as alterações são realizadas no painel, por espaço de trabalho, sem a necessidade de editar código ou arquivos de configuração. Cada alteração de escopo, política ou parâmetro é registrada no diário assinado, juntamente com os valores anteriores e posteriores, e cada início de observação indica os valores em vigor.
-
-| Onde | O que o senhor configura |
-| --- | --- |
-| **Fontes** | Escopo (conversas selecionadas, uma pasta do Telegram, toda a conta), tipos de fontes, exclusões, ações próprias, quais alterações devem ser mantidas, tipos de anexos e tamanho por tipo (1–2.000 MiB), intervalo de verificação para conversas prioritárias e outras (qualquer número de minutos, 0 = desativado), instantâneos do histórico, notificações |
-| **Exportações** | Downloads protegidos por senha, modo de evidência (intervalo, autoridades de carimbo de data/hora e calendários), cópia externa no S3 (intervalo, retenção e modo do Object Lock) |
-| **Witness** | Tokens de testemunha somente para leitura; as opções do próprio testemunho são exibidas com comandos pré-definidos |
-| **Parâmetros** | Tamanho e atualização da lista de conversas, intervalos de heartbeat e checkpoint, buffer de inicialização, como as novas verificações distribuem as solicitações (primeiro atraso, conversas por passagem, pausa, mensagens recuperadas e solicitadas novamente), reserva de disco, tempo limite de download, velocidade e tentativas de repetição, o que os perfis de usuários procuram, incluindo suas próprias expressões regulares, tamanho e frequência das notificações, snapshot, limites de ZIP e de download no navegador, tempo limite de ação do painel, tempos limite e tentativas do cliente do Telegram |
-
-Os valores dos **parâmetros** mostram seu intervalo e valor padrão; os que foram alterados estão marcados e podem ser restaurados um por um ou todos de uma vez. Eles passam a ser aplicados a partir da próxima utilização; os tempos limite e novas tentativas do cliente Telegram a partir da próxima conexão. Um limite de ZIP acima de 4 GiB requer `verify.py --max-gib N` quando o arquivo for verificado ([operações](../OPERATIONS.md#panel-layout)).
-
-
-![Section divider](../assets/presentation/divider.svg)
-
-## Evidências e verificação
-
-| Exportar | Índice | Integridade |
-| --- | --- | --- |
-| **Arquivo ZIP assinado** | JSONL, CSV, relatório em HTML, cobertura, mídia, manifesto, verificador | Eventos assinados, além de um manifesto assinado de cada arquivo, indicando o autor. Utilize isso para a transferência. |
-| JSONL | Registros originais com hashes e assinaturas | Assinaturas Ed25519 por evento e cadeia de hash |
-| CSV / HTML | Tabela compatível com planilhas / relatório legível offline | Informações disponíveis apenas no arquivo ZIP assinado |
-| JSON de ponto de verificação | Comprimento do diário e hash do cabeçalho | Assinado separadamente; mantenha-o fora do coletor |
-| JSON de recibo de execução | Hashes do código, versões das dependências, escopo, configurações | Declaração de processo assinada separadamente |
-| Perfis de pessoas em JSON | Perfis de um chat com referências de registros | Declaração assinada; os hashes do arquivo foram verificados em relação ao ZIP |
-| Arquivo ZIP do diário Witness | Número de testemunhas obtidas, respostas perdidas, publicações no canal | Assinado pela própria chave da testemunha |
-
-Os filtros afetam apenas a navegação; as exportações sempre contêm o diário completo até um número de sequência fixo. Verifique um arquivo com uma cópia confiável do verificador e uma impressão digital da chave e um ponto de verificação mantidos de forma independente:
+Confira sem conta e sem instalar nada. O exemplo publicado traz o próprio verificador:
 
 ```sh
-python -m pip install cryptography
-python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 --checkpoint tgwitness-checkpoint.json
-# with an independent witness and its channel (Telegram Desktop export)
-python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 \
-    --witness witness.zip --witness-fingerprint WITNESS_SHA256 --channel result.json
+curl -LO https://phishdestroy.github.io/TgWitness/demo/downloads/tgwitness-demo.zip
+unzip -o tgwitness-demo.zip verify.py        # o verificador vem dentro do arquivo
+python verify.py tgwitness-demo.zip          # Python 3.11+, só precisa de `cryptography`
 ```
 
-O verificador exibe o produtor assinado, os períodos de observação contínua, as lacunas e os IDs de mensagens que nunca foram observados, e apresenta falha caso o diário difira de qualquer cabeçalho que a testemunha tenha visto.
+Ele exibe os registros assinados, o hash do cabeçalho e a impressão digital do signatário e termina com `0`.
+O exemplo é fictício; o mesmo verificador funciona com qualquer exportação real.
 
-Verifique as assinaturas do diário, a cadeia de hashes e os anexos com uma chave confiável, e guarde os pontos de verificação separadamente. Analise o escopo e os intervalos de coleta, os comprovantes de tempo externos e as verificações do ambiente disponíveis para o modo selecionado.
-
-[procedimento de carimbo de data e hora](../TIMESTAMP.md) · [modelo de evidência](../EVIDENCE.md) · [para transferência de investigação](../EVIDENCE.md#investigation-handoff)
-
-## Implantação
-
-> [!NOTE]
-> Resultados e limites dos testes: [registro de verificação](../VERIFICATION.md).
-
-**Servidor local ou único com Docker:**
+Uma exportação contém as mensagens, os arquivos e o verificador. Envie ao destinatário a impressão
+digital da sua chave por outro canal, e ele mesmo poderá conferir:
 
 ```sh
-docker compose up -d --build --wait
-docker compose exec tgwitness cat /data/panel-token.txt
+python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --tsa-ca TSA-ROOT.pem --require evidence
 ```
 
-O contêiner é executado como um usuário não root com um sistema de arquivos somente leitura, publica apenas em `127.0.0.1:8787` e mantém todos os dados em um volume nomeado.
+O verificador confere as assinaturas, a cadeia do diário, a lista de arquivos e os anexos.
+Para valer como prova, ele precisa da impressão digital da sua chave e de um carimbo do tempo de terceiros que cubra o último
+registro, como um carimbo do tempo RFC 3161 conferido com o certificado raiz da autoridade.
 
-**Servidor público com HTTPS automático (Caddy):** copie `deploy/env.example` para `.env`, configure `TGWITNESS_DOMAIN`, aponte o DNS para o servidor, abra as portas TCP 80/443 e execute
+**De onde vêm as mensagens.** O TgWitness as recebe do Telegram pela
+sessão MTProto criptografada da conta, como fazem os aplicativos oficiais, e grava cada uma no
+diário, já assinada, assim que chega. A [captura com GitHub Actions](../SEALED-ACTIONS.md) e o
+[Phala Intel TDX](../HIGH-ASSURANCE.md) também atestam o coletor que as recebeu.
 
-```sh
-docker compose -f compose.yaml -f deploy/compose/compose.https.yaml up -d --build --wait
-```
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-chain-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-chain-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/casework-chain-mobile.svg">
+  <img src="../assets/presentation/casework-chain.svg" width="1200" alt="Mensagens novas, edições salvas e observações de exclusão formam um diário encadeado e assinado. Verifique-o com uma chave confiável obtida de forma independente.">
+</picture>
 
-**No Windows, sem necessidade de instalação:** o arquivo ZIP portátil anexado a cada versão contém o ambiente de execução oficial do Python e todas as dependências. Os dados permanecem na pasta `data`; para atualizar, extraia a nova versão e copie essa pasta para o local correspondente.
+[Verificação do arquivo](../wiki/Exports-and-Verification.md) · [Formato das provas](../EVIDENCE.md) · [Testemunha independente](../WITNESS.md) · [Carimbos do tempo externos](../TIMESTAMP.md) · [Verificações e escala testada](../VERIFICATION.md)
 
-**Sem o Docker:** os modelos para o systemd, a tarefa de logon do Windows e o launchd estão na pasta [deploy/.](../../deploy/README.md) Atualizações, backups, portas alternativas e imagens do GHCR (assim que forem publicadas pelo fluxo de trabalho de lançamento) são abordados na seção de [implantação](DEPLOYMENT.md).
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
-### Linha de comando
+## De uma conversa a um caso
 
-```text
-python start.py [--demo] [--setup-only] [--check [--json]] [--host HOST] [--port PORT] [--data-dir DIR]
-```
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-features-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-features-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-features-mobile.svg">
+  <img src="../assets/presentation/readme-features.svg" width="1200" alt="Três fluxos de trabalho animados: exportar um chat para HTML e JSON, encontrar um link compartilhado nos chats registrados e manter as versões capturadas após um aviso de exclusão.">
+</picture>
 
-| Tarefa | Comando (a partir do ambiente do projeto) |
+<table>
+<tr>
+<td width="33%" align="center"><a href="../wiki/Chat-Export.md"><b>Exportação de chat&nbsp;↗</b></a><br><sub>Um chat em HTML e JSON assinados</sub></td>
+<td width="33%" align="center"><a href="../INVESTIGATION.md"><b>Investigação&nbsp;↗</b></a><br><sub>Siga uma pista pelos chats registrados</sub></td>
+<td width="33%" align="center"><a href="../COLLECTION.md"><b>Versões salvas&nbsp;↗</b></a><br><sub>Edições e avisos de exclusão, preservados</sub></td>
+</tr>
+</table>
+
+Duas formas de usar: [exportar sua conta](../ACCOUNT-EXPORT.md) uma vez ou
+[acompanhar uma investigação](../INVESTIGATION.md) e continuar salvando as alterações.
+Escolha alguns chats, uma pasta do Telegram ou a conta inteira. Cada conta tem seu
+próprio espaço de trabalho, sessão e chave de assinatura.
+
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
+
+## Saiba mais
+
+<details>
+<summary><strong>Exportações medidas · 6 de novembro de 2026</strong> · 56.329 mensagens, os dois arquivos verificados</summary>
+
+**56.329 mensagens exportadas em duas execuções do zero.** Os dois arquivos assinados passaram na verificação com chaves de coletor fixadas.
+
+[![Velocidade medida de coleta e de exportação completa](../../website/validation/performance.svg)](https://phishdestroy.github.io/TgWitness/pt/docs/validation/)
+
+| Execução | Mensagens | Tempo de coleta | Velocidade de coleta | Exportação completa | Velocidade de ponta a ponta |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Servidor A | 27.030 | 189,043 s | **142,983 mensagens/s** | 211,647 s | 127,713 mensagens/s |
+| Servidor B | 29.299 | 182,513 s | **160,531 mensagens/s** | 206,650 s | 141,781 mensagens/s |
+
+Texto e metadados via WARP, duas contas por servidor, sem anexos nem registros reaproveitados.
+Medido na revisão [`92e539af`](https://github.com/phishdestroy/TgWitness/commit/92e539af40d8368d198ff5e040f1d876f2c1310e).
+Cada execução publicada informa a revisão de origem, a carga de trabalho, os tempos e o resultado da verificação:
+[carga de trabalho, tempos e verificação](../EXPORT-BENCHMARK-2026-11-06.md). As alterações em `main`
+passam pelos [fluxos de trabalho de CI](../../.github/workflows/README.md) públicos, incluindo os testes do instalador no Linux e no Windows
+e o build do verificador independente.
+
+[**Explore a demo →**](https://phishdestroy.github.io/TgWitness/demo/?lang=pt) ·
+[**Medições, datas e método →**](https://phishdestroy.github.io/TgWitness/pt/docs/validation/) ·
+[Baixe uma exportação de exemplo fictícia](https://phishdestroy.github.io/TgWitness/demo/downloads/tgwitness-demo.zip) ·
+[Auditoria assinada em inglês](../../website/validation/audit/REPORT.md)
+
+</details>
+
+<a name="start-simple"></a>
+
+<details>
+<summary><strong>Comece simples. Veja todas as rotas.</strong> · primeira inicialização e o mapa do sistema</summary>
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-start-map-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-start-map-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-start-map-mobile.svg">
+  <img src="../assets/presentation/readme-start-map.svg" width="1200" alt="A primeira inicialização oferece Só baixar, Acompanhar chats ou Provas para um caso e mostra só as seções correspondentes. O mapa do sistema liga o painel, o coletor, o Telegram, o diário, a testemunha e os serviços externos, com observações de rede. Valores fictícios.">
+</picture>
+
+A primeira inicialização faz uma única pergunta: **Só baixar**, **Acompanhar chats** ou
+**Provas para um caso**. A resposta define o objetivo e o nível da interface, e o
+painel mostra só as seções de que essa tarefa precisa. Conexão, login no Telegram e
+escolha dos chats vêm em seguida, em cinco etapas. A verificação da conexão roda sozinha, e
+as opções de rota só aparecem quando ela falha. As ferramentas avançadas ficam a um botão de distância.
+
+O **Mapa do sistema** mostra como a instalação chega ao Telegram e aos serviços
+externos: acesso ao painel, rota e destino no Telegram de cada conta, caminho do diário e
+da testemunha e as observações de rede mais recentes. Uma observação ausente é
+identificada como ausente.
+
+[Primeira configuração](../SETTINGS.md) · [Mapa do sistema](../SYSTEM-MAP.md)
+
+</details>
+
+<details>
+<summary><strong>Feito para o resto da investigação</strong> · fichas de alvos, listas de observação, carteiras, monitoramento de status online, documentos para o tribunal</summary>
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-capabilities-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-capabilities-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-capabilities-mobile.svg">
+  <img src="../assets/presentation/readme-capabilities.svg" width="1200" alt="Acompanhe nomes e nomes de usuário pelo ID do Telegram. Registre as interações compatíveis com bots, com recibos assinados. Pesquise mensagens arquivadas e conecte clientes MCP somente leitura. Implante um coletor com o SSH mascarado e registros do provedor para revisão. Documente uma conversa passo a passo com referências ao diário. Entregue um pacote do caso BagIt com modelos para o tribunal. Fluxos de trabalho ilustrativos.">
+</picture>
+
+<table>
+<tr>
+<td width="50%" align="center"><a href="../INVESTIGATION.md#4-connect-observations-across-chats"><b>Pessoas e dossiês&nbsp;↗</b></a><br><sub>Nomes e nomes de usuário acompanhados pelo ID do Telegram</sub></td>
+<td width="50%" align="center"><a href="../COLLECTION.md#act-from-the-panel"><b>Investigação de bots&nbsp;↗</b></a><br><sub>Interações com bots, com recibos assinados</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><a href="https://phishdestroy.github.io/TgWitness/pt/docs/archive/"><b>Busca no arquivo, IA e MCP&nbsp;↗</b></a><br><sub>Pesquise no arquivo e conecte clientes somente leitura</sub></td>
+<td width="50%" align="center"><a href="../HIGH-ASSURANCE.md"><b>Implantação selada na nuvem&nbsp;↗</b></a><br><sub>Um coletor dentro do Intel TDX</sub></td>
+</tr>
+</table>
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-documentation-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-documentation-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-documentation-mobile.svg">
+  <img src="../assets/presentation/readme-documentation.svg" width="1200" alt="Três etapas animadas: uma ficha de alvo cujo instantâneo posterior registra uma mudança de nome, um plano de conversa cujos objetivos se fecham com registros do diário e um código QR de pagamento decodificado em uma carteira com soma de verificação válida que gera uma ocorrência na lista de observação. Valores fictícios.">
+</picture>
+
+**Documente a conversa.** Abra uma ata para um chat no painel lateral **Documentação**
+e cada etapa se registra sozinha: ações no painel, respostas com o intervalo antes
+delas, edições, avisos de exclusão, notas e rascunhos de IA. Cada etapa cita seu registro
+no diário e o SHA-256. Ao finalizar o documento, ele é assinado e o hash da declaração é gravado
+no diário.
+
+| | |
 | --- | --- |
-| Verificação de prontidão sem iniciar o sistema | `python start.py --check` |
-| Converta uma sessão do Telethon SQLite para o modo offline | `python -m tgwitness.sessions account.session --out account.tgwitness-session` |
-| Transfira uma exportação de grande volume para o disco | `python -m tgwitness.download --token-file data/live/panel-token.txt --out evidence.zip` |
-| Verifique um arquivo exportado | `python tgwitness/verify.py tgwitness-evidence.zip --fingerprint SHA256` |
-| Verifique um arquivo com mais de 4 GiB | `python tgwitness/verify.py big-evidence.zip --fingerprint SHA256 --max-gib 16` |
-| Execute um testemunho independente a partir de um arquivo de configuração | `python -m tgwitness.witness run --config witness.json` |
+| [Fichas de alvos](../INVESTIGATION-MODE.md#subject-cards) | Instantâneos do perfil de um bot, pessoa, canal ou grupo com os rótulos BOT, VERIFIED, SCAM e FAKE do Telegram; um instantâneo posterior lista o que mudou |
+| [Planos de conversa](../INVESTIGATION-MODE.md#conversation-plans) | Objetivos para a rota de pagamento, a infraestrutura ou as pessoas, mensagens preparadas, tempos de resposta, atividade por hora e o estilo de escrita do outro lado |
+| [Tradução](../INVESTIGATION-MODE.md#machine-translation) | Exibida abaixo do original com idiomas, modelo e registro no diário |
+| [Listas de observação](../INVESTIGATION-MODE.md#watchlists) | Palavras, padrões, carteiras, @nomes de usuário, IDs, domínios, telefones e links, detectados em texto, edições, destinos de links ocultos, botões de bots, códigos QR e OCR |
+| [Monitoramento de status online](../INVESTIGATION-MODE.md#online-watch) | Verificações a cada 1–60 minutos, até 100 contas por solicitação, com um padrão por hora e dia da semana |
+| [Códigos e carteiras](../INVESTIGATION-MODE.md#codes-in-images) | Códigos QR de pagamento; endereços EVM conferidos pelo EIP-55, TON em formato bruto, somas de verificação do XRP Ledger, links de pagamento com rede, valor e token |
+| [Rastros do cliente](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-can-and-cannot-show) | Rastros do codificador em vídeos redondos e mensagens de voz; comparar o horário de upload com o de envio revela provas “ao vivo” pré-gravadas |
+| [Disfarce e autorização](../INVESTIGATION-MODE.md#cover-and-authority) | Identidades fictícias, autorizações e um registro de atuação infiltrada que sinaliza mensagens fora dos chats ou do período autorizados |
+| [Controle da conta](../INVESTIGATION-MODE.md#account-control) | Edição de perfil e privacidade com registros de antes e depois, verificação de exposição e modo offline logo após cada ação |
+| [Documentos para o tribunal](../INVESTIGATION-MODE.md#documents-for-court) | Pacote do caso BagIt com modelo de certificação conforme a Rule 902(13)/(14), índice de provas, anexo de solicitação e legendas WebVTT/SRT para gravações de tela |
 
-Os comandos auxiliares `python -m tgwitness…` devem ser executados dentro de `.venv` (`.venv\Scripts\python.exe` no Windows, `.venv/bin/python` nas demais plataformas).
+Conteúdo marcado como 18+, violência ou dados pessoais fica na cópia para o tribunal, selado com
+AES-256-GCM; as chaves são enviadas separadamente.
 
-| Variável | Objetivo |
+As [configurações de exportação](../EXPORT_HASHES.md) cobrem a aquisição pela API comum e pelo Takeout,
+o histórico de mensagens antes dos anexos, o download de arquivos ou os hashes do servidor e visualizações
+JSON/HTML compatíveis com o Telegram Desktop. A [exportação distribuída de chats](../DISTRIBUTED-EXPORT.md#history-acquisition)
+oferece um caminho opcional pelo Takeout para histórico público, pontos de verificação assinados a cada 100 mensagens
+e recuperação dentro de um intervalo usando a mesma conta; seu
+[projeto de desempenho](../FAST-ACQUISITION.md) descreve o comportamento de aquisição testado
+e as medições ao vivo planejadas.
+
+</details>
+
+<details>
+<summary><strong>Todo o resto</strong> · histórico, contas, proxies, IA, integrações</summary>
+
+| | |
 | --- | --- |
-| `TGWITNESS_HOST`, `TGWITNESS_PORT` | Endereço e porta de escuta (padrão `127.0.0.1:8787`) |
-| `TGWITNESS_DATA` | Diretório de dados (padrão `data/live`) |
-| `TGWITNESS_TOKEN` | Token de painel fixo em vez do gerado (pelo menos 24 caracteres) |
-| `TGWITNESS_VAULT_KEY_FILE` | Chave mestra externa do cofre para novas instalações |
-| `TGWITNESS_DOMAIN`, `TGWITNESS_IMAGE` | Nome de host HTTPS do Docker e imagem publicada (consulte `deploy/env.example`) |
-| `TGWITNESS_WITNESS_*` | Testemunha independente: coletor, tokens, canal, `_INTERVAL`, `_TIMEOUT`, `_POST` (todos, alterações, problemas), `_TITLE`, `_CONFIG` ([testemunha](../WITNESS.md#options)) |
+| [Carregar mensagens antigas](../HISTORY.md) | Baixe o histórico de chats selecionados; pause e retome quando quiser |
+| [Várias contas](../ACCOUNTS.md#multiple-accounts) | Espaços de trabalho separados, cada um com sua própria sessão do Telegram, diário e chave de assinatura |
+| [Importação em massa](../ACCOUNTS.md#bulk-import-and-account-groups) | Envie vários arquivos de sessão de uma vez e organize as contas em grupos com configurações compartilhadas |
+| [Conjunto de MTProxy](../wiki/Proxies.md#pool-dashboard-and-custom-sources) | Ping, países, filtros e suas próprias listas |
+| [Sessões existentes](../ACCOUNTS.md) | TData, Telethon, Pyrogram, StringSession, auth key ou uma linha `key:DC`; autorização independente opcional por QR a partir de um doador importado |
+| [Segurança da conta](../ACCOUNTS.md#create-an-independent-authorization) | Alertas de novas sessões, encerramento de outras sessões, um modo de sessão única que também define uma senha de verificação em duas etapas e uma [sonda testemunha](../ACCOUNTS.md#witness-probe) que percebe quando as atualizações ao vivo deixam de chegar a esta sessão |
+| [Exportação de chat retomável](../EXPORT_HASHES.md#restricted-github-capture-and-single-chat-export) | Uma exportação interrompida mantém uma cópia parcial assinada: retome, recomece ou baixe o que foi salvo |
+| [Proxies](../CONNECTION-SECURITY.md#ip-modes) | SOCKS5, HTTP CONNECT ou MTProxy por espaço de trabalho. **Ocultar IP** nunca recorre à conexão direta |
+| [Busca e IA](../ANALYSIS.md) | Busca local e IA opcional com fontes que você pode conferir |
+| [Busca de texto completo](../SEARCH.md) | Formas de palavras, frases exatas, domínios, @nomes de usuário e chinês sem espaços, com os melhores resultados primeiro (**versão prévia**) |
+| [MCP](../MCP.md) | Acesso somente leitura para clientes MCP, limitado aos chats que você escolher |
+| [Linha de comando](../CLI.md) | `search`, `context`, `messages`, `stats` e `export` em JSON Lines com `--json` para scripts e agentes, localmente ou com um token de escopo restrito (**versão prévia**) |
+| [OCR e transcrição](../MEDIA-ANALYSIS.md) | Roda localmente; os originais não são alterados |
+| [Captura independente](../OPTIONAL-CAPTURE.md) | Gravadores opcionais de navegador/AyuGram em **Mais ferramentas → Extras** (prévia, desativados por padrão) |
+| [Trusted Live](../TRUSTED-LIVE.md) | Sessão oficial do Desktop/Web, vídeo protegido e análise de continuidade da exportação nativa (prévia; qualificação ao vivo pendente) |
+| [Web oficial selada](../OFFICIAL-WITNESS.md) | Navegador oficial novo no GitHub Actions, controles restritos, vídeo assinado e código-fonte/configurações esperados de forma independente |
+| [Webhooks](../WEBHOOKS.md) | Eventos de saída assinados com novas tentativas; exemplo para n8n incluído |
+| [Acesso compartilhado](../ACCESS.md) | Dê a alguém acesso só aos chats selecionados, com prazo de validade e limites de IP |
+| [Números de mensagens ausentes](../EVIDENCE.md#missing-message-numbers-gap_summary) | Números atribuídos pelo Telegram que nunca foram observados, por canal e para a conta inteira, na cobertura, nos relatórios e no MCP (**versão prévia**) |
+| [Instantâneos do estado do chat](../COLLECTION.md) | Instantâneos assinados periódicos do título, da descrição, das mensagens fixadas, dos administradores e dos presentes, com o que mudou (**versão prévia**) |
+| [Mapa do sistema](../SYSTEM-MAP.md) | Mapa ao vivo do acesso ao painel, das rotas das contas, dos destinos no Telegram e dos serviços externos, com as 200 mais recentes de até 2.000 observações de rede |
 
+</details>
 
-![Section divider](../assets/presentation/divider.svg)
+<details>
+<summary><strong>Escolha o que sustenta o registro</strong> · local, nuvem auditada, GitHub Actions ou Intel TDX</summary>
 
-## Responsabilidade e proteção de dados (RGPD)
+Rode localmente, adicione uma implantação auditada na nuvem ou colete dentro de uma **VM confidencial
+do Phala Cloud com Intel TDX**. Todas as opções mantêm o diário assinado; as verificações
+extras tratam do ambiente em que ele foi coletado.
 
-O TgWitness é uma ferramenta. Quem o opera decide o que é coletado, por que motivo e por quanto tempo, e é responsável por isso — nos termos do GDPR da UE/Reino Unido, geralmente na qualidade de *controlador* desses dados pessoais. As mensagens do Telegram contêm dados pessoais de pessoas que nunca consentiram em ser registradas: nomes, nomes de usuário, IDs, fotos, números de telefone, opiniões. Esta seção não constitui aconselhamento jurídico; verifique a legislação aplicável ao seu caso e os termos de uso do Telegram.
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-assurance-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-assurance-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/casework-assurance-mobile.svg">
+  <img src="../assets/presentation/casework-assurance.svg" width="1200" alt="Três opções de implantação: verificação local do diário; uma VM auditada com registros do provedor e de acesso; Phala Intel TDX com quote verificado, sistema operacional e aplicativo medidos e uma chave de coletor vinculada.">
+</picture>
 
-- **É necessário dispor de uma base legal e de uma finalidade.** A prevenção de fraudes, a segurança de redes e informações e a defesa contra ações judiciais são comumente invocadas como interesses legítimos (RGPD, Art. 6(1)(f), Considerandos 47 e 49; Art. 9(2)(f) para ações judiciais). Registre a finalidade para cada caso. As autoridades públicas atuam com base em suas próprias bases legais.
-- **Colete apenas o necessário para o objetivo pretendido.** Comece com os chats selecionados. Os modos “pasta” e “conta inteira” registram chats privados e mensagens de terceiros: utilize-os apenas em contas dedicadas; o painel solicita confirmação e o diário assinado registra a ação. Desative os tipos de eventos, tipos de anexos e ações próprias desnecessárias, e exclua chats.
-- **Os perfis de pessoas são uma forma de análise de perfis.** Eles estão desativados por padrão e são ativados por conversa. Utilize-os para uma investigação específica, não baseie decisões automatizadas sobre pessoas neles (Art. 22) e desative-os ou remova a conversa quando terminar — isso os exclui. O monitoramento sistemático de muitas pessoas geralmente exige uma avaliação de impacto sobre a proteção de dados (Art. 35).
-- **Mantenha a segurança.** Sessões, credenciais e chaves estão armazenadas em um cofre criptografado; coloque o diretório de dados em um disco criptografado, proteja as exportações com uma senha (ZIP com AES-256), mantenha o painel protegido por HTTPS e forneça ao testemunho apenas seu token de leitura exclusiva. As notificações não contêm texto de mensagem, a menos que você ative os trechos, o que envia o texto para o serviço de notificações.
-- **Retenção e apagamento.** O diário é do tipo “somente adição”, de modo que sua integridade possa ser comprovada; registros individuais não podem ser removidos sem quebrar a cadeia de assinaturas. Planeje a retenção por espaço de trabalho e exclua todo o espaço de trabalho (Contas → Excluir) ou seu diretório de dados quando a finalidade for encerrada. Cópias externas sob o S3 Object Lock não podem ser excluídas antes de sua data de retenção — escolha o período adequadamente. O direito ao apagamento tem exceções, por exemplo, para o estabelecimento ou defesa de reivindicações legais (Art. 17(3)(e)).
-- **Solicitações das pessoas registradas.** As exportações de bate-papos e os arquivos de perfil permitem identificar quais informações são mantidas sobre uma pessoa (Art. 15).
-- **Nada é enviado aos autores.** O TgWitness não possui telemetria nem serviço hospedado; os dados saem da sua máquina apenas pelas rotas que o senhor configurar (Telegram, serviços de registro de data e hora, cópia no S3, notificações, witness).
+O verificador TDX confere o quote com a raiz fixada e os dados de revogação da Intel,
+vincula-o a uma declaração assinada do coletor e a um desafio novo e compara o
+sistema operacional e o aplicativo medidos com entradas esperadas de forma independente. O relatório lista
+cada resultado separadamente, para que o ambiente medido, a identidade do coletor, os registros
+de captura e a cobertura possam ser revisados em conjunto.
 
-## Segurança e status do projeto
+**Captura com procedência do GitHub** (prévia). Colete um chat em um runner hospedado pelo GitHub
+com uma versão fixada do TgWitness e uma sessão nova do Telegram e depois baixe o arquivo
+criptografado com o atestado do GitHub. O verificador confere o fluxo de trabalho aprovado e a
+versão do coletor, o resumo criptográfico do arquivo, o diário e os anexos. Também disponível
+em **Exportações** no painel.
+[Abrir a página de captura](https://phishdestroy.github.io/TgWitness/pt/docs/capture/) · [Instruções](../SEALED-ACTIONS.md)
 
+Para observação ao vivo, histórico ou uma exportação pontual, escolha um
+[método de coleta](../COLLECTION-MODES.md). Chats privados na nuvem ficam disponíveis
+quando a conta conectada tem acesso a eles. O aplicativo publicado também inclui a
+[integração com chats secretos](../PSEUDO-SECRET.md): instale a dependência opcional do protocolo
+e ative-a por conta para registrar os chats criados ou aceitos nela.
+Consulte o [escopo da coleta](../COLLECTION.md) para ver os caminhos de aquisição disponíveis.
 
-- O painel escuta no localhost por padrão. Para acesso remoto, utilize o perfil Compose via HTTPS ou um túnel SSH; nunca exponha o HTTP simples.
-- As sessões do Telegram, as credenciais da API, as credenciais do proxy e a chave de assinatura são armazenadas em um cofre criptografado com Fernet. Por padrão, sua chave fica no mesmo diretório de dados; defina `TGWITNESS_VAULT_KEY_FILE` para uma chave mestra externa. O conteúdo das mensagens locais e as mídias **não** são criptografados pelo TgWitness; mantenha o diretório de dados em um disco ou volume criptografado. As exportações em ZIP assinadas podem, opcionalmente, ser criptografadas com senha.
-- Arquivos de dados, sessões, tokens, chaves e exportações estão excluídos das compilações do Git e do Docker.
-- Relate vulnerabilidades de forma confidencial, conforme descrito no arquivo [SECURITY.md](../../.github/SECURITY.md).
+[Phala / Intel TDX e implantações auditadas](../HIGH-ASSURANCE.md) ·
+[Qualificação ao vivo no Phala](../VERIFICATION.md#live-phala-cloud-deployment--4-november-2026) ·
+[Limites de confiança](../SECURITY-MODEL.md)
 
-### O que foi testado
+</details>
 
-O TgWitness 0**.6.1** é executado no Windows 11 com Python 3.12. Situação em 29 de outubro de 2026:
+<a name="manifesto"></a>
 
-| Área | Como foi testado |
+<details>
+<summary><strong>Confira a captura e o registro salvo</strong> · o que o destinatário verifica e a Export Clinic</summary>
+
+<picture>
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-manifesto-mobile.svg">
+  <img src="../assets/presentation/readme-manifesto.svg" width="1200" alt="Capture a conversa. Verifique o registro. Salve mensagens, edições e arquivos, confira assinaturas e pontos de verificação e revise o processo de captura.">
+</picture>
+
+O TgWitness registra o conteúdo entregue à conta do Telegram conectada, com
+identificadores de chat, mensagem e remetente, versões capturadas e metadados de coleta.
+O arquivo reúne esses registros, os anexos preservados e os dados de verificação
+para revisão.
+
+| Verificação | O que o destinatário verifica |
 | --- | --- |
-| Mensagens, edições, exclusões, anexos, novas verificações após reinicializações, pausas do FloodWait | Realizado com **uma conta real do Telegram**, de 27 a 29 de outubro de 2026: 9.968 registros assinados, todas as assinaturas e a cadeia de hashes verificadas ([teste ao vivo](../VERIFICATION.md#live-telegram-test-whole-account--29-october-2026)) |
-| Observação de toda a conta e instantâneos do histórico | Realizado com **uma conta real** em 29 de outubro de 2026: mensagens de 2 grupos ou canais e 3 conversas privadas e bots |
-| Ao clicar no botão de uma mensagem na seção **“Conversas”** | Realizado uma vez com **uma conta real** |
-| Faça login com os arquivos de sessão do Telethon/Pyrogram e o TData do Telegram Desktop | Realizado com **uma conta real** |
-| Login por telefone, código QR e chave de autenticação; novas conversas que entram no escopo com suas mensagens anteriores; envio de mensagens; participação por convite; reações; adesão; perfis de usuários; várias contas simultaneamente; exportações e o verificador | Testes automatizados com clientes sintéticos do Telegram |
-| Proxies SOCKS5/HTTP, bot Witness, monitor Proof, notificações, cópia no S3, RFC 3161 e OpenTimestamps | Testes automatizados em servidores de teste locais |
-| Listas públicas do MTProxy | Baixado e filtrado (118 servidores em 29 de outubro); ainda não foi estabelecida conexão por meio deles |
-| Testes atuais e seus limites | [Validações pendentes](../VERIFICATION.md#remaining-qualification) |
+| Diário assinado e manifesto | As assinaturas dos registros, a cadeia de hashes e os arquivos entregues em relação à chave de assinatura esperada. |
+| Ponto de verificação guardado à parte | O diário em relação a um comprimento e um hash do cabeçalho registrados anteriormente. |
+| Testemunha independente | O diário em relação aos pontos de verificação guardados por uma testemunha separada. |
+| Captura com GitHub Actions | O arquivo em relação ao seu atestado, ao fluxo de trabalho hospedado aprovado e à versão do coletor. |
 
-Detalhes: [registro de verificação](../VERIFICATION.md), [status da versão](../internal/RELEASE.md) e [prontidão](../internal/READINESS.md).
+[Export Clinic](https://phishdestroy.github.io/TgWitness/docs/export-clinic/)
+mostra uma conversa do Telegram ao lado de arquivos de exportação do Desktop alterados de propósito.
+Compare as versões, examine as alterações e siga as etapas de coleta e
+verificação de um arquivo assinado do TgWitness.
 
+[Etapas de verificação](../wiki/Exports-and-Verification.md) ·
+[Captura no GitHub](../SEALED-ACTIONS.md) ·
+[Modelo técnico de confiança](../SECURITY-MODEL.md)
 
-![Section divider](../assets/presentation/divider.svg)
+</details>
 
-## Desenvolvimento
+<a name="operations"></a>
 
-```sh
-python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\Activate.ps1
-python -m pip install -c deploy/constraints.txt -e ".[dev]"
-python -m ruff check .                                 # source checks
-python -m playwright install chromium
-python tools/build_portable.py                         # Windows portable ZIP (Windows + Python 3.12)
-python tools/build_source.py                          # source ZIP with SHA-256 manifest
-python tools/build_site.py                             # static project site in dist/site
-```
+<details>
+<summary><strong>Mantenha a investigação em andamento</strong> · notificações, armazenamento e recuperação</summary>
 
-As verificações do navegador usam dados sintéticos. Os processos atuais de compilação e publicação estão definidos em `.github/workflows/`. Leia [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) antes de abrir um pull request.
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-services-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-services-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-services-mobile.svg">
+  <img src="../assets/presentation/readme-services.svg" width="1200" alt="Fluxos de trabalho animados: o Apprise envia os alertas configurados; as cópias externas são criptografadas antes do envio para um armazenamento compatível com S3.">
+</picture>
 
-## Documentação
+[Notificações](../OPERATIONS.md#notifications) · [Cópia externa criptografada](../wiki/Off-site-Copy.md) · [Backup e recuperação](../wiki/Backup-and-Recovery.md) · [Solução de problemas](../OPERATIONS.md)
 
-| Guia | Capas |
+<table>
+<tr>
+<td width="33%" align="center"><a href="https://phishdestroy.github.io/TgWitness/pt/docs/start/"><b>Guia de configuração&nbsp;↗</b></a><br><sub>Da instalação ao primeiro chat</sub></td>
+<td width="33%" align="center"><a href="https://phishdestroy.github.io/TgWitness/pt/docs/dedicated-account/"><b>Prepare sua conta&nbsp;↗</b></a><br><sub>Uma conta dedicada do Telegram</sub></td>
+<td width="33%" align="center"><a href="DEPLOYMENT.md"><b>Docker e servidores&nbsp;↗</b></a><br><sub>HTTPS, reinicializações e atualizações</sub></td>
+</tr>
+</table>
+
+</details>
+
+<a name="repository-map"></a>
+
+<details>
+<summary><strong>Explore o repositório</strong> · onde ficam o código, a documentação e as ferramentas</summary>
+
+| Diretório | Comece por aqui |
 | --- | --- |
-| [Introdução rápida](QUICKSTART.md) | Primeira inicialização, conexão da conta e primeira exportação |
-| [Formatos de contas e sessões](../ACCOUNTS.md) | Dados de login, conversão, contas múltiplas |
-| [Como funciona a coleta](../COLLECTION.md) | Políticas de captura, versões, anexos, lacunas |
-| [Conexão e segurança](../CONNECTION-SECURITY.md) | Proxies, criptografia e chaves |
-| [Operações](../OPERATIONS.md) | Fluxo de trabalho diário, backup, restauração e capacidade |
-| [Implantação](DEPLOYMENT.md) e [modelos de serviço](../../deploy/README.md) | Servidores, contêineres, HTTPS, atualizações |
-| [Modelo de evidências](../EVIDENCE.md) e [registros de data e hora](../TIMESTAMP.md) | Integridade, cobertura, perfis de pessoas, confiança e transferência de responsabilidade |
-| [Testemunha independente](../WITNESS.md) | Tokens de testemunha somente para leitura, perfil do Docker, publicações no canal, verificações cruzadas |
-| [Arquitetura](../ARCHITECTURE.md) e [modelo de produto](../PRODUCT.md) | Funcionamento interno e decisões de projeto |
-| [Verificação](../VERIFICATION.md) e [preparação](../internal/READINESS.md) | Verificações realizadas e tarefas pendentes |
-| [Registro de alterações](../CHANGELOG.md) | Histórico de versões |
-| [Site e publicação](../internal/PUBLISHING.md) | Visualização do site local, GitHub Pages, primeira publicação |
+| [docs/](../README.md) | Configuração, fluxos de investigação e referência técnica |
+| [tgwitness/](../../tgwitness/README.md) | Aplicativo principal, coletor, diário e painel web |
+| [tgwitness_capture/](../../tgwitness_capture/README.md) | Gravadores independentes e o código de verificação deles |
+| [addons/](../../addons/README.md) | Instalação, configuração e testes da captura opcional |
+| [deploy/](../../deploy/README.md) | Instaladores, contêineres e serviços em segundo plano |
+| [examples/](../../examples/README.md) | Configurações de exportação de conta e de captura selada |
+| [integrations/](../../integrations/README.md) | Webhooks assinados e um receptor para n8n |
+| [.agents/](../../.agents/README.md) | Instruções de tarefas para ler o arquivo pela CLI |
+| [scripts/](../../scripts/README.md) | Inicializadores e utilitários de CI |
+| [tools/](../../tools/README.md) | Builds, verificações e empacotamento |
+| [website/](../../website/README.md) | Site público, guias traduzidos e demo interativa |
+| [.github/](../../.github/AUTOMATION.md) | Fluxos de trabalho, diretrizes de contribuição e suporte |
 
+[Guia completo do projeto](../PROJECT-GUIDE.md) ·
+[Como contribuir](../../.github/CONTRIBUTING.md) · [Obter ajuda](../../.github/SUPPORT.md)
 
-![Section divider](../assets/presentation/divider.svg)
+</details>
 
-## Licença
+<details>
+<summary><strong>⚖️ Aviso ético e continuidade histórica</strong></summary>
 
-[MIT License](../../LICENSE)
+A posição dos autores e o aviso sobre o operador, neste idioma:
 
-## Guias nesta pasta
+[Aviso sobre incompatibilidade de licença e arquitetura](TAYLOR-WESSING-EXCLUSION.md) · [Aviso sobre o operador](OPERATOR-INCOMPATIBILITY.md) · [Licença MIT](../../LICENSE) · [NOTICE original](../../NOTICE)
 
-| Arquivo | Conteúdo |
-| --- | --- |
-| [DEPLOYMENT.md](DEPLOYMENT.md) | Implantação e operações |
-| [QUICKSTART.md](QUICKSTART.md) | Introdução rápida ao TgWitness |
+</details>
 
-[Aviso sobre incompatibilidade de licença e arquitetura](TAYLOR-WESSING-EXCLUSION.md) · [MIT License](../../LICENSE)
+<a name="languages"></a>
+
+<details>
+<summary><strong>Leia a apresentação do projeto no seu idioma</strong></summary>
+
+[English](../../README.md) · [Русский](../ru/README.md) · [Українська](../uk/README.md) · [Español](../es/README.md) · **Português (Brasil)** · [Türkçe](../tr/README.md) · [العربية](../ar/README.md) · [فارسی](../fa/README.md) · [اردو](../ur/README.md) · [हिन्दी](../hi/README.md) · [Bahasa Indonesia](../id/README.md) · [Tiếng Việt](../vi/README.md) · [简体中文](../zh/README.md) · [繁體中文](../zh-Hant/README.md) · [Français](../fr/README.md) · [Deutsch](../de/README.md) · [Italiano](../it/README.md) · [Polski](../pl/README.md) · [O‘zbekcha](../uz/README.md) · [한국어](../ko/README.md) · [日本語](../ja/README.md) · [Bahasa Melayu](../ms/README.md) · [ไทย](../th/README.md) · [עברית](../he/README.md) · [বাংলা](../bn/README.md) · [አማርኛ](../am/README.md)
+
+</details>
+
+<p align="center">
+  <a href="../README.md"><b>Documentação técnica</b></a> ·
+  <a href="https://github.com/phishdestroy/TgWitness/wiki"><b>Manual de investigação</b></a> ·
+  <a href="https://github.com/phishdestroy"><b>Feito pela PhishDestroy</b></a> ·
+  <a href="../../.github/CONTRIBUTING.md"><b>Contribua</b></a> ·
+  <a href="../../.github/SUPPORT.md"><b>Obter ajuda</b></a> ·
+  <a href="../../.github/SECURITY.md"><b>Relatar uma vulnerabilidade</b></a>
+</p>
+
+[Índice do projeto legível por máquina](../../llms.txt) · [Manual completo em texto](https://phishdestroy.github.io/TgWitness/llms-full.txt) · [Regras do repositório para agentes](../../AGENTS.md)

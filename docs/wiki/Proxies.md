@@ -26,7 +26,7 @@ Every workspace has its own Telegram route. The IP mode decides whether it's eve
 
 ## Choose a route
 
-Open **Account → Settings → Connection settings → Change connection route**.
+Open **More tools → Account → Settings → Connection settings → Change connection route**.
 
 | IP mode | When a proxy is unavailable |
 | --- | --- |
@@ -68,7 +68,7 @@ the background, a failed download keeps the last good list. **Update public list
 refreshes without touching a manual route.
 
 Rotation, failure thresholds, cooldowns, sharing and retries live under
-**Parameters → Automatic MTProxy**. Accounts get separate proxies when there are enough.
+**More tools → Parameters → Automatic MTProxy**. Accounts get separate proxies when there are enough.
 Sharing limit 1 means an account waits rather than share; different servers can still
 have the same exit IP.
 
@@ -80,7 +80,7 @@ Operators can add a local catalog with `TGWITNESS_PROXY_CATALOG` and route list 
 
 ## Pool dashboard and custom sources
 
-**Account → Settings → Connection settings → Proxy servers** lists servers with ping,
+**More tools → Account → Settings → Connection settings → Proxy servers** lists servers with ping,
 status, country, source and which workspaces use them. Filter, pause observation, hit **Use**.
 
 **Lists and sources** (admin): turn off bundled lists, add HTTPS list URLs, upload files or

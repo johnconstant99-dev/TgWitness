@@ -13,5 +13,5 @@
 </blockquote>
 
 <p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Enregistrement source</a> · <a href="OPERATOR-INCOMPATIBILITY.md">Avis éthique et continuité historique</a></p>
-<p><a href="../../LICENSE">Licence MIT complète</a> · <a href="../../README.md">Projet</a> · <a href="../README.md">Documentation</a> · <a href="../wiki/Home.md">Wiki</a></p>
+<p><a href="../../LICENSE">Licence MIT complète</a> · <a href="README.md">Projet</a> · <a href="README.md">Documentation</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

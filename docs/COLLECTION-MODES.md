@@ -10,12 +10,12 @@ choosing one does not silently start another or change the account's connection.
 | Goal | Where | Result | Account use |
 | --- | --- | --- | --- |
 | Share material already saved | Exports → Saved observations | Signed journal archive, readable report or minimized handover | No Telegram reads; observation can continue |
-| Keep future changes | Sources → start observation | Delivered messages, versions and deletion notices in the workspace | Owns the account while running |
-| Add past history to the workspace | Sources → Full history | Current visible messages, media outcomes and available Recent Actions in the signed journal | Pause observation first; choose Standard API or Takeout |
+| Keep future changes | Chats → Choose, then Start observation | Delivered messages, versions and deletion notices in the workspace | Owns the account while running |
+| Add past history to the workspace | More tools → Sources → Chats in scope → Full history | Current visible messages, media outcomes and available Recent Actions in the signed journal | Pause observation first; choose Standard API or Takeout |
 | Create a separate account snapshot | Exports → Telegram account | Selected chats, files and optional account data in a separate signed archive | Requires an idle account; observation sources do not define this selection |
 | Export one chat | Chats → Export chat | Signed selected history and context, optionally split across eligible accounts | Every selected account must be idle and already have access |
-| Preserve an official-client session | Extras → Independent capture → Trusted Live | Guarded video, preserved native JSON and continuity artifacts | Separate recorder and manual official-client login; preview |
-| Capture with GitHub workflow provenance | Exports → GitHub capture | Encrypted handoff and workflow attestation | Separate runner and explicitly authorized session; preview |
+| Preserve an official-client session | More tools → Extras → Independent capture → Trusted Live | Guarded video, preserved native JSON and continuity artifacts | Separate recorder and manual official-client login; preview |
+| Capture with GitHub workflow provenance | Exports → Other formats & capture tools → GitHub Actions capture | Encrypted handoff and workflow attestation | Separate runner and explicitly authorized session; preview |
 
 ## Existing observations and fresh reads
 

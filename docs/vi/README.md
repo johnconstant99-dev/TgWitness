@@ -1,360 +1,482 @@
-[English](../../README.md) · [Русский](../ru/README.md) · [Українська](../uk/README.md) · [Español](../es/README.md) · [Português (Brasil)](../pt/README.md) · [Türkçe](../tr/README.md) · [العربية](../ar/README.md) · [فارسی](../fa/README.md) · [اردو](../ur/README.md) · [हिन्दी](../hi/README.md) · [Bahasa Indonesia](../id/README.md) · **Tiếng Việt** · [简体中文](../zh/README.md)
-
-![TgWitness — preserve the record, verify the evidence](../assets/presentation/casework-hero-static.svg)
-
-<p align="center">
-  <strong>Không gian làm việc quan sát Telegram của quý vị.</strong><br>
-  Lưu trữ các cuộc trò chuyện đã ghi lại, nắm bắt những thay đổi và chia sẻ lịch sử đã được ký xác thực.<br>
-  Trên máy tính hoặc máy chủ riêng của quý vị. Sử dụng các tài khoản của chính quý vị.
-</p>
-
-<p align="center">
-  <img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-243a52?logo=python&amp;logoColor=white">
-  <img alt="FastAPI + Telethon" src="https://img.shields.io/badge/FastAPI-Telethon-243a52?logo=fastapi&amp;logoColor=white">
-  <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-243a52?logo=docker&amp;logoColor=white">
-  <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-243a52">
-  <img alt="Version: 0.9.1" src="https://img.shields.io/badge/version-0.9.1-243a52">
-</p>
-
-<p align="center">
-  <a href="#hướng-dẫn-bắt-đầu-nhanh">Hướng dẫn bắt đầu nhanh</a> ·
-  <a href="#các-tính-năng">Các tính năng</a> ·
-  <a href="#kết-nối-tài-khoản-telegram">Tài khoản</a> ·
-  <a href="#bằng-chứng-và-xác-minh">Bằng chứng</a> ·
-  <a href="#triển-khai">Triển khai</a> ·
-  <a href="../README.md">Tài liệu hướng dẫn</a>
-</p>
-
-> [!TIP]
-> **Hãy khám phá trước khi kết nối.** Vui lòng chạy `scripts\Demo.cmd` hoặc `sh start.sh --demo` để mở không gian làm việc với các cuộc trò chuyện giả định. Không cần tài khoản Telegram.
-
-**Lần đầu ghé thăm?** [Bắt đầu →](QUICKSTART.md) · [Wiki →](../wiki/Home.md) · [Chọn hướng dẫn →](../README.md) · [Nhận trợ giúp →](../../.github/SUPPORT.md) · [Xem những gì đã được kiểm thử →](../VERIFICATION.md)
-
-> [!WARNING]
-> **Vui lòng sử dụng một tài khoản Telegram chuyên dụng mà quý vị có thể chấp nhận rủi ro mất mát.** Chúng tôi khuyến cáo mạnh mẽ không nên kết nối các tài khoản cá nhân hoặc có giá trị, cũng như không nên tạo thông tin đăng nhập API ID / API hash trên các tài khoản đó. Telegram có thể hạn chế hoặc cấm vĩnh viễn các tài khoản. [Vui lòng tham khảo hướng dẫn về tài khoản](../ACCOUNTS.md).
-
-## Các tính năng
-
-- **Các cuộc trò chuyện có lịch sử.** Đọc các tin nhắn đã lưu, so sánh các bản chỉnh sửa đã ghi lại và xem thông báo xóa trong bối cảnh của cuộc trò chuyện.
-- **Theo dõi theo cách của quý vị. Quý vị** có thể chọn các cuộc trò chuyện riêng lẻ, một thư mục trên Telegram hoặc toàn bộ tài khoản. Mỗi tài khoản đều có không gian làm việc và cài đặt riêng.
-- **Các tệp xuất mà quý vị có thể xác minh.** Một tệp ZIP đã được ký số, các bản ghi gốc, các tệp đính kèm được lưu giữ nguyên vẹn và một báo cáo HTML ngoại tuyến. Tính năng bảo vệ bằng mật khẩu tùy chọn khi chuyển giao.
-- **Được thiết kế dành cho việc sử dụng hàng ngày. Hỗ trợ** chế độ sáng và tối, 25 ngôn ngữ, tính năng tìm kiếm, điều hướng bằng phím tắt Ctrl/Cmd+K, cùng các thao tác trực tiếp từ mục Trò chuyện.
-
-<details>
-<summary>Tất cả các tính năng và chi tiết kỹ thuật</summary>
-
-- **Tuyến kết nối của quý vị.** Trong **phần** **Tài khoản → Cài đặt proxy**, quý vị có thể chọn từ các danh sách MTProxy công khai được tích hợp sẵn, làm mới chúng từ nguồn gốc hoặc dán liên kết proxy Telegram của riêng quý vị. Tính năng cấu hình thủ công SOCKS5/HTTP/MTProxy và danh mục nhà cung cấp vẫn được duy trì. Các danh sách công khai đã được tải xuống và lọc sẵn, nhưng hiện tại vẫn chưa có tài khoản nào kết nối qua máy chủ nào trong danh sách này. [Cách thức hoạt động của các danh sách công khai](../CONNECTION-SECURITY.md#public-proxies-supplied-by-your-installation).
-
-- **Một nhật ký ghi lại những gì các tài khoản của quý vị thực sự quan sát được. Bao gồm** các tin nhắn mới, các chỉnh sửa, thông báo xóa, phản hồi, các sự kiện liên quan đến thành viên cũng như những khoảng trống trong phạm vi theo dõi từ các nhóm và kênh mà quý vị lựa chọn.
-- **Các cuộc trò chuyện đã chọn, một thư mục trên Telegram hoặc toàn bộ tài khoản.** Chọn các loại nội dung cần ghi lại — kênh, nhóm, cuộc trò chuyện riêng tư, bot — và các cuộc trò chuyện mới sẽ được thêm vào ngay khi chúng xuất hiện. Các trường hợp loại trừ, tin nhắn gửi đi và các chỉnh sửa của chính người dùng, các nội dung bị xóa trong các cuộc trò chuyện riêng tư sẽ được khớp với cuộc trò chuyện tương ứng, việc kiểm tra lại theo mức độ ưu tiên và giới hạn tệp đính kèm cho từng loại ([bộ sưu tập](../COLLECTION.md#observation-scope-chosen-chats-a-folder-or-the-whole-account)).
-- **Chế độ điều tra.** Chỉ với một nút bấm, hệ thống sẽ tạo sẵn một tài khoản chuyên dụng để tham gia các nhóm và tương tác với các bot: mọi thứ tài khoản này nhìn thấy và gửi đi đều được ghi lại, các nút dưới tin nhắn của bot (liên kết, ứng dụng web, văn bản cần sao chép) được lưu giữ và các chỉnh sửa chỉ bằng nút sẽ trở thành phiên bản mới, đồng thời mọi cuộc trò chuyện hoặc bot mới đều có hồ sơ riêng (mô tả, lệnh, thành viên) và các tin nhắn hiển thị trước đó được lưu lại ngay lập tức ([chế độ điều tra](../COLLECTION.md#investigation-mode-joining-teams-and-talking-to-bots)). **Hướng dẫn** **về Tài khoản chuyên dụng** trên bảng điều khiển (`/dedicated-account.html`) giải thích lý do tại sao không được sử dụng tài khoản chính, lý do tại sao TgWitness hoạt động thông qua các cặp băm ứng dụng công khai/ID ứng dụng và lý do tại sao một cặp API tự thân không cấp quyền truy cập vào tài khoản của quý vị (kèm theo các liên kết đến tài liệu hướng dẫn của Telegram), đồng thời liệt kê các cách để tạo một tài khoản bổ sung.
-- **Thực hiện trực tiếp từ mục Trò chuyện.** Gửi tin nhắn và trả lời, nhấn các nút gọi lại/nhắn tin của bot, hoặc xem trước lời mời Telegram và tham gia. Tài khoản được chọn sẽ thực hiện hành động; các yêu cầu, bản xem trước lời mời và phản hồi dưới dạng cửa sổ bật lên/URL từ bot sẽ được ghi vào nhật ký đã ký của tài khoản đó ([khách hàng thu nhỏ trên bảng điều khiển](../COLLECTION.md#act-from-the-panel)).
-- **Phạm vi bao quát mà quý vị có thể nêu rõ.** Các báo cáo và công cụ xác minh sẽ ghi rõ “được theo dõi liên tục từ X đến Y”, liệt kê các khoảng trống kèm theo lý do và ID tin nhắn chưa từng được ghi nhận — đồng thời tuyệt đối không trình bày chúng như những tin nhắn đã bị xóa.
-- **Hồ sơ cá nhân, tùy chọn tham gia theo từng cuộc trò chuyện.** Lịch sử tên và tên người dùng, các cờ cảnh báo trên Telegram, mã SHA-256 và pHash của ảnh đại diện, hoạt động, ai trả lời ai cùng các ví, số điện thoại, tên người dùng và liên kết được đề cập — được xây dựng hoàn toàn từ các bản ghi đã lưu trữ, mỗi sự kiện đều trỏ đến bản ghi tương ứng trong nhật ký, được xuất dưới dạng một tệp riêng biệt có chữ ký ([mô hình bằng chứng](../EVIDENCE.md#people-profiles)).
-- **Nhân chứng độc lập.** Một tiến trình riêng biệt với khóa và bot riêng sẽ truy xuất phần đầu nhật ký đã được ký, đăng nó lên một kênh Telegram và báo cáo khi bộ thu thập không phản hồi; người xác minh sẽ đối chiếu các bản xuất với phần nhật ký này. Khoảng thời gian, thời gian chờ, các kiểm tra nào được đăng và nội dung của các bài đăng đều là các tùy chọn hoặc được định nghĩa trong tệp cấu hình JSON ([witness](../WITNESS.md)). Đã được thử nghiệm trên máy chủ Bot API cục bộ, chưa thử nghiệm với bot và kênh thực tế.
-- **Các thiết lập thu thập dữ liệu trong bảng điều khiển.** Các giới hạn và tốc độ thu thập, kiểm tra lại, tải xuống, hồ sơ cá nhân, thông báo và xuất dữ liệu được hiển thị trên trang **Thông** **số** cùng với phạm vi và giá trị mặc định tương ứng; mọi thay đổi đều được ghi lại trong nhật ký có chữ ký ([cài đặt và thông số](#cài-đặt-và-tham-số)).
-- **Các thao tác chỉnh sửa và xóa được hiển thị trong bối cảnh cụ thể.** Mỗi lần chỉnh sửa sẽ tạo thành một phiên bản riêng biệt được hiển thị bên cạnh phiên bản trước đó; thông báo xóa sẽ không bao giờ xóa bỏ nội dung đã được lưu lại trước đó.
-- **Các tệp xuất có chữ ký và có thể xác minh.** Mỗi sự kiện đều được liên kết bằng hàm băm (SHA-256) và ký số (Ed25519). Gói ZIP có chữ ký này bao gồm các tệp JSONL, CSV, báo cáo HTML ngoại tuyến, các tệp phương tiện được lưu giữ nguyên vẹn và một công cụ xác minh độc lập.
-- **Các tệp xuất được bảo vệ bằng mật khẩu.** Tùy chọn, quý vị có thể nén bất kỳ tệp xuất nào thành tệp ZIP được mã hóa bằng AES-256 bằng WinZip – định dạng này có thể được 7-Zip và WinRAR đọc được; nội dung đã được ký số bên trong vẫn được giữ nguyên. Một tệp lưu trữ thử nghiệm đã được mở theo từng byte trong libarchive (Windows `tar`) và hệ thống đã từ chối khi nhập mật khẩu sai ([mô hình bằng chứng](../EVIDENCE.md#investigation-handoff)).
-- **Thông báo.** Các sự cố (dung lượng đĩa thấp, tài khoản đã đăng xuất, lỗi thu thập dữ liệu, lỗi sao chép hoặc lỗi dấu thời gian), những thay đổi trong các cuộc trò chuyện được theo dõi và bản tóm tắt hàng ngày, được gửi qua [Apprise](https://github.com/caronc/apprise) đến Matrix, Telegram, Discord, Slack, ntfy, email và nhiều dịch vụ khác — không kèm theo nội dung tin nhắn trừ khi quý vị bật tính năng trích đoạn — và được liệt kê trong bảng điều khiển. Việc gửi thông báo đã được kiểm tra trên một điểm cuối cục bộ; các dịch vụ này vẫn chưa được kiểm tra.
-- **Hỗ trợ 25 ngôn ngữ giao diện.** Bảng điều khiển và toàn bộ tài liệu hướng dẫn đều sử dụng chung các ngôn ngữ này, bao gồm tiếng Đức, tiếng Pháp, tiếng Nhật và tiếng Do Thái. Nội dung Telegram và các bản ghi trong sổ chứng cứ luôn được hiển thị chính xác như bản đã lưu.
-- **Chế độ giao diện sáng và tối.** Theo mặc định, ứng dụng sẽ tuân theo cài đặt hệ thống; lựa chọn này sẽ được lưu lại cho từng trình duyệt.
-- **Điều hướng thuận tiện bằng bàn phím.** Nhấn **Ctrl+K** (Mac: **⌘K**) hoặc chọn **“Đi đến…”** để tìm một phần. Sử dụng các phím mũi tên và phím Enter để mở phần đó; nhấn phím Escape để đóng menu.
-- **Hỗ trợ nhiều tài khoản. Có thể tạo** bất kỳ số lượng không gian làm việc độc lập nào, mỗi không gian đều có phiên Telegram, nhật ký, khóa ký, đường dẫn proxy và chính sách ghi lại riêng biệt.
-- **Các phương thức đăng nhập linh hoạt.** Số điện thoại + mã xác thực + xác thực hai yếu tố (2FA), mã QR, Telethon/Pyrogram `.session`, tệp ZIP TData của Telegram Desktop, Telethon StringSession hoặc Khóa xác thực đầy đủ kèm theo ID DC của nó.
-- **Các proxy dành riêng cho từng tài khoản.** SOCKS5 và HTTP CONNECT, đã được kiểm thử trên các proxy thử nghiệm cục bộ, cùng với MTProxy đang trong giai đoạn thử nghiệm, chưa được kiểm thử trên máy chủ thực tế. Trong trường hợp proxy gặp sự cố, hệ thống sẽ không tự động chuyển sang kết nối trực tiếp mà không có thông báo.
-- **Được thiết kế để bảo mật riêng tư.** Hoạt động trên máy tính hoặc máy chủ của quý vị. Giao diện người dùng web được tích hợp sẵn, không cần Node.js, không cần dịch vụ lưu trữ bên ngoài, không có dữ liệu theo dõi. Các phiên làm việc, thông tin đăng nhập API và khóa bí mật proxy được lưu trữ trong kho dữ liệu được mã hóa.
-- **Dễ dàng vận hành.** Chỉ cần nhấp đúp trên Windows, chạy một tập lệnh trên Linux/macOS, hoặc sử dụng Docker Compose với tùy chọn HTTPS tự động. Kết quả và giới hạn kiểm thử: [hồ sơ xác minh](../VERIFICATION.md).
-
-</details>
-
-## Hướng dẫn bắt đầu nhanh
-
-| Nền tảng | Cách bắt đầu | Yêu cầu |
-| --- | --- | --- |
-| **Hệ điều hành Windows, chưa cài đặt bất kỳ phần mềm nào** | Tải xuống `TgWitness-<version>-windows-amd64-portable.zip` từ [mục Phát hành](../../../../releases), giải nén, nhấp đúp vào **`TgWitness.cmd`** | Không có gì; Python đã được tích hợp sẵn |
-| Windows, từ mã nguồn | Nhấp đúp vào **`Start.cmd`** | Python 3.11 trở lên; sẽ được cung cấp và cài đặt sẵn cho quý vị nếu chưa có |
-| Linux / macOS | `sh start.sh` | Yêu cầu Python 3.11 trở lên cùng với `venv`; nếu thiếu, tập lệnh sẽ hiển thị lệnh cài đặt phù hợp với hệ thống của quý vị |
-| Docker, mọi hệ điều hành | Nhấp đúp vào **`scripts\Docker.cmd`** hoặc chạy `sh scripts/docker-start.sh` | Docker Engine/Desktop với Compose phiên bản 2.20 trở lên |
-
-1. Mở **http://127.0.0.1:8787**.
-2. Dán mã thông báo truy cập bảng điều khiển vào đây:
-   - Cài đặt phiên bản di động hoặc từ mã nguồn: nội dung của `data/live/panel-token.txt`
-   - Docker: được in bởi `scripts\Docker.cmd`/`scripts/docker-start.sh`, hoặc `docker compose exec tgwitness cat /data/panel-token.txt`
-3. Thêm tài khoản Telegram của quý vị, chọn các cuộc trò chuyện cần theo dõi và nhấn **“Bắt đầu theo dõi**”.
-
-Lần khởi chạy nguồn đầu tiên sẽ tạo ra một tài khoản riêng tư `.venv` và cài đặt các phụ thuộc bắt buộc (yêu cầu kết nối Internet). Các công cụ hỗ trợ Docker sẽ xây dựng hình ảnh, chờ cho đến khi bảng điều khiển hoạt động ổn định và hiển thị địa chỉ cùng mã thông báo của nó. `python start.py --check` (hoặc `TgWitness-Check.cmd` trong gói di động) sẽ cung cấp báo cáo sẵn sàng mà không cần tương tác với Telegram.
-
-> **Chỉ muốn xem thử?** Vui lòng truy cập **`scripts\Demo.cmd`** hoặc `sh start.sh --demo`. Một nhật ký giả định sẽ mở trực tiếp trên trình duyệt; không có tài khoản Telegram nào được kết nối và dữ liệu được lưu trữ riêng biệt tại `data/demo`.
-
-<details>
-<summary><strong>Bên trong không gian làm việc: các cuộc trò chuyện, lịch sử và tính năng xuất dữ liệu</strong></summary>
+<p align="right"><sub><a href="../../README.md">English</a> · <a href="#languages">Ngôn ngữ khác</a></sub></p>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="../assets/chats-dark.png">
-  <img src="../assets/chats.png" alt="TgWitness chats view with synthetic demo data: deleted and edited messages highlighted">
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-hero-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-hero-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/casework-hero-mobile.svg">
+  <img src="../assets/presentation/casework-hero.svg" width="1440" alt="TgWitness — Lần theo dấu vết. Bảo toàn bằng chứng. Sổ nhật ký có chữ ký liên kết bằng mã băm, điểm kiểm tra được lưu giữ riêng và tệp lưu trữ bằng chứng có thể xác minh.">
 </picture>
 
-### Lịch sử quan sát
+<table>
+<tr>
+<td width="33%" align="center"><a href="https://phishdestroy.github.io/TgWitness/demo/?lang=vi"><b>Xem bản demo&nbsp;↗</b></a><br><sub>Giao diện thật với bản ghi hư cấu</sub></td>
+<td width="33%" align="center"><a href="#quick-start"><b>Tải xuống và bắt đầu&nbsp;↓</b></a><br><sub>Một lệnh cho Linux, macOS và Windows</sub></td>
+<td width="33%" align="center"><a href="https://github.com/phishdestroy/TgWitness/wiki"><b>Đọc sổ tay&nbsp;↗</b></a><br><sub>Hướng dẫn điều tra từng bước</sub></td>
+</tr>
+</table>
 
-![Journal with fictional demo data](../assets/workspace.png)
+<p align="center"><strong>Không gian làm việc tự lưu trữ cho các cuộc điều tra trên Telegram.</strong><br>Lưu cuộc trò chuyện, giữ lại các lần sửa và xóa, xem ai liên hệ với ai<br>và bàn giao bản xuất có chữ ký mà ai cũng kiểm tra được.</p>
 
-### Các tệp xuất có chữ ký
+<p align="center"><strong>ZERO TRUST.</strong> TgWitness không đứng về phía nào: các bước kiểm tra như nhau áp dụng cho nhà vận hành, cho PhishDestroy và cho bất kỳ ai khác.<br>Chỉ những gì bên thứ ba hoặc toán học xác nhận mới được tính. <a href="../LIMITS-AND-OBJECTIONS.md">Giới hạn và phản biện</a></p>
 
-![Export records and verify signatures](../assets/exports.png)
+<p align="center">
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · bản tiền phát hành"></a>
+  <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
+  <sub><a href="../VERIFICATION.md">Môi trường đã kiểm thử</a> · 25 ngôn ngữ giao diện · 26 ngôn ngữ hướng dẫn</sub>
+</p>
+
+<a name="screenshots"></a>
+
+<a href="https://phishdestroy.github.io/TgWitness/demo/?lang=vi">
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-workspace-mobile-dark-still.webp">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-workspace-dark-still.webp">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-workspace-mobile-dark.webp">
+  <img src="../assets/presentation/readme-workspace-dark.webp" width="1440" alt="Bản demo TgWitness đang hoạt động: tin nhắn đã ghi lại, các phiên bản đã lưu và nội dung được giữ lại sau khi bị xóa. Bản ghi minh họa hư cấu.">
+</picture>
+</a>
+
+<p align="center"><sub>Khám phá giao diện thật với bản ghi hư cấu. Nhấp vào không gian làm việc để dùng thử.</sub></p>
+
+## TgWitness làm được gì
+
+<table>
+<tr>
+<td width="33%" valign="top"><b><a href="../COLLECTION.md">Giữ lại mọi lần sửa và xóa</a></b><br><sub>Mọi phiên bản của tin nhắn đều được lưu, và văn bản vẫn còn sau thông báo xóa.</sub></td>
+<td width="33%" valign="top"><b><a href="../wiki/Exports-and-Verification.md">Bằng chứng ai cũng kiểm tra được</a></b><br><sub>Bản ghi có chữ ký, liên kết theo chuỗi băm. Người nhận xác minh tệp lưu trữ ngoại tuyến bằng một lệnh.</sub></td>
+<td width="33%" valign="top"><b><a href="../EVIDENCE.md#where-the-messages-come-from">Nguồn gốc chứng minh được</a></b><br><sub>Nhận qua phiên MTProto đã xác thực của tài khoản và ký ngay khi đến; GitHub Actions và Intel TDX bổ sung chứng thực.</sub></td>
+</tr>
+<tr>
+<td width="33%" valign="top"><b><a href="../EXPORT-BENCHMARK-2026-11-06.md">Đo lường ở quy mô lớn</a></b><br><sub>48 tệp lưu trữ đã xác minh với 3,598,381 bản ghi; tám tài khoản thu được 768,007 bản ghi lịch sử với tốc độ 687.5 bản ghi/s.</sub></td>
+<td width="33%" valign="top"><b><a href="../INVESTIGATION-MODE.md">Xây dựng cho điều tra</a></b><br><sub>Danh sách theo dõi trên văn bản, mã QR và OCR, kiểm tra ví, thẻ đối tượng, Bảng vụ án và gói hồ sơ cho tòa án.</sub></td>
+<td width="33%" valign="top"><b><a href="../SECURITY-MODEL.md">Do bạn tự vận hành</a></b><br><sub>Tự lưu trữ, không có telemetry. Phiên được giữ trong kho dữ liệu được mã hóa; bảng điều khiển lắng nghe trên localhost.</sub></td>
+</tr>
+</table>
+
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
+
+<a name="quick-start"></a>
+<a name="run-it-on-your-machine"></a>
+
+## Cài đặt
+
+Đã kèm sẵn Python. Dùng chính các lệnh này để cập nhật.
+
+**Linux / macOS**
+
+```sh
+curl -fsSL https://get.destroy.tools/install.sh | bash
+```
+
+**Windows · PowerShell hoặc CMD**
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm https://get.destroy.tools/install.ps1 | iex"
+```
+
+<sub>Máy chủ Ubuntu: chạy với quyền root. Máy tính để bàn: chạy bằng tài khoản người dùng thông thường. `-ExecutionPolicy Bypass` chỉ áp dụng cho tiến trình PowerShell này.</sub>
+
+Các bản dựng có chữ ký đến từ [quy trình Installer](../../.github/workflows/installer.yml) công khai, và trình cài đặt kiểm tra SHA-256 cùng chữ ký RSA của từng gói trước khi cài đặt.
+
+[Xác minh script trước](../INSTALLATION.md#verify-before-running) · [Thiết lập ban đầu](../SETTINGS.md) · [Bản phát hành](https://github.com/phishdestroy/TgWitness/releases) · [Docker](DEPLOYMENT.md)
+
+<details>
+<summary><strong>Cách bảo vệ trình cài đặt và dữ liệu của bạn</strong></summary>
+
+`get.destroy.tools` là trang tải xuống của dự án. [Quy trình Installer](../../.github/workflows/installer.yml)
+công khai dựng trang này từ
+[`deploy/installer/`](../../deploy/installer/README.md) cho đúng bản sửa đổi `main`,
+xuất bản sau khi các bài kiểm thử cài đặt trên Linux và Windows đạt, rồi ký các
+script cài đặt và gói ứng dụng bằng khóa phát hành trong
+[`release-signing.pub`](../../deploy/installer/release-signing.pub). Trình cài đặt kiểm tra
+SHA-256 và chữ ký RSA của gói và tệp khóa phụ thuộc trước khi cài đặt.
+Để kiểm tra chính script trước, hãy tải nó xuống cùng chữ ký và chạy
+[các lệnh xác minh trước](../INSTALLATION.md#verify-before-running). Khi bản dựng thất bại,
+bản tải xuống trước đó được giữ nguyên; các bảng điều khiển đã cài sẽ cập nhật khi bạn chạy lại trình cài đặt.
+Các [bản phát hành](https://github.com/phishdestroy/TgWitness/releases) trên GitHub, mã nguồn và
+[Docker](DEPLOYMENT.md) là những cách cài đặt khác.
+
+**Phiên và dữ liệu của bạn.** TgWitness chạy trên máy tính hoặc máy chủ của bạn, và bảng điều khiển
+mặc định lắng nghe trên localhost. Phiên Telegram, thông tin đăng nhập proxy và mã băm
+token truy cập được lưu trong kho dữ liệu được mã hóa của từng không gian làm việc, có thể dùng thêm
+[khóa chính bên ngoài](../SECURITY-MODEL.md#external-master-key) tùy chọn. Ứng dụng
+không có telemetry. Ứng dụng kết nối tới Telegram và các dịch vụ được dùng trong phần cài đặt:
+danh sách MTProxy công khai, proxy của bạn, bộ lưu trữ S3, bot nhân chứng, tổ chức cấp dấu
+thời gian, nhà cung cấp AI và webhook. [Sơ đồ hệ thống](../SYSTEM-MAP.md) liệt kê
+các kết nối mà tiến trình ứng dụng tạo ra.
+Hãy quan sát bằng một [tài khoản Telegram chuyên dụng](https://phishdestroy.github.io/TgWitness/vi/docs/dedicated-account/).
+
+Huy hiệu phiên bản mô tả cây mã nguồn này. Các bản dựng cài đặt được liệt kê trong mục
+[Bản phát hành](https://github.com/phishdestroy/TgWitness/releases); một tính năng được hợp nhất vào
+`main` sẽ có trong các bản tải xuống đó từ lần phát hành kế tiếp.
+
+[Thiết lập và truy cập bảng điều khiển](../INSTALLATION.md) ·
+[Chữ ký và SHA-256](https://get.destroy.tools/#verification) ·
+[Cập nhật](../INSTALLATION.md#update-an-existing-installation) ·
+[Năng lực hiện tại và tình trạng thẩm định](../STATUS.md) ·
+[Chọn phương pháp thu thập](../COLLECTION-MODES.md)
 
 </details>
 
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
-![Section divider](../assets/presentation/divider.svg)
+<a name="how-it-works"></a>
 
-## Kết nối tài khoản Telegram
+## Bản ghi mà người khác có thể kiểm tra
 
-> [!CAUTION]
-> Chỉ nên kết nối các tài khoản chuyên dụng mà quý vị có thể chấp nhận rủi ro mất đi. Telegram có thể khóa vĩnh viễn các tài khoản một cách bất ngờ; xin vui lòng tham khảo cảnh báo ở đầu trang này. **Hướng dẫn** **về tài khoản chuyên dụng** trên bảng điều khiển (ở thanh bên hoặc `/dedicated-account.html`) sẽ giải thích lý do cũng như cách thức để tạo một tài khoản như vậy.
-
-Đăng nhập bằng số điện thoại, mã QR hoặc phiên đăng nhập hiện có — không cần ID API hay mã băm.
-
-**Tại sao lại cần một nhóm API tích hợp sẵn?** Việc tạo ID API riêng trên [my.telegram.org](https://my.telegram.org) được biết là nguyên nhân dẫn đến việc tài khoản bị hạn chế, và Telegram không công bố các giới hạn rõ ràng — nhiều nhà nghiên cứu đã mất tài khoản chính của mình vì lý do này. Trang [“Cách lấy ID API”](https://core.telegram.org/api/obtaining_api_id) của chính Telegram cho biết các tài khoản sử dụng các ứng dụng khách API không chính thức sẽ tự động bị đưa vào diện giám sát và chuyển những người dùng bị cấm oan sang địa chỉ recover@telegram.org. Do đó, TgWitness cung cấp sẵn các cặp API công khai đã được các ứng dụng khách mã nguồn mở khác sử dụng, nhờ đó quý vị sẽ không bao giờ phải tạo ID API mới. Nếu quý vị có ID API riêng, vui lòng nhập vào mục **“API ID + Hash”** và hệ thống sẽ sử dụng ID đó thay thế.
-
-Khi không có cặp thông tin nào được nhập, nhập khẩu hoặc đã được lưu sẵn trong không gian làm việc, TgWitness sẽ chọn một trong 50 cặp có sẵn trong danh sách và chuyển sang cặp tiếp theo nếu Telegram từ chối cặp đó. Cặp thông tin đã đăng nhập sẽ được liên kết với tài khoản đó. Một cặp thông tin dùng để xác định ứng dụng; quý vị vẫn phải ủy quyền cho tài khoản Telegram của mình một cách riêng biệt. Mã thông báo truy cập bảng điều khiển sẽ mở TgWitness và hoàn toàn tách biệt với quá trình đăng nhập Telegram.
-
-| Những gì quý vị có | Cách sử dụng |
-| --- | --- |
-| Số điện thoại có quyền truy cập vào tài khoản | Tab **Điện thoại**: mã từ Telegram, sau đó là mật khẩu xác thực hai yếu tố (2FA) nếu tính năng này đã được kích hoạt |
-| Ứng dụng Telegram đã đăng nhập sẵn | Tab **mã QR**: Cài đặt → Thiết bị → Kết nối thiết bị máy tính để bàn |
-| Telethon (sơ đồ 7/8) hoặc Pyrogram (sơ đồ 2/3) `.session` | Tab **Tệp** |
-| Cặp hình ảnh `name.session` + `name.json` | Tại tab **Tệp**, hãy chọn cả hai; tệp JSON cung cấp ID API/mã băm |
-| Thư mục Telegram Desktop `tdata` | Chỉ ZIP `key_datas` và `D877F783D5D3EF8Cs`, sau đó là **Tệp**; mã thông báo cục bộ (nếu đã được thiết lập) |
-| Telethon StringSession, `.txt` hoặc `.tgwitness-session` | Tab **Tệp** hoặc *Mã thông báo hoặc nội dung phiên làm việc* |
-| Tệp JSON tài khoản kèm theo khóa phiên hoặc khóa xác thực | Tab **Tệp** |
-| Khóa xác thực đầy đủ (512 ký tự hex) + DC ID | Tab **Khóa xác thực**; ID người dùng (tùy chọn) sẽ được đối chiếu với hệ thống Telegram |
-
-Không được hỗ trợ: bộ nhớ TDLib, chuỗi phiên Pyrogram, mã thông báo bot, TData đa tài khoản và danh sách tài khoản hàng loạt. Các tệp sẽ được chuyển đổi trong bộ nhớ trên máy chủ của quý vị và được kiểm tra với Telegram trước khi được lưu lại. Hướng dẫn về tài khoản ([hướng dẫn về tài khoản](../ACCOUNTS.md)) giải thích từng định dạng một cách chi tiết từng bước: cách lấy thông tin đăng nhập API, cách nhận diện tệp, các trường JSON, giới hạn và thông báo lỗi.
-
-Sau khi đăng nhập, hãy mở **mục Nguồn** (các cuộc trò chuyện của quý vị sẽ tự động tải), thêm các nhóm cần thiết, chọn nội dung cần ghi lại (ví dụ: *Tin nhắn, các thao tác chỉnh sửa và xóa*) rồi bắt đầu quá trình quan sát. Hãy duy trì quá trình này hoạt động: **Tạm dừng quan sát** sẽ ngừng thu thập dữ liệu, trong khi **Khóa** chỉ đóng quyền truy cập trên trình duyệt.
-
-## Hình ảnh minh họa
-
-| So sánh các phiên bản | Nguồn và chính sách thu thập dữ liệu |
-| --- | --- |
-| ![Detail drawer comparing a previous and a newly observed message version](../assets/detail.png) | ![Selected chats and per-account monitoring settings](../assets/sources.png) |
-| **Các tệp xuất có chữ ký** | **Đăng nhập** |
-| ![Export page with the signed archive and other formats](../assets/exports.png) | ![Account page with phone sign-in](../assets/connection.png) |
-| **Tạp chí** | **Chế độ giao diện tối** |
-| ![Journal with observed messages, edits, deletion notices and coverage events](../assets/workspace.png) | ![Journal in the dark theme](../assets/workspace-dark.png) |
-
-Tất cả các ảnh chụp màn hình đều sử dụng dữ liệu minh họa tổng hợp. Mã QR trong [tệp qr-login.png](../assets/qr-login.png) mã hóa một mã thông báo hư cấu từ kênh thử nghiệm.
-
-
-![Section divider](../assets/presentation/divider.svg)
-
-## Cách thức hoạt động
-
-```mermaid
-flowchart LR
-    A[Authorize an account] --> B[Select sources and event types]
-    B --> C[Start observation]
-    C --> D[Append signed records]
-    D --> E[Review versions and gaps]
-    E --> F[Export and verify]
-```
-
-Mỗi không gian làm việc thuộc về một tài khoản Telegram. Bộ thu thập dữ liệu sẽ tiếp nhận các bản cập nhật từ ứng dụng khách của tài khoản đó, áp dụng chính sách ghi lại đã lưu và thêm các quan sát vào một nhật ký chỉ ghi thêm.
-
-| Quan sát | Những nội dung được lưu giữ | Phạm vi |
-| --- | --- | --- |
-| Tin nhắn mới | Nội dung tin nhắn, ID người gửi, mã tham chiếu trả lời, siêu dữ liệu, thời gian quan sát | Chỉ cung cấp các bản cập nhật cho các nguồn được chọn lọc |
-| Chỉnh sửa | Một phiên bản nội dung riêng biệt | Các phiên bản trung gian bị bỏ lỡ trong thời gian ngoại tuyến sẽ không thể khôi phục được |
-| Xóa | ID tin nhắn cùng toàn bộ dữ liệu đã được ghi lại trước đó | Telegram thường không hiển thị thông tin về người đã xóa và thời điểm xóa |
-| Phản hồi | Số liệu thống kê và danh tính gần đây khi được cung cấp | Đây là bản tóm tắt, không phải là nhật ký thay đổi đầy đủ |
-| Thành viên | Thông báo dịch vụ và cập nhật dành cho người tham gia | Không phải mọi thao tác tham gia/rời khỏi đều được đảm bảo sẽ được gửi đi |
-| Tệp đính kèm | Tệp chứa nội dung tùy chọn kèm mã SHA-256 | Các tệp có thể biến mất trước khi được tải xuống; kết quả sẽ được ghi lại |
-| Phạm vi bao quát | Khởi động, dừng, ngắt kết nối, tín hiệu kiểm tra trạng thái, thay đổi chính sách | Tính hoạt động không phải là bằng chứng cho việc ghi lại đầy đủ |
-| Bản chụp lịch sử | Các tin nhắn hiển thị mới nhất, tối đa 500 tin nhắn trừ khi được điều chỉnh trong **phần Thông số**, được gắn nhãn rõ ràng | Không thể khôi phục các chỉnh sửa hoặc xóa bỏ đã bị bỏ sót |
-
-Tìm hiểu [cách thức hoạt động của quá trình thu thập dữ liệu](../COLLECTION.md) liên quan đến các chính sách, hàng đợi tệp đính kèm và quá trình khởi động lại.
-
-## Cài đặt và tham số
-
-Mọi thay đổi đều được thực hiện trực tiếp trên bảng điều khiển, theo từng không gian làm việc, mà không cần chỉnh sửa mã nguồn hay tệp cấu hình. Mỗi thay đổi về phạm vi, chính sách hoặc tham số đều được ghi lại trong nhật ký đã được ký số kèm theo các giá trị trước và sau khi thay đổi, đồng thời mỗi lần bắt đầu quan sát đều ghi rõ các giá trị hiện hành.
-
-| Tại đâu | Những gì quý vị cần thiết lập |
-| --- | --- |
-| **Nguồn** | Phạm vi (các cuộc trò chuyện đã chọn, một thư mục Telegram, toàn bộ tài khoản), các loại nguồn, các trường hợp loại trừ, các hành động tự thực hiện, những thay đổi cần lưu giữ, các loại tệp đính kèm và kích thước theo từng loại (1–2.000 MiB), khoảng thời gian kiểm tra lại đối với các cuộc trò chuyện ưu tiên và các cuộc trò chuyện khác (bất kỳ số phút nào, 0 = tắt), ảnh chụp nhanh lịch sử, thông báo |
-| **Tệp xuất** | Tải xuống được bảo vệ bằng mật khẩu, chế độ bằng chứng (khoảng thời gian, cơ quan xác nhận dấu thời gian và lịch), bản sao lưu ngoài trang web trên S3 (khoảng thời gian, chế độ lưu giữ và chế độ Object Lock) |
-| **Witness** | Mã thông báo chứng thực chỉ đọc; các tùy chọn của chính người chứng thực được hiển thị kèm theo các lệnh đã được chuẩn bị sẵn |
-| **Các tham số** | Kích thước danh sách trò chuyện và tần suất làm mới, khoảng thời gian kiểm tra trạng thái và điểm kiểm tra, bộ đệm khởi động, cách thức kiểm tra lại phân bổ các yêu cầu (thời gian trễ ban đầu, số cuộc trò chuyện mỗi lượt, thời gian tạm dừng, số tin nhắn được khôi phục và yêu cầu lại), dung lượng đĩa dự trữ, thời gian chờ tải xuống, tốc độ và số lần thử lại, các tiêu chí mà hồ sơ người dùng tìm kiếm (bao gồm cả biểu thức chính quy do quý vị tự định nghĩa), kích thước và tần suất thông báo, ảnh chụp nhanh, giới hạn tệp ZIP và tải xuống qua trình duyệt, thời gian chờ thao tác trên bảng điều khiển, thời gian chờ và số lần thử lại của ứng dụng Telegram |
-
-Các giá trị của **các tham số** hiển thị phạm vi và giá trị mặc định của chúng; các tham số đã được thay đổi sẽ được đánh dấu và có thể khôi phục từng tham số một hoặc tất cả cùng một lúc. Các thay đổi này sẽ có hiệu lực từ lần sử dụng tiếp theo; thời gian chờ và số lần thử lại của ứng dụng Telegram sẽ được áp dụng từ lần kết nối tiếp theo. Giới hạn kích thước tệp ZIP trên 4 GiB yêu cầu `verify.py --max-gib N` khi xác minh tệp lưu trữ ([các thao tác](../OPERATIONS.md#panel-layout)).
-
-
-![Section divider](../assets/presentation/divider.svg)
-
-## Bằng chứng và xác minh
-
-| Xuất | Mục lục | Tính toàn vẹn |
-| --- | --- | --- |
-| **Tệp ZIP đã được ký** | JSONL, CSV, báo cáo HTML, phạm vi bao phủ, phương tiện truyền thông, tệp manifest, công cụ xác minh | Các sự kiện được ký điện tử kèm theo bản kê khai được ký điện tử của từng tệp, trong đó nêu rõ tên người tạo. Vui lòng sử dụng tài liệu này cho quá trình bàn giao. |
-| JSONL | Các bản ghi gốc kèm theo mã băm và chữ ký | Chữ ký Ed25519 cho từng sự kiện và chuỗi băm |
-| CSV / HTML | Bảng tính an toàn / báo cáo có thể đọc ngoại tuyến | Chỉ có trong tệp ZIP đã được ký điện tử |
-| Tệp JSON điểm kiểm tra | Độ dài nhật ký và mã băm đầu | Được ký riêng biệt; vui lòng lưu trữ tệp này bên ngoài bộ thu thập dữ liệu |
-| Tệp JSON biên lai thực thi | Băm mã nguồn, phiên bản các thư viện phụ thuộc, phạm vi, cài đặt | Tuyên bố quy trình được ký riêng biệt |
-| Tệp JSON chứa hồ sơ cá nhân | Hồ sơ của một cuộc trò chuyện kèm theo các tham chiếu ghi chép | Tuyên bố đã được ký; các giá trị băm của tệp đã được đối chiếu với tệp ZIP |
-| Tệp ZIP của nhật ký Witness | Danh sách các nhân chứng đã thu thập, các câu trả lời bị bỏ lỡ, các bài đăng trên kênh | Được ký bằng chính khóa riêng của người làm chứng |
-
-Các bộ lọc chỉ ảnh hưởng đến quá trình duyệt; các tệp xuất luôn chứa toàn bộ nhật ký cho đến một số thứ tự cố định. Vui lòng xác minh tệp lưu trữ bằng bản sao đáng tin cậy của công cụ xác minh cùng với dấu vân tay khóa và điểm kiểm tra được lưu giữ độc lập:
+Kiểm tra mà không cần tài khoản hay cài đặt. Bản mẫu được công bố có kèm trình xác minh riêng:
 
 ```sh
-python -m pip install cryptography
-python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 --checkpoint tgwitness-checkpoint.json
-# with an independent witness and its channel (Telegram Desktop export)
-python tgwitness/verify.py tgwitness-evidence.zip --fingerprint TRUSTED_PUBLIC_KEY_SHA256 \
-    --witness witness.zip --witness-fingerprint WITNESS_SHA256 --channel result.json
+curl -LO https://phishdestroy.github.io/TgWitness/demo/downloads/tgwitness-demo.zip
+unzip -o tgwitness-demo.zip verify.py        # trình xác minh nằm sẵn trong tệp lưu trữ
+python verify.py tgwitness-demo.zip          # Python 3.11+, chỉ cần `cryptography`
 ```
 
-Trình xác minh sẽ hiển thị thông tin về nhà sản xuất đã được ký tên, các khoảng thời gian quan sát liên tục, các khoảng trống và các ID tin nhắn chưa từng được ghi nhận; đồng thời sẽ báo lỗi nếu nhật ký này có sự khác biệt so với bất kỳ bản gốc nào mà nhân chứng đã quan sát được.
+Lệnh in ra các bản ghi có chữ ký, mã băm của bản ghi mới nhất, dấu vân tay của người ký và thoát với mã `0`.
+Bản mẫu là hư cấu; cùng trình xác minh đó chạy được với mọi bản xuất thật.
 
-Xác minh chữ ký nhật ký, chuỗi băm và tệp đính kèm bằng khóa tin cậy, đồng thời lưu các điểm kiểm tra ở nơi độc lập. Đối chiếu phạm vi và khoảng thời gian thu thập, biên nhận thời gian bên ngoài và kết quả kiểm tra môi trường thu thập có trong chế độ đã chọn.
-
-[quy trình đóng dấu thời gian](../TIMESTAMP.md) · [mô hình bằng chứng](../EVIDENCE.md) · [bàn giao điều tra](../EVIDENCE.md#investigation-handoff)
-
-## Triển khai
-
-> [!NOTE]
-> Kết quả và giới hạn kiểm thử: [hồ sơ xác minh](../VERIFICATION.md).
-
-**Máy chủ cục bộ hoặc máy chủ đơn lẻ sử dụng Docker:**
+Một bản xuất chứa tin nhắn, tệp và trình xác minh. Gửi dấu vân tay khóa của bạn cho người nhận
+qua một kênh khác, và họ có thể tự kiểm tra:
 
 ```sh
-docker compose up -d --build --wait
-docker compose exec tgwitness cat /data/panel-token.txt
+python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --tsa-ca TSA-ROOT.pem --require evidence
 ```
 
-Container này chạy dưới quyền người dùng không phải root với hệ thống tệp chỉ đọc, chỉ đăng tải lên `127.0.0.1:8787` và lưu trữ toàn bộ dữ liệu trong một khối lượng có tên.
+Trình xác minh kiểm tra chữ ký, chuỗi sổ nhật ký, danh sách tệp và tệp đính kèm.
+Để dùng làm bằng chứng, nó cần dấu vân tay khóa của bạn và một dấu thời gian của bên thứ ba bao phủ
+bản ghi cuối cùng, chẳng hạn dấu thời gian RFC 3161 được đối chiếu với chứng chỉ gốc của tổ chức cấp.
 
-**Máy chủ công khai với HTTPS tự động (Caddy):** sao chép `deploy/env.example` vào `.env`, thiết lập `TGWITNESS_DOMAIN`, trỏ DNS đến máy chủ, mở cổng TCP 80/443 và khởi chạy
+**Tin nhắn đến từ đâu.** TgWitness nhận tin nhắn từ Telegram qua phiên MTProto
+được mã hóa của tài khoản, giống như các ứng dụng chính thức, và ký từng tin vào
+sổ nhật ký ngay khi tin đến. [Ghi lại trên GitHub Actions](../SEALED-ACTIONS.md) và
+[Phala Intel TDX](../HIGH-ASSURANCE.md) còn chứng thực trình thu thập đã nhận các tin nhắn đó.
 
-```sh
-docker compose -f compose.yaml -f deploy/compose/compose.https.yaml up -d --build --wait
-```
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-chain-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-chain-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/casework-chain-mobile.svg">
+  <img src="../assets/presentation/casework-chain.svg" width="1200" alt="Tin nhắn mới, các lần sửa đã lưu và các quan sát về việc xóa tạo thành một sổ nhật ký có chữ ký, liên kết với nhau. Hãy xác minh bằng một khóa được tin cậy một cách độc lập.">
+</picture>
 
-**Trên Windows mà không cần cài đặt bất kỳ phần mềm nào:** tệp ZIP di động đính kèm trong mỗi bản phát hành đã chứa sẵn môi trường chạy Python chính thức cùng tất cả các thành phần phụ thuộc. Dữ liệu được lưu trữ trong thư mục `data`; để cập nhật, quý vị chỉ cần giải nén phiên bản mới và sao chép thư mục đó vào vị trí tương ứng.
+[Xác minh tệp lưu trữ](../wiki/Exports-and-Verification.md) · [Định dạng bằng chứng](../EVIDENCE.md) · [Nhân chứng độc lập](../WITNESS.md) · [Dấu thời gian bên ngoài](../TIMESTAMP.md) · [Các bước kiểm tra và quy mô đã kiểm thử](../VERIFICATION.md)
 
-**Trong trường hợp không sử dụng Docker:** các mẫu systemd, tác vụ đăng nhập Windows và launchd được đặt trong [thư mục deploy/. Các nội dung liên quan đến](../../deploy/README.md) cập nhật, sao lưu, cổng thay thế và hình ảnh GHCR (sau khi quy trình phát hành hoàn tất việc công bố) được đề cập chi tiết trong [phần triển khai](DEPLOYMENT.md).
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
-### Dòng lệnh
+## Từ một cuộc trò chuyện đến một vụ án
 
-```text
-python start.py [--demo] [--setup-only] [--check [--json]] [--host HOST] [--port PORT] [--data-dir DIR]
-```
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-features-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-features-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-features-mobile.svg">
+  <img src="../assets/presentation/readme-features.svg" width="1200" alt="Ba quy trình động: xuất một cuộc trò chuyện sang HTML và JSON, tìm một liên kết được chia sẻ trong các cuộc trò chuyện đã ghi, và giữ lại các phiên bản đã ghi sau thông báo xóa.">
+</picture>
 
-| Nhiệm vụ | Lệnh (từ môi trường dự án) |
+<table>
+<tr>
+<td width="33%" align="center"><a href="../wiki/Chat-Export.md"><b>Bản xuất cuộc trò chuyện&nbsp;↗</b></a><br><sub>Một cuộc trò chuyện thành HTML và JSON có chữ ký</sub></td>
+<td width="33%" align="center"><a href="../INVESTIGATION.md"><b>Điều tra&nbsp;↗</b></a><br><sub>Lần theo manh mối qua các cuộc trò chuyện đã ghi</sub></td>
+<td width="33%" align="center"><a href="../COLLECTION.md"><b>Phiên bản đã lưu&nbsp;↗</b></a><br><sub>Các lần sửa và thông báo xóa đều được giữ lại</sub></td>
+</tr>
+</table>
+
+Có hai cách dùng: [xuất tài khoản của bạn](../ACCOUNT-EXPORT.md) một lần, hoặc
+[theo đuổi một cuộc điều tra](../INVESTIGATION.md) và liên tục lưu các thay đổi.
+Chọn vài cuộc trò chuyện, một thư mục Telegram hoặc toàn bộ tài khoản. Mỗi tài khoản có
+không gian làm việc, phiên và khóa ký riêng.
+
+<p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
+
+## Tìm hiểu thêm
+
+<details>
+<summary><strong>Kết quả đo xuất dữ liệu · 6 tháng 11 năm 2026</strong> · 56,329 tin nhắn, cả hai tệp lưu trữ đều đã xác minh</summary>
+
+**56,329 tin nhắn được xuất trong hai lần chạy mới.** Cả hai tệp lưu trữ có chữ ký đều vượt qua bước xác minh với khóa trình thu thập đã ghim.
+
+[![Tốc độ thu thập và tốc độ xuất trọn vẹn đo được](../../website/validation/performance.svg)](https://phishdestroy.github.io/TgWitness/vi/docs/validation/)
+
+| Lần chạy | Tin nhắn | Thời gian thu thập | Tốc độ thu thập | Xuất trọn vẹn | Tốc độ đầu cuối |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Máy chủ A | 27,030 | 189.043 s | **142.983 tin nhắn/s** | 211.647 s | 127.713 tin nhắn/s |
+| Máy chủ B | 29,299 | 182.513 s | **160.531 tin nhắn/s** | 206.650 s | 141.781 tin nhắn/s |
+
+Văn bản và siêu dữ liệu qua WARP, hai tài khoản mỗi máy chủ, không có tệp đính kèm hay bản ghi dùng lại.
+Đo trên bản sửa đổi [`92e539af`](https://github.com/phishdestroy/TgWitness/commit/92e539af40d8368d198ff5e040f1d876f2c1310e).
+Mỗi lần chạy được công bố đều nêu bản sửa đổi mã nguồn, khối lượng công việc, thời gian và kết quả xác minh:
+[khối lượng công việc, thời gian và xác minh](../EXPORT-BENCHMARK-2026-11-06.md). Mọi thay đổi trên `main`
+đều chạy qua các [quy trình CI](../../.github/workflows/README.md) công khai, bao gồm kiểm thử trình cài đặt trên Linux và Windows
+và bản dựng trình xác minh độc lập.
+
+[**Xem bản demo →**](https://phishdestroy.github.io/TgWitness/demo/?lang=vi) ·
+[**Số liệu đo, ngày và phương pháp →**](https://phishdestroy.github.io/TgWitness/vi/docs/validation/) ·
+[Tải xuống bản xuất mẫu hư cấu](https://phishdestroy.github.io/TgWitness/demo/downloads/tgwitness-demo.zip) ·
+[Báo cáo kiểm toán tiếng Anh có chữ ký](../../website/validation/audit/REPORT.md)
+
+</details>
+
+<a name="start-simple"></a>
+
+<details>
+<summary><strong>Bắt đầu đơn giản. Thấy mọi tuyến kết nối.</strong> · lần khởi động đầu tiên và sơ đồ hệ thống</summary>
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-start-map-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-start-map-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-start-map-mobile.svg">
+  <img src="../assets/presentation/readme-start-map.svg" width="1200" alt="Lần khởi động đầu tiên cho chọn Chỉ tải xuống, Theo dõi cuộc trò chuyện hoặc Bằng chứng cho một vụ án và chỉ hiển thị các mục tương ứng. Sơ đồ hệ thống liên kết bảng điều khiển, trình thu thập, Telegram, sổ nhật ký, nhân chứng và các dịch vụ bên ngoài, kèm các quan sát mạng. Giá trị hư cấu.">
+</picture>
+
+Lần khởi động đầu tiên chỉ hỏi một câu: **Chỉ tải xuống**, **Theo dõi cuộc trò chuyện** hay
+**Bằng chứng cho một vụ án**. Câu trả lời xác định mục tiêu và cấp độ giao diện, nên
+bảng điều khiển chỉ hiện các mục mà nhiệm vụ đó cần. Tiếp theo là kết nối, đăng nhập Telegram và
+chọn cuộc trò chuyện qua năm giai đoạn. Bước kiểm tra kết nối tự chạy, và
+các tùy chọn tuyến kết nối chỉ mở ra khi bước này thất bại. Công cụ chuyên gia luôn sẵn sau một công tắc.
+
+**Sơ đồ hệ thống** cho thấy bản cài đặt kết nối tới Telegram và các dịch vụ bên ngoài
+như thế nào: quyền truy cập bảng điều khiển, tuyến kết nối và đích Telegram của từng tài khoản, đường đi của sổ nhật ký và
+nhân chứng, cùng các quan sát mạng mới nhất. Quan sát nào bị thiếu sẽ được
+đánh dấu là thiếu.
+
+[Thiết lập ban đầu](../SETTINGS.md) · [Sơ đồ hệ thống](../SYSTEM-MAP.md)
+
+</details>
+
+<details>
+<summary><strong>Phục vụ phần còn lại của cuộc điều tra</strong> · thẻ đối tượng, danh sách theo dõi, ví, theo dõi trạng thái trực tuyến, tài liệu cho tòa án</summary>
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-capabilities-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-capabilities-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-capabilities-mobile.svg">
+  <img src="../assets/presentation/readme-capabilities.svg" width="1200" alt="Theo dõi tên và tên người dùng theo Telegram ID. Ghi lại các tương tác được hỗ trợ với bot kèm biên nhận có chữ ký. Tìm kiếm tin nhắn đã lưu trữ và kết nối các máy khách MCP chỉ đọc. Triển khai trình thu thập với SSH được che và bản ghi của nhà cung cấp để xem xét. Ghi lại từng bước một cuộc trò chuyện kèm tham chiếu sổ nhật ký. Bàn giao gói vụ án BagIt kèm mẫu văn bản cho tòa án. Quy trình minh họa.">
+</picture>
+
+<table>
+<tr>
+<td width="50%" align="center"><a href="../INVESTIGATION.md#4-connect-observations-across-chats"><b>Con người và hồ sơ&nbsp;↗</b></a><br><sub>Tên và tên người dùng được theo dõi theo Telegram ID</sub></td>
+<td width="50%" align="center"><a href="../COLLECTION.md#act-from-the-panel"><b>Điều tra bot&nbsp;↗</b></a><br><sub>Tương tác với bot kèm biên nhận có chữ ký</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><a href="https://phishdestroy.github.io/TgWitness/vi/docs/archive/"><b>Tìm kiếm tệp lưu trữ, AI và MCP&nbsp;↗</b></a><br><sub>Tìm trong tệp lưu trữ, kết nối máy khách chỉ đọc</sub></td>
+<td width="50%" align="center"><a href="../HIGH-ASSURANCE.md"><b>Triển khai đám mây niêm phong&nbsp;↗</b></a><br><sub>Trình thu thập bên trong Intel TDX</sub></td>
+</tr>
+</table>
+
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-documentation-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-documentation-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-documentation-mobile.svg">
+  <img src="../assets/presentation/readme-documentation.svg" width="1200" alt="Ba bước động: thẻ đối tượng có ảnh chụp nhanh sau đó ghi nhận việc đổi tên, kế hoạch hội thoại có các mục tiêu được hoàn tất bằng bản ghi sổ nhật ký, và mã QR thanh toán được giải mã thành địa chỉ ví có checksum hợp lệ, kích hoạt một kết quả khớp danh sách theo dõi. Giá trị hư cấu.">
+</picture>
+
+**Ghi lại cuộc trò chuyện.** Bắt đầu ghi cho một cuộc trò chuyện trong ngăn **Tài liệu hướng dẫn**
+và mọi bước sẽ tự được ghi lại: thao tác trên bảng điều khiển, câu trả lời kèm độ trễ trước
+đó, các lần sửa, thông báo xóa, ghi chú và bản nháp AI. Mỗi bước dẫn chiếu bản ghi sổ nhật ký
+và SHA-256 của bản ghi đó. Khi chốt tài liệu, tài liệu được ký và mã băm của bản tường trình được ghi vào
+sổ nhật ký.
+
+| | |
 | --- | --- |
-| Kiểm tra tình trạng sẵn sàng mà không cần khởi động | `python start.py --check` |
-| Chuyển đổi phiên làm việc Telethon SQLite sang chế độ ngoại tuyến | `python -m tgwitness.sessions account.session --out account.tgwitness-session` |
-| Truyền một tệp xuất có dung lượng lớn sang đĩa | `python -m tgwitness.download --token-file data/live/panel-token.txt --out evidence.zip` |
-| Xác minh tệp lưu trữ đã xuất | `python tgwitness/verify.py tgwitness-evidence.zip --fingerprint SHA256` |
-| Xác minh tệp lưu trữ có dung lượng trên 4 GiB | `python tgwitness/verify.py big-evidence.zip --fingerprint SHA256 --max-gib 16` |
-| Chạy một máy chủ chứng kiến độc lập từ tệp cấu hình | `python -m tgwitness.witness run --config witness.json` |
+| [Thẻ đối tượng](../INVESTIGATION-MODE.md#subject-cards) | Ảnh chụp nhanh hồ sơ của bot, người, kênh hoặc nhóm với nhãn BOT, VERIFIED, SCAM và FAKE của Telegram; ảnh chụp sau liệt kê những gì đã thay đổi |
+| [Kế hoạch hội thoại](../INVESTIGATION-MODE.md#conversation-plans) | Mục tiêu về đường đi của tiền thanh toán, hạ tầng hoặc con người, tin nhắn soạn sẵn, thời gian trả lời, mức hoạt động theo giờ và văn phong của phía bên kia |
+| [Bản dịch](../INVESTIGATION-MODE.md#machine-translation) | Hiển thị bên dưới bản gốc, kèm ngôn ngữ, mô hình và bản ghi sổ nhật ký |
+| [Danh sách theo dõi](../INVESTIGATION-MODE.md#watchlists) | Từ khóa, mẫu, ví, @tên người dùng, ID, tên miền, số điện thoại và liên kết, được đối chiếu trong văn bản, các lần sửa, đích liên kết ẩn, nút bot, mã QR và OCR |
+| [Theo dõi trạng thái trực tuyến](../INVESTIGATION-MODE.md#online-watch) | Kiểm tra mỗi 1–60 phút, tối đa 100 tài khoản mỗi yêu cầu, kèm quy luật theo giờ và ngày trong tuần |
+| [Mã và ví](../INVESTIGATION-MODE.md#codes-in-images) | Mã QR thanh toán; địa chỉ EVM được kiểm tra theo EIP-55, TON ở dạng thô, checksum XRP Ledger, liên kết thanh toán kèm chuỗi, số tiền và token |
+| [Dấu vết ứng dụng khách](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-can-and-cannot-show) | Dấu vết bộ mã hóa trong video tròn và tin nhắn thoại; so sánh thời gian tải lên với thời gian gửi sẽ lật tẩy bằng chứng “trực tiếp” được quay sẵn |
+| [Danh tính ngụy trang và thẩm quyền](../INVESTIGATION-MODE.md#cover-and-authority) | Nhân dạng giả, giấy ủy quyền và bản ghi hoạt động bí mật, gắn cờ các tin nhắn nằm ngoài các cuộc trò chuyện hoặc khoảng thời gian được phép |
+| [Kiểm soát tài khoản](../INVESTIGATION-MODE.md#account-control) | Chỉnh sửa hồ sơ và quyền riêng tư kèm bản ghi trước/sau, kiểm tra mức độ lộ diện và chuyển ngoại tuyến ngay sau mỗi thao tác |
+| [Tài liệu cho tòa án](../INVESTIGATION-MODE.md#documents-for-court) | Gói vụ án BagIt kèm mẫu chứng nhận Rule 902(13)/(14), danh mục vật chứng, phụ lục yêu cầu và phụ đề WebVTT/SRT cho video quay màn hình |
 
-Các lệnh phụ trợ `python -m tgwitness…` phải được thực thi bên trong `.venv` (`.venv\Scripts\python.exe` trên Windows, `.venv/bin/python` trên các hệ điều hành khác).
+Nội dung được đánh dấu 18+, bạo lực hoặc dữ liệu cá nhân vẫn nằm trong bản dành cho tòa án, được niêm phong bằng
+AES-256-GCM; khóa được chuyển riêng.
 
-| Biến | Mục đích |
+[Cài đặt xuất](../EXPORT_HASHES.md) bao gồm thu thập qua API thông thường và Takeout,
+lấy lịch sử tin nhắn trước tệp đính kèm, tải tệp xuống hoặc dùng mã băm của máy chủ, và các chế độ xem
+JSON/HTML tương thích với Telegram Desktop. [Xuất cuộc trò chuyện phân tán](../DISTRIBUTED-EXPORT.md#history-acquisition)
+cung cấp lộ trình Takeout phải chủ động bật cho lịch sử công khai, điểm kiểm tra có chữ ký sau mỗi 100 tin nhắn,
+và khôi phục trong một khoảng bằng cùng tài khoản; tài liệu
+[thiết kế hiệu năng](../FAST-ACQUISITION.md) của tính năng này liệt kê hành vi thu thập đã kiểm thử
+và các phép đo thực tế đã lên kế hoạch.
+
+</details>
+
+<details>
+<summary><strong>Mọi thứ khác</strong> · lịch sử, tài khoản, proxy, AI, tích hợp</summary>
+
+| | |
 | --- | --- |
-| `TGWITNESS_HOST`, `TGWITNESS_PORT` | Địa chỉ và cổng lắng nghe (mặc định `127.0.0.1:8787`) |
-| `TGWITNESS_DATA` | Thư mục dữ liệu (mặc định `data/live`) |
-| `TGWITNESS_TOKEN` | Đã sửa mã thông báo bảng điều khiển thay vì mã được tạo tự động (ít nhất 24 ký tự) |
-| `TGWITNESS_VAULT_KEY_FILE` | Khóa chính kho lưu trữ bên ngoài dành cho các cài đặt mới |
-| `TGWITNESS_DOMAIN`, `TGWITNESS_IMAGE` | Tên máy chủ HTTPS của Docker và hình ảnh đã được công bố (xem `deploy/env.example`) |
-| `TGWITNESS_WITNESS_*` | Nhân chứng độc lập: trình thu thập, mã thông báo, kênh, `_INTERVAL`, `_TIMEOUT`, `_POST` (tất cả, thay đổi, sự cố), `_TITLE`, `_CONFIG` ([nhân chứng](../WITNESS.md#options)) |
+| [Tải tin nhắn cũ hơn](../HISTORY.md) | Kéo lịch sử trước đây của các cuộc trò chuyện đã chọn, tạm dừng và tiếp tục bất cứ lúc nào |
+| [Nhiều tài khoản](../ACCOUNTS.md#multiple-accounts) | Các không gian làm việc riêng biệt, mỗi nơi có phiên Telegram, sổ nhật ký và khóa ký riêng |
+| [Nhập hàng loạt](../ACCOUNTS.md#bulk-import-and-account-groups) | Thả vào cả loạt tệp phiên, sắp xếp tài khoản thành nhóm có chung cài đặt |
+| [Kho MTProxy](../wiki/Proxies.md#pool-dashboard-and-custom-sources) | Ping, quốc gia, bộ lọc, danh sách của riêng bạn |
+| [Phiên có sẵn](../ACCOUNTS.md) | TData, Telethon, Pyrogram, StringSession, auth key hoặc một dòng `key:DC`; tùy chọn ủy quyền QR độc lập từ tài khoản nguồn đã nhập |
+| [Bảo mật tài khoản](../ACCOUNTS.md#create-an-independent-authorization) | Cảnh báo phiên mới, kết thúc các phiên khác, chế độ phiên duy nhất đồng thời đặt mật khẩu xác minh hai bước, và [đầu dò nhân chứng](../ACCOUNTS.md#witness-probe) nhận ra khi cập nhật trực tiếp không còn đến được phiên này |
+| [Xuất cuộc trò chuyện có thể tiếp tục](../EXPORT_HASHES.md#restricted-github-capture-and-single-chat-export) | Bản xuất bị dừng giữa chừng vẫn giữ một bản sao một phần có chữ ký: tiếp tục, làm lại từ đầu hoặc tải xuống phần đã lưu |
+| [Proxy](../CONNECTION-SECURITY.md#ip-modes) | SOCKS5, HTTP CONNECT hoặc MTProxy cho từng không gian làm việc. **Ẩn IP** không bao giờ quay về kết nối trực tiếp |
+| [Tìm kiếm và AI](../ANALYSIS.md) | Tìm kiếm cục bộ, AI tùy chọn với nguồn bạn có thể kiểm tra |
+| [Tìm kiếm toàn văn](../SEARCH.md) | Các dạng từ, cụm từ chính xác, tên miền, @tên người dùng và tiếng Trung không có dấu cách, kết quả khớp nhất lên đầu (**bản xem trước**) |
+| [MCP](../MCP.md) | Quyền truy cập chỉ đọc cho máy khách MCP, giới hạn ở các cuộc trò chuyện bạn chọn |
+| [Dòng lệnh](../CLI.md) | `search`, `context`, `messages`, `stats` và `export` dạng JSON Lines với `--json` cho script và agent, chạy cục bộ hoặc với token có phạm vi giới hạn (**bản xem trước**) |
+| [OCR và chuyển giọng nói thành văn bản](../MEDIA-ANALYSIS.md) | Chạy cục bộ, bản gốc giữ nguyên |
+| [Ghi lại độc lập](../OPTIONAL-CAPTURE.md) | Trình ghi trình duyệt/AyuGram tùy chọn trong **Các công cụ khác → Tiện ích bổ sung** (xem trước, tắt theo mặc định) |
+| [Trusted Live](../TRUSTED-LIVE.md) | Phiên Desktop/Web chính thức, video được bảo vệ và phân tích tính liên tục của bản xuất gốc (xem trước; đang chờ thẩm định thực tế) |
+| [Web chính thức niêm phong](../OFFICIAL-WITNESS.md) | Trình duyệt chính thức mới khởi chạy trên GitHub Actions, điều khiển bị hạn chế, video có chữ ký, nguồn/cài đặt có giá trị kỳ vọng được xác định độc lập |
+| [Webhooks](../WEBHOOKS.md) | Sự kiện gửi đi có chữ ký kèm cơ chế thử lại, có sẵn ví dụ n8n |
+| [Chia sẻ quyền truy cập](../ACCESS.md) | Chỉ cấp cho người khác các cuộc trò chuyện đã chọn, kèm thời hạn và giới hạn IP |
+| [Số tin nhắn bị thiếu](../EVIDENCE.md#missing-message-numbers-gap_summary) | Những số Telegram đã cấp nhưng chưa từng được quan sát, theo từng kênh và cho toàn bộ tài khoản, trong mức độ bao phủ, báo cáo và MCP (**bản xem trước**) |
+| [Ảnh chụp trạng thái cuộc trò chuyện](../COLLECTION.md) | Ảnh chụp có chữ ký định kỳ về tiêu đề, mô tả, tin ghim, quản trị viên và quà tặng, kèm những gì đã thay đổi (**bản xem trước**) |
+| [Sơ đồ hệ thống](../SYSTEM-MAP.md) | Bản đồ trực tiếp về truy cập bảng điều khiển, tuyến kết nối của tài khoản, đích Telegram và dịch vụ bên ngoài, với 200 quan sát mạng mới nhất trong tối đa 2,000 quan sát |
 
+</details>
 
-![Section divider](../assets/presentation/divider.svg)
+<details>
+<summary><strong>Chọn nền tảng bảo chứng cho bản ghi</strong> · cục bộ, đám mây đã kiểm toán, GitHub Actions hoặc Intel TDX</summary>
 
-## Trách nhiệm và bảo vệ dữ liệu (GDPR)
+Chạy cục bộ, thêm một bản triển khai đám mây đã kiểm toán, hoặc thu thập bên trong **máy ảo bảo mật Phala Cloud
+với Intel TDX**. Phương án nào cũng giữ sổ nhật ký có chữ ký; các bước kiểm tra bổ sung
+nhắm vào môi trường nơi dữ liệu được thu thập.
 
-TgWitness là một công cụ. Bất kỳ ai vận hành công cụ này đều quyết định những thông tin nào sẽ được thu thập, lý do và thời gian lưu trữ, đồng thời chịu trách nhiệm về việc đó — theo Quy định chung về bảo vệ dữ liệu (GDPR) của EU/Vương quốc Anh, người đó thường đóng vai trò là bên *kiểm* *soát* dữ liệu cá nhân đó. Các tin nhắn trên Telegram chứa dữ liệu cá nhân của những người chưa bao giờ đồng ý được ghi lại: tên, tên người dùng, ID, ảnh, số điện thoại, ý kiến. Phần này không phải là tư vấn pháp lý; quý vị vui lòng kiểm tra luật pháp áp dụng đối với quý vị cũng như các điều khoản của Telegram.
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-assurance-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/casework-assurance-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/casework-assurance-mobile.svg">
+  <img src="../assets/presentation/casework-assurance.svg" width="1200" alt="Ba lựa chọn triển khai: xác minh sổ nhật ký cục bộ; máy ảo đã kiểm toán kèm bản ghi của nhà cung cấp và bản ghi truy cập; Phala Intel TDX với quote đã xác minh, hệ điều hành và ứng dụng đã đo, cùng khóa trình thu thập được ràng buộc.">
+</picture>
 
-- **Phải có cơ sở pháp lý và mục đích rõ ràng.** Phòng chống gian lận, an ninh mạng và thông tin, cũng như việc bảo vệ các khiếu nại pháp lý thường được coi là các lợi ích hợp pháp (Điều 6(1)(f) của GDPR, Phần Giải thích 47 và 49; Điều 9(2)(f) đối với các khiếu nại pháp lý). Vui lòng ghi rõ mục đích cho từng trường hợp cụ thể. Các cơ quan công quyền hoạt động dựa trên các cơ sở pháp lý riêng của mình.
-- **Chỉ thu thập dữ liệu ở mức tối thiểu cần thiết cho mục đích sử dụng.** Hãy bắt đầu với các cuộc trò chuyện đã chọn. Chế độ theo thư mục và toàn bộ tài khoản sẽ ghi lại các cuộc trò chuyện riêng tư cũng như tin nhắn từ bên thứ ba: chỉ nên sử dụng các chế độ này trên các tài khoản chuyên dụng; bảng điều khiển sẽ yêu cầu xác nhận và nhật ký đã được ký điện tử sẽ ghi lại thông tin này. Vui lòng tắt các loại sự kiện, loại tệp đính kèm và các hành động cá nhân mà quý vị không cần đến, đồng thời loại trừ các cuộc trò chuyện không mong muốn.
-- **Tính năng lập hồ sơ người dùng đang được kích hoạt.** Tính năng này mặc định bị tắt và chỉ được bật theo từng cuộc trò chuyện. Quý vị hãy sử dụng tính năng này cho các cuộc điều tra cụ thể, không nên dựa vào đó để đưa ra các quyết định tự động liên quan đến người dùng (Điều 22), và hãy tắt tính năng này hoặc xóa cuộc trò chuyện khi hoàn tất — việc này sẽ xóa các hồ sơ đó. Việc giám sát có hệ thống đối với nhiều người thường đòi hỏi phải thực hiện đánh giá tác động về bảo vệ dữ liệu (Điều 35).
-- **Hãy đảm bảo an toàn.** Các phiên làm việc, thông tin đăng nhập và khóa được lưu trữ trong kho dữ liệu được mã hóa; hãy đặt thư mục dữ liệu trên ổ đĩa được mã hóa, đặt mật khẩu cho các tệp xuất (ZIP mã hóa AES-256), duy trì bảng điều khiển qua kết nối HTTPS và chỉ cấp cho người chứng kiến mã thông báo chỉ đọc. Các thông báo sẽ không chứa nội dung tin nhắn trừ khi quý vị bật tính năng trích dẫn, khi đó văn bản sẽ được gửi đến dịch vụ thông báo.
-- **Lưu trữ và xóa dữ liệu.** Nhật ký này chỉ cho phép ghi thêm để đảm bảo tính toàn vẹn của dữ liệu; không thể xóa các bản ghi riêng lẻ mà không làm đứt chuỗi chữ ký. Hãy lập kế hoạch lưu trữ cho từng không gian làm việc và xóa toàn bộ không gian làm việc (Tài khoản → Xóa) hoặc thư mục dữ liệu của nó khi mục đích sử dụng kết thúc. Các bản sao ngoài trang web được bảo vệ bởi S3 Object Lock không thể bị xóa trước ngày hết hạn lưu trữ — quý vị hãy lựa chọn khoảng thời gian phù hợp. Quyền xóa dữ liệu có các trường hợp ngoại lệ, ví dụ như để thiết lập hoặc bảo vệ các khiếu nại pháp lý (Điều 17(3)(e)).
-- **Các yêu cầu từ người dân đã được ghi lại.** Các tệp xuất dữ liệu trò chuyện và tệp hồ sơ cho phép xác định thông tin nào được lưu trữ về một cá nhân (Điều 15).
-- **Không có bất kỳ dữ liệu nào được gửi đến các tác giả.** TgWitness không có tính năng thu thập dữ liệu từ xa và không sử dụng dịch vụ lưu trữ bên ngoài; dữ liệu chỉ rời khỏi máy tính của quý vị thông qua các kênh mà quý vị đã cấu hình (Telegram, dịch vụ ghi thời gian, sao chép lên S3, thông báo, chứng thực).
+Trình xác minh TDX kiểm tra quote dựa trên gốc tin cậy đã ghim và dữ liệu thu hồi của Intel,
+ràng buộc quote với một bản tường trình có chữ ký của trình thu thập và một challenge mới, rồi so sánh
+hệ điều hành và ứng dụng đã đo với các đầu vào kỳ vọng được xác định độc lập. Báo cáo liệt kê
+từng kết quả riêng, nhờ đó có thể xem xét cùng lúc môi trường đã đo, danh tính trình thu thập,
+bản ghi quá trình ghi lại và mức độ bao phủ.
 
-## An ninh và tình trạng dự án
+**Ghi lại có nguồn gốc xác thực từ GitHub** (xem trước). Thu thập một cuộc trò chuyện trên runner do GitHub lưu trữ
+với TgWitness được ghim phiên bản và một phiên Telegram mới, sau đó tải xuống tệp lưu trữ
+đã mã hóa kèm chứng thực GitHub. Trình xác minh kiểm tra quy trình và phiên bản
+trình thu thập đã được phê duyệt, digest của tệp lưu trữ, sổ nhật ký và tệp đính kèm. Tính năng này cũng có
+trong mục **Xuất dữ liệu** trên bảng điều khiển.
+[Mở trang ghi lại](https://phishdestroy.github.io/TgWitness/vi/docs/capture/) · [Hướng dẫn](../SEALED-ACTIONS.md)
 
+Với quan sát trực tiếp, lịch sử hay một lần xuất duy nhất, hãy chọn một
+[phương pháp thu thập](../COLLECTION-MODES.md). Có thể thu thập các cuộc trò chuyện đám mây riêng tư
+khi tài khoản được kết nối có quyền truy cập. Ứng dụng đã phát hành còn có
+[tích hợp Secret Chat](../PSEUDO-SECRET.md): cài phần phụ thuộc giao thức tùy chọn
+và bật cho từng tài khoản để ghi lại các cuộc trò chuyện được tạo hoặc chấp nhận trong tài khoản đó.
+Xem [phạm vi thu thập](../COLLECTION.md) để biết các cách thu thập hiện có.
 
-- Theo mặc định, bảng điều khiển sẽ lắng nghe trên localhost. Để truy cập từ xa, quý vị hãy sử dụng cấu hình HTTPS Compose hoặc đường hầm SSH; tuyệt đối không được để lộ kết nối HTTP thuần túy.
-- Các phiên Telegram, thông tin đăng nhập API, thông tin đăng nhập proxy và khóa ký được lưu trữ trong một kho dữ liệu được mã hóa bằng Fernet. Theo mặc định, khóa này nằm trong cùng thư mục dữ liệu; hãy thiết lập `TGWITNESS_VAULT_KEY_FILE` để sử dụng khóa chính bên ngoài. Nội dung tin nhắn và tệp đa phương tiện cục bộ **không** được TgWitness mã hóa; quý vị nên lưu trữ thư mục dữ liệu trên một đĩa hoặc phân vùng đã được mã hóa. Các tệp ZIP xuất ra đã được ký có thể được mã hóa bằng mật khẩu (tùy chọn).
-- Các tệp dữ liệu, phiên làm việc, mã thông báo, khóa và tệp xuất dữ liệu không được bao gồm trong các bản dựng git và Docker.
-- Vui lòng báo cáo các lỗ hổng bảo mật một cách riêng tư theo hướng dẫn trong [tệp SECURITY.md](../../.github/SECURITY.md).
+[Phala / Intel TDX và các bản triển khai đã kiểm toán](../HIGH-ASSURANCE.md) ·
+[Thẩm định thực tế trên Phala](../VERIFICATION.md#live-phala-cloud-deployment--4-november-2026) ·
+[Ranh giới tin cậy](../SECURITY-MODEL.md)
 
-### Những nội dung đã được kiểm thử
+</details>
 
-TgWitness phiên bản **0.6.1** hoạt động trên hệ điều hành Windows 11 với Python 3.12. Tình trạng cập nhật vào ngày 29 tháng 10 năm 2026:
+<a name="manifesto"></a>
 
-| Lĩnh vực | Quá trình thử nghiệm |
+<details>
+<summary><strong>Kiểm tra quá trình ghi lại và bản ghi đã lưu</strong> · những gì người nhận xác minh và Export Clinic</summary>
+
+<picture>
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-manifesto-mobile.svg">
+  <img src="../assets/presentation/readme-manifesto.svg" width="1200" alt="Ghi lại cuộc trò chuyện. Xác minh bản ghi. Lưu tin nhắn, các lần sửa và tệp, kiểm tra chữ ký và điểm kiểm tra, rồi xem xét quá trình ghi lại.">
+</picture>
+
+TgWitness ghi lại nội dung được gửi đến tài khoản Telegram đã kết nối, kèm
+mã định danh cuộc trò chuyện, tin nhắn và người gửi, các phiên bản đã ghi lại và siêu dữ liệu thu thập.
+Tệp lưu trữ tập hợp các bản ghi đó, tệp đính kèm được bảo toàn và dữ liệu xác minh
+để phục vụ việc xem xét.
+
+| Bước kiểm tra | Những gì người nhận xác minh |
 | --- | --- |
-| Tin nhắn, chỉnh sửa, xóa, tệp đính kèm, kiểm tra lại sau khi khởi động lại, tạm dừng FloodWait | Được thực hiện bằng **một tài khoản Telegram thực tế**, từ ngày 27 đến 29 tháng 10 năm 2026: 9.968 bản ghi đã được ký, mọi chữ ký và chuỗi băm đều đã được xác minh ([thử nghiệm trực tiếp](../VERIFICATION.md#live-telegram-test-whole-account--29-october-2026)) |
-| Theo dõi toàn bộ tài khoản và các bản chụp lịch sử | Đã thực hiện bằng **tài khoản thực** vào ngày 29 tháng 10 năm 2026: các tin nhắn từ 2 nhóm hoặc kênh, cùng 3 cuộc trò chuyện riêng tư và các bot |
-| Nhấn vào nút tin nhắn trong **phần Trò chuyện** | Đã thực hiện một lần bằng **tài khoản thật** |
-| Đăng nhập bằng tệp phiên Telethon/Pyrogram và TData của Telegram Desktop | Đã hoàn tất với **một tài khoản thực** |
-| Đăng nhập bằng số điện thoại, mã QR và Khóa xác thực; các cuộc trò chuyện mới sẽ được đưa vào phạm vi theo dõi cùng với các tin nhắn trước đó; gửi tin nhắn; tham gia qua lời mời; phản hồi; tư cách thành viên; hồ sơ cá nhân; sử dụng nhiều tài khoản cùng lúc; xuất dữ liệu và công cụ xác minh | Các bài kiểm thử tự động với các ứng dụng khách Telegram mô phỏng |
-| Proxy SOCKS5/HTTP, bot chứng thực, công cụ giám sát Proof, thông báo, bản sao S3, RFC 3161 và OpenTimestamps | Các bài kiểm thử tự động trên các máy chủ thử nghiệm cục bộ |
-| Danh sách MTProxy công khai | Đã tải xuống và lọc dữ liệu (118 máy chủ vào ngày 29 tháng 10); hiện vẫn chưa thể kết nối qua các máy chủ này |
-| Kiểm thử hiện tại và giới hạn | [Các bước xác minh còn lại](../VERIFICATION.md#remaining-qualification) |
+| Sổ nhật ký có chữ ký và manifest | Chữ ký bản ghi, chuỗi băm và các tệp được giao, đối chiếu với khóa ký dự kiến. |
+| Điểm kiểm tra được lưu giữ riêng | Sổ nhật ký, đối chiếu với độ dài và mã băm của bản ghi mới nhất đã ghi nhận trước đó. |
+| Nhân chứng độc lập | Sổ nhật ký, đối chiếu với các điểm kiểm tra do một nhân chứng riêng lưu giữ. |
+| Ghi lại trên GitHub Actions | Tệp lưu trữ, đối chiếu với chứng thực, quy trình được lưu trữ đã phê duyệt và phiên bản trình thu thập. |
 
-Chi tiết: [bản ghi xác minh](../VERIFICATION.md), [tình trạng phát hành](../internal/RELEASE.md) và [mức độ sẵn sàng](../internal/READINESS.md).
+[Export Clinic](https://phishdestroy.github.io/TgWitness/docs/export-clinic/)
+đặt một cuộc trò chuyện Telegram cạnh các tệp xuất Desktop đã bị cố ý chỉnh sửa.
+Hãy so sánh các phiên bản, xem xét các thay đổi, rồi làm theo các bước thu thập và
+xác minh cho một tệp lưu trữ TgWitness có chữ ký.
 
+[Các bước xác minh](../wiki/Exports-and-Verification.md) ·
+[Ghi lại trên GitHub](../SEALED-ACTIONS.md) ·
+[Mô hình tin cậy kỹ thuật](../SECURITY-MODEL.md)
 
-![Section divider](../assets/presentation/divider.svg)
+</details>
 
-## Phát triển
+<a name="operations"></a>
 
-```sh
-python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\Activate.ps1
-python -m pip install -c deploy/constraints.txt -e ".[dev]"
-python -m ruff check .                                 # source checks
-python -m playwright install chromium
-python tools/build_portable.py                         # Windows portable ZIP (Windows + Python 3.12)
-python tools/build_source.py                          # source ZIP with SHA-256 manifest
-python tools/build_site.py                             # static project site in dist/site
-```
+<details>
+<summary><strong>Giữ cho cuộc điều tra luôn vận hành</strong> · thông báo, lưu trữ và khôi phục</summary>
 
-Các kiểm tra trình duyệt sử dụng dữ liệu giả lập. Các tác vụ dựng và phát hành hiện tại được định nghĩa trong `.github/workflows/`. Đọc [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) trước khi mở pull request.
+<picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-services-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-services-static.svg">
+  <source media="(max-width: 640px)" srcset="../assets/presentation/readme-services-mobile.svg">
+  <img src="../assets/presentation/readme-services.svg" width="1200" alt="Các quy trình động: Apprise gửi các cảnh báo đã cấu hình; bản sao ngoài site được mã hóa trước khi tải lên bộ lưu trữ tương thích S3.">
+</picture>
 
-## Tài liệu hướng dẫn
+[Thông báo](../OPERATIONS.md#notifications) · [Bản sao ngoài site được mã hóa](../wiki/Off-site-Copy.md) · [Sao lưu và khôi phục](../wiki/Backup-and-Recovery.md) · [Khắc phục sự cố](../OPERATIONS.md)
 
-| Hướng dẫn | Nội dung bao gồm |
+<table>
+<tr>
+<td width="33%" align="center"><a href="https://phishdestroy.github.io/TgWitness/vi/docs/start/"><b>Hướng dẫn thiết lập&nbsp;↗</b></a><br><sub>Từ cài đặt đến cuộc trò chuyện đầu tiên</sub></td>
+<td width="33%" align="center"><a href="https://phishdestroy.github.io/TgWitness/vi/docs/dedicated-account/"><b>Chuẩn bị tài khoản&nbsp;↗</b></a><br><sub>Một tài khoản Telegram chuyên dụng</sub></td>
+<td width="33%" align="center"><a href="DEPLOYMENT.md"><b>Docker và máy chủ&nbsp;↗</b></a><br><sub>HTTPS, khởi động lại và cập nhật</sub></td>
+</tr>
+</table>
+
+</details>
+
+<a name="repository-map"></a>
+
+<details>
+<summary><strong>Khám phá kho mã</strong> · nơi chứa mã nguồn, tài liệu và công cụ</summary>
+
+| Thư mục | Bắt đầu từ đây |
 | --- | --- |
-| [Hướng dẫn bắt đầu nhanh](QUICKSTART.md) | Khởi chạy lần đầu, kết nối tài khoản và xuất dữ liệu lần đầu |
-| [Các tài khoản và định dạng phiên làm việc](../ACCOUNTS.md) | Thông tin đăng nhập, chuyển đổi, quản lý nhiều tài khoản |
-| [Cách thức thu thập dữ liệu hoạt động như thế nào](../COLLECTION.md) | Chính sách thu thập, phiên bản, tệp đính kèm, các lỗ hổng |
-| [Kết nối và bảo mật](../CONNECTION-SECURITY.md) | Máy chủ proxy, mã hóa và khóa |
-| [Hoạt động](../OPERATIONS.md) | Quy trình làm việc hàng ngày, sao lưu, khôi phục, dung lượng |
-| [Triển khai](DEPLOYMENT.md) và [các mẫu dịch vụ](../../deploy/README.md) | Máy chủ, container, HTTPS, các bản cập nhật |
-| [Mô hình bằng chứng](../EVIDENCE.md) và [dấu thời gian](../TIMESTAMP.md) | Tính toàn vẹn, phạm vi bao quát, hồ sơ cá nhân, mức độ tin cậy và việc chuyển giao |
-| [Nhân chứng độc lập](../WITNESS.md) | Mã thông báo chứng thực chỉ đọc, cấu hình Docker, bài đăng trên kênh, kiểm tra chéo |
-| [Kiến trúc](../ARCHITECTURE.md) và [mô hình sản phẩm](../PRODUCT.md) | Cơ chế hoạt động và các quyết định thiết kế |
-| [Xác minh](../VERIFICATION.md) và [sự sẵn sàng](../internal/READINESS.md) | Các kiểm tra đã thực hiện và công việc còn lại |
-| [Nhật ký thay đổi](../CHANGELOG.md) | Lịch sử phát hành |
-| [Trang web và xuất bản](../internal/PUBLISHING.md) | Xem trước trang web cục bộ, GitHub Pages, bài đăng đầu tiên |
+| [docs/](../README.md) | Thiết lập, quy trình điều tra và tài liệu tham khảo kỹ thuật |
+| [tgwitness/](../../tgwitness/README.md) | Ứng dụng chính, trình thu thập, sổ nhật ký và bảng điều khiển web |
+| [tgwitness_capture/](../../tgwitness_capture/README.md) | Các trình ghi độc lập và mã xác minh của chúng |
+| [addons/](../../addons/README.md) | Cài đặt, cấu hình và kiểm thử tính năng ghi lại tùy chọn |
+| [deploy/](../../deploy/README.md) | Trình cài đặt, container và dịch vụ chạy nền |
+| [examples/](../../examples/README.md) | Cấu hình xuất tài khoản và ghi lại niêm phong |
+| [integrations/](../../integrations/README.md) | Webhook có chữ ký và bộ nhận n8n |
+| [.agents/](../../.agents/README.md) | Hướng dẫn tác vụ để đọc tệp lưu trữ qua CLI |
+| [scripts/](../../scripts/README.md) | Trình khởi chạy và tiện ích CI |
+| [tools/](../../tools/README.md) | Bản dựng, kiểm tra và đóng gói |
+| [website/](../../website/README.md) | Trang web công khai, hướng dẫn đã dịch và bản demo tương tác |
+| [.github/](../../.github/AUTOMATION.md) | Quy trình, hướng dẫn đóng góp và hỗ trợ |
 
+[Hướng dẫn đầy đủ về dự án](../PROJECT-GUIDE.md) ·
+[Đóng góp](../../.github/CONTRIBUTING.md) · [Nhận trợ giúp](../../.github/SUPPORT.md)
 
-![Section divider](../assets/presentation/divider.svg)
+</details>
 
-## Giấy phép
+<details>
+<summary><strong>⚖️ Thông báo về đạo đức &amp; tính liên tục lịch sử</strong></summary>
 
-[MIT License](../../LICENSE)
+Quan điểm của các tác giả và thông báo cho nhà vận hành, bằng tiếng Việt:
 
-## Hướng dẫn trong thư mục này
+[Thông báo về sự không tương thích giữa giấy phép và kiến trúc](TAYLOR-WESSING-EXCLUSION.md) · [Thông báo cho nhà vận hành](OPERATOR-INCOMPATIBILITY.md) · [Giấy phép MIT](../../LICENSE) · [NOTICE gốc](../../NOTICE)
 
-| Tệp | Nội dung |
-| --- | --- |
-| [DEPLOYMENT.md](DEPLOYMENT.md) | Triển khai và vận hành |
-| [QUICKSTART.md](QUICKSTART.md) | Hướng dẫn bắt đầu nhanh với TgWitness |
+</details>
 
-[Thông báo về sự không tương thích giữa giấy phép và kiến trúc](TAYLOR-WESSING-EXCLUSION.md) · [MIT License](../../LICENSE)
+<a name="languages"></a>
+
+<details>
+<summary><strong>Đọc tổng quan dự án bằng ngôn ngữ của bạn</strong></summary>
+
+[English](../../README.md) · [Русский](../ru/README.md) · [Українська](../uk/README.md) · [Español](../es/README.md) · [Português (Brasil)](../pt/README.md) · [Türkçe](../tr/README.md) · [العربية](../ar/README.md) · [فارسی](../fa/README.md) · [اردو](../ur/README.md) · [हिन्दी](../hi/README.md) · [Bahasa Indonesia](../id/README.md) · **Tiếng Việt** · [简体中文](../zh/README.md) · [繁體中文](../zh-Hant/README.md) · [Français](../fr/README.md) · [Deutsch](../de/README.md) · [Italiano](../it/README.md) · [Polski](../pl/README.md) · [O‘zbekcha](../uz/README.md) · [한국어](../ko/README.md) · [日本語](../ja/README.md) · [Bahasa Melayu](../ms/README.md) · [ไทย](../th/README.md) · [עברית](../he/README.md) · [বাংলা](../bn/README.md) · [አማርኛ](../am/README.md)
+
+</details>
+
+<p align="center">
+  <a href="../README.md"><b>Tài liệu kỹ thuật</b></a> ·
+  <a href="https://github.com/phishdestroy/TgWitness/wiki"><b>Sổ tay điều tra</b></a> ·
+  <a href="https://github.com/phishdestroy"><b>Do PhishDestroy phát triển</b></a> ·
+  <a href="../../.github/CONTRIBUTING.md"><b>Đóng góp</b></a> ·
+  <a href="../../.github/SUPPORT.md"><b>Nhận trợ giúp</b></a> ·
+  <a href="../../.github/SECURITY.md"><b>Báo cáo lỗ hổng</b></a>
+</p>
+
+[Chỉ mục dự án dạng máy đọc được](../../llms.txt) · [Sổ tay dạng văn bản đầy đủ](https://phishdestroy.github.io/TgWitness/llms-full.txt) · [Quy tắc kho mã dành cho agent](../../AGENTS.md)

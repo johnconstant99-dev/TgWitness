@@ -809,7 +809,7 @@
   "Links and Mini Apps reveal your device": "Les liens et les mini-applications révèlent votre appareil",
   "Links and “Log in” buttons": "Liens et boutons « Se connecter »",
   "Live messages + history snapshots": "Messages en temps réel + instantanés de l'historique",
-  "Liveness record every": "Enregistrement de la présence en temps réel de chaque",
+  "Liveness record every": "Signal d’activité toutes les",
   "Load a closed, consistent schema 7/8 file directly. The optional Telethon-only CLI converter also accepts files up to 64 MiB.": "Chargez directement un fichier au schéma fermé et cohérent 7/8. Le convertisseur CLI optionnel, réservé à Telethon, accepte également des fichiers d’une taille maximale de 64 MiB.",
   "Load a schema 2/3 production user session. The panel detects its contents; renaming a file is not conversion.": "Chargez une session utilisateur de production « schéma 2/3 ». Le panneau détecte son contenu ; le fait de renommer un fichier ne constitue pas une conversion.",
   "Load chats": "Charger les discussions",

@@ -1493,7 +1493,7 @@
   "Re-read the chat list every": "ہر بار چیٹ لسٹ کو دوبارہ پڑھیں",
   "Folder and whole-account modes: picks up folder changes and chats that appeared while offline.": "فولڈر اور پورے اکاؤنٹ کے موڈز: آف لائن کے دوران فولڈر میں ہونے والی تبدیلیاں اور نمودار ہونے والی چیٹس کو بھی شامل کرتا ہے۔",
   "minutes": "منٹ",
-  "Liveness record every": "لائوِوِنِس ہر ریکارڈ کرتا ہے",
+  "Liveness record every": "سرگرمی کا ریکارڈ ہر",
   "Reports treat silence longer than three of these intervals, and at least three minutes, as a gap.": "رپورٹس ان میں سے تین وقفوں سے زیادہ خاموشی، یعنی کم از کم تین منٹ، کو وقفہ سمجھتی ہیں۔",
   "seconds": "سیکنڈز",
   "Signed checkpoint every": "ہر کے لیے دستخط شدہ چیک پوائنٹ",

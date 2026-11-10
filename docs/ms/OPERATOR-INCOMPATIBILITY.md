@@ -22,5 +22,5 @@
 </blockquote>
 <p>Untuk mematuhi Lesen MIT sepenuhnya, kami tidak mengehadkan penggunaan perisian ini. Walau bagaimanapun, hendaklah jelas: retainer korporat, intimidasi undang-undang, dan tuntutan pemadaman digital tidak dapat mengubah sejarah, menulis semula keturunan, atau menyembunyikan kebenaran.</p>
 <p><a href="../../LICENSE">Lesen MIT</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Pendapat kami mengenai Taylor Wessing</a> · <a href="../HOW-IT-WORKS.md">Model bukti</a></p>
-<p><a href="../../README.md">Projek</a> · <a href="../README.md">Dokumentasi</a> · <a href="../wiki/Home.md">Wiki</a></p>
+<p><a href="README.md">Projek</a> · <a href="README.md">Dokumentasi</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

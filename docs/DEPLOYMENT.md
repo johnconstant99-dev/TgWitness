@@ -83,7 +83,7 @@ python -m tgwitness --data-dir /path/to/private/data --host 127.0.0.1 --port 878
 ~~~
 
 Environment variables: TGWITNESS_DATA, TGWITNESS_HOST, TGWITNESS_PORT, TGWITNESS_TOKEN.
-TGWITNESS_VAULT_KEY_FILE selects external-key mode for a new installation; see below.
+TGWITNESS_VAULT_KEY_FILE selects external-key mode for a new installation; see [External master key](SECURITY-MODEL.md#external-master-key).
 TGWITNESS_TOKEN, if supplied, must contain at least 24 characters; use a cryptographically
 random value. Without it, the app generates a 256-bit random token in panel-token.txt.
 The environment override does not rewrite that file. Restart to rotate credentials.
@@ -186,7 +186,7 @@ Inspect the panel's collector state, heartbeat, errors, and coverage events.
 
 The optional `witness` service runs an [independent witness](WITNESS.md) in its own
 container, with its own key and journal in the `witness-data` volume and only a read-only
-witness token for the collector. Create the token on the panel's **Witness** page, add it
+witness token for the collector. Create the token in the panel under **More tools → Extras → Independent witness**, add it
 with a bot token and channel to `.env`, then start the profile:
 
 ```sh
@@ -339,14 +339,14 @@ periodic recheck recovers missed messages and records saved ones that Telegram n
 longer returns. Dialogs are reloaded on start. Every startup records the preceding
 journal head, the offline boundary and the update position it resumed from.
 The monitor checks connectivity every 10 seconds and adds a heartbeat every minute
-(**Parameters → Liveness record every**).
+(**More tools → Parameters → Liveness record every**).
 Disconnections and silent periods are recorded as coverage gaps with their reason.
 History snapshots are stored as separate current-history observations next to live records.
 
 The media queue is stored in each workspace's SQLite database. A message and its job
 are committed atomically. Interrupted running jobs are recovered for retry on start.
 Each download has a 120-second base timeout plus time at 256 KiB/s for its size, and a
-1–2,000 MiB limit per attachment type; timeout, speed and retries are under **Parameters**. The collector
+1–2,000 MiB limit per attachment type; timeout, speed and retries are under **More tools → Parameters**. The collector
 skips files whose size is unknown. Pausing retains queued work. Retry uses the original
 observed file descriptor, never the latest version of a subsequently edited message.
 Temporary failures have bounded retries; media FloodWait pauses survive restart.
@@ -368,7 +368,7 @@ metadata, media, temporary exports, and backups.
 Startup verification and export stream records instead of loading the whole journal.
 An export pins a read snapshot while new WAL writes can continue; long-running exports
 can retain WAL pages, so disk capacity still matters. ZIPs are capped at 4 GiB
-uncompressed to match the independent verifier's default; **Parameters → Largest signed ZIP**
+uncompressed to match the independent verifier's default; **More tools → Parameters → Largest signed ZIP**
 raises the cap, and such archives are verified with `verify.py --max-gib N`. Other formats have no event-count cap.
 Supported browsers stream response chunks to a user-selected file. Other browsers
 buffer at most 128 MiB and direct larger transfers to the authenticated CLI:

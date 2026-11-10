@@ -11,12 +11,36 @@ that your accounts can access. It runs locally with its own data directory.
 
 **First visit?** [Explore the demo](#explore-the-interface) before connecting an account.
 [Choose a guide](README.md) for proxies, witnesses, exports or server setup.
+[GitHub Actions capture](SEALED-ACTIONS.md) (preview) runs a capture in your own
+GitHub fork instead of a local installation.
 
 ## Install and start
 
-[GitHub Actions capture (preview)](SEALED-ACTIONS.md)
+The guided installer includes its own Python and checks package hashes and release
+signatures before installing. Running it again updates an existing installation.
 
-Choose one method. Portable downloads become available after a release build is published:
+**Linux / macOS:**
+
+```sh
+curl -fsSL https://get.destroy.tools/install.sh | bash
+```
+
+**Windows (PowerShell or Command Prompt):**
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm https://get.destroy.tools/install.ps1 | iex"
+```
+
+On an Ubuntu server, run as root to install a background service; on a desktop, run
+as your normal user. On Ubuntu the installer prints the panel address and access key;
+on macOS and Windows the local panel opens in your browser. Continue at **Connect Telegram**
+below. [Install, verify and update](INSTALLATION.md) covers the server access choices,
+checking the script before running it, updates and removal.
+
+### Other methods
+
+GitHub releases, the source and Docker are alternatives to the installer. Portable
+downloads become available after a release build is published:
 
 | Host | Nothing installed | From source: Python 3.11+ | Docker: Engine/Desktop with Compose 2.20+ |
 | --- | --- | --- | --- |
@@ -126,7 +150,8 @@ directly accessed local demo gets automatic entry. A remote/proxied demo still u
 - Edit details show the available before/after content. Deletion details show the
   last captured content, if any; an unknown actor remains unknown.
 - **Exports:** signed ZIP, JSONL, CSV and offline HTML.
-- **Full chat export** (Sources → Full chat export): download one chat's entire visible
+- **Full chat export** (**Chats → Export chat**, or **Exports → Capture or export one
+  chat**): download one chat's entire visible
   history as a signed bundle with `chat.json` (Telegram-export style) and a readable
   `chat.html`. Private chats work when the account is a member. It is a current
   snapshot, not a reconstruction of deleted or previously edited messages. Verify a
@@ -148,7 +173,7 @@ python -m tgwitness.download --token-file data/live/panel-token.txt --out eviden
 For another workspace, add `--profile ID` using **Exports → Workspace ID**.
 For a remote server, add `--url https://your-server`. The default transfer limit is
 5 GiB; `--max-mib` changes it. Signed ZIP content has a separate 4 GiB uncompressed
-verification limit by default (**Parameters** raises it; verify such archives with
+verification limit by default (**More tools → Parameters** raises it; verify such archives with
 `verify.py --max-gib N`). Verify the archive using a trusted copy of the verifier, an
 independently retained key fingerprint and, for the minimum for evidence, the timestamp
 authority's root certificate (`--tsa-ca`).
@@ -173,7 +198,7 @@ unless that environment is already activated.
 
 A closed, consistent Telethon SQLite `.session` can be converted locally with
 `python -m tgwitness.sessions account.session --out account.tgwitness-session`, then
-loaded in Account. Direct file import and QR login are also available. See
+loaded in **More tools → Account → Files**. Direct file import and QR login are also available. See
 [CONNECTION-SECURITY.md](CONNECTION-SECURITY.md) for login formats, SOCKS5,
 HTTP CONNECT, MTProxy and external master keys.
 

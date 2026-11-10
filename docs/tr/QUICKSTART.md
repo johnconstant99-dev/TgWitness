@@ -1,86 +1,191 @@
-[TgWitness](../../README.md) / [Documentation](../README.md) / [Folder](README.md)
+[TgWitness](../../README.md) / [Belgeler](../README.md) / [Klasör](README.md)
 
-![Getting started](../assets/presentation/chapter-start.svg)
+![Başlarken](../assets/presentation/chapter-start.svg)
 
 [English](../QUICKSTART.md) · [Русский](../ru/QUICKSTART.md) · [Українська](../uk/QUICKSTART.md) · [Español](../es/QUICKSTART.md) · [Português (Brasil)](../pt/QUICKSTART.md) · **Türkçe** · [العربية](../ar/QUICKSTART.md) · [فارسی](../fa/QUICKSTART.md) · [اردو](../ur/QUICKSTART.md) · [हिन्दी](../hi/QUICKSTART.md) · [Bahasa Indonesia](../id/QUICKSTART.md) · [Tiếng Việt](../vi/QUICKSTART.md) · [简体中文](../zh/QUICKSTART.md)
 
 # TgWitness hızlı başlangıç
 
-TgWitness, hesaplarınızın erişebildiği Telegram gruplarını ve kanallarını gözlemlemek için kullanılan bağımsız bir uygulamadır. Kendi veri diziniyle yerel olarak çalışır.
+TgWitness, hesaplarınızın erişebildiği Telegram gruplarını ve kanallarını gözlemlemek için bağımsız bir uygulamadır.
+Kendi veri diziniyle yerel olarak çalışır.
 
-**İlk kez mi ziyaret ediyorsunuz?** Hesabınızı bağlamadan önce [demoyu inceleyin](#arayüzü-keşfedin). Proxy'ler, tanıklar, veri aktarımları veya sunucu kurulumu için [bir kılavuz seçin](../README.md).
+**İlk kez mi buradasınız?** Bir hesap bağlamadan önce [demoyu inceleyin](#explore-the-interface).
+Proxy'ler, tanıklar, dışa aktarımlar veya sunucu kurulumu için [bir kılavuz seçin](../README.md).
+[GitHub Actions ile kayıt](../SEALED-ACTIONS.md) (önizleme), kaydı yerel bir kurulum yerine
+kendi GitHub fork'unuzda yürütür.
 
-## Yükle ve başlat
+<a name="install-and-start"></a>
 
-Bir yöntem seçin. Sürüm derlemesi yayınlandıktan sonra taşınabilir indirme dosyaları kullanıma sunulur:
+## Kurulum ve başlatma
 
-| Barındırma | Yüklü bir şey yok | Kaynak: Python 3.11+ | Docker: Engine/Desktop ile Compose 2.20+ |
+Rehberli yükleyici kendi Python'unu içerir ve kurulumdan önce paket hash'lerini ve sürüm
+imzalarını denetler. Yeniden çalıştırıldığında mevcut bir kurulumu günceller.
+
+**Linux / macOS:**
+
+```sh
+curl -fsSL https://get.destroy.tools/install.sh | bash
+```
+
+**Windows (PowerShell veya Komut İstemi):**
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm https://get.destroy.tools/install.ps1 | iex"
+```
+
+Ubuntu sunucusunda arka plan hizmeti kurmak için root olarak çalıştırın; masaüstünde normal
+kullanıcınızla çalıştırın. Ubuntu'da yükleyici panel adresini ve erişim anahtarını yazdırır;
+macOS ve Windows'ta yerel panel tarayıcınızda açılır. Aşağıdaki **Telegram'ı bağla** adımından
+devam edin. [Kurulum, doğrulama ve güncelleme](../INSTALLATION.md) kılavuzu sunucu erişim
+seçeneklerini, betiği çalıştırmadan önce denetlemeyi, güncellemeleri ve kaldırmayı ele alır.
+
+### Diğer yöntemler
+
+GitHub sürümleri, kaynak kod ve Docker, yükleyicinin alternatifleridir. Taşınabilir indirmeler,
+bir sürüm derlemesi yayımlandıktan sonra kullanılabilir hale gelir:
+
+| Ana makine | Kurulu bir şey gerekmez | Kaynaktan: Python 3.11+ | Docker: Compose 2.20+ ile Engine/Desktop |
 | --- | --- | --- | --- |
-| Windows | GitHub Sürümleri'nden `TgWitness-<version>-windows-amd64-portable.zip` dosyasını çıkarın, `TgWitness.cmd` dosyasına çift tıklayın | `Start.cmd` öğesine çift tıklayın | `scripts\Docker.cmd` öğesine çift tıklayın |
+| Windows | GitHub Releases'tan `TgWitness-<version>-windows-amd64-portable.zip` arşivini çıkarın, `TgWitness.cmd` dosyasına çift tıklayın | `Start.cmd` dosyasına çift tıklayın | `scripts\Docker.cmd` dosyasına çift tıklayın |
 | Linux / macOS | — | `sh start.sh` | `sh scripts/docker-start.sh` |
 
-Kaynak kod yöntemleri için, GitHub Releases'tan kaynak ZIP dosyasını indirip açın veya depoyu klonlayın. `Start.cmd`, uygun bir Python bulunamadığında (winget veya imzalı python.org yükleyicisi) Windows kullanıcınız için Python 3.12'yi yüklemeyi önerir. `start.sh`, Python eksikse Linux dağıtımınız veya macOS için tam yükleme komutunu görüntüler. Kaynak kodun ilk çalıştırılması, `.venv` dosyasını oluşturur ve bağımlılıkları otomatik olarak yükler.
+Kaynak koddan kurulum için [güncel `main` dalını indirip çıkarın](https://github.com/phishdestroy/TgWitness/archive/refs/heads/main.zip)
+veya depoyu klonlayın:
 
-Docker, uygulamayı derler ve arka planda çalıştırır; ana bilgisayarda Python bulunması gerekmez. `scripts\Docker.cmd` ve `scripts/docker-start.sh`, konteyner düzgün çalıştığında panel adresini ve jetonu görüntüler. Desteklenen tüm ana bilgisayarlarda kullanılabilecek eşdeğer Docker komutları şunlardır:
+```sh
+git clone https://github.com/phishdestroy/TgWitness.git
+cd TgWitness
+```
+
+Uygun bir Python bulunamazsa `Start.cmd`, Windows kullanıcınız için Python 3.12'yi kurmayı
+önerir (winget veya imzalı python.org yükleyicisiyle). Python yoksa `start.sh`, Linux
+dağıtımınız veya macOS için tam kurulum komutunu yazdırır. Kaynaktan ilk başlatma `.venv`
+ortamını oluşturur ve bağımlılıkları otomatik olarak kurar.
+
+Docker uygulamayı derler ve arka planda başlatır; ana makinede Python gerekmez.
+`scripts\Docker.cmd` ve `scripts/docker-start.sh`, konteyner sağlıklı duruma geldiğinde panel
+adresini ve jetonu yazdırır. Desteklenen tüm ana makinelerde eşdeğer Docker komutları şunlardır:
 
 ```sh
 docker compose up -d --build --wait
 docker compose exec tgwitness cat /data/panel-token.txt
 ```
 
-**http://127.0.0.1:8787** dosyasını açın. Docker yardımcı programı veya ikinci Docker komutu tarafından yazdırılan jetonu kullanın ya da taşınabilir veya kaynak kurulum için **data/live/panel-token.txt dosyasını** okuyun. Aşağıdaki **"Telegram'a Bağlan"** bölümünden devam edin. Yerel ve Docker kurulumları ayrı depolama alanları kullanır; Docker'ı başlatmak mevcut bir yerel günlüğü içe aktarmaz.
+**http://127.0.0.1:8787** adresini açın. Docker yardımcısının veya ikinci Docker komutunun
+yazdırdığı jetonu kullanın; taşınabilir veya kaynak kurulumda ise **data/live/panel-token.txt**
+dosyasını okuyun. Aşağıdaki **Telegram'ı bağla** adımından devam edin. Yerel ve Docker kurulumları
+ayrı depolama kullanır; Docker'ı başlatmak mevcut bir yerel kurulumun günlüğünü içe aktarmaz.
 
-Sunucu için [dağıtım](DEPLOYMENT.md), otomatik HTTPS, yeniden başlatma, yayınlanan görseller, güncellemeler ve yedeklemeleri kapsar.
+Sunucu için [dağıtım kılavuzu](DEPLOYMENT.md) otomatik HTTPS, yeniden başlatma, yayımlanmış
+imajlar, güncellemeler ve yedeklemeleri ele alır.
+
+<a name="explore-the-interface"></a>
 
 ## Arayüzü keşfedin
 
-1. Taşınabilir paketteki **TgWitness-Demo.cmd** **dosyasını**, Windows kaynak klasöründeki **scripts\Demo.cmd** dosyasını veya Linux/macOS'ta `sh start.sh --demo` dosyasını çalıştırın. Kaynak dosyasını çalıştırdığınızda önce `.venv` dosyası oluşturulur ve bağımlılıklar yüklenir.
-2. **http://127.0.0.1:8787** dosyasını açın.
-3. Yerel demo, örnek günlüğü otomatik olarak açar. Doğrudan yerel erişim için token kopyalamaya gerek yoktur.
+1. Taşınabilir pakette **TgWitness-Demo.cmd** dosyasını, Windows'taki kaynak klasöründe
+   **scripts\Demo.cmd** dosyasını veya Linux/macOS'ta `sh start.sh --demo` komutunu çalıştırın.
+   Kaynaktan başlatma önce `.venv` ortamını oluşturur ve bağımlılıkları kurar.
+2. **http://127.0.0.1:8787** adresini açın.
+3. Yerel demo örnek günlüğü otomatik olarak açar. Doğrudan yerel erişimde jeton kopyalamanız gerekmez.
 
-Demo mesajları kurgusaldır. Demo modunda gerçek bir Telegram hesabına bağlanılamaz.
+Demo mesajları kurgusaldır. Demo modunda gerçek bir Telegram hesabı bağlanamaz.
 
-## Telegram'a bağlanın
+## Telegram'ı bağlayın
 
 > [!WARNING]
-> **Kaybetmeyi göze alamayacağınız hiçbir şeyi kullanmayın.** Kişisel veya değerli hesaplarınızı bağlamamanızı ve değer verdiğiniz bir hesap üzerinde API kimliği / hash oluşturmamanızı şiddetle tavsiye ederiz. Telegram, istemciden bağımsız olarak hesapları öngörülemez bir şekilde ve genellikle kalıcı olarak yasaklar. Sorunsuz bir test çalışması TgWitness'e değil Telegram'a bağlıdır ve ileride herhangi bir garanti vermez.
+> **Bu iş için ayrılmış hesaplar kullanın.** Telegram, istemci ne olursa olsun, aşırı gördüğü
+> istek hacimleri nedeniyle hesapları kısıtlayabilir veya kalıcı olarak yasaklayabilir. Kişisel
+> ya da değerli hesaplar yerine gözlem için hazırlanmış hesapları bağlayın ve API kimliğini /
+> hash'i de bu amaçla ayrılmış bir hesapta oluşturun.
 
-1. Yerel demo çalışıyorsa, onu durdurun ve **Start.cmd** dosyasını veya `sh start.sh` komutunu çalıştırın. Aksi takdirde, yukarıda başlatılan canlı kurulumu çalışır durumda bırakın.
-2. Paneli açmak için kurulum yönteminize uygun panel jetonunu kullanın.
-3. Proxy'ye ihtiyacınız varsa, bunu **Hesap → Ayarlar → Bağlantı ayarları → Bağlantı yolunu değiştir** seçeneği altında kaydedin.
-4. **Hesap** bölümünde telefon numaranızı girin ve **Devam'a** basın, **QR kodu → QR kodunu göster'i** seçin veya dosyaları seçip **Hesabı bağla'ya** basın. **API Kimliği + Hash** isteğe bağlıdır: çalışma alanı, kaydedilmiş veya içe aktarılmış çifti ya da yerleşik havuzdan çalışan bir çifti kullanır. Kendi uygulamanızı kullanmak için, API Kimliği alanına bir `API ID:API Hash` çifti yapıştırın. Tam bir yetkilendirme anahtarı için **Yetkilendirme anahtarı'nı** seçin, 512 onaltılık karakterin tamamını yapıştırın ve sağlanan DC Kimliği'ni seçin. Kullanıcı Kimliği isteğe bağlıdır ve girildiğinde işaretlenir.
-5. Seçtiğiniz oturum açma yöntemini tamamlayın: telefon/kod/2FA, QR kodu için oturum açılmış bir Telegram uygulamasından onay veya desteklenen bir yetkili oturum içe aktarımı.
-6. Görüntülenen hesap kimliğini kontrol edin. Açık **Kaynaklar**: sohbetleriniz otomatik olarak yüklenir; gruplarınızı ekleyin.
-7. "**Hangi değişikliklerin korunacağını seçin**" bölümünde, olay kategorilerini veya "**Mesajlar, düzenlemeler ve silme işlemleri"** ön ayarını seçin, ardından izleme ayarlarını kaydedin.
-8. Ek ayarlarını ayrı ayrı seçin, ardından **Gözlem başlat düğmesine** basın.
+1. Yerel demo çalışıyorsa durdurun ve **Start.cmd** dosyasını ya da `sh start.sh` komutunu
+   çalıştırın. Aksi halde yukarıda başlattığınız canlı kurulumu çalışır durumda bırakın.
+2. Panel jetonuyla giriş yapın. Yeni bir çalışma alanı [ilk kurulum](../SETTINGS.md) ekranını açar.
+   **Sadece indir**, **Sohbetleri izle** veya **Bir davaya ilişkin deliller** seçeneğini seçin.
+3. Bağlantı kontrolünün sonucunu inceleyin. Gerekirse kendi proxy'nizi yapılandırın; bağlantı
+   ayarlarına kurulumdan sonra da erişebilirsiniz.
+4. **Telegram'ı bağla** adımında QR kodunu tarayın veya telefon numaranızı girin. Dosyadan içe
+   aktarma ve tam yetkilendirme anahtarı **Diğer oturum açma yöntemleri** altındadır.
+   İstendiğinde Telegram onayını tamamlayın, kodu ve iki aşamalı şifreyi girin.
+5. Görüntülenen hesabı kontrol edin, sohbetleri seçin ve ayarlarınızı gözden geçirin. Kurulumu
+   son ekrandan tamamlayın. **Sadece indir** seçeneğinde **Dışa aktarmaya başla** düğmesi tek
+   seferlik bir dışa aktarma başlatır ve ilerlemesini göstermek için Dışa aktarımlar sayfasını açar;
+   sürekli gözlemi etkinleştirmez.
 
-API kimlik bilgileri uygulamanızı tanımlar; tek başlarına bir hesaba yetki vermezler. Özel gruplar için herkese açık kullanıcı adı gerekmez, ancak hesabınızın erişim izni olmalıdır.
+Kurulumdan sonra seçili sohbetleri **Sohbetler → Seç** ile değiştirebilirsiniz. **Ayarlar**
+toplama ve dosya seçeneklerini yönetir; **Diğer araçlar → Kaynaklar**, Standart veya Uzman
+düzeyinde ayrıntılı kaynak listesini sunar. [Panel kılavuzu](../PANEL.md) altı ana bölümü ve
+bunların bağlama göre değişen denetimlerini açıklar.
 
-Mevcut hesaplar için [hesaplara ve oturum formatlarına](../ACCOUNTS.md) bakın: panel, Telethon StringSession, Telethon/Pyrogram SQLite, tek hesaplı TData ZIP ve desteklenen hesap JSON formatlarını kabul eder. Bir oturumu ve ona ait JSON dosyasını birlikte seçin, ardından "**Hesabı bağla"** düğmesine basın. Aynı isteğe bağlı API ayarlarıyla QR koduyla giriş de yapılabilir. TDLib, botlar ve toplu hesap listeleri desteklenmemektedir.
+**API Kimliği + Hash** isteğe bağlıdır: çalışma alanı kaydedilmiş ya da içe aktarılmış çiftini
+veya yerleşik havuzdan çalışan bir çifti kullanır. Kendi uygulamanızı kullanmak için API Kimliği
+alanına tek bir `API ID:API Hash` çifti yapıştırın. **Otorizasyon anahtarı** için 512 onaltılık
+karakterin tamamını yapıştırın ve size verilen DC Kimliğini seçin. Kullanıcı Kimliği isteğe
+bağlıdır; girilirse doğrulanır.
 
-Başka bir hesap eklemek için hesap seçicinin yanındaki **+ işaretine** basın veya **Hesap → Ayarlar → Bağlantı ayarları → Çalışma alanları'nı** açın ya da **Hesaplar'ı** kullanın. Çalışma alanlarının ayrı oturumları, günlükleri, anahtarları, kaynakları ve kuyrukları vardır. Görünümler arasında geçiş yapıldığında diğer toplayıcılar çalışmaya devam eder. Bu kurulumda aynı Telegram hesabı iki çalışma alanına atanamaz. Çalışma alanlarının sayısı sabit değildir; hepsi tek bir işlemi paylaşır, bu nedenle kapasite makineye bağlıdır.
+API kimlik bilgileri uygulamanızı tanımlar; tek başlarına bir hesaba yetki vermezler. Özel
+grupların herkese açık bir kullanıcı adına ihtiyacı yoktur, ancak hesabınızın bu gruplara
+erişimi olmalıdır.
 
-Canlı panel jetonu, Telegram yetkilendirmelerinize ve kaydedilmiş materyallerinize erişimi korur; bu jeton, Telegram API kimlik bilgilerinden ayrıdır. Yalnızca açıkça başlatılmış ve doğrudan erişilen yerel bir demo otomatik olarak giriş yapabilir. Uzak/proxy üzerinden erişilen bir demo ise hâlâ `data/demo/panel-token.txt` kullanır.
+Mevcut hesaplar için [hesaplar ve oturum biçimleri](../ACCOUNTS.md) kılavuzuna bakın: panel
+Telethon StringSession, Telethon/Pyrogram SQLite, tek hesaplı TData ZIP ve desteklenen hesap
+JSON dosyalarını kabul eder. Oturumu ve ona eşlik eden JSON dosyasını birlikte seçip
+**Hesap bağla** düğmesine basın. Aynı isteğe bağlı API ayarlarıyla QR koduyla giriş de
+kullanılabilir. TDLib, bot oturumları ve CSV/JSON hesap envanterleri desteklenmez.
+
+Birden fazla hesap için **Hesaplar → Hesapları içe aktar** seçeneğini kullanın ve desteklenen
+oturum dosyalarını seçin. Eşlik eden JSON dosyaları uzantısız dosya adına göre eşleştirilir;
+içe aktarılan her hesap kendi çalışma alanını alır. Bkz.
+[toplu içe aktarma ve hesap grupları](../ACCOUNTS.md#bulk-import-and-account-groups).
+
+Başka bir hesap eklemek için hesap seçicinin yanındaki **+** düğmesine basın veya
+**Hesaplar → Hesap ekle** seçeneğini kullanın. Çalışma alanlarının oturumları, günlükleri,
+anahtarları, kaynakları ve kuyrukları birbirinden ayrıdır. Görünüm değiştirmek diğer toplayıcıları
+durdurmaz. Bu kurulumda aynı Telegram hesabı iki çalışma alanına atanamaz. Çalışma alanı sayısı
+sabit değildir; hepsi tek bir işlemi paylaşır, bu yüzden kapasite makineye bağlıdır.
+
+Canlı panel jetonu, Telegram yetkilendirmelerinize ve kaydedilmiş materyale erişimi korur;
+Telegram API kimlik bilgilerinden ayrıdır. Otomatik giriş yalnızca açıkça başlatılmış ve
+doğrudan erişilen yerel bir demoya tanınır. Uzaktan veya proxy üzerinden erişilen bir demo yine
+`data/demo/panel-token.txt` dosyasını kullanır.
 
 ## İnceleme ve dışa aktarma
 
-- **Günlük:** Gözlemleri kaynağa ve olay türüne göre arayın ve filtreleyin.
-- Bir olayı seçerek orijinal kaydını, kaynağını ve kaydedilmiş sürümlerini inceleyin.
-- Düzenleme ayrıntıları, mevcut önceki/sonraki içeriği gösterir. Silme ayrıntıları, varsa en son yakalanan içeriği gösterir; kimliği bilinmeyen bir aktör ise bilinmez olarak kalır.
-- **Dışa aktarma formatları:** imzalı ZIP, JSONL, CSV ve çevrimdışı HTML.
-- **Sohbetin tam olarak dışa aktarılması** (Kaynaklar → Sohbetin tam olarak dışa aktarılması): Bir sohbetin görünür geçmişinin tamamını, `chat.json` (Telegram dışa aktarma stili) ve okunabilir bir `chat.html` içeren imzalı bir paket olarak indirin. Özel sohbetler, hesap üye olduğunda çalışır. Bu, silinmiş veya daha önce düzenlenmiş mesajların yeniden oluşturulmuş hali değil, o anki bir anlık görüntüdür. Bir kopyayı `python verify.py chat-export.zip --fingerprint TRUSTED_SHA256` ile doğrulayın.
-- **Kontrol noktası kaydetme:** imzalanmış günlük sınırını toplayıcının dışında tutun.
+- **Günlük:** gözlemleri kaynağa ve olay türüne göre arayın ve filtreleyin.
+- Bir olayı seçerek özgün kaydını, atıf bilgisini ve kaydedilmiş sürümlerini inceleyin.
+- Düzenleme ayrıntıları mevcut önceki/sonraki içeriği gösterir. Silme ayrıntıları, varsa son
+  yakalanan içeriği gösterir; bilinmeyen bir aktör bilinmeyen olarak kalır.
+- **Dışa aktarımlar:** imzalı ZIP, JSONL, CSV ve çevrimdışı HTML.
+- **Sohbetlerin tam olarak dışa aktarılması** (**Sohbetler → Sohbeti dışa aktar** veya
+  **Dışa aktarımlar → Bir sohbeti yakala veya dışa aktar**): bir sohbetin görünür geçmişinin
+  tamamını, `chat.json` (Telegram dışa aktarma biçiminde) ve okunabilir bir `chat.html` içeren
+  imzalı bir paket olarak indirin. Hesap üye olduğu sürece özel sohbetler de dışa aktarılabilir.
+  Bu, silinmiş veya daha önce düzenlenmiş mesajların yeniden oluşturulması değil, mevcut durumun
+  anlık görüntüsüdür. Bir kopyayı `python verify.py chat-export.zip --fingerprint TRUSTED_SHA256`
+  ile doğrulayın.
+- **Kontrol noktasını kaydet:** imzalı günlük sınırını toplayıcının dışında saklayın.
 - **İmzalı çalıştırma makbuzunu indirin:** toplayıcının program/sürüm kaydını saklayın.
-- **Zaman damgası isteği hazırlama:** bir zaman damgası yetkilisi için çevrimdışı bir istek hazırlayın; yanıtı almak ve doğrulamak için [TIMESTAMP.md dosyasını](../TIMESTAMP.md) izleyin.
-- **Günlüğü doğrulayın:** olay imzalarını ve zincir bağlantılarını kontrol edin. ZIP dışa aktarma işlemi, medya dosyalarını da kontrol eder.
+- **Zaman damgası isteği hazırla:** bir zaman damgası otoritesi için çevrimdışı bir istek
+  hazırlayın; yanıtı almak ve doğrulamak için [TIMESTAMP.md](../TIMESTAMP.md) adımlarını izleyin.
+- **Günlüğü doğrula:** olay imzalarını ve zincir bağlantılarını denetleyin. ZIP dışa aktarma
+  medyayı da denetler.
 
-Desteklenen tarayıcılar, büyük boyutlu dışa aktarımları doğrudan seçilen bir dosyaya kaydeder. Diğer tarayıcılar ise en fazla 128 MiB'lik bir tampon alanı kullanır. Sunucu çalışırken, akış CLI'si tüm yanıtı tampona almadan daha büyük boyutlu indirmeleri destekler:
+Desteklenen tarayıcılar büyük dışa aktarımları doğrudan seçilen bir dosyaya kaydeder. Diğer
+tarayıcılar en fazla 128 MiB arabelleğe alır. Sunucu çalışırken akış tabanlı CLI, yanıtın tamamını
+arabelleğe almadan daha büyük indirmeleri destekler:
 
 ```sh
 python -m tgwitness.download --token-file data/live/panel-token.txt --out evidence.zip
 ```
 
-Başka bir çalışma alanı için, **İhracat → Çalışma Alanı Kimliği'ni** kullanarak `--profile ID` ekleyin. Uzak bir sunucu için `--url https://your-server` ekleyin. Varsayılan aktarım sınırı 5 GiB'dir; `--max-mib` ile bu sınır değiştirilebilir. İmzalı ZIP içeriği, varsayılan olarak ayrı bir 4 GiB sıkıştırılmamış doğrulama sınırına sahiptir (**Parameters** bu sınırı artırır; bu tür arşivleri `verify.py --max-gib N` ile doğrulayın). Doğrulayıcının güvenilir bir kopyasını ve bağımsız olarak saklanan anahtar parmak izi/kontrol noktasını kullanarak arşivi doğrulayın.
+Başka bir çalışma alanı için **Dışa aktarımlar → Çalışma alanı kimliği** değerini kullanarak
+`--profile ID` ekleyin. Uzak bir sunucu için `--url https://your-server` ekleyin. Varsayılan aktarım
+sınırı 5 GiB'dir; `--max-mib` ile değiştirilir. İmzalı ZIP içeriği için varsayılan olarak ayrıca
+sıkıştırılmamış 4 GiB'lik bir doğrulama sınırı vardır (**Diğer araçlar → Parametreler** bu sınırı
+yükseltir; bu tür arşivleri `verify.py --max-gib N` ile doğrulayın). Arşivi doğrulayıcının
+güvenilir bir kopyası ve bağımsız olarak saklanan bir anahtar parmak iziyle, kanıt için asgari
+şartlar açısından da zaman damgası otoritesinin kök sertifikasıyla (`--tsa-ca`) doğrulayın.
 
 ## Kurulumu kontrol edin
 
@@ -90,18 +195,38 @@ python start.py --check
 python start.py --check --json
 ```
 
-`--check`, yerel bağımlılıkları, imza desteğini, depolama alanını, anahtar yapılandırmasını ve dinleme adresini kontrol eder. Herhangi bir şey yüklemez veya Telegram'a bağlanmaz. Bağlantı noktası meşgulse, başka bir örnek çalışıyor olabilir. Farklı bir `--port` kullanın veya önce onu durdurun.
+`--check` yerel bağımlılıkları, imzalama desteğini, depolamayı, anahtar yapılandırmasını ve
+dinleme adresini yoklar. Hiçbir şey kurmaz ve Telegram'a bağlanmaz. Meşgul bir bağlantı noktası,
+başka bir örneğin çalıştığı anlamına gelebilir. Farklı bir `--port` kullanın veya önce o örneği
+durdurun.
 
-Başlatıcı, `.venv` konumuna kurulur. Yardımcı `python -m tgwitness...` komutları, ilgili ortam halihazırda etkinleştirilmemişse, Windows'ta `.venv\Scripts\python.exe` veya Linux/macOS'ta `.venv/bin/python` komutunu kullanmalıdır.
+Başlatıcı `.venv` içine kurulum yapar. Bu ortam etkinleştirilmemişse yardımcı
+`python -m tgwitness...` komutları Windows'ta `.venv\Scripts\python.exe`, Linux/macOS'ta
+`.venv/bin/python` ile çalıştırılmalıdır.
 
 ## Oturumlar, koruma ve işletim
 
-Kapalı, tutarlı bir Telethon SQLite `.session` dosyası, `python -m tgwitness.sessions account.session --out account.tgwitness-session` ile yerel olarak dönüştürülebilir ve ardından Account'a yüklenebilir. Doğrudan dosya içe aktarma ve QR koduyla giriş seçenekleri de mevcuttur. Giriş formatları, SOCKS5, HTTP CONNECT, MTProxy ve harici anahtarlar hakkında bilgi için [CONNECTION-SECURITY.md dosyasına](../CONNECTION-SECURITY.md) bakın.
+Kapalı ve tutarlı bir Telethon SQLite `.session` dosyası
+`python -m tgwitness.sessions account.session --out account.tgwitness-session` ile yerel olarak
+dönüştürülüp **Diğer araçlar → Hesap → Dosyalar** bölümünden yüklenebilir. Doğrudan dosya içe
+aktarma ve QR koduyla giriş de kullanılabilir. Giriş biçimleri, SOCKS5, HTTP CONNECT, MTProxy ve
+harici ana anahtarlar için [CONNECTION-SECURITY.md](../CONNECTION-SECURITY.md) belgesine bakın.
 
-**Gözlemi duraklatmak**, veri toplama işlemini durdurur. **Kilitleme** yalnızca tarayıcı erişimini kapatır. Sekmeyi kapatmak, toplayıcı sürecinin çalışmaya devam etmesine neden olur. Süreci durdurmak, veri toplama işlemini kesintiye uğratır; geçmiş anlık görüntüsü, kaçırılan tüm düzenlemeleri veya silme işlemlerini yeniden oluşturamaz. Olay politikaları, ek kuyrukları, hesap izolasyonu ve yeniden başlatma davranışı için [veri toplama işleminin nasıl çalıştığını](../COLLECTION.md) inceleyin.
+**Gözlemi duraklat** toplamayı durdurur. **Kilitle** yalnızca tarayıcı erişimini kapatır.
+Sekmeyi kapatmak toplayıcı işlemini durdurmaz. İşlemi durdurmak toplamayı keser; geçmiş anlık
+görüntüsü kaçırılan tüm düzenlemeleri veya silmeleri yeniden oluşturamaz. Olay politikaları, ek
+kuyrukları, hesap yalıtımı ve yeniden başlatma davranışı için
+[toplamanın nasıl çalıştığı](../COLLECTION.md) belgesine bakın.
 
-Oturumlar ve gizli bilgiler şifrelenmiştir. Mesaj içeriği, medya dosyaları ve dışa aktarımlar için şifrelenmiş bir disk veya birim gereklidir. Günlük imzalarını, hash zincirini ve ekleri güvenilir bir anahtarla doğrulayın; kontrol noktalarını ayrı bir yerde saklayın. Seçilen modun toplama kapsamını ve zaman aralıklarını, harici zaman kayıtlarını ve toplama ortamı için mevcut doğrulama sonuçlarını birlikte inceleyin.
+Oturumlar ve gizli bilgiler şifrelenir. Mesaj içeriği, medya ve dışa aktarımlar için şifreli bir
+disk veya birim gerekir. Günlük imzalarını güvenilir bir anahtara karşı doğrulayın ve kontrol
+noktalarını ayrı saklayın. Seçilen toplama modu için yakalama kayıtlarını, harici zaman
+makbuzlarını ve ortam tasdiklerini inceleyin.
 
-Yedekleme/geri yükleme için [OPERATIONS.md dosyasını](../OPERATIONS.md), barındırma için [DEPLOYMENT.md dosyasını](DEPLOYMENT.md) ve hizmet örnekleri için [deploy/ dizinini](../../deploy/README.md) inceleyin. Yüklenen panelde ayrıca `/guide.html` adresinde bir çevrimdışı kurulum kılavuzu da bulunmaktadır.
+Yedekleme/geri yükleme için [OPERATIONS.md](../OPERATIONS.md), barındırma için
+[DEPLOYMENT.md](DEPLOYMENT.md) ve hizmet örnekleri için [deploy/](../../deploy/README.md)
+belgelerini okuyun. Kurulu panel ayrıca `/guide.html` adresinde çevrimdışı bir kurulum kılavuzu
+içerir.
 
-Gerçek doğrulama ve mevcut sınırlamalar, [VERIFICATION.md](../VERIFICATION.md) ve [READINESS.md](../internal/READINESS.md) dosyalarında kaydedilmiştir.
+Fiilen yapılan doğrulamalar ve kalan sınırlar [VERIFICATION.md](../VERIFICATION.md) ve
+[READINESS.md](../internal/READINESS.md) belgelerinde kayıtlıdır.

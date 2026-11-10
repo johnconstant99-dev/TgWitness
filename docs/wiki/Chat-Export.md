@@ -26,9 +26,16 @@ Saves what your account can see in a chat as a signed archive, with a readable
 ## Choose and export
 
 1. Pick the workspace and open **Chats**.
-2. Open the chat, **Export chat** (or **Sources → Full chat export → Export full chat**).
+2. Open the chat, **Export chat** (or **Exports → Capture or export one chat → Export full chat**).
 3. Wait for it to finish and save the archive.
 4. Keep the original. Unpack a copy, `chat.html` to read offline, `chat.json` for analysis.
+
+If the export fails or you cancel it, the messages and files read so far stay in the
+workspace under a statement signed with the collector key. The export form shows the
+saved range: **Resume export** continues from it, **Start over** deletes it and reads the
+chat again from the newest message. When Telegram ended the account's authorization during
+the export, **Download partial export** saves a signed archive of the saved range, marked
+partial. Details in [export hashes](../EXPORT_HASHES.md).
 
 The account needs access to the chat; private chats work too. Each archive covers one
 chat. Exports can run concurrently on separate accounts; for a whole account use
@@ -39,7 +46,7 @@ chat. Exports can run concurrently on separate accounts; for a whole account use
 | Your task | Use |
 | --- | --- |
 | Read a chat offline | **Full chat export** |
-| Pull history of enabled sources into the journal | **Sources → Load full history** ([guide](../HISTORY.md)) |
+| Pull history of enabled sources into the journal | **More tools → Sources → Chats in scope → Load full history** ([guide](../HISTORY.md)) |
 | Grab recent messages into the journal | **History snapshot** |
 | Catch edits and deletions as they happen | **Start observation** |
 | Hand over observations, media and verification data | **Signed evidence ZIP** in Exports |

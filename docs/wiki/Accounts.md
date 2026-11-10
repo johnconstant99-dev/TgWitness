@@ -27,12 +27,14 @@ some workspaces and chats.
 
 ## Choose a sign-in method
 
+Sign in under **Settings → Telegram account**, or **More tools → Account** at Expert level.
+
 | You have | Use |
 | --- | --- |
-| Phone and access to login codes | **Account → Phone**, then code and 2FA |
-| The account open in a Telegram app | **Account → QR code**, approve it in the app |
-| A saved session | **Account → Files**, pick the session and its JSON together |
-| A full auth key | **Account → Auth key**, 512 hex characters + DC ID |
+| Phone and access to login codes | **Phone** tab, then code and 2FA |
+| The account open in a Telegram app | **QR code** tab, approve it in the app |
+| A saved session | **Files** tab, pick the session and its JSON together |
+| A full auth key | **Auth key** tab, 512 hex characters + DC ID |
 
 Works with Telethon StringSession, Telethon/Pyrogram SQLite, account JSON and single-account
 TData ZIPs. Not TDLib folders or CSV account lists. JSON with only metadata will still need
@@ -47,7 +49,7 @@ pool, or yours under **API ID + Hash**.
 2. Set its [proxy route](Proxies.md) first if you need one.
 3. Sign in.
 4. Check the Telegram account ID shown.
-5. In **Sources** pick a chat you control and start observation.
+5. In **Chats → Choose** pick a chat you control and start observation.
 6. Send a message and see it land in the journal.
 
 A connection test only checks the network. Being logged in and seeing a given chat are separate things.

@@ -25,7 +25,8 @@ storage. Everything is encrypted with AES-256-GCM before it leaves your machine.
 
 ## Configure the destination
 
-**Exports → Off-site copy** in the workspace you want. Bring your own bucket and keys,
+**Settings → Notifications and off-site copy → Off-site copy** in the workspace you want
+(also under **More tools → Extras → Evidence & backups → Configure**). Bring your own bucket and keys,
 TgWitness doesn't create buckets.
 
 | Field | Enter |

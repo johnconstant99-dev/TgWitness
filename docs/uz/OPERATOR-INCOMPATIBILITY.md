@@ -22,5 +22,5 @@
 </blockquote>
 <p>MIT litsenziyasiga qat&#x27;iy rioya qilish maqsadida biz ushbu dasturiy ta&#x27;minotdan foydalanishni cheklamaymiz. Biroq aniq bo&#x27;lsin: korporativ shartnomalar, huquqiy qo&#x27;rqitish va raqamli o&#x27;chirish talablari tarixni o&#x27;zgartira olmaydi, nasl-nasabni qayta yozolmaydi yoki haqiqatni yashira olmaydi.</p>
 <p><a href="../../LICENSE">MIT litsenziyasi</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Taylor Wessing bo&#x27;yicha pozitsiyamiz</a> · <a href="../HOW-IT-WORKS.md">Dalil modeli</a></p>
-<p><a href="../../README.md">Loyiha</a> · <a href="../README.md">Hujjatlash</a> · <a href="../wiki/Home.md">Wiki</a></p>
+<p><a href="README.md">Loyiha</a> · <a href="README.md">Hujjatlash</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

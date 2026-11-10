@@ -11,7 +11,7 @@ result and are not treated as proof of deletion.
 
 Open a chat and choose **Export chat**. Select idle account workspaces that already have access to the source. Every account keeps its configured connection. This feature does not change WARP or choose an exit IP.
 
-On **Start → Export a chat by link**, enter a public username or invite link to preview
+On **Home → Export a chat by link**, enter a public username or invite link to preview
 accessible chat facts and eligible accounts; each account left out shows why. Checking
 briefly reserves an idle reader; it does not join the chat or start an export. Time
 estimates cover one account, the selected accounts and, for channels and supergroups,

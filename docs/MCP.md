@@ -41,7 +41,7 @@ Use the Python environment that runs the panel. From a source checkout:
 
 Restart the panel with its usual data directory and launch arguments after
 installation. Readiness should include `[PASS] mcp: streamable-http available`.
-**Integrations → MCP** shows the runtime status and an installation command using
+**More tools → Integrations → MCP** shows the runtime status and an installation command using
 that server's actual Python executable. **Re-check** refreshes this status without
 reloading the page; it does not install packages or restart the server.
 

@@ -5,7 +5,7 @@
 # Trusted Live (preview)
 
 Trusted Live is an isolated official-client recorder, available alongside the other
-recorders under **Extras → Independent capture**. Its panel selects Telegram Desktop
+recorders under **More tools → Extras → Independent capture**. Its panel selects Telegram Desktop
 Linux or Telegram Web, native JSON export / visual capture / hybrid, and a provisioned
 connector. It does not start TgWitness's Telethon collector or import a Telegram session.
 

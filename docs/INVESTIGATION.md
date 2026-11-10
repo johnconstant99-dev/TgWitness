@@ -59,17 +59,17 @@ flowchart TD
 1. Connect the collecting account in its own workspace. In [Case Board](CASE-BOARD.md)
    or your case register, record the case reference, account ID, workspace and
    observation start. Retain the trusted signing-key fingerprint independently.
-2. For a dedicated collecting account, open **Sources → Observation scope → Investigation mode**. The preset selects
+2. For a dedicated collecting account, open **More tools → Sources → Scope → Investigation mode**. The preset selects
    **Whole account**, channels/groups/private chats/bots, own actions, source
    profiles and the latest 200 visible messages for newly discovered sources.
    Review it, press **Save scope**, and complete the scope confirmation.
    Main accounts use selected chats or a folder; whole-account collection is
    available to accounts marked for investigation.
 3. **Load chats** and compare the sources with the account's dialog list. Check
-   exclusions. **Parameters → Chats read from the account's list** defaults to
+   exclusions. **More tools → Parameters → Chats read from the account's list** defaults to
    1,000 and allows up to 20,000. Sources beyond the list limit are added when
    they become active. Record what was actually enumerated.
-4. In **Recording settings**, select **All visible activity** and save the
+4. In **More tools → Sources → Recording**, select **All visible activity** and save the
    monitoring settings. Review attachment types/limits and free disk space.
 5. Start observation. Validate a controlled new message, edit and deletion, then
    retain the test references and any failures.
@@ -94,13 +94,13 @@ Keep a source register with one row per chat:
 
 Use the right acquisition for each source:
 
-- **Load full history** in **Sources** loads available past
+- **Load full history** in **More tools → Sources → Chats in scope** loads available past
   messages from enabled sources into the workspace journal. It supports pause/resume
   and a signed progress report. See [history acquisition](HISTORY.md).
 - **History snapshot** saves recent visible messages into the observation journal.
-  Its default maximum is 500; **Parameters → Largest history snapshot** can raise
+  Its default maximum is 500; **More tools → Parameters → Largest history snapshot** can raise
   that to 10,000. These are current history observations, not reconstructed edits.
-- **Full chat export → Export full chat**, or **Chats → Export chat**, fetches the
+- **Exports → Capture or export one chat → Export full chat**, or **Chats → Export chat**, fetches the
   currently visible history of one chat into a separate signed `chat.json` /
   `chat.html` bundle. Repeat for the case's sources and retain each result.
 - **When a new chat or bot appears** can save its profile and up to 1,000 recent
@@ -152,7 +152,7 @@ In a relevant chat, open **People → Turn on profiles** and inspect a person:
 - Saved avatar metadata and similar cached avatars, with their separate origin.
 
 Open the cited records before using a derived profile in a finding. Profiles cover
-people with saved messages, not every member of the group. **Parameters → Records
+people with saved messages, not every member of the group. **More tools → Parameters → Records
 cited per fact** limits the reference list, not the underlying activity count.
 Mentions and avatar similarity are leads; ownership and identity rest on numeric IDs and attributed senders.
 

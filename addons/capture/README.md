@@ -15,7 +15,7 @@
 For the owned official Telegram Web browser, required video, guarded actions and the GitHub-hosted procedure, see [Official client witness](../../docs/OFFICIAL-WITNESS.md). That mode uses `compose.official.yaml` and a fresh temporary profile. The generic recorders described below retain their existing behavior.
 
 This preview adds two independently operated recorders. It is a separate Python
-package and optional Compose deployment, controlled from **Extras → Independent capture**
+package and optional Compose deployment, controlled from **More tools → Extras → Independent capture**
 or each recorder's standalone English panel. The ordinary application does not start
 recorders or receive their signing keys or client sessions. Both recorders start with
 capture **disabled**, including after a restart. Video is separately selectable and

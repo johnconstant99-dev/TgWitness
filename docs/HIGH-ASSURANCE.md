@@ -123,7 +123,7 @@ Every start of the collector recorded in the journal carries such an attestation
 and the CVM's operations serve as the provider log: a compose changed after the deployment fails
 the report, and restarts are listed for review.
 
-In the panel choose **Confidential virtual machine · Phala Cloud** under **Extras** → **Server 24/7**
+In the panel choose **Confidential virtual machine · Phala Cloud** under **More tools → Extras → Server 24/7**
 and paste a Phala Cloud API key; the quick tunnel works as on Hetzner. From the command line:
 
 ```sh
@@ -221,7 +221,7 @@ destroy have run on Phala Cloud itself; see
 
 ## From the panel
 
-On your own computer, **Extras → Server 24/7** runs the same `deploy` for Hetzner in three
+On your own computer, **More tools → Extras → Server 24/7** runs the same `deploy` for Hetzner in three
 steps: choose Europe or the United States, paste a Hetzner token (Read & Write), then review
 the server type, monthly price, address and version the panel found with that token. Nothing
 is created before you confirm. The panel shows each step as `deploy` reports it, then the

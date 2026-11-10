@@ -13,5 +13,5 @@
 </blockquote>
 
 <p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">บันทึกต้นฉบับ</a> · <a href="OPERATOR-INCOMPATIBILITY.md">ประกาศด้านจริยธรรมและความต่อเนื่องทางประวัติศาสตร์</a></p>
-<p><a href="../../LICENSE">ใบอนุญาต MIT แบบเต็ม</a> · <a href="../../README.md">โครงการ</a> · <a href="../README.md">เอกสารประกอบ</a> · <a href="../wiki/Home.md">Wiki</a></p>
+<p><a href="../../LICENSE">ใบอนุญาต MIT แบบเต็ม</a> · <a href="README.md">โครงการ</a> · <a href="README.md">เอกสารประกอบ</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

@@ -4,7 +4,8 @@
 
 A workspace for documenting a conversation: what the investigator did, what
 the other side answered, and a package a prosecutor can read and check. The mode
-lives in the **Documentation** drawer of the panel. The signed journal underneath
+lives in the **Documentation** drawer of the panel, opened from **More tools → Documentation**
+(from the main sidebar while a session is recording). The signed journal underneath
 is unchanged; everything here cites it.
 
 <details>
@@ -185,7 +186,7 @@ required or sufficient.
 
 ## Account control
 
-The **Account** screen manages the investigating account by hand: first and last
+The **Account** tab of the drawer manages the investigating account by hand: first and last
 name, @username, bio and profile photo, thirteen privacy settings grouped by
 who sees the profile and who can reach it, and account-wide options such as
 hiding read time.

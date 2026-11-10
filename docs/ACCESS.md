@@ -26,7 +26,7 @@ case should stay limited to them.
 
 ## Give someone access
 
-1. Sign in as the main administrator and open **Access**.
+1. Sign in as the main administrator and open **More tools → Access**.
 2. Under **Give someone access**, enter a name you will recognize in the log.
 3. Choose the workspaces and, where needed, the individual chats.
 4. Select what this person may do. **View** is always included.
@@ -131,7 +131,7 @@ sign-in records still use the client address.
 
 ### Replace the main key
 
-Use **Access → My limits → Reissue administrator key**, or run
+Use **More tools → Access → My limits → Reissue administrator key**, or run
 `tgwitness token rotate` from a managed installation while the panel is running.
 All existing browser sessions end, including sessions opened with colleague
 tokens. The requesting browser receives a new session; save the new administrator

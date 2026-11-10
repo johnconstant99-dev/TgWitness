@@ -29,7 +29,7 @@ Collection settings and the first connection belong to the workspace administrat
 | Level | Fields | Sidebar |
 | --- | --- | --- |
 | Simple | Only the essentials | Home, Chats, Journal, Exports, Accounts and Settings |
-| Standard | Common settings with explanations | Adds Case Board, Sources and Access under More tools |
+| Standard | Common settings with explanations | Adds Case Board, Sources, Access and Documentation under More tools |
 | Expert | All fields, limits and technical details | Also adds System map, Network topology, Extras, Ask the archive, Parameters, Account, System log and Integrations under More tools |
 
 Section names stay the same at every level. Open Appearance at the bottom of the

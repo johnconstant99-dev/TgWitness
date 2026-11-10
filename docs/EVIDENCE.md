@@ -394,7 +394,7 @@ Every signed ZIP carries `coverage.json`, the HTML report opens with the same su
   ends at a pause, a stop, a lost Telegram connection, a sign-out, a process start without
   an orderly stop, or more than three minutes without any record while observing
   (heartbeats are written every minute, so silence means the process stopped, froze or the
-  computer slept). When the heartbeat interval is changed in **Parameters**, each heartbeat
+  computer slept). When the heartbeat interval is changed in **More tools → Parameters**, each heartbeat
   records it and the allowed silence becomes three intervals, never less than three minutes.
 - **Gaps** list the time between periods with the reason. A gap still open at the last
   record is marked `not_resumed_by_last_record`.
@@ -405,6 +405,14 @@ Every signed ZIP carries `coverage.json`, the HTML report opens with the same su
   one such chat mean nothing and are not listed there.
 - Chat-level gap notices (for example Telegram asking for difference recovery in one
   channel) are counted as notes; they do not interrupt global coverage.
+- **Session records.** Windows in which Telegram's update counter grew while no update
+  reached this session (`updates_diverted`), this session left Telegram's session list while
+  its connection kept working (`session_revoked_externally`), or a witness probe's answer
+  arrived only from history (`probe_ack_missed_live`) are listed separately. The verifier
+  also reports where the Telegram session key came from, other sessions signed in when
+  observation started, sessions added during observation, Telegram security notices
+  (777000), other sessions ended from the workspace, only-session periods, witness probe
+  counts and phone call updates. See [accounts](ACCOUNTS.md#witness-probe).
 
 ### Missing message numbers (`gap_summary`)
 
@@ -416,7 +424,7 @@ every message numbered in it was observed. A gap names no actor and no reason.
 
 | Field | Meaning |
 | --- | --- |
-| `status` | `on`, or `off` when turned off in **Parameters → Gap analysis** |
+| `status` | `on`, or `off` when turned off in **More tools → Parameters → Gap analysis** |
 | `parameters` | The parameters that produced the result, so it can be repeated |
 | `chats[]` | One entry per channel or supergroup, each numbered on its own |
 | `account` | The account-wide sequence of private chats, bots and ordinary groups |
@@ -528,16 +536,22 @@ manifest.sig is the base64 Ed25519 signature over canonical manifest JSON.
 The verifier rejects unexpected/missing members, duplicate names, corrupt files,
 broken sequence/chain, invalid signatures, and mismatch with a provided checkpoint.
 It never extracts archive paths. It limits total declared uncompressed size to 4 GiB;
-`--max-gib N` allows larger archives made with a raised **Parameters** limit.
+`--max-gib N` allows larger archives made with a raised **More tools → Parameters** limit.
 
 Run verification from your installed TgWitness version or a reviewed checkout.
 The copy included in an archive supports portable use; check that copy against your
 trusted installation before executing it.
 
 A checkpoint signs a statement containing the public key, journal length, head
-hash, and creation time. The verifier can check that a later archive contains the
-same prefix. Retain the checkpoint outside the collector, so later verification compares
-the archive with a reference held separately from it. The collector key signs it, so it
+hash, and creation time. It also carries the newest drand round the workspace has
+fetched (`drand_anchor`): the collector asks a drand relay through the workspace's
+outside route before each periodic checkpoint, so Hide IP, proxies and a turned-off
+outside route apply, and making the checkpoint itself never connects out. The verifier can check
+that a later archive contains the same prefix. With `--checkpoint` and `--check-drand`
+it confirms that round with the drand relays and reports that the checkpoint was signed
+no earlier than the round's time; the round does not change the assurance tier. Retain
+the checkpoint outside the collector, so later verification compares the archive with a
+reference held separately from it. The collector key signs it, so it
 binds the records up to it only if the recipient obtained it before the archive, through
 another channel; on its own it does not meet the minimum for evidence.
 
@@ -656,7 +670,7 @@ of the execution environment, pair it with the GitHub attestation or TDX checks 
 in [Verification scope](#verification-scope).
 
 Automatic checkpoints are retained locally on startup, every five minutes while
-observing (**Parameters → Signed checkpoint every**), and on orderly stop. Startup verification and export compare the journal
+observing (**More tools → Parameters → Signed checkpoint every**), and on orderly stop. Startup verification and export compare the journal
 against the latest retained local checkpoint. This can detect a database rollback
 when the checkpoint survives. Independent retention keeps that reference available outside
 the workspace; a verified external timestamp additionally anchors it in time.
@@ -668,7 +682,8 @@ longer returns a saved message; the latter is not a deletion notice and names no
 
 ### Off-site copy and restore (S3)
 
-The off-site copy (Exports, off by default) uploads journal segments, preserved files, checkpoints
+The off-site copy (**Settings → Notifications and off-site copy → Off-site copy**, or
+**More tools → Extras → Evidence & backups**; off by default) uploads journal segments, preserved files, checkpoints
 with their timestamps and finished chat exports to S3-compatible storage, encrypted with
 AES-256-GCM before upload under a key kept in the workspace vault; Object Lock retention applies
 when the bucket supports it. Without the downloaded key the copy cannot be read. Restore and verify
@@ -716,14 +731,16 @@ it was checked. The collector checkpoint signature and journal must still be ver
 separately with the trusted collector fingerprint.
 
 Verification checks the response signature, checkpoint bytes and, when supplied,
-the original request under the specified CA trust. Revocation checks and long-term
-archival validation after certificate expiry are outside the current verifier.
+the original request under the specified CA trust. This manual procedure does not check
+revocation; for time stamps obtained in evidence mode, `verify.py` checks the stored OCSP or
+CRL evidence ([signing certificate revocation](TIMESTAMP.md#signing-certificate-revocation)).
+Long-term archival validation after certificate expiry is outside the current verifier.
 See the [procedure](TIMESTAMP.md) and [validation results](VERIFICATION.md).
 
 ## Optional records in evidence mode: drand and Telegram devices
 
 Two more records can run on the same passes as the timestamps. Both are off by default and
-take effect only while evidence mode is on: Extras → Evidence & backups → **More witnesses · optional**,
+take effect only while evidence mode is on: More tools → Extras → Evidence & backups → **More witnesses · optional**,
 or `"drand": true` and `"devices": true` in `POST /api/evidence`. One failing does not stop the
 other or the timestamps; the panel shows the latest result of each under the form.
 

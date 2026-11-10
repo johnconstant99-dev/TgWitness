@@ -43,7 +43,7 @@ time zone or interface level:
 | Level | Sections in the sidebar |
 | --- | --- |
 | Simple | The daily sections |
-| Standard | Also Case Board, Sources and Access under More tools |
+| Standard | Also Case Board, Sources, Access and Documentation under More tools |
 | Expert | Also System map, Network topology, Extras, Ask the archive, Parameters, Account, System log and Integrations under More tools |
 
 Section names stay the same at every level. A level only hides sections. A hidden feature keeps working, and the server checks
@@ -237,6 +237,9 @@ Progress survives a restart; attachments follow your media settings. See
   session list. The same line offers **Create an independent authorization**, which
   opens the sign-in page with that option selected. See
   [accounts](ACCOUNTS.md#create-an-independent-authorization).
+- A chat export that fails or is cancelled keeps the range it saved. **Capture or export
+  one chat** then offers **Resume export** and **Start over**; see
+  [export one chat](wiki/Chat-Export.md).
 - **Prepared exports** keeps up to 20 files within 2 GiB, plus the latest one, for
   repeat downloads, each with its SHA-256 for the recipient to compare.
 - When the browser refuses its save dialog, the panel falls back to an ordinary download.
@@ -261,6 +264,8 @@ Progress survives a restart; attachments follow your media settings. See
   only session when Telegram allows it**, which repeats that action after the 24 hours
   Telegram requires and shows the two-step password it sets once. See
   [account security](ACCOUNTS.md#create-an-independent-authorization).
+  **Account security → Witness probe** uses a second workspace to check that this
+  session receives updates live; see [witness probe](ACCOUNTS.md#witness-probe).
 
 ## Extras
 
@@ -317,8 +322,9 @@ paste Apprise addresses directly.
 
 - **Problems**: disk almost full, account signed out, collection, copy or timestamp
   errors, a new session signed in to the account with the device, application and
-  country Telegram lists. On a sealed server, an opened SSH port or a login is a
-  problem too.
+  country Telegram lists, a login code or new sign-in that Telegram reports during
+  observation, and another session after **Make this the only session**. On a sealed
+  server, an opened SSH port or a login is a problem too.
 - **Changes**: deleted, edited and missing messages in observed chats, grouped into
   one notification per check (every minute unless changed in Parameters).
 - **Completed tasks**: history, exports and storage copies.
@@ -414,5 +420,7 @@ See the English <a href="OPTIONAL-CAPTURE.md">Independent capture guide</a>.</p>
   [signed webhooks](WEBHOOKS.md).
 - **Case Board**: private team notes, bookmarks and slices next to the evidence. See
   [Case Board](CASE-BOARD.md).
+- **Documentation**: the [investigation mode](INVESTIGATION-MODE.md) drawer. While a
+  documented session is recording, it moves to the main sidebar.
 - **GitHub Actions capture** in Exports: one chat captured from your fork. See
   [sealed capture](SEALED-ACTIONS.md).

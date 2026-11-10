@@ -13,5 +13,5 @@
 </blockquote>
 
 <p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Manba yozuvi</a> · <a href="OPERATOR-INCOMPATIBILITY.md">Axloqiy bildirishnoma va tarixiy uzluksizlik</a></p>
-<p><a href="../../LICENSE">To&#x27;liq MIT litsenziyasi</a> · <a href="../../README.md">Loyiha</a> · <a href="../README.md">Hujjatlash</a> · <a href="../wiki/Home.md">Wiki</a></p>
+<p><a href="../../LICENSE">To&#x27;liq MIT litsenziyasi</a> · <a href="README.md">Loyiha</a> · <a href="README.md">Hujjatlash</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

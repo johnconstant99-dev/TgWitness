@@ -1181,6 +1181,17 @@ class Collector:
     def network_config(self):
         return saved_route(self.vault.read("network"))
 
+    async def refresh_drand(self):
+        # Checkpoints carry the latest drand round as a lower time bound; fetch it through the outside route
+        # so Hide IP, proxies and a turned-off outside route apply.
+        from .verify import DRAND_CHAIN
+        from .witness import drand_latest
+        with suppress(Exception):
+            beacon = await asyncio.wait_for(drand_latest(self.outside_route()), 20)
+            if beacon:
+                self.store.set_setting("drand_latest", {"round": beacon["round"], "randomness": beacon["randomness"],
+                                                        "chain": DRAND_CHAIN})
+
     def automatic(self):
         return self.network_config().kind == "mtproxy_auto"
 
@@ -2693,6 +2704,7 @@ class Collector:
                 await refresh_one(self)
             if checkpoint_at is None or now - checkpoint_at >= self.param("checkpoint_minutes") * 60 - 1:
                 checkpoint_at = now
+                await self.refresh_drand()
                 retain_checkpoint(self.store, self.vault)
             if self.running and self.client.is_connected():
                 await self.watch_updates()

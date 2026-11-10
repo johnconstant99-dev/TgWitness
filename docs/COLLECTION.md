@@ -52,7 +52,7 @@ show what arrived.
 
 ## Observation scope: chosen chats, a folder or the whole account
 
-Sources → **Observation scope** decides which chats a workspace records.
+**More tools → Sources → Scope** decides which chats a workspace records.
 
 | Mode | Records | New chats |
 | --- | --- | --- |
@@ -83,7 +83,7 @@ Scope of these modes:
 - **Offline periods.** After a restart TgWitness resumes the saved update position, asks
   Telegram for missed updates and rechecks chats. Telegram keeps a bounded backlog, so after
   a long outage reports and `verify.py` list the remaining interval as a gap (see [coverage](EVIDENCE.md#coverage-continuity-gaps-and-unobserved-ids)).
-- Only the first 1,000 dialogs are listed at start (the limit is under **Parameters**); older
+- Only the first 1,000 dialogs are listed at start (the limit is under **More tools → Parameters**); older
   chats are added when they next become active. The earlier history of an added chat is not fetched — take a history
   snapshot or a full chat export when you need it.
 - Folder conditions that change all the time (muted, read) are not applied: such chats
@@ -100,7 +100,7 @@ Each workspace has its own sources. TgWitness does not join groups, accept
 invitations, or enumerate every member automatically. Sources must already be
 accessible to the account. At startup, the collector checks selected sources
 against the account's visible dialogs; the first 1,000 dialogs are inspected unless
-**Parameters → Chats read from the account's list** says otherwise.
+**More tools → Parameters → Chats read from the account's list** says otherwise.
 An absent source is marked **access unconfirmed**, not assumed to have removed you.
 
 | Setting | Collects | Effect when disabled |
@@ -144,7 +144,7 @@ messages. Explicit panel actions and manually requested history snapshots remain
 
 ## Investigation mode: joining teams and talking to bots
 
-**Sources → Observation scope → Investigation mode** prepares the scope for a dedicated
+**More tools → Sources → Scope → Investigation mode** prepares the scope for a dedicated
 account that joins team chats, starts bots and writes to them: the whole account, every
 source type, own actions, and for every chat or bot that appears its profile and its latest
 200 visible messages. Review the form and press **Save scope**; the switch to the whole
@@ -189,7 +189,7 @@ account asks for the usual confirmation.
     least every seven days and whenever anything other than a count changes.
   - `parts_complete` marks capped lists. Additions require a complete earlier list,
     removals require a complete current list, and explicit empty values record clearing.
-  - **Parameters → Chat state** sets the interval (12 hours by default, 0 turns snapshots
+  - **More tools → Parameters → Chat state** sets the interval (12 hours by default, 0 turns snapshots
     off), the pause between sources, which parts are read, and whether checks that found no
     change are recorded. `FLOOD_WAIT` and `FLOOD_PREMIUM_WAIT` stop the remaining
     snapshot requests, preserve any longer account-wide deadline, and leave the
@@ -219,7 +219,7 @@ Turn on **Start observation** to capture incoming replies live. Panel actions wo
 observation is paused; the panel then saves their direct responses, and live
 observation captures the rest of the conversation.
 Newly added sources use the configured profile/history intake when observation is running.
-When a source is paused, enable it in **Sources** before sending or pressing its buttons.
+When a source is paused, enable it in **More tools → Sources** before sending or pressing its buttons.
 
 `interaction.preview`, `interaction.requested` and `interaction.result` are ordinary signed
 journal events included in evidence exports. Requests identify the account, message/button
@@ -244,11 +244,11 @@ Sources marked with a star are **priority** sources, rechecked every 15 minutes 
 all other sources every 6 hours. Chosen chats start as priority sources, chats added by a
 folder or the whole account as regular ones. At most 30 sources are rechecked per pass and
 the rest wait for the next minute; after a reconnect, priority sources go first. Both
-intervals are set under Sources → Recording settings → Recheck (0 turns a tier off) and are
+intervals are set under **More tools → Sources → Recording → Recheck** (0 turns a tier off) and are
 recorded as `recheck.changed`.
 
 Missed messages are fetched upward from where the previous pass stopped, at most
-**Parameters → Missed messages recovered per chat and pass** (1,000 by default). After a long stop the
+**More tools → Parameters → Missed messages recovered per chat and pass** (1,000 by default). After a long stop the
 recheck therefore fills the whole gap, even when live messages newer than the gap were saved
 first. A chat that is still catching up is rechecked again on the next minute instead of
 waiting for its tier interval; `recheck.completed` shows `continues_after` until it is done.

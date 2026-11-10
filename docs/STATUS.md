@@ -17,11 +17,14 @@ available under [Releases](https://github.com/phishdestroy/TgWitness/releases).
 | Standard/Takeout history with resumable cursors | [Full history](BACKFILL.md) |
 | Secret Chats created or accepted by TgWitness; optional protocol dependency | [Secret Chats](PSEUDO-SECRET.md) |
 | Account and chat export, file policies and minimized sharing copies | [Account export](ACCOUNT-EXPORT.md) |
+| Stopped chat exports: signed saved range, resume, start over, partial archive after authorization loss | [Export hashes](EXPORT_HASHES.md) |
 | Signed journals, checkpoints and standalone verification | [Evidence](EVIDENCE.md) |
+| RFC 3161 time stamps with stored OCSP/CRL evidence, OpenTimestamps and drand rounds | [Timestamps](TIMESTAMP.md) |
+| Account sessions: new-session alerts, ending other sessions, only-session mode and a witness probe | [Accounts](ACCOUNTS.md#witness-probe) |
 | Separate witness with online Merkle continuity checks | [Witness](WITNESS.md) |
 | Official-client capture and session video | [Trusted Live](TRUSTED-LIVE.md) |
 | GitHub capture with a session time budget and encrypted delivery | [GitHub capture](SEALED-ACTIONS.md) |
-| Intel TDX collection and independent quote verification | [High assurance](HIGH-ASSURANCE.md) |
+| Intel TDX collection, independent quote verification and an offline quote check in `verify.py` | [High assurance](HIGH-ASSURANCE.md) |
 | Guided first setup: Just download, Follow chats or Evidence for a case | [First setup](SETTINGS.md) |
 | Case documentation: subject cards, conversation plans, translation, watchlists, online watch and a BagIt case package with court templates | [Investigation mode](INVESTIGATION-MODE.md) |
 | Exposure check of the investigating account's privacy rules and profile | [Account control](INVESTIGATION-MODE.md#account-control) |

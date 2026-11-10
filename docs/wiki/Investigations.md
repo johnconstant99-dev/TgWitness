@@ -30,7 +30,7 @@ and what's still open apart from each other.
 ## Set up the case
 
 1. Write down the question, the time range and which sources you want.
-2. Set the scope in **Sources**. Whole-account only if everything on that account belongs to the case.
+2. Set the scope in **More tools → Sources → Scope**. Whole-account only if everything on that account belongs to the case.
 3. Check settings for outgoing messages, bots, attachments and events.
 4. Start observation and note the time.
 5. Save chat histories where you need earlier context.
@@ -59,7 +59,7 @@ where the same Telegram ID wrote. Open the cited records before calling anything
 
 ## Organize and review on Case Board
 
-**Investigation → Case Board** (Standard or Expert mode). Make a collection for the case,
+**More tools → Case Board** (Standard or Expert mode). Make a collection for the case,
 then hit **To board** (or **B**) on a journal record or chat message. Select text for
 **Highlight → board**, Shift-click two messages for **Slice between**, or save the current
 Journal filters as a slice.
@@ -114,7 +114,7 @@ username or ID comes from this workspace's records and is shown outside the pict
 
 ## Work with the saved archive
 
-**Ask the archive** searches saved records and can ask AI. MCP, OCR/transcription and
+**More tools → Ask the archive** searches saved records and can ask AI. MCP, OCR/transcription and
 webhooks: [Archive and integrations](Archive-and-Integrations.md).
 
 ## Hand over the case

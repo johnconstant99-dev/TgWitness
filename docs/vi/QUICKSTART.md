@@ -1,88 +1,120 @@
-[TgWitness](../../README.md) / [Documentation](../README.md) / [Folder](README.md)
+[TgWitness](../../README.md) / [Tài liệu hướng dẫn](../README.md) / [Thư mục](README.md)
 
-![Getting started](../assets/presentation/chapter-start.svg)
+![Bắt đầu](../assets/presentation/chapter-start.svg)
 
 [English](../QUICKSTART.md) · [Русский](../ru/QUICKSTART.md) · [Українська](../uk/QUICKSTART.md) · [Español](../es/QUICKSTART.md) · [Português (Brasil)](../pt/QUICKSTART.md) · [Türkçe](../tr/QUICKSTART.md) · [العربية](../ar/QUICKSTART.md) · [فارسی](../fa/QUICKSTART.md) · [اردو](../ur/QUICKSTART.md) · [हिन्दी](../hi/QUICKSTART.md) · [Bahasa Indonesia](../id/QUICKSTART.md) · **Tiếng Việt** · [简体中文](../zh/QUICKSTART.md)
 
-# Hướng dẫn bắt đầu nhanh với TgWitness
+# Bắt đầu nhanh với TgWitness
 
-TgWitness là một ứng dụng độc lập dùng để theo dõi các nhóm và kênh Telegram mà tài khoản của quý vị có thể truy cập. Ứng dụng này chạy cục bộ với thư mục dữ liệu riêng.
+TgWitness là một ứng dụng độc lập để quan sát các nhóm và kênh Telegram mà tài khoản của bạn có quyền truy cập. Ứng dụng chạy cục bộ với thư mục dữ liệu riêng.
 
-**Đây là lần đầu tiên quý vị ghé thăm?** [Hãy khám phá bản demo](#khám-phá-giao-diện) trước khi kết nối tài khoản. [Vui lòng chọn hướng dẫn phù hợp](../README.md) về proxy, chứng nhân, xuất dữ liệu hoặc thiết lập máy chủ.
+**Lần đầu sử dụng?** Hãy [khám phá bản demo](#explore-the-interface) trước khi kết nối tài khoản. [Chọn hướng dẫn](../README.md) về proxy, nhân chứng, xuất dữ liệu hoặc thiết lập máy chủ. [Thu thập bằng GitHub Actions](../SEALED-ACTIONS.md) (xem trước) chạy quá trình thu thập trong bản fork GitHub của riêng bạn thay vì trên một bản cài đặt cục bộ.
+
+<a name="install-and-start"></a>
 
 ## Cài đặt và khởi động
 
-Vui lòng chọn một phương thức. Các bản tải xuống di động sẽ có sẵn sau khi bản phát hành chính thức được công bố:
+Trình cài đặt có hướng dẫn đi kèm Python riêng và kiểm tra mã băm của các gói cũng như chữ ký của bản phát hành trước khi cài đặt. Chạy lại trình cài đặt sẽ cập nhật bản cài đặt hiện có.
 
-| Máy chủ | Chưa cài đặt bất kỳ phần mềm nào | Từ nguồn: Python 3.11 trở lên | Docker: Engine/Desktop với Compose 2.20 trở lên |
+**Linux / macOS:**
+
+```sh
+curl -fsSL https://get.destroy.tools/install.sh | bash
+```
+
+**Windows (PowerShell hoặc Command Prompt):**
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "irm https://get.destroy.tools/install.ps1 | iex"
+```
+
+Trên máy chủ Ubuntu, hãy chạy với quyền root để cài đặt dịch vụ chạy nền; trên máy tính để bàn, hãy chạy bằng tài khoản người dùng thông thường. Trên Ubuntu, trình cài đặt in ra địa chỉ bảng điều khiển và khóa truy cập; trên macOS và Windows, bảng điều khiển cục bộ sẽ mở trong trình duyệt. Tiếp tục ở bước **Kết nối Telegram** bên dưới. [Cài đặt, xác minh và cập nhật](../INSTALLATION.md) trình bày các lựa chọn truy cập máy chủ, cách kiểm tra tập lệnh trước khi chạy, cách cập nhật và gỡ cài đặt.
+
+### Các cách cài đặt khác
+
+Ngoài trình cài đặt, bạn có thể dùng bản phát hành trên GitHub, mã nguồn hoặc Docker. Các bản tải xuống portable sẽ có sau khi một bản build phát hành được công bố:
+
+| Hệ điều hành | Không cần cài sẵn gì | Từ mã nguồn: Python 3.11+ | Docker: Engine/Desktop với Compose 2.20+ |
 | --- | --- | --- | --- |
-| Windows | Trích xuất `TgWitness-<version>-windows-amd64-portable.zip` từ GitHub Releases, nhấp đúp vào `TgWitness.cmd` | Nhấp đúp vào `Start.cmd` | Nhấp đúp vào `scripts\Docker.cmd` |
+| Windows | Giải nén `TgWitness-<version>-windows-amd64-portable.zip` tải từ GitHub Releases, nhấp đúp vào `TgWitness.cmd` | Nhấp đúp vào `Start.cmd` | Nhấp đúp vào `scripts\Docker.cmd` |
 | Linux / macOS | — | `sh start.sh` | `sh scripts/docker-start.sh` |
 
-Đối với các phương pháp nguồn, quý vị vui lòng tải xuống và giải nén tệp ZIP nguồn từ GitHub Releases hoặc sao chép kho lưu trữ. `Start.cmd` sẽ đề xuất cài đặt Python 3.12 cho người dùng Windows nếu không tìm thấy phiên bản Python phù hợp (winget hoặc trình cài đặt có chữ ký từ python.org). `start.sh` sẽ hiển thị lệnh cài đặt chính xác dành cho bản phân phối Linux hoặc macOS của quý vị nếu thiếu Python. Lần khởi chạy mã nguồn đầu tiên sẽ tạo tệp `.venv` và tự động cài đặt các phụ thuộc.
+Với các cách chạy từ mã nguồn, hãy [tải xuống và giải nén nhánh `main` hiện tại](https://github.com/phishdestroy/TgWitness/archive/refs/heads/main.zip) hoặc clone kho mã nguồn:
 
-Docker sẽ biên dịch ứng dụng và khởi chạy nó ở chế độ nền; không cần cài đặt Python trên máy chủ. `scripts\Docker.cmd` và `scripts/docker-start.sh` sẽ hiển thị địa chỉ bảng điều khiển và mã thông báo khi container đang hoạt động bình thường. Các lệnh Docker tương ứng trên mọi máy chủ được hỗ trợ là:
+```sh
+git clone https://github.com/phishdestroy/TgWitness.git
+cd TgWitness
+```
+
+Nếu không tìm thấy Python phù hợp, `Start.cmd` sẽ đề nghị cài Python 3.12 cho tài khoản người dùng Windows của bạn (qua winget hoặc trình cài đặt có chữ ký từ python.org). Nếu thiếu Python, `start.sh` in ra chính xác lệnh cài đặt cho bản phân phối Linux hoặc macOS của bạn. Lần khởi chạy từ mã nguồn đầu tiên sẽ tự động tạo `.venv` và cài đặt các thành phần phụ thuộc.
+
+Docker sẽ build ứng dụng và khởi chạy nó ở chế độ nền; máy host không cần Python. `scripts\Docker.cmd` và `scripts/docker-start.sh` in ra địa chỉ bảng điều khiển và mã thông báo khi container hoạt động bình thường. Các lệnh Docker tương đương trên mọi máy host được hỗ trợ là:
 
 ```sh
 docker compose up -d --build --wait
 docker compose exec tgwitness cat /data/panel-token.txt
 ```
 
-Mở tệp **http://127.0.0.1:8787**. Sử dụng mã thông báo được tạo bởi công cụ hỗ trợ Docker hoặc lệnh Docker thứ hai, hoặc tham khảo **tệp** **data/live/panel-token.txt** trong trường hợp cài đặt di động hoặc từ mã nguồn. Tiếp tục tại **phần** **“Kết nối Telegram”** bên dưới. Các bản cài đặt gốc và Docker sử dụng bộ nhớ lưu trữ riêng biệt; việc khởi động Docker sẽ không nhập nhật ký gốc hiện có.
+Mở **http://127.0.0.1:8787**. Dùng mã thông báo do tập lệnh hỗ trợ Docker hoặc lệnh Docker thứ hai in ra; với bản portable hoặc bản cài từ mã nguồn, hãy đọc **data/live/panel-token.txt**. Tiếp tục ở bước **Kết nối Telegram** bên dưới. Bản cài đặt trực tiếp (native) và bản cài đặt Docker dùng bộ nhớ lưu trữ riêng; khởi động Docker không nhập sổ nhật ký hiện có của bản cài đặt trực tiếp.
 
-Đối với máy chủ, [quá trình triển khai](DEPLOYMENT.md) bao gồm kích hoạt HTTPS tự động, khởi động lại, hình ảnh được công bố, cập nhật và sao lưu.
+Đối với máy chủ, tài liệu [triển khai](DEPLOYMENT.md) trình bày HTTPS tự động, khởi động lại, các image đã phát hành, cập nhật và sao lưu.
+
+<a name="explore-the-interface"></a>
 
 ## Khám phá giao diện
 
-1. Vui lòng chạy **tệp TgWitness-Demo.cmd** trong gói di động, tệp **scripts\Demo.cmd** trong thư mục nguồn trên Windows, hoặc `sh start.sh --demo` trên Linux/macOS. Khi khởi chạy từ nguồn, hệ thống sẽ tạo tệp `.venv` và cài đặt các phụ thuộc.
+1. Chạy **TgWitness-Demo.cmd** trong gói portable, **scripts\Demo.cmd** trong thư mục mã nguồn trên Windows, hoặc `sh start.sh --demo` trên Linux/macOS. Khi khởi chạy từ mã nguồn, trước tiên `.venv` sẽ được tạo và các thành phần phụ thuộc được cài đặt.
 2. Mở **http://127.0.0.1:8787**.
-3. Bản demo cục bộ sẽ tự động mở nhật ký mẫu. Quý vị không cần sao chép mã thông báo để truy cập trực tiếp tại máy cục bộ.
+3. Bản demo cục bộ tự động mở sổ nhật ký mẫu. Khi truy cập trực tiếp tại máy, không cần sao chép mã thông báo.
 
-Các tin nhắn trong bản demo là hư cấu. Chế độ demo không thể kết nối với tài khoản Telegram thực.
+Tin nhắn trong bản demo là hư cấu. Chế độ demo không thể kết nối tài khoản Telegram thật.
 
-## Kết nối với Telegram
+## Kết nối Telegram
 
 > [!WARNING]
-> **Xin đừng sử dụng bất kỳ thứ gì mà quý vị không thể chấp nhận mất mát.** Chúng tôi khuyến cáo mạnh mẽ quý vị không nên kết nối các tài khoản cá nhân hoặc có giá trị, cũng như không nên tạo ID API / mã băm trên tài khoản mà quý vị coi trọng. Telegram có thể khóa tài khoản một cách bất ngờ và thường là vĩnh viễn, bất kể ứng dụng khách nào được sử dụng. Việc chạy thử nghiệm suôn sẻ phụ thuộc vào Telegram, không phải vào TgWitness, và không đảm bảo bất kỳ điều gì cho các giai đoạn sau này.
+> **Hãy dùng tài khoản chuyên dụng.** Telegram có thể hạn chế hoặc cấm vĩnh viễn tài khoản nếu cho rằng khối lượng yêu cầu là quá mức, bất kể dùng ứng dụng khách nào. Hãy kết nối các tài khoản được chuẩn bị riêng cho việc quan sát thay vì tài khoản cá nhân hoặc tài khoản có giá trị, và tạo ID API / băm API trên một tài khoản chuyên dụng.
 
-1. Nếu bản demo gốc đang chạy, xin vui lòng dừng nó lại và chạy **tệp** **Start.cmd** hoặc `sh start.sh`. Trong trường hợp khác, xin vui lòng tiếp tục duy trì bản cài đặt trực tiếp đã khởi chạy ở trên.
-2. Vui lòng sử dụng mã thông báo (token) của bảng điều khiển tương ứng với phương thức cài đặt của quý vị để mở bảng điều khiển.
-3. Nếu quý vị cần sử dụng máy chủ trung gian (proxy), vui lòng lưu cài đặt tại **mục** **Tài khoản → Cài đặt → Cài đặt kết nối → Thay đổi đường dẫn kết nối**.
-4. Trong **phần** **Tài khoản**, vui lòng nhập số điện thoại của quý vị và nhấn **Tiếp tục**, chọn **Mã QR → Hiển thị mã QR**, hoặc chọn tệp và nhấn **Kết nối tài khoản**. **API ID + Hash** là tùy chọn: không gian làm việc sẽ sử dụng cặp thông tin đã lưu hoặc nhập vào, hoặc một cặp thông tin hoạt động từ kho dự trữ tích hợp sẵn. Để sử dụng ứng dụng của riêng quý vị, hãy dán một cặp `API ID:API Hash` vào trường API ID. Để có khóa ủy quyền đầy đủ, hãy chọn **Khóa ủy quyền**, dán toàn bộ 512 ký tự thập lục phân và chọn DC ID được cung cấp. ID người dùng là tùy chọn và sẽ được xác nhận nếu được nhập.
-5. Vui lòng hoàn tất phương thức đăng nhập mà quý vị đã chọn: số điện thoại/mã xác thực/xác thực hai yếu tố (2FA), xác nhận từ ứng dụng Telegram đã đăng nhập đối với mã QR, hoặc nhập phiên đăng nhập được ủy quyền từ các nền tảng được hỗ trợ.
-6. Vui lòng kiểm tra ID tài khoản được hiển thị. **Nguồn** mở: các cuộc trò chuyện của quý vị sẽ được tải tự động; hãy thêm các nhóm của quý vị.
-7. Trong phần **“Chọn những thay đổi cần lưu giữ**”, hãy chọn các danh mục sự kiện hoặc cài đặt sẵn **“Tin** **nhắn, chỉnh sửa và xóa”**, sau đó lưu cài đặt giám sát.
-8. Vui lòng chọn các thiết lập tệp đính kèm riêng biệt, sau đó nhấn **Bắt đầu quan sát**.
+1. Nếu bản demo chạy trực tiếp (native) đang chạy, hãy dừng nó rồi chạy **Start.cmd** hoặc `sh start.sh`. Nếu không, hãy để bản cài đặt thực đã khởi động ở trên tiếp tục chạy.
+2. Dùng mã thông báo bảng điều khiển để đăng nhập. Một không gian làm việc mới sẽ mở phần [thiết lập ban đầu](../SETTINGS.md). Chọn **Chỉ tải xuống**, **Theo dõi cuộc trò chuyện** hoặc **Bằng chứng cho một vụ án**.
+3. Xem lại kết quả kiểm tra kết nối. Nếu cần, hãy cấu hình proxy của riêng bạn; cài đặt kết nối vẫn khả dụng sau khi hoàn tất thiết lập.
+4. Ở bước **Kết nối Telegram**, quét mã QR hoặc nhập số điện thoại. Nhập từ tệp và khóa xác thực đầy đủ nằm trong **Cách đăng nhập khác**. Hoàn tất bước xác nhận của Telegram, mã xác thực và mật khẩu xác thực hai bước khi được yêu cầu.
+5. Kiểm tra tài khoản được hiển thị, chọn các cuộc trò chuyện và xem lại cài đặt. Hoàn tất ở màn hình cuối cùng. Với **Chỉ tải xuống**, **Bắt đầu xuất** sẽ chạy một lần xuất duy nhất và mở mục Xuất dữ liệu để hiển thị tiến độ; thao tác này không bật quan sát liên tục.
 
-Thông tin đăng nhập API dùng để xác định ứng dụng của quý vị; bản thân chúng không có chức năng cấp quyền truy cập cho tài khoản. Các nhóm riêng tư không yêu cầu tên người dùng công khai, nhưng tài khoản của quý vị phải có quyền truy cập.
+Sau khi thiết lập, **Cuộc trò chuyện → Chọn** dùng để thay đổi các cuộc trò chuyện đã chọn. **Cài đặt** điều khiển việc thu thập và tệp; **Các công cụ khác → Nguồn** cung cấp danh sách nguồn chi tiết ở cấp Tiêu chuẩn hoặc Chuyên gia. [Hướng dẫn bảng điều khiển](../PANEL.md) mô tả sáu mục chính và các điều khiển theo ngữ cảnh của chúng.
 
-Đối với các tài khoản hiện có, vui lòng tham khảo [các định dạng tài khoản và phiên làm việc](../ACCOUNTS.md): bảng điều khiển hỗ trợ Telethon StringSession, Telethon/Pyrogram SQLite, tệp ZIP TData cho một tài khoản duy nhất và định dạng JSON tài khoản được hỗ trợ. Vui lòng chọn một phiên làm việc cùng với tệp JSON tương ứng, sau đó nhấn **“Kết nối tài khoản**”. Tính năng đăng nhập qua mã QR cũng có sẵn với các cài đặt API tùy chọn tương tự. TDLib, các bot và danh sách tài khoản số lượng lớn không được hỗ trợ.
+**ID API + Băm** là tùy chọn: không gian làm việc sẽ dùng cặp đã lưu hoặc đã nhập, hoặc một cặp còn hoạt động từ kho tích hợp sẵn. Để dùng ứng dụng của riêng bạn, hãy dán một cặp `API ID:API Hash` vào trường ID API. Với **Khóa xác thực**, hãy dán đủ 512 ký tự thập lục phân và chọn DC ID được cung cấp kèm theo. ID người dùng là tùy chọn và sẽ được kiểm tra nếu bạn nhập.
 
-Để thêm một tài khoản khác, quý vị hãy nhấn vào **biểu** **tượng** **+** bên cạnh trình chọn tài khoản hoặc mở **Tài khoản → Cài đặt → Cài đặt kết nối → Không gian làm việc**, hoặc sử dụng **mục Tài khoản**. Các không gian làm việc có các phiên làm việc, nhật ký, khóa, nguồn và hàng đợi riêng biệt. Việc chuyển đổi chế độ xem sẽ không làm gián đoạn hoạt động của các trình thu thập dữ liệu khác. Trong bản cài đặt này, cùng một tài khoản Telegram không thể được gán cho hai không gian làm việc. Không có số lượng không gian làm việc cố định; các không gian này chia sẻ chung một tiến trình, do đó dung lượng phụ thuộc vào máy tính.
+Thông tin xác thực API dùng để định danh ứng dụng của bạn; bản thân chúng không ủy quyền cho tài khoản. Nhóm riêng tư không cần tên người dùng công khai, nhưng tài khoản của bạn phải có quyền truy cập.
 
-Mã thông báo bảng điều khiển trực tiếp bảo vệ quyền truy cập vào các thông tin ủy quyền Telegram và tài liệu đã lưu của quý vị; mã này tách biệt với thông tin đăng nhập API Telegram. Chỉ bản demo cục bộ được khởi chạy rõ ràng và truy cập trực tiếp mới được cấp quyền truy cập tự động. Bản demo từ xa hoặc qua proxy vẫn sử dụng thẻ `data/demo/panel-token.txt`.
+Với tài khoản có sẵn, xem [định dạng tài khoản và phiên](../ACCOUNTS.md): bảng điều khiển chấp nhận Telethon StringSession, Telethon/Pyrogram SQLite, tệp ZIP TData của một tài khoản và JSON tài khoản được hỗ trợ. Chọn cùng lúc tệp phiên và tệp JSON đi kèm, rồi nhấn **Kết nối tài khoản**. Đăng nhập bằng mã QR cũng khả dụng với cùng các cài đặt API tùy chọn. TDLib, phiên bot và danh sách tài khoản dạng CSV/JSON không được hỗ trợ.
+
+Với nhiều tài khoản, dùng **Tài khoản → Nhập các tài khoản** và chọn các tệp phiên được hỗ trợ của chúng. Các tệp JSON đi kèm được ghép cặp theo tên tệp (basename); mỗi tài khoản được nhập sẽ có không gian làm việc riêng. Xem [nhập hàng loạt và nhóm tài khoản](../ACCOUNTS.md#bulk-import-and-account-groups).
+
+Để thêm tài khoản khác, nhấn **+** bên cạnh bộ chọn tài khoản hoặc dùng **Tài khoản → Thêm tài khoản**. Các không gian làm việc có phiên, sổ nhật ký, khóa, nguồn và hàng đợi riêng. Chuyển chế độ xem không làm dừng các trình thu thập khác. Trong bản cài đặt này, một tài khoản Telegram không thể được gán cho hai không gian làm việc. Số lượng không gian làm việc không cố định; chúng dùng chung một tiến trình, nên khả năng đáp ứng phụ thuộc vào máy.
+
+Mã thông báo bảng điều khiển của bản cài đặt thực bảo vệ quyền truy cập vào các ủy quyền Telegram và dữ liệu đã lưu của bạn; nó tách biệt với thông tin xác thực API Telegram. Chỉ bản demo cục bộ được khởi động có chủ đích và truy cập trực tiếp mới được vào tự động. Bản demo truy cập từ xa hoặc qua proxy vẫn dùng `data/demo/panel-token.txt`.
 
 ## Xem lại và xuất dữ liệu
 
-- **Tạp chí:** tìm kiếm và lọc các quan sát theo nguồn và loại sự kiện.
-- Vui lòng chọn một sự kiện để xem bản ghi gốc, nguồn trích dẫn và các phiên bản đã lưu của sự kiện đó.
-- Chi tiết chỉnh sửa hiển thị nội dung trước và sau khi chỉnh sửa (nếu có). Chi tiết xóa hiển thị nội dung được ghi lại lần cuối (nếu có); đối tượng không xác định vẫn được giữ nguyên trạng thái không xác định.
-- **Các định dạng xuất:** tệp ZIP có chữ ký, JSONL, CSV và HTML ngoại tuyến.
-- **Xuất toàn bộ lịch sử trò chuyện** (Nguồn → Xuất toàn bộ lịch sử trò chuyện): tải xuống toàn bộ lịch sử hiển thị của một cuộc trò chuyện dưới dạng gói dữ liệu đã được ký số kèm theo `chat.json` (theo phong cách xuất dữ liệu của Telegram) và một tệp `chat.html` có thể đọc được. Tính năng này hoạt động với các cuộc trò chuyện riêng tư khi tài khoản là thành viên của nhóm. Đây là bản chụp nhanh tại thời điểm hiện tại, không phải là bản tái tạo các tin nhắn đã bị xóa hoặc đã được chỉnh sửa trước đó. Vui lòng xác minh bản sao bằng `python verify.py chat-export.zip --fingerprint TRUSTED_SHA256`.
-- **Lưu điểm kiểm tra:** duy trì ranh giới của nhật ký đã được ký bên ngoài bộ thu thập dữ liệu.
-- **Tải xuống biên nhận chạy đã được ký:** lưu giữ bản ghi chương trình/phiên bản của bộ thu thập dữ liệu.
-- **Chuẩn bị yêu cầu dấu thời gian:** chuẩn bị một yêu cầu ngoại tuyến gửi đến cơ quan cấp dấu thời gian; làm theo hướng dẫn trong [tệp TIMESTAMP.md](../TIMESTAMP.md) để nhận và xác minh phản hồi.
-- **Xác minh nhật ký:** kiểm tra chữ ký sự kiện và các liên kết chuỗi. Tệp ZIP xuất ra cũng kiểm tra các tệp phương tiện.
+- **Sổ nhật ký:** tìm kiếm và lọc các quan sát theo nguồn và loại sự kiện.
+- Chọn một sự kiện để xem bản ghi gốc, thông tin quy kết (attribution) và các phiên bản đã lưu của nó.
+- Chi tiết chỉnh sửa hiển thị nội dung trước/sau hiện có. Chi tiết xóa hiển thị nội dung được thu thập lần cuối, nếu có; người thực hiện không xác định thì vẫn là không xác định.
+- **Xuất dữ liệu:** ZIP có chữ ký, JSONL, CSV và HTML ngoại tuyến.
+- **Xuất toàn bộ nội dung trò chuyện** (**Cuộc trò chuyện → Xuất nội dung trò chuyện**, hoặc **Xuất dữ liệu → Thu thập hoặc xuất một cuộc trò chuyện**): tải xuống toàn bộ lịch sử hiển thị của một cuộc trò chuyện dưới dạng gói có chữ ký, gồm `chat.json` (theo kiểu bản xuất của Telegram) và tệp `chat.html` dễ đọc. Cuộc trò chuyện riêng tư cũng xuất được khi tài khoản là thành viên. Đây là ảnh chụp nhanh trạng thái hiện tại, không phải bản tái dựng các tin nhắn đã bị xóa hoặc đã bị chỉnh sửa trước đó. Xác minh bản sao bằng `python verify.py chat-export.zip --fingerprint TRUSTED_SHA256`.
+- **Lưu điểm kiểm tra:** lưu giữ ranh giới đã ký của sổ nhật ký ở bên ngoài trình thu thập.
+- **Tải xuống biên nhận thực thi đã được ký điện tử:** lưu giữ bản ghi chương trình/phiên bản của trình thu thập.
+- **Chuẩn bị yêu cầu đóng dấu thời gian:** chuẩn bị một yêu cầu ngoại tuyến gửi tới cơ quan cấp dấu thời gian; làm theo [TIMESTAMP.md](../TIMESTAMP.md) để nhận và xác minh phản hồi.
+- **Xác minh sổ nhật ký:** kiểm tra chữ ký sự kiện và các liên kết chuỗi. Với bản xuất ZIP, việc kiểm tra còn bao gồm cả tệp phương tiện.
 
-Các trình duyệt được hỗ trợ có thể lưu trực tiếp các tệp xuất có dung lượng lớn vào tệp đã chọn. Các trình duyệt khác chỉ có thể lưu tạm tối đa 128 MiB. Trong khi máy chủ đang hoạt động, CLI truyền trực tuyến hỗ trợ tải xuống các tệp có dung lượng lớn hơn mà không cần lưu tạm toàn bộ phản hồi:
+Các trình duyệt được hỗ trợ lưu bản xuất lớn thẳng vào tệp do bạn chọn. Các trình duyệt khác chỉ đệm tối đa 128 MiB. Khi máy chủ đang chạy, CLI truyền theo luồng (streaming) hỗ trợ tải xuống dung lượng lớn hơn mà không cần đệm toàn bộ phản hồi:
 
 ```sh
 python -m tgwitness.download --token-file data/live/panel-token.txt --out evidence.zip
 ```
 
-Đối với không gian làm việc khác, hãy thêm `--profile ID` bằng cách sử dụng **Xuất → ID không gian làm việc**. Đối với máy chủ từ xa, hãy thêm `--url https://your-server`. Giới hạn truyền tải mặc định là 5 GiB; `--max-mib` cho phép thay đổi giới hạn này. Nội dung ZIP đã ký có giới hạn xác minh khi giải nén riêng biệt là 4 GiB theo mặc định (**tùy chọn Parameters** cho phép tăng giới hạn này; hãy xác minh các tệp lưu trữ như vậy bằng `verify.py --max-gib N`). Vui lòng xác minh tệp lưu trữ bằng cách sử dụng bản sao đáng tin cậy của công cụ xác minh cùng với dấu vân tay khóa hoặc điểm kiểm tra được lưu giữ độc lập.
+Với không gian làm việc khác, thêm `--profile ID`, lấy ID tại **Xuất dữ liệu → ID không gian làm việc**. Với máy chủ từ xa, thêm `--url https://your-server`. Giới hạn truyền mặc định là 5 GiB; `--max-mib` dùng để thay đổi giới hạn này. Theo mặc định, nội dung ZIP có chữ ký còn có một giới hạn xác minh riêng là 4 GiB khi chưa nén (**Các công cụ khác → Các tham số** cho phép nâng giới hạn này; hãy xác minh các tệp lưu trữ như vậy bằng `verify.py --max-gib N`). Xác minh tệp lưu trữ bằng một bản sao đáng tin cậy của trình xác minh, một dấu vân tay khóa được lưu giữ độc lập và, để đạt mức tối thiểu cho bằng chứng, chứng chỉ gốc của cơ quan cấp dấu thời gian (`--tsa-ca`).
 
-## Kiểm tra quá trình cài đặt
+## Kiểm tra bản cài đặt
 
 ```sh
 python start.py --setup-only
@@ -90,18 +122,18 @@ python start.py --check
 python start.py --check --json
 ```
 
-`--check` kiểm tra các phụ thuộc cục bộ, hỗ trợ ký số, bộ nhớ lưu trữ, cấu hình khóa và địa chỉ lắng nghe. Công cụ này không cài đặt bất kỳ thành phần nào cũng như không kết nối với Telegram. Nếu cổng đang bận, điều đó có thể có nghĩa là một phiên bản khác đang chạy. Vui lòng sử dụng một `--port` khác hoặc dừng phiên bản đó trước.
+`--check` kiểm tra các thành phần phụ thuộc cục bộ, khả năng ký, bộ nhớ lưu trữ, cấu hình khóa và địa chỉ lắng nghe. Lệnh này không cài đặt gì và không kết nối Telegram. Nếu cổng đang bận, có thể một phiên chạy khác đang hoạt động. Hãy dùng `--port` khác hoặc dừng phiên chạy đó trước.
 
-Trình khởi chạy sẽ được cài đặt vào `.venv`. Các lệnh phụ trợ `python -m tgwitness...` phải sử dụng `.venv\Scripts\python.exe` trên Windows hoặc `.venv/bin/python` trên Linux/macOS, trừ khi môi trường đó đã được kích hoạt sẵn.
+Trình khởi chạy cài đặt vào `.venv`. Các lệnh phụ trợ `python -m tgwitness...` phải dùng `.venv\Scripts\python.exe` trên Windows hoặc `.venv/bin/python` trên Linux/macOS, trừ khi môi trường đó đã được kích hoạt.
 
-## Các phiên làm việc, bảo mật và vận hành
+## Phiên, bảo vệ và vận hành
 
-Một cơ sở dữ liệu Telethon SQLite khép kín và nhất quán `.session` có thể được chuyển đổi cục bộ bằng `python -m tgwitness.sessions account.session --out account.tgwitness-session`, sau đó được tải vào Tài khoản. Tính năng nhập tệp trực tiếp và đăng nhập qua mã QR cũng được hỗ trợ. Vui lòng tham khảo [tệp CONNECTION-SECURITY.md](../CONNECTION-SECURITY.md) để biết các định dạng đăng nhập, SOCKS5, HTTP CONNECT, MTProxy và các khóa chính bên ngoài.
+Một tệp Telethon SQLite `.session` đã đóng và nhất quán có thể được chuyển đổi cục bộ bằng `python -m tgwitness.sessions account.session --out account.tgwitness-session`, sau đó tải lên tại **Các công cụ khác → Tài khoản → Tệp tin**. Nhập tệp trực tiếp và đăng nhập bằng mã QR cũng khả dụng. Xem [CONNECTION-SECURITY.md](../CONNECTION-SECURITY.md) để biết về định dạng đăng nhập, SOCKS5, HTTP CONNECT, MTProxy và khóa chính bên ngoài.
 
-**Tạm dừng quan sát** sẽ ngừng quá trình thu thập dữ liệu. **Chế độ Khóa** chỉ chặn quyền truy cập qua trình duyệt. Việc đóng một tab sẽ không làm dừng quá trình thu thập; quá trình này vẫn tiếp tục chạy. Việc dừng quá trình mới thực sự ngắt quá trình thu thập; bản chụp lịch sử không thể khôi phục lại toàn bộ các chỉnh sửa hoặc xóa bỏ đã bị bỏ lỡ. Vui lòng tham khảo [cách thức hoạt động của quá trình thu thập](../COLLECTION.md) đối với các chính sách sự kiện, hàng đợi tệp đính kèm, cách ly tài khoản và hành vi khởi động lại.
+**Tạm dừng quan sát** sẽ dừng việc thu thập. **Khóa** chỉ đóng quyền truy cập qua trình duyệt. Đóng tab không làm dừng tiến trình thu thập. Dừng tiến trình sẽ làm gián đoạn việc thu thập; ảnh chụp nhanh lịch sử không thể tái dựng mọi chỉnh sửa hoặc thao tác xóa đã bị bỏ lỡ. Xem [cách hoạt động của việc thu thập](../COLLECTION.md) để biết về chính sách sự kiện, hàng đợi tệp đính kèm, cách ly tài khoản và hành vi khi khởi động lại.
 
-Các phiên làm việc và thông tin bí mật đều được mã hóa. Nội dung tin nhắn, tệp đa phương tiện và các tệp xuất ra yêu cầu phải được lưu trữ trên đĩa hoặc phân vùng được mã hóa. Xác minh chữ ký nhật ký, chuỗi băm và tệp đính kèm bằng khóa tin cậy, đồng thời lưu các điểm kiểm tra ở nơi độc lập. Đối chiếu phạm vi và khoảng thời gian thu thập, biên nhận thời gian bên ngoài và kết quả kiểm tra môi trường thu thập có trong chế độ đã chọn.
+Phiên và các thông tin bí mật được mã hóa. Nội dung tin nhắn, tệp phương tiện và bản xuất cần được lưu trên ổ đĩa hoặc volume được mã hóa. Hãy xác minh chữ ký sổ nhật ký bằng một khóa đáng tin cậy và lưu giữ điểm kiểm tra ở nơi riêng. Xem xét bản ghi thu thập, biên nhận thời gian bên ngoài và chứng thực môi trường tương ứng với chế độ thu thập đã chọn.
 
-Vui lòng tham khảo [tệp OPERATIONS.md](../OPERATIONS.md) để biết thông tin về sao lưu/khôi phục, [tệp DEPLOYMENT.md](DEPLOYMENT.md) để biết về việc lưu trữ, và [thư mục deploy/](../../deploy/README.md) để xem các ví dụ về dịch vụ. Bảng điều khiển đã cài đặt cũng bao gồm hướng dẫn thiết lập ngoại tuyến tại `/guide.html`.
+Đọc [OPERATIONS.md](../OPERATIONS.md) về sao lưu/khôi phục, [DEPLOYMENT.md](DEPLOYMENT.md) về triển khai trên máy chủ, và [deploy/](../../deploy/README.md) để xem ví dụ về dịch vụ. Bảng điều khiển đã cài đặt cũng có hướng dẫn thiết lập ngoại tuyến tại `/guide.html`.
 
-Các kết quả xác minh thực tế và những hạn chế còn tồn tại được ghi chép trong [các tệp VERIFICATION.md](../VERIFICATION.md) và [READINESS.md](../internal/READINESS.md).
+Các bước xác minh đã thực hiện trên thực tế và những giới hạn còn lại được ghi trong [VERIFICATION.md](../VERIFICATION.md) và [READINESS.md](../internal/READINESS.md).

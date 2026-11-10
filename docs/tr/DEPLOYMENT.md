@@ -1,78 +1,128 @@
-[TgWitness](../../README.md) / [Documentation](../README.md) / [Folder](README.md)
+[TgWitness](../../README.md) / [Belgeler](../README.md) / [Klasör](README.md)
 
-![Deployment & recovery](../assets/presentation/chapter-operate.svg)
+![Dağıtım ve kurtarma](../assets/presentation/chapter-operate.svg)
 
 [English](../DEPLOYMENT.md) · [Русский](../ru/DEPLOYMENT.md) · [Українська](../uk/DEPLOYMENT.md) · [Español](../es/DEPLOYMENT.md) · [Português (Brasil)](../pt/DEPLOYMENT.md) · **Türkçe** · [العربية](../ar/DEPLOYMENT.md) · [فارسی](../fa/DEPLOYMENT.md) · [اردو](../ur/DEPLOYMENT.md) · [हिन्दी](../hi/DEPLOYMENT.md) · [Bahasa Indonesia](../id/DEPLOYMENT.md) · [Tiếng Việt](../vi/DEPLOYMENT.md) · [简体中文](../zh/DEPLOYMENT.md)
 
 # Dağıtım ve işletim
 
-## Bir kurulum seçeneği belirleyin
+## Kurulum türünü seçin
 
-Taşınabilir paket için, GitHub Sürümleri'nden `TgWitness-<version>-windows-amd64-portable.zip` dosyasını çıkarın. Diğer yöntemler için, kaynak ZIP dosyasını indirip açın veya depoyu klonlayın, ardından proje dizininden aşağıdakileri çalıştırın:
+Taşınabilir paket için GitHub Releases'tan `TgWitness-<version>-windows-amd64-portable.zip`
+arşivini çıkarın. Diğer yöntemler için kaynak ZIP dosyasını indirip çıkarın veya depoyu
+klonlayın, ardından proje dizininde aşağıdakini çalıştırın:
 
-| Kurulum | Başlangıç | Arka planda çalışır mı? |
+| Kurulum | Başlatma | Arka planda çalışır mı? |
 | --- | --- | --- |
 | Windows taşınabilir paketi | `TgWitness.cmd` | Hayır; pencereyi açık tutun. |
-| Windows için yerel sürüm | `Start.cmd` | Hayır; arka planda çalıştırmak için isteğe bağlı oturum açma görevini kullanın. |
-| Linux/macOS için yerel sürüm | `sh start.sh` | Hayır; arka planda çalıştırmak için systemd/launchd kullanın. |
-| Desteklenen herhangi bir ana bilgisayarda Docker | `docker compose up -d --build --wait` | Evet, Docker arka plan programı çalışırken. |
-| Windows'ta Docker yardımcısı | `scripts\Docker.cmd` | Evet; yardımcı program, web sunucusunun durumunu bekler. |
-| Linux/macOS üzerinde Docker yardımcısı | `sh scripts/docker-start.sh` | Evet; yardımcı program, web sunucusunun durumunu bekler. |
+| Yerel Windows kurulumu | `Start.cmd` | Hayır; arka planda çalıştırmak için isteğe bağlı oturum açma görevini kullanın. |
+| Yerel Linux/macOS kurulumu | `sh start.sh` | Hayır; arka planda çalıştırmak için systemd/launchd kullanın. |
+| Desteklenen herhangi bir ana makinede Docker | `docker compose up -d --build --wait` | Evet, Docker daemon'ı çalıştığı sürece. |
+| Windows'ta Docker yardımcısı | `scripts\Docker.cmd` | Evet; yardımcı, web sunucusunun sağlıklı duruma gelmesini bekler. |
+| Linux/macOS'ta Docker yardımcısı | `sh scripts/docker-start.sh` | Evet; yardımcı, web sunucusunun sağlıklı duruma gelmesini bekler. |
 
-Yerel başlatma işlemi, özel bir `.venv` oluşturur ve sabitlenmiş bağımlılıkları yükler. Docker, ana bilgisayar Python'una ihtiyaç duymadan bunları görüntü içinde derler. İlk kurulum için İnternet erişimi gereklidir. Python 3.11+ bulunmadığında, `Start.cmd`, mevcut Windows kullanıcısı için Python 3.12'yi yüklemeden önce sorar (winget; aksi takdirde, Python Software Foundation imzasını kontrol ettikten sonra python.org yükleyicisi kullanılır); hiçbir zaman yönetici ayrıcalıkları talep etmez. Docker ve işletim sistemi hizmetleri ön koşul olarak kalır.
+Üçüncü bir tarafın denetleyebilmesi gereken bir bulut sunucusu için — sağlayıcının API'si
+üzerinden, SSH olmadan oluşturulan ve yalnızca bir Cloudflare Tunnel üzerinden erişilen —
+[yüksek güvenceli dağıtım](../HIGH-ASSURANCE.md) belgesine bakın.
 
-Yerel ve taşınabilir kurulumlar, kendi klasörleri içinde `data/live` kullanır. Docker ise `/data` konumunda `tgwitness-data` adlı birim kullanır. Veri dizinini kasıtlı olarak tamamen taşıyana kadar bunlar ayrı kurulumlardır. Yeni bir Docker konteynerinin yerel hesapları otomatik olarak algılamasını beklemeyin.
+Yerel başlatma özel bir `.venv` oluşturur ve sürümü sabitlenmiş bağımlılıkları kurar. Docker
+bunları imajın içinde derler; ana makinede Python gerekmez. İlk kurulum İnternet erişimi
+gerektirir. Python 3.11+ bulunamazsa `Start.cmd`, geçerli Windows kullanıcısı için Python 3.12'yi
+kurmadan önce onay ister (winget ile, o olmazsa Python Software Foundation imzasını
+doğruladıktan sonra python.org yükleyicisiyle); hiçbir zaman yönetici ayrıcalığı istemez. Docker
+ve işletim sistemi hizmetleri yine ön koşuldur.
+
+Yerel ve taşınabilir kurulumlar kendi klasörlerindeki `data/live` dizinini kullanır. Docker,
+`/data` konumundaki `tgwitness-data` adlı birimi kullanır. Veri dizininin tamamını bilinçli olarak
+taşıyana kadar bunlar ayrı kurulumlardır. Yeni bir Docker konteynerinin yerel kurulumdaki
+hesapları kendiliğinden bulmasını beklemeyin.
 
 ## Kurulum gereksinimleri
 
-Yerel kurulum için Python 3.11 veya üstü sürümü (`venv` ve `ensurepip` ile birlikte), ilk bağımlılık kurulumunda internet erişimi ve `.venv` için yazma izni olan bir proje dizini gereklidir. Pakete dahil olan panel için Node.js veya ön uç derlemesi gerekmez. Başlatıcıyı normal işletim sistemi hesabınızdan çalıştırın; TgWitness için yönetici/root ayrıcalıkları gerekmez.
+Yerel kurulum için `venv` ve `ensurepip` içeren Python 3.11 veya üstü, ilk bağımlılık kurulumu
+için İnternet erişimi ve `.venv` için yazılabilir bir proje dizini gerekir. Pakete dahil panel için
+Node.js veya ön yüz derlemesi gerekmez. Başlatıcıyı normal işletim sistemi hesabınızla
+çalıştırın; TgWitness yönetici/root ayrıcalığı gerektirmez.
 
-- **Windows:** `Start.cmd` önce `py -3`'yi, ardından `python`'yi, sonra da varsayılan kullanıcı başına ve Program Files kurulum klasörlerini kontrol eder ve 3.11 veya daha yeni bir sürümü gerektirir. Hiçbiri işe yaramazsa, yukarıda açıklanan otomatik kullanıcı başına kurulum seçeneğini sunar. `py -3 start.py` de çalışır. Taşınabilir paket için Python'a hiç gerek yoktur.
-- **Linux:** `start.sh`, `python3.13`, `python3.12`, `python3.11`, `python3` ve `python` komutlarını dener ve uygun bir seçenek bulunmadığında apt, dnf, pacman, zypper, apk veya Homebrew için kurulum komutunu görüntüler. Debian/Ubuntu kurulumlarında, seçilen yorumlayıcıyla eşleşen `python3-venv` paketinin yüklenmesi gerekebilir. Dağıtımın eski varsayılan Python sürümü, Python 3.11+ ile değiştirilmeli veya bu sürümle desteklenmelidir.
-- **macOS:** Güncel bir Python 3.11+ dağıtımını yükleyin; işletim sistemi tarafından sağlanan yorumlayıcının gereksinimleri karşıladığını varsaymayın. Proje dizininden `python3 start.py` dosyasını kullanın.
-- **Docker:** Compose v2.20 veya daha yeni bir sürümle birlikte Docker Engine/Desktop kullanın. Docker Desktop, Windows üzerinde Linux konteynerleri kullanmalıdır. Konteyner kendi Python bağımlılıklarını yükler; ana bilgisayarda ayrı bir Python kurulumu gerekmez.
-
-Veri dizini için kalıcı yerel depolama alanı kullanın. Mesajlar, medya, WAL büyümesi, dışa aktarmalar ve yedeklemelerden yola çıkarak kapasite planlaması yapın; her iş yükü için kanıta dayalı, evrensel bir minimum disk/RAM spesifikasyonu bulunmamaktadır. Uyumlu bağımlılık tekerlekleri (dependency wheels) bulunmayan CPU mimarileri ve Python sürümleri, ek derleme araçları ve kendi yeterlilik testlerini gerektirebilir. "Taşınabilir" ifadesi, evrensel işletim sistemi veya donanım desteği iddiası değildir.
-
-Windows 11/Python 3.12 yerel olarak doğrulanmıştır. Linux/macOS/konteyner tanımları ve CI sağlanmıştır ancak bu geliştirme sunucusunda çalıştırılmamıştır. Kesin kapsam için [VERIFICATION.md](../VERIFICATION.md) dosyasına bakınız.
+- **Windows:** `Start.cmd` sırasıyla `py -3`, `python` ve ardından kullanıcıya özel ve
+  Program Files altındaki varsayılan kurulum klasörlerini dener; 3.11 veya üstü sürüm gerektirir.
+  Hiçbiri işe yaramazsa yukarıda açıklanan otomatik, kullanıcıya özel kurulumu önerir.
+  `py -3 start.py` de çalışır. Taşınabilir paket Python'a hiç ihtiyaç duymaz.
+- **Linux:** `start.sh` sırasıyla `python3.13`, `python3.12`, `python3.11`, `python3` ve
+  `python` komutlarını dener; hiçbiri uygun değilse apt, dnf, pacman, zypper, apk veya Homebrew
+  için kurulum komutunu yazdırır. Debian/Ubuntu kurulumlarında seçilen yorumlayıcıyla eşleşen
+  `python3-venv` paketi gerekebilir. Dağıtımın varsayılan Python'u eskiyse Python 3.11+ ile
+  değiştirilmeli veya yanına Python 3.11+ kurulmalıdır.
+- **macOS:** güncel bir Python 3.11+ dağıtımı kurun; işletim sistemiyle gelen yorumlayıcının
+  gereksinimi karşıladığını varsaymayın. Proje dizininde `python3 start.py` komutunu kullanın.
+- **Docker:** Compose v2.20 veya üstüyle Docker Engine/Desktop kullanın. Docker Desktop,
+  Windows'ta Linux konteynerlerini kullanmalıdır. Konteyner kendi Python bağımlılıklarını kurar;
+  ana makinede ayrıca Python kurulumu gerekmez.
 
 ## Yerel bilgisayar
 
-Windows'ta `Start.cmd`, Linux/macOS'ta ise `sh start.sh` komutunu kullanın. `scripts\Setup.cmd` veya `sh start.sh --setup-only` komutları ortamı hazırlar. Başlatıcı, ilk kullanımda bağımlılıkları yükler; sonraki başlatmalarda mevcut ortam kullanılır. Kurulum ve Telegram verilerinin toplanması için internet erişimi gereklidir, ancak mevcut kayıtların görüntülenmesi ve dışa aktarımların oluşturulması çevrimdışı olarak yapılabilir.
+Windows'ta `Start.cmd`, Linux/macOS'ta `sh start.sh` kullanın. `scripts\Setup.cmd` veya
+`sh start.sh --setup-only` ortamı hazırlar. Başlatıcı bağımlılıkları ilk kullanımda kurar;
+sonraki başlatmalar aynı ortamı yeniden kullanır. Kurulum ve Telegram'dan toplama için İnternet
+erişimi gerekir; mevcut kayıtlara göz atmak ve dışa aktarım oluşturmak ise çevrimdışı çalışır.
 
-Kurulumdan sonra `python start.py --check` komutunu çalıştırarak, bir toplayıcı başlatmadan yerel bağımlılıkları, Ed25519'u, depolama alanını, anahtar yapılandırmasını ve dinleme adresini kontrol edin. Yapılandırılmış çıktı için `--json` komutunu kullanın. İstenen `--data-dir`, `--host` ve `--port` parametrelerini aktarın. Bu kontrol, paketleri yüklemez, bir günlük oluşturmaz veya Telegram'a bağlanmaz; bir bütünlük veya kapsama yeterliliği değerlendirmesi değildir. Başlangıç işlemi, mevcut günlükleri ayrı olarak doğrular. `python start.py --help` da kurulumdan kaçınır.
+Kurulumdan sonra, toplayıcıyı başlatmadan yerel bağımlılıkları, Ed25519'u, depolamayı, anahtar
+yapılandırmasını ve dinleme adresini incelemek için `python start.py --check` komutunu
+çalıştırın. Yapılandırılmış çıktı için `--json` kullanın. Kullanmayı planladığınız `--data-dir`,
+`--host` ve `--port` değerlerini verin. Kontrol paket kurmaz, günlük oluşturmaz ve Telegram'a
+bağlanmaz; bir bütünlük veya kapsam yeterlilik testi değildir. Mevcut günlükler başlatma sırasında
+ayrıca doğrulanır. `python start.py --help` da kurulum yapmaz.
 
-Seçenekler:
-
-start.py dosyasını kullandıktan sonra, Windows'ta `.venv\Scripts\python.exe`, Linux/macOS'ta `.venv/bin/python` komutlarıyla yardımcı komutları çalıştırın veya önce o ortamı etkinleştirin. Aşağıdaki `python -m ...` örnekleri, ortamın etkin olduğunu varsaymaktadır.
+start.py'yi kullandıktan sonra yardımcı komutları Windows'ta `.venv\Scripts\python.exe`,
+Linux/macOS'ta `.venv/bin/python` ile çalıştırın ya da önce bu ortamı etkinleştirin. Aşağıdaki
+`python -m ...` örnekleri ortamın etkin olduğunu varsayar.
 
 ~~~sh
 python -m tgwitness --data-dir /path/to/private/data --host 127.0.0.1 --port 8787
 ~~~
 
-Ortam değişkenleri: TGWITNESS_DATA, TGWITNESS_HOST, TGWITNESS_PORT, TGWITNESS_TOKEN. TGWITNESS_VAULT_KEY_FILE, yeni bir kurulum için harici anahtar modunu seçer; aşağıya bakınız. TGWITNESS_TOKEN, belirtilirse en az 24 karakter içermelidir; kriptografik olarak rastgele bir değer kullanın. Bu değer belirtilmezse, uygulama panel-token.txt dosyasında 256 bitlik rastgele bir token oluşturur. Ortam değişkeni bu dosyayı yeniden yazmaz. Kimlik bilgilerini yenilemek için sistemi yeniden başlatın.
+Ortam değişkenleri: TGWITNESS_DATA, TGWITNESS_HOST, TGWITNESS_PORT, TGWITNESS_TOKEN.
+TGWITNESS_VAULT_KEY_FILE yeni bir kurulum için harici anahtar modunu seçer; bkz. [Harici ana anahtar](../SECURITY-MODEL.md#external-master-key).
+TGWITNESS_TOKEN verilirse en az 24 karakter içermelidir; kriptografik olarak rastgele bir değer
+kullanın. Verilmezse uygulama panel-token.txt dosyasında 256 bitlik rastgele bir jeton üretir.
+Ortam değişkeniyle yapılan geçersiz kılma bu dosyayı yeniden yazmaz. Kimlik bilgilerini yenilemek
+için yeniden başlatın.
 
-Bir veri dizinine tam olarak tek bir işlem sahip olabilir. Platformlar arası bir işletim sistemi dosya kilidi, kazara eşzamanlı yazma işlemlerini önler. Tek bir Uvicorn işçisi kullanın. Panel, profiller/<id>/ altındaki ek çalışma alanı dizinleriyle birlikte istediği sayıda çalışma alanını yönetebilir. Ayrı hizmet örnekleri için ayrı dizinler ve bağlantı noktaları kullanın. SQLite WAL dosyaları, ağ dosya sisteminde değil, yerel kalıcı depolama alanında bulunmalıdır. Replikalar arasında tek bir birimi paylaşmayın.
+Bir veri dizinine yalnızca tek bir işlem sahip olabilir. Platformlar arası bir işletim sistemi
+dosya kilidi, birden fazla yazıcının yanlışlıkla aynı anda çalışmasını önler. Tek bir Uvicorn
+worker kullanın. Panel istenen sayıda çalışma alanını yönetebilir; ek çalışma alanı dizinleri
+profiles/<id>/ altında bulunur. Ayrı hizmet örnekleri için ayrı dizinler ve bağlantı noktaları
+kullanın. SQLite WAL dosyaları ağ dosya sisteminde değil, yerel kalıcı depolamada bulunmalıdır.
+Bir birimi replikalar arasında paylaşmayın.
 
 ## Windows taşınabilir paketi
 
-Her GitHub Sürümü, `TgWitness-<version>-windows-amd64-portable.zip` ve `.sha256` öğelerini içerir. Bu sürüm, python.org'dan alınan resmi gömülebilir Python 3.12 çalışma zamanını (`tools/build_portable.py` öğesinde sabitlenmiş sağlama toplamı), TgWitness ve sabitlenmiş bağımlılıklarını ve üç başlatıcıyı içerir:
+Her GitHub Release, `TgWitness-<version>-windows-amd64-portable.zip` arşivini ve onun `.sha256`
+dosyasını içerir. Arşivde python.org'un resmi gömülebilir Python 3.12 çalışma zamanı (sağlama
+toplamı `tools/build_portable.py` içinde sabitlenmiştir), TgWitness ve sürümü sabitlenmiş
+bağımlılıkları ile üç başlatıcı bulunur:
 
 | Dosya | Amaç |
 | --- | --- |
-| `TgWitness.cmd` | Paneli başlatın; ek seçenekler aktarılır, örneğin `TgWitness.cmd --port 8790` |
-| `TgWitness-Demo.cmd` | `data\demo` adresindeki sentetik demoyu başlatın |
-| `TgWitness-Check.cmd` | Başlatmadan hazırlık kontrolünü çalıştırın |
+| `TgWitness.cmd` | Paneli başlatır; ek seçenekler aynen iletilir, örneğin `TgWitness.cmd --port 8790` |
+| `TgWitness-Demo.cmd` | `data\demo` içinde sentetik demoyu başlatır |
+| `TgWitness-Check.cmd` | Uygulamayı başlatmadan hazırlık kontrolünü çalıştırır |
 
-Arşivin tamamını `Documents\TgWitness` gibi yazılabilir bir klasöre çıkarın; ZIP dosyasının içinden veya Program Files klasöründen çalıştırmayın. Çalışma ortamı izole bir modül yolu kullanır, bu nedenle diğer Python kurulumları ve `PYTHONPATH` onu etkilemez. Veriler, paketin `data` klasöründe kalır. Güncellemek için TgWitness'i durdurun, yeni sürümü yeni bir klasöre çıkarın ve `data` klasörünü buraya kopyalayın.
+Sürümü sabitlenmiş Rusça morfoloji sözlüğü ve PDF renk profilleri çevrimdışı kullanım için pakete
+dahildir. Paketleme, bağımlılıkların `data` dizinlerinde yalnızca bu dosyaların bilinen yollarına
+izin verir; bu dizinlerde beklenmeyen bir dosya bulunursa derleme başarısız olur.
 
-Python 3.12 kullanarak 64 bit Windows üzerinde kendiniz derleyin:
+Arşivin tamamını `Documents\TgWitness` gibi yazılabilir bir klasöre çıkarın; ZIP'in içinden veya
+Program Files'tan çalıştırmayın. Çalışma zamanı yalıtılmış bir modül yolu kullanır; bu nedenle
+diğer Python kurulumları ve `PYTHONPATH` onu etkilemez. Veriler paketin `data` klasöründe kalır.
+Güncellemek için TgWitness'i durdurun, yeni sürümü yeni bir klasöre çıkarın ve `data` klasörünü
+oraya kopyalayın.
+
+Paketi 64 bit Windows'ta Python 3.12 ile kendiniz derleyebilirsiniz:
 
 ~~~sh
 python tools/build_portable.py
 ~~~
-
-Oluşturucu, çalışma zamanı sağlama toplamını doğrular, kısıtlı bağımlılıkları pakete yükler, gömülü yorumlayıcıyla hazırlık kontrolünü çalıştırır ve ZIP dosyasını ve sağlama toplamını `dist/` dosyasına yazar.
 
 ## Konteyner
 
@@ -80,11 +130,24 @@ Oluşturucu, çalışma zamanı sağlama toplamını doğrular, kısıtlı bağ�
 docker compose up -d --build --wait
 ```
 
-Bu, /data için adlandırılmış bir kalıcı birim oluşturur. Web bağlantı noktası 127.0.0.1:8787 adresine eşlenir. İşlem, yetkileri kaldırılmış UID 10001 olarak, salt okunur bir kök dosya sistemi ve yazılabilir /data ile /tmp dizinleriyle çalışır. `--wait`, geri dönüş yapmadan önce web sunucusunun durumunu kontrol eder; Telegram yetkilendirme veya mesaj teslimi işlemi gerçekleştirmez. Sağlanan yardımcı programlar, derlemeden sonra 180 saniyelik bir hazırlık zaman aşımı kullanır. İlk bağımlılık indirmeleri bu süreden daha uzun sürebilir.
+Bu komut /data için adlandırılmış kalıcı bir birim oluşturur. Web bağlantı noktası
+127.0.0.1:8787 adresine eşlenir. İşlem UID 10001 olarak, yetenekleri (capabilities) kısıtlanmış
+şekilde, salt okunur bir kök dosya sistemi ve yazılabilir /data ile /tmp dizinleriyle çalışır.
+`--wait`, komut dönmeden önce web sunucusunun sağlığını denetler; Telegram yetkilendirmesi ve
+teslimat durumu panelde görünür. Sağlanan yardımcılar derlemeden sonra 180 saniyelik bir hazır olma
+zaman aşımı kullanır. İlk bağımlılık indirmeleri bundan uzun sürebilir.
 
-Her iki temel Compose dosyası da proje adı `tgwitness` kullanır; bu nedenle, yeni bir sürümü başka bir dizine çıkardığınızda sistem otomatik olarak yeni bir veri birimi seçmez. O proje için yalnızca bir dağıtımı aktif tutun. Bağımsız kurulumlar için benzersiz bir `docker compose -p NAME ...` ve farklı bir ana bilgisayar bağlantı noktası kullanın ve güncellemelerde her ikisini de koruyun. Farklı bir proje adı kullanan eski bir dağıtım için, `-p` ile orijinal adını kullanmaya devam edin; `docker compose ls` mevcut projeleri listeler.
+Her iki temel Compose dosyası da `tgwitness` proje adını kullanır; bu sayede yeni bir sürümü başka
+bir dizine çıkarmak sessizce yeni bir veri biriminin seçilmesine yol açmaz. Bu proje için yalnızca
+bir dağıtımı etkin tutun. Bağımsız kurulumlar için benzersiz bir `docker compose -p NAME ...` ve
+farklı bir ana makine bağlantı noktası kullanın ve güncellemelerde ikisini de koruyun. Farklı
+proje adı kullanan eski bir dağıtımda `-p` ile özgün adı kullanmaya devam edin;
+`docker compose ls` mevcut projeleri listeler.
 
-`deploy/env.example`'yi `.env`'ye kopyalayın ve `TGWITNESS_PORT`'yi farklı bir loopback bağlantı noktası kullanacak şekilde değiştirin. Örneğin, `TGWITNESS_PORT=8788` paneli `http://127.0.0.1:8788` adresinde gösterir; konteyner ise hala 8787 numaralı bağlantı noktasını dinler. `.env`, Git tarafından göz ardı edilir.
+Farklı bir loopback bağlantı noktası kullanmak için `deploy/env.example` dosyasını `.env` olarak
+kopyalayın ve `TGWITNESS_PORT` değerini değiştirin. Örneğin `TGWITNESS_PORT=8788` paneli
+`http://127.0.0.1:8788` adresinde sunar; konteyner yine 8787'de dinler. `.env` Git tarafından yok
+sayılır.
 
 İlk jetonu alın:
 
@@ -101,35 +164,57 @@ docker compose stop
 docker compose up -d --wait
 ```
 
-`restart: unless-stopped`, bir çökme veya Docker arka plan hizmetinin yeniden başlatılmasından sonra toplayıcıyı yeniden başlatır. Linux sunucusunda, dağıtımınızın hizmet yöneticisini (genellikle `sudo systemctl enable --now docker`) kullanarak önyükleme sırasında Docker'ı etkinleştirin. Windows/macOS'ta, Docker Desktop'ın oturum açıldığında başlatma ayarını etkinleştirin. Masaüstünden çıkış, uyku modu veya durdurulmuş bir Docker arka plan hizmeti, veri toplama işlemini kesintiye uğratabilir. Açıkça durdurulmuş bir konteyner, siz onu yeniden başlatana kadar durdurulmuş halde kalır.
+`restart: unless-stopped`, bir çökmeden veya Docker daemon'ının yeniden başlatılmasından sonra
+toplayıcıyı yeniden başlatır. Linux sunucuda Docker'ın açılışta başlamasını dağıtımınızın hizmet
+yöneticisiyle etkinleştirin; bu genellikle `sudo systemctl enable --now docker` komutudur.
+Windows/macOS'ta Docker Desktop'ın oturum açıldığında başlama ayarını etkinleştirin. Masaüstü
+oturumunun kapatılması, uyku modu veya durmuş bir Docker daemon'ı toplamayı kesintiye
+uğratabilir. Açıkça durdurulan bir konteyner, siz yeniden başlatana kadar durmuş kalır.
 
-Örnek yapılandırmada /tmp biriminin üst sınırı 512 MiB olarak belirlenmiştir. Dışa aktarma yapısı, bunun yerine her çalışma alanının `temporary-exports/` öğesini kalıcı /data dizininde kullanır. Eşzamanlı dışa aktarmalar, günlük/WAL büyümesi, medya ve yedeklemeler için burada yer ayırın. Başlatıcı ve Docker, qualified runtime bağımlılık sürümlerini sabitlemek için deploy/constraints.txt dosyasını kullanır. Bu, hash kilitli bir tedarik zinciri değildir: Python temel görüntüsü ve paket yapı öğeleri hâlâ bağımsız sürüm onayına tabidir.
+Örnek yapılandırmada /tmp birimi 512 MiB ile sınırlıdır. Dışa aktarımlar bunun yerine kalıcı
+/data üzerindeki her çalışma alanının `temporary-exports/` dizininde oluşturulur. Eşzamanlı dışa
+aktarımlar, günlük/WAL büyümesi, medya ve yedeklemeler için orada yer ayırın. Başlatıcı,
+yeterliliği doğrulanmış çalışma zamanı bağımlılık sürümlerini sabitlemek için
+deploy/constraints.txt dosyasını kullanır. Docker ve yüksek güvenceli sunucular
+deploy/requirements.lock ve deploy/build.lock dosyalarından pip --require-hashes ile kurulum yapar:
+her paket dosyası commit'te kayıtlı bir SHA-256 değeriyle eşleşmelidir, bu nedenle PyPI'da veya
+bir yansıda değiştirilmiş bir dosya reddedilir. Python temel imajı ve işletim sistemi paketleri ise
+hâlâ sürüm için bağımsız yeterlilik doğrulaması gerektirir.
 
-Günlüğü ve anahtarları silmek niyetinde değilseniz, docker compose down -v komutunu kullanmayın. Konteyner durum raporu, web sunucusunun erişilebilirliğini gösterir; Telegram verilerinin başarılı bir şekilde yakalandığını göstermez. Panelin toplayıcı durumunu, kalp atışını, hatalarını ve kapsama olaylarını inceleyin.
+Günlüğü ve anahtarları yok etmek istemiyorsanız docker compose down -v kullanmayın. Konteyner
+sağlık durumu Telegram'dan başarılı yakalamayı değil, web sunucusunun erişilebilirliğini bildirir.
+Paneldeki toplayıcı durumunu, kalp atışını, hataları ve kapsam olaylarını inceleyin.
 
 ### Bağımsız tanık profili
 
-İsteğe bağlı `witness` hizmeti, kendi konteynerinde [bağımsız tanık](../WITNESS.md) çalıştırır; bu hizmetin `witness-data` biriminde kendi anahtarı ve günlüğü bulunur ve toplayıcı için yalnızca salt okunur bir tanık jetonu vardır. Jetonu panelin **Witness** sayfasında oluşturun, bir bot jetonu ve kanal ile birlikte `.env` adresine ekleyin, ardından profili başlatın:
+İsteğe bağlı `witness` hizmeti, [bağımsız tanığı](../WITNESS.md) kendi konteynerinde çalıştırır:
+anahtarı ve günlüğü `witness-data` biriminde ayrı tutulur ve toplayıcı için elinde yalnızca salt
+okunur bir tanık jetonu bulunur. Jetonu panelde **Diğer araçlar → Ekstralar → Bağımsız tanık**
+altında oluşturun, bir bot jetonu ve kanalla birlikte `.env` dosyasına ekleyin, ardından profili
+başlatın:
 
 ```sh
 docker compose --profile witness up -d          # deploy/compose/compose.image.yaml: same flag
 docker compose logs witness                     # witness key fingerprint
 ```
 
-Hizmet, Compose ağı içindeki toplayıcıya `http://tgwitness:8787` adresinden ulaşır (`TGWITNESS_WITNESS_COLLECTOR` bu adresi geçersiz kılar; örneğin, başka bir çalışma alanı için `/profiles/<workspace ID>`). Başka biri tarafından işletilen ayrı bir sunucudaki tanık için, orada `deploy/compose/compose.witness.yaml` dosyasını kullanın ve `TGWITNESS_WITNESS_COLLECTOR` dosyasını toplayıcının HTTPS adresine ayarlayın; bu dosya yalnızca tanığı içerir.
+Hizmet, Compose ağı içinde toplayıcıya `http://tgwitness:8787` adresinden ulaşır
+(`TGWITNESS_WITNESS_COLLECTOR` bunu geçersiz kılar; örneğin başka bir çalışma alanı için
+`/profiles/<workspace ID>`). Başka birinin işlettiği ayrı bir sunucudaki tanık için orada
+`deploy/compose/compose.witness.yaml` dosyasını, `TGWITNESS_WITNESS_COLLECTOR` değerini
+toplayıcının HTTPS adresine ayarlayarak kullanın; bu dosya yalnızca tanığı içerir.
 
-## Yayınlanmış bir görüntüyü yükleyin
+## Yayımlanmış bir imajı kurun
 
-Bu, başarılı bir [sürüm iş akışı](#otomatik-github-sürümleri) ve halka açık GHCR paketi yapılandırmasının ardından kullanıma sunulur. Deponun sahibi/adı bu kaynak ağacına sabit olarak kodlanmamıştır. İlgili sürümün iş akışı özetinde gösterilen görüntüyü kullanın.
-
-`deploy/env.example` öğesini `.env` öğesine kopyalayın. `TGWITNESS_IMAGE` öğesini, **küçük harfli** depo yolunu kullanarak yayınlanan sürüme ayarlayın, örneğin:
+`deploy/env.example` dosyasını `.env` olarak kopyalayın. `TGWITNESS_IMAGE` değerini, depo yolunu
+**küçük harflerle** yazarak yayımlanmış sürüme ayarlayın, örneğin:
 
 ```dotenv
-TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.9.1
+TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.9.2
 TGWITNESS_PORT=8787
 ```
 
-`compose.yaml` yerine bu dosyayı tek başına çalıştırın:
+Bu dosyayı `compose.yaml` yerine tek başına kullanın:
 
 ```sh
 docker compose --project-directory . -f deploy/compose/compose.image.yaml pull
@@ -137,19 +222,29 @@ docker compose --project-directory . -f deploy/compose/compose.image.yaml up -d 
 docker compose --project-directory . -f deploy/compose/compose.image.yaml exec tgwitness cat /data/panel-token.txt
 ```
 
-Ana bilgisayarda kaynak derleme, Python veya derleyici gerekmez. Sürüm iş akışı, Docker Desktop'ın Linux VM'si dahil olmak üzere Linux AMD64 ve ARM64 kapsayıcılarını hedefler. İş akışı özetinden bir sürüm etiketi veya `ghcr.io/owner/repository@sha256:...` kullanın. `latest` etiketinin taşınması veya gözetimsiz uygulama yükseltmesi yapılandırılmamıştır. Görüntü ve kaynak varyantları, proje adları eşleştiğinde aynı veri hacmini kullanır.
+Ana makinede kaynak derlemesi, Python veya derleyici gerekmez. Sürüm iş akışı, Docker Desktop'ın
+Linux sanal makinesi dahil Linux AMD64 ve ARM64 konteynerlerini hedefler. İş akışı özetindeki bir
+sürüm etiketini veya `ghcr.io/owner/repository@sha256:...` değerini kullanın. Değişken bir `latest`
+etiketi ya da gözetimsiz uygulama yükseltmesi yapılandırılmamıştır. İmaj ve kaynak varyantları,
+proje adları aynı olduğunda aynı veri birimini kullanır.
+
+<a name="automatic-https-on-a-server"></a>
 
 ## Sunucuda otomatik HTTPS
 
-Docker yüklü bir sunucu, sizin kontrolünüz altındaki bir alan adı ve kalıcı yerel depolama alanı kullanın. Alan adının A/AAAA kayıtlarını sunucuya yönlendirin; yalnızca IPv6 erişimi varsa AAAA kaydını yayınlayın. Sertifika düzenlenmesi için gelen TCP 80 ve 443 bağlantılarına ve giden DNS/HTTPS bağlantılarına izin verin. Bu bağlantı noktaları başka hizmetler tarafından kullanılmamalıdır.
+Docker kurulu bir sunucu, denetiminizdeki bir alan adı ve kalıcı yerel depolama kullanın. Alan
+adının A/AAAA kayıtlarını sunucuya yönlendirin; AAAA kaydını yalnızca sunucuya IPv6 ile
+ulaşılabiliyorsa yayımlayın. Sertifika verilmesi için gelen TCP 80 ve 443 ile giden DNS/HTTPS
+trafiğine izin verin. Bu bağlantı noktaları başka hizmetler tarafından kullanılıyor olmamalıdır.
 
-`deploy/env.example`'yi `.env`'ye kopyalayın ve şema veya yol olmadan bir ana bilgisayar adı belirleyin:
+`deploy/env.example` dosyasını `.env` olarak kopyalayın ve şema veya yol içermeyen bir ana makine
+adı ayarlayın:
 
 ```dotenv
 TGWITNESS_DOMAIN=watch.your-domain.org
 ```
 
-HTTPS overlay ile kaynak derlemesini başlatın:
+Kaynak derlemesini HTTPS katmanıyla başlatın:
 
 ```sh
 docker compose -f compose.yaml -f deploy/compose/compose.https.yaml up -d --build --wait
@@ -160,95 +255,157 @@ docker compose -f compose.yaml -f deploy/compose/compose.https.yaml exec tgwitne
 docker compose --project-directory . -f deploy/compose/compose.image.yaml -f deploy/compose/compose.https.yaml up -d --wait
 ```
 
-Yayınlanmış bir resim için, bunun yerine ilk dosya olarak `deploy/compose/compose.image.yaml`'yi kullanın. `-f` argümanlarının her ikisini de daha sonraki durum, günlük, güncelleme ve durdurma komutları için saklayın.
+Yayımlanmış bir imaj için ilk dosya olarak bunun yerine `deploy/compose/compose.image.yaml`
+kullanın. Sonraki durum, log, güncelleme ve durdurma komutlarında her iki `-f` bağımsız değişkenini
+de koruyun.
 
-Caddy, sertifikayı alır ve yeniler, HTTP'yi HTTPS'ye yönlendirir ve istekleri özel Compose ağındaki toplayıcıya iletir. Sertifika durumu kendi kalıcı biriminde bulunur. Toplayıcının doğrudan ana bilgisayar bağlantı noktası yalnızca döngü içi (loopback) olarak kalır. Sağlanan Caddy yapılandırması, erişim günlüğü kaydını etkinleştirmez.
+Caddy sertifikayı alır ve yeniler, HTTP'yi HTTPS'ye yönlendirir ve istekleri özel Compose ağındaki
+toplayıcıya iletir. Sertifika durumu kendi kalıcı biriminde tutulur. Toplayıcının ana makinedeki
+doğrudan bağlantı noktası yalnızca loopback'e açık kalır. Sağlanan Caddy yapılandırması erişim
+loglamasını etkinleştirmez.
 
-`https://watch.your-domain.org` dosyasını açın ve panel jetonunu girin. Hazırlık durumu, sertifika verilmesini veya harici erişilebilirliği teyit etmez. HTTPS hazır değilse, DNS'yi, güvenlik duvarı kurallarını ve aşağıdakileri kontrol edin:
+`https://watch.your-domain.org` adresini açın ve panel jetonunu girin. Compose'un hazır olma
+denetimi konteynerleri kapsar; sertifika verilmesi ve dışarıdan erişilebilirlik DNS'e ve
+güvenlik duvarına bağlıdır. HTTPS hazır değilse DNS'i, güvenlik duvarı kurallarını ve şu komutun
+çıktısını inceleyin:
 
 ```sh
 docker compose -f compose.yaml -f deploy/compose/compose.https.yaml logs --tail 100 caddy
 ```
 
-Sağlanan Caddy görüntüsü, `2-alpine` etiketinin hemen ardından gelir. Pull işlemi bu görüntüyü yeniler; sabit altyapı sürümlerine ihtiyacınız varsa, dağıtımınıza test edilmiş bir özeti sabitleyin.
+Sağlanan Caddy imajı `2-alpine` etiketini izler. Pull işlemi bu imajı yeniler; sabit altyapı
+sürümlerine ihtiyacınız varsa dağıtımınızda test edilmiş bir digest değerini sabitleyin.
 
 ## Güncellemeler ve yedeklemeler
 
-Güncellemeler sırasında Compose proje adını ve veri hacmini koruyun. Öncelikle toplayıcıyı durdurun ve tam bir yedekleme yapın. Varsayılan kaynak tabanlı dağıtım için:
+Güncellemeler boyunca Compose proje adını ve veri birimini koruyun. Önce toplayıcıyı durdurun ve
+eksiksiz bir yedek alın. Varsayılan, kaynaktan derlenen dağıtım için:
 
 ```sh
 docker compose stop
 docker compose cp tgwitness:/data ../tgwitness-backup-before-update
 ```
 
-Her seferinde, depo dışında yeni bir yedekleme hedefi kullanın ve bunu hesap erişim materyali olarak koruyun. Örnek yol sadece açıklayıcı niteliktedir; kendi özel yedekleme konumunuzu kullanın. Gizli dosyalar, tüm çalışma alanları, anahtarlar, günlükler ve medya dahil olmak üzere tüm dizini kopyalayın. Yapılandırılmışsa, harici kasa anahtarını ayrı olarak yedekleyin. Kanıt ZIP dosyası, geri yüklenebilir bir uygulama yedeği değildir. HTTPS için, sertifika/hesap durumunu korumak istiyorsanız Caddy birimlerini de saklayın.
+Her seferinde depo dışında yeni bir yedekleme hedefi kullanın ve onu hesaplara erişim sağlayan
+materyal olarak koruyun. Örnek yol yalnızca açıklama amaçlıdır; kendi özel yedekleme konumunuzu
+kullanın. Gizli dosyalar, tüm çalışma alanları, anahtarlar, günlükler ve medya dahil dizinin
+tamamını kopyalayın. Yapılandırılmışsa harici kasa ana anahtarını ayrıca yedekleyin. Bir kanıt
+ZIP'i geri yüklenebilir bir uygulama yedeği değildir. HTTPS kullanıyorsanız ve Caddy'nin
+sertifika/hesap durumunu korumanız gerekiyorsa Caddy birimlerini de saklayın.
 
-Kaynak dağıtımı için yeni sürüm dosyalarını edinin ve şu komutu çalıştırın:
+Kaynaktan dağıtımda yeni sürüm dosyalarını edinin ve şunu çalıştırın:
 
 ```sh
 docker compose up -d --build --wait
 ```
 
-Görüntü dağıtımı için `TGWITNESS_IMAGE`'yi istediğiniz sürüme değiştirin, ardından şunu çalıştırın:
+İmaj dağıtımında `TGWITNESS_IMAGE` değerini istenen sürüme değiştirin, ardından şunu çalıştırın:
 
 ```sh
 docker compose --project-directory . -f deploy/compose/compose.image.yaml pull
 docker compose --project-directory . -f deploy/compose/compose.image.yaml up -d --wait
 ```
 
-Yukarıdaki durdurma/kopyalama komutları için de kurulumunuzun Compose dosyalarını kullanın. `.env` öğesini, özel yapılandırmayı ve aynı proje adını koruyun. `down`, adlandırılmış birimleri korur; **`down -v`** ise **bunları siler**. `.venv` öğesini işletim sistemleri veya Python sürümleri arasında kopyalamayın. Yerel güncellemeler için TgWitness'i durdurun, tüm veri dizinini yedekleyin, kaynak dosyaları değiştirin ve başlatmadan önce `python start.py --setup-only` komutunu çalıştırın.
+Yukarıdaki durdurma/kopyalama komutlarında da kurulumunuzun Compose dosyasını (dosyalarını)
+kullanın. `.env` dosyasını, özel yapılandırmayı ve aynı proje adını koruyun. `down` adlandırılmış
+birimleri korur; **`down -v` bunları siler**. `.venv` dizinini işletim sistemleri veya Python
+sürümleri arasında kopyalamayın. Yerel kurulumu güncellemek için TgWitness'i durdurun, veri
+dizininin tamamını yedekleyin, kaynak dosyaları değiştirin ve başlatmadan önce
+`python start.py --setup-only` komutunu çalıştırın.
 
-Güncellemeden sonra panel erişimini, hesap kimliğini, gözlem durumunu ve kapsama alanını kontrol edin. Yeniden başlatmanın ardından TgWitness, kaydedilen Telegram güncelleme konumuna geri döner ve güncelleme sırasında kaçırılan güncellemeleri talep eder. Gelecekteki bir sürümde depolama formatlarında değişiklik olması durumunda, geri alma işlemi için güncelleme öncesi yedeğin kullanılması gerekebilir.
-
-## Otomatik GitHub sürümleri
-
-Bu proje, Actions özelliği etkinleştirilmiş bir GitHub deposuna gönderildikten sonra [sürüm yayınlama iş akışı](../../.github/workflows/release.yml) kullanıma hazır hale gelir. Bu iş akışı, ön sürüm dahil olmak üzere bir GitHub Sürümü yayınlandığında çalışır. Taslaklar ve etiket gönderimleri tek başına paketlerin yayınlanmasına yol açmaz.
-
-1. Paket sürümünü ve değişiklik günlüğünü belirleyin, ardından `v` etiketiyle ve tam `pyproject.toml` sürümüyle (örneğin `v0.9.1`) bir sürüm yayınlayın.
-2. İş akışı, etiketi doğrular ve paylaşılan Windows/Linux/macOS Python, genel/hesap içe aktarma/QR tarayıcı, kaynak paket ve Docker kontrollerini çalıştırır. Ayrıca, Python 3.12 kullanılarak üç işletim sisteminin tümünde yeni yerel kurulum da gerçekleştirilir.
-3. Bu kontroller başarıyla tamamlandıktan sonra, QEMU altında bir ARM64 görüntüsünü hızlı test eder, AMD64/ARM64 görüntülerini `ghcr.io/<lowercase-owner>/<lowercase-repository>:<version>` adresine yayınlar ve kaynak ZIP dosyasını, sağlama toplamını ve Python wheel dosyasını sürüme ekler. Ayrı bir Windows işi, taşınabilir ZIP dosyasını ve sağlama toplamını derler ve ekler.
-4. İlk yayınlamadan sonra, GHCR paket ayarlarını açın ve anonim görüntü çekimleri planlanıyorsa görünürlüğü "**Herkese Açık**" olarak ayarlayın. Yalnızca herkese açık bir kaynak deposu, paketin herkese açık bir konteyner paketi olacağını garanti etmez. Kuruluş politikaları, paket yayınlamasına izin vermelidir. İş akışı `GITHUB_TOKEN` kullanır; depoda kayıt defteri şifresi veya VPS kimlik bilgileri bulunmamalıdır.
-
-Bu yerel hazırlık ile uzaktan iş akışının başarısı henüz kanıtlanmamıştır. ARM64 emülasyonu, yerel donanım veya canlı Telegram yeterliliği değil, bir ön test niteliğindedir. Bu, sürüm paketlemeyi otomatikleştirir; ancak bir sunucuyu başlatmak için hâlâ Compose komutu ve bunun etki alanı/ana bilgisayar ön koşulları gereklidir. Bir sürüm yayınlandığında, mevcut sunucular otomatik olarak güncellenmez veya yeniden başlatılmaz.
+Güncellemeden sonra panel erişimini, hesap kimliğini, gözlem durumunu ve kapsamı kontrol edin.
+Yeniden başlatmanın ardından TgWitness kaydedilmiş Telegram güncelleme konumundan devam eder ve
+güncelleme sırasında kaçırılan güncellemeleri ister. Gelecekteki bir sürüm depolama biçimlerini
+değiştirirse geri dönüş için güncelleme öncesi yedek gerekebilir.
 
 ## Uzak sunucu
 
-Hizmeti loopback'e bağlı tutun ve bir SSH tüneli kullanın ya da HTTPS'yi bir ters proxy'de sonlandırın. Temel Compose dosyası yalnızca yerel kullanım içindir; isteğe bağlı `deploy/compose/compose.https.yaml` katmanı, yapılandırılmış bir etki alanı için Caddy sağlar. Bearer token'ını URL'lerden ve proxy günlüklerinden uzak tutun. Bir ters proxy, istek boyutunu ve bağlantı hızlarını sınırlamalıdır. Düz HTTP'yi İnternet'e maruz bırakmayın.
+Hizmeti loopback'e bağlı tutup bir SSH tüneli kullanın veya HTTPS'yi bir ters proxy'de
+sonlandırın. Temel Compose dosyası yalnızca yerel erişim içindir; isteğe bağlı
+`deploy/compose/compose.https.yaml` katmanı, yapılandırılmış bir alan adı için Caddy sağlar.
+Bearer jetonunu URL'lerin ve proxy loglarının dışında tutun. Ters proxy, istek boyutunu ve bağlantı
+hızlarını sınırlamalıdır. Şifresiz HTTP'yi İnternet'e açmayın.
 
-[deploy/](../../deploy/README.md) dizininde systemd, bir Windows oturum açma görevi, bir macOS kullanıcı ajanı ve Caddy için örnekler sunulmaktadır. Kurulumdan önce bunların yollarını gözden geçirin ve uyarlayın. Bunlar, yerel olarak yürütülen platform yapılandırmaları değil, şablonlar olarak sağlanmıştır. Normal başlatıcı tarafından hiçbir arka plan hizmeti veya görevi kaydedilmez.
+systemd, Windows oturum açma görevi, macOS kullanıcı aracısı (user agent) ve Caddy için örnekler
+[deploy/](../../deploy/README.md) dizinindedir. Kurmadan önce içlerindeki yolları gözden geçirip
+uyarlayın. Bunlar sağlanan şablonlardır; yerelde çalıştırılmış platform yeterlilik testleri
+değildir. Normal başlatıcı hiçbir arka plan hizmeti veya görevi kaydetmez.
 
-Windows'ta, penceresiz `pythonw.exe` başlatma işlemi, başlangıç/sunucu tanılama bilgilerini veri dizini altındaki `logs/server.log` konumuna kaydeder (dosya başına 5 MiB, iki adet dönüşümlü yedek). Konsol başlatmaları, konsol günlüğünü korur. Her iki modda da HTTP erişim günlüğü devre dışıdır. Günlükleri veri diziniyle koruyun ve paylaşmadan önce gözden geçirin.
+Windows'ta penceresiz `pythonw.exe` başlatması, başlatma/sunucu tanılama bilgilerini veri dizini
+altındaki `logs/server.log` dosyasına yazar (dosya başına 5 MiB, döndürülen iki yedek). Konsoldan
+yapılan başlatmalarda loglar konsola yazılmaya devam eder. HTTP erişim loglaması her iki modda da
+kapalıdır. Logları veri diziniyle birlikte koruyun ve paylaşmadan önce gözden geçirin.
 
 ## Yeniden başlatma ve boşluklar
 
-En son istenen gözlem durumu kalıcı olarak saklanır. Gözlem etkin durumdaysa, başlangıç sırasında seçilen kaynaklara yeniden bağlanılmaya ve izlemeye devam edilmeye çalışılır. Manuel duraklatma işlemi bu niyeti siler. Başarısız bir yeniden başlatma kayda alınır ve panelde gösterilir.
+Son istenen gözlem durumu kalıcı olarak saklanır. Gözlem etkinse başlatma sırasında yeniden
+bağlanılmaya ve seçili kaynaklara devam edilmeye çalışılır. Elle duraklatma bu niyeti temizler.
+Başarısız bir yeniden başlatma kaydedilir ve panelde gösterilir.
 
-TgWitness, hesap ve her kanal için Telegram'ın güncelleme konumunu (pts, qts, seq ve tarih) çalışma alanı kasasında saklar ve bir sonraki başlatmada geri yükler. Ardından istemci, işlem durdurulduğu sırada kaçırılan güncellemeleri talep eder ve periyodik yeniden kontrol, kaçırılan mesajları kurtarır ve Telegram'ın artık döndürmediği kaydedilmiş mesajları kaydeder. Sohbetler başlangıçta yeniden yüklenir. Her başlangıçta, önceki günlük başlığı, çevrimdışı sınırı ve devam edildiği güncelleme konumu kaydedilir. İzleyici, her 10 saniyede bir bağlantıyı kontrol eder ve her dakika bir kalp atışı ekler (**Parametreler → Canlılık kaydı her**). Bağlantı kesintileri ve sessiz dönemler, nedenleriyle birlikte kapsama boşlukları olarak kaydedilir. Geçmiş anlık görüntüleri, canlı kayıtların yanında ayrı güncel geçmiş gözlemleri olarak saklanır.
+TgWitness, Telegram'ın hesap ve her kanal için güncelleme konumunu (pts, qts, seq ve date)
+çalışma alanının kasasında saklar ve bir sonraki başlatmada geri yükler. İstemci ardından işlem
+dururken kaçırılan güncellemeleri ister; periyodik yeniden kontrol ise kaçırılan mesajları kurtarır
+ve kaydedilmiş olup Telegram'ın artık döndürmediği mesajları kayda geçirir. Diyaloglar başlatmada
+yeniden yüklenir. Her başlatma; önceki günlük başını (head), çevrimdışı dönemin sınırını ve devam
+edilen güncelleme konumunu kaydeder. İzleyici bağlantıyı 10 saniyede bir denetler ve dakikada bir
+kalp atışı ekler (**Diğer araçlar → Parametreler → Canlılık kaydı her**). Bağlantı kopmaları ve
+sessiz dönemler, nedenleriyle birlikte kapsam boşlukları olarak kaydedilir. Geçmiş anlık
+görüntüleri, canlı kayıtların yanında ayrı "güncel geçmiş" gözlemleri olarak saklanır.
 
-Medya kuyruğu, her çalışma alanının SQLite veritabanında saklanır. Bir mesaj ve ilgili iş, atomik olarak kaydedilir. Yürütülmesi kesintiye uğrayan işler, başlangıçta yeniden deneme amacıyla kurtarılır. Her indirme işlemi için 120 saniyelik bir temel zaman aşımı süresi ile dosya boyutuna göre 256 KiB/s hızda hesaplanan süre ve ek türü başına 1–2.000 MiB'lik bir sınır vardır; zaman aşımı, hız ve yeniden deneme ayarları **Parametreler** bölümünde bulunur. Toplayıcı, boyutu bilinmeyen dosyaları atlar. Duraklatma işlemi, kuyrukta bekleyen işleri korur. Yeniden deneme, orijinal gözlemlenen dosya tanımlayıcısını kullanır; daha sonra düzenlenmiş bir mesajın en son sürümünü asla kullanmaz. Geçici arızalar için sınırlı sayıda yeniden deneme vardır; FloodWait duraklamaları yeniden başlatma sonrasında da korunur. Medya kurtarma, Telegram güncelleme kurtarmasından ayrıdır ve kaybolan dosyaları yeniden oluşturamaz.
+Medya kuyruğu her çalışma alanının SQLite veritabanında saklanır. Mesaj ve ona ait iş atomik
+olarak kaydedilir (commit). Yarıda kesilen çalışan işler başlatmada yeniden denenmek üzere
+kurtarılır. Her indirmenin 120 saniyelik temel zaman aşımı ile buna eklenen ve boyutuna göre
+256 KiB/s hızla hesaplanan bir süresi vardır; ek türü başına sınır 1–2.000 MiB'dir. Zaman aşımı,
+hız ve yeniden deneme ayarları **Diğer araçlar → Parametreler** altındadır. Toplayıcı boyutu
+bilinmeyen dosyaları atlar. Duraklatma kuyruktaki işleri korur. Yeniden deneme, sonradan
+düzenlenmiş bir mesajın en son sürümünü asla kullanmaz; ilk gözlemlenen dosya tanımlayıcısını
+kullanır. Geçici hatalar için yeniden deneme sayısı sınırlıdır; medya FloodWait duraklamaları
+yeniden başlatmadan sonra da sürer. Medya kurtarma Telegram güncelleme kurtarmasından ayrıdır ve
+kaybolmuş dosyaları yeniden oluşturamaz.
 
 ## Yedekleme, geri yükleme ve kapasite
 
-Vault.key, signing.enc, credentials.enc, SQLite veritabanı/WAL dosyaları, medya, token, kontrol noktaları ve tüm profiller/alt dizinler dahil olmak üzere **tüm veri dizin**ini kopyalamadan önce işlemi durdurun. Hedef hizmet durdurulmuşken kopyanın tamamını geri yükleyin. Eksik vault anahtarları veya imza anahtarı uyuşmazlığı, başlatma işleminin başarısız olmasına neden olur; erişimi zorlamak için anahtarları yeniden oluşturmayın.
+vault.key, signing.enc, credentials.enc, SQLite veritabanı/WAL dosyaları, medya, jeton, kontrol
+noktaları ve tüm profiles/ alt dizinleri dahil **veri dizininin tamamını** kopyalamadan önce işlemi
+durdurun. Kopyanın tamamını hedef hizmet dururken geri yükleyin. Eksik kasa anahtarları veya
+imzalama anahtarı uyuşmazlığı başlatmanın başarısız olmasına neden olur; erişimi zorlamak için
+anahtarları yeniden üretmeyin.
 
-Gizli yedeklemeleri şifreli tutun ve erişim kontrolü uygulayın. Kanıt ZIP dosyaları, uygulama yedeklemeleri veya Telegram oturum yedeklemeleri değil, taşınabilir inceleme öğeleridir. Otomatik saklama süresi dolduktan sonra silme işlemi yoktur. Tüm mesajlar, ham meta veriler, medya dosyaları, geçici dışa aktarımlar ve yedeklemeler için disk alanı ayırın.
+Gizli bilgi içeren yedekleri şifreli ve erişim denetimli tutun. Kanıt ZIP'leri taşınabilir inceleme
+çıktılarıdır; uygulama yedeği veya Telegram oturumu yedeği değildir. Saklama süresine bağlı
+otomatik silme yoktur. Tüm mesajlar, ham meta veriler, medya, geçici dışa aktarımlar ve yedekler
+için disk alanı planlayın.
 
-Günlüğün tamamını yüklemek yerine, başlangıç doğrulaması ve akış kayıtlarının dışa aktarılması. Dışa aktarma işlemi, okunan anlık görüntüyü sabitlerken yeni WAL yazma işlemleri devam edebilir; uzun süren dışa aktarma işlemleri WAL sayfalarını tutabilir, bu nedenle disk kapasitesi hâlâ önemlidir. ZIP dosyaları, bağımsız doğrulayıcının varsayılan ayarına uymak için sıkıştırılmamış halde 4 GiB ile sınırlandırılmıştır; **Parametreler → En Büyük İmzalı ZIP seçeneği** bu sınırı artırır ve bu tür arşivler `verify.py --max-gib N` ile doğrulanır. Diğer formatlarda olay sayısı sınırı yoktur. Desteklenen tarayıcılar, yanıt parçalarını kullanıcının seçtiği bir dosyaya akış olarak gönderir. Diğer tarayıcılar en fazla 128 MiB'yi arabelleğe alır ve daha büyük aktarımları kimliği doğrulanmış CLI'ye yönlendirir:
+Başlatma doğrulaması ve dışa aktarma, günlüğün tamamını yüklemek yerine kayıtları akış halinde
+işler. Bir dışa aktarma bir okuma anlık görüntüsünü sabitlerken yeni WAL yazmaları sürebilir; uzun
+süren dışa aktarımlar WAL sayfalarını tutabilir, bu yüzden disk kapasitesi yine önemlidir. ZIP'ler,
+bağımsız doğrulayıcının varsayılanıyla uyumlu olarak sıkıştırılmamış 4 GiB ile sınırlıdır;
+**Diğer araçlar → Parametreler → En büyük imzalı ZIP dosyası** bu sınırı yükseltir ve bu tür
+arşivler `verify.py --max-gib N` ile doğrulanır. Diğer biçimlerde olay sayısı sınırı yoktur.
+Desteklenen tarayıcılar yanıt parçalarını kullanıcının seçtiği bir dosyaya akış halinde yazar.
+Diğer tarayıcılar en fazla 128 MiB arabelleğe alır ve daha büyük aktarımları kimliği doğrulanmış
+CLI'ye yönlendirir:
 
 ~~~sh
 python -m tgwitness.download --token-file data/live/panel-token.txt --out evidence.zip
 ~~~
 
-Başka bir çalışma alanı için **İhracat → Çalışma Alanı Kimliği**'nden `--profile ID`'yi, uzak bir sunucu için `--format zip|jsonl|csv|html`, `--url https://your-server`'yi veya 5 GiB aktarım sınırını değiştirmek için `--max-mib`'yi kullanın. Düz HTTP yalnızca döngü geri dönüşü için izin verilir. Jetonlar başlıklarda iletilir, yönlendirmeler reddedilir, mevcut dosyalar üzerine yazılmaz ve tamamlanmamış indirmeler tamamlanmış dosyalar olarak yayınlanmaz. TGWITNESS_TOKEN, oluşturulan jetonu geçersiz kılarsa, bu etkin değeri içeren ayrı olarak korunan bir dosya kullanın: panel-token.txt dosyası, geçersiz kılma işlemiyle yeniden yazılmaz. Komutun SHA-256 değeri yalnızca bir aktarım sağlama toplamıdır; imzalı ZIP dosyasını bağımsız olarak doğrulayın.
+Başka bir çalışma alanı için **Dışa aktarımlar → Çalışma alanı kimliği** değeriyle `--profile ID`,
+`--format zip|jsonl|csv|html`, uzak sunucu için `--url https://your-server` ya da 5 GiB aktarım
+sınırını değiştirmek için `--max-mib` kullanın. Şifresiz HTTP'ye yalnızca loopback için izin
+verilir. Jetonlar başlıklarda taşınır, yönlendirmeler reddedilir, mevcut dosyaların üzerine
+yazılmaz ve tamamlanmamış indirmeler bitmiş dosya olarak yayımlanmaz. TGWITNESS_TOKEN oluşturulan
+jetonu geçersiz kılıyorsa, bu etkin değeri içeren ve ayrıca korunan bir dosya kullanın:
+geçersiz kılma panel-token.txt dosyasını yeniden yazmaz. Komutun gösterdiği SHA-256 yalnızca bir
+aktarım sağlama toplamıdır; imzalı ZIP'i bağımsız olarak doğrulayın.
 
-Sunucu dışa aktarım dosyaları, her çalışma alanının özel `temporary-exports/` dizininde kalır. Başarılı yanıtlar, dosyalarını temizler. Kesintiye uğrayan dışa aktarımlar, özel örnek kilidi tutulmuş haldeyken bir sonraki çalışma alanı başlatıldığında kaldırılır. Bu dizin, depolama tehdidi/kapasite modelinin bir parçasıdır; şifrelenmiş bir veri birimi kullanın. Üretim ölçeğindeki multi-gigabyte aktarımlar için hedef sisteminizde yine de uygunluk testi gereklidir.
+Panel kuyruktaki/başarısız medyayı, bekleyen en eski medyayı, boş disk alanını, Telegram istek
+duraklamalarını ve erişimi doğrulanmamış kaynakları gösterir. Bu tanılamalar uçtan uca eksiksiz bir
+teslimat izleyicisi değildir. Çalışma alanları tek bir işlemi paylaşır; yoğun trafik üreten bir
+hesap diğerlerini yine de etkileyebilir. Ayrı worker işlemleri, saklama/döndürme, kalıcı güncelleme
+kurtarma ve tam dağıtım yeterlilik doğrulaması hâlâ yapılacak işler arasındadır. Kapsamı
+sınırlandırılmış panel erişimi [erişim ve izinler](../ACCESS.md) belgesinde, bağımsız kontrol
+noktaları ise [tanık kılavuzunda](../WITNESS.md) anlatılır.
 
-Panel, kuyrukta bekleyen/başarısız olan medya öğelerini, en eski bekleyen medya öğelerini, boş disk alanını, Telegram istek duraklamalarını ve erişimi onaylanmamış kaynakları gösterir. Bu tanılama bilgileri, eksiksiz bir uçtan uca teslimat izleme aracı değildir. Çalışma alanları aynı süreci paylaşır; sorunlu bir hesap, diğerlerini yine de etkileyebilir. Ayrı işçi süreçleri, saklama/dönüşüm, kalıcı güncelleme kurtarma, uzaktan kontrol noktası sabitleme, roller ve tam dağıtım yeterliliği konuları hâlâ ele alınmalıdır.
-
-## Bağlantı ve koruma seçenekleri
-
-Bağlantı yolları çalışma alanı başına belirlenir ve yetkilendirme işleminden önce yapılandırılmalıdır. SOCKS5/HTTP CONNECT, sabitlenmiş python-socks bağımlılığını kullanır. MTProxy, Telethon'un deneysel rastgele ara aktarımını kullanır; sahte TLS ee gizli anahtarları desteklenmez. Otomatik doğrudan yedekleme yapılandırılmamıştır. Bu, sistem genelinde geçerli bir ağ yolu değildir.
-
-Yeni kurulumlarda, TGWITNESS_VAULT_KEY_FILE, ayrı olarak korunan rastgele bir ana anahtar dosyasına işaret eder. Bu dosyayı bir konteyner içinde /data dizininin dışında salt okunur olarak bağlayın. Her çalışma alanı ve ana anahtar için public vault.external.json salt meta verilerini ayrı ayrı saklayın. Mevcut yerel kasalar için planlı bir geçiş gereklidir; bu değişkenin ayarlanması, kasaları otomatik olarak dönüştürmez. Mesaj/medya depolama ve dışa aktarımlar uygulama düzeyinde şifrelenmez. Gerektiğinde şifreli birimler ve yeterli miktarda özel geçici depolama alanı kullanın.
-
-Ayrıntılı prosedürler: [bağlantı/güvenlik](../CONNECTION-SECURITY.md) ve [çalışma modları](../OPERATIONS.md).
+Ayrıntılı prosedürler: [bağlantı/güvenlik](../CONNECTION-SECURITY.md) ve
+[çalışma modları](../OPERATIONS.md).

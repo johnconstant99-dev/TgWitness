@@ -191,7 +191,7 @@ computation can be repeated from `events.jsonl` with `tgwitness.metrics.run`.
 | `join_leave_per_month` v1 | Joins, departures and removals or bans per month, one per person, chat, change and day. |
 | `pinned_per_month` v1 | Pin service messages, unpin notices, and pinned messages added or removed between chat-state snapshots, per month. |
 
-**Parameters → Report metrics** selects processors and the number of displayed rows,
+**More tools → Parameters → Report metrics** selects processors and the number of displayed rows,
 including in filtered reports. Daily and monthly tables show recent rows, service-share
 tables rank chats by saved message count. Totals cover every row.
 
