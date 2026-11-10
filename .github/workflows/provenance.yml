@@ -19,17 +19,17 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
-      id-token: write
-      attestations: write
+      id-token: write  # OIDC token for Sigstore signing
+      attestations: write  # store build provenance attestations
     steps:
       - name: Checkout the triggering commit
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
           fetch-depth: 0
       - name: Set up Python
-        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: '3.12'
       - name: Validate the release version
@@ -75,7 +75,7 @@ jobs:
         run: |
           python3 -I tools/sbom_locks.py stage --output build/sbom-locks
       - name: Generate the repository and declared Python dependency SBOM
-        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c  # v0.24.3
         with:
           path: .
           format: spdx-json
@@ -87,7 +87,7 @@ jobs:
         run: python3 -I tools/sbom_locks.py verify --output build/sbom-locks --sbom sbom.spdx.json --archive-dir dist
       - name: Attest the build outputs
         id: provenance
-        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # v4.2.2
         with:
           subject-path: |
             dist/*.zip
@@ -95,7 +95,7 @@ jobs:
             sbom.spdx.json
       - name: Bind the SBOM to the archive and checksum file
         id: sbom
-        uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e
+        uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e  # v4.1.0
         with:
           subject-path: |
             dist/*.zip
@@ -110,7 +110,7 @@ jobs:
           cp "$PROVENANCE_BUNDLE" dist/provenance.sigstore.json
           cp "$SBOM_BUNDLE" dist/sbom.sigstore.json
       - name: Preserve the exact files for publication or manual verification
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: attested-source
           path: dist/*
@@ -124,10 +124,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: write
+      contents: write  # attach provenance files to the release
     steps:
       - name: Download only this run's signed files
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
         with:
           name: attested-source
           path: dist

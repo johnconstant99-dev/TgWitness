@@ -27,19 +27,19 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
-      security-events: write
+      security-events: write  # upload SARIF results
     steps:
       - name: Checkout workflows for static analysis
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
       - name: Use Python with safe module search paths
-        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: '3.12'
       - name: Audit workflows and upload SARIF
         id: zizmor
-        uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd
+        uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd  # v0.8.1
         env:
           PYTHONSAFEPATH: '1'
           PYTHONPATH: ''
@@ -50,7 +50,7 @@ jobs:
           advanced-security: true
       - name: Make findings available outside the Security dashboard
         if: ${{ !cancelled() && steps.zizmor.outputs.output-file != '' }}
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: workflow-audit-sarif
           path: ${{ steps.zizmor.outputs.output-file }}
