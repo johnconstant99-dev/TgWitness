@@ -8528,5 +8528,10 @@
   "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "Telegram은 세션이 24시간이 지난 뒤에만 이를 허용합니다. TgWitness는 나중에 다시 시도하고 설정한 2단계 비밀번호를 보여 줍니다.",
   "Set automatically; open Sessions of this account to see it once.": "자동으로 설정됨. 한 번만 확인하려면 이 계정의 세션을 여세요.",
   "Automatic only-session changed": "자동 단독 세션 설정 변경",
-  "Only-session attempt postponed": "단독 세션 시도 연기"
+  "Only-session attempt postponed": "단독 세션 시도 연기",
+  "Download partial export": "부분 내보내기 다운로드",
+  "Resume export": "내보내기 재개",
+  "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}: 중단 전에 메시지 {messages}개 저장됨, ID {low}–{high}.",
+  "resumed": "재개됨",
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "중단된 내보내기에서 저장된 메시지를 삭제하고 이 채팅을 최신 메시지부터 다시 읽을까요?"
 }

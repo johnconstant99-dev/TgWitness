@@ -94,8 +94,9 @@ advance the workspace head without invalidating a source cursor. Older runs reco
 their unsigned cursor from signed observations before continuing. Disposable routing
 and admin-log deduplication indexes are rebuilt from the journal.
 
-Media workers run concurrently with text acquisition while network calls remain
-serialized per account. Files stream to temporary paths, are hashed incrementally and
+Media workers run concurrently with text acquisition. Network calls of one account
+are serialized except file reads, of which up to three run in parallel; each worker
+downloads up to three files at once. Files stream to temporary paths, are hashed incrementally and
 atomically moved to content-addressed storage. Completed, skipped, retrying and failed
 attachments append new events. Signed message records are never rewritten to add a
 hash. A refreshed file reference must still describe the original attachment.

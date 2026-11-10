@@ -53,6 +53,18 @@ _READ_RECEIPTS = (functions.messages.ReadHistoryRequest, functions.messages.Read
                   functions.messages.ReadReactionsRequest, functions.messages.ReadEncryptedHistoryRequest,
                   functions.stories.ReadStoriesRequest)
 _OWN_UPDATES = (types.messages.AffectedMessages, types.messages.AffectedHistory, types.messages.AffectedFoundMessages)
+_FILE_READS = (functions.upload.GetFileRequest, functions.upload.GetCdnFileRequest)
+FILE_REQUESTS = 3
+
+
+def file_request(request):
+    for _ in range(8):
+        if isinstance(request, _FILE_READS):
+            return True
+        request = getattr(request, "query", None)
+        if not isinstance(request, TLRequest):
+            return False
+    return False
 
 
 def method_name(request):
@@ -173,9 +185,13 @@ class WitnessClient(TelegramClient):
             self._rpc_lock = asyncio.Lock()
             self._rpc_owner = None
             self._rpc_wait_until = 0
+            self._file_slots = asyncio.Semaphore(FILE_REQUESTS)
         current = asyncio.current_task()
         if self._rpc_owner is current:
             return await self._serial_call(sender, request, ordered, flood_sleep_threshold)
+        if not utils.is_list_like(request) and file_request(request):
+            async with self._file_slots:
+                return await self._serial_call(sender, request, ordered, flood_sleep_threshold)
         async with self._rpc_lock:
             self._rpc_owner = current
             try:

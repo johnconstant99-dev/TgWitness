@@ -8645,5 +8645,10 @@
   "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "Telegram дозволяє це лише через 24 години після входу сесії. TgWitness повторить спробу пізніше та покаже встановлений ним пароль двоступеневої аутентифікації.",
   "Set automatically; open Sessions of this account to see it once.": "Встановлено автоматично; відкрийте «Сесії цього облікового запису», щоб побачити його один раз.",
   "Automatic only-session changed": "Автоматичний режим єдиної сесії змінено",
-  "Only-session attempt postponed": "Спробу залишити лише цю сесію відкладено"
+  "Only-session attempt postponed": "Спробу залишити лише цю сесію відкладено",
+  "Download partial export": "Завантажити частковий експорт",
+  "Resume export": "Продовжити експорт",
+  "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}: до зупинки збережено повідомлень — {messages}, номери {low}–{high}.",
+  "resumed": "продовжено",
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "Видалити повідомлення, збережені зупиненим експортом, і прочитати цей чат знову, починаючи з найновішого повідомлення?"
 }

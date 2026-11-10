@@ -8528,5 +8528,10 @@
   "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "Telegram 只有在会话满 24 小时后才允许此操作。TgWitness 稍后会重试，并显示它设置的两步验证密码。",
   "Set automatically; open Sessions of this account to see it once.": "已自动设置；打开该账户的会话可查看一次。",
   "Automatic only-session changed": "自动唯一会话设置已更改",
-  "Only-session attempt postponed": "唯一会话尝试已推迟"
+  "Only-session attempt postponed": "唯一会话尝试已推迟",
+  "Download partial export": "下载部分导出",
+  "Resume export": "继续导出",
+  "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}：停止前已保存 {messages} 条消息，ID {low}–{high}。",
+  "resumed": "已续传",
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "删除已停止的导出所保存的消息，并从最新消息开始重新读取此聊天？"
 }

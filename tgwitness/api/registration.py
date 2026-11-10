@@ -633,6 +633,9 @@ def register(app, ctx):
     router.post("/api/chat-export/start", dependencies=[Depends(authenticate)])(
         routes_export.chat_export_start
     )
+    router.post("/api/chat-export/start-over", dependencies=[Depends(authenticate)])(
+        routes_export.chat_export_start_over
+    )
     router.get("/api/report-guidance", dependencies=[Depends(authenticate)])(
         routes_export.report_guidance_catalog
     )

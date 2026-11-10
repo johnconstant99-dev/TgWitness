@@ -8528,5 +8528,10 @@
   "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "Telegram hanya mengizinkannya setelah sesi berusia 24 jam. TgWitness mencoba lagi nanti dan menampilkan kata sandi dua langkah yang disetelnya.",
   "Set automatically; open Sessions of this account to see it once.": "Disetel otomatis; buka Sesi akun ini untuk melihatnya sekali.",
   "Automatic only-session changed": "Pengaturan sesi tunggal otomatis diubah",
-  "Only-session attempt postponed": "Upaya sesi tunggal ditunda"
+  "Only-session attempt postponed": "Upaya sesi tunggal ditunda",
+  "Download partial export": "Unduh ekspor sebagian",
+  "Resume export": "Lanjutkan ekspor",
+  "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}: {messages} pesan disimpan sebelum berhenti, ID {low}–{high}.",
+  "resumed": "dilanjutkan",
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "Hapus pesan yang disimpan dari ekspor yang terhenti dan baca ulang obrolan ini mulai dari pesan terbaru?"
 }

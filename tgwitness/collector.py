@@ -65,6 +65,7 @@ LOG = logging.getLogger("tgwitness.collector")
 
 STORAGE_RECHECK_SECONDS = 30
 SMALL_MEDIA_BYTES = 2 * 1024**2
+MEDIA_DOWNLOADS = 3
 
 
 class AuthorizationRequired(ValueError):
@@ -117,8 +118,8 @@ def sessions_snapshot(authorizations):
                 "app_version": a.app_version, "api_id": a.api_id, "official_app": bool(a.official_app),
                 "country": a.country, "region": a.region, "created_at": date_string(a.date_created)}
     current = next((a for a in authorizations if a.current), None)
-    return {"current": {**entry(current), "ip_sha256": hashlib.sha256((current.ip or "").encode()).hexdigest()}
-            if current else None,
+    return {"current": {**entry(current), **({"ip_sha256": hashlib.sha256(current.ip.encode()).hexdigest()}
+                                              if current.ip else {})} if current else None,
             "others": sorted((entry(a) for a in authorizations if not a.current), key=lambda e: e["hash"])}
 
 
@@ -603,6 +604,8 @@ class Collector:
         self.buffer_overflow = False
         self.buffer_limit = tuning.BY_KEY["startup_buffer"].default
         self.storage_low = False
+        self.download_reserved = 0
+        self.export_files_lock = asyncio.Lock()
         self._forensics_clients = weakref.WeakSet()
         self.history = History(self)
 
@@ -3700,7 +3703,7 @@ class Collector:
                 "pages": pages, "estimate_seconds": round(pages * per_page),
                 "request_seconds": round(request_seconds, 3)}
 
-    async def start_export(self, chat_id, report_options=None, files=None):
+    async def start_export(self, chat_id, report_options=None, files=None, fresh=False):
 
         export_id = secrets.token_urlsafe(18)
         if not self.reserve_export(export_id):
@@ -3713,6 +3716,8 @@ class Collector:
                 total = (await self.client.get_messages(entity, limit=0)).total
             except Exception:
                 total = None
+            if fresh:
+                await complete_in_thread(self.discard_partial, chat_id)
             record = {"id": export_id, "chat_id": chat_id, "title": info.get("title"),
                       "phase": "running", "captured": 0, "total": total, "eta_seconds": None,
                       "ready": False, "error": None, "started_at": utcnow(), "files": files}
@@ -3728,6 +3733,10 @@ class Collector:
             raise
         await asyncio.sleep(0)
         return dict(record)
+
+    def discard_partial(self, chat_id):
+        chat_export.PartialExport(self.store, self.vault, chat_id,
+                                  (self.store.get_setting("account", None) or {}).get("id")).discard()
 
     async def run_export(self, entity, info, record, report_options=None):
         client = self.client
@@ -4009,11 +4018,12 @@ class Collector:
         if size is None or size > limit:
             return {"file_status": "above_limit" if size else "unknown_size", "file_kind": kind,
                     **({"file_size": size} if size else {})}
-        reused = await complete_in_thread(reuse_into, self.store, directory, downloadable_media(message), size)
+        async with self.export_files_lock:
+            reused = await complete_in_thread(reuse_into, self.store, directory, downloadable_media(message), size)
         if reused:
             return {"file": "media/" + reused["sha256"], "file_sha256": reused["sha256"], "file_size": size,
                     "file_kind": kind, "file_reused": reused["source"]}
-        if shutil.disk_usage(directory).free < size + self.param("media_min_free_mb") * 1024**2:
+        if shutil.disk_usage(directory).free - self.download_reserved < size + self.param("media_min_free_mb") * 1024**2:
             raise ValueError("Not enough free disk space for the attachments of this export. Free space or turn "
                              "attachment downloads off under Sources → Recording.")
 
@@ -4022,6 +4032,7 @@ class Collector:
                 raise ValueError("above_limit")
         timeout = self.param("media_timeout_seconds") + size // (self.param("media_min_speed_kbps") * 1024)
         temp = directory / ("part-" + str(message.id))
+        self.download_reserved += size
         try:
             for attempt in range(3):
                 try:
@@ -4044,7 +4055,8 @@ class Collector:
                             raise ValueError("existing_content_addressed_file_is_corrupt")
                     else:
                         temp.replace(destination)
-                    await complete_in_thread(remember_file, directory, media, digest, written)
+                    async with self.export_files_lock:
+                        await complete_in_thread(remember_file, directory, media, digest, written)
                     return {"file": "media/" + digest, "file_sha256": digest, "file_size": written, "file_kind": kind}
                 except FLOOD_ERRORS as exc:
                     if attempt == 2:
@@ -4059,6 +4071,7 @@ class Collector:
                         raise
                     return {"file_status": "above_limit", "file_kind": kind, "file_size": size}
         finally:
+            self.download_reserved -= size
             temp.unlink(missing_ok=True)
 
     async def stream_history(self, entity, scratch, record, media_dir=None, files=None, partial=None):
@@ -4114,8 +4127,19 @@ class Collector:
                     entry = json.loads(line)
                     if entry.get("id") in wanted:
                         expected[entry["id"]] = hashlib.sha256(canonical(message_details.stable(entry))).digest()
+        slots = asyncio.Semaphore(MEDIA_DOWNLOADS)
+
+        def advance():
+            record["files_done"] += 1
+            elapsed = time.monotonic() - started
+            record["eta_seconds"] = round((len(ids) - record["files_done"]) * elapsed / record["files_done"])
+
+        async def attach(message):
+            async with slots:
+                found[message.id] = await self.export_attachment(message, media_dir, files)
+            advance()
         for low in range(0, len(ids), 100):
-            batch = ids[low:low + 100]
+            batch, pending = ids[low:low + 100], []
             for message in await self.client.get_messages(entity, ids=batch):
                 if message is None or isinstance(message, types.MessageEmpty):
                     continue
@@ -4125,11 +4149,17 @@ class Collector:
                         or hashlib.sha256(canonical(message_details.stable(message_record(message)))).digest()
                         != expected.get(message.id)):
                     found[message.id] = {"file_status": "message_changed_or_unavailable_at_media_read"}
+                    advance()
                 else:
-                    found[message.id] = await self.export_attachment(message, media_dir, files)
-                record["files_done"] += 1
-                elapsed = time.monotonic() - started
-                record["eta_seconds"] = round((len(ids) - record["files_done"]) * elapsed / record["files_done"])
+                    found[message.id] = None
+                    pending.append(asyncio.create_task(attach(message)))
+            try:
+                await asyncio.gather(*pending)
+            except BaseException:
+                for task in pending:
+                    task.cancel()
+                await asyncio.gather(*pending, return_exceptions=True)
+                raise
         for missing in set(ids) - set(found):
             found[missing] = {"file_status": "message_unavailable_at_file_read"}
         merged = scratch.with_suffix(".files")
@@ -4295,64 +4325,90 @@ class Collector:
                               client_for_job=None):
         media_root = self.store.root / "media"
         media_root.mkdir(exist_ok=True)
-        while self.running or owner and self.export_claim == owner:
-            deferred = None
-            if lane != "ephemeral" and not owner and capture_settings(self.store)["messages_first"]:
-                state = self.history.status()
-                if state["phase"] in ("running", "paused"):
-                    deferred = state["id"]
-            if not capture_settings(self.store)["download_media"]:
-                if owner:
-                    return
-                self.media_wakeup.clear()
-                try:
-                    await asyncio.wait_for(self.media_wakeup.wait(), 1)
-                except TimeoutError:
-                    pass
-                continue
-            if time.time() < self.store.get_setting("rpc_backoff_until", 0):
-                await asyncio.sleep(1)
-                continue
-            free, threshold = shutil.disk_usage(media_root).free, self.param("media_min_free_mb") * 1024**2
-            if free < threshold:
+        slots, active, stopped = asyncio.Semaphore(MEDIA_DOWNLOADS), set(), asyncio.Event()
 
-                if not self.storage_low:
-                    self.storage_low = True
-                    self.store.append("storage.low", {"free_bytes": free, "threshold_bytes": threshold,
-                                                      "media_jobs": self.store.media_stats()})
-                await asyncio.sleep(STORAGE_RECHECK_SECONDS)
-                continue
-            if self.storage_low:
-                self.storage_low = False
-                self.store.append("storage.ok", {"free_bytes": free, "media_jobs": self.store.media_stats()})
-            account = self.store.get_setting("account", {}) or {}
-            limits = lane_limits(lane)
-            capture = capture_settings(self.store)
-            job = self.store.claim_media(account.get("id", 0), history_run=history_run,
-                                         allow_takeout=client_for_job is not None, exclude_history_run=deferred,
-                                         **limits) if capture["download_media"] else None
-            if not job:
-                if owner:
-                    retry_at = self.store.next_history_media_attempt(account.get("id", 0), history_run, **limits)
-                    if retry_at is not None:
-                        await asyncio.sleep(max(.05, min(1, retry_at - time.time())))
-                        continue
-                    if producer_done is not None and not producer_done.is_set():
-                        self.media_wakeup.clear()
-                        try:
-                            await asyncio.wait_for(self.media_wakeup.wait(), 1)
-                        except TimeoutError:
-                            pass
-                        continue
-                    return
-                self.media_wakeup.clear()
-                try:
-                    await asyncio.wait_for(self.media_wakeup.wait(), 1)
-                except TimeoutError:
-                    pass
-                continue
-            if await self.process_media_job(job, capture, media_root, client_for_job):
-                return
+        async def download(job, capture):
+            try:
+                if await self.process_media_job(job, capture, media_root, client_for_job):
+                    stopped.set()
+            finally:
+                slots.release()
+        try:
+            while (self.running or owner and self.export_claim == owner) and not stopped.is_set():
+                for task in [task for task in active if task.done()]:
+                    active.discard(task)
+                    task.result()
+                if slots.locked():
+                    await asyncio.wait(active, return_when=asyncio.FIRST_COMPLETED)
+                    continue
+                deferred = None
+                if lane != "ephemeral" and not owner and capture_settings(self.store)["messages_first"]:
+                    state = self.history.status()
+                    if state["phase"] in ("running", "paused"):
+                        deferred = state["id"]
+                if not capture_settings(self.store)["download_media"]:
+                    if owner:
+                        break
+                    self.media_wakeup.clear()
+                    try:
+                        await asyncio.wait_for(self.media_wakeup.wait(), 1)
+                    except TimeoutError:
+                        pass
+                    continue
+                if time.time() < self.store.get_setting("rpc_backoff_until", 0):
+                    await asyncio.sleep(1)
+                    continue
+                free, threshold = shutil.disk_usage(media_root).free, self.param("media_min_free_mb") * 1024**2
+                if free < threshold:
+
+                    if not self.storage_low:
+                        self.storage_low = True
+                        self.store.append("storage.low", {"free_bytes": free, "threshold_bytes": threshold,
+                                                          "media_jobs": self.store.media_stats()})
+                    await asyncio.sleep(STORAGE_RECHECK_SECONDS)
+                    continue
+                if self.storage_low:
+                    self.storage_low = False
+                    self.store.append("storage.ok", {"free_bytes": free, "media_jobs": self.store.media_stats()})
+                account = self.store.get_setting("account", {}) or {}
+                limits = lane_limits(lane)
+                capture = capture_settings(self.store)
+                job = self.store.claim_media(account.get("id", 0), history_run=history_run,
+                                             allow_takeout=client_for_job is not None, exclude_history_run=deferred,
+                                             **limits) if capture["download_media"] else None
+                if not job:
+                    if owner:
+                        retry_at = self.store.next_history_media_attempt(account.get("id", 0), history_run, **limits)
+                        if retry_at is not None:
+                            await asyncio.sleep(max(.05, min(1, retry_at - time.time())))
+                            continue
+                        if producer_done is not None and not producer_done.is_set():
+                            self.media_wakeup.clear()
+                            try:
+                                await asyncio.wait_for(self.media_wakeup.wait(), 1)
+                            except TimeoutError:
+                                pass
+                            continue
+                        if active:
+                            await asyncio.wait(active, return_when=asyncio.FIRST_COMPLETED)
+                            continue
+                        break
+                    self.media_wakeup.clear()
+                    try:
+                        await asyncio.wait_for(self.media_wakeup.wait(), 1)
+                    except TimeoutError:
+                        pass
+                    continue
+                await slots.acquire()
+                active.add(asyncio.create_task(download(job, capture)))
+            for result in await asyncio.gather(*active, return_exceptions=True):
+                if isinstance(result, BaseException):
+                    raise result
+        except BaseException:
+            for task in active:
+                task.cancel()
+            await asyncio.gather(*active, return_exceptions=True)
+            raise
 
     async def process_media_job(self, job, capture, media_root, client_for_job=None):
         temp = media_root / ("pending-" + str(job["message_event"]))
@@ -4405,8 +4461,16 @@ class Collector:
         job = attempt.job
         if size is None or size > job["max_bytes"]:
             raise ValueError("unknown_size_or_above_limit")
-        if shutil.disk_usage(media_root).free < size + 64 * 1024**2:
+        if shutil.disk_usage(media_root).free - self.download_reserved < size + 64 * 1024**2:
             raise OSError("insufficient_free_space")
+        self.download_reserved += size
+        try:
+            await self.fetch_media(attempt, message, size, media_root, temp, client)
+        finally:
+            self.download_reserved -= size
+
+    async def fetch_media(self, attempt, message, size, media_root, temp, client):
+        job = attempt.job
 
         async def progress(current, total):
             if max(current, total) > job["max_bytes"]:

@@ -8528,5 +8528,10 @@
   "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "Telegram อนุญาตให้ทำได้หลังจากเซสชันมีอายุครบ 24 ชั่วโมงเท่านั้น TgWitness จะลองใหม่ภายหลังและแสดงรหัสผ่านสองขั้นตอนที่ตั้งไว้",
   "Set automatically; open Sessions of this account to see it once.": "ตั้งค่าโดยอัตโนมัติ เปิดเซสชันของบัญชีนี้เพื่อดูเพียงครั้งเดียว",
   "Automatic only-session changed": "การตั้งค่าเซสชันเดียวอัตโนมัติเปลี่ยนแปลง",
-  "Only-session attempt postponed": "เลื่อนการพยายามให้เหลือเซสชันเดียว"
+  "Only-session attempt postponed": "เลื่อนการพยายามให้เหลือเซสชันเดียว",
+  "Download partial export": "ดาวน์โหลดการส่งออกบางส่วน",
+  "Resume export": "ส่งออกต่อ",
+  "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}: บันทึก {messages} ข้อความก่อนหยุด, ID {low}–{high}",
+  "resumed": "ทำต่อแล้ว",
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "ลบข้อความที่บันทึกจากการส่งออกที่หยุดไว้ แล้วอ่านแชทนี้ใหม่ตั้งแต่ข้อความล่าสุดหรือไม่"
 }

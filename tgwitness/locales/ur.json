@@ -8567,5 +8567,10 @@
   "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "ٹیلیگرام اس کی اجازت سیشن کے 24 گھنٹے پرانا ہونے کے بعد ہی دیتا ہے۔ TgWitness بعد میں دوبارہ کوشش کرتا ہے اور مقرر کردہ دو مرحلوں والا پاس ورڈ دکھاتا ہے۔",
   "Set automatically; open Sessions of this account to see it once.": "خودکار طور پر مقرر ہوا؛ ایک بار دیکھنے کے لیے اس اکاؤنٹ کے سیشنز کھولیں۔",
   "Automatic only-session changed": "خودکار واحد سیشن کی ترتیب تبدیل ہوئی",
-  "Only-session attempt postponed": "واحد سیشن کی کوشش مؤخر کر دی گئی"
+  "Only-session attempt postponed": "واحد سیشن کی کوشش مؤخر کر دی گئی",
+  "Download partial export": "جزوی ایکسپورٹ ڈاؤن لوڈ کریں",
+  "Resume export": "ایکسپورٹ جاری رکھیں",
+  "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}: رکنے سے پہلے {messages} پیغامات محفوظ ہوئے، شناختی نمبر {low}–{high}۔",
+  "resumed": "دوبارہ شروع شدہ",
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "رکی ہوئی ایکسپورٹ سے محفوظ شدہ پیغامات حذف کر کے اس چیٹ کو تازہ ترین پیغام سے دوبارہ پڑھیں؟"
 }

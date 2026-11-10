@@ -200,12 +200,23 @@ async def disclosure_download(
 async def chat_export_start(
     request: Request, body: ChatExport, *, ctx=Depends(current_context)
 ):
+    return await begin_chat_export(ctx, request, body, False)
+
+
+async def chat_export_start_over(
+    request: Request, body: ChatExport, *, ctx=Depends(current_context)
+):
+    return await begin_chat_export(ctx, request, body, True)
+
+
+async def begin_chat_export(ctx, request, body, fresh):
     ctx.require_chat(request, body.chat_id)
     record = await ctx.operation(
         ctx.app.state.collector.start_export,
         body.chat_id,
         report_options(ctx.app.state.store, request, body.language),
         body.files,
+        fresh,
     )
     ctx.chat_export_owners.clear()
     ctx.chat_export_owners[record["id"]] = request.state.principal.owner

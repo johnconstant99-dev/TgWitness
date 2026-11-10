@@ -442,7 +442,15 @@ class HistoryWriter:
         return self
 
     def __exit__(self, *failure):
-        self.stream.close()
+        try:
+            if failure[0] is None and self.partial.carried and self.count > self.checked:
+                self.stream.flush()
+                os.fsync(self.stream.fileno())
+                self.partial.save(self.partial.file, self.size, self.digest.hexdigest(), self.count,
+                                  json.loads(self.first)["id"], json.loads(self.last)["id"])
+                self.checked = self.count
+        finally:
+            self.stream.close()
 
     def write(self, text):
         data = text.encode("utf-8")

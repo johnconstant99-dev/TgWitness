@@ -2007,6 +2007,7 @@ function resetChatExportTools(){
   $("export-chat-tools").open=false;
   $("chat-export-progress").textContent="";
   show("chat-export-download",false);show("chat-export-cancel",false);
+  show("chat-export-partial-download",false);show("chat-export-partial",false);state.exportPartial=null;
 }
 function renderChatExportTools(){
   const s=state.status;if(!s||state.view!=="evidence")return;
@@ -2079,18 +2080,29 @@ $("snapshot-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submi
 });});
 let exportPoll=null;
 function stopExportPoll(){if(exportPoll){clearTimeout(exportPoll);exportPoll=null;}}
+function renderExportPartial(x){
+  state.exportPartial=x;show("chat-export-partial",!!x&&may("export"));
+  if(!x)return;
+  const s=state.status;
+  $("chat-export-partial-info").textContent=tr("{title}: {messages} messages saved before the stop, IDs {low}–{high}.",
+    {title:x.title||tr("chat"),messages:x.partial.messages.toLocaleString(),low:x.partial.low,high:x.partial.high});
+  for(const id of ["chat-export-resume","chat-export-restart"])$(id).disabled=!s||s.demo||!s.collector.has_session;
+}
 function renderExportState(x){
   const prog=$("chat-export-progress");
   const running=!!x&&x.phase==="running",done=!!x&&x.phase==="done"&&x.ready;
-  show("chat-export-cancel",running);show("chat-export-download",done);
+  const stopped=!!x&&["failed","cancelled"].includes(x.phase);
+  show("chat-export-cancel",running);show("chat-export-download",done);show("chat-export-partial-download",stopped&&!!x.ready);
+  renderExportPartial(stopped&&x.partial?.retained?x:null);
   const percent=running&&x.total?Math.min(99,Math.floor((x.captured||0)*100/x.total)):null;
   if(!x||x.phase==="unknown"){prog.textContent="";return;}
-  const counts={title:x.title||tr("chat"),captured:(x.captured||0).toLocaleString(),total:(x.total||0).toLocaleString(),percent};
+  const resumed=x.resumed?" ("+tr("resumed")+")":"";
+  const counts={title:(x.title||tr("chat"))+resumed,captured:(x.captured||0).toLocaleString(),total:(x.total||0).toLocaleString(),percent};
   if(running&&x.stage==="files")prog.textContent=tr("Exporting {title}: ",counts)+tr("{captured} messages saved; files: {done}/{total}",{captured:counts.captured,done:(x.files_done||0).toLocaleString(),total:(x.files_total||0).toLocaleString()})+
     (x.eta_seconds!==null&&x.eta_seconds!==undefined?" · "+tr("{time} left",{time:fmtDuration(x.eta_seconds)}):"")+"…";
   else if(running)prog.textContent=tr("Exporting {title}: ",counts)+tr(x.total?"{captured} of {total} messages ({percent}%)":"{captured} messages read",counts)+
     (x.eta_seconds!==null&&x.eta_seconds!==undefined?" · "+tr("{time} left",{time:fmtDuration(x.eta_seconds)}):"")+"…";
-  else if(x.phase==="done")prog.textContent=tr("Done: {captured} messages. Download the signed bundle.",counts);
+  else if(x.phase==="done")prog.textContent=tr("Done: {captured} messages. Download the signed bundle.",counts)+resumed;
   else if(x.phase==="failed")prog.textContent=tr("Export failed")+(x.error?" ("+x.error+")":"")+". "+tr("Try again.");
   else if(x.phase==="cancelled")prog.textContent=tr("Export cancelled.");
 }
@@ -2104,7 +2116,7 @@ async function pollExport(id){
     if(!current())return;
     renderExportState(x);
     if(x.phase==="running")exportPoll=setTimeout(()=>{if(current())pollExport(id);},1500);
-    else{state.exportId=x.phase==="done"?id:null;state.exportName=x.filename;}
+    else{state.exportId=x.ready?id:null;state.exportName=x.filename;}
   }catch(e){if(e instanceof StaleView||!current())return;renderExportState({phase:"failed",error:e.message});state.exportId=null;}
 }
 function syncExport(s){
@@ -2113,7 +2125,7 @@ function syncExport(s){
   if(state.exportId||exportPoll)return;
   if(!x){renderExportState(null);return;}
   if(x.phase==="running"){state.exportId=x.id;renderExportState(x);pollExport(x.id);}
-  else if(x.phase==="done"){state.exportId=x.id;state.exportName=x.filename;renderExportState(x);}
+  else if(x.ready){state.exportId=x.id;state.exportName=x.filename;renderExportState(x);}
   else renderExportState(x);
 }
 $("chat-export-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitter,async()=>{
@@ -2125,20 +2137,36 @@ $("chat-export-form").addEventListener("submit",e=>{e.preventDefault();busy(e.su
   toast(tr("Full chat export started. Large chats can take a while."));pollExport(x.id);
 });});
 $("chat-export-cancel").addEventListener("click",e=>busy(e.currentTarget,async()=>{
-  if(!state.exportId)return;
-  await json("chat-export/"+encodeURIComponent(state.exportId)+"/cancel",{});
-  stopExportPoll();state.exportId=null;renderExportState({phase:"cancelled"});
+  const id=state.exportId;if(!id)return;
+  await json("chat-export/"+encodeURIComponent(id)+"/cancel",{});
+  stopExportPoll();state.exportId=null;
+  const x=await json("chat-export/"+encodeURIComponent(id)).catch(error=>{if(error instanceof StaleView)throw error;return {phase:"cancelled"};});
+  const known=!["unknown","running"].includes(x.phase);
+  if(known&&x.ready){state.exportId=id;state.exportName=x.filename;}
+  renderExportState(known?x:{phase:"cancelled"});
 }));
+async function continueExport(fresh){
+  const x=state.exportPartial;if(!x)return;
+  if(fresh&&!(await askConfirm(tr("Delete the messages saved from the stopped export and read this chat again from the newest message?"),{danger:true,confirmText:tr("Start over")})))return;
+  if(state.exportPartial!==x)return;
+  const language=exportLanguage();
+  const r=await json(fresh?"chat-export/start-over":"chat-export/start",{chat_id:x.chat_id,...(language?{language}:{}),...(x.files?{files:x.files}:{})});
+  state.exportId=r.id;renderExportState(r);
+  toast(tr("Full chat export started. Large chats can take a while."));pollExport(r.id);
+}
+$("chat-export-resume").addEventListener("click",e=>busy(e.currentTarget,()=>continueExport(false)));
+$("chat-export-restart").addEventListener("click",e=>busy(e.currentTarget,()=>continueExport(true)));
 function saveExport(button){return busy(button,async()=>{
   if(!state.exportId)throw new Error(tr("No finished export to download."));
   const revision=state.workspaceRevision;
   if(await download("chat-export/"+encodeURIComponent(state.exportId)+"/download",state.exportName,true)===false)return;
   if(revision!==state.workspaceRevision)return;
   toast(tr("Signed chat export downloaded."));
-  show("chat-export-download",false);state.exportId=null;
+  show("chat-export-download",false);show("chat-export-partial-download",false);state.exportId=null;
   $("chat-export-progress").textContent=tr("Downloaded. Export another chat if needed.");
 });}
 $("chat-export-download").addEventListener("click",e=>saveExport(e.currentTarget));
+$("chat-export-partial-download").addEventListener("click",e=>saveExport(e.currentTarget));
 const accountExportKinds=["private","bot","group","supergroup","channel"];
 const accountExportMedia=["photo","video","video_message","voice","audio","document","sticker","animation"];
 const accountExportFallback={purpose:"",chat_kinds:accountExportKinds,from_utc:null,to_utc:null,chat_ids:[],

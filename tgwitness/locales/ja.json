@@ -8528,5 +8528,10 @@
   "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "Telegram はセッションの作成から 24 時間後にのみこれを許可します。TgWitness は後で再試行し、設定した 2 段階認証パスワードを表示します。",
   "Set automatically; open Sessions of this account to see it once.": "自動的に設定されました。一度だけ確認するには、このアカウントのセッションを開いてください。",
   "Automatic only-session changed": "自動の唯一セッション設定を変更",
-  "Only-session attempt postponed": "唯一セッションの試行を延期"
+  "Only-session attempt postponed": "唯一セッションの試行を延期",
+  "Download partial export": "部分エクスポートをダウンロード",
+  "Resume export": "エクスポートを再開",
+  "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}：停止前に {messages} 件のメッセージを保存済み、ID {low}–{high}。",
+  "resumed": "再開済み",
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "停止したエクスポートで保存したメッセージを削除し、このチャットを最新のメッセージから読み直しますか？"
 }

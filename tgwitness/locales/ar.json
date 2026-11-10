@@ -8723,5 +8723,10 @@
   "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "لا يسمح تيليجرام بذلك إلا بعد مرور 24 ساعة على الجلسة. يعيد TgWitness المحاولة لاحقًا ويعرض كلمة مرور التحقق بخطوتين التي يحددها.",
   "Set automatically; open Sessions of this account to see it once.": "حُددت تلقائيًا؛ افتح جلسات هذا الحساب لرؤيتها مرة واحدة.",
   "Automatic only-session changed": "تغيّر إعداد الجلسة الوحيدة التلقائي",
-  "Only-session attempt postponed": "تأجلت محاولة الجلسة الوحيدة"
+  "Only-session attempt postponed": "تأجلت محاولة الجلسة الوحيدة",
+  "Download partial export": "تنزيل التصدير الجزئي",
+  "Resume export": "استئناف التصدير",
+  "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}: حُفظت {messages} رسالة قبل التوقف، المعرّفات {low}–{high}.",
+  "resumed": "مُستأنَف",
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "هل تريد حذف الرسائل المحفوظة من التصدير المتوقف وقراءة هذه المحادثة مجددًا بدءًا من أحدث رسالة؟"
 }

@@ -8567,5 +8567,10 @@
   "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "Telegram buna yalnızca oturum 24 saatlik olduktan sonra izin verir. TgWitness daha sonra yeniden dener ve belirlediği iki aşamalı şifreyi gösterir.",
   "Set automatically; open Sessions of this account to see it once.": "Otomatik olarak belirlendi; bir kez görmek için bu hesabın oturumlarını açın.",
   "Automatic only-session changed": "Otomatik tek oturum ayarı değişti",
-  "Only-session attempt postponed": "Tek oturum denemesi ertelendi"
+  "Only-session attempt postponed": "Tek oturum denemesi ertelendi",
+  "Download partial export": "Kısmi dışa aktarmayı indir",
+  "Resume export": "Dışa aktarmaya devam et",
+  "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}: durmadan önce {messages} mesaj kaydedildi, kimlikler {low}–{high}.",
+  "resumed": "devam ettirildi",
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "Durdurulan dışa aktarmadan kaydedilen mesajlar silinsin ve bu sohbet en yeni mesajdan itibaren yeniden okunsun mu?"
 }

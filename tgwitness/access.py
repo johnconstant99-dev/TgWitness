@@ -188,6 +188,7 @@ POLICY = {
     "GET /api/chats/{chat_id}/dossier/export": ("export", "path"),
     "POST /api/chats/{chat_id}/dossier/export": ("export", "path"),
     "POST /api/chat-export/start": ("export", "body"),
+    "POST /api/chat-export/start-over": ("export", "body"),
     "GET /api/chat-export/{export_id}": ("export", "body"),
     "POST /api/chat-export/{export_id}/cancel": ("export", "body"),
     "GET /api/chat-export/{export_id}/download": ("export", "body"),

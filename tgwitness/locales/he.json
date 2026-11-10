@@ -8606,5 +8606,10 @@
   "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "טלגרם מאפשרת זאת רק לאחר שההפעלה בת 24 שעות. TgWitness ינסה שוב מאוחר יותר ויציג את סיסמת האימות הדו-שלבי שהוא קובע.",
   "Set automatically; open Sessions of this account to see it once.": "נקבעה אוטומטית; פתחו את ההפעלות של חשבון זה כדי לראות אותה פעם אחת.",
   "Automatic only-session changed": "הגדרת הסשן היחיד האוטומטי שונתה",
-  "Only-session attempt postponed": "ניסיון הסשן היחיד נדחה"
+  "Only-session attempt postponed": "ניסיון הסשן היחיד נדחה",
+  "Download partial export": "הורד ייצוא חלקי",
+  "Resume export": "המשך ייצוא",
+  "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}: {messages} הודעות נשמרו לפני העצירה, מזהים {low}–{high}.",
+  "resumed": "הומשך",
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "למחוק את ההודעות שנשמרו מהייצוא שנעצר ולקרוא את הצ'אט הזה מחדש החל מההודעה החדשה ביותר?"
 }

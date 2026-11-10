@@ -11,6 +11,7 @@ import tempfile
 import urllib.request
 import uuid
 import zipfile
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from . import __version__
@@ -37,6 +38,8 @@ LIMITS = [
     "Verify with the collector fingerprint you retained and with checkpoints, witness records or timestamps that cover "
     "the last exported record.",
 ]
+SET_ASIDE = re.compile(r"-?[0-9]+\.set-aside-([0-9]{8}T[0-9]{12})")
+SET_ASIDE_DAYS = 7
 
 
 def producer():
@@ -510,7 +513,28 @@ def encrypt_export(path, fmt, password, inner_name=None, mode="zip"):
         path.unlink(missing_ok=True)
 
 
+def set_aside_at(name):
+    found = SET_ASIDE.fullmatch(name)
+    try:
+        return datetime.strptime(found.group(1), "%Y%m%dT%H%M%S%f").replace(tzinfo=timezone.utc) if found else None
+    except ValueError:
+        return None
+
+
+def cleanup_set_aside(root):
+    directory = root / "partial-exports"
+    if directory.is_symlink() or not directory.is_dir() or directory.resolve().parent != root.resolve():
+        return
+    cutoff = datetime.now(timezone.utc) - timedelta(days=SET_ASIDE_DAYS)
+    for item in directory.iterdir():
+        moved = set_aside_at(item.name)
+        if (moved is not None and moved < cutoff and not item.is_symlink() and item.is_dir()
+                and not getattr(item.lstat(), "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT):
+            shutil.rmtree(item, ignore_errors=True)
+
+
 def cleanup_exports(root):
+    cleanup_set_aside(root)
     directory = root / "temporary-exports"
     if directory.is_symlink() or not directory.is_dir() or directory.resolve().parent != root.resolve():
         return

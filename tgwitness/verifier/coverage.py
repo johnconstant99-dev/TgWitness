@@ -16,6 +16,7 @@ SESSION_NOTES = {"updates_diverted": "Telegram's update counter grew while no up
 SESSION_WINDOWS = ("updates_diverted", "session_revoked_externally", "probe_ack_missed_live")
 PROBE_KINDS = {"probe.sent": "sent", "probe.acked": "answered live", "probe.unanswered": "unanswered",
                "probe.inconclusive": "inconclusive"}
+WITNESS_PROBE_KINDS = {"probe.seen": "seen", "probe.ack_sent": "answered", "probe.ack_failed": "answer failed"}
 SOURCE_KINDS = ("message.new", "message.snapshot", "message.recovered", "message.edited")
 SOURCE_GROUPS = (("live observation", ("live_update", "update_recovery")),
                  ("history reads", ("history_snapshot", "baseline_snapshot", "new_chat_snapshot", "history_acquisition",
@@ -194,6 +195,12 @@ class Coverage:
             delay = payload.get("delay_seconds")
             if kind == "probe.acked" and isinstance(delay, (int, float)):
                 s["probe_delay_max"] = max(s.get("probe_delay_max", 0), delay)
+        elif kind in WITNESS_PROBE_KINDS:
+            answers = s.setdefault("probe_answers", {})
+            for name in (WITNESS_PROBE_KINDS[kind], "seen live" if kind == "probe.seen" and payload.get("via") == "push"
+                         else None):
+                if name:
+                    answers[name] = answers.get(name, 0) + 1
         elif kind == "session.exclusive_from":
             s.setdefault("only_session", []).append({"from": at, "ended": payload.get("other_sessions_ended"),
                                                     "two_step": payload.get("two_step")})
@@ -486,6 +493,9 @@ def session_lines(coverage):
         lines.append("Witness probes: " + ", ".join(name + " " + str(count) for name, count in s["probes"].items())
                      + ("; slowest live answer " + str(round(s["probe_delay_max"], 1)) + " s"
                         if s.get("probe_delay_max") is not None else ""))
+    if s.get("probe_answers"):
+        lines.append("Probes of another workspace answered as its witness: "
+                     + ", ".join(name + " " + str(count) for name, count in s["probe_answers"].items()))
     if s.get("phone_calls"):
         lines.append("Phone call updates delivered to this session: " + str(s["phone_calls"]))
     return lines

@@ -8528,5 +8528,10 @@
   "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "Telegram chỉ cho phép điều này sau khi phiên đủ 24 giờ. TgWitness sẽ thử lại sau và hiển thị mật khẩu xác thực hai bước mà nó đặt.",
   "Set automatically; open Sessions of this account to see it once.": "Được đặt tự động; mở Các phiên của tài khoản này để xem một lần.",
   "Automatic only-session changed": "Cài đặt phiên duy nhất tự động đã thay đổi",
-  "Only-session attempt postponed": "Đã hoãn lần thử giữ phiên duy nhất"
+  "Only-session attempt postponed": "Đã hoãn lần thử giữ phiên duy nhất",
+  "Download partial export": "Tải xuống bản xuất một phần",
+  "Resume export": "Tiếp tục xuất",
+  "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}: đã lưu {messages} tin nhắn trước khi dừng, ID {low}–{high}.",
+  "resumed": "đã tiếp tục",
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "Xóa các tin nhắn đã lưu từ lần xuất bị dừng và đọc lại cuộc trò chuyện này từ tin nhắn mới nhất?"
 }

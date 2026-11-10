@@ -88,7 +88,8 @@ checkpoints of up to 100 decoded messages inside a chunk, with observer-bound
 recovery and standalone verification. These local batches differ from account
 export's API-page receipts; older distributed plans retain chunk-only recovery.
 
-The shared client serializes RPC calls and persists the complete server-requested
+The shared client serializes RPC calls, except up to three parallel file reads
+(`upload.getFile`, `upload.getCdnFile`) per account, and persists the complete server-requested
 deadline before another call, including after reconnect. It now records method,
 wrappers, wait duration, effective deadline and per-method client-call counts in
 `telegram.backoff`. Connection details show the method and deadline while paused.

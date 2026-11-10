@@ -8528,5 +8528,10 @@
   "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "Telegram 只有在工作階段滿 24 小時後才允許。TgWitness 稍後會再試一次，並顯示它設定的兩步驟驗證密碼。",
   "Set automatically; open Sessions of this account to see it once.": "已自動設定；開啟此帳戶的連線即可檢視一次。",
   "Automatic only-session changed": "自動唯一工作階段設定已變更",
-  "Only-session attempt postponed": "唯一工作階段的嘗試已延後"
+  "Only-session attempt postponed": "唯一工作階段的嘗試已延後",
+  "Download partial export": "下載部分匯出",
+  "Resume export": "繼續匯出",
+  "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}：停止前已儲存 {messages} 則訊息，ID {low}–{high}。",
+  "resumed": "已續傳",
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "刪除已停止的匯出所儲存的訊息，並從最新訊息開始重新讀取此聊天？"
 }
