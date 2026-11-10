@@ -41,19 +41,18 @@ def quoted_html(text):
     return '<blockquote>\n' + '\n'.join(blocks) + '\n</blockquote>'
 
 
-def ethical_excerpt(ethical):
-    heading, body = ethical.split('\n', 1)
-    title = html.escape(heading.removeprefix('## '))
-    return f'''<details>
-<summary><strong>{title}</strong></summary>
+def readme_excerpt():
+    art = 'docs/assets/presentation/readme-gdpr-price'
+    return f'''<a href="docs/TAYLOR-WESSING-GDPR-FILE.md"><picture>
+  <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="{art}-mobile-static.svg">
+  <source media="(prefers-reduced-motion: reduce)" srcset="{art}-static.svg">
+  <source media="(max-width: 640px)" srcset="{art}-mobile.svg">
+  <img src="{art}.svg" width="1200" alt="What does GDPR non-compliance cost? Read the case file.">
+</picture></a>
 
-{body.strip()}
-
-[Source record]({SOURCE})
-
-[MIT License](LICENSE) · [Technical notice](docs/OPERATOR-INCOMPATIBILITY.md) · [Original NOTICE](NOTICE)
-
-</details>'''
+**What does GDPR non-compliance cost?** Elite lawyers hide history and sell GDPR non-compliance in Germany:
+a GDPR access request that took 106 days, and a PDF whose black boxes hid nothing.
+[Read the case file →](docs/TAYLOR-WESSING-GDPR-FILE.md) · [Operator notice](docs/OPERATOR-INCOMPATIBILITY.md) · [Source record]({SOURCE})'''
 
 
 def excerpt(notice, licence, raw):
@@ -122,7 +121,7 @@ def outputs(root):
             raise ValueError('Exactly one notice slot is required in ' + name)
         before, tail = source.split(START, 1)
         _, after = tail.split(END, 1)
-        content = ethical_excerpt(ethical) if name == 'README.md' else excerpt(notice, licence, raw)
+        content = readme_excerpt() if name == 'README.md' else excerpt(notice, licence, raw)
         result[name] = before + START + '\n\n' + content + '\n\n' + END + after
     return result
 

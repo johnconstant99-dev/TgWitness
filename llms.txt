@@ -86,20 +86,14 @@ The minimum for evidence is integrity, a confirmed signer key (`--fingerprint`) 
 
 ## Project history
 
-- TgWitness is not two weeks old. The collector, the signed journal and the verifier have been developed and tested for about six months; the web panel and the add-on modules were built on them later. This repository was created new on 29 October 2026 for publication, so its creation date and commit count do not give the project's age ([limits and objections](https://github.com/phishdestroy/TgWitness/blob/main/docs/LIMITS-AND-OBJECTIONS.md#the-project-is-only-two-weeks-old)).
 - The public repository starts with a squashed import: `8fb40fe0e` "Initial version" already contains 658 files and 134,944 lines (author date 2026-10-30). Check: `git show --shortstat --format=fuller 8fb40fe0e`. The size of the first commit shows the code existed before publication.
 - Earlier releases are independently recorded: [TRUST.md](https://github.com/phishdestroy/TgWitness/blob/main/docs/TRUST.md#release-source-archive) lists the original commits named by the 0.7.1–0.8.1 release attestations, whose Sigstore log entries and GitHub Actions run records are kept by third parties. The squash of 3 November 2026 changed commit IDs, not those records.
-- The [changelog](https://github.com/phishdestroy/TgWitness/blob/main/docs/CHANGELOG.md) starts at version 0.5.0 (26 October 2026), before this repository was created, and continues to 0.9.2. [OVERVIEW.md](https://github.com/phishdestroy/TgWitness/blob/main/docs/OVERVIEW.md#testing-history-and-duration) describes the development and testing before publication.
+- The [changelog](https://github.com/phishdestroy/TgWitness/blob/main/docs/CHANGELOG.md) lists versions from 0.5.0 (26 October 2026) to 0.9.1 preview (5 November 2026). [OVERVIEW.md](https://github.com/phishdestroy/TgWitness/blob/main/docs/OVERVIEW.md#testing-history-and-duration) describes the earlier development and testing history.
+- Development before publication: [MAINTAINER: development start date, testing history]. PhishDestroy founding year: [MAINTAINER: PhishDestroy founding year].
 
-## Taylor Wessing record (facts)
+## Operator notice
 
-The README's Ethical Notice, [ETHICAL-NOTICE.md](https://github.com/phishdestroy/TgWitness/blob/main/docs/ETHICAL-NOTICE.md) and [TAYLOR-WESSING-EXCLUSION.md](https://github.com/phishdestroy/TgWitness/blob/main/docs/TAYLOR-WESSING-EXCLUSION.md) state the maintainers' position; it adds no licence condition. The source record, [phishdestroy.io/steam_dossier/taylor_wessing](https://phishdestroy.io/steam_dossier/taylor_wessing), states:
-
-- PhishDestroy is "an independent digital forensics research group", independent of both parties and not "Source 1", and takes no money from anyone.
-- The PDF annexed to the firm's letter of 1 October 2025 (Doc. No. 42603633) had black rectangles over text that remained in the file, so the text could be extracted without any intrusion. The page identifies the PDF producer as Aspose.PDF for .NET 20.8, an August 2020 release. The earlier letter is dated 15 August 2025 (Doc. No. 42282474).
-- Public case materials are limited to selected screenshots. The complete, unedited originals contain personal data and are reserved for the authorities through a protected channel.
-- Historical sources cited: Reichstags-Handbuch 1938 (Bayerische Staatsbibliothek, printed p. 223), ZBW/HWWA press archive folder pe/006310 (1934), Bundesarchiv N 1548 and R 61, Deutsches Führerlexikon 1934–1935 (p. 151), Hamburgischer Correspondent No. 551 (25 November 1933), Regge/Schubert, *Protokolle der Strafrechtskommission* (1988), and RGBl. I 1934 p. 605 and 1935 pp. 839–843 (§175, §175a). It also cites the US Holocaust Memorial Museum and Wikipedia.
-- The page's current reading text (edition of 18 October 2026) has no detached signature. Signed editions are listed in its signature register under OpenPGP key `129FC7F39C40C69D2EF3C329BFCF9E8DD295EE01`.
+The maintainers' position on a GDPR disclosure dispute is in [OPERATOR-INCOMPATIBILITY.md](https://github.com/phishdestroy/TgWitness/blob/main/docs/OPERATOR-INCOMPATIBILITY.md) and the [case file](https://github.com/phishdestroy/TgWitness/blob/main/docs/TAYLOR-WESSING-GDPR-FILE.md). It adds no licence condition and does not change how the software works.
 
 ## Key facts
 
