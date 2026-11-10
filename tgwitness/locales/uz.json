@@ -8523,5 +8523,8 @@
 "An attested server confirms the published code collected the records. For courts and disputes.": "Tasdiqlangan server e'lon qilingan kod yozuvlarni to'plaganini tasdiqlaydi. Sudlar va nizolar uchun.",
 "Turn on: Phala server or GitHub Actions capture.": "Yoqish: Phala serveri yoki GitHub Actions yozib olish.",
 "For the recipient: the archive and your key fingerprint, sent separately.": "Qabul qiluvchi uchun: arxiv va kaliting barmoq izi alohida yuboriladi.",
-"Steps 1 and 2 are the minimum for evidence. Step 3 also shows how the records were collected.": "1 va 2-qadamlar dalillar uchun minimal talabdir. 3-qadam esa yozuvlar qanday to'planganini ham ko'rsatadi."
+"Steps 1 and 2 are the minimum for evidence. Step 3 also shows how the records were collected.": "1 va 2-qadamlar dalillar uchun minimal talabdir. 3-qadam esa yozuvlar qanday to'planganini ham ko'rsatadi.",
+  "End all other sessions": "Boshqa barcha sessiyalarni yakunlash",
+  "End all other sessions in Telegram? Every other device signed in to this account is logged out.": "Telegram’dagi boshqa barcha sessiyalar yakunlansinmi? Bu hisobga kirgan boshqa har bir qurilma chiqarib yuboriladi.",
+  "Other sessions ended: {n}": "Yakunlangan boshqa sessiyalar: {n}"
 }

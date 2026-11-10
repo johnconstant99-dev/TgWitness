@@ -2187,7 +2187,7 @@ class Collector:
         try:
             await asyncio.wait_for(self.client(functions.auth.ResetAuthorizationsRequest()), 30)
         except FreshResetAuthorisationForbiddenError:
-            raise ValueError("Telegram lets a session terminate all others only after it has been signed in for "
+            raise ValueError("Telegram lets a session end other sessions only after it has been signed in for "
                              "24 hours.") from None
         snapshot_after = await self.check_sessions()
         others_after = len((snapshot_after or {}).get("others", []))

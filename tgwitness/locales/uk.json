@@ -8601,5 +8601,8 @@
 "An attested server confirms the published code collected the records. For courts and disputes.": "Сервер, що має відповідний сертифікат, підтверджує, що опублікований код зібрав записи. Для судів та вирішення спорів.",
 "Turn on: Phala server or GitHub Actions capture.": "Увімкніть: сервер Phala або збір даних за допомогою GitHubActions.",
 "For the recipient: the archive and your key fingerprint, sent separately.": "Для одержувача: архів та відбиток вашого ключа, надіслані окремо.",
-"Steps 1 and 2 are the minimum for evidence. Step 3 also shows how the records were collected.": "Кроки 1 і 2 є мінімальними вимогами для збору доказів. Крок 3 також показує, як було зібрано записи."
+"Steps 1 and 2 are the minimum for evidence. Step 3 also shows how the records were collected.": "Кроки 1 і 2 є мінімальними вимогами для збору доказів. Крок 3 також показує, як було зібрано записи.",
+  "End all other sessions": "Завершити всі інші сесії",
+  "End all other sessions in Telegram? Every other device signed in to this account is logged out.": "Завершити всі інші сесії в Telegram? Усі інші пристрої, що увійшли в цей обліковий запис, буде відключено.",
+  "Other sessions ended: {n}": "Завершено інших сесій: {n}"
 }

@@ -8484,5 +8484,8 @@
 "An attested server confirms the published code collected the records. For courts and disputes.": "Một máy chủ được chứng thực xác nhận rằng mã nguồn đã được công bố đã thu thập các bản ghi. Dành cho tòa án và các tranh chấp.",
 "Turn on: Phala server or GitHub Actions capture.": "Bật: Máy chủ Phala hoặc tính năng ghi lại của GitHub.",
 "For the recipient: the archive and your key fingerprint, sent separately.": "Dành cho người nhận: tệp lưu trữ và dấu vân tay khóa của bạn, được gửi riêng biệt.",
-"Steps 1 and 2 are the minimum for evidence. Step 3 also shows how the records were collected.": "Bước 1 và 2 là những bước tối thiểu để thu thập bằng chứng. Bước 3 cũng cho thấy cách các bản ghi được thu thập."
+"Steps 1 and 2 are the minimum for evidence. Step 3 also shows how the records were collected.": "Bước 1 và 2 là những bước tối thiểu để thu thập bằng chứng. Bước 3 cũng cho thấy cách các bản ghi được thu thập.",
+  "End all other sessions": "Kết thúc mọi phiên khác",
+  "End all other sessions in Telegram? Every other device signed in to this account is logged out.": "Kết thúc mọi phiên khác trong Telegram? Mọi thiết bị khác đang đăng nhập vào tài khoản này sẽ bị đăng xuất.",
+  "Other sessions ended: {n}": "Số phiên khác đã kết thúc: {n}"
 }

@@ -8562,5 +8562,8 @@
 "An attested server confirms the published code collected the records. For courts and disputes.": "שרת מאומת מאשר שהקוד שפורסם אסף את הרשומות. לשימוש בבתי משפט ובסכסוכים.",
 "Turn on: Phala server or GitHub Actions capture.": "הפעל: שרת Phala או לכידת פעולות ב-GitHub.",
 "For the recipient: the archive and your key fingerprint, sent separately.": "לנמען: הארכיון וטביעת האצבע של המפתח שלך, הנשלחים בנפרד.",
-"Steps 1 and 2 are the minimum for evidence. Step 3 also shows how the records were collected.": "שלבים 1 ו-2 הם המינימום הנדרש לצורך איסוף ראיות. שלב 3 מראה גם כיצד נאספו הרישומים."
+"Steps 1 and 2 are the minimum for evidence. Step 3 also shows how the records were collected.": "שלבים 1 ו-2 הם המינימום הנדרש לצורך איסוף ראיות. שלב 3 מראה גם כיצד נאספו הרישומים.",
+  "End all other sessions": "סיום כל ההפעלות האחרות",
+  "End all other sessions in Telegram? Every other device signed in to this account is logged out.": "לסיים את כל ההפעלות האחרות ב-Telegram? כל מכשיר אחר שמחובר לחשבון הזה ינותק.",
+  "Other sessions ended: {n}": "הפעלות אחרות שהסתיימו: {n}"
 }

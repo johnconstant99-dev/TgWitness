@@ -8484,5 +8484,8 @@
 "An attested server confirms the published code collected the records. For courts and disputes.": "經認證的伺服器會確認已發布的程式碼確實已收集相關紀錄。供法院及爭議解決之用。",
 "Turn on: Phala server or GitHub Actions capture.": "啟用：Phala 伺服器或 GitHub Actions 擷取功能。",
 "For the recipient: the archive and your key fingerprint, sent separately.": "致收件人：檔案及您的金鑰指紋，將分開寄送。",
-"Steps 1 and 2 are the minimum for evidence. Step 3 also shows how the records were collected.": "步驟 1 和 2 是取得證據的最低要求。步驟 3 則說明了記錄的收集方式。"
+"Steps 1 and 2 are the minimum for evidence. Step 3 also shows how the records were collected.": "步驟 1 和 2 是取得證據的最低要求。步驟 3 則說明了記錄的收集方式。",
+  "End all other sessions": "結束所有其他會話",
+  "End all other sessions in Telegram? Every other device signed in to this account is logged out.": "要結束 Telegram 中的所有其他會話嗎？登入此帳號的所有其他裝置都會被登出。",
+  "Other sessions ended: {n}": "已結束的其他會話：{n}"
 }

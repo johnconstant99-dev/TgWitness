@@ -608,6 +608,10 @@ async def end_account_session(body: EndSession, *, ctx=Depends(current_context))
     return await ctx.operation(ctx.app.state.collector.end_session, body.hash)
 
 
+async def end_other_account_sessions(*, ctx=Depends(current_context)):
+    return await ctx.operation(ctx.app.state.collector.terminate_all_other_sessions)
+
+
 async def change_account_password(
     body: AccountPassword, *, ctx=Depends(current_context)
 ):

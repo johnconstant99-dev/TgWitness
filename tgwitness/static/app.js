@@ -4530,6 +4530,16 @@ async function showAccountSessions(){
   const others=r.sessions.filter(s=>!s.current).length;
   box.append(node("p","hint",others?tr("Other sessions signed in to this account: {n}",{n:others}):
     tr("No other sessions. Only this one is signed in.")));
+  if(others){
+    const all=node("button","quiet danger",tr("End all other sessions"));all.type="button";
+    all.addEventListener("click",e=>busy(e.currentTarget,async()=>{
+      if(!(await askConfirm(tr("End all other sessions in Telegram? Every other device signed in to this account is logged out."),{danger:true,confirmText:tr("End all other sessions")})))return;
+      if(!owner.current())return;
+      const done=await json("account/sessions/end-others",{},{profile:owner.profile,token:owner.token});
+      toast(tr("Other sessions ended: {n}",{n:done.terminated}));await showAccountSessions();
+    }));
+    box.append(all);
+  }
   for(const s of [...r.sessions].sort((a,b)=>Number(b.current)-Number(a.current)||String(b.active_at).localeCompare(String(a.active_at)))){
     const row=node("div","account-session"+(s.current?" current":""));
     row.append(node("span","account-session-device",[s.device_model,[s.app_name,s.app_version].filter(Boolean).join(" ")].filter(Boolean).join(" · ")+

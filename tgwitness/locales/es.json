@@ -8523,5 +8523,8 @@
 "An attested server confirms the published code collected the records. For courts and disputes.": "Un servidor certificado confirma que el código publicado ha recopilado los registros. Para tribunales y litigios.",
 "Turn on: Phala server or GitHub Actions capture.": "Activar: captura del servidor Phala o de GitHub Actions.",
 "For the recipient: the archive and your key fingerprint, sent separately.": "Para el destinatario: el archivo y la huella digital de tu clave, enviados por separado.",
-"Steps 1 and 2 are the minimum for evidence. Step 3 also shows how the records were collected.": "Los pasos 1 y 2 son los mínimos necesarios para obtener pruebas. El paso 3 también muestra cómo se recopilaron los registros."
+"Steps 1 and 2 are the minimum for evidence. Step 3 also shows how the records were collected.": "Los pasos 1 y 2 son los mínimos necesarios para obtener pruebas. El paso 3 también muestra cómo se recopilaron los registros.",
+  "End all other sessions": "Finalizar todas las demás sesiones",
+  "End all other sessions in Telegram? Every other device signed in to this account is logged out.": "¿Finalizar todas las demás sesiones en Telegram? Se cerrará la sesión en todos los demás dispositivos conectados a esta cuenta.",
+  "Other sessions ended: {n}": "Otras sesiones finalizadas: {n}"
 }

@@ -263,6 +263,10 @@ not imply a blanket 24-hour reading ban. Export can separately return
 `TAKEOUT_INIT_DELAY_*`. TgWitness retains server-requested pauses and does not retry
 token acceptance automatically or revoke sessions to work around restrictions.
 
+**Account security → Sessions of this account → End all other sessions** calls `auth.resetAuthorizations` on the
+operator's request and records `account.all_other_sessions_terminated` with the session
+counts before and after. Telegram accepts it from a session signed in for 24 hours.
+
 ### Telethon `.session`
 
 | | |

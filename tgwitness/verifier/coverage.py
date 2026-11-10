@@ -8,6 +8,11 @@ MESSAGE_KINDS = ("message.new", "message.snapshot", "message.edited", "message.r
 INTERRUPTIONS = {"transport_disconnected": "connection to Telegram lost",
                  "authorization_required": "Telegram signed the account out",
                  "resume_failed": "observation could not resume after a restart"}
+SESSION_NOTES = {"updates_diverted": "Telegram's update counter grew while no update reached this session",
+                 "session_revoked_externally": "this session left Telegram's session list while its connection kept working",
+                 "concurrent_sessions_at_start": "other sessions were signed in when observation started"}
+KEY_ORIGINS = {"created": "created by signing in from this workspace", "imported": "imported from an existing session"}
+LOGIN_METHODS = {"qr": "QR code", "phone_code": "phone code", "session_import": "session import"}
 ACCOUNT_LOSS = {"account_banned": "account banned", "account_deleted": "account deleted",
                 "account_frozen": "account frozen", "session_duplicated": "session used in two places",
                 "session_revoked": "session revoked", "session_expired": "session expired",
@@ -36,6 +41,7 @@ class Coverage:
         self.ids, self.titles = {}, {}
         self.first = self.last = None
         self.allowed = LIVENESS_GAP_SECONDS
+        self.session = {}
 
     def open(self, at):
         if self.closed_at is not None:
@@ -112,7 +118,26 @@ class Coverage:
                 self.titles[added.get("chat_id")] = added.get("title")
         if kind in MESSAGE_KINDS and numbered_per_chat(chat_id) and isinstance(event["message_id"], int):
             self.ids.setdefault(chat_id, set()).add(event["message_id"])
+        self.session_event(at, kind, payload)
         self.sequences.add(event, MESSAGE_KINDS)
+
+    def session_event(self, at, kind, payload):
+        s = self.session
+        if kind == "account.authorized":
+            s["key_origin"], s["login_method"], s["authorized_at"] = (payload.get("key_origin"),
+                                                                       payload.get("login_method"), at)
+        elif kind == "session.import_warning":
+            s.setdefault("import_warning_at", at)
+        elif kind == "account.security_event":
+            counts = s.setdefault("security_events", {})
+            name = str(payload.get("event_kind") or "security_notice")
+            counts[name] = counts.get(name, 0) + 1
+        elif kind == "account.all_other_sessions_terminated":
+            s.setdefault("other_sessions_ended", []).append({"at": at, "ended": payload.get("sessions_before")})
+        elif kind == "account.password_changed":
+            s.setdefault("password_changes", []).append({"at": at, "operation": payload.get("operation")})
+        elif kind == "account.phone_call":
+            s["phone_calls"] = s.get("phone_calls", 0) + 1
 
     def result(self, ranges_per_chat=50):
         periods = [dict(p) for p in self.periods]
@@ -137,7 +162,8 @@ class Coverage:
                 "unobserved_ids": unobserved, "gap_summary": self.sequences.result(self.titles), "first_record": self.first, "last_record": self.last,
                 "meaning": "Observation intervals follow connected capture heartbeats from the same run, within three "
                            "heartbeat intervals (at least three minutes). Each interval ends at its last capture "
-                           "confirmation or recorded stop. Message-number gaps describe the observed numbering range."}
+                           "confirmation or recorded stop. Message-number gaps describe the observed numbering range.",
+                **({"session": self.session} if self.session else {})}
 
 
 GAP_DEFAULTS = {"gap_analysis": True, "gap_account_sequence": True, "gap_cluster_min": 1, "gap_clusters_listed": 20,
@@ -319,6 +345,29 @@ class Sequences:
         return result
 
 
+def session_lines(coverage):
+    s, lines = coverage.get("session") or {}, []
+    if s.get("key_origin"):
+        lines.append("Telegram session key: " + KEY_ORIGINS.get(s["key_origin"], str(s["key_origin"]))
+                     + (" by " + LOGIN_METHODS.get(s["login_method"], str(s["login_method"])) if s.get("login_method") else "")
+                     + " at " + str(s.get("authorized_at")))
+    for reason, label in SESSION_NOTES.items():
+        found = [n["at"] for n in coverage.get("notes") or [] if n.get("reason") == reason and n.get("chat_id") is None]
+        if found:
+            lines.append("Session: " + label + " (" + str(len(found)) + "x, first " + found[0] + ")")
+    if s.get("security_events"):
+        lines.append("Telegram security notices (777000): " + ", ".join(
+            name + " " + str(count) for name, count in sorted(s["security_events"].items())))
+    for item in s.get("other_sessions_ended") or []:
+        lines.append("All other sessions ended from this workspace at " + item["at"]
+                     + (" (" + str(item["ended"]) + " signed in before)" if isinstance(item.get("ended"), int) else ""))
+    for item in s.get("password_changes") or []:
+        lines.append("Two-step password " + str(item.get("operation") or "set or changed") + " from this workspace at " + item["at"])
+    if s.get("phone_calls"):
+        lines.append("Phone call updates delivered to this session: " + str(s["phone_calls"]))
+    return lines
+
+
 def coverage_lines(coverage):
     def span(seconds):
         hours, rest = divmod(int(seconds), 3600)
@@ -327,6 +376,7 @@ def coverage_lines(coverage):
              + (", observing at the last capture confirmation" if p.get("still_observing") else "")
              for p in coverage["continuous"]]
     lines += ["Gap from " + g["from"] + " to " + g["to"] + ": " + str(g["reason"]) for g in coverage["gaps"]]
+    lines += session_lines(coverage)
     for chat in coverage["unobserved_ids"]:
         if chat["not_observed"]:
             lines.append("Chat " + (chat["title"] or str(chat["chat_id"])) + ": IDs " + str(chat["observed_from"])

@@ -8679,5 +8679,8 @@
 "An attested server confirms the published code collected the records. For courts and disputes.": "يؤكد خادم معتمد أن الكود المنشور قد جمع السجلات. للاستخدام في المحاكم والنزاعات.",
 "Turn on: Phala server or GitHub Actions capture.": "قم بتشغيل: خادم Phala أو التقاط إجراءات GitHub.",
 "For the recipient: the archive and your key fingerprint, sent separately.": "بالنسبة للمستلم: الأرشيف وبصمة مفتاحك، يتم إرسالهما بشكل منفصل.",
-"Steps 1 and 2 are the minimum for evidence. Step 3 also shows how the records were collected.": "الخطوتان 1 و2 هما الحد الأدنى المطلوب لتقديم الأدلة. وتوضح الخطوة 3 أيضًا كيفية جمع السجلات."
+"Steps 1 and 2 are the minimum for evidence. Step 3 also shows how the records were collected.": "الخطوتان 1 و2 هما الحد الأدنى المطلوب لتقديم الأدلة. وتوضح الخطوة 3 أيضًا كيفية جمع السجلات.",
+  "End all other sessions": "إنهاء كل الجلسات الأخرى",
+  "End all other sessions in Telegram? Every other device signed in to this account is logged out.": "إنهاء كل الجلسات الأخرى في Telegram؟ سيُسجَّل خروج كل جهاز آخر مسجّل الدخول إلى هذا الحساب.",
+  "Other sessions ended: {n}": "الجلسات الأخرى التي أُنهيت: {n}"
 }
