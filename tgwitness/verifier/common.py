@@ -61,7 +61,9 @@ class CheckUnavailable(Exception):
 def safe_text(value):
     text = str(value)
     text = re.sub(r"\x1b(?:\[[0-?]*[ -/]*[@-~]|\][^\x07\x1b]*(?:\x07|\x1b\\))", "", text)
-    return re.sub(r"[\x00-\x08\x0b-\x1f\x7f-\x9f]", "", text)
+    text = re.sub(r"[\x00-\x08\x0b-\x1f\x7f-\x9f]", "", text)
+    return re.sub("[\u061c\u200e\u200f\u2028\u2029\u202a-\u202e\u2066-\u2069]",
+                  lambda match: "\\u%04x" % ord(match.group()), text)
 
 
 def authenticate_statement(value, key_field="public_key"):

@@ -5,6 +5,7 @@ from fastapi import Depends, HTTPException, Request
 from .access import Refused
 from .archive import ArchiveQuery, ArchiveReader
 from .media_analysis import MediaJob, MediaQueue, authorize, available
+from .workers import complete_in_thread
 
 
 def register(app, authenticate):
@@ -43,7 +44,8 @@ def register(app, authenticate):
             result, ranked = [], {}
             if query.strip():
                 try:
-                    ranked = {ident: rank for rank, ident in enumerate(state.store.fulltext.derived.matching(query))}
+                    found = await complete_in_thread(state.store.fulltext.derived.matching, query)
+                    ranked = {ident: rank for rank, ident in enumerate(found)}
                 except ValueError:
                     ranked = {}
             for entry in queue.recover(state):

@@ -9,6 +9,8 @@ from .store import ZERO, canonical, utcnow
 from .verify import (ANNOTATION_FIELDS, annotation_hash, board_prepare, board_replay, board_scope,
                      board_slice_summary, board_where, fingerprint)
 
+MAX_THREAD_DEPTH = 50
+
 
 def initialize(db):
     db.executescript("""
@@ -182,6 +184,12 @@ class Board:
                 if action == "comment":
                     if old and old["parent_id"] != model.parent_id:
                         raise ValueError("A comment revision cannot change its parent.")
+                    depth, above = 0, parent
+                    while above and above["kind"] == "board.comment":
+                        depth += 1
+                        if depth >= MAX_THREAD_DEPTH:
+                            raise ValueError("Replies can be nested at most " + str(MAX_THREAD_DEPTH) + " levels deep.")
+                        above = lookup.get(above.get("parent_id"))
                 if action == "move" and model.collection_id:
                     collection = lookup.get(model.collection_id)
                     if not collection or collection["kind"] != "board.collection" or collection.get("removed"):

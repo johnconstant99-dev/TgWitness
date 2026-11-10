@@ -1,9 +1,11 @@
 import hashlib
 import hmac
 import io
+import lzma
 import stat
 import struct
 import zipfile
+import zlib
 from pathlib import PurePosixPath
 
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -142,5 +144,6 @@ def read_tdata_zip(payload, passcode=""):
             if len(matching) != 1:
                 raise ValueError("TData must contain exactly one authorization for its main DC.")
             return dc, matching[0], user_id
-    except (zipfile.BadZipFile, RuntimeError, NotImplementedError, struct.error, EOFError):
+    except (zipfile.BadZipFile, RuntimeError, NotImplementedError, struct.error, EOFError, zlib.error, lzma.LZMAError,
+            OSError):
         raise ValueError("Invalid or unsupported TData ZIP.") from None

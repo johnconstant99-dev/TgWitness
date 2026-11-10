@@ -425,6 +425,10 @@ def verification_evidence(args):
         if conflict:
             raise ValueError("The journal differs from what the witness saw at " + conflict["at"] + " (record "
                              + str(conflict["event_count"]) + ")")
+        broken = [a for a in result["witness"]["anomalies"] if a["status"] in ("fork", "rollback", "key_changed")]
+        if broken:
+            raise ValueError("The witness saw this journal " + broken[0]["status"].replace("_", " ") + " at "
+                             + str(broken[0].get("at")) + " (record " + str(broken[0].get("event_count")) + ")")
         if result["witness"]["seen_after_export"]:
             notes.append("The witness saw record " + str(result["witness"]["seen_after_export"]["event_count"]) + " at "
                          + result["witness"]["seen_after_export"]["at"] + ", beyond this export's last record "

@@ -2735,6 +2735,7 @@ class Collector:
         self.store.append("message.deleted", payload, chat_id, message_id)
 
     def deletion_batch(self, chat_id, ids, raw):
+        ids = [message_id for message_id in ids if not self.store.message_state(chat_id, message_id)["deleted"]]
         if len(ids) < 2:
             return None
         outgoing = sum(1 for message_id in ids

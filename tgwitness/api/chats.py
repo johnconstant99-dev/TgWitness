@@ -647,6 +647,7 @@ async def notifications(request: Request, *, ctx=Depends(current_context)):
         tuning.value(ctx.app.state.store, "panel_notifications"),
         allowed_chats=ctx.visible_chats(request),
         workspace_id=ctx.profile_id,
+        hide_admin=not request.state.principal.admin,
     )
     return {"items": items}
 

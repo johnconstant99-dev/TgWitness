@@ -637,6 +637,8 @@ class AccountDisclosureCheck:
                 checksum = hashlib.file_digest(stream, "sha256").hexdigest()
             if checksum != self.manifest["source_archive_sha256"]:
                 raise ValueError("Disclosure source archive hash mismatch")
+            if self.fp != self.manifest["source_collector_fingerprint"]:
+                raise ValueError("The disclosure is signed by a different key than its source archive")
             verify_account_export(self.source, self.manifest["source_collector_fingerprint"], max_gib=self.max_gib)
             source_checked = True
         return {"format": self.manifest["format"], "fingerprint": self.fp, "key_pinned": bool(self.expected_fingerprint),

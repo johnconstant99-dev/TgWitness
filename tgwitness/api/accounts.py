@@ -37,6 +37,18 @@ import asyncio
 import base64
 import io
 
+IMPORT_REFUSED = ("This server runs an attested deployment, so it does not collect on an imported key: that key also "
+                  "exists outside this server and the recipient cannot tell who else holds it. Use the same file for "
+                  "an independent login instead, or sign in by phone or QR. Either way the key is created here and "
+                  "the attestation covers it.")
+
+
+def refuse_imported_session():
+    from .. import assurance
+
+    if assurance.attested_deployment():
+        raise HTTPException(409, IMPORT_REFUSED)
+
 
 async def profiles_list(request: Request, *, ctx=Depends(current_context)):
     from ..operator_privacy import status_parts
@@ -145,6 +157,8 @@ async def profiles_import(
     body: ProfileImport, request: Request, *, ctx=Depends(current_context)
 ):
     ctx.require_live()
+    if not body.new_session:
+        refuse_imported_session()
     if (body.api_id is None) != (body.api_hash is None):
         raise HTTPException(
             422, "Provide both API ID and API hash, or leave both empty."
@@ -519,6 +533,8 @@ async def independent_session(
 
 async def import_account(body: AccountImport, *, ctx=Depends(current_context)):
     ctx.require_live()
+    if not body.new_session:
+        refuse_imported_session()
     try:
         result = await asyncio.to_thread(
             import_accounts,

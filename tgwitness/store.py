@@ -94,6 +94,7 @@ class Store:
         initialize_board(self.db)
         self.targets_revision = 0
         self.listeners = []
+        self.committed = []
         with self.transaction():
             continuity.initialize(self.db)
             migrate_media(self.db)
@@ -103,7 +104,7 @@ class Store:
     @contextmanager
     def transaction(self):
         with self.lock:
-            outer = not self.db.in_transaction
+            outer, mark = not self.db.in_transaction, len(self.committed)
             if outer:
                 self.db.execute("BEGIN IMMEDIATE")
             try:
@@ -113,7 +114,17 @@ class Store:
             except BaseException:
                 if outer:
                     self.db.rollback()
+                    del self.committed[mark:]
                 raise
+            if outer:
+                events, self.committed = self.committed, []
+                for event in events:
+                    for listen in self.listeners:
+                        try:
+                            listen(event)
+                        except Exception:
+                            LOG.exception("Journal listener %s failed for event #%d",
+                                          getattr(listen, "__qualname__", type(listen).__qualname__), event["seq"])
 
     def bind(self, vault):
         identity = self.get_setting("public_key", None)
@@ -143,12 +154,7 @@ class Store:
                     (event["seq"], media_job["account_id"], chat_id, message_id,
                      media_job["descriptor"], hashlib.sha256(media_job["descriptor"]).hexdigest(),
                      media_job["max_bytes"], media_job.get("priority", 10), media_job.get("estimated_bytes")))
-            for listen in self.listeners:
-                try:
-                    listen(event)
-                except Exception:
-                    LOG.exception("Journal listener %s failed for event #%d",
-                                  getattr(listen, "__qualname__", type(listen).__qualname__), event["seq"])
+            self.committed.append(event)
             return event
 
     @staticmethod

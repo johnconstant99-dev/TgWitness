@@ -1802,7 +1802,7 @@ def account_key_check(report, keys):
         if origin == "imported" else "the journal records this authorization without the key's origin")
         for seq, origin in keys if origin != "created"]
     imported = any(origin == "imported" for _, origin in keys)
-    report.add("account_key", "review" if imported else "unavailable" if notes or not keys else "pass",
+    report.add("account_key", "fail" if imported else "unavailable" if notes or not keys else "pass",
                "The Telegram authorization key was created on this server",
                "; ".join(notes[:20]) or ("created by signing in on this server (record " + ", ".join(
                    str(seq) for seq, _ in keys) + ")" if keys else "no account authorization in this journal"), JOURNAL)

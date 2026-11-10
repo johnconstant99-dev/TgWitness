@@ -506,7 +506,7 @@ def bridge_command(config, data):
         return [config["bridge"], "tunnel", "--config", str(empty), "--no-autoupdate",
                 "--metrics", "127.0.0.1:0", "--url", origin]
     caddy = data / "Caddyfile"
-    atomic(caddy, hostname(config["domain"]) + " {\n  reverse_proxy " + origin + "\n}\n")
+    atomic(caddy, "{\n  admin off\n}\n\n" + hostname(config["domain"]) + " {\n  reverse_proxy " + origin + "\n}\n")
     return [config["bridge"], "run", "--config", str(caddy), "--adapter", "caddyfile"]
 
 

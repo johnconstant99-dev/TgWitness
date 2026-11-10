@@ -249,7 +249,7 @@ class Sequences:
         self.channels, self.services, self.content = {}, {}, {}
         self.account, self.account_service, self.account_content, self.window = {}, set(), set(), None
         self.scope, self.wide_since, self.wide_periods = None, None, 0
-        self.paused = False
+        self.paused, self.disabled, self.monitoring = False, set(), {}
 
     def add(self, event, message_kinds):
         if not self.settings["gap_analysis"]:
@@ -270,6 +270,15 @@ class Sequences:
             self.paused = False
             if isinstance(payload.get("scope"), dict):
                 self.set_scope(payload["scope"], event["observed_at"])
+        elif kind == "target.changed" and account_numbered(chat_id):
+            if payload.get("enabled") is False:
+                self.disabled.add(chat_id)
+            else:
+                self.disabled.discard(chat_id)
+            self.set_scope(self.scope, event["observed_at"])
+        elif kind == "monitoring.changed" and isinstance(payload.get("after"), dict):
+            self.monitoring = payload["after"]
+            self.set_scope(self.scope, event["observed_at"])
         elif kind == "deletion.unscoped":
             for number in payload.get("message_ids") or []:
                 if type(number) is int and number > 0:
@@ -297,7 +306,8 @@ class Sequences:
 
     def set_scope(self, scope, at):
         self.scope = scope
-        if wide(scope):
+        recorded = all(self.monitoring.get(kind, True) is not False for kind in ("messages", "membership"))
+        if wide(scope) and not self.disabled and recorded:
             if self.wide_since is None:
                 self.wide_since, self.wide_periods = at, self.wide_periods + 1
         else:

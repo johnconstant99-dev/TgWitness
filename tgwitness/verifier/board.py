@@ -158,23 +158,25 @@ def board_replay(records, public_key=None):
 
 def board_scope(item, lookup, trail=None):
     trail = set() if trail is None else trail
-    identifier = item.get("id")
-    if identifier in trail:
-        raise ValueError("Cyclic board reference")
-    trail.add(identifier)
-    kind = item["kind"]
-    if kind in {"board.bookmark", "board.highlight"}:
-        chat = item["target"].get("chat_id")
-        return {chat} if chat is not None else None
-    if kind == "board.slice":
-        query = item["query"]
-        if query.get("include_unscoped"):
+    while True:
+        identifier = item.get("id")
+        if identifier in trail:
+            raise ValueError("Cyclic board reference")
+        trail.add(identifier)
+        kind = item["kind"]
+        if kind in {"board.bookmark", "board.highlight"}:
+            chat = item["target"].get("chat_id")
+            return {chat} if chat is not None else None
+        if kind == "board.slice":
+            query = item["query"]
+            if query.get("include_unscoped"):
+                return None
+            return set(query.get("chat_ids") or [query["chat_id"]])
+        if kind == "board.collection":
+            return set(item.get("chat_ids", [])) or None
+        item = lookup.get(item.get("parent_id") or item.get("card_id"))
+        if not item:
             return None
-        return set(query.get("chat_ids") or [query["chat_id"]])
-    if kind == "board.collection":
-        return set(item.get("chat_ids", [])) or None
-    parent = lookup.get(item.get("parent_id") or item.get("card_id"))
-    return board_scope(parent, lookup, trail) if parent else None
 
 
 def board_where(query, boundary=None):

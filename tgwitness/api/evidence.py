@@ -458,7 +458,7 @@ async def anchor_request(*, ctx=Depends(current_context)):
     )
 
 
-def evidence_status(store, vault):
+def evidence_status(store, vault, receipt=None):
     folder = store.root / "checkpoints" / "anchors"
     stamped = [
         int(proof.name.split(".", 1)[0][11:])
@@ -476,6 +476,7 @@ def evidence_status(store, vault):
         "timestamps": bool(evidence_settings(store)["enabled"]),
         "stamped_through": max(stamped, default=0),
         "witness_at": max(polled, default=None),
+        "attested": bool((receipt or {}).get("tdx_start") or (receipt or {}).get("sealed")),
     }
 
 
@@ -489,7 +490,8 @@ async def verify(*, ctx=Depends(current_context)):
             409,
             "Journal integrity verification failed. Preserve the directory for inspection.",
         ) from None
-    return {**checked, "conditions": evidence_status(ctx.app.state.store, ctx.app.state.vault)}
+    return {**checked, "conditions": evidence_status(ctx.app.state.store, ctx.app.state.vault,
+                                                     getattr(ctx.app.state, "run_receipt", None))}
 
 
 class EvidenceOperations:

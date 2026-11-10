@@ -450,14 +450,19 @@ class Query:
         return text_clauses(token, question=self.match == "any")
 
     def option(self, key, value):
+        def number(text):
+            found = int(text)
+            if not -2**63 <= found < 2**63:
+                raise ValueError
+            return found
         try:
             if key == "chat":
-                self.chats.add(int(value))
+                self.chats.add(number(value))
             elif key == "id":
-                self.message_ids.add(int(value.lstrip("#")))
+                self.message_ids.add(number(value.lstrip("#")))
             elif key == "from":
                 if re.fullmatch(r"-?\d+", value):
-                    self.senders.add(int(value))
+                    self.senders.add(number(value))
                 elif handle := HANDLE.fullmatch(value.casefold()):
                     self.usernames.add(handle.group(1))
                 else:
@@ -849,6 +854,9 @@ class FullText:
                     raise TimeoutError("Search timed out. Add words or narrow the chats and period.") from None
                 if "fts5" in str(exc) or "syntax" in str(exc):
                     raise ValueError("This search could not be read. Remove special characters and retry.") from None
+                raise
+            except BaseException:
+                db.set_progress_handler(None, 0)
                 raise
             total = None
             if not query.phrases:

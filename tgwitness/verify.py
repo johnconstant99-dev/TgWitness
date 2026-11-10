@@ -1,4 +1,4 @@
-# TgWitness verifier sources SHA-256: 513f85bad5b6f34b458ddf0a1d8f7860ebfb219a1f0f80b4087707baabdd46b0
+# TgWitness verifier sources SHA-256: ee492675198adac4072b14954b55418c9c366b579645bba65537825b37d31b25
 """Standalone verifier"""
 import argparse
 import base64
@@ -62,7 +62,9 @@ class CheckUnavailable(Exception):
 def safe_text(value):
     text = str(value)
     text = re.sub(r"\x1b(?:\[[0-?]*[ -/]*[@-~]|\][^\x07\x1b]*(?:\x07|\x1b\\))", "", text)
-    return re.sub(r"[\x00-\x08\x0b-\x1f\x7f-\x9f]", "", text)
+    text = re.sub(r"[\x00-\x08\x0b-\x1f\x7f-\x9f]", "", text)
+    return re.sub("[\u061c\u200e\u200f\u2028\u2029\u202a-\u202e\u2066-\u2069]",
+                  lambda match: "\\u%04x" % ord(match.group()), text)
 
 
 def authenticate_statement(value, key_field="public_key"):
@@ -1289,7 +1291,7 @@ class Sequences:
         self.channels, self.services, self.content = {}, {}, {}
         self.account, self.account_service, self.account_content, self.window = {}, set(), set(), None
         self.scope, self.wide_since, self.wide_periods = None, None, 0
-        self.paused = False
+        self.paused, self.disabled, self.monitoring = False, set(), {}
 
     def add(self, event, message_kinds):
         if not self.settings["gap_analysis"]:
@@ -1310,6 +1312,15 @@ class Sequences:
             self.paused = False
             if isinstance(payload.get("scope"), dict):
                 self.set_scope(payload["scope"], event["observed_at"])
+        elif kind == "target.changed" and account_numbered(chat_id):
+            if payload.get("enabled") is False:
+                self.disabled.add(chat_id)
+            else:
+                self.disabled.discard(chat_id)
+            self.set_scope(self.scope, event["observed_at"])
+        elif kind == "monitoring.changed" and isinstance(payload.get("after"), dict):
+            self.monitoring = payload["after"]
+            self.set_scope(self.scope, event["observed_at"])
         elif kind == "deletion.unscoped":
             for number in payload.get("message_ids") or []:
                 if type(number) is int and number > 0:
@@ -1337,7 +1348,8 @@ class Sequences:
 
     def set_scope(self, scope, at):
         self.scope = scope
-        if wide(scope):
+        recorded = all(self.monitoring.get(kind, True) is not False for kind in ("messages", "membership"))
+        if wide(scope) and not self.disabled and recorded:
             if self.wide_since is None:
                 self.wide_since, self.wide_periods = at, self.wide_periods + 1
         else:
@@ -1717,8 +1729,9 @@ def verify_checkpoint(checkpoint, public_key, event_count, hash_at, check_drand=
 
 
 def read_sealed(stream):
-    digest, window = hashlib.sha256(), b""
+    digest, window, start = hashlib.sha256(), b"", None
     for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+        start = chunk[:16] if start is None else start
         window += chunk
         if len(window) > 2 * SEAL_WINDOW:
             digest.update(window[:-SEAL_WINDOW])
@@ -1726,6 +1739,8 @@ def read_sealed(stream):
     at = window.rfind(SEAL_OPEN)
     if at < 0:
         return None
+    if not start.lower().startswith(b"<!doctype html"):
+        raise ValueError("This seal belongs to an HTML report, but the file is not one")
     digest.update(window[:at])
     block = window[at + len(SEAL_OPEN):]
     if not block.endswith(SEAL_CLOSE):
@@ -2117,23 +2132,25 @@ def board_replay(records, public_key=None):
 
 def board_scope(item, lookup, trail=None):
     trail = set() if trail is None else trail
-    identifier = item.get("id")
-    if identifier in trail:
-        raise ValueError("Cyclic board reference")
-    trail.add(identifier)
-    kind = item["kind"]
-    if kind in {"board.bookmark", "board.highlight"}:
-        chat = item["target"].get("chat_id")
-        return {chat} if chat is not None else None
-    if kind == "board.slice":
-        query = item["query"]
-        if query.get("include_unscoped"):
+    while True:
+        identifier = item.get("id")
+        if identifier in trail:
+            raise ValueError("Cyclic board reference")
+        trail.add(identifier)
+        kind = item["kind"]
+        if kind in {"board.bookmark", "board.highlight"}:
+            chat = item["target"].get("chat_id")
+            return {chat} if chat is not None else None
+        if kind == "board.slice":
+            query = item["query"]
+            if query.get("include_unscoped"):
+                return None
+            return set(query.get("chat_ids") or [query["chat_id"]])
+        if kind == "board.collection":
+            return set(item.get("chat_ids", [])) or None
+        item = lookup.get(item.get("parent_id") or item.get("card_id"))
+        if not item:
             return None
-        return set(query.get("chat_ids") or [query["chat_id"]])
-    if kind == "board.collection":
-        return set(item.get("chat_ids", [])) or None
-    parent = lookup.get(item.get("parent_id") or item.get("card_id"))
-    return board_scope(parent, lookup, trail) if parent else None
 
 
 def board_where(query, boundary=None):
@@ -3530,6 +3547,8 @@ class AccountDisclosureCheck:
                 checksum = hashlib.file_digest(stream, "sha256").hexdigest()
             if checksum != self.manifest["source_archive_sha256"]:
                 raise ValueError("Disclosure source archive hash mismatch")
+            if self.fp != self.manifest["source_collector_fingerprint"]:
+                raise ValueError("The disclosure is signed by a different key than its source archive")
             verify_account_export(self.source, self.manifest["source_collector_fingerprint"], max_gib=self.max_gib)
             source_checked = True
         return {"format": self.manifest["format"], "fingerprint": self.fp, "key_pinned": bool(self.expected_fingerprint),
@@ -6991,6 +7010,10 @@ def verification_evidence(args):
         if conflict:
             raise ValueError("The journal differs from what the witness saw at " + conflict["at"] + " (record "
                              + str(conflict["event_count"]) + ")")
+        broken = [a for a in result["witness"]["anomalies"] if a["status"] in ("fork", "rollback", "key_changed")]
+        if broken:
+            raise ValueError("The witness saw this journal " + broken[0]["status"].replace("_", " ") + " at "
+                             + str(broken[0].get("at")) + " (record " + str(broken[0].get("event_count")) + ")")
         if result["witness"]["seen_after_export"]:
             notes.append("The witness saw record " + str(result["witness"]["seen_after_export"]["event_count"]) + " at "
                          + result["witness"]["seen_after_export"]["at"] + ", beyond this export's last record "

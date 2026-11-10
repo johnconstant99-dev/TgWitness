@@ -814,7 +814,8 @@ class ExportOperations:
             path=path,
             httponly=True,
             samesite="strict",
-            secure=request.url.scheme == "https",
+            secure=request.url.scheme == "https"
+            or request.url.hostname not in ("127.0.0.1", "localhost", "::1"),
         )
         return response
 

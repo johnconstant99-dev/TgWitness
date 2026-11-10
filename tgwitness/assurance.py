@@ -242,6 +242,11 @@ def attestation(selected, value):
         return {"error": type(exc).__name__ + ": " + str(exc)[:200]}
 
 
+def attested_deployment():
+    from .providers.phala import SOCKET
+    return os.path.exists(SOCKET)
+
+
 def start_attestation(selected, receipt):
     return attestation(selected, start_binding(receipt))
 

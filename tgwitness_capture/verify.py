@@ -68,6 +68,7 @@ def verify_zip(path, expected_fingerprint=None, checkpoint=None, receipt=None,
     drand = confirm(events, check_drand)
     anchored_seq = 0
     independently_witnessed = False
+    checkpoints = [checkpoint] if checkpoint is not None else []
     if receipt is not None:
         if not witness_fingerprint:
             raise ValueError("A trusted witness fingerprint is required for a receipt")
@@ -78,23 +79,23 @@ def verify_zip(path, expected_fingerprint=None, checkpoint=None, receipt=None,
         if fingerprint(witness_key) != witness_fingerprint or witness_key == public_key:
             raise ValueError("Untrusted or shared witness key")
         check_seal(witness_key, "receipt", receipt_body, receipt["signature"])
-        checkpoint = receipt_body["checkpoint"]
+        checkpoints.append(receipt_body["checkpoint"])
         independently_witnessed = True
-    if checkpoint is not None:
-        body = check_checkpoint(checkpoint, public_key, manifest["observer_id"])
-        anchored_seq = body["seq"]
-        if anchored_seq > len(events):
+    for retained in checkpoints:
+        body = check_checkpoint(retained, public_key, manifest["observer_id"])
+        if body["seq"] > len(events):
             raise ValueError("Export is shorter than retained checkpoint")
-        expected_head = events[anchored_seq - 1]["hash"] if anchored_seq else ZERO
+        expected_head = events[body["seq"] - 1]["hash"] if body["seq"] else ZERO
         if expected_head != body["head_hash"]:
             raise ValueError("Export disagrees with retained checkpoint")
-    if require_final_anchor and (checkpoint is None or anchored_seq != len(events)):
+        anchored_seq = max(anchored_seq, body["seq"])
+    if require_final_anchor and (not checkpoints or anchored_seq != len(events)):
         raise ValueError("Export has an unanchored tail")
     from .official_proof import official_report
     official = official_report(events, expected_settings)
     return {"valid": True, "format": FORMAT, "observer_id": manifest["observer_id"],
             "fingerprint": actual_fingerprint, "key_pinned": expected_fingerprint is not None,
-            "events": len(events), "head_hash": head, "checkpoint_checked": checkpoint is not None,
+            "events": len(events), "head_hash": head, "checkpoint_checked": bool(checkpoints),
             "independently_witnessed": independently_witnessed, "anchored_seq": anchored_seq,
             "unanchored_events": len(events) - anchored_seq,
             "trusted_reports_checked": report_count, "drand": drand,

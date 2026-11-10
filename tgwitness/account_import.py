@@ -15,6 +15,7 @@ from telethon.errors import AuthKeyNotFound, RPCError, SessionPasswordNeededErro
 from telethon.sessions import StringSession
 from telethon.tl import functions, types
 
+from .security import KeyInUse, KeyLock
 from .tdata import read_tdata_zip
 from . import api_pool
 from . import client_identity
@@ -245,11 +246,16 @@ async def check_session(collector, account, api_id=None, api_hash=None, language
                             else api_pool.login_order()[0])
     supplied = {**client_identity.validate(languages), **client_identity.validate(account.get("client_profile"))}
     device = client_identity.resolve(api_id, supplied, hashlib.sha256(session_key(account["session"])).hexdigest())
-    owner, client = "session-check-" + secrets.token_hex(16), None
+    owner, client, lock = "session-check-" + secrets.token_hex(16), None, None
 
     def lost(cause, error=None):
         return {"state": CHECK_STATES[cause], "message": LOSS_MEANING[cause], "telegram_error": error}
     try:
+        key = session_key(account["session"])
+        try:
+            lock = KeyLock(key) if key else None
+        except KeyInUse as exc:
+            return {"state": "duplicate", "message": str(exc)}
         _, route = await collector.pool().acquire(owner, share=collector.share())
         client = collector.client_factory(StringSession(account["session"]), api_id, api_hash, receive_updates=False,
                                           flood_sleep_threshold=0, connection_retries=0, request_retries=1,
@@ -302,3 +308,5 @@ async def check_session(collector, account, api_id=None, api_hash=None, language
         finally:
             collector.pool().release(owner)
             collector.pool().waiting.discard(owner)
+            if lock is not None:
+                lock.close()

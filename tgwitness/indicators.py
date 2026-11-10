@@ -5,6 +5,7 @@ import io
 import json
 import re
 import uuid
+import warnings
 from datetime import datetime, timezone
 from urllib.parse import urlsplit
 
@@ -39,6 +40,8 @@ EVM = re.compile(r"(?<![A-Za-z0-9])0x[0-9a-fA-F]{40}(?![A-Za-z0-9])")
 WORD = re.compile(r"\S+")
 TON = re.compile(r"(?<![A-Za-z0-9_+/-])[EUk0]Q[A-Za-z0-9_+/-]{46}(?![A-Za-z0-9_+/-])")
 TON_RAW = re.compile(r"(?<![\w:-])(?:0|-1):[0-9a-fA-F]{64}(?![0-9a-fA-F])")
+
+IMAGE_PIXELS = 40_000_000
 
 
 def b58decode(text):
@@ -101,10 +104,14 @@ def by_word(pattern, text, longest=1024):
 def image_hash(path):
     try:
         from PIL import Image
-        with Image.open(path) as picture:
-            picture.draft("L", (64, 64))
-            small = picture.convert("L").resize((9, 8), Image.Resampling.LANCZOS)
-            pixels = list(small.tobytes())
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", Image.DecompressionBombWarning)
+            with Image.open(path) as picture:
+                if picture.width * picture.height > IMAGE_PIXELS:
+                    return None
+                picture.draft("L", (64, 64))
+                small = picture.convert("L").resize((9, 8), Image.Resampling.LANCZOS)
+                pixels = list(small.tobytes())
     except Exception:
         return None
     bits = [pixels[row * 9 + column] > pixels[row * 9 + column + 1] for row in range(8) for column in range(8)]

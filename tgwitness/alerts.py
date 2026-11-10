@@ -546,13 +546,15 @@ def notice_entry(event, level, text, read_key, *, group_id=None, count_exact=Tru
             "last_at": event["observed_at"], "category": category, "severity": severity, "action": action}
 
 
-def panel_items(store, words, limit=60, *, allowed_chats=None, workspace_id="default"):
+def panel_items(store, words, limit=60, *, allowed_chats=None, workspace_id="default", hide_admin=False):
     if limit <= 0 or allowed_chats is not None and not allowed_chats:
         return []
     titles = {t["chat_id"]: t["title"] for t in store.targets()
               if allowed_chats is None or t["chat_id"] in allowed_chats}
 
     def scan(kinds, bound):
+        if hide_admin:
+            kinds = tuple(kind for kind in kinds if not kind.startswith(("access.", "profile.")))
         records = store.events_of(kinds, limit=bound + 1, chat_ids=allowed_chats)
         return records[:bound], len(records) > bound
 

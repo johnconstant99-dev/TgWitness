@@ -24,8 +24,9 @@ from .common import (
     x509,
 )
 def read_sealed(stream):
-    digest, window = hashlib.sha256(), b""
+    digest, window, start = hashlib.sha256(), b"", None
     for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+        start = chunk[:16] if start is None else start
         window += chunk
         if len(window) > 2 * SEAL_WINDOW:
             digest.update(window[:-SEAL_WINDOW])
@@ -33,6 +34,8 @@ def read_sealed(stream):
     at = window.rfind(SEAL_OPEN)
     if at < 0:
         return None
+    if not start.lower().startswith(b"<!doctype html"):
+        raise ValueError("This seal belongs to an HTML report, but the file is not one")
     digest.update(window[:at])
     block = window[at + len(SEAL_OPEN):]
     if not block.endswith(SEAL_CLOSE):
