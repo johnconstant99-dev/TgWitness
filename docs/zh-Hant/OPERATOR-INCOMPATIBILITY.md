@@ -6,21 +6,65 @@
 <p><strong>PhishDestroy · TgWitness 專案公告</strong></p>
 <p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">原始記錄</a> · <a href="../../NOTICE">原始「聲明」</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ 道德聲明與歷史延續性</h2>
-<p>我們最近得知，對於某些律師事務所——尤其是托拜厄斯·謝林斯基博士（Dr. Tobias Schelinski）與帕特里克·文森特·祖爾海德博士（Dr. Patrick Vincent Zurheide）——而言，數學與客觀事實皆無關緊要。</p>
-<p>將 GDPR 不合規行為作為商業服務推銷給企業，卻連自身的基本資料處理都做不好，這並非法律專業知識。</p>
-<p>若抱持「你就是法律」的錯覺，或以為偽造索賠文件上某位精英的簽名能神奇地將謊言轉化為真相，都無法掩蓋技術上的無能。</p>
+<p>我們獲悉，對於某些律師事務所——具體而言是<strong>托拜厄斯·謝林斯基博士</strong>（Dr. Tobias Schelinski）與<strong>派翠克·文森特·祖爾海德博士</strong>（Dr. Patrick Vincent Zurheide）——而言，數學、技術完整性及客觀事實皆無關緊要。</p>
+<p>向企業兜售不符合《一般資料保護規範》（GDPR）的服務，卻連基本的資料處理都做不好，這並非法律專業能力。在偽造的主張上加上精英級的簽名，也無法掩蓋技術上的無能。</p>
 <p>本工具不適用於以下情況占主導地位的司法管轄區：</p>
 <ul>
-<li>企業統治</li>
-<li>私有化或商業化司法</li>
-<li>金權政治</li>
-<li>盜賊統治與制度性腐敗</li>
+<li><strong>企業統治</strong></li>
+<li><strong>私有化的司法</strong></li>
+<li><strong>金權政治</strong></li>
+<li><strong>竊權統治與制度性腐敗</strong></li>
 </ul>
-<p>特別提及 Patrick Zurheide 博士、Tobias Schelinski 博士，以及那些企圖將「被遺忘權」武器化，以掩蓋自身資料處理失誤、美化其機構淵源，並抹除歷史紀錄的人士：</p>
 <blockquote>
-<p>Taylor Wessing（托拜厄斯·謝林斯基博士與帕特里克·文森特·祖爾海德博士）→ Wessing &amp; Berenberg-Gossler → Stonewall Top 100 → 格拉夫·馮·德·戈爾茨博士 Wessing &amp; Partner （自 1957 年起）→ 呂迪格·馮·德爾·戈爾茨伯爵 → 1935 年修訂版的第 175 條</p>
+<p>泰勒·韋辛（Taylor Wessing）（托比亞斯·謝林斯基博士與帕特里克·文森特·祖爾海德博士）→ 韋辛與貝倫貝格-戈斯勒（Wessing &amp; Berenberg-Gossler）→ <a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">石牆百強（Stonewall Top 100</a>）→ 格拉夫·馮·德爾·戈爾茨博士、韋辛與合夥人（Dr. Graf von der Goltz, Dr. Wessing &amp; Partner） （自 1957 年起）→ 呂迪格·馮·德爾·戈爾茨伯爵 → <a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">1935 年修訂版第 175 條</a></p>
 </blockquote>
-<p>為嚴格遵守 MIT 授權條款，我們不限制本軟體的使用。然而，必須明確指出：企業聘僱、法律威嚇及要求刪除數位資料等行為，皆無法抹去歷史、改寫淵源，亦無法隱瞞真相。</p>
+<hr />
+<h3 id="1-what-are-people-supposed-to-do-when-lawyers-edit-their-own-reputation">1. 當律師自行修飾自身聲譽時，人們該如何應對？</h3>
+<p>當律師透過手動從搜尋引擎刪除證據來管理自身聲譽時，客戶與監管機構該如何應對？難道要全盤信任他們的簽名嗎？這背後的真實代價究竟是什麼？抑或如今的公式已簡化為：<strong>從 Google 刪除 = 搞定？</strong></p>
+<ol>
+<li><strong>《一般資料保護條例》（GDPR）第 15 條在一年多後仍未獲得落實；</strong></li>
+<li><strong>兩位簽署人在官方文件中的陳述相互矛盾：</strong>謝林斯基（Schelinski）將 1,938 份投訴書作為定罪證據，並聲稱<em>「不論細節如何」</em>； 祖爾海德則提交了 2,002 筆紀錄，其中包含 64 筆禁令頒布後的補充資料，並聲稱因<em>「手動刪除」</em>某份檔案而延誤 106 天，而該檔案實際上僅耗時 <strong>36 秒</strong>便由 <code>Aspose.PDF for .NET 20.8</code> 生成；</li>
+<li><strong>該律師事務所的律師誤以為，企業的指控可凌駕於法定資料揭露法之上。</strong></li>
+</ol>
+<h3 id="2-both-doctors-personally-used-the-right-to-be-forgotten--it-is-not-magic-we-have-not-forgotten">2. 兩位醫師皆親自行使了「被遺忘權」——這並非魔法，我們並未遺忘</h3>
+<ul>
+<li>在我們針對該損壞的 PDF 文件遮蔽處理進行技術審計後，<strong>帕特里克·文森特·祖爾海德博士依據《一般資料保護條例》（GDPR）第 17 條提交了搜尋結果下架通知。</strong></li>
+<li><strong>整整 3 天後，托比亞斯·謝林斯基博士提交了他自己的搜尋結果下架通知。</strong></li>
+<li>在長達四個月的時間裡，這演變成一場有系統的行動，旨在從搜尋引擎中清除所有基於事實的批評。</li>
+</ul>
+<p><strong>這並非演算法錯誤，也非魔法。</strong>這是兩位法學博士蓄意濫用隱私法，以掩蓋自身技術過失的證據。<strong>我們並未忘記。</strong></p>
+<h3 id="3-the-doctor-prefix-vs-cryptographic-reality">3. 「博士」頭銜與加密技術的現實</h3>
+<p>博士學位僅是某個狹窄領域內過往理論研究的<strong>歷史紀錄</strong>。它完全無法證明持有人具備二進位格式或資料安全方面的專業能力：</p>
+<ul>
+<li>一個頭銜無法修復損壞的資料，而精英的簽名也無法將程序上的謊言轉化為事實。</li>
+<li>在加密驗證中，學術前綴的<strong>熵值為零</strong>：硬體晶片（TPM、Secure Enclave）、SHA-256 雜湊鏈、RFC 3161 時間戳記，以及比特幣共識機制，均不會因博士學位而有所讓步。</li>
+</ul>
+<h3 id="4-taylor-wessing-without-taylor-is-just-wessing--and-how-history-is-purged">4. 沒有「Taylor」的「Taylor Wessing」就只是「Wessing」——以及歷史如何被抹去</h3>
+<p>將具侵略性的轉介網絡包裝為「去中心化」，純粹是<strong>企業用來分散法律責任的遮掩手段。</strong>當違規行為曝光時，這個統一的全球品牌便會分裂成獨立實體，以保護領導層。</p>
+<ul>
+<li><strong>泰勒退出：</strong>英國分支已獨立（<em>溫斯頓·泰勒</em>，2026年6月）。德國方面僅剩<strong>韋辛</strong>——一個掛著昂貴招牌的自由職業者網絡。</li>
+<li><strong>兩度遭維基百科刪除：</strong>該律師事務所曾兩度從<a href="https://de.wikipedia.org/wiki/Taylor_Wessing#Geschichte">德語維基百科</a>中刪除有關其於 2020 年 3 月 COVID-19 疫情爆發之初解僱<strong>全部 95 名學生助理（<code>wissenschaftliche Mitarbeiter</code>）</strong>的紀錄（<a href="https://www.juve.de/nachrichten/verwaltung/2020/03/corona-krise-taylor-wessing-kuendigt-allen-wissenschaftlichen-mitarbeitern">JUVE</a>）。</li>
+<li><strong>創辦人呂迪格·格拉夫·馮·德爾·戈爾茨：</strong>（納粹黨 <code>#1,033,215</code>、戈培爾的法律顧問、<a href="https://www.digitale-sammlungen.de/en/view/bsb00000146?page=224">帝國議會議員</a>）是<strong>刑法委員會八名成員之一</strong>（<a href="https://resolver.sub.uni-hamburg.de/kitodo/PPN689065124_19331125">1933年11月25日任命</a>；<a href="https://api.pageplace.de/preview/DT0400.9783110892055_A36623967/preview-9783110892055_A36623967.pdf#page=16">會議紀錄</a>），該委員會起草並通過了<strong><a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">1935年納粹對第175條的修訂</a></strong>（<a href="https://encyclopedia.ushmm.org/content/en/article/paragraph-175-and-the-nazi-campaign-against-homosexuality">美國大屠殺紀念館</a>）。</li>
+</ul>
+<h3 id="5-the-485-line-stochastic-challenge-to-dr-tobias-schelinski">5. 針對托比亞斯·謝林斯基博士的 485 行隨機挑戰</h3>
+<p>謝林斯基在未閱讀內容的情況下，便將 1,938 份投訴認定為證據——儘管其中<strong>超過 500 份屬於直接的種族仇恨及新納粹戰爭宣傳性誹謗（<code>[REDACTED]</code>）</strong>。</p>
+<blockquote>
+<p>我們提出一項嚴謹的實驗：從語料庫中精確提取 25% 的內容—— ⌈1,938 × 0.25⌉ = 485 行 —— 透過無放回的隨機抽樣（採用費雪–耶茨（Fisher–Yates）洗牌演算法，種子為該 70,717 字資料集的公開 SHA-256 雜湊值）進行抽取。</p>
+<p><strong>謝林斯基博士是否願意審閱這 485 則隨機抽取的條目，並公開說明為何這些內容「不具實質意義」？</strong></p>
+<p>若他能令人信服地證明此內容與本案無關，<strong>我們將立即承認錯誤、公開致歉，並刪除所有提及其姓名的內容。</strong></p>
+</blockquote>
+<p>與此同時，Zurheide 那份 830 頁的 PDF 檔案，其 100% 的文字皆可在向量框內進行擷取：</p>
+<ul>
+<li>在刻意保留可見的微小 2% 樣本中，<strong>第 1 行第 1 項是一則未經刪節的恐同辱罵用語（<code>[REDACTED]</code>）</strong>——這與該律師事務所的歷史（創辦人戈爾茨，第 175 條）及其<a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">「石牆百強」</a>行銷活動形成了諷刺性的對比。</li>
+<li>此範例發生於<strong>永久封禁之後</strong>，採用<strong>固定格式的使用者名稱</strong>，且特定時間戳記已被有選擇地移除（<code>2025-08-</code>）以掩蓋自動化發文的間隔。</li>
+</ul>
+<h3 id="6-asposepdf-208-free-software--state-archives-after-dec-1-2026">6. Aspose.PDF 20.8、自由軟體與國家檔案館（2026年12月1日之後）</h3>
+<p>我們無從得知該公司憑藉何種權利得以豁免《一般資料保護條例》（GDPR），但他們那套「精英級」的拖延戰術與信頭紙可不是免費的。在他們的 PDF 檔案中，竟嵌入了 <strong><code>Aspose.PDF for .NET 20.8</code></strong>（於 <strong>2020 年 8</strong> 月購買，從未續訂——畢竟，付費購買軟體可不是「精英級」IT 律師會做的事！）。</p>
+<ul>
+<li>若您因自 2020 年以來未曾付費購買軟體而感到難為情，進而刪除搜尋結果：<strong><code>TgWitness</code></strong> <strong>完全免費（<a href="https://github.com/phishdestroy/TgWitness/blob/main/LICENSE">MIT 授權</a>）</strong>—— 並具備隔離容器與真正的加密功能。</li>
+<li><strong>這一點也不好笑。真正好笑的是，看著頂尖律師們耗費數月，試圖從 Google 上刪除這項漏洞的相關提及。零信任。</strong></li>
+<li>若您於 <strong>2026 年 12 月 1 日</strong>之後閱讀此聲明：這些紀錄已永久存檔於<strong>德國國家檔案館（<em>Staatsarchiv / Bundesarchiv</em>）</strong>及海外司法檔案館，任何「被遺忘權」的網路表單均無法刪除這些紀錄。</li>
+</ul>
 <p><a href="../../LICENSE">MIT 授權條款</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">我們對 Taylor Wessing 的立場</a> · <a href="../HOW-IT-WORKS.md">證據模型</a></p>
 <p><a href="README.md">專案</a> · <a href="README.md">文件說明</a> · <a href="../wiki/Home.md">維基</a></p>
 </div>

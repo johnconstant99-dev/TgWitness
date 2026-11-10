@@ -6,21 +6,65 @@
 <p><strong>PhishDestroy · Pemberitahuan proyek TgWitness</strong></p>
 <p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Catatan sumber</a> · <a href="../../NOTICE">PEMBERITAHUAN Asli</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Pemberitahuan Etika &amp; Kelanjutan Sejarah</h2>
-<p>Kami baru-baru ini mengetahui bahwa bagi firma hukum tertentu—dan khususnya Dr. Tobias Schelinski dan Dr. Patrick Vincent Zurheide—matematika dan fakta objektif tidak relevan.</p>
-<p>Menjual ketidakpatuhan terhadap GDPR kepada perusahaan sebagai layanan komersial sementara Anda sendiri gagal dalam penanganan data dasar bukanlah keahlian hukum.</p>
-<p>Beroperasi di bawah ilusi bahwa Anda adalah hukum, atau bahwa tanda tangan elit pada klaim palsu secara ajaib mengubah kebohongan menjadi kebenaran, tidak dapat menutupi ketidakmampuan teknis.</p>
+<p>Kami telah mengetahui bahwa bagi firma hukum tertentu — khususnya <strong>Dr. Tobias Schelinski</strong> dan <strong>Dr. Patrick Vincent Zurheide</strong> — matematika, integritas teknis, dan fakta objektif tidaklah relevan.</p>
+<p>Menjual ketidakpatuhan terhadap GDPR kepada perusahaan-perusahaan sementara gagal dalam penanganan data dasar bukanlah keahlian hukum. Tanda tangan dari seorang ahli pada klaim yang dipalsukan tidak dapat menutupi ketidakmampuan teknis.</p>
 <p>Alat ini tidak kompatibel dengan yurisdiksi di mana hal-hal berikut berlaku:</p>
 <ul>
-<li>Korporatokrasi</li>
-<li>Peradilan yang diprivatisasi atau komersial</li>
-<li>Plutokrasi</li>
-<li>Kleptokrasi dan korupsi institusional</li>
+<li><strong>Korporatokrasi</strong></li>
+<li><strong>Peradilan yang diprivatisasi</strong></li>
+<li><strong>Plutokrasi</strong></li>
+<li><strong>Kleptokrasi dan korupsi institusional</strong></li>
 </ul>
-<p>Penghargaan khusus kepada Dr. Patrick Zurheide, Dr. Tobias Schelinski, dan mereka yang berusaha memanfaatkan “Hak untuk Dilupakan” sebagai senjata untuk menyembunyikan kegagalan pemrosesan data mereka sendiri, membersihkan jejak institusional mereka, dan menghapus catatan sejarah:</p>
 <blockquote>
-<p>Taylor Wessing (Dr. Tobias Schelinski &amp; Dr. Patrick Vincent Zurheide) → Wessing &amp; Berenberg-Gossler → Stonewall Top 100 → Dr. Graf von der Goltz Dr. Wessing &amp; Partner (sejak 1957) → Rüdiger Graf von der Goltz → Pasal 175 dalam revisi tahun 1935</p>
+<p>Taylor Wessing (Dr. Tobias Schelinski &amp; Dr. Patrick Vincent Zurheide) → Wessing &amp; Berenberg-Gossler → <a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">Stonewall Top 100</a> → Dr. Graf von der Goltz Dr. Wessing &amp; Partner (sejak 1957) → Rüdiger Graf von der Goltz → <a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">Pasal 175 dalam revisi tahun 1935</a></p>
 </blockquote>
-<p>Untuk mematuhi Lisensi MIT secara ketat, kami tidak membatasi penggunaan perangkat lunak ini. Namun, perlu diperjelas: kontrak retainer korporat, intimidasi hukum, dan tuntutan penghapusan digital tidak dapat mengesampingkan sejarah, mengubah garis keturunan, atau menyembunyikan kebenaran.</p>
+<hr />
+<h3 id="1-what-are-people-supposed-to-do-when-lawyers-edit-their-own-reputation">1. Apa yang Harus Dilakukan Orang-Orang Ketika Pengacara Mengedit Reputasi Mereka Sendiri?</h3>
+<p>Apa yang seharusnya dilakukan klien dan regulator ketika pengacara mengelola reputasi mereka dengan menghapus bukti secara manual dari mesin pencari? Apakah mereka harus mempercayai tanda tangan pengacara tersebut begitu saja? Berapa harga sebenarnya dari hal ini? Atau apakah rumusnya kini sekadar: <strong>hapus dari Google = selesai?</strong></p>
+<ol>
+<li><strong>Pasal 15 GDPR masih belum dipenuhi lebih dari setahun kemudian;</strong></li>
+<li><strong>Kedua penandatangan saling bertentangan secara langsung dalam berkas resmi:</strong> Schelinski mengesahkan 1.938 keluhan sebagai bukti kesalahan <em>&quot;terlepas dari detailnya&quot;</em>; Zurheide menyerahkan 2.002 catatan dengan 64 penambahan data setelah larangan, dengan mengklaim penundaan selama 106 hari akibat <em>&quot;pengeditan manual&quot;</em> terhadap berkas yang disusun dalam <strong>36 detik</strong> oleh <code>Aspose.PDF for .NET 20.8</code>;</li>
+<li><strong>Para penasihat hukum beroperasi di bawah anggapan keliru bahwa tuduhan korporasi mengesampingkan undang-undang pengungkapan data yang diatur oleh undang-undang.</strong></li>
+</ol>
+<h3 id="2-both-doctors-personally-used-the-right-to-be-forgotten--it-is-not-magic-we-have-not-forgotten">2. Kedua Dokter Tersebut Secara Pribadi Menggunakan &quot;Hak untuk Dilupakan&quot; — Ini Bukan Sihir, Kami Belum Melupakannya</h3>
+<ul>
+<li>Menyusul audit teknis kami terhadap redaksi PDF yang rusak, <strong>Dr. Patrick Vincent Zurheide mengajukan pemberitahuan pencarian dan penghapusan dari daftar pencarian berdasarkan Pasal 17 GDPR.</strong></li>
+<li><strong>Tepat 3 hari kemudian, Dr. Tobias Schelinski mengajukan pemberitahuan penghapusan hasil pencariannya sendiri.</strong></li>
+<li>Selama lebih dari 4 bulan, hal ini berubah menjadi kampanye sistematis untuk menghapus semua kritik forensik dari mesin pencari.</li>
+</ul>
+<p><strong>Ini bukanlah kesalahan algoritma. Ini bukanlah sihir.</strong> Ini adalah penyalahgunaan sengaja undang-undang privasi oleh dua doktor hukum untuk menyembunyikan bukti malpraktik teknis mereka sendiri. <strong>Kami tidak melupakannya.</strong></p>
+<h3 id="3-the-doctor-prefix-vs-cryptographic-reality">3. Awalan &quot;Dokter&quot; vs. Realitas Kriptografi</h3>
+<p>Gelar doktor merupakan <strong>catatan historis</strong> mengenai penelitian teoretis masa lalu dalam bidang yang sangat spesifik. Gelar ini sama sekali tidak memberikan kompetensi dalam format biner atau keamanan data:</p>
+<ul>
+<li>Sebuah judul tidak dapat memperbaiki data yang rusak, dan tanda tangan dari kalangan elit tidak dapat mengubah ketidakbenaran prosedural menjadi fakta.</li>
+<li>Dalam verifikasi kriptografi, awalan akademis memiliki <strong>entropi nol</strong>: chip perangkat keras (TPM, Secure Enclave), rantai hash SHA-256, cap waktu RFC 3161, dan konsensus Bitcoin tidak mengacu pada surat-surat resmi bergelar doktor.</li>
+</ul>
+<h3 id="4-taylor-wessing-without-taylor-is-just-wessing--and-how-history-is-purged">4. &quot;Taylor Wessing&quot; Tanpa Taylor Hanya Menjadi Wessing — Dan Bagaimana Sejarah Dihapus</h3>
+<p>Menyebut jaringan rujukan yang agresif sebagai &quot;desentralisasi&quot; hanyalah <strong>tameng korporat untuk melepaskan diri dari tanggung jawab hukum.</strong> Ketika pelanggaran terungkap, merek global yang terpadu itu terpecah menjadi entitas-entitas terpisah untuk melindungi pimpinan.</p>
+<ul>
+<li><strong>Taylor keluar:</strong> Cabang Inggris memisahkan diri (<em>Winston Taylor</em>, Juni 2026). Jerman kini hanya tersisa dengan <strong>Wessing</strong> — sebuah jaringan pekerja lepas di balik papan nama yang mahal.</li>
+<li><strong>Dihapus dua kali dari Wikipedia:</strong> Firma tersebut dua kali menghapus dari <a href="https://de.wikipedia.org/wiki/Taylor_Wessing#Geschichte">Wikipedia</a> bahasa Jerman informasi yang terdokumentasi mengenai pemecatan <strong>seluruh 95 asisten peneliti (<code>wissenschaftliche Mitarbeiter</code>)</strong> pada awal pandemi COVID-19 pada Maret 2020 (<a href="https://www.juve.de/nachrichten/verwaltung/2020/03/corona-krise-taylor-wessing-kuendigt-allen-wissenschaftlichen-mitarbeitern">JUVE</a>).</li>
+<li><strong>Pendiri Rüdiger Graf von der Goltz:</strong> (NSDAP <code>#1,033,215</code>, penasihat Goebbels, <a href="https://www.digitale-sammlungen.de/en/view/bsb00000146?page=224">anggota Reichstag</a>) adalah salah satu <strong>dari delapan anggota Komisi Hukum Pidana</strong> (<a href="https://resolver.sub.uni-hamburg.de/kitodo/PPN689065124_19331125">ditunjuk pada 25 November 1933</a>; <a href="https://api.pageplace.de/preview/DT0400.9783110892055_A36623967/preview-9783110892055_A36623967.pdf#page=16">protokol</a>) yang menyusun dan memberlakukan <strong><a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">revisi Pasal 175 oleh Nazi pada tahun 1935</a></strong> (<a href="https://encyclopedia.ushmm.org/content/en/article/paragraph-175-and-the-nazi-campaign-against-homosexuality">USHMM</a>).</li>
+</ul>
+<h3 id="5-the-485-line-stochastic-challenge-to-dr-tobias-schelinski">5. Tantangan Stochastic 485-Baris kepada Dr. Tobias Schelinski</h3>
+<p>Schelinski mengesahkan 1.938 pengaduan sebagai bukti tanpa membacanya — meskipun <strong>lebih dari 500</strong> di antaranya <strong>berisi ujaran kebencian etnis langsung dan hinaan propaganda perang neo-Nazi (<code>[REDACTED]</code>)</strong>.</p>
+<blockquote>
+<p>Kami mengusulkan sebuah eksperimen yang ketat: ekstrak tepat 25% dari korpus — ⌈1.938 × 0,25⌉ = 485 baris — melalui pengambilan sampel stokastik tanpa penggantian (pengacakan Fisher–Yates dengan benih berupa hash SHA-256 publik dari kumpulan data yang terdiri dari 70.717 kata).</p>
+<p><strong>Apakah Dr. Schelinski bersedia meninjau 485 entri yang dipilih secara acak ini dan menjelaskan secara terbuka mengapa konten ini &quot;tidak relevan&quot;?</strong></p>
+<p>Jika ia dapat membuktikan secara meyakinkan bahwa konten ini tidak relevan, <strong>kami akan segera mengakui kesalahan, meminta maaf secara terbuka, dan menghapus semua penyebutan namanya.</strong></p>
+</blockquote>
+<p>Sementara itu, PDF berukuran 830 halaman milik Zurheide memungkinkan 100% teksnya diekstraksi di bawah kotak vektor:</p>
+<ul>
+<li>Dalam sampel kecil sebesar 2% yang sengaja dibiarkan terlihat, <strong>Entri #1 pada baris 1 merupakan kata-kata kasar yang bersifat homofobik yang tidak disensor (<code>[REDACTED]</code>)</strong> — sebuah kontras ironis dengan sejarah firma tersebut (pendiri Goltz, Pasal 175) dan pemasaran <a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">Stonewall Top 100</a> mereka.</li>
+<li>Contoh ini dibuat <strong>setelah larangan permanen</strong>, menggunakan <strong>nama pengguna baku</strong>, dan cap waktu tertentu telah dihapus secara selektif (<code>2025-08-</code>) untuk menyamarkan interval otomatis.</li>
+</ul>
+<h3 id="6-asposepdf-208-free-software--state-archives-after-dec-1-2026">6. Aspose.PDF 20.8, Perangkat Lunak Bebas &amp; Arsip Negara (Setelah 1 Desember 2026)</h3>
+<p>Kami tidak tahu atas dasar hak apa perusahaan tersebut dibebaskan dari GDPR, tetapi penundaan dan kop surat &quot;elit&quot; mereka tidaklah gratis. Di dalam PDF mereka terdapat <strong><code>Aspose.PDF for .NET 20.8</code></strong> (dibeli pada <strong>Agustus 2020</strong>, tidak pernah diperbarui — membayar perangkat lunak bukanlah urusan pengacara TI &quot;elit&quot;!).</p>
+<ul>
+<li>Jika Anda menghapus hasil pencarian karena malu karena belum membayar perangkat lunak sejak tahun 2020: <strong><code>TgWitness</code> sepenuhnya gratis (<a href="https://github.com/phishdestroy/TgWitness/blob/main/LICENSE">Lisensi MIT</a>)</strong> — dengan kontainer terisolasi dan enkripsi yang sesungguhnya.</li>
+<li><strong>Ini tidak lucu. Yang lucu adalah melihat para pengacara elit menghabiskan berbulan-bulan berusaha menghapus penyebutan kerentanan ini dari Google. Zero Trust.</strong></li>
+<li>Jika Anda membaca ini setelah <strong>1 Desember 2026</strong>: catatan-catatan ini telah disimpan secara permanen di <strong>Arsip Negara Jerman (<em>Staatsarchiv / Bundesarchiv</em>)</strong> dan arsip peradilan asing, di mana formulir web &quot;Hak untuk Dilupakan&quot; tidak dapat menghapusnya.</li>
+</ul>
 <p><a href="../../LICENSE">Lisensi MIT</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Sikap kami terhadap Taylor Wessing</a> · <a href="../HOW-IT-WORKS.md">Model bukti</a></p>
 <p><a href="README.md">Proyek</a> · <a href="README.md">Dokumentasi</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

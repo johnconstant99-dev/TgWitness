@@ -6,21 +6,65 @@
 <p><strong>PhishDestroy · የTgWitness ፕሮጀክት ማስታወቂያ</strong></p>
 <p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">የመነሻ ማስረጃ</a> · <a href="../../NOTICE">የመጀመሪያው NOTICE</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ የሥነ ምግባር ማስታወቂያ እና ታሪካዊ ቀጣይነት</h2>
-<p>ለአንዳንድ የሕግ ድርጅቶች—በተለይም ለDr. Tobias Schelinski እና Dr. Patrick Vincent Zurheide—ሒሳብና ተጨባጭ እውነታዎች ምንም ፋይዳ እንደሌላቸው በቅርቡ ተረድተናል።</p>
-<p>እናንተ ራሳችሁ በመሠረታዊ የውሂብ አያያዝ እየተሳናችሁ፣ GDPRን አለማክበርን እንደ ንግድ አገልግሎት ለኮርፖሬሽኖች መሸጥ የሕግ ሙያዊ ብቃት አይደለም።</p>
-<p>እናንተ ራሳችሁ ሕጉ እንደሆናችሁ፣ ወይም በተጭበረበረ አቤቱታ ላይ የታዋቂ ሰው ፊርማ መኖሩ ውሸትን በተአምር ወደ እውነት እንደሚቀይረው በማመን መሥራት፣ የቴክኒክ ብቃት ማነስን አይሸፍንም።</p>
+<p>ለአንዳንድ የሕግ ድርጅቶች — በተለይም ለ<strong>Dr. Tobias Schelinski</strong> እና ለ<strong>Dr. Patrick Vincent Zurheide</strong> — ሒሳብ፣ ቴክኒካዊ ታማኝነት እና ተጨባጭ እውነታዎች ምንም ፋይዳ እንደሌላቸው ተረድተናል።</p>
+<p>በመሠረታዊ የውሂብ አያያዝ እየተሳኑ GDPRን አለማክበርን ለኮርፖሬሽኖች መሸጥ የሕግ ሙያዊ ብቃት አይደለም። በተጭበረበረ አቤቱታ ላይ ያለ የታዋቂ ሰው ፊርማ የቴክኒክ ብቃት ማነስን አይሸፍንም።</p>
 <p>ይህ መሣሪያ የሚከተሉት በሚሰፍኑባቸው የሕግ ሥልጣን ክልሎች ውስጥ ካለው አሠራር ጋር አይስማማም፦</p>
 <ul>
-<li>የኮርፖሬሽኖች የበላይነት</li>
-<li>ወደ ግል ወይም ወደ ንግድ የተቀየረ ፍትሕ</li>
-<li>የሀብታሞች አገዛዝ</li>
-<li>የዘራፊዎች አገዛዝ እና ተቋማዊ ሙስና</li>
+<li><strong>የኮርፖሬሽኖች የበላይነት</strong></li>
+<li><strong>ወደ ግል የተቀየረ ፍትሕ</strong></li>
+<li><strong>የሀብታሞች አገዛዝ</strong></li>
+<li><strong>የዘራፊዎች አገዛዝ እና ተቋማዊ ሙስና</strong></li>
 </ul>
-<p>የራሳቸውን የውሂብ አያያዝ ጉድለቶች ለመቅበር፣ የተቋማቸውን የዘር ሐረግ ለማንጻት እና ታሪካዊ መዝገቡን ለማጥፋት «የመረሳት መብት»ን እንደ መሣሪያ ለመጠቀም ለሚሞክሩት፣ በተለይም ለDr. Patrick Zurheide እና Dr. Tobias Schelinski፣ ልዩ ማስታወሻ፦</p>
 <blockquote>
-<p>Taylor Wessing (Dr. Tobias Schelinski &amp; Dr. Patrick Vincent Zurheide) → Wessing &amp; Berenberg-Gossler → Stonewall Top 100 → Dr. Graf von der Goltz Dr. Wessing &amp; Partner (ከ1957 ጀምሮ) → Rüdiger Graf von der Goltz → በ1935 የተሻሻለው አንቀጽ 175</p>
+<p>Taylor Wessing (Dr. Tobias Schelinski &amp; Dr. Patrick Vincent Zurheide) → Wessing &amp; Berenberg-Gossler → <a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">Stonewall Top 100</a> → Dr. Graf von der Goltz Dr. Wessing &amp; Partner (ከ1957 ጀምሮ) → Rüdiger Graf von der Goltz → <a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">በ1935 የተሻሻለው አንቀጽ 175</a></p>
 </blockquote>
-<p>የMIT ፈቃድን በትክክል ለማክበር፣ የዚህን ሶፍትዌር አጠቃቀም አንገድብም። ይሁን እንጂ አንድ ነገር ግልጽ ይሁን፦ ከኮርፖሬሽኖች የሚከፈሉ የሕግ አገልግሎት ክፍያዎች፣ በሕግ ስም ማስፈራራት እና ዲጂታል መረጃ እንዲጠፋ የሚቀርቡ ጥያቄዎች ታሪክን ሊሽሩ፣ የዘር ሐረግን እንደገና ሊጽፉ ወይም እውነትን ሊደብቁ አይችሉም።</p>
+<hr />
+<h3 id="1-what-are-people-supposed-to-do-when-lawyers-edit-their-own-reputation">1. ጠበቆች የራሳቸውን ስም ራሳቸው ሲያርሙ ሰዎች ምን ማድረግ አለባቸው?</h3>
+<p>ጠበቆች ማስረጃዎችን ከፍለጋ ሞተሮች በእጅ በማስወገድ ስማቸውን ሲያስተዳድሩ ደንበኞችና ተቆጣጣሪ አካላት ምን ማድረግ አለባቸው? ፊርማቸውን በጭፍን ማመን? እውነተኛ ዋጋው ምንድን ነው? ወይስ ቀመሩ አሁን በቀላሉ <strong>ከGoogle ማስወገድ = ተጠናቀቀ ሆኗል?</strong></p>
+<ol>
+<li><strong>በGDPR አንቀጽ 15 የቀረበው ጥያቄ ከአንድ ዓመት በኋላም አልተፈጸመም፤</strong></li>
+<li><strong>ሁለቱ ፈራሚዎች በይፋዊ ሰነዶች እርስ በርሳቸው በቀጥታ ተቃርነዋል፦</strong> Schelinski 1,938 ቅሬታዎችን <em>«ዝርዝሮቹ ምንም ቢሆኑ»</em> የጥፋተኝነት ማስረጃ እንደሆኑ አረጋገጠ፤ Zurheide ደግሞ ከእገዳው በኋላ የገቡ 64 ግቤቶችን የያዙ 2,002 መዝገቦችን አቀረበ፤ በ<code>Aspose.PDF for .NET 20.8</code> በ<strong>36 ሰከንድ</strong> የተዘጋጀን ፋይል <em>«በእጅ ለማረም»</em> 106 ቀናት እንደዘገየ ገለጸ፤</li>
+<li><strong>ጠበቆቹ የኮርፖሬሽን ክሶች ከሕጋዊ የውሂብ ይፋ የማድረግ ግዴታዎች በላይ ናቸው ብለው በተሳሳተ እምነት ይሠራሉ።</strong></li>
+</ol>
+<h3 id="2-both-doctors-personally-used-the-right-to-be-forgotten--it-is-not-magic-we-have-not-forgotten">2. ሁለቱም ዶክተሮች «የመረሳት መብት»ን በግል ተጠቅመዋል — ይህ ተአምር አይደለም፣ አልረሳንም</h3>
+<ul>
+<li>የተበላሸውን የPDF ሽፋን ቴክኒካዊ ኦዲታችንን ተከትሎ <strong>Dr. Patrick Vincent Zurheide በGDPR አንቀጽ 17 መሠረት ከፍለጋ ውጤቶች የማስወገድ ጥያቄ አቀረቡ።</strong></li>
+<li><strong>ልክ ከ3 ቀናት በኋላ Dr. Tobias Schelinski የራሳቸውን የማስወገድ ጥያቄ አቀረቡ።</strong></li>
+<li>በ4 ወራት ውስጥ ይህ ሁሉንም የፎረንሲክ ትችቶች ከፍለጋ ሞተሮች ለማጥፋት የተደረገ ሥርዓታዊ ዘመቻ ሆነ።</li>
+</ul>
+<p><strong>ይህ የአልጎሪዝም ስሕተት አልነበረም። ተአምርም አልነበረም።</strong> ሁለት የሕግ ዶክተሮች የራሳቸውን የቴክኒክ ስሕተት ማስረጃ ለመቅበር የግላዊነት ሕጎችን ሆን ብለው አላግባብ መጠቀማቸው ነበር። <strong>አልረሳንም።</strong></p>
+<h3 id="3-the-doctor-prefix-vs-cryptographic-reality">3. «ዶክተር» የሚለው ቅድመ ማዕረግ ከክሪፕቶግራፊ እውነታ አንጻር</h3>
+<p>የዶክትሬት ዲግሪ በጠባብ ዘርፍ የተካሄደ ያለፈ የንድፈ ሐሳብ ምርምር <strong>ታሪካዊ መዝገብ</strong> ነው። በሁለትዮሽ ቅርጸቶች ወይም በውሂብ ደኅንነት ምንም ብቃት አይሰጥም፦</p>
+<ul>
+<li>ማዕረግ የተበላሸ ውሂብን ሊያስተካክል አይችልም፣ የታዋቂ ሰው ፊርማም የሥነ ሥርዓት ሐሰትን ወደ እውነታ ሊቀይር አይችልም።</li>
+<li>በክሪፕቶግራፊ ማረጋገጫ ውስጥ የአካዳሚክ ማዕረጎች <strong>ዜሮ ኤንትሮፒ</strong> አላቸው፦ የሃርድዌር ቺፖች (TPM፣ Secure Enclave)፣ የSHA-256 ሃሽ ሰንሰለቶች፣ የRFC 3161 የጊዜ ማኅተሞች እና የBitcoin ስምምነት ለዶክትሬት ደብዳቤ ራሳቸውን አያስገዙም።</li>
+</ul>
+<h3 id="4-taylor-wessing-without-taylor-is-just-wessing--and-how-history-is-purged">4. «Taylor Wessing» ያለ Taylor Wessing ብቻ ነው — ታሪክ እንዴት እንደሚጠፋ</h3>
+<p>ኃይለኛ የሪፈራል መረብን «ያልተማከለ አሠራር» ብሎ መሰየም <strong>የሕግ ተጠያቂነትን ለመበተን የሚያገለግል የኮርፖሬት ጋሻ ብቻ ነው።</strong> ጥሰቶች ሲጋለጡ፣ አንድ የሆነው ዓለም አቀፍ ብራንድ አመራሩን ለመጠበቅ ወደ ተለያዩ ድርጅቶች ይከፋፈላል።</p>
+<ul>
+<li><strong>Taylor ወጣ፦</strong> የብሪታንያው ክፍል ተለየ (<em>Winston Taylor</em>፣ ጁን 2026)። በጀርመን የቀረው <strong>Wessing</strong> ነው — በውድ ታፔላ ስር ያለ የፍሪላንስ መረብ።</li>
+<li><strong>ሁለት ጊዜ ከዊኪፔዲያ ተሰርዟል፦</strong> ድርጅቱ በማርች 2020 የCOVID-19 መጀመሪያ ላይ <strong>ሁሉንም 95 የተማሪ ረዳቶች (<code>wissenschaftliche Mitarbeiter</code>)</strong> ማሰናበቱን የሚገልጸውን የተመዘገበ እውነታ ከጀርመንኛ <a href="https://de.wikipedia.org/wiki/Taylor_Wessing#Geschichte">ዊኪፔዲያ</a> ሁለት ጊዜ አስወግዷል (<a href="https://www.juve.de/nachrichten/verwaltung/2020/03/corona-krise-taylor-wessing-kuendigt-allen-wissenschaftlichen-mitarbeitern">JUVE</a>)።</li>
+<li><strong>መሥራቹ Rüdiger Graf von der Goltz፦</strong> (NSDAP <code>#1,033,215</code>፣ የGoebbels አማካሪ፣ <a href="https://www.digitale-sammlungen.de/en/view/bsb00000146?page=224">የReichstag ተወካይ</a>) የ<strong><a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">በ1935 የናዚ የአንቀጽ 175 ማሻሻያ</a></strong>ን ያረቀቁና ያጸደቁ <strong>ከ8ቱ የወንጀል ሕግ ኮሚሽን አባላት አንዱ</strong> ነበሩ (<a href="https://resolver.sub.uni-hamburg.de/kitodo/PPN689065124_19331125">ኖቬምበር 25 ቀን 1933 ተሾሙ</a>፤ <a href="https://api.pageplace.de/preview/DT0400.9783110892055_A36623967/preview-9783110892055_A36623967.pdf#page=16">ቃለ ጉባኤዎች</a>) (<a href="https://encyclopedia.ushmm.org/content/en/article/paragraph-175-and-the-nazi-campaign-against-homosexuality">USHMM</a>)።</li>
+</ul>
+<h3 id="5-the-485-line-stochastic-challenge-to-dr-tobias-schelinski">5. ለDr. Tobias Schelinski የቀረበ የ485 መስመሮች ስቶካስቲክ ፈተና</h3>
+<p>Schelinski 1,938 ቅሬታዎችን ሳያነብ እንደ ማስረጃ አረጋገጠ — ምንም እንኳን <strong>ከ500 በላይ የሚሆኑት ቀጥተኛ የብሔር ጥላቻ እና የኒዮ-ናዚ የጦርነት ፕሮፓጋንዳ ስድቦች (<code>[REDACTED]</code>)</strong> ቢሆኑም።</p>
+<blockquote>
+<p>ጥብቅ ሙከራ እናቀርባለን፦ ከጠቅላላው ስብስብ ልክ 25% — ⌈1,938 × 0.25⌉ = 485 መስመሮች — ያለ መተካት በዘፈቀደ ናሙና እንዲወጣ (በ70,717 ቃላት የውሂብ ስብስብ ይፋዊ የSHA-256 ሃሽ የተዘራ የFisher–Yates ቅልቅል)።</p>
+<p><strong>Dr. Schelinski እነዚህን በዘፈቀደ የተመረጡ 485 ግቤቶች ለመመርመርና ይህ ይዘት ለምን «አግባብነት የሌለው» እንደሆነ በይፋ ለማብራራት ዝግጁ ናቸው?</strong></p>
+<p>ይህ ይዘት አግባብነት እንደሌለው አሳማኝ በሆነ መንገድ ካሳዩ፣ <strong>ወዲያውኑ ስሕተታችንን እንቀበላለን፣ በይፋ ይቅርታ እንጠይቃለን እንዲሁም ስማቸውን የሚጠቅሱ ሁሉንም ጽሑፎች እናስወግዳለን።</strong></p>
+</blockquote>
+<p>በተመሳሳይ ጊዜ፣ የZurheide ባለ 830 ገጽ PDF በቬክተር ሳጥኖች ስር ያለውን ጽሑፍ 100% ማውጣት በሚቻልበት ሁኔታ ትቶታል፦</p>
+<ul>
+<li>ሆን ተብሎ እንዲታይ በተተወው 2% ትንሽ ናሙና ውስጥ <strong>በመስመር 1 ላይ ያለው ግቤት #1 ያልተሸፈነ የግብረ ሰዶማውያን ጥላቻ ስድብ ነው (<code>[REDACTED]</code>)</strong> — ይህ ከድርጅቱ ታሪክ (መሥራቹ Goltz፣ አንቀጽ 175) እና ከ<a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">Stonewall Top 100</a> ማስታወቂያው ጋር የሚያስገርም ንፅፅር ነው።</li>
+<li>ናሙናው <strong>ከቋሚ እገዳው በኋላ</strong> ያለ ነው፣ <strong>በቀመር የተሠሩ የተጠቃሚ ስሞችን</strong> ይጠቀማል፣ እንዲሁም አውቶማቲክ ክፍተቶችን ለመደበቅ የተወሰኑ የጊዜ ማኅተሞች ተመርጠው ተቆርጠዋል (<code>2025-08-</code>)።</li>
+</ul>
+<h3 id="6-asposepdf-208-free-software--state-archives-after-dec-1-2026">6. Aspose.PDF 20.8፣ ነፃ ሶፍትዌር እና የመንግሥት ቤተ መዛግብት (ከዲሴምበር 1 ቀን 2026 በኋላ)</h3>
+<p>ኮርፖሬሽኑ ከGDPR በምን መብት ነፃ እንደሆነ አናውቅም፣ ነገር ግን የታዋቂዎቹ መዘግየትና የደብዳቤ ራስጌያቸው ነፃ አልነበሩም። በPDF ፋይላቸው ውስጥ <strong><code>Aspose.PDF for .NET 20.8</code></strong> ተገኝቷል (በ<strong>ኦገስት 2020</strong> የተገዛ፣ ፈጽሞ ያልታደሰ — ለሶፍትዌር መክፈል ለታዋቂ የIT ጠበቆች አይደለም!)።</p>
+<ul>
+<li>ከ2020 ጀምሮ ለሶፍትዌር ባለመክፈላችሁ አፍራችሁ የፍለጋ ውጤቶችን እያጸዳችሁ ከሆነ፦ <strong><code>TgWitness</code> ሙሉ በሙሉ ነፃ ነው (<a href="https://github.com/phishdestroy/TgWitness/blob/main/LICENSE">የMIT ፈቃድ</a>)</strong> — በተለዩ ኮንቴይነሮች እና በእውነተኛ ምስጠራ።</li>
+<li><strong>ይህ አስቂኝ አይደለም። አስቂኙ ነገር ታዋቂ ጠበቆች ስለዚህ ተጋላጭነት የሚጠቅሱ ጽሑፎችን ከGoogle ለማስወገድ ወራትን ሲያጠፉ ማየት ነው። Zero Trust።</strong></li>
+<li>ይህን ከ<strong>ዲሴምበር 1 ቀን 2026</strong> በኋላ እያነበቡ ከሆነ፦ እነዚህ መዛግብት በ<strong>ጀርመን የመንግሥት ቤተ መዛግብት (<em>Staatsarchiv / Bundesarchiv</em>)</strong> እና በውጭ የፍትሕ ቤተ መዛግብት ውስጥ ለዘለቄታው ተቀምጠዋል፤ ማንኛውም የ«የመረሳት መብት» የድር ቅጽ ሊያስወግዳቸው አይችልም።</li>
+</ul>
 <p><a href="../../LICENSE">የMIT ፈቃድ</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">በTaylor Wessing ላይ ያለን አቋም</a> · <a href="../HOW-IT-WORKS.md">የማስረጃ ሞዴል</a></p>
 <p><a href="README.md">ፕሮጀክት</a> · <a href="README.md">ሰነዶች</a> · <a href="../wiki/Home.md">ዊኪ</a></p>
 </div>

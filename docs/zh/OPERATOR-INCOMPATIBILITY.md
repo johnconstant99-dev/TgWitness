@@ -6,21 +6,65 @@
 <p><strong>PhishDestroy · TgWitness 项目公告</strong></p>
 <p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">源记录</a> · <a href="../../NOTICE">原始声明</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ 道德声明与历史延续性</h2>
-<p>我们最近了解到，对于某些律师事务所——特别是托比亚斯·谢林斯基博士和帕特里克·文森特·祖尔海德博士——而言，数学和客观事实毫无意义。</p>
-<p>将GDPR不合规行为作为商业服务推销给企业，而自身却连基本的数据处理都做不到，这并非法律专业知识。</p>
-<p>抱有“你就是法律”的妄想，或者认为伪造索赔单上某个精英的签名能神奇地将谎言变成真相，都无法掩盖技术上的无能。</p>
+<p>我们了解到，对于某些律师事务所——特别是<strong>托比亚斯·谢林斯基博士</strong>和<strong>帕特里克·文森特·祖尔海德博士</strong>——而言，数学、技术诚信和客观事实均无关紧要。</p>
+<p>一边向企业兜售不符合《通用数据保护条例》（GDPR）的方案，一边却连基本的数据处理都做不好，这绝非法律专业能力。在伪造的索赔文件上加盖精英人士的签名，也无法掩盖技术上的无能。</p>
 <p>该工具不适用于以下情况占主导地位的司法管辖区：</p>
 <ul>
-<li>企业统治</li>
-<li>私有化或商业化司法</li>
-<li>金权政治</li>
-<li>盗贼统治与制度性腐败</li>
+<li><strong>企业统治</strong></li>
+<li><strong>司法私有化</strong></li>
+<li><strong>金权政治</strong></li>
+<li><strong>掠夺性统治与制度性腐败</strong></li>
 </ul>
-<p>特别提及帕特里克·祖尔海德博士、托比亚斯·谢林斯基博士，以及那些试图将“被遗忘权”武器化，以掩盖自身数据处理失误、粉饰机构血统并抹去历史记录的人士：</p>
 <blockquote>
-<p>泰勒·韦辛（Dr. Tobias Schelinski &amp; Dr. Patrick Vincent Zurheide）→ 韦辛与贝伦贝格-戈斯勒 → 斯通沃尔百强 → 格拉夫·冯·德·戈尔茨博士 韦辛与合伙人 （自 1957 年起）→ 吕迪格·冯·德·戈尔茨伯爵 → 1935 年修订版的第 175 条</p>
+<p>泰勒·韦辛（托比亚斯·谢林斯基博士与帕特里克·文森特·祖尔海德博士）→ 韦辛与贝伦贝格-戈斯勒 → <a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">石墙百强</a> → 冯·德·戈尔茨伯爵博士 韦辛与合伙人 （自1957年起）→ 吕迪格·冯·德尔·戈尔茨伯爵 → <a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">1935年修订版的第175条</a></p>
 </blockquote>
-<p>为严格遵守MIT许可证，我们不对本软件的使用设置限制。但需明确：企业预付金、法律恐吓及数字删除要求，均无法抹去历史、篡改溯源或掩盖真相。</p>
+<hr />
+<h3 id="1-what-are-people-supposed-to-do-when-lawyers-edit-their-own-reputation">1. 当律师们在编辑自己的声誉时，人们该如何应对？</h3>
+<p>当律师通过手动从搜索引擎中删除证据来管理自身声誉时，客户和监管机构该如何应对？难道要仅凭信任就相信他们的声明吗？这究竟要付出怎样的代价？还是说，如今的公式已经简单化为：<strong>从谷歌上删除＝大功告成？</strong></p>
+<ol>
+<li><strong>《通用数据保护条例》（GDPR）第15条在一年多后仍未得到落实；</strong></li>
+<li><strong>两位签署人在官方文件中相互矛盾：</strong>谢林斯基将1,938份投诉作为定罪证据予以认证<em>，称“无论细节如何”</em>； 祖尔海德则提交了2,002份记录，其中包含64次禁令后的追加操作，并声称因对一份仅<strong>用36秒</strong>便生成的文件<em>进行“手动编辑”</em>而导致106天的延误，该文件由 <code>Aspose.PDF for .NET 20.8</code>;</li>
+<li><strong>律师们误以为企业的指控可以凌驾于法定数据披露法律之上。</strong></li>
+</ol>
+<h3 id="2-both-doctors-personally-used-the-right-to-be-forgotten--it-is-not-magic-we-have-not-forgotten">2. 两位医生都亲自行使了“被遗忘权”——这并非魔法，我们并未遗忘</h3>
+<ul>
+<li>在我们对该损坏的PDF文件中被遮盖内容进行技术审计后，<strong>帕特里克·文森特·祖尔海德博士根据《通用数据保护条例》（GDPR）第17条提交了搜索结果下架通知。</strong></li>
+<li><strong>整整3天后，托比亚斯·谢林斯基博士提交了自己的搜索结果下架通知。</strong></li>
+<li>在长达4个月的时间里，这演变成了一场系统性的行动，旨在从搜索引擎中清除所有具有批判性的分析内容。</li>
+</ul>
+<p><strong>这并非算法错误，也非魔法。</strong>而是两名法学博士蓄意滥用隐私法，企图掩盖其自身技术过失的证据。<strong>我们不会忘记。</strong></p>
+<h3 id="3-the-doctor-prefix-vs-cryptographic-reality">3. “博士”头衔与密码学现实</h3>
+<p>博士学位是过去在某个狭窄领域内开展的理论研究<strong>的历史记录</strong>。它对二进制格式或数据安全毫无帮助：</p>
+<ul>
+<li>头衔无法修复损坏的数据，精英的签名也无法将程序上的虚假陈述变成事实。</li>
+<li>在加密验证中，学术前缀的<strong>熵为零</strong>：硬件芯片（TPM、安全隔离区）、SHA-256哈希链、RFC 3161时间戳以及比特币共识机制均不以博士学位为依据。</li>
+</ul>
+<h3 id="4-taylor-wessing-without-taylor-is-just-wessing--and-how-history-is-purged">4. “Taylor Wessing”若去掉“Taylor”就只剩“Wessing”——以及历史如何被抹去</h3>
+<p>将一种激进的推荐网络包装成“去中心化”，不过是<strong>企业为分散法律责任而设置的保护伞。</strong>当违规行为被曝光时，这个统一的全球品牌便会分裂成多个独立实体，以保护领导层。</p>
+<ul>
+<li><strong>泰勒退出了：</strong>英国分部已脱离（<em>温斯顿·泰勒</em>，2026年6月）。德国方面只剩下<strong>韦辛</strong>——一个挂着昂贵招牌的自由职业者网络。</li>
+<li><strong>两次被维基百科删除：</strong>该律所曾两次从德语<a href="https://de.wikipedia.org/wiki/Taylor_Wessing#Geschichte">维基百科</a>中删除有关2020年3月新冠疫情爆发初期解雇<strong>全部95名学生助理（<code>wissenschaftliche Mitarbeiter</code>）</strong>的记录（<a href="https://www.juve.de/nachrichten/verwaltung/2020/03/corona-krise-taylor-wessing-kuendigt-allen-wissenschaftlichen-mitarbeitern">JUVE</a>）。</li>
+<li><strong>创始人吕迪格·格拉夫·冯·德尔·戈尔茨：</strong>（纳粹党 <code>#1,033,215</code>、戈培尔的法律顾问、<a href="https://www.digitale-sammlungen.de/en/view/bsb00000146?page=224">帝国议会议员</a>）是<strong>刑法委员会8名成员之一</strong>（<a href="https://resolver.sub.uni-hamburg.de/kitodo/PPN689065124_19331125">1933年11月25日任命</a>；<a href="https://api.pageplace.de/preview/DT0400.9783110892055_A36623967/preview-9783110892055_A36623967.pdf#page=16">会议记录</a>），该委员会起草并颁布了<strong><a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">1935年纳粹对第175条的修订</a></strong>（<a href="https://encyclopedia.ushmm.org/content/en/article/paragraph-175-and-the-nazi-campaign-against-homosexuality">美国大屠杀纪念馆</a>）。</li>
+</ul>
+<h3 id="5-the-485-line-stochastic-challenge-to-dr-tobias-schelinski">5. 针对托比亚斯·谢林斯基博士的485行随机挑战</h3>
+<p>舍林斯基在未阅读的情况下，将1,938份投诉认定为证据——尽管其中<strong>超过500份属于直接的种族仇恨和新纳粹战争宣传性辱骂（<code>[REDACTED]</code>）</strong>。</p>
+<blockquote>
+<p>我们提出一项严谨的实验：从语料库中精确提取25%的内容—— ⌈1,938 × 0.25⌉ = 485 行——通过无放回的随机抽样（采用费舍尔-耶茨（Fisher–Yates）洗牌算法，种子为该 70,717 词数据集的公开 SHA-256 哈希值）进行抽取。</p>
+<p><strong>谢林斯基博士是否准备审查这485条随机抽取的条目，并公开解释为何这些内容“无关紧要”？</strong></p>
+<p>如果他能令人信服地证明该内容无关紧要，<strong>我们将立即承认错误，公开致歉，并删除所有提及他姓名的内容。</strong></p>
+</blockquote>
+<p>与此同时，Zurheide那份长达830页的PDF文件中，100%的文本均可在矢量框内被提取：</p>
+<ul>
+<li>在刻意保留可见的微小2%样本中，<strong>第1行第1条记录是一条未经删节的恐同辱骂用语（<code>[REDACTED]</code>）</strong>——这与该律所的历史（创始人戈尔茨，第175条）及其<a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">石墙百强</a>营销活动形成了讽刺性的反差。</li>
+<li>该示例发布于<strong>永久封禁之后</strong>，使用了<strong>固定格式的用户名</strong>，且特定时间戳已被有选择地删除（<code>2025-08-</code>）以掩盖自动化发布间隔。</li>
+</ul>
+<h3 id="6-asposepdf-208-free-software--state-archives-after-dec-1-2026">6. Aspose.PDF 20.8、自由软件与国家档案馆（2026年12月1日之后）</h3>
+<p>我们不知该企业凭何理由豁免于《通用数据保护条例》（GDPR），但他们那套“精英式”的拖延战术和带公司抬头的信函可并非免费。在其PDF文件中，我们发现了<strong><code>Aspose.PDF for .NET 20.8</code></strong>（<strong>于2020年8月</strong>购买，从未续订——毕竟，为软件付费可不是“精英”IT律师的作风！）。</p>
+<ul>
+<li>如果你因为自2020年以来一直未付费购买软件而感到难为情，从而清理搜索结果：<strong><code>TgWitness</code>完全免费（<a href="https://github.com/phishdestroy/TgWitness/blob/main/LICENSE">MIT许可证</a>）</strong>——并具备隔离容器和真正的加密功能。</li>
+<li><strong>这没什么好笑的。真正好笑的是，看着那些精英律师花数月时间试图从谷歌上删除关于此漏洞的提及。零信任。</strong></li>
+<li>如果您<strong>在2026年12月1日之后</strong>阅读本文：这些记录已永久存入<strong>德国国家档案馆（<em>Staatsarchiv / Bundesarchiv</em>）</strong>及国外司法档案馆，任何“被遗忘权”网络表单均无法将其删除。</li>
+</ul>
 <p><a href="../../LICENSE">MIT 许可协议</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">我们对 Taylor Wessing 的立场</a> · <a href="../HOW-IT-WORKS.md">证据模型</a></p>
 <p><a href="README.md">项目</a> · <a href="README.md">文档</a> · <a href="../wiki/Home.md">维基</a></p>
 </div>

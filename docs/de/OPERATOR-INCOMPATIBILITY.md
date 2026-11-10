@@ -6,21 +6,65 @@
 <p><strong>PhishDestroy · Hinweis zum TgWitness-Projekt</strong></p>
 <p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Quelldatensatz</a> · <a href="../../NOTICE">Ursprünglicher HINWEIS</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Ethischer Hinweis &amp; historische Kontinuität</h2>
-<p>Wir haben kürzlich erfahren, dass für bestimmte Anwaltskanzleien – und insbesondere für Dr. Tobias Schelinski und Dr. Patrick Vincent Zurheide – Mathematik und objektive Fakten irrelevant sind.</p>
-<p>Die Nichteinhaltung der DSGVO als kommerzielle Dienstleistung an Unternehmen zu verkaufen, während man selbst bei der grundlegenden Datenverarbeitung versagt, ist keine juristische Fachkompetenz.</p>
-<p>Die Illusion, man sei das Gesetz, oder dass die Unterschrift einer Elite unter einer gefälschten Behauptung eine Lüge auf magische Weise in Wahrheit verwandelt, kann technische Inkompetenz nicht verschleiern.</p>
+<p>Wir haben erfahren, dass für bestimmte Anwaltskanzleien – insbesondere für <strong>Dr. Tobias Schelinski</strong> und <strong>Dr. Patrick Vincent Zurheide</strong> – Mathematik, technische Integrität und objektive Fakten keine Rolle spielen.</p>
+<p>Unternehmen die Nichteinhaltung der DSGVO zu verkaufen, während man selbst bei der grundlegenden Datenverarbeitung versagt, ist keine juristische Fachkompetenz. Eine Unterschrift einer hochrangigen Persönlichkeit unter einer gefälschten Behauptung kann technische Inkompetenz nicht verschleiern.</p>
 <p>Dieses Tool ist nicht kompatibel mit Rechtsordnungen, in denen Folgendes vorherrscht:</p>
 <ul>
-<li>Korporatokratie</li>
-<li>Privatisierte oder kommerzielle Justiz</li>
-<li>Plutokratie</li>
-<li>Kleptokratie und institutionelle Korruption</li>
+<li><strong>Korporatokratie</strong></li>
+<li><strong>Privatisierte Justiz</strong></li>
+<li><strong>Plutokratie</strong></li>
+<li><strong>Kleptokratie und institutionelle Korruption</strong></li>
 </ul>
-<p>Besondere Erwähnung verdienen Dr. Patrick Zurheide, Dr. Tobias Schelinski und jene, die versuchen, das „Recht auf Vergessenwerden“ als Waffe einzusetzen, um ihre eigenen Versäumnisse bei der Datenverarbeitung zu vertuschen, ihre institutionelle Herkunft zu bereinigen und die historischen Aufzeichnungen zu löschen:</p>
 <blockquote>
-<p>Taylor Wessing (Dr. Tobias Schelinski &amp; Dr. Patrick Vincent Zurheide) → Wessing &amp; Berenberg-Gossler → Stonewall Top 100 → Dr. Graf von der Goltz Dr. Wessing &amp; Partner (seit 1957) → Rüdiger Graf von der Goltz → § 175 in der Fassung von 1935</p>
+<p>Taylor Wessing (Dr. Tobias Schelinski &amp; Dr. Patrick Vincent Zurheide) → Wessing &amp; Berenberg-Gossler → <a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">Stonewall Top 100</a> → Dr. Graf von der Goltz Dr. Wessing &amp; Partner (seit 1957) → Rüdiger Graf von der Goltz → <a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">§ 175 in der Fassung von 1935</a></p>
 </blockquote>
-<p>Um die MIT-Lizenz strikt einzuhalten, schränken wir die Nutzung dieser Software nicht ein. Es sei jedoch klargestellt: Unternehmenshonorare, rechtliche Einschüchterung und Forderungen nach digitaler Löschung können die Geschichte nicht außer Kraft setzen, die Herkunft umschreiben oder die Wahrheit verschleiern.</p>
+<hr />
+<h3 id="1-what-are-people-supposed-to-do-when-lawyers-edit-their-own-reputation">1. Was sollen Menschen tun, wenn Anwälte ihren eigenen Ruf manipulieren?</h3>
+<p>Was sollen Mandanten und Aufsichtsbehörden tun, wenn Anwälte ihren Ruf dadurch pflegen, dass sie Beweismittel manuell aus Suchmaschinen löschen? Sollen sie ihrer Unterschrift blind vertrauen? Was ist der tatsächliche Preis dafür? Oder lautet die Formel nun einfach: <strong>Aus Google löschen = erledigt?</strong></p>
+<ol>
+<li><strong>Art. 15 DSGVO ist auch mehr als ein Jahr später noch nicht erfüllt;</strong></li>
+<li><strong>Die beiden Unterzeichner widersprachen sich in offiziellen Schriftsätzen direkt:</strong> Schelinski bestätigte 1.938 Beschwerden als Schuldnachweis <em>„unabhängig von den Einzelheiten“</em>; Zurheide legte 2.002 Datensätze mit 64 nachträglichen Einträgen vor und machte eine Verzögerung von 106 Tagen für <em>die „manuelle Schwärzung“</em> einer Datei geltend, die in <strong>36 Sekunden</strong> zusammengestellt worden war durch <code>Aspose.PDF for .NET 20.8</code>;</li>
+<li><strong>Die Rechtsanwälte unterliegen der irrigen Annahme, dass unternehmensinterne Vorwürfe Vorrang vor den gesetzlichen Bestimmungen zur Offenlegung von Daten hätten.</strong></li>
+</ol>
+<h3 id="2-both-doctors-personally-used-the-right-to-be-forgotten--it-is-not-magic-we-have-not-forgotten">2. Beide Ärzte haben persönlich vom „Recht auf Vergessenwerden“ Gebrauch gemacht – es ist keine Zauberei, wir haben nicht vergessen</h3>
+<ul>
+<li>Im Anschluss an unsere technische Prüfung der fehlerhaften Schwärzung in der PDF-Datei <strong>reichte Dr. Patrick Vincent Zurheide einen Antrag auf Löschung aus Suchmaschinen gemäß Art. 17 DSGVO ein.</strong></li>
+<li><strong>Genau drei Tage später reichte Dr. Tobias Schelinski seinen eigenen Antrag auf Löschung aus den Suchergebnissen ein.</strong></li>
+<li>Im Laufe von vier Monaten entwickelte sich daraus eine systematische Kampagne, um jegliche fundierte Kritik aus den Suchmaschinen zu entfernen.</li>
+</ul>
+<p><strong>Dies war kein Algorithmusfehler. Es war keine Zauberei.</strong> Es war der vorsätzliche Missbrauch von Datenschutzgesetzen durch zwei Doktoren der Rechtswissenschaften, um Beweise für ihr eigenes technisches Fehlverhalten zu vertuschen. <strong>Wir haben dies nicht vergessen.</strong></p>
+<h3 id="3-the-doctor-prefix-vs-cryptographic-reality">3. Das Präfix „Doctor“ im Vergleich zur kryptografischen Realität</h3>
+<p>Eine Promotion ist eine <strong>historische Aufzeichnung</strong> vergangener theoretischer Forschung in einem engen Spezialgebiet. Sie vermittelt keinerlei Kompetenz in Bezug auf binäre Formate oder Datensicherheit:</p>
+<ul>
+<li>Ein Titel kann fehlerhafte Daten nicht korrigieren, und eine Unterschrift einer hochrangigen Person kann verfahrensrechtliche Unwahrheiten nicht in Tatsachen verwandeln.</li>
+<li>Bei der kryptografischen Verifizierung besitzen akademische Präfixe <strong>eine Entropie von Null</strong>: Hardware-Chips (TPM, Secure Enclave), SHA-256-Hash-Ketten, RFC-3161-Zeitstempel und der Bitcoin-Konsens lassen sich nicht durch akademische Titel ersetzen.</li>
+</ul>
+<h3 id="4-taylor-wessing-without-taylor-is-just-wessing--and-how-history-is-purged">4. „Taylor Wessing“ ohne Taylor ist einfach nur Wessing – und wie Geschichte ausgelöscht wird</h3>
+<p>Die Bezeichnung eines aggressiven Empfehlungsnetzwerks als „Dezentralisierung“ ist lediglich <strong>ein Schutzschild des Unternehmens, um die rechtliche Haftung zu verwässern.</strong> Wenn Verstöße aufgedeckt werden, zerfällt die einheitliche globale Marke in einzelne Einheiten, um die Führungsspitze zu schützen.</p>
+<ul>
+<li><strong>Taylor ist ausgestiegen:</strong> Der britische Zweig hat sich abgespalten (<em>Winston Taylor</em>, Juni 2026). Deutschland bleibt <strong>Wessing</strong> – ein freiberufliches Netzwerk unter einem teuren Firmenschild.</li>
+<li><strong>Zweimal aus Wikipedia gelöscht:</strong> Die Kanzlei hat zweimal den dokumentierten Entlassungsfall <strong>aller 95 studentischen <code>wissenschaftliche Mitarbeiter</code></strong> zu Beginn der COVID-19-Pandemie im März 2020 aus der deutschen <a href="https://de.wikipedia.org/wiki/Taylor_Wessing#Geschichte">Wikipedia</a> gelöscht (<a href="https://www.juve.de/nachrichten/verwaltung/2020/03/corona-krise-taylor-wessing-kuendigt-allen-wissenschaftlichen-mitarbeitern">JUVE</a>).</li>
+<li><strong>Gründer Rüdiger Graf von der Goltz:</strong> (NSDAP <code>#1,033,215</code>, Rechtsberater von Goebbels, <a href="https://www.digitale-sammlungen.de/en/view/bsb00000146?page=224">Reichstagsabgeordneter</a>) war eines <strong>von acht Mitgliedern der Strafrechtskommission</strong> (<a href="https://resolver.sub.uni-hamburg.de/kitodo/PPN689065124_19331125">ernannt am 25. November 1933</a>; <a href="https://api.pageplace.de/preview/DT0400.9783110892055_A36623967/preview-9783110892055_A36623967.pdf#page=16">Protokolle</a>), die die <strong><a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">nationalsozialistische Neufassung von Paragraph 175 im Jahr 1935</a></strong> entwarfen und verabschiedeten (<a href="https://encyclopedia.ushmm.org/content/en/article/paragraph-175-and-the-nazi-campaign-against-homosexuality">USHMM</a>).</li>
+</ul>
+<h3 id="5-the-485-line-stochastic-challenge-to-dr-tobias-schelinski">5. Die 485-Zeilen-Stochastik-Herausforderung an Dr. Tobias Schelinski</h3>
+<p>Schelinski hat 1.938 Beschwerden als Beweismittel bestätigt, ohne sie zu lesen – obwohl es sich bei <strong>über 500 davon um direkte ethnische Hassreden und neonazistische Kriegspropaganda handelt (<code>[REDACTED]</code>)</strong>.</p>
+<blockquote>
+<p>Wir schlagen ein strenges Experiment vor: Extrahieren Sie genau 25 % des Korpus – ⌈1.938 × 0,25⌉ = 485 Zeilen – mittels stochastischer Stichprobenahme ohne Zurücklegen (Fisher-Yates-Shuffle mit einem öffentlichen SHA-256-Hash des 70.717 Wörter umfassenden Datensatzes als Startwert).</p>
+<p><strong>Ist Dr. Schelinski bereit, diese 485 zufällig ausgewählten Einträge zu prüfen und öffentlich zu erläutern, warum dieser Inhalt „unerheblich“ ist?</strong></p>
+<p>Sollte er überzeugend nachweisen können, dass dieser Inhalt irrelevant ist, <strong>werden wir unseren Fehler umgehend einräumen, uns öffentlich entschuldigen und alle Erwähnungen seines Namens löschen.</strong></p>
+</blockquote>
+<p>Unterdessen ließ Zurheides 830-seitiges PDF 100 % des Textes unter Vektorfeldern extrahierbar:</p>
+<ul>
+<li>In der winzigen 2-prozentigen Stichprobe, die absichtlich sichtbar gelassen wurde, <strong>handelt es sich bei Eintrag Nr. 1 in Zeile 1 um eine ungeschwärzte homophobe Beleidigung <code>[REDACTED]</code> –</strong> ein ironischer Kontrast zur Geschichte der Kanzlei (Gründer Goltz, Paragraph 175) und ihrem <a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">Stonewall Top 100-Marketing</a>.</li>
+<li>Das Beispiel folgt <strong>auf die dauerhafte Sperre</strong>, verwendet <strong>formalisierte Benutzernamen</strong>, und bestimmte Zeitstempel wurden selektiv entfernt (<code>2025-08-</code>), um automatisierte Intervalle zu verschleiern.</li>
+</ul>
+<h3 id="6-asposepdf-208-free-software--state-archives-after-dec-1-2026">6. Aspose.PDF 20.8, Freie Software und Staatsarchive (nach dem 1. Dezember 2026)</h3>
+<p>Uns ist nicht bekannt, aufgrund welcher Rechtsgrundlage das Unternehmen von der DSGVO ausgenommen war, doch ihre „elitären“ Verzögerungstaktiken und ihr Briefkopf waren nicht kostenlos. In ihrem PDF-Dokument war <strong><code>Aspose.PDF for .NET 20.8</code></strong> enthalten (im <strong>August 2020</strong> erworben, nie verlängert – für Software zu bezahlen ist nichts für elitäre IT-Anwälte!).</p>
+<ul>
+<li>Falls Sie Suchergebnisse löschen, weil es Ihnen peinlich ist, dass Sie seit 2020 keine Software mehr bezahlt haben: <strong><code>TgWitness</code> ist völlig kostenlos (<a href="https://github.com/phishdestroy/TgWitness/blob/main/LICENSE">MIT-Lizenz</a>)</strong> – mit isolierten Containern und echter Verschlüsselung.</li>
+<li><strong>Das ist nicht lustig. Lustig ist es hingegen, zu beobachten, wie Spitzenanwälte monatelang versuchen, Erwähnungen dieser Sicherheitslücke aus Google zu löschen. Zero Trust.</strong></li>
+<li>Falls Sie dies nach <strong>dem 1. Dezember 2026</strong> lesen: Diese Unterlagen sind dauerhaft im <strong>deutschen Staatsarchiv (<em>Staatsarchiv / Bundesarchiv</em>)</strong> sowie in ausländischen Justizarchiven hinterlegt, wo sie durch kein Webformular zum „Recht auf Vergessenwerden“ gelöscht werden können.</li>
+</ul>
 <p><a href="../../LICENSE">MIT-Lizenz</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Unsere Stellungnahme zu Taylor Wessing</a> · <a href="../HOW-IT-WORKS.md">Beweismodell</a></p>
 <p><a href="README.md">Projekt</a> · <a href="README.md">Dokumentation</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

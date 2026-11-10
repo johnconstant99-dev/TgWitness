@@ -6,21 +6,65 @@
 <p><strong>PhishDestroy · Thông báo dự án TgWitness</strong></p>
 <p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Bản ghi nguồn</a> · <a href="../../NOTICE">THÔNG BÁO gốc</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Thông báo về Đạo đức &amp; Tính liên tục lịch sử</h2>
-<p>Gần đây, chúng tôi được biết rằng đối với một số công ty luật nhất định — và cụ thể là Tiến sĩ Tobias Schelinski và Tiến sĩ Patrick Vincent Zurheide — toán học và các sự kiện khách quan là không liên quan.</p>
-<p>Việc tiếp thị việc không tuân thủ GDPR cho các doanh nghiệp dưới dạng dịch vụ thương mại trong khi chính bản thân quý vị lại không thể xử lý dữ liệu cơ bản một cách đúng đắn không phải là chuyên môn pháp lý.</p>
-<p>Việc hành động với ảo tưởng rằng quý vị chính là pháp luật, hoặc rằng chữ ký của một nhân vật ưu tú trên một tuyên bố bị làm giả sẽ biến lời nói dối thành sự thật một cách kỳ diệu, không thể che giấu được sự thiếu năng lực về mặt kỹ thuật.</p>
+<p>Chúng tôi được biết rằng đối với một số công ty luật — cụ thể là <strong>Tiến sĩ Tobias Schelinski</strong> và <strong>Tiến sĩ Patrick Vincent Zurheide</strong> — toán học, tính toàn vẹn kỹ thuật và các sự kiện khách quan đều không có ý nghĩa gì.</p>
+<p>Việc chào bán dịch vụ vi phạm GDPR cho các doanh nghiệp trong khi không thể đảm bảo các quy trình xử lý dữ liệu cơ bản không thể được coi là chuyên môn pháp lý. Chữ ký của một chuyên gia hàng đầu trên một tuyên bố bị làm giả cũng không thể che giấu sự thiếu năng lực về mặt kỹ thuật.</p>
 <p>Công cụ này không tương thích với các khu vực pháp lý nơi các quy định sau đây được áp dụng:</p>
 <ul>
-<li>Chế độ doanh nghiệp thống trị</li>
-<li>Hệ thống tư pháp tư nhân hóa hoặc thương mại hóa</li>
-<li>Chế độ tài phiệt</li>
-<li>Chế độ tham nhũng và tham nhũng thể chế</li>
+<li><strong>Chế độ thống trị của các tập đoàn</strong></li>
+<li><strong>Tư nhân hóa hệ thống tư pháp</strong></li>
+<li><strong>Chế độ tài phiệt</strong></li>
+<li><strong>Chế độ tham nhũng và tham nhũng thể chế</strong></li>
 </ul>
-<p>Xin đặc biệt đề cập đến Tiến sĩ Patrick Zurheide, Tiến sĩ Tobias Schelinski, cùng những cá nhân đang cố gắng lợi dụng “Quyền được lãng quên” để che giấu những sai sót trong việc xử lý dữ liệu của chính họ, làm sạch lịch sử tổ chức của mình và xóa bỏ các ghi chép lịch sử:</p>
 <blockquote>
-<p>Taylor Wessing (Tiến sĩ Tobias Schelinski &amp; Tiến sĩ Patrick Vincent Zurheide) → Wessing &amp; Berenberg-Gossler → Stonewall Top 100 → Tiến sĩ Graf von der Goltz Tiến sĩ Wessing &amp; Partner (từ năm 1957) → Rüdiger Graf von der Goltz → Điều 175 trong bản sửa đổi năm 1935</p>
+<p>Taylor Wessing (Tiến sĩ Tobias Schelinski &amp; Tiến sĩ Patrick Vincent Zurheide) → Wessing &amp; Berenberg-Gossler → <a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">Stonewall Top 100</a> → Tiến sĩ Graf von der Goltz Tiến sĩ Wessing &amp; Partner (từ năm 1957) → Rüdiger Graf von der Goltz → <a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">Điều 175 trong bản sửa đổi năm 1935</a></p>
 </blockquote>
-<p>Để tuân thủ nghiêm ngặt Giấy phép MIT, chúng tôi không hạn chế việc sử dụng phần mềm này. Tuy nhiên, xin làm rõ: các hợp đồng tư vấn doanh nghiệp, hành vi đe dọa pháp lý và các yêu cầu xóa dữ liệu kỹ thuật số không thể phủ nhận lịch sử, viết lại nguồn gốc hay che giấu sự thật.</p>
+<hr />
+<h3 id="1-what-are-people-supposed-to-do-when-lawyers-edit-their-own-reputation">1. Mọi người nên làm gì khi các luật sư tự chỉnh sửa danh tiếng của chính mình?</h3>
+<p>Khách hàng và các cơ quan quản lý nên làm gì khi các luật sư quản lý danh tiếng của mình bằng cách xóa thủ công các bằng chứng khỏi các công cụ tìm kiếm? Có nên tin tưởng vào chữ ký của họ một cách mù quáng? Giá trị thực sự của việc này là gì? Hay công thức hiện nay chỉ đơn giản là: <strong>xóa khỏi Google = xong việc?</strong></p>
+<ol>
+<li><strong>Điều 15 của GDPR vẫn chưa được tuân thủ sau hơn một năm;</strong></li>
+<li><strong>Hai bên ký tên đã trực tiếp mâu thuẫn với nhau trong các văn bản chính thức:</strong> Ông Schelinski đã xác nhận 1.938 đơn khiếu nại làm bằng chứng về tội lỗi <em>“bất kể chi tiết cụ thể”</em>; Zurheide đã nộp 2.002 hồ sơ kèm theo 64 lần cập nhật sau khi lệnh cấm có hiệu lực, đồng thời khẳng định có sự chậm trễ 106 ngày do <em>“việc chỉnh sửa thủ công”</em> đối với một tệp tin được tổng hợp chỉ trong <strong>36 giây</strong> bởi <code>Aspose.PDF for .NET 20.8</code>;</li>
+<li><strong>Các luật sư đang hoạt động dưới ảo tưởng rằng các cáo buộc từ phía doanh nghiệp có thể vượt qua các quy định pháp luật về công bố thông tin.</strong></li>
+</ol>
+<h3 id="2-both-doctors-personally-used-the-right-to-be-forgotten--it-is-not-magic-we-have-not-forgotten">2. Cả hai bác sĩ đều đã tự mình sử dụng “Quyền được lãng quên” — Đây không phải là phép màu, chúng tôi vẫn chưa quên</h3>
+<ul>
+<li>Sau khi chúng tôi tiến hành kiểm toán kỹ thuật đối với việc che giấu thông tin trong tệp PDF bị lỗi, <strong>Tiến sĩ Patrick Vincent Zurheide đã nộp thông báo yêu cầu xóa kết quả tìm kiếm theo Điều 17 của GDPR.</strong></li>
+<li><strong>Chính xác 3 ngày sau đó, Tiến sĩ Tobias Schelinski đã nộp thông báo yêu cầu gỡ bỏ kết quả tìm kiếm của riêng mình.</strong></li>
+<li>Trong hơn 4 tháng, điều này đã trở thành một chiến dịch có hệ thống nhằm xóa bỏ mọi lời chỉ trích có căn cứ khỏi các công cụ tìm kiếm.</li>
+</ul>
+<p><strong>Đây không phải là lỗi thuật toán. Đây cũng không phải là phép màu.</strong> Đây là hành vi lạm dụng có chủ ý các quy định về quyền riêng tư của hai tiến sĩ luật nhằm che giấu bằng chứng về sai sót chuyên môn của chính họ. <strong>Chúng tôi vẫn chưa quên.</strong></p>
+<h3 id="3-the-doctor-prefix-vs-cryptographic-reality">3. Tiền tố “Doctor” so với thực tế mật mã học</h3>
+<p>Bằng tiến sĩ là một <strong>tư liệu lịch sử</strong> ghi lại các nghiên cứu lý thuyết trong quá khứ thuộc một lĩnh vực chuyên sâu hẹp. Bằng cấp này không mang lại bất kỳ năng lực nào về định dạng nhị phân hay bảo mật dữ liệu:</p>
+<ul>
+<li>Một tiêu đề không thể khắc phục dữ liệu bị lỗi, và chữ ký của giới tinh hoa cũng không thể biến sự sai lệch về thủ tục thành sự thật.</li>
+<li>Trong quá trình xác minh mật mã, các tiền tố học thuật có <strong>entropy bằng không</strong>: chip phần cứng (TPM, Secure Enclave), chuỗi băm SHA-256, dấu thời gian RFC 3161 và cơ chế đồng thuận Bitcoin không phụ thuộc vào các tài liệu học thuật cấp tiến sĩ.</li>
+</ul>
+<h3 id="4-taylor-wessing-without-taylor-is-just-wessing--and-how-history-is-purged">4. “Taylor Wessing” mà không có “Taylor” thì chỉ còn là “Wessing” — Và cách lịch sử bị xóa bỏ</h3>
+<p>Việc gắn nhãn cho một mạng lưới giới thiệu khách hàng mang tính chất cạnh tranh gay gắt dưới danh nghĩa “phi tập trung hóa” thực chất chỉ là <strong>một lá chắn doanh nghiệp nhằm phân tán trách nhiệm pháp lý.</strong> Khi các vi phạm bị phanh phui, thương hiệu toàn cầu thống nhất này sẽ phân tách thành các thực thể riêng biệt để bảo vệ ban lãnh đạo.</p>
+<ul>
+<li><strong>Taylor đã rời đi:</strong> Chi nhánh tại Anh đã tách ra (<em>Winston Taylor</em>, tháng 6 năm 2026). Đức hiện chỉ còn lại <strong>Wessing</strong> — một mạng lưới các chuyên gia tự do hoạt động dưới một thương hiệu đắt đỏ.</li>
+<li><strong>Đã bị xóa hai lần khỏi Wikipedia:</strong> Công ty này đã hai lần xóa khỏi <a href="https://de.wikipedia.org/wiki/Taylor_Wessing#Geschichte">Wikipedia</a> tiếng Đức thông tin được ghi chép rõ ràng về việc sa thải <strong>toàn bộ 95 cộng sự sinh viên (<code>wissenschaftliche Mitarbeiter</code>)</strong> vào thời điểm đại dịch COVID-19 bùng phát vào tháng 3 năm 2020 (<a href="https://www.juve.de/nachrichten/verwaltung/2020/03/corona-krise-taylor-wessing-kuendigt-allen-wissenschaftlichen-mitarbeitern">JUVE</a>).</li>
+<li><strong>Người sáng lập Rüdiger Graf von der Goltz:</strong> (thành viên NSDAP <code>#1,033,215</code>, cố vấn của Goebbels, <a href="https://www.digitale-sammlungen.de/en/view/bsb00000146?page=224">đại biểu Reichstag</a>) là <strong>một trong tám thành viên của Ủy ban Luật Hình sự</strong> (<a href="https://resolver.sub.uni-hamburg.de/kitodo/PPN689065124_19331125">được bổ nhiệm ngày 25 tháng 11 năm 1933</a>; <a href="https://api.pageplace.de/preview/DT0400.9783110892055_A36623967/preview-9783110892055_A36623967.pdf#page=16">biên bản</a>) đã soạn thảo và ban hành bản <strong><a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">sửa đổi năm 1935 của chế độ Quốc xã đối với Điều 175</a></strong> (<a href="https://encyclopedia.ushmm.org/content/en/article/paragraph-175-and-the-nazi-campaign-against-homosexuality">USHMM</a>).</li>
+</ul>
+<h3 id="5-the-485-line-stochastic-challenge-to-dr-tobias-schelinski">5. Thử thách Stochastic 485 dòng dành cho Tiến sĩ Tobias Schelinski</h3>
+<p>Ông Schelinski đã xác nhận 1.938 đơn khiếu nại làm bằng chứng mà không đọc nội dung — mặc dù trong số đó <strong>có hơn 500 trường hợp chứa đựng những lời lẽ kích động hận thù sắc tộc trực tiếp và những lời lăng mạ mang tính tuyên truyền chiến tranh theo chủ nghĩa tân Quốc xã (<code>[REDACTED]</code>)</strong>.</p>
+<blockquote>
+<p>Chúng tôi đề xuất một thí nghiệm nghiêm ngặt: trích xuất chính xác 25% tập dữ liệu — ⌈1.938 × 0,25⌉ = 485 dòng — thông qua phương pháp lấy mẫu ngẫu nhiên không lặp lại (phương pháp xáo trộn Fisher–Yates với giá trị khởi tạo là hàm băm SHA-256 công khai của tập dữ liệu gồm 70.717 từ).</p>
+<p><strong>Tiến sĩ Schelinski có sẵn sàng xem xét 485 mục được chọn ngẫu nhiên này và giải thích công khai lý do tại sao nội dung này lại “không liên quan” hay không?</strong></p>
+<p>Nếu ông ấy có thể chứng minh một cách thuyết phục rằng nội dung này không liên quan, <strong>chúng tôi sẽ ngay lập tức thừa nhận sai sót, xin lỗi công khai và xóa bỏ mọi đề cập đến tên của ông ấy.</strong></p>
+</blockquote>
+<p>Trong khi đó, tệp PDF dài 830 trang của Zurheide cho phép trích xuất 100% nội dung văn bản dưới dạng các hộp vectơ:</p>
+<ul>
+<li>Trong mẫu nhỏ 2% được cố ý để lộ, <strong>Mục số 1 ở dòng 1 là một từ lăng mạ mang tính kỳ thị người đồng tính chưa được che đi <code>[REDACTED]</code> —</strong> tạo nên sự tương phản đầy mỉa mai với lịch sử của công ty (người sáng lập Goltz, Điều 175) và chiến dịch tiếp thị <a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">Stonewall Top 100</a> của họ.</li>
+<li>Ví dụ này được đưa ra <strong>sau khi áp dụng lệnh cấm vĩnh viễn</strong>, sử dụng <strong>các tên người dùng theo mẫu có sẵn</strong>, và các dấu thời gian cụ thể đã được loại bỏ một cách có chọn lọc (<code>2025-08-</code>) nhằm che giấu các khoảng thời gian hoạt động tự động.</li>
+</ul>
+<h3 id="6-asposepdf-208-free-software--state-archives-after-dec-1-2026">6. Aspose.PDF 20.8, Phần mềm miễn phí &amp; Lưu trữ Nhà nước (Sau ngày 1 tháng 12 năm 2026)</h3>
+<p>Chúng tôi không rõ dựa trên cơ sở pháp lý nào mà tập đoàn này được miễn trừ khỏi GDPR, nhưng việc trì hoãn một cách “đẳng cấp” cùng giấy tiêu đề của họ chắc chắn không phải là miễn phí. Bên trong tệp PDF của họ chứa phần mềm <strong><code>Aspose.PDF for .NET 20.8</code></strong> (được mua vào <strong>tháng 8 năm 2020</strong>, chưa bao giờ gia hạn — việc chi trả cho phần mềm dường như không phải là điều dành cho các luật sư CNTT “đẳng cấp”!).</p>
+<ul>
+<li>Nếu quý vị đang xóa các kết quả tìm kiếm vì cảm thấy xấu hổ khi chưa thanh toán tiền phần mềm kể từ năm 2020: <strong><code>TgWitness</code> hoàn toàn miễn phí (<a href="https://github.com/phishdestroy/TgWitness/blob/main/LICENSE">Giấy phép MIT</a>)</strong> — với các container cách ly và mã hóa thực sự.</li>
+<li><strong>Điều này không có gì đáng cười cả. Điều đáng cười là chứng kiến các luật sư hàng đầu phải mất hàng tháng trời để cố gắng xóa các đề cập về lỗ hổng bảo mật này khỏi Google. Zero Trust.</strong></li>
+<li>Nếu quý vị đọc thông báo này sau <strong>ngày 1 tháng 12 năm 2026</strong>: các hồ sơ này đã được lưu trữ vĩnh viễn tại Kho <strong>lưu trữ Nhà nước Đức (<em>Staatsarchiv / Bundesarchiv</em>)</strong> và các kho lưu trữ tư pháp nước ngoài, nơi mà không có biểu mẫu trực tuyến nào về “Quyền được lãng quên” có thể xóa bỏ chúng.</li>
+</ul>
 <p><a href="../../LICENSE">Giấy phép MIT</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Quan điểm của chúng tôi về Taylor Wessing</a> · <a href="../HOW-IT-WORKS.md">Mô hình bằng chứng</a></p>
 <p><a href="README.md">Dự án</a> · <a href="README.md">Tài liệu</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

@@ -6,21 +6,65 @@
 <p><strong>PhishDestroy · Aviso do projeto TgWitness</strong></p>
 <p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Registro de origem</a> · <a href="../../NOTICE">AVISO original</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Aviso Ético e Continuidade Histórica</h2>
-<p>Ficamos sabendo recentemente que, para certos escritórios de advocacia — e, especificamente, para o Dr. Tobias Schelinski e o Dr. Patrick Vincent Zurheide —, a matemática e os fatos objetivos são irrelevantes.</p>
-<p>Vender a não conformidade com o GDPR a empresas como um serviço comercial, ao mesmo tempo em que vocês próprios falham no tratamento básico de dados, não constitui especialização jurídica.</p>
-<p>Agir sob a ilusão de que o senhor é a lei, ou de que a assinatura de uma elite em uma alegação falsificada transforma magicamente uma mentira em verdade, não encobre a incompetência técnica.</p>
+<p>Ficamos sabendo que, para certos escritórios de advocacia — especificamente <strong>o Dr. Tobias Schelinski</strong> e <strong>o Dr. Patrick Vincent Zurheide</strong> —, a matemática, a integridade técnica e os fatos objetivos são irrelevantes.</p>
+<p>Vender a não conformidade com o GDPR a empresas enquanto se falha no tratamento básico de dados não constitui especialização jurídica. A assinatura de uma personalidade de destaque em uma alegação falsificada não encobre a incompetência técnica.</p>
 <p>Esta ferramenta é incompatível com jurisdições nas quais prevalecem os seguintes aspectos:</p>
 <ul>
-<li>Corporatocracia</li>
-<li>Justiça privatizada ou comercial</li>
-<li>Plutocracia</li>
-<li>Cleptocracia e corrupção institucional</li>
+<li><strong>Corporatocracia</strong></li>
+<li><strong>Justiça privatizada</strong></li>
+<li><strong>Plutocracia</strong></li>
+<li><strong>Cleptocracia e corrupção institucional</strong></li>
 </ul>
-<p>Uma menção especial ao Dr. Patrick Zurheide, ao Dr. Tobias Schelinski e àqueles que tentam instrumentalizar o “Direito ao Esquecimento” para encobrir suas próprias falhas no processamento de dados, limpar sua linhagem institucional e apagar o registro histórico:</p>
 <blockquote>
-<p>Taylor Wessing (Dr. Tobias Schelinski e Dr. Patrick Vincent Zurheide) → Wessing &amp; Berenberg-Gossler → Stonewall Top 100 → Dr. Graf von der Goltz, Dr. Wessing &amp; Partner (desde 1957) → Rüdiger Graf von der Goltz → Parágrafo 175 em sua revisão de 1935</p>
+<p>Taylor Wessing (Dr. Tobias Schelinski e Dr. Patrick Vincent Zurheide) → Wessing &amp; Berenberg-Gossler → <a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">Stonewall Top 100</a> → Dr. Graf von der Goltz, Dr. Wessing &amp; Partner (desde 1957) → Rüdiger Graf von der Goltz → <a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">Parágrafo 175 em sua revisão de 1935</a></p>
 </blockquote>
-<p>Para cumprir rigorosamente a Licença MIT, não restringimos o uso deste software. No entanto, que fique claro: contratos de prestação de serviços corporativos, intimidação jurídica e exigências de apagamento digital não podem anular o histórico, reescrever a linhagem ou ocultar a verdade.</p>
+<hr />
+<h3 id="1-what-are-people-supposed-to-do-when-lawyers-edit-their-own-reputation">1. O que as pessoas devem fazer quando os advogados editam sua própria reputação?</h3>
+<p>O que os clientes e os órgãos reguladores devem fazer quando os advogados gerenciam sua reputação excluindo manualmente evidências dos mecanismos de busca? Confiar cegamente em sua palavra? Qual é o preço real disso? Ou será que a fórmula agora é simplesmente: <strong>excluir do Google = resolvido?</strong></p>
+<ol>
+<li><strong>O Art. 15 do RGPD continua sem ser cumprido, mais de um ano depois;</strong></li>
+<li><strong>Os dois signatários se contradisseram diretamente nos autos oficiais:</strong> Schelinski certificou 1.938 denúncias como prova de culpa <em>“independentemente dos detalhes”</em>; Zurheide apresentou 2.002 registros com 64 inserções posteriores à proibição, alegando 106 dias de atraso para <em>a “redação manual”</em> de um arquivo compilado em <strong>36 segundos</strong> por <code>Aspose.PDF for .NET 20.8</code>;</li>
+<li><strong>Os advogados agem sob a ilusão de que as alegações corporativas se sobrepõem às leis de divulgação de dados previstas na legislação.</strong></li>
+</ol>
+<h3 id="2-both-doctors-personally-used-the-right-to-be-forgotten--it-is-not-magic-we-have-not-forgotten">2. Ambos os médicos exerceram pessoalmente o “direito ao esquecimento” — não se trata de mágica, nós não esquecemos</h3>
+<ul>
+<li>Após nossa auditoria técnica da expurgação incorreta do PDF, <strong>o Dr. Patrick Vincent Zurheide apresentou uma notificação de remoção de resultados de pesquisa nos termos do Art. 17 do RGPD.</strong></li>
+<li><strong>Exatamente três dias depois, o Dr. Tobias Schelinski apresentou sua própria notificação de exclusão dos resultados de busca.</strong></li>
+<li>Ao longo de quatro meses, isso se transformou em uma campanha sistemática para eliminar todas as críticas forenses dos mecanismos de busca.</li>
+</ul>
+<p><strong>Isso não foi um erro de algoritmo. Não foi mágica.</strong> Foi o abuso deliberado das leis de privacidade por parte de dois doutores em Direito para ocultar provas de sua própria negligência técnica. <strong>Não nos esquecemos disso.</strong></p>
+<h3 id="3-the-doctor-prefix-vs-cryptographic-reality">3. O prefixo “Doutor” versus a realidade criptográfica</h3>
+<p>Um doutorado é um <strong>registro histórico</strong> de pesquisas teóricas anteriores em um nicho restrito. Ele não confere nenhuma competência em formatos binários ou segurança de dados:</p>
+<ul>
+<li>Um título não pode corrigir dados incorretos, e uma assinatura de autoridade não pode transformar uma falsidade processual em fato.</li>
+<li>Na verificação criptográfica, os prefixos acadêmicos possuem <strong>entropia zero</strong>: chips de hardware (TPM, Secure Enclave), cadeias de hash SHA-256, carimbos de data e hora RFC 3161 e o consenso do Bitcoin não se submetem a títulos de doutorado.</li>
+</ul>
+<h3 id="4-taylor-wessing-without-taylor-is-just-wessing--and-how-history-is-purged">4. “Taylor Wessing” sem Taylor é apenas Wessing — e como a história é apagada</h3>
+<p>Rotular uma rede agressiva de indicações como “descentralização” é simplesmente <strong>um escudo corporativo para diluir a responsabilidade legal.</strong> Quando as violações são expostas, a marca global unificada se fragmenta em entidades separadas para proteger a liderança.</p>
+<ul>
+<li><strong>Taylor se retirou:</strong> a filial britânica se separou (<em>Winston Taylor</em>, junho de 2026). A Alemanha fica com <strong>a Wessing</strong> — uma rede de profissionais autônomos sob uma marca de prestígio.</li>
+<li><strong>Excluído duas vezes da Wikipédia:</strong> O escritório excluiu duas vezes da <a href="https://de.wikipedia.org/wiki/Taylor_Wessing#Geschichte">Wikipédia</a> em alemão a informação documentada sobre a demissão de <strong>todos os 95 estagiários (em <code>wissenschaftliche Mitarbeiter</code>)</strong> no início da pandemia da COVID-19, em março de 2020 (<a href="https://www.juve.de/nachrichten/verwaltung/2020/03/corona-krise-taylor-wessing-kuendigt-allen-wissenschaftlichen-mitarbeitern">JUVE</a>).</li>
+<li><strong>Fundador Rüdiger Graf von der Goltz:</strong> (NSDAP <code>#1,033,215</code>, advogado de Goebbels, <a href="https://www.digitale-sammlungen.de/en/view/bsb00000146?page=224">deputado do Reichstag</a>) foi um <strong>dos oito membros da Comissão de Direito Penal</strong> (<a href="https://resolver.sub.uni-hamburg.de/kitodo/PPN689065124_19331125">nomeados em 25 de novembro de 1933</a>; <a href="https://api.pageplace.de/preview/DT0400.9783110892055_A36623967/preview-9783110892055_A36623967.pdf#page=16">atas</a>) que redigiram e promulgaram a <strong><a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">revisão nazista de 1935 do Parágrafo 175</a></strong> (<a href="https://encyclopedia.ushmm.org/content/en/article/paragraph-175-and-the-nazi-campaign-against-homosexuality">USHMM</a>).</li>
+</ul>
+<h3 id="5-the-485-line-stochastic-challenge-to-dr-tobias-schelinski">5. O Desafio Estocástico de 485 Linhas ao Dr. Tobias Schelinski</h3>
+<p>Schelinski certificou 1.938 denúncias como prova sem lê-las — embora <strong>mais de 500 sejam manifestações diretas de ódio étnico e calúnias de propaganda de guerra neonazista (<code>[REDACTED]</code>)</strong>.</p>
+<blockquote>
+<p>Propomos um experimento rigoroso: extrair exatamente 25% do corpus — ⌈1.938 × 0,25⌉ = 485 linhas — por meio de amostragem estocástica sem reposição (baralhamento de Fisher–Yates com semente baseada em um hash SHA-256 público do conjunto de dados de 70.717 palavras).</p>
+<p><strong>O Dr. Schelinski está disposto a analisar essas 485 entradas selecionadas aleatoriamente e explicar publicamente por que esse conteúdo é “irrelevante”?</strong></p>
+<p>Caso ele consiga demonstrar de forma convincente que esse conteúdo é irrelevante, <strong>reconheceremos imediatamente o erro, pediremos desculpas publicamente e excluiremos todas as menções ao seu nome.</strong></p>
+</blockquote>
+<p>Enquanto isso, o PDF de 830 páginas de Zurheide permitiu que 100% do texto fosse extraído sob caixas vetoriais:</p>
+<ul>
+<li>Na minúscula amostra de 2% deixada intencionalmente visível, <strong>a Entrada nº 1 na linha 1 é um insulto homofóbico não censurado (<code>[REDACTED]</code>)</strong> — um contraste irônico com a história do escritório (fundador Goltz, parágrafo 175) e sua campanha de marketing <a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">Stonewall Top 100</a>.</li>
+<li>O exemplo se situa <strong>após o banimento permanente</strong>, utiliza <strong>nomes de usuário padronizados</strong>, e os registros de data e hora específicos foram removidos seletivamente (<code>2025-08-</code>) para ocultar intervalos automatizados.</li>
+</ul>
+<h3 id="6-asposepdf-208-free-software--state-archives-after-dec-1-2026">6. Aspose.PDF 20.8, Software Livre e Arquivos Estaduais (após 1º de dezembro de 2026)</h3>
+<p>Não sabemos com base em que direito a empresa foi isenta do GDPR, mas sua demora “de elite” e seu papel timbrado não foram de graça. Dentro do PDF deles estava o <strong><code>Aspose.PDF for .NET 20.8</code></strong> (adquirido em <strong>agosto de 2020</strong>, nunca renovado — pagar por software não é coisa para advogados de TI de elite!).</p>
+<ul>
+<li>Caso o senhor apague resultados de pesquisa por se sentir constrangido por não ter pago por software desde 2020: o <strong><code>TgWitness</code> é totalmente gratuito (<a href="https://github.com/phishdestroy/TgWitness/blob/main/LICENSE">Licença MIT</a>)</strong> — com contêineres isolados e criptografia real.</li>
+<li><strong>Isso não tem graça. O que é engraçado é ver advogados de elite passarem meses tentando excluir menções a essa vulnerabilidade do Google. Zero Trust.</strong></li>
+<li>Caso leia isto após <strong>1º de dezembro de 2026</strong>: esses registros estão permanentemente arquivados nos <strong>Arquivos Estaduais da Alemanha (<em>Staatsarchiv / Bundesarchiv</em>)</strong> e em arquivos judiciais estrangeiros, onde nenhum formulário online de “Direito ao Esquecimento” poderá excluí-los.</li>
+</ul>
 <p><a href="../../LICENSE">Licença MIT</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Nossa posição sobre a Taylor Wessing</a> · <a href="../HOW-IT-WORKS.md">Modelo de evidências</a></p>
 <p><a href="README.md">Projeto</a> · <a href="README.md">Documentação</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

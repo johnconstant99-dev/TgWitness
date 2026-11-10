@@ -6,21 +6,65 @@
 <p><strong>PhishDestroy · TgWitness loyihasi bildirishnomas</strong></p>
 <p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Manba yozuvi</a> · <a href="../../NOTICE">Asl E&#x27;LON</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Axloqiy ogohlantirish va tarixiy uzluksizlik</h2>
-<p>Yaqinda biz ma&#x27;lum yuridik firmalar — xususan Dr. Tobias Schelinski va Dr. Patrick Vincent Zurheide uchun — matematika va ob&#x27;ektiv faktlar ahamiyatsiz ekanligini bildik.</p>
-<p>Korporatsiyalarga GDPR talablariga rioya qilmaslikni tijorat xizmati sifatida sotish, o&#x27;zingiz esa oddiy ma&#x27;lumotlarni boshqarishni uddalay olmasligingiz – bu huquqiy ekspertiza emas.</p>
-<p>O&#x27;zingizni qonun deb o&#x27;ylash yoki soxta da&#x27;voga elita imzosi yolg&#x27;onni sehrli tarzda haqiqatga aylantiradi, degan xayol ostida harakat qilish texnik beqobiliyatni yashira olmaydi.</p>
+<p>Biz bilib oldikki, ayrim yuridik firmalar — xususan <strong>Dr Tobias Schelinski</strong> va <strong>Dr Patrick Vincent Zurheide</strong> — uchun matematika, texnik yaxlitlik va ob&#x27;ektiv faktlar ahamiyatsizdir.</p>
+<p>GDPR talablariga rioya qilmaslikni korporatsiyalarga sotish va asosiy ma&#x27;lumotlarni boshqarishda muvaffaqiyatsiz bo&#x27;lish huquqiy ekspertiza hisoblanmaydi. Soxtalashtirilgan da&#x27;voga elita imzo texnik malakatsizlikni yashira olmaydi.</p>
 <p>Ushbu vosita quyidagilar hukmron bo&#x27;lgan yurisdiktsiyalarda ishlashga mos kelmaydi:</p>
 <ul>
-<li>Korporatokratiya</li>
-<li>Xususiylashtirilgan yoki tijorat adolati</li>
-<li>Plutokratiya</li>
-<li>Kleptokratiya va institutsional korrupsiya</li>
+<li><strong>Korporatokratiya</strong></li>
+<li><strong>Xususiylashtirilgan adliya</strong></li>
+<li><strong>Plutokratiya</strong></li>
+<li><strong>Kleptokratiya va institutsional korrupsiya</strong></li>
 </ul>
-<p>Maxsus ta&#x27;kidlash: Dr. Patrick Zurheide, Dr. Tobias Schelinski va &quot;Unutilish huquqi&quot;ni o&#x27;z ma&#x27;lumotlarni qayta ishlashdagi xatolarini yashirish, institutsional kelib chiqishlarini tozalash va tarixiy yozuvlarni o&#x27;chirish uchun qurolga aylantirishga urinayotganlarga:</p>
 <blockquote>
-<p>Taylor Wessing (Dr. Tobias Schelinski &amp; Dr. Patrick Vincent Zurheide) → Wessing &amp; Berenberg-Gossler → Stonewall Top 100 → Dr. Graf von der Goltz Dr. Wessing &amp; Partner (1957 yildan beri) → Rüdiger Graf von der Goltz → 175-moddaning 1935 yildagi tahriri</p>
+<p>Taylor Wessing (Dr. Tobias Schelinski &amp; Dr. Patrick Vincent Zurheide) → Wessing &amp; Berenberg-Gossler → <a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">Stonewall Top 100</a> → Dr. Graf von der Goltz Dr. Wessing &amp; Partner (1957 yildan beri) → Rüdiger Graf von der Goltz → <a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">175-bandning 1935 yildagi tahriri</a></p>
 </blockquote>
-<p>MIT litsenziyasiga qat&#x27;iy rioya qilish maqsadida biz ushbu dasturiy ta&#x27;minotdan foydalanishni cheklamaymiz. Biroq aniq bo&#x27;lsin: korporativ shartnomalar, huquqiy qo&#x27;rqitish va raqamli o&#x27;chirish talablari tarixni o&#x27;zgartira olmaydi, nasl-nasabni qayta yozolmaydi yoki haqiqatni yashira olmaydi.</p>
+<hr />
+<h3 id="1-what-are-people-supposed-to-do-when-lawyers-edit-their-own-reputation">1. Advokatlar o&#x27;z obro&#x27;larini tahrirlaganda odamlar nima qilishlari kerak?</h3>
+<p>Advokatlar o&#x27;z obro&#x27;larini qidiruv tizimlaridan dalillarni qo&#x27;lda o&#x27;chirib yuborish orqali boshqarayotgan paytda mijozlar va regulyatorlar nima qilishi kerak? Ularning imzosiga ko&#x27;r-ko&#x27;rona ishonishmi? Uning haqiqiy narxi nima? Yoki endi formulasi shunchaki: <strong>Googledan o&#x27;chirish = ish bitdi?</strong></p>
+<ol>
+<li><strong>GDPRning 15-moddasi bir yildan ortiq vaqt o&#x27;tib ham bajarilmagan;</strong></li>
+<li><strong>Ikki imzochi rasmiy hujjatlarda to&#x27;g&#x27;ridan-to&#x27;g&#x27;ri qarama-qarshi chiqdilar:</strong> Schelinski 1 938 ta shikoyatni <em>&quot;detallarga e&#x27;tibor bermasdan&quot;</em> aybni isbotlash dalili sifatida tasdiqladi; Zurheide 2 002 yozuvni topshirdi, unda taqiqdan keyin 64 ta in&#x27;ektsiya bo&#x27;lib, <strong>36</strong> soniyada tuzilgan fayldagi <em>&quot;qo&#x27;lda tahrirlash&quot;</em> uchun 106 kunlik kechikishni da&#x27;vo qildi <code>Aspose.PDF for .NET 20.8</code>;</li>
+<li><strong>Advokatlar korporativ ayblovlar qonunda belgilangan ma&#x27;lumotlarni oshkor etish to&#x27;g&#x27;risidagi qonunlardan ustun deb noto&#x27;g&#x27;ri tushunishadi.</strong></li>
+</ol>
+<h3 id="2-both-doctors-personally-used-the-right-to-be-forgotten--it-is-not-magic-we-have-not-forgotten">2. Ikkala shifokor ham shaxsan &quot;unutilish huquqi&quot;dan foydalangan — bu sehr emas, biz unutmadik</h3>
+<ul>
+<li>Buzilgan PDF redaksiyasining texnik auditi natijasida <strong>Dr. Patrick Vincent Zurheide GDPR 17-moddasi bo&#x27;yicha qidiruv natijalaridan chiqarib tashlash to&#x27;g&#x27;risida bildirishnoma berdi.</strong></li>
+<li><strong>Aniq 3 kun o&#x27;tgach, Dr. Tobias Schelinski o&#x27;zining qidiruv natijalaridan chiqarib tashlash to&#x27;g&#x27;risidagi bildirishnomasini topshirdi.</strong></li>
+<li>To&#x27;rt oy davomida bu qidiruv tizimlaridan barcha sud-tibbiy tanqidlarni tozalashga qaratilgan tizimli kampaniyaga aylandi.</li>
+</ul>
+<p><strong>Bu algoritm xatosi emas edi. Bu sehr ham emas edi.</strong> Bu ikki huquqshunosning shaxsiy hayotni himoya qilish qonunlarini ataylab suiiste&#x27;mol qilib, o&#x27;zlarining texnik beparvoligi dalillarini yashirishga bo&#x27;lgan hiylasi edi. <strong>Biz unutmadik.</strong></p>
+<h3 id="3-the-doctor-prefix-vs-cryptographic-reality">3. &quot;Doctor&quot; prefiksi va kriptografik haqiqat</h3>
+<p>Doktorlik darajasi tor sohadagi nazariy tadqiqotlarning <strong>tarixiy</strong> yozuvidir. U ikkilik formatlar yoki ma&#x27;lumotlar xavfsizligi bo&#x27;yicha hech qanday malaka bermaydi:</p>
+<ul>
+<li>Sarlavha buzilgan ma&#x27;lumotlarni tuzeta olmaydi, elita imzosi esa protsessual yolg&#x27;onni haqiqatga aylantira olmaydi.</li>
+<li>Kriptografik tasdiqlashda akademik prefikslarning <strong>entropiyasi nolga</strong> teng: apparat chiplari (TPM, Secure Enclave), SHA-256 xesh zanjirlari, RFC 3161 vaqt tamg&#x27;alari va Bitcoin konsensusi doktorlik varaqalariga bo&#x27;ysunmaydi.</li>
+</ul>
+<h3 id="4-taylor-wessing-without-taylor-is-just-wessing--and-how-history-is-purged">4. &quot;Taylor Wessing&quot; Taylorsiz — faqat Wessingdir — va tarix qanday o&#x27;chirib tashlanadi</h3>
+<p>Hujumkor tavsiya tarmog&#x27;ini &quot;markazlashmaslik&quot; deb brendlash – bu <strong>huquqiy mas&#x27;uliyatni yoyib yuborish uchun korporativ qalqondir.</strong> Qonunbuzarliklar fosh etilganda, yagona global brend rahbariyatni himoya qilish maqsadida alohida sub&#x27;ektlarga bo&#x27;linadi.</p>
+<ul>
+<li><strong>Taylor chiqib ketdi:</strong> Britaniya bo&#x27;limi ajralib chiqdi (<em>Uinston Teylor</em>, 2026 yil iyun). Germaniyada esa <strong>Wessing</strong> qoldi — qimmatbaho reklama taxtasi ostidagi mustaqil tarmoq.</li>
+<li><strong>Vikipediyadan ikki marta o&#x27;chirib tashlandi:</strong> firma 2020 yil mart oyida COVID-19 boshlanganda Germaniya <a href="https://de.wikipedia.org/wiki/Taylor_Wessing#Geschichte">Vikipediyasidan</a> <strong>barcha 95 nafar talaba hamkor (<code>wissenschaftliche Mitarbeiter</code>)</strong> ishdan bo&#x27;shatilgani haqidagi hujjatlashtirilgan ma&#x27;lumotni ikki marta o&#x27;chirib tashladi (<a href="https://www.juve.de/nachrichten/verwaltung/2020/03/corona-krise-taylor-wessing-kuendigt-allen-wissenschaftlichen-mitarbeitern">JUVE</a>).</li>
+<li><strong>Asoschi Rüdiger Graf fon der Gols:</strong> (NSDAP <code>#1,033,215</code>, Goebbelsning advokati, <a href="https://www.digitale-sammlungen.de/en/view/bsb00000146?page=224">Reyxstag deputati</a>) <strong><a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">1935 yildagi 175-moddaning natsistlarcha qayta ko&#x27;rib</a></strong> chiqilishini loyihalab, qabul qilgan <strong>8 kishilik Jinoyat huquqi komissiyasi a&#x27;zolaridan biri</strong> edi (<a href="https://resolver.sub.uni-hamburg.de/kitodo/PPN689065124_19331125">1933 yil 25 noyabrda tayinlangan</a>; <a href="https://api.pageplace.de/preview/DT0400.9783110892055_A36623967/preview-9783110892055_A36623967.pdf#page=16">protokollar</a>) (<a href="https://encyclopedia.ushmm.org/content/en/article/paragraph-175-and-the-nazi-campaign-against-homosexuality">USHMM</a>).</li>
+</ul>
+<h3 id="5-the-485-line-stochastic-challenge-to-dr-tobias-schelinski">5. Doktor Tobias Shelinskiga qarshi 485 qatorli stoxastik chaqiriq</h3>
+<p>Schelinski 1 938 ta shikoyatni o&#x27;qimasdan dalil sifatida tasdiqladi — garchi ulardan <strong>500 dan ortig&#x27;i bevosita irqiy nafrat va neo-natsist urush propagandasiga oid haqoratlar bo&#x27;lsa</strong> ham <strong>(<code>[REDACTED]</code>)</strong>.</p>
+<blockquote>
+<p>Biz qat&#x27;iy tajriba taklif qilamiz: korpusning aynan 25 foizini ajratib oling — ⌈1,938 × 0.25⌉ = 485 qator — almashtirmasdan tasodifiy namunaviy tanlov (Fisher–Yates aralashuvi, 70,717 so&#x27;zli ma&#x27;lumotlar to&#x27;plami bo&#x27;yicha ommaviy SHA-256 xesh bilan urug&#x27;langan) orqali.</p>
+<p><strong>Doktor Shelinski ushbu tasodifiy tanlab olingan 485 ta yozuvni ko&#x27;rib chiqib, bu kontent nima uchun &quot;ahamiyatsiz&quot; ekanligini ommaga tushuntirishga tayyormi?</strong></p>
+<p>Agar u ushbu kontent ahamiyatsiz ekanligini ishonchli tarzda ko&#x27;rsata olsa, <strong>biz darhol xatoni tan olamiz, ommaviy ravishda uzr so&#x27;raymiz va uning ismi tilga olingan barcha joylarni o&#x27;chirib tashlaymiz.</strong></p>
+</blockquote>
+<p>Shu bilan birga, Zurheide&#x27;ning 830 betli PDF-fayli vektorli qutilar ostida matnning 100 foizini ajratib olish imkonini berdi:</p>
+<ul>
+<li>Ataylab ko&#x27;rinib turadigan qilib qoldirilgan kichik 2% li namunada, <strong>1-qatordagi 1-kiritma tahrirlanmagan homofob haqorat (<code>[REDACTED]</code>)</strong> — bu firma tarixi (asoschisi Goltz, 175-modda) va uning <a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">Stonewall Top 100</a> marketingi bilan ironik qarama-qarshi turadi.</li>
+<li>Namuna <strong>doimiy taqiqdan keyin</strong> joylashgan, <strong>formulaviy foydalanuvchi nomlaridan</strong> foydalanadi va ma&#x27;lum vaqt belgilari tanlab olib tashlangan (<code>2025-08-</code>) avtomatlashtirilgan oraliklarni yashirish maqsadida tanlab olib tashlangan.</li>
+</ul>
+<h3 id="6-asposepdf-208-free-software--state-archives-after-dec-1-2026">6. Aspose.PDF 20.8, erkin dasturiy ta&#x27;minot va davlat arxivlari (2026 yil 1 dekabrdan keyin)</h3>
+<p>Biz korporatsiya GDPRdan qaysi huquq asosida ozod qilinganini bilmaymiz, lekin ularning elita kechiktirishi va shablon xat boshi bepul emas edi. Ularning PDF faylida <strong><code>Aspose.PDF for .NET 20.8</code></strong> o&#x27;rnatilgan edi (<strong>2020 yil</strong> avgustda sotib olingan, hech qachon yangilanmagan — dasturiy ta&#x27;minot uchun pul to&#x27;lash elita IT yuristlari uchun emas!).</p>
+<ul>
+<li>Agar 2020 yildan beri dasturiy ta&#x27;minot uchun pul to&#x27;lamaganingizdan uyalib qidiruv natijalarini tozalayotgan bo&#x27;lsangiz: <strong><code>TgWitness</code></strong> <strong>to&#x27;liq bepul (<a href="https://github.com/phishdestroy/TgWitness/blob/main/LICENSE">MIT litsenziyasi</a>)</strong> — izolyatsiyalangan konteynerlar va haqiqiy shifrlash bilan.</li>
+<li><strong>Bu kulgili emas. Kulgili tomoni shundaki, elit yuristlar oylar davomida Google&#x27;dan ushbu zaiflikka oid eslatmalarni o&#x27;chirishga urinishlarini tomosha qilish. Zero Trust.</strong></li>
+<li>Agar siz buni <strong>2026-yil 1-dekabrdan</strong> keyin o&#x27;qisangiz: bu yozuvlar doimiy ravishda <strong>Germaniya Davlat</strong> arxivlariga <strong>(<em>Staatsarchiv / Bundesarchiv</em>)</strong> va xorijiy sud arxivlariga topshirilgan bo&#x27;lib, ularni hech qanday &quot;Unutilish huquqi&quot; veb-formasi o&#x27;chira olmaydi.</li>
+</ul>
 <p><a href="../../LICENSE">MIT litsenziyasi</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Taylor Wessing bo&#x27;yicha pozitsiyamiz</a> · <a href="../HOW-IT-WORKS.md">Dalil modeli</a></p>
 <p><a href="README.md">Loyiha</a> · <a href="README.md">Hujjatlash</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

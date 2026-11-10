@@ -6,21 +6,65 @@
 <p><strong>PhishDestroy · TgWitness proje bildirimi</strong></p>
 <p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Kaynak kaydı</a> · <a href="../../NOTICE">Orijinal BİLDİRİM</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Etik Bildirim ve Tarihsel Süreklilik</h2>
-<p>Kısa süre önce, bazı hukuk firmaları için —özellikle Dr. Tobias Schelinski ve Dr. Patrick Vincent Zurheide için— matematiğin ve nesnel gerçeklerin önemsiz olduğunu öğrendik.</p>
-<p>Temel veri işleme konusunda kendiniz başarısız olurken, GDPR&#x27;ye uyumsuzluğu şirketlere ticari bir hizmet olarak satmak hukuki uzmanlık değildir.</p>
-<p>Sizin kanun olduğunuzu ya da sahte bir iddianın üzerindeki seçkin bir imzanın yalanı sihirli bir şekilde gerçeğe dönüştürdüğünü sanmak, teknik yetersizliği örtbas etmez.</p>
+<p>Bazı hukuk firmaları için — özellikle <strong>Dr. Tobias Schelinski</strong> ve <strong>Dr. Patrick Vincent Zurheide</strong> — matematik, teknik dürüstlük ve nesnel gerçeklerin önemsiz olduğunu öğrendik.</p>
+<p>Temel veri işleme kurallarını yerine getiremezken şirketlere GDPR&#x27;ye uyumsuzluk satmak, hukuki uzmanlık değildir. Tahrif edilmiş bir iddianın üzerinde yer alan seçkin bir imzanın, teknik yetersizliği örtbas edemeyeceği açıktır.</p>
 <p>Bu araç, aşağıdakilerin geçerli olduğu yargı bölgeleriyle uyumsuzdur:</p>
 <ul>
-<li>Kurumsal otokrasi</li>
-<li>Özelleştirilmiş veya ticari adalet</li>
-<li>Plütokrasi</li>
-<li>Kleptokrasi ve kurumsal yolsuzluk</li>
+<li><strong>Kurumsal otokrasi</strong></li>
+<li><strong>Özelleştirilmiş adalet</strong></li>
+<li><strong>Plütokrasi</strong></li>
+<li><strong>Kleptokrasi ve kurumsal yolsuzluk</strong></li>
 </ul>
-<p>Dr. Patrick Zurheide’ye, Dr. Tobias Schelinski’ye ve kendi veri işleme hatalarını örtbas etmek, kurumsal geçmişlerini temizlemek ve tarihsel kayıtları silmek için “Unutulma Hakkı”nı bir silah olarak kullanmaya çalışanlara özel bir atıfta bulunmak isterim:</p>
 <blockquote>
-<p>Taylor Wessing (Dr. Tobias Schelinski &amp; Dr. Patrick Vincent Zurheide) → Wessing &amp; Berenberg-Gossler → Stonewall Top 100 → Dr. Graf von der Goltz Dr. Wessing &amp; Partner (1957&#x27;den beri) → Rüdiger Graf von der Goltz → 1935 revizyonundaki 175. madde</p>
+<p>Taylor Wessing (Dr. Tobias Schelinski &amp; Dr. Patrick Vincent Zurheide) → Wessing &amp; Berenberg-Gossler → <a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">Stonewall Top 100</a> → Dr. Graf von der Goltz Dr. Wessing &amp; Partner (1957&#x27;den beri) → Rüdiger Graf von der Goltz → <a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">1935 revizyonundaki 175. madde</a></p>
 </blockquote>
-<p>MIT Lisansı’na sıkı sıkıya uymak amacıyla, bu yazılımın kullanımını kısıtlamıyoruz. Ancak şunu açıkça belirtelim: kurumsal danışmanlık sözleşmeleri, hukuki sindirme ve dijital silme talepleri, tarihi geçersiz kılamaz, geçmişi yeniden yazamaz veya gerçeği gizleyemez.</p>
+<hr />
+<h3 id="1-what-are-people-supposed-to-do-when-lawyers-edit-their-own-reputation">1. Avukatlar kendi itibarlarını düzenlediklerinde insanlar ne yapmalıdır?</h3>
+<p>Avukatlar, arama motorlarından kanıtları manuel olarak silerek itibarlarını yönetirken, müşteriler ve düzenleyici kurumlar ne yapmalıdır? Onların imzasına körü körüne güvenmeli mi? Bunun gerçek bedeli nedir? Yoksa artık formül basitçe şöyledir: <strong>Google&#x27;dan sil = iş bitmiştir?</strong></p>
+<ol>
+<li><strong>GDPR’nin 15. maddesi, bir yıldan fazla bir süre geçmesine rağmen hâlâ yerine getirilmemiştir;</strong></li>
+<li><strong>İki imza sahibi, resmi belgelerde birbirleriyle doğrudan çelişti:</strong> Schelinski, <em>&quot;ayrıntılara bakılmaksızın&quot;</em> suçun kanıtı olarak 1.938 şikayeti onayladı; Zurheide ise 2.002 kayıt ve 64 yasak sonrası enjeksiyon sunarak, <strong>36</strong> saniyede derlenen bir dosyanın <em>“manuel olarak sansürlenmesi”</em> nedeniyle 106 günlük gecikme olduğunu iddia etti. <code>Aspose.PDF for .NET 20.8</code>;</li>
+<li><strong>Avukatlar, şirketlerin iddialarının yasal veri ifşa kanunlarının üzerinde olduğu yanılgısıyla hareket etmektedir.</strong></li>
+</ol>
+<h3 id="2-both-doctors-personally-used-the-right-to-be-forgotten--it-is-not-magic-we-have-not-forgotten">2. Her iki doktor da kişisel olarak “Unutulma Hakkı”ndan yararlandı — Bu sihir değil, biz unutmadık</h3>
+<ul>
+<li>Bozuk PDF dosyasındaki sansürleme işlemine ilişkin teknik denetimimizin ardından, <strong>Dr. Patrick Vincent Zurheide, GDPR Madde 17 uyarınca arama sonuçlarından kaldırma talebinde bulundu.</strong></li>
+<li><strong>Tam olarak 3 gün sonra, Dr. Tobias Schelinski kendi arama sonuçlarından kaldırma bildirimini sundu.</strong></li>
+<li>4 ay boyunca bu, arama motorlarından tüm eleştirel içerikleri temizlemeye yönelik sistematik bir kampanyaya dönüştü.</li>
+</ul>
+<p><strong>Bu bir algoritma hatası değildi. Sihir de değildi.</strong> Kendi teknik ihmalinin kanıtlarını örtbas etmek için iki hukuk doktoru tarafından gizlilik yasalarının kasıtlı olarak suistimal edilmesiydi. <strong>Unutmadık.</strong></p>
+<h3 id="3-the-doctor-prefix-vs-cryptographic-reality">3. &quot;Doktor&quot; Önekine Karşı Kriptografik Gerçeklik</h3>
+<p>Doktora tezi, dar bir alanda geçmişte yapılan teorik araştırmaların <strong>tarihsel</strong> bir kaydıdır. İkili formatlar veya veri güvenliği konusunda hiçbir yetkinlik sağlamaz:</p>
+<ul>
+<li>Bir başlık, hatalı verileri düzeltemez; seçkin bir imzanın gücü de usul açısından yanlış olanı gerçeğe dönüştüremez.</li>
+<li>Kriptografik doğrulamada, akademik öneklerin <strong>entropisi</strong> sıfırdır: donanım yongaları (TPM, Secure Enclave), SHA-256 hash zincirleri, RFC 3161 zaman damgaları ve Bitcoin konsensüsü, doktora unvanına bağlı değildir.</li>
+</ul>
+<h3 id="4-taylor-wessing-without-taylor-is-just-wessing--and-how-history-is-purged">4. &quot;Taylor Wessing&quot;, Taylor olmadan sadece Wessing&#x27;dir — ve tarih nasıl silinir?</h3>
+<p>Agresif bir tavsiye ağını &quot;merkeziyetsizlik&quot; olarak markalamak, <strong>yasal sorumluluğu dağıtmak için kullanılan basit bir kurumsal kalkan</strong> niteliğindedir. İhlaller ortaya çıktığında, liderliği korumak için tek bir küresel marka, ayrı varlıklar halinde parçalanır.</p>
+<ul>
+<li><strong>Taylor ayrıldı:</strong> İngiliz kolu ayrıldı (<em>Winston Taylor</em>, Haziran 2026). Almanya’da geriye <strong>Wessing</strong> kaldı — pahalı bir tabela altında faaliyet gösteren serbest çalışanlardan oluşan bir ağ.</li>
+<li><strong>Vikipedi&#x27;den iki kez silindi:</strong> Firma, Mart 2020&#x27;de COVID-19 salgınının başlangıcında <strong>95 öğrencinin tamamının (<code>wissenschaftliche Mitarbeiter</code>)</strong> işten çıkarılmasına ilişkin belgelenmiş bilgiyi Alman <a href="https://de.wikipedia.org/wiki/Taylor_Wessing#Geschichte">Vikipedi</a>&#x27;den iki kez sildi (<a href="https://www.juve.de/nachrichten/verwaltung/2020/03/corona-krise-taylor-wessing-kuendigt-allen-wissenschaftlichen-mitarbeitern">JUVE</a>).</li>
+<li><strong>Kurucu Rüdiger Graf von der Goltz:</strong> (NSDAP <code>#1,033,215</code>, Goebbels’in avukatı, <a href="https://www.digitale-sammlungen.de/en/view/bsb00000146?page=224">Reichstag milletvekili</a>), <strong><a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">1935’te 175. maddenin Nazi revizyon</a></strong>unu (<a href="https://encyclopedia.ushmm.org/content/en/article/paragraph-175-and-the-nazi-campaign-against-homosexuality">USHMM</a>) hazırlayan ve yürürlüğe koyan <strong>8 Ceza Hukuku Komisyonu üyesinden</strong> biriydi (<a href="https://resolver.sub.uni-hamburg.de/kitodo/PPN689065124_19331125">25 Kasım 1933’te atandı</a>; <a href="https://api.pageplace.de/preview/DT0400.9783110892055_A36623967/preview-9783110892055_A36623967.pdf#page=16">tutanaklar</a>).</li>
+</ul>
+<h3 id="5-the-485-line-stochastic-challenge-to-dr-tobias-schelinski">5. Dr. Tobias Schelinski’ye Yönelik 485 Satırlık Stokastik Meydan Okuma</h3>
+<p>Schelinski, 1.938 şikayeti okumadan delil olarak onayladı — oysa bunların <strong>500&#x27;den fazlası doğrudan etnik nefret ve neo-Nazi savaş propagandası içeren hakaretlerdi (<code>[REDACTED]</code>)</strong>.</p>
+<blockquote>
+<p>Titiz bir deney öneriyoruz: metin kümesinin tam olarak %25’ini çıkarın — ⌈1.938 × 0,25⌉ = 485 satır — 70.717 kelimelik veri kümesinin halka açık SHA-256 hash değeri ile tohumlanan, yer değiştirmesiz stokastik örnekleme (Fisher–Yates karıştırma yöntemi) yoluyla.</p>
+<p><strong>Dr. Schelinski, rastgele seçilen bu 485 girişi inceleyip, bu içeriğin neden &quot;önemsiz&quot; olduğunu kamuoyuna açıklamaya hazır mı?</strong></p>
+<p>Eğer bu içeriğin önemsiz olduğunu ikna edici bir şekilde kanıtlayabilirse, <strong>hatamızı derhal kabul edecek, kamuoyuna özür dileyecek ve isminin geçtiği tüm ifadeleri sileceğiz.</strong></p>
+</blockquote>
+<p>Öte yandan, Zurheide&#x27;nin 830 sayfalık PDF dosyasında metnin %100&#x27;ü vektör kutuları altında ayıklanabilir durumda bırakılmıştır:</p>
+<ul>
+<li>Kasıtlı olarak görünür bırakılan %2&#x27;lik küçük örnekte, <strong>1. satırdaki 1 numaralı giriş</strong>, <strong>sansürlenmemiş homofobik bir hakaret (<code>[REDACTED]</code>) içeriyor</strong> — bu durum, firmanın geçmişiyle (kurucu Goltz, 175. madde) ve <a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">Stonewall Top 100</a> pazarlama kampanyasıyla ironik bir tezat oluşturuyor.</li>
+<li>Örnek, <strong>kalıcı engellemenin ardından</strong> yer almaktadır; <strong>kalıplaşmış kullanıcı adları</strong> kullanılmıştır ve belirli zaman damgaları, otomatik aralıkları gizlemek amacıyla seçici olarak kaldırılmıştır (<code>2025-08-</code>) otomatik aralıkları gizlemek amacıyla seçici olarak kaldırılmıştır.</li>
+</ul>
+<h3 id="6-asposepdf-208-free-software--state-archives-after-dec-1-2026">6. Aspose.PDF 20.8, Özgür Yazılım ve Devlet Arşivleri (1 Aralık 2026&#x27;dan sonra)</h3>
+<p>Şirketin hangi hakka dayanarak GDPR&#x27;den muaf tutulduğunu bilmiyoruz, ancak seçkin gecikmeleri ve antetli kağıtları bedava değildi. PDF dosyalarının içinde <strong><code>Aspose.PDF for .NET 20.8</code></strong> vardı (<strong>Ağustos 2020&#x27;de</strong> satın alınmış, hiç yenilenmemiş — yazılım için para ödemek seçkin BT avukatlarına göre değil!).</p>
+<ul>
+<li>2020&#x27;den beri yazılım için ödeme yapmadığınız için utandığınız için arama sonuçlarını siliyorsanız: <strong><code>TgWitness</code></strong>, izole edilmiş kapsayıcılar ve gerçek şifreleme ile <strong>tamamen ücretsizdir (<a href="https://github.com/phishdestroy/TgWitness/blob/main/LICENSE">MIT Lisansı</a>)</strong>.</li>
+<li><strong>Bu komik değil. Komik olan, seçkin avukatların bu güvenlik açığına ilişkin bahisleri Google&#x27;dan silmek için aylarca uğraşmalarını izlemek. Sıfır Güven.</strong></li>
+<li>Bunu <strong>1 Aralık 2026&#x27;dan</strong> sonra okuyorsanız: bu kayıtlar, &quot;Unutulma Hakkı&quot; web formu ile silinemeyecek şekilde <strong>Alman Devlet</strong> Arşivleri&#x27;ne <strong>(<em>Staatsarchiv / Bundesarchiv</em>)</strong> ve yabancı adli arşivlere kalıcı olarak teslim edilmiştir.</li>
+</ul>
 <p><a href="../../LICENSE">MIT Lisansı</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Taylor Wessing hakkındaki tutumumuz</a> · <a href="../HOW-IT-WORKS.md">Kanıt modeli</a></p>
 <p><a href="README.md">Proje</a> · <a href="README.md">Belgeler</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

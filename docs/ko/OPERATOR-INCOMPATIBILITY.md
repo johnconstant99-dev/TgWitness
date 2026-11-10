@@ -6,21 +6,65 @@
 <p><strong>PhishDestroy · TgWitness 프로젝트 공지</strong></p>
 <p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">원본 기록</a> · <a href="../../NOTICE">원본 공지사항</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ 윤리 공지 및 역사적 연속성</h2>
-<p>최근 우리는 특정 로펌들—특히 토비아스 셸린스키(Tobias Schelinski) 박사와 패트릭 빈센트 주르하이데(Patrick Vincent Zurheide) 박사—에게 있어 수학과 객관적인 사실은 무의미하다는 사실을 알게 되었습니다.</p>
-<p>자신들은 기본적인 데이터 처리조차 제대로 하지 못하면서, 기업들에게 GDPR 미준수 서비스를 상업적 서비스로 판매하는 것은 법적 전문성이 아닙니다.</p>
-<p>자신이 곧 법이라고 착각하거나, 위조된 청구에 엘리트의 서명이 있으면 거짓이 마법처럼 진실로 바뀐다고 믿는다고 해도, 기술적 무능함을 가릴 수는 없습니다.</p>
+<p>저희는 특정 로펌들, 특히 <strong>토비아스 셸린스키(Tobias Schelinski) 박사</strong>와 <strong>패트릭 빈센트 주르하이데(Patrick Vincent Zurheide) 박사</strong>에게 있어 수학, 기술적 무결성, 객관적 사실은 전혀 중요하지 않다는 사실을 알게 되었습니다.</p>
+<p>기본적인 데이터 처리조차 제대로 하지 못하면서 기업에 GDPR 미준수 서비스를 판매하는 것은 법률 전문성이 아닙니다. 위조된 주장서에 엘리트급 인사가 서명했다고 해서 기술적 무능력을 가릴 수는 없습니다.</p>
 <p>이 도구는 다음 사항이 지배적인 관할권에서는 호환되지 않습니다:</p>
 <ul>
-<li>기업 지배 체제</li>
-<li>민영화된 또는 상업화된 사법 제도</li>
-<li>재벌 정치</li>
-<li>도둑 정권과 제도적 부패</li>
+<li><strong>기업 지배 체제</strong></li>
+<li><strong>사유화된 사법 제도</strong></li>
+<li><strong>재벌 정치</strong></li>
+<li><strong>도둑 정권과 제도적 부패</strong></li>
 </ul>
-<p>패트릭 주르하이데(Patrick Zurheide) 박사, 토비아스 셸린스키(Tobias Schelinski) 박사, 그리고 자신의 데이터 처리 실패를 은폐하고, 기관의 계보를 미화하며, 역사적 기록을 지우기 위해 ‘잊혀질 권리’를 악용하려는 이들에게 특별히 언급합니다:</p>
 <blockquote>
-<p>Taylor Wessing (토비아스 셸린스키 박사 &amp; 패트릭 빈센트 주르하이데 박사) → Wessing &amp; Berenberg-Gossler → Stonewall Top 100 → 그라프 폰 데어 골츠 박사, Wessing &amp; Partner (1957년 설립) → 뤼디거 그라프 폰 데어 골츠 → 1935년 개정된 제175조</p>
+<p>Taylor Wessing (토비아스 셸린스키 박사 및 패트릭 빈센트 주르하이데 박사) → Wessing &amp; Berenberg-Gossler → <a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">Stonewall Top 100</a> → 그라프 폰 데어 골츠 박사, Wessing &amp; Partner (1957년 설립) → 뤼디거 그라프 폰 데어 골츠 → <a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">1935년 개정된 제175조</a></p>
 </blockquote>
-<p>MIT 라이선스를 엄격히 준수하기 위해, 당사는 이 소프트웨어의 사용을 제한하지 않습니다. 그러나 한 가지 분명히 밝히자면, 기업의 고문 계약, 법적 협박, 디지털 삭제 요구는 역사를 무효화하거나, 계보를 재작성하거나, 진실을 은폐할 수 없습니다.</p>
+<hr />
+<h3 id="1-what-are-people-supposed-to-do-when-lawyers-edit-their-own-reputation">1. 변호사들이 자신의 평판을 조작할 때 사람들은 어떻게 해야 할까요?</h3>
+<p>변호사들이 검색 엔진에서 증거를 수동으로 삭제하여 자신의 평판을 관리할 때, 의뢰인과 규제 당국은 어떻게 해야 할까요? 그들의 서명을 맹목적으로 믿어야 할까요? 그 대가는 과연 무엇일까요? 아니면 이제 공식이 단순히 <strong>‘구글에서 삭제하면 끝’</strong>인 것일까요?</p>
+<ol>
+<li><strong>GDPR 제15조는 1년이 넘게 지난 지금도 여전히 이행되지 않고 있습니다;</strong></li>
+<li><strong>두 서명자는 공식 제출 서류에서 서로 정면으로 상반된 주장을 펼쳤다:</strong> 셸린스키는 <em>“세부 사항과 무관하게”</em> 유죄의 증거로 1,938건의 불만 사항을 인증했으며, 반면 주르하이데는 금지 조치 이후 64건의 추가 기록이 포함된 2,002건의 기록을 제출하며, <code>Aspose.PDF for .NET 20.8</code>로 <strong>36초</strong> 만에 작성된 파일을 <em>“수동으로 편집”하는</em> 데 106일이 소요되었다고 주장했다;</li>
+<li><strong>변호인 측은 기업의 주장이 법정 정보 공개법을 우선한다는 착각에 빠져 있습니다.</strong></li>
+</ol>
+<h3 id="2-both-doctors-personally-used-the-right-to-be-forgotten--it-is-not-magic-we-have-not-forgotten">2. 두 의사 모두 개인적으로 “잊혀질 권리”를 행사했다 — 이는 마법이 아니며, 우리는 잊지 않았다</h3>
+<ul>
+<li>손상된 PDF 문서의 편집 내용에 대한 기술적 감사를 거친 후, <strong>패트릭 빈센트 주르하이데 박사는 GDPR 제17조에 따른 검색 결과 삭제 요청 통지를 제출했습니다.</strong></li>
+<li><strong>정확히 3일 후, 토비아스 셸린스키 박사는 자신의 검색 결과 삭제 요청서를 제출했다.</strong></li>
+<li>4개월에 걸쳐, 이는 검색 엔진에서 모든 비판적 의견을 제거하려는 체계적인 캠페인으로 발전했다.</li>
+</ul>
+<p><strong>이는 알고리즘 오류도 아니었고, 마법도 아니었습니다.</strong> 이는 두 명의 법학 박사가 자신들의 기술적 과실에 대한 증거를 은폐하기 위해 개인정보 보호법을 고의적으로 악용한 것이었습니다. <strong>우리는 이를 잊지 않았습니다.</strong></p>
+<h3 id="3-the-doctor-prefix-vs-cryptographic-reality">3. “닥터(Doctor)” 접두사와 암호학적 현실</h3>
+<p>박사 학위는 좁은 전문 분야에서 과거에 수행된 이론적 연구의 <strong>역사적</strong> 기록일 뿐입니다. 이 학위는 이진 형식이나 데이터 보안에 대한 전문성을 전혀 제공하지 않습니다:</p>
+<ul>
+<li>제목만으로는 손상된 데이터를 복구할 수 없으며, 권위 있는 서명만으로는 절차상의 허위를 사실로 바꿀 수 없다.</li>
+<li>암호학적 검증에서 학술적 접두사는 <strong>엔트로피가</strong> 제로입니다. 하드웨어 칩(TPM, Secure Enclave), SHA-256 해시 체인, RFC 3161 타임스탬프, 비트코인 합의는 박사 학위 논문 형식에 따르지 않습니다.</li>
+</ul>
+<h3 id="4-taylor-wessing-without-taylor-is-just-wessing--and-how-history-is-purged">4. “Taylor Wessing”에서 ‘Taylor’가 빠지면 그저 ‘Wessing’일 뿐 — 그리고 역사가 어떻게 지워지는가</h3>
+<p>공격적인 추천 네트워크를 “분산화”라고 포장하는 것은 단순히 <strong>법적 책임을 회피하기 위한 기업의 방패</strong>일 뿐입니다. 위반 사실이 드러나면, 통합된 글로벌 브랜드는 경영진을 보호하기 위해 개별 조직으로 분열됩니다.</p>
+<ul>
+<li><strong>테일러가 떠났다:</strong> 영국 지사가 분리되었다(<em>윈스턴 테일러</em>, 2026년 6월). 독일에는 <strong>‘베싱’만</strong> 남게 되었는데, 이는 값비싼 간판 아래 모인 프리랜서 네트워크에 불과하다.</li>
+<li><strong>위키백과에서 두 차례 삭제됨:</strong> 해당 로펌은 2020년 3월 코로나19 사태 초기에 <strong>95명의 학생 연구원(<code>wissenschaftliche Mitarbeiter</code>) 전원을</strong> 해고한 사실이 기록된 <a href="https://de.wikipedia.org/wiki/Taylor_Wessing#Geschichte">내용을</a> 독일어 위키백과에서 두 차례 삭제했다(<a href="https://www.juve.de/nachrichten/verwaltung/2020/03/corona-krise-taylor-wessing-kuendigt-allen-wissenschaftlichen-mitarbeitern">JUVE</a>).</li>
+<li><strong>창립자 뤼디거 그라프 폰 데어 골츠:</strong> (NSDAP <code>#1,033,215</code>, 괴벨스의 법률 고문, <a href="https://www.digitale-sammlungen.de/en/view/bsb00000146?page=224">라이히스타그 의원</a>)는 <strong><a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">1935년 나치에 의해 개정된 제175조</a></strong>(<a href="https://encyclopedia.ushmm.org/content/en/article/paragraph-175-and-the-nazi-campaign-against-homosexuality">USHMM</a>)를 초안하고 제정했던 <strong>형법 위원회 위원 8명 중 한 명</strong>이었다(<a href="https://resolver.sub.uni-hamburg.de/kitodo/PPN689065124_19331125">1933년 11월 25일 임명</a>; <a href="https://api.pageplace.de/preview/DT0400.9783110892055_A36623967/preview-9783110892055_A36623967.pdf#page=16">회의록</a>).</li>
+</ul>
+<h3 id="5-the-485-line-stochastic-challenge-to-dr-tobias-schelinski">5. 토비아스 셸린스키 박사를 향한 485줄의 확률론적 도전</h3>
+<p>셸린스키는 1,938건의 신고 내용을 읽지도 않은 채 증거로 인정했는데, 그중 <strong>500건 이상은 직접적인 인종적 증오와 네오나치 전쟁 선전 비방이었다(<code>[REDACTED]</code>)</strong>.</p>
+<blockquote>
+<p>우리는 다음과 같은 엄격한 실험을 제안합니다: 코퍼스의 정확히 25%를 추출합니다 — ⌈1,938 × 0.25⌉ = 485줄 —을 중복 없이 확률적 표본 추출(70,717단어 데이터셋의 공개 SHA-256 해시를 시드로 사용하는 피셔-예이츠 셔플)을 통해 추출합니다.</p>
+<p><strong>셸린스키 박사는 무작위로 추출된 이 485건의 항목을 검토하고, 해당 내용이 왜 “무관하다”고 볼 수 있는지 공개적으로 설명할 준비가 되어 있습니까?</strong></p>
+<p>만약 그가 이 내용이 사안과 무관하다는 점을 설득력 있게 입증할 수 있다면, <strong>당사는 즉시 잘못을 인정하고 공개적으로 사과하며, 그의 이름이 언급된 모든 내용을 삭제하겠습니다.</strong></p>
+</blockquote>
+<p>한편, Zurheide의 830페이지 분량 PDF 파일은 벡터 상자 내에서 텍스트의 100%를 추출할 수 있도록 되어 있습니다:</p>
+<ul>
+<li>의도적으로 노출된 2%의 극히 일부 샘플에서, <strong>1행의 항목 #1은 편집되지 않은 동성애 혐오적 비방어(<code>[REDACTED]</code>)로</strong>, 이는 해당 로펌의 역사(설립자 골츠, 제175조) 및 <a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">스톤월 톱 100</a> 마케팅과 아이러니한 대조를 이룬다.</li>
+<li>이 예문은 <strong>영구 차단 조치 이후의</strong> 상황을 다루며, <strong>정형화된 사용자 이름을</strong> 사용했고, 특정 타임스탬프는 자동화된 시간 간격을 숨기기 위해 선택적으로 삭제되었습니다(<code>2025-08-</code>) 자동화된 간격을 모호하게 하기 위해 선택적으로 제거되었습니다.</li>
+</ul>
+<h3 id="6-asposepdf-208-free-software--state-archives-after-dec-1-2026">6. Aspose.PDF 20.8, 자유 소프트웨어 및 국가 기록 보관소 (2026년 12월 1일 이후)</h3>
+<p>해당 기업이 어떤 근거로 GDPR 적용을 면제받았는지는 알 수 없으나, 그들의 ‘엘리트급’ 지연 전술과 레터헤드 사용에는 비용이 들었을 것입니다. 그들의 PDF 파일 안에는 <strong><code>Aspose.PDF for .NET 20.8</code></strong>이 포함되어 있었는데(<strong>2020년</strong> 8월에 구매했으나 갱신하지 않음 — 소프트웨어 비용을 지불하는 건 ‘엘리트’ IT 변호사들의 스타일이 아니니까요!).</p>
+<ul>
+<li>2020년 이후로 소프트웨어 사용료를 한 번도 내지 않은 것이 부끄러워 검색 결과를 지우고 계신다면: <strong><code>TgWitness</code></strong>는 <strong>완전히 무료(<a href="https://github.com/phishdestroy/TgWitness/blob/main/LICENSE">MIT 라이선스</a>)</strong>이며, 격리된 컨테이너와 진정한 암호화 기능을 제공합니다.</li>
+<li><strong>이건 웃을 일이 아닙니다. 웃긴 건 엘리트 변호사들이 구글에서 이 취약점에 대한 언급을 삭제하려고 몇 달을 허비하는 모습을 지켜보는 것입니다. 제로 트러스트.</strong></li>
+<li><strong>2026년 12월 1일</strong> 이후에 이 글을 읽으신다면: 이 기록들은 <strong>독일 국가 기록원(<em>Staatsarchiv / Bundesarchiv</em>)</strong> 및 해외 사법 기록원에 영구적으로 보관되어 있으며, 그곳에서는 ‘잊혀질 권리’ 웹 양식을 통해 삭제할 수 없습니다.</li>
+</ul>
 <p><a href="../../LICENSE">MIT 라이선스</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Taylor Wessing에 대한 당사의 입장</a> · <a href="../HOW-IT-WORKS.md">증거 모델</a></p>
 <p><a href="README.md">프로젝트</a> · <a href="README.md">문서</a> · <a href="../wiki/Home.md">위키</a></p>
 </div>

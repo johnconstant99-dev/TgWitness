@@ -6,21 +6,65 @@
 <p><strong>PhishDestroy · TgWitness プロジェクトに関するお知らせ</strong></p>
 <p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">ソースレコード</a> · <a href="../../NOTICE">オリジナルの「NOTICE」</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ 倫理に関する通知および歴史的連続性</h2>
-<p>最近、特定の法律事務所――具体的にはトビアス・シェリンスキー博士およびパトリック・ヴィンセント・ツアハイデ博士――にとって、数学や客観的事実は無関係であることが判明しました。</p>
-<p>自らが基本的なデータ処理さえ適切に行えていないにもかかわらず、GDPR違反を企業向けの商用サービスとして売り込むことは、法的専門知識とは言えません。</p>
-<p>自分が法そのものであるという妄想の下で行動したり、偽造された主張にエリートの署名があれば嘘が魔法のように真実になると信じ込んだりしても、技術的な無能さを隠すことはできません。</p>
+<p>特定の法律事務所、具体的には<strong>トビアス・シェリンスキー博士</strong>および<strong>パトリック・ヴィンセント・ツアハイデ博士</strong>にとって、数学、技術的な整合性、そして客観的な事実は無関係であるということが判明いたしました。</p>
+<p>基本的なデータ処理さえ適切に行えない状態で、企業に対してGDPR不遵守を売り込むことは、法的専門知識とは言えません。偽造された主張にエリート層の署名があったとしても、技術的な無能さを隠すことはできません。</p>
 <p>本ツールは、以下の事項が優先される法域では利用できません：</p>
 <ul>
-<li>コーポラトクラシー</li>
-<li>民営化または商業化された司法</li>
-<li>金権政治</li>
-<li>盗賊政治と制度的腐敗</li>
+<li><strong>コーポラトクラシー</strong></li>
+<li><strong>私物化された司法</strong></li>
+<li><strong>金権政治</strong></li>
+<li><strong>盗賊政治と制度的腐敗</strong></li>
 </ul>
-<p>特に、パトリック・ツールハイデ博士、トビアス・シェリンスキー博士、そして「忘れられる権利」を武器として利用し、自らのデータ処理上の失敗を隠蔽し、組織の系譜を美化し、歴史的記録を抹消しようとしている方々について言及しておきます：</p>
 <blockquote>
-<p>Taylor Wessing（トビアス・シェリンスキー博士およびパトリック・ヴィンセント・ツアハイデ博士） → Wessing &amp; Berenberg-Gossler → Stonewall Top 100 → グラフ・フォン・デア・ゴルツ博士 Dr. Wessing &amp; Partner （1957年より）→ リュディガー・グラフ・フォン・デア・ゴルツ → 1935年改正版の第175条</p>
+<p>テイラー・ウェッシング（トビアス・シェリンスキー博士およびパトリック・ヴィンセント・ツアハイデ博士） → ウェッシング＆ベレンベルク＝ゴスラー → <a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">ストーンウォール・トップ100</a> → グラフ・フォン・デア・ゴルツ博士、ウェッシング＆パートナー （1957年より）→ リュディガー・グラフ・フォン・デア・ゴルツ → <a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">1935年改正第175条</a></p>
 </blockquote>
-<p>MITライセンスを厳格に遵守するため、当ソフトウェアの使用を制限することはありません。ただし、明確にしておきますが、企業からの顧問契約、法的威嚇、およびデジタルデータの消去要求は、歴史を覆したり、系譜を書き換えたり、真実を隠蔽したりすることはできません。</p>
+<hr />
+<h3 id="1-what-are-people-supposed-to-do-when-lawyers-edit-their-own-reputation">1. 弁護士が自らの評判を操作している場合、人々はどのように対応すべきでしょうか？</h3>
+<p>弁護士が検索エンジンから証拠を手作業で削除して自らの評判を管理している場合、クライアントや規制当局はどのように対応すべきなのでしょうか？　彼らの署名を盲信すべきなのでしょうか？　その真の代償とは何でしょうか？　それとも、今や「<strong>Googleから削除すれば、それで終わり</strong>」という単純な公式になってしまったのでしょうか？</p>
+<ol>
+<li><strong>GDPR第15条は、1年以上が経過した現在もなお履行されていません；</strong></li>
+<li><strong>2人の署名者は、公式の提出書類において互いに真っ向から矛盾する主張を行いました。</strong>シェリンスキー氏は、<em>「詳細にかかわらず」</em>有罪の証拠として1,938件の苦情を認定しました。 一方、ツールハイデ氏は、禁止措置後の注入が64件含まれる2,002件の記録を提出し、<strong>36秒</strong>で作成されたファイルの<em>「手動による編集」</em>に106日間の遅延が生じたと主張しました。 <code>Aspose.PDF for .NET 20.8</code>;</li>
+<li><strong>弁護団は、企業の主張が法定のデータ開示法に優先するという誤った認識の下で活動しています。</strong></li>
+</ol>
+<h3 id="2-both-doctors-personally-used-the-right-to-be-forgotten--it-is-not-magic-we-have-not-forgotten">2. 両医師は個人的に「忘れられる権利」を行使しました――それは魔法ではありません。私たちは忘れてはいません</h3>
+<ul>
+<li>破損したPDFの黒塗り処理に関する技術監査の結果を受け、<strong>パトリック・ヴィンセント・ツアハイデ博士は、GDPR第17条に基づく検索結果からの削除要請を提出しました。</strong></li>
+<li><strong>ちょうど3日後、トビアス・シェリンスキー博士は、独自の検索結果削除通知を提出しました。</strong></li>
+<li>4ヶ月以上にわたり、これは検索エンジンからあらゆる客観的な批判を排除しようとする組織的なキャンペーンへと発展しました。</li>
+</ul>
+<p><strong>これはアルゴリズムのエラーではありませんでした。魔法でもありませんでした。</strong>これは、2人の法学博士が、自らの技術的過誤の証拠を隠蔽するために、プライバシー関連法を意図的に悪用したものです。<strong>私たちは決して忘れてはいません。</strong></p>
+<h3 id="3-the-doctor-prefix-vs-cryptographic-reality">3. 「ドクター」という接頭辞と暗号学上の現実</h3>
+<p>博士号とは、特定の狭い分野における過去の理論的研究の<strong>記録</strong>に過ぎません。バイナリ形式やデータセキュリティに関する能力は、一切示していません：</p>
+<ul>
+<li>肩書きがあっても破損したデータを修復することはできず、権威ある署名があっても手続き上の虚偽を事実に変えることはできません。</li>
+<li>暗号学的検証において、学術的な接頭辞<strong>のエントロピーはゼロ</strong>です。ハードウェアチップ（TPM、Secure Enclave）、SHA-256ハッシュチェーン、RFC 3161タイムスタンプ、およびビットコインのコンセンサスは、博士号の肩書きに左右されることはありません。</li>
+</ul>
+<h3 id="4-taylor-wessing-without-taylor-is-just-wessing--and-how-history-is-purged">4. 「テイラー・ウェッシング」から「テイラー」がなくなれば、残るのは「ウェッシング」だけ――そして、歴史がいかに抹消されるか</h3>
+<p>攻撃的な紹介ネットワークを「分散化」と称することは、単に<strong>法的責任を分散させるための企業の盾</strong>に過ぎません。違反が明るみに出ると、統一されたグローバルブランドは、経営陣を守るために個別の組織へと分裂します。</p>
+<ul>
+<li><strong>テイラー氏が離脱：</strong>英国部門が分離しました（<em>ウィンストン・テイラー</em>、2026年6月）。ドイツには<strong>ウェッシング</strong>が残されました――高額な看板を掲げたフリーランスのネットワークです。</li>
+<li><strong>ウィキペディアから2度にわたり削除：</strong>同法律事務所は、2020年3月の新型コロナウイルス感染症（COVID-19）の発生当初に、<strong>95名の学生アシスタント（<code>wissenschaftliche Mitarbeiter</code>）全員が</strong>解雇されたという事実を、<a href="https://de.wikipedia.org/wiki/Taylor_Wessing#Geschichte">ドイツ語版ウィキペディアから</a>2度にわたり削除しました（<a href="https://www.juve.de/nachrichten/verwaltung/2020/03/corona-krise-taylor-wessing-kuendigt-allen-wissenschaftlichen-mitarbeitern">JUVE</a>）。</li>
+<li><strong>創設者のリュディガー・グラフ・フォン・デア・ゴルツ氏：</strong>（NSDAP <code>#1,033,215</code>、ゲッベルスの顧問弁護士、<a href="https://www.digitale-sammlungen.de/en/view/bsb00000146?page=224">帝国議会議員</a>）は、<strong><a href="https://de.wikisource.org/wiki/Gesetz_zur_%C3%84nderung_des_Strafgesetzbuchs_(1935)">1935年のナチスによる第175条改正案</a></strong>（<a href="https://encyclopedia.ushmm.org/content/en/article/paragraph-175-and-the-nazi-campaign-against-homosexuality">USHMM</a>）を起草・制定した<strong>刑法委員会の8名の委員のうちの</strong>1人でした（<a href="https://resolver.sub.uni-hamburg.de/kitodo/PPN689065124_19331125">1933年11月25日任命</a>、<a href="https://api.pageplace.de/preview/DT0400.9783110892055_A36623967/preview-9783110892055_A36623967.pdf#page=16">議事録</a>）。</li>
+</ul>
+<h3 id="5-the-485-line-stochastic-challenge-to-dr-tobias-schelinski">5. トビアス・シェリンスキー博士に対する485行の確率論的挑戦</h3>
+<p>シェリンスキー氏は、1,938件の苦情を、内容を確認することなく証拠として認定しました。その中には、<strong>500件以上が、直接的な民族憎悪やネオナチによる戦争プロパガンダ的な中傷である（<code>[REDACTED]</code>）</strong>にもかかわらずです。</p>
+<blockquote>
+<p>厳密な実験を提案いたします。コーパスのちょうど25％を抽出します — ⌈1,938 × 0.25⌉ = 485行——を、無置換の確率的サンプリング（70,717語のデータセットの公開SHA-256ハッシュをシードとしたフィッシャー・イェーツ法によるシャッフル）によって抽出することを提案いたします。</p>
+<p><strong>シェリンスキー博士は、無作為に抽出されたこれら485件の項目を精査し、なぜこの内容が「重要ではない」のかを公に説明する用意がありますか？</strong></p>
+<p>もし彼が、この内容が重要ではないことを説得力を持って示すことができれば、<strong>私たちは直ちに誤りを認め、公に謝罪し、彼の名前に関するすべての言及を削除いたします。</strong></p>
+</blockquote>
+<p>一方、Zurheide氏の830ページに及ぶPDFでは、ベクターボックス内のテキストが100％抽出可能でした：</p>
+<ul>
+<li>意図的に公開されたごくわずかな2％のサンプルにおいて、<strong>1行目のエントリ#1には</strong>、<strong>編集されていない同性愛者差別的な蔑称（<code>[REDACTED]</code>）が含まれています</strong>。これは、同法律事務所の沿革（創設者ゴルツ、第175条）や、「<a href="https://www.taylorwessing.com/fr/insights-and-events/news/media-centre/press-releases/2020/01/we-are-a-stonewall-top-100-employer-for-third-year-running">ストーンウォール・トップ100</a>」を掲げたマーケティング活動と皮肉な対照をなしています。</li>
+<li>このサンプルは<strong>永久利用停止処分後の</strong>ものですが、<strong>定型的なユーザー名</strong>を使用しており、特定のタイムスタンプは自動的な間隔を隠すために選択的に削除されています（<code>2025-08-</code>）これにより、自動投稿の間隔が判別しにくくなっています。</li>
+</ul>
+<h3 id="6-asposepdf-208-free-software--state-archives-after-dec-1-2026">6. Aspose.PDF 20.8、フリーソフトウェアと国家公文書館（2026年12月1日以降）</h3>
+<p>当該企業がどのような根拠でGDPRの適用除外となったのかは不明ですが、彼らの「エリート」らしい遅延対応やレターヘッドの使用には、当然ながら費用がかかっていたはずです。彼らのPDFファイル内には、<strong><code>Aspose.PDF for .NET 20.8</code></strong>が含まれていました（<strong>2020年8月に</strong>購入しましたが、更新は一度も行われていません――ソフトウェア代を支払うことなど、エリートIT弁護士には向いていないようです！）。</p>
+<ul>
+<li>2020年以降、ソフトウェアの料金を支払っていないことを恥ずかしく思って検索結果を削除している方へ：<strong><code>TgWitness</code></strong>は<strong>完全に無料（<a href="https://github.com/phishdestroy/TgWitness/blob/main/LICENSE">MITライセンス</a>）です</strong>。独立したコンテナと本格的な暗号化機能を備えています。</li>
+<li><strong>これは笑える話ではありません。笑えるのは、一流の弁護士たちが、この脆弱性に関する言及をGoogleから削除しようと何ヶ月も費やしている様子を見ることです。ゼロトラスト。</strong></li>
+<li><strong>2026年12月1日以降に</strong>本声明をお読みになる場合：これらの記録は、<strong>ドイツの州公文書館（<em>Staatsarchiv / Bundesarchiv</em>）</strong>および海外の司法公文書館に恒久的に保管されており、「忘れられる権利」のウェブフォームによって削除されることはありません。</li>
+</ul>
 <p><a href="../../LICENSE">MITライセンス</a> · <a href="TAYLOR-WESSING-EXCLUSION.md">Taylor Wessing に関する当社の立場</a> · <a href="../HOW-IT-WORKS.md">証拠モデル</a></p>
 <p><a href="README.md">プロジェクト</a> · <a href="README.md">ドキュメント</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>
