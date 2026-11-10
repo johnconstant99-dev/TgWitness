@@ -6380,7 +6380,13 @@
 "8ddd95d2c280abb70a350d4a34a53c00090b87f1deac591bfcce89632be0dd95": "2020年以降、ソフトウェアの料金を支払っていないことを恥ずかしく思って検索結果を削除している方へ：<strong><code>TgWitness</code></strong>は<strong>完全に無料（<a href=\"https://github.com/phishdestroy/TgWitness/blob/main/LICENSE\">MITライセンス</a>）です</strong>。独立したコンテナと本格的な暗号化機能を備えています。",
 "d119252fa47997b208205f84b06d3fcff60dfd898c02a0c1c953ef88917dc995": "<strong>これは笑える話ではありません。笑えるのは、一流の弁護士たちが、この脆弱性に関する言及をGoogleから削除しようと何ヶ月も費やしている様子を見ることです。ゼロトラスト。</strong>",
 "b2597c8e72fee90cb4d58c00152b68c39b0a7024cbcebe378f97c8336fa5e0c2": "<strong>2026年12月1日以降に</strong>本声明をお読みになる場合：これらの記録は、<strong>ドイツの州公文書館（<em>Staatsarchiv / Bundesarchiv</em>）</strong>および海外の司法公文書館に恒久的に保管されており、「忘れられる権利」のウェブフォームによって削除されることはありません。",
-"0f7f9b18937dbf09ada716abcdadc37a1f5e3727cd20eb8055d7c33158716a0b": "106日間のGDPRファイル"
+"0f7f9b18937dbf09ada716abcdadc37a1f5e3727cd20eb8055d7c33158716a0b": "106日間のGDPRファイル",
+"0748955a50498f2793cb32ce1cd05dfc2af3a66e20dffc4d9e015a4eed1c7896": "ライブデモ <span aria-hidden=\"true\">↗</span>",
+"f738d12b15df05cb084462c3af96fe689f2625f0c0c0eb26cd1c80a14f0730ca": "ライブデモを見る <span aria-hidden=\"true\">↗</span>",
+"ad85afa400c3646f7a6627817862765d75f36adaf0ab9115fa8f707a2bfa2233": "リアルタイムの記録を見るか、架空の事例を体験できます。Telegramへのログインは不要です。",
+"e40ce6f8acd187d30d5bcb52c590e1e4c32ef5413875e3593f899585fb5062cd": "<span class=\"live-indicator\" aria-hidden=\"true\"></span> ライブデモ",
+"6b828b1f9dd88b61fc2b1ea1e9af93105b7eae63952a7ad58ae80866e703e4ab": "記録の様子をリアルタイムで。",
+"7beb4441d36927ae577a4e8d15efee21866e22fc85d7a34244a53760243137ba": "読み取り専用の公開デモで、新着メッセージ、内容を伏せた編集履歴、削除通知を確認できます。"
 },
 "modes": {
 "modes.actions.body": "プレビュー、リクエスト、および結果の受信確認には署名が付与されます。ボタンが押される前に、サーバーはメッセージを再度取得し、変更されたキーボードを拒否します。返されたコールバックのテキストおよびURLは、記録されたコンテキストとして残ります。",
