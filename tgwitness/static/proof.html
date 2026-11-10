@@ -4,7 +4,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark"><meta name="theme-color" content="#0b1120">
   <title>TgWitness · Proof</title><link rel="icon" href="mark.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="proof.css"><script src="proof.js" defer></script>
+  <link rel="stylesheet" href="proof.css"><script src="proof-locales.js" defer></script><script src="proof.js" defer></script>
 </head>
 <body>
   <header class="wrap"><a class="brand" href="./"><img src="mark.svg" width="34" height="34" alt="">TgWitness <span>PROOF</span></a><button id="language" type="button" aria-label="Switch language">RU</button></header>
@@ -12,7 +12,7 @@
     <noscript><p class="boundary">Enable JavaScript to load the signed collector replies.</p></noscript>
     <section class="intro"><p class="eyebrow" data-copy="eyebrow">AN INDEPENDENT OBSERVER PROCESS</p><h1 data-copy="heading">Collection you can see.<br>A record you can check.</h1><p class="lead" data-copy="lead">Signed collector replies, message counters and journal hashes. Without publishing conversations.</p><p id="title" class="instance"></p></section>
     <div class="status-line" role="status"><span class="status-dot"></span><span id="connection" data-copy="loading">Waiting for the first response…</span><span id="updated"></span></div>
-    <section class="totals" aria-label="Overview"><div><span data-copy="workspaces">Account workspaces</span><strong id="total-accounts">—</strong></div><div><span data-copy="collecting">Collecting now</span><strong id="total-active">—</strong></div><div><span data-copy="delta">New between checks</span><strong id="total-delta">—</strong></div></section>
+    <section class="totals" aria-label="Overview"><div><span data-copy="workspaces">Account workspaces</span><strong id="total-accounts">—</strong></div><div><span data-copy="collecting">Collection enabled</span><strong id="total-active">—</strong></div><div><span data-copy="delta">New between checks</span><strong id="total-delta">—</strong></div></section>
     <div class="section-label"><h2 data-copy="accounts">Collectors</h2><p data-copy="intervalNote">Every account has its own journal and key.</p></div>
     <section id="accounts" class="accounts" aria-label="Collectors"></section>
     <section class="explanation"><div><span class="step">01</span><h2 data-copy="checkTitle">Download the proof</h2><p data-copy="checkBody">The JSON carries the collector's signed answer and the witness's signature. Compare key fingerprints through a separate trusted channel.</p></div><div><span class="step">02</span><h2 data-copy="compareTitle">Compare with the journal</h2><p data-copy="compareBody">The independent verifier checks signatures, hashes and counters against an evidence ZIP. A canary message in a test group separately checks delivery.</p></div></section>

@@ -163,6 +163,10 @@ def create_app(config, watcher_factory=ProofWatcher):
     async def script():
         return FileResponse(STATIC / "proof.js")
 
+    @app.get("/proof-locales.js")
+    async def locales():
+        return FileResponse(STATIC / "proof-locales.js")
+
     @app.get("/mark.svg")
     async def mark():
         return FileResponse(STATIC / "mark.svg")

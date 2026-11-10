@@ -20,6 +20,7 @@ from ..app import ProfileGroupAssign
 from ..app import ProfileImport
 from ..app import client_languages
 from ..app import panel_language
+from ..network import NetworkConfig
 from ..profiles import GROUP_SECTIONS
 from ..profiles import JournalNotExported
 from ..profiles import Profiles
@@ -214,6 +215,10 @@ async def profiles_import(
         async with child.state.operation_lock:
             if child.state.closing:
                 raise ValueError("The new workspace could not start.")
+            if body.route:
+                from ..guided_connection import adopt_route
+
+                await adopt_route(child, body.route, body.route_consent)
             connect = (
                 collector.import_new_session
                 if body.new_session
@@ -324,15 +329,32 @@ async def profiles_check(
         release = registry.reserve_session(key, object())
     except ValueError as exc:
         return {"state": "duplicate", "message": str(exc)}
+    tunnel = None
     try:
+        route = NetworkConfig(kind="direct") if body.route == "direct" else None
+        if body.route == "warp":
+            if getattr(ctx.app.state, "check_tunnel", None) is None:
+                from ..guided_connection import CheckTunnel
+
+                ctx.app.state.check_tunnel = CheckTunnel(
+                    ctx.app.state.connection.portable
+                )
+            try:
+                route = await ctx.app.state.check_tunnel.acquire(body.route_consent)
+            except (ValueError, OSError) as exc:
+                return {"state": "unchecked", "message": describe(exc)}
+            tunnel = ctx.app.state.check_tunnel
         result = await check_session(
             ctx.app.state.collector,
             account,
             body.api_id,
             body.api_hash,
             client_languages(request),
+            route,
         )
     finally:
+        if tunnel:
+            await tunnel.release()
         release()
     holder = (
         registry.holder(result["account"]["id"]) if result["state"] == "alive" else None

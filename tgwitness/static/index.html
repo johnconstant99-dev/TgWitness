@@ -1396,7 +1396,7 @@
         <button type="button" class="connect-route" data-connect-mode="direct" aria-pressed="false"><strong>Direct</strong><span>This machine's IP</span></button>
         <button type="button" class="connect-route" data-connect-mode="vpn" aria-pressed="false"><strong>VPN</strong><span>Import WireGuard</span></button>
         <button type="button" class="connect-route" data-connect-mode="proxy" aria-pressed="false"><strong>My proxy</strong><span>Server or proxy URL</span></button>
-        <button type="button" class="connect-route" data-connect-mode="mtproxy" aria-pressed="false"><strong>Public MTProto</strong><span>Automatic pool</span></button>
+        <button type="button" class="connect-route" data-connect-mode="mtproxy" aria-pressed="false"><strong>Public MTProxy</strong><span>Automatic pool</span></button>
         <button type="button" class="connect-route" data-connect-mode="warp" aria-pressed="true"><strong>WARP</strong><span>Managed local tunnel</span></button>
       </div>
       <p id="connect-note" class="hint"></p>
@@ -1423,7 +1423,7 @@
   <div class="workflow-handoff" hidden id="workflow-handoff"><p id="workflow-handoff-copy"></p><button class="primary" id="workflow-continue" type="button" hidden>Continue to export</button><button class="quiet" data-open="start" type="button">Change task</button></div>
   <div class="notice" hidden id="account-summary"></div>
   <div class="auth-card">
-    <div hidden id="demo-account-state"><span class="eyebrow">Sample workspace</span><h2>Try TgWitness with your account</h2><p>Stop the demo with Ctrl+C, then run from your project folder:</p><code class="start-command">python start.py</code><p class="hint">On Windows, you can double-click <strong>Start.cmd</strong> instead. Open the panel address printed in the terminal.</p><a class="format-help" href="/guide.html#trouble" rel="noopener" target="_blank">Installation help ↗</a><button class="primary full" data-open="observations" type="button">Back to sample journal</button></div>
+    <div hidden id="demo-account-state"><span class="eyebrow">Sample workspace</span><h2>Try TgWitness with your account</h2><p>Stop the demo with Ctrl+C, then start your own panel:</p><code class="start-command" data-no-translate>tgwitness</code><p class="hint">Running from a source folder instead? Use python start.py, or Start.cmd on Windows. Open the panel address printed in the terminal.</p><a class="format-help" href="/guide.html#trouble" rel="noopener" target="_blank">Installation help ↗</a><button class="primary full" data-open="observations" type="button">Back to sample journal</button></div>
     <form id="credentials-form" novalidate>
       <div aria-label="Sign-in method" class="login-methods" role="group">
         <button aria-pressed="true" class="login-method active" data-auth-method="phone" type="button">Phone</button>
@@ -1699,7 +1699,10 @@
       <div><label for="fleet-group-name">New group name</label><input id="fleet-group-name" maxlength="80" placeholder="e.g. Scam monitors"></div>
       <div><label for="fleet-passcode">TData passcode · optional</label><input autocomplete="off" id="fleet-passcode" maxlength="512" type="password"></div>
       <div><label for="fleet-api">API ID:Hash · optional</label><input autocomplete="off" id="fleet-api" placeholder="Built-in pool when empty" spellcheck="false"></div>
+      <div><label for="fleet-route">Connection route</label><select id="fleet-route"><option value="warp">WARP · own tunnel per account</option><option value="mtproxy">Public MTProxy · automatic pool</option><option value="direct">Direct · this machine's IP</option></select></div>
     </div>
+    <p class="hint" id="fleet-route-hint" role="status"></p>
+    <label class="check-label" id="fleet-route-consent-wrap"><input type="checkbox" id="fleet-route-consent">Allow setup to download the pinned WARP helpers from GitHub and register a WARP device with Cloudflare for each account, under its terms.</label>
     <p class="hint">Check sessions only reads each account's profile and settings: it signs nothing out, resets nothing and joins nothing. Only live sessions are imported. Spam blocks are not checked, because that needs a message to @SpamBot.</p>
     <div class="fleet-import-run"><button class="secondary" id="fleet-folder-open" type="button">Choose a folder</button><button class="secondary" disabled id="fleet-import-check" type="button">Check sessions</button><button class="primary" disabled id="fleet-import-start" type="button">Import active accounts</button><button class="secondary" hidden id="fleet-import-stop" type="button">Stop after this account</button><span class="hint" id="fleet-import-summary" role="status"></span></div>
     <ol class="fleet-results" id="fleet-results"></ol>

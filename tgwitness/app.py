@@ -277,6 +277,8 @@ class ProfileImport(AccountImport):
     group: str | None = Field(default=None, max_length=40)
     api_id: int | None = Field(default=None, gt=0)
     api_hash: str | None = Field(default=None, pattern=r"^[0-9a-f]{32}$")
+    route: Literal["warp", "mtproxy", "direct"] | None = None
+    route_consent: bool = False
 
 
 class RoutePolicyUpdate(RoutePolicy):

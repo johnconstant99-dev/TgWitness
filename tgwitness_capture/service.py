@@ -377,7 +377,7 @@ def create_app(root, config=None):
 
     @app.get("/static/{name}")
     async def asset(name: str):
-        if name not in {"app.js", "style.css", "official.js", "official.css"}:
+        if name not in {"app.js", "style.css", "official.js", "official-locales.js", "official.css"}:
             raise HTTPException(404)
         return FileResponse(static / name)
 

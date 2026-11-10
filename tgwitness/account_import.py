@@ -238,7 +238,7 @@ PASSWORD_PENDING = ("The sign-in of this session stopped at the two-step passwor
                     "someone enters that password on the original device.")
 
 
-async def check_session(collector, account, api_id=None, api_hash=None, languages=None):
+async def check_session(collector, account, api_id=None, api_hash=None, languages=None, route=None):
     from .collector import LOSS_MEANING, ROUTE_ERRORS, account_loss_cause, telegram_error
     from .proxy_catalog import NoProxyAvailable
     if api_id is None:
@@ -256,7 +256,8 @@ async def check_session(collector, account, api_id=None, api_hash=None, language
             lock = KeyLock(key) if key else None
         except KeyInUse as exc:
             return {"state": "duplicate", "message": str(exc)}
-        _, route = await collector.pool().acquire(owner, share=collector.share())
+        if route is None:
+            _, route = await collector.pool().acquire(owner, share=collector.share())
         client = collector.client_factory(StringSession(account["session"]), api_id, api_hash, receive_updates=False,
                                           flood_sleep_threshold=0, connection_retries=0, request_retries=1,
                                           timeout=CHECK_SECONDS,

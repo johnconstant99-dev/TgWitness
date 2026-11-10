@@ -60,6 +60,81 @@ def revision(collector):
     return hashlib.sha256(json.dumps(data, sort_keys=True).encode()).hexdigest()
 
 
+async def install(c, route, managed, policy, mode, check):
+    await c.stop()
+    c.store.set_setting("route_policy", {"exposure": "tunnel", "outside_enabled": False})
+    await c.set_network(route)
+    if not route.telegram_only:
+        c.vault.save("outside_proxy", {})
+    c.vault.save("portable_route", managed or {})
+    with c.store.transaction():
+        c.store.set_setting("route_policy", policy.model_dump())
+        check["revision"] = revision(c)
+        c.store.set_setting("connection_check", check)
+        c.store.append("network.connection_applied", {"mode": mode, **route.receipt(),
+            "policy": policy.model_dump(), "check": check,
+            "meaning": "Transport route checked for this connection."})
+
+
+async def adopt_route(app, mode, consent):
+    c, portable = app.state.collector, app.state.connection.portable
+    managed = None
+    try:
+        if mode == "warp":
+            managed = await portable.prepare("warp", "", consent, lambda stage: None)
+            route = NetworkConfig.model_validate(managed["network"])
+        else:
+            route = NetworkConfig(kind="direct" if mode == "direct" else "mtproxy_auto")
+        policy = RoutePolicy(exposure="tunnel" if route.kind == "direct" else "hide",
+                             outside_enabled=not route.telegram_only or c.outside_proxy() is not None)
+        check = await asyncio.wait_for(probe(c, route, mode, outside=policy.outside_enabled), 45)
+        await install(c, route, managed, policy, mode, check)
+        c.store.set_setting("connection_strategy", {"mode": mode, "allow_direct": mode == "direct"})
+        return check
+    except BaseException:
+        if managed:
+            with suppress(Exception):
+                await portable.stop(managed["id"])
+        raise
+
+
+class CheckTunnel:
+    def __init__(self, portable):
+        self.portable, self.lock, self.users, self.saved, self.timer = portable, asyncio.Lock(), 0, None, None
+
+    async def acquire(self, consent):
+        async with self.lock:
+            if self.timer:
+                self.timer.cancel()
+                self.timer = None
+            selected = self.portable.selected()
+            if selected and selected["mode"] == "warp" and not selected.get("paused"):
+                await self.portable.start(selected)
+                saved = selected
+            else:
+                if self.saved is None:
+                    self.saved = await self.portable.prepare("warp", "", consent, lambda stage: None)
+                saved = self.saved
+            self.users += 1
+            return NetworkConfig.model_validate(saved["network"])
+
+    async def release(self):
+        async with self.lock:
+            self.users -= 1
+            if not self.users and self.saved and not self.timer:
+                self.timer = asyncio.get_running_loop().call_later(60, lambda: asyncio.ensure_future(self.stop()))
+
+    async def stop(self):
+        async with self.lock:
+            self.timer = None
+            saved = self.saved
+            if self.users or not saved:
+                return
+            self.saved = None
+            if self.portable.selected() != saved:
+                await self.portable.stop(saved["id"])
+
+
 def busy_account(app):
     c = app.state.collector
     if c.export_busy() or c.export_claim or app.state.account_export.busy():
@@ -185,7 +260,7 @@ class GuidedConnection:
 
     async def automatic_route(self, c, portable, body, progress):
         errors = []
-        for mode in ("mtproxy", "warp", "direct"):
+        for mode in ("warp", "mtproxy", "direct"):
             if mode == "direct" and not body.allow_direct:
                 continue
             managed = None
@@ -331,19 +406,7 @@ class GuidedConnection:
         policy, was_running = c.route_policy(), c.running
         try:
             check = await asyncio.wait_for(probe(c, item["route"], mode, outside=item["policy"].outside_enabled), 45)
-            await c.stop()
-            c.store.set_setting("route_policy", {"exposure": "tunnel", "outside_enabled": False})
-            await c.set_network(item["route"])
-            if not item["route"].telegram_only:
-                c.vault.save("outside_proxy", {})
-            c.vault.save("portable_route", item["managed"] or {})
-            with c.store.transaction():
-                c.store.set_setting("route_policy", item["policy"].model_dump())
-                check["revision"] = revision(c)
-                c.store.set_setting("connection_check", check)
-                c.store.append("network.connection_applied", {"mode": mode, **item["route"].receipt(),
-                    "policy": item["policy"].model_dump(), "check": check,
-                    "meaning": "Transport route checked for this connection."})
+            await install(c, item["route"], item["managed"], item["policy"], mode, check)
         except BaseException as exc:
             for name, value in old.items():
                 c.vault.save(name, value)

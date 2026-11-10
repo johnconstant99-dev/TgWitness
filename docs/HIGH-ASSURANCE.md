@@ -56,11 +56,18 @@ flowchart LR
 | This exact software runs | The collector's signed source-tree hash equals a checkout of the deployed commit | Collector, checked against Git |
 | The signing key was created on that server | The key signs a statement naming the provider's server ID and the hash of the cloud-init it received | Collector, checked against the provider |
 | The journal belongs to that key and server | Every process start in the evidence ZIP carries the host measurement for that server | Evidence ZIP |
+| The Telegram key was created in the attested run | `account.authorized` records `key_origin: "created"` | Evidence ZIP |
 
 The collector records SSH state, sessions, login history and boot information in signed
 process-start and <code>host.state</code> records. On an ordinary VM these are local inventory
 records, which the reviewer compares with the provider's independent records. The
 Intel TDX deployment below additionally verifies hardware-backed measurements.
+
+An attested deployment does not collect on an imported session key. Sign in by phone or
+QR, or use the session file for an independent login: either way the Telegram
+authorization key is created inside the attested run, the journal records
+<code>key_origin: "created"</code>, and <code>python -m tgwitness.cloud verify</code> passes
+<code>account_key</code>. A journal with an imported key fails that check.
 
 ## Providers
 

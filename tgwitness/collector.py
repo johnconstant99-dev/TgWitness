@@ -2754,15 +2754,15 @@ class Collector:
         try:
             raw = plain(event.original_update)
             if event.chat_id is None:
-
-
-                unresolved, by_chat = [], {}
+                unknown, unobserved, by_chat = [], [], {}
                 for message_id in event.deleted_ids:
                     chat_id = self.store.account_message_chat(message_id)
-                    if chat_id is not None and await self.covers(chat_id):
+                    if chat_id is None:
+                        unknown.append(message_id)
+                    elif await self.covers(chat_id):
                         by_chat.setdefault(chat_id, []).append(message_id)
                     else:
-                        unresolved.append(message_id)
+                        unobserved.append(message_id)
                 for chat_id, ids in by_chat.items():
                     batch = self.deletion_batch(chat_id, ids, raw)
                     for message_id in ids:
@@ -2770,10 +2770,12 @@ class Collector:
                             "method": "chat of the previously saved message with this ID",
                             "basis": "private chats and ordinary groups share one account-wide message ID sequence"},
                             batch=batch)
-                if unresolved:
-                    self.store.append("deletion.unscoped", {
-                        "message_ids": unresolved, "scope": "account-level update; not attributed to a currently observed chat",
-                        "deleted_by": None, "raw": raw})
+                for ids, scope in ((unknown, "account-level update; no saved message has these IDs"),
+                                   (unobserved, "account-level update; these IDs belong to saved messages of chats "
+                                                "that are not observed now")):
+                    if ids:
+                        self.store.append("deletion.unscoped", {"message_ids": ids, "scope": scope, "deleted_by": None,
+                                                                "raw": raw})
             elif await self.covers(event.chat_id):
                 batch = self.deletion_batch(event.chat_id, list(event.deleted_ids), raw)
                 for message_id in event.deleted_ids:

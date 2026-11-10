@@ -24,6 +24,7 @@ from .evidence import BundleSizeLimit, export_file
 from .middleware import KEEP_ALIVE_SECONDS, RequestLimit
 from .monitoring import capture_settings, normalize_capture
 from .export_preflight import preview_capture
+from .failures import describe
 from . import export_budget
 from .provenance import run_receipt
 from .sealed_crypto import recipient_id
@@ -420,8 +421,7 @@ def create_app(root, output, config, client_factory=WitnessClient):
                     raise ValueError("Finish the existing login attempt or cancel this capsule")
                 return await asyncio.wait_for(call(*args), 120)
             except Exception as exc:
-
-                raise HTTPException(400, "Operation failed: " + type(exc).__name__) from None
+                raise HTTPException(400, describe(exc)) from None
 
     @app.get("/")
     async def index():
@@ -430,6 +430,10 @@ def create_app(root, output, config, client_factory=WitnessClient):
     @app.get("/sealed.js")
     async def script():
         return FileResponse(STATIC / "sealed.js", media_type="text/javascript")
+
+    @app.get("/sealed-locales.js")
+    async def locales():
+        return FileResponse(STATIC / "sealed-locales.js", media_type="text/javascript")
 
     @app.get("/sealed.css")
     async def styles():

@@ -64,7 +64,8 @@ python -m tgwitness.anchor verify --checkpoint checkpoint.json --request timesta
 
 Add `--intermediates tsa-intermediates.pem` or `--openssl /path/to/openssl` if needed.
 OpenSSL must support `ts`. On Windows the verifier also searches the standard Git
-installation. OpenSSL 3.5.9 was tested locally with a synthetic CA/TSA.
+installation. OpenSSL 3.5.9 was used for the synthetic CA/TSA tests and for the live
+service check below.
 
 6. Export a signed journal ZIP after the checkpoint so it includes that prefix.
    Verify using the independently known fingerprint:
@@ -123,5 +124,15 @@ gaps, verifier version and verification outcome. Sign and independently retain t
 record through your organization's process. A multi-user custody-record system is
 not implemented in TgWitness.
 
-No independent live TSA was contacted during development. Local tests create a
-synthetic CA/TSA to check compatibility and rejection of changed data, nonce or CA.
+## Live service check, 9 November 2026
+
+One RFC 3161 request was sent to each default service. Both granted it.
+
+| Service | Reply | Signing unit | Verifier result |
+| --- | --- | --- | --- |
+| `http://tsa.belgium.be/connect` | Granted, policy 2.16.56.13.6.3.1.1000 | Timestamp Unit 202301 | Qualified eIDAS time stamp |
+| `https://freetsa.org/tsr` | Granted | FreeTSA | RFC 3161 time stamp |
+
+The Belgian signing certificate carries the qcStatements compliance statement and
+matches the unit recorded in the verifier. Local tests also use a synthetic CA/TSA to
+check rejection of changed data, a changed nonce and a wrong CA.

@@ -4360,12 +4360,17 @@ $("policy-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitt
   toast(tr("IP protection saved."));
 });});
 $("network-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitter,async()=>{
-  if(!(await confirmRouteChange()))return;
-  const kind=$("network-kind").value,body={kind};
+  const kind=$("network-kind").value,body={kind},previous=state.policy;
+  const exposing=kind==="direct"&&!!previous&&previous.exposure!=="tunnel";
+  if(!(await (exposing?askConfirm(tr("Connect directly? Telegram will see this machine's public IP address. IP protection for this account switches to “Server behind a tunnel or VPN”. Any pending sign-in will be cancelled.")):confirmRouteChange())))return;
   if(kind!=="direct"&&kind!=="mtproxy_auto")Object.assign(body,{host:$("network-host").value.trim(),port:Number($("network-port").value)});
   if(kind==="socks5"||kind==="http")Object.assign(body,{username:$("network-username").value,password:$("network-password").value});
   if(kind==="mtproxy")body.secret=$("network-secret").value.trim();
-  await json("network",body);
+  if(exposing){
+    await json("network/policy",{exposure:"tunnel",outside_enabled:previous.outside_enabled});
+    try{await json("network",body);}
+    catch(error){await json("network/policy",{exposure:previous.exposure,outside_enabled:previous.outside_enabled}).catch(()=>{});throw error;}
+  }else await json("network",body);
   await routeSaved();
 });});
 $("network-test").addEventListener("click",e=>busy(e.currentTarget,async()=>{
@@ -5982,7 +5987,7 @@ async function bootstrap(){
       state.demoToken=entry.token;state.token=entry.token;state.profile="default";
       show("unlock-form",false);show("open-demo",true);
       $("gate-description").textContent=tr("Explore fictional messages, saved edits, deletion notices and verifiable exports. No Telegram account is connected.");
-      $("gate-help").textContent=tr("For your own groups, run Start.cmd or python start.py using a separate data directory. Demo data cannot be converted into a real investigation.");
+      $("gate-help").textContent=tr("For your own groups, start your own panel with tgwitness and a separate data directory. Demo data cannot be converted into a real investigation.");
     }
   }catch(error){                                                                     }
   if(!accessStarted&&revision===state.workspaceRevision&&state.token)

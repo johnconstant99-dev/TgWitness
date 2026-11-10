@@ -12,7 +12,7 @@
   const settings = new Map(), moving = new Map(), writing = new Map(), groupActions = new Map();
   const editable = () => !!state.me?.admin && !state.status?.demo;
   const SECTIONS = {parameters: "Parameters", reports: "Report settings", capture: "Capture and monitoring",
-                    recheck: "Recheck schedule", route: "IP protection mode"};
+                    recheck: "Recheck schedule", route: "Connection route"};
   const labelOf = id => (state.profiles || []).find(p => p.id === id)?.label || id;
 
   function clearForms() {
@@ -476,6 +476,23 @@
     controls();
   }
 
+  const ROUTE_HINTS = {
+    warp: "Each account gets its own WARP tunnel before its first sign-in. Many Cloudflare users share WARP exit addresses.",
+    mtproxy: "Sessions reach Telegram through public MTProxy servers from open lists. Files download slower.",
+    direct: "Telegram sees this machine's public IP address for every imported account."};
+
+  function routeHint() {
+    const route = $("fleet-route").value;
+    $("fleet-route-hint").textContent = tr(ROUTE_HINTS[route]);
+    $("fleet-route-consent-wrap").hidden = route !== "warp";
+  }
+
+  function routeChoice() {
+    const route = $("fleet-route").value, consent = $("fleet-route-consent").checked;
+    if (route === "warp" && !consent) throw new Error(tr("Allow the WARP setup or choose another connection route."));
+    return {route, route_consent: route === "warp"};
+  }
+
   function apiPair() {
     const text = $("fleet-api").value.trim(), pair = text.match(/^(\d{1,10})\s*[:\s]\s*([0-9a-fA-F]{32})$/);
     if (text && !pair) throw new Error(tr("Enter the API pair as ID:Hash, or leave it empty."));
@@ -493,7 +510,7 @@
 
   async function check() {
     if (importing || !editable()) return;
-    const pair = apiPair(), passcode = $("fleet-passcode").value, revision = state.workspaceRevision, serial = pickSerial;
+    const pair = apiPair(), route = routeChoice(), passcode = $("fleet-passcode").value, revision = state.workspaceRevision, serial = pickSerial;
     const current = () => serial === pickSerial && revision === state.workspaceRevision && !!state.token;
     const queue = picked.filter(bundle => ["ready", "unchecked"].includes(bundle.state));
     working(true);
@@ -502,7 +519,7 @@
         if (!current() || stopping) return;
         mark(bundle, "checking");
         try {
-          const result = await json("profiles/check", {files: bundle.body, passcode, ...pair}, {root: true});
+          const result = await json("profiles/check", {files: bundle.body, passcode, ...pair, ...route}, {root: true});
           if (!current()) return;
           bundle.account = result.account;
           mark(bundle, result.state, result.account ? who(result.account) : importError(result.message));
@@ -543,7 +560,7 @@
     if (importing || !editable()) return;
     const revision = state.workspaceRevision, queue = picked.filter(bundle => bundle.state === "alive");
     const current = () => revision === state.workspaceRevision && !!state.token;
-    const pair = apiPair();
+    const pair = apiPair(), route = routeChoice();
     let passcode = $("fleet-passcode").value, group = $("fleet-group").value || null;
     working(true);
     try {
@@ -561,7 +578,7 @@
         if (stopping) { mark(bundle, "cancelled", who(bundle.account)); continue; }
         mark(bundle, "importing", who(bundle.account));
         try {
-          const result = await json("profiles/import", {files: bundle.body, label: bundle.name.slice(0, 80), group, passcode, ...pair},
+          const result = await json("profiles/import", {files: bundle.body, label: bundle.name.slice(0, 80), group, passcode, ...pair, ...route},
                                     {root: true});
           mark(bundle, "imported", who(result.account));
         } catch (error) {
@@ -580,7 +597,7 @@
   }
 
   $("fleet-import-open").addEventListener("click", () => {
-    show("fleet-import", true); fillSelects(); $("fleet-import").scrollIntoView({block: "start", behavior: "smooth"});
+    show("fleet-import", true); fillSelects(); routeHint(); $("fleet-import").scrollIntoView({block: "start", behavior: "smooth"});
   });
   $("fleet-import-close").addEventListener("click", () => {
     stopping = importing; pickSerial++; show("fleet-import", false); picked = []; renderPicked();
@@ -601,7 +618,13 @@
     busy(null, async () => pick(roots.length ? await walk(roots) : files));
   });
   $("fleet-passcode").addEventListener("change", () => { if (picked.length && !importing) busy(null, inspect); });
-  $("fleet-group").addEventListener("change", () => { $("fleet-group-name").closest("div").hidden = $("fleet-group").value !== "__new"; });
+  $("fleet-group").addEventListener("change", () => {
+    $("fleet-group-name").closest("div").hidden = $("fleet-group").value !== "__new";
+    const mode = groups.find(group => group.id === $("fleet-group").value)?.values?.route?.mode;
+    if (["warp", "mtproxy", "direct"].includes(mode)) { $("fleet-route").value = mode; routeHint(); }
+  });
+  $("fleet-route").addEventListener("change", routeHint);
+  routeHint();
   $("fleet-import-check").addEventListener("click", () => busy(null, check));
   $("fleet-import-start").addEventListener("click", () => busy(null, run));
   $("fleet-group-new").addEventListener("click", () => busy(null, async () => {
@@ -621,6 +644,7 @@
     clearForms(); loadError = "";
     picked = []; groups = []; sections = []; pickSerial++;
     for (const id of ["fleet-passcode", "fleet-api", "fleet-files", "fleet-folder"]) $(id).value = "";
+    $("fleet-route-consent").checked = false;
     $("fleet-groups").replaceChildren(); renderPicked(); show("fleet-import", false);
   });
   window.TgWitnessFleet = {load, decorate, beforeRender};

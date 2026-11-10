@@ -10,6 +10,7 @@ import os
 import re
 import shutil
 import sqlite3
+import struct
 import subprocess
 import sys
 import tempfile
@@ -122,6 +123,34 @@ def ends_at_directory(archive):
         handle.seek(position)
 
 
+def contiguous(archive, infos):
+    handle, start = archive.fp, archive.fp.tell()
+    try:
+        position = 0
+        for info in sorted(infos, key=lambda item: item.header_offset):
+            if info.header_offset != position:
+                raise ValueError("Archive has bytes between its members")
+            handle.seek(position)
+            header = handle.read(30)
+            if len(header) != 30 or header[:4] != b"PK\x03\x04":
+                raise ValueError("Archive member header is damaged")
+            name_length, extra_length = struct.unpack("<HH", header[26:30])
+            extra = handle.read(name_length + extra_length)[name_length:]
+            wide, at = False, 0
+            while at + 4 <= len(extra):
+                field, length = struct.unpack("<HH", extra[at:at + 4])
+                wide, at = wide or field == 1, at + 4 + length
+            position += 30 + name_length + extra_length + info.compress_size
+            if info.flag_bits & 8:
+                handle.seek(position)
+                signed = handle.read(4) == b"PK\x07\x08"
+                position += (4 if signed else 0) + (20 if wide else 12)
+        if position != archive.start_dir:
+            raise ValueError("Archive has bytes between its members")
+    finally:
+        handle.seek(start)
+
+
 def open_archive(path, max_gib=None):
     limit = MAX_UNCOMPRESSED_GIB if max_gib is None else max_gib
     if type(limit) not in (int, float) or not math.isfinite(limit) or limit <= 0:
@@ -136,6 +165,7 @@ def open_archive(path, max_gib=None):
             raise ValueError("Duplicate ZIP members")
         if infos and min(info.header_offset for info in infos) != 0:
             raise ValueError("Archive has data before its first member")
+        contiguous(archive, infos)
         if archive.comment:
             raise ValueError("Archive carries bytes in its trailing comment")
         if not ends_at_directory(archive):

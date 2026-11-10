@@ -602,6 +602,12 @@ the server dates Telegram supplied. In GitHub Actions capture and Intel TDX
 deployments, attestation additionally binds that session and signing key to the
 approved collector execution.
 
+The journal records where the authorization key came from. Signing in by phone or QR,
+or an independent login from a session file, writes `account.authorized` with
+`key_origin: "created"`; collecting on an imported `.session`, TData or JSON key writes
+`imported`. An imported key also exists wherever it came from. Attested deployments
+refuse imported keys.
+
 Evaluate source attribution through the acquisition path in the table above:
 authenticated Telegram connection, recorded updates or captured frames, their binding
 to journal entries, and the verified execution environment where applicable. Archive

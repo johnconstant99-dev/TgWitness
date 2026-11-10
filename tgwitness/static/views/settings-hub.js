@@ -6,7 +6,7 @@ export function createSettingsHub(ctx) {
   const rank = {simple:0, standard:1, expert:2};
   const goals = [['copy','📥','Just download','Save chats and files once. Nothing keeps running in the background. The archive shows integrity only and does not meet the minimum for evidence for other people.'],['watch','👁','Follow chats','Keep new messages and their changes, with independent timestamps from a third party that the recipient checks. Needs requests outside Telegram.'],['evidence','⚖','Evidence for a case','Record continuously with independent timestamps from a third party that the recipient checks. Needs requests outside Telegram.']];
   const goalLevels = {copy:'simple',watch:'standard',evidence:'standard'};
-  const routes = [['auto','✨','Automatic','Try public proxies, then WARP.'],['warp','🛡','Cloudflare WARP','Connect through a local tunnel.'],['proxy','🔌','My proxy','Paste one proxy address.'],['direct','🌐','Direct','Telegram will see this server’s address.']];
+  const routes = [['auto','✨','Automatic','Try WARP, then public proxies.'],['warp','🛡','Cloudflare WARP','Connect through a local tunnel.'],['proxy','🔌','My proxy','Paste one proxy address.'],['direct','🌐','Direct','Telegram will see this server’s address.']];
   const levels = [['simple','🙂','Simple','Only the essentials.'],['standard','⚙','Standard','Common settings and explanations.'],['expert','🛠','Expert','All fields, limits and technical details.']];
   const navLevels = {'system-map':'expert',topology:'expert',start:'simple',chats:'simple',observations:'simple',evidence:'simple',settings:'simple',
     board:'standard',accounts:'simple',access:'standard',sources:'standard',connection:'expert',witness:'expert',analysis:'expert',

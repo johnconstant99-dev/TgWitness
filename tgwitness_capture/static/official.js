@@ -1,29 +1,29 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const english = Object.fromEntries([...document.querySelectorAll('[data-t]')].map(el => [el.dataset.t,el.textContent]));
-  const ru = {language:'Язык',title:'Свидетель в официальном клиенте',intro:'Просмотр Telegram Web в отдельном браузере, с ограниченными действиями и подписанной записью.',token:'Токен управления рекордером',connect:'Подключиться',stop:'Немедленно остановить',limits:'Открытие клиента создаёт новую сессию Telegram, а просмотр может отмечать сообщения прочитанными. Ограничения аккаунта определяет Telegram. Администратор хоста входит в границу доверия локального рекордера.',plan:'1. Выберите способ наблюдения',mode:'Режим',passive:'Наблюдать без автоматических действий',paced:'Просматривать старые сообщения с ограниченным темпом',minutes:'Не более минут',minpause:'Минимальная пауза, секунды',maxpause:'Максимальная пауза, секунды',pixels:'Шаг прокрутки, пиксели',steps:'Не более шагов прокрутки',modes:'Оба режима сохраняют только наблюдаемое в клиенте, это не полная выгрузка аккаунта. Автоматический просмотр идёт последовательно, с переменными паузами, он не обещает незаметность автоматизации.',open:'Сохранить настройки и открыть официальный клиент',client:'2. Войдите и выберите чат',qr:'Отсканируйте официальный QR-код доверенным устройством Telegram. Вход не попадает в доказательную запись. Этот экран не принимает клики и нажатия клавиш.',password:'Пароль двухэтапной проверки Telegram',submitpassword:'Передать в официальную форму входа',refreshchats:'Прочитать видимый список чатов',chat:'Чат',selectchat:'Выбрать чат',chatlimit:'В списке только чаты, которые сейчас отображает официальный клиент. Выбор чата может отправить отметку прочтения.',observe:'3. Запишите процедуру',start:'Начать запись',older:'Прокрутить к старым',newer:'Прокрутить к новым',snapshot:'Сохранить снимок',finish:'Завершить и выйти из Telegram',pausehint:'На паузе ограничение действий остаётся включённым. Закрытие панели не останавливает процедуру, используйте паузу или завершение.',exporttitle:'4. Проверьте и скачайте',fingerprint:'Отпечаток ключа рекордера',boundary:'Граница подписанного журнала',proof:'Сохраните отпечаток ключа и контрольные точки независимо. Подписи обнаруживают изменения относительно этого ключа; содержимое сообщений — то, что показал официальный клиент, записанное на подписанное видео. Пробелы записи и неподтверждённый выход отмечаются в пакете.',selection:'Сохранить ожидаемые настройки',checkpoint:'Скачать контрольную точку',export:'Скачать подписанный ZIP',events:'Последние события'};
-  let lang = navigator.language.startsWith('ru') ? 'ru' : 'en', token = '', status = null, busy = false, refreshing = false, screenUrl = null, revision = 0, clientState = 'loading';
+  const locales = window.TGW_OFFICIAL_LOCALES || {}, browser = navigator.language.split('-')[0];
+  const english = new Map([...document.querySelectorAll('[data-t]')].map(el => [el,el.textContent]));
+  let lang = locales[browser] ? browser : 'en', token = '', status = null, busy = false, refreshing = false, screenUrl = null, revision = 0, clientState = 'loading';
   const access = new URLSearchParams(location.hash.slice(1)).get('access');
   if(access && /^[A-Za-z0-9_-]{43}$/.test(access)) {token=access; history.replaceState(null,'',location.pathname+location.search);}
-  const text = (en,russian) => lang === 'ru' ? russian : en;
-  function translate() {document.documentElement.lang=lang; $('language').value=lang; for(const el of document.querySelectorAll('[data-t]')) el.textContent=lang==='ru' ? ru[el.dataset.t] : english[el.dataset.t]; if(status) render(status);}
+  const text = en => lang === 'en' ? en : locales[lang]?.[en] ?? en;
+  function translate() {document.documentElement.lang=lang; $('language').value=lang; for(const [el,en] of english) el.textContent=text(en); if(status) render(status);}
   $('language').addEventListener('change',()=>{lang=$('language').value; translate();}); translate();
   async function api(path,body) {
     const response=await fetch('/api/'+path,{method:body===undefined?'GET':'POST',headers:{Authorization:'Bearer '+token,...(body===undefined?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body),cache:'no-store'});
-    if(!response.ok) {let detail=text('Operation refused','Действие отклонено'); try{const data=await response.json(); if(typeof data.detail==='string') detail=data.detail;}catch{} throw new Error(detail);}
+    if(!response.ok) {let detail=text('Operation refused'); try{const data=await response.json(); if(typeof data.detail==='string') detail=data.detail;}catch{} throw new Error(detail);}
     return response;
   }
   function render(data) {
     status=data; const o=data.official; if(!o) throw new Error('This recorder does not provide the official client');
     for(const button of document.querySelectorAll('#workspace button')) button.disabled=false;
     $('login').hidden=true; $('workspace').hidden=false;
-    const names={created:text('Not started','Не запущен'),login:text('Login without recording','Вход без записи'),ready:text('Ready to record','Готов к записи'),observing:text('Recording','Идёт запись'),paused:text('Paused','Пауза'),stopped:text('Stopped','Остановлен'),finishing:text('Finishing','Завершение'),finished:text('Finished','Завершён')};
+    const names={created:text('Not started'),login:text('Login without recording'),ready:text('Ready to record'),observing:text('Recording'),paused:text('Paused'),stopped:text('Stopped'),finishing:text('Finishing'),finished:text('Finished')};
     $('badge').textContent=names[o.phase]+(o.reason?':'+o.reason:''); $('badge').className='badge'+(data.settings.enabled?' active':o.reason?' error':'');
-    $('selected').textContent=(o.selected_chat||text('No chat selected','Чат не выбран'))+' · '+o.steps+' '+text('steps','шагов');
-    $('route').textContent=(o.options.egress==='direct'?text('Direct connection · Telegram sees the runner or host public IP','Прямое соединение · Telegram видит внешний IP раннера или сервера'):o.options.egress+' · '+o.options.proxy_server+' · '+text('No direct fallback','Без прямого обхода'))+' · '+(o.exit_ip||text('IP not checked yet','IP ещё не проверен'));
+    $('selected').textContent=(o.selected_chat||text('No chat selected'))+' · '+o.steps+' '+text('steps');
+    $('route').textContent=(o.options.egress==='direct'?text('Direct connection · Telegram sees the runner or host public IP'):o.options.egress+' · '+o.options.proxy_server+' · '+text('No direct fallback'))+' · '+(o.exit_ip||text('IP not checked yet'));
     $('plan-section').hidden=o.phase!=='created'; $('client-section').hidden=['created','finished'].includes(o.phase);
-    $('toggle').textContent=data.settings.enabled?text('Pause recording','Приостановить запись'):text('Start recording','Начать запись');
+    $('toggle').textContent=data.settings.enabled?text('Pause recording'):text('Start recording');
     $('toggle').disabled=!o.selected_chat||!['ready','paused','observing'].includes(o.phase); $('stop').disabled=['created','finished'].includes(o.phase);
     for(const id of ['older','newer','snapshot']) $(id).disabled=!data.settings.enabled;
     const canChoose=!busy&&clientState==='ready'&&!o.source_locked&&['login','ready','paused'].includes(o.phase);
@@ -31,9 +31,9 @@
     $('chat-select').disabled=!canChoose||!$('chats').value;
     $('selection').disabled=!o.source;
     $('finish').disabled=['created','finished','finishing'].includes(o.phase); $('export').disabled=data.settings.enabled;
-    $('video-help').textContent=data.video_available?text('Video available, closed segments enter the signed journal.','Видео доступно, закрытые сегменты входят в подписанный журнал.'):text('Video unavailable. A profile requiring video cannot start.','Видео недоступно. Профиль с обязательным видео не запустится.');
+    $('video-help').textContent=data.video_available?text('Video available, closed segments enter the signed journal.'):text('Video unavailable. A profile requiring video cannot start.');
     $('fingerprint').textContent=data.fingerprint; $('boundary').textContent='#'+data.seq+' · '+data.head_hash;
-    $('finish-result').textContent=o.phase==='finished'?(o.logout_confirmed?text('Telegram logout confirmed, browser context closed.','Выход из Telegram подтверждён, контекст браузера закрыт.'):text('Logout unconfirmed. Revoke this session from a trusted Telegram device.','Выход не подтверждён. Завершите эту сессию с доверенного устройства Telegram.')):'';
+    $('finish-result').textContent=o.phase==='finished'?(o.logout_confirmed?text('Telegram logout confirmed, browser context closed.'):text('Logout unconfirmed. Revoke this session from a trusted Telegram device.')):'';
     if(busy) for(const button of document.querySelectorAll('#workspace button:not(#stop)')) button.disabled=true;
   }
   async function refresh() {
@@ -42,7 +42,7 @@
       const data=await (await api('status')).json(); if(expected!==revision) return; render(data); const o=status.official;
       if(!['created','finished','finishing'].includes(o.phase)) {
         const login=await (await api('official/login')).json(); if(expected!==revision)return;
-        clientState=login.state; render(data); $('login-state').textContent=text('Client state:','Состояние клиента:')+login.state;
+        clientState=login.state; render(data); $('login-state').textContent=text('Client state:')+login.state;
         $('password-form').hidden=login.state!=='password'||o.phase!=='login';
         const blob=await (await api('official/screen')).blob(); if(expected!==revision)return; if(screenUrl) URL.revokeObjectURL(screenUrl); screenUrl=URL.createObjectURL(blob); $('screen').src=screenUrl;
       }

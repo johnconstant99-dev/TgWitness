@@ -55,11 +55,15 @@ in another tab.
 
 ## Connection
 
-**Automatic** tries public MTProxy servers, then WARP, then a direct connection, the
+**Automatic** tries WARP, then public MTProxy servers, then a direct connection, the
 last only when the server's address may be shown. Automatic and WARP can install
-hash-checked components and register the server with Cloudflare. WARP uses the
-existing wgcf/wireproxy manager and a local SOCKS5 port; the system routing table is
-not changed. When outside services are needed, Automatic prefers WARP to MTProxy.
+hash-checked components and register the server with Cloudflare; without that consent
+Automatic skips WARP. WARP uses the existing wgcf/wireproxy manager and a local SOCKS5
+port; the system routing table is not changed.
+
+**Bulk import** asks for the route before any session reaches Telegram: WARP (default),
+public MTProxy or direct. The session check uses the same kind of route, and every
+imported account gets its own WARP tunnel before its first sign-in.
 
 Your own proxy accepts `tg://proxy`, `socks5://`, `http://` and `https://`. An HTTPS
 proxy's certificate is checked before credentials are sent to it.
