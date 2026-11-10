@@ -17,7 +17,7 @@ KINDS = {"evidence": "Evidence archive", "chat": "Chat export", "account": "Acco
          "account_disclosure": "Account disclosure", "witness": "Witness journal",
          "dossier": "People profiles", "proof": "Public proof", "report": "Sealed report",
          "history": "History report", "handover": "Handover extract", "selection": "Viewer selection",
-         "distributed": "Distributed acquisition", "board": "Case Board"}
+         "distributed": "Distributed acquisition", "board": "Case Board", "attestation": "Collector attestation"}
 
 
 def verifier_language(value):
@@ -390,6 +390,32 @@ class Console:
         for gap in coverage["gaps"]:
             self.check("warn", "Gap", str(gap))
 
+    def tdx(self, tdx):
+        from .timestamps import TDX_MEASUREMENTS
+        self.heading("Intel TDX")
+        for quote in tdx["quotes"]:
+            where = self.t("record {n}", n=self.number(quote["record"])) + " · " if "record" in quote else ""
+            if quote["status"] != "pass":
+                self.check("bad", "Intel TDX quote", where + self.t(quote["detail"])
+                           + (" · " + quote["error"] if quote.get("error") else ""))
+                continue
+            self.check("ok", "Intel TDX quote",
+                       where + self.t("quote signature, quoting enclave and PCK chain to the pinned Intel root are valid"))
+            self.say("    " + self.paint(quote["pck_ca"] + " · FMSPC " + quote["fmspc"] + " · v"
+                                         + str(quote["quote_version"]), "dim"))
+            for name in TDX_MEASUREMENTS:
+                self.field({"report_data": "REPORTDATA"}.get(name, name.upper()), quote[name])
+            self.check("ok", "Report data", self.t("SHA-512 of the start record: binds the journal key, run and host"
+                                                   if "record" in quote else "SHA-512 of the signed collector statement"))
+            tcb = quote["tcb"]
+            if tcb["status"] == "not checked":
+                self.check("warn", "Intel TCB status", self.t(tcb["detail"]))
+            else:
+                self.check("ok" if tcb["status"] == "UpToDate" else "warn", "Intel TCB status", tcb["status"] + " · "
+                           + self.t("Intel collateral issued {issued}, evaluated at {time}",
+                                    issued=tcb["collateral_issued"], time=tcb["evaluated_at"]))
+        self.check("warn", "Not checked", self.t("compose and OS image: python -m tgwitness.cloud verify"))
+
     def show(self, shown, path, result, notes):
         from .account import account_export_lines
         from .coverage import coverage_lines
@@ -486,6 +512,10 @@ class Console:
             facts = [key + ": " + json.dumps(value, ensure_ascii=False) for key, value in result.items()
                      if isinstance(value, (str, int, bool)) and key != "fingerprint"]
             self.lines("Technical details", facts, limit=12)
+        if result.get("tdx"):
+            from .timestamps import tdx_lines
+            self.tdx(result["tdx"])
+            notes = [note for note in notes if note not in tdx_lines(result["tdx"])]
         self.lines("Notes", [self.localized_note(note) for note in notes])
         self.case(result.get("case") or (result.get("report_seal") or {}).get("case") or {})
         self.conditions(result.get("evidence"))

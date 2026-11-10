@@ -4,10 +4,15 @@ from .common import (
     OTS_BITCOIN,
     OTS_MAGIC,
     OTS_PENDING,
+    VerifierTooOld,
+    authenticate_statement,
+    base64,
     datetime,
     ec,
+    encode_dss_signature,
     hashes,
     hashlib,
+    json,
     os,
     padding,
     re,
@@ -15,6 +20,7 @@ from .common import (
     rsa,
     shutil,
     strict_json,
+    struct,
     subprocess,
     tempfile,
     timezone,
@@ -571,5 +577,499 @@ def verify_anchors(archive, names, public_key, event_count, hash_at, tsa_ca=None
                 continue
             results.append(entry)
     return results
+
+
+INTEL_SGX_ROOT = base64.b64decode(
+    "MIICjzCCAjSgAwIBAgIUImUM1lqdNInzg7SVUr9QGzknBqwwCgYIKoZIzj0EAwIwaDEaMBgGA1UEAwwRSW50ZWwgU0dYIFJvb3Qg"
+    "Q0ExGjAYBgNVBAoMEUludGVsIENvcnBvcmF0aW9uMRQwEgYDVQQHDAtTYW50YSBDbGFyYTELMAkGA1UECAwCQ0ExCzAJBgNVBAYT"
+    "AlVTMB4XDTE4MDUyMTEwNDUxMFoXDTQ5MTIzMTIzNTk1OVowaDEaMBgGA1UEAwwRSW50ZWwgU0dYIFJvb3QgQ0ExGjAYBgNVBAoM"
+    "EUludGVsIENvcnBvcmF0aW9uMRQwEgYDVQQHDAtTYW50YSBDbGFyYTELMAkGA1UECAwCQ0ExCzAJBgNVBAYTAlVTMFkwEwYHKoZI"
+    "zj0CAQYIKoZIzj0DAQcDQgAEC6nEwMDIYZOj/iPWsCzaEKi71OiOSLRFhWGjbnBVJfVnkY4u3IjkDYYL0MxO4mqsyYjlBalTVYxF"
+    "P2sJBK5zlKOBuzCBuDAfBgNVHSMEGDAWgBQiZQzWWp00ifODtJVSv1AbOScGrDBSBgNVHR8ESzBJMEegRaBDhkFodHRwczovL2Nl"
+    "cnRpZmljYXRlcy50cnVzdGVkc2VydmljZXMuaW50ZWwuY29tL0ludGVsU0dYUm9vdENBLmRlcjAdBgNVHQ4EFgQUImUM1lqdNInz"
+    "g7SVUr9QGzknBqwwDgYDVR0PAQH/BAQDAgEGMBIGA1UdEwEB/wQIMAYBAf8CAQEwCgYIKoZIzj0EAwIDSQAwRgIhAOW/5QkR+S9C"
+    "iSDcNoowLuPRLsWGf/Yi7GSX94BgwTwgAiEA4J0lrHoMs+Xo5o/sX6O9QWxHRAvZUGOdRQ7cvqRXaqI=")
+INTEL_SGX_ROOT_SHA256 = "44a0196b2b99f889b8e149e95b807a350e7424964399e885a7cbb8ccfab674d3"
+INTEL_QE_VENDOR = bytes.fromhex("939a7233f79c4ca9940a0db3957f0607")
+INTEL_TD_QE_SIGNER = bytes.fromhex("dc9e2a7c6f948f17474e34a7fc43ed030f7c1563f1babddf6340c82e0e54a8c5")
+INTEL_PCK_CAS = ("Intel SGX PCK Platform CA", "Intel SGX PCK Processor CA")
+SGX_PCK_EXTENSION = "1.2.840.113741.1.13.1"
+TDX_BODIES = {2: 584, 3: 648, 4: 885}
+TDX_REPORT_FIELDS = (("tee_tcb_svn", 16), ("mr_seam", 48), ("mr_signer_seam", 48), ("seam_attributes", 8),
+                     ("td_attributes", 8), ("xfam", 8), ("mrtd", 48), ("mr_config_id", 48), ("mr_owner", 48),
+                     ("mr_owner_config", 48), ("rtmr0", 48), ("rtmr1", 48), ("rtmr2", 48), ("rtmr3", 48),
+                     ("report_data", 64))
+TDX_MEASUREMENTS = ("mrtd", "rtmr0", "rtmr1", "rtmr2", "rtmr3", "report_data")
+TDX_STATUSES = ("UpToDate", "SWHardeningNeeded", "ConfigurationNeeded", "ConfigurationAndSWHardeningNeeded",
+                "OutOfDate", "OutOfDateConfigurationNeeded", "Revoked")
+TDX_QE_STATUSES = ("UpToDate", "OutOfDate", "Revoked")
+TDX_RESERVED_ATTRIBUTES = sum(1 << bit for bit in (*range(1, 4), *range(7, 16), *range(23, 27), *range(32, 62)))
+TDX_NOT_CHECKED = ("the code the VM ran: the compose RTMR3 measures and the OS image behind MRTD and RTMR0-2; "
+                   "python -m tgwitness.cloud verify compares them")
+ATTESTATION_RECORDS = ("tgwitness-attestation-record-v1", "tgwitness-deployment-v1")
+
+
+class QuoteInvalid(ValueError):
+    pass
+
+
+def tdx_root():
+    root = x509.load_der_x509_certificate(INTEL_SGX_ROOT)
+    if root.fingerprint(hashes.SHA256()).hex() != INTEL_SGX_ROOT_SHA256:
+        raise QuoteInvalid("The pinned Intel SGX Root CA is damaged")
+    return root
+
+
+def tdx_quote(raw):
+    if len(raw) < 48:
+        raise QuoteInvalid("The quote is truncated")
+    version, key_type, tee = struct.unpack_from("<HHI", raw, 0)
+    if tee != 0x81:
+        raise QuoteInvalid("Not an Intel TDX quote")
+    if key_type != 2:
+        raise QuoteInvalid("Unsupported attestation key type " + str(key_type))
+    if raw[12:28] != INTEL_QE_VENDOR:
+        raise QuoteInvalid("The quote was not produced by Intel's quoting enclave")
+    if version == 4:
+        kind, offset = 2, 48
+    elif version == 5:
+        if len(raw) < 54:
+            raise QuoteInvalid("The quote is truncated")
+        kind, size = struct.unpack_from("<HI", raw, 48)
+        if TDX_BODIES.get(kind) != size:
+            raise QuoteInvalid("Unsupported TD report body " + str(kind) + " of " + str(size) + " bytes")
+        offset = 54
+    else:
+        raise QuoteInvalid("Unsupported quote version " + str(version))
+    signed = offset + TDX_BODIES[kind]
+    if len(raw) < signed + 4:
+        raise QuoteInvalid("The quote is truncated")
+    length = struct.unpack_from("<I", raw, signed)[0]
+    auth = raw[signed + 4:signed + 4 + length]
+    if len(auth) != length or len(auth) < 134 or raw[signed + 4 + length:].strip(b"\0"):
+        raise QuoteInvalid("The quote's signature data has the wrong length")
+    cert_type, cert_size = struct.unpack_from("<HI", auth, 128)
+    cert = auth[134:134 + cert_size]
+    if cert_type != 6 or len(cert) != cert_size or len(cert) < 456:
+        raise QuoteInvalid("The quote carries no quoting enclave report")
+    inner = 450 + struct.unpack_from("<H", cert, 448)[0]
+    if len(cert) < inner + 6:
+        raise QuoteInvalid("The quote's certification data is truncated")
+    chain_type, chain_size = struct.unpack_from("<HI", cert, inner)
+    chain = cert[inner + 6:inner + 6 + chain_size]
+    if chain_type != 5 or len(chain) != chain_size:
+        raise QuoteInvalid("The quote carries no PCK certificate chain")
+    fields = TDX_REPORT_FIELDS + ((("tee_tcb_svn2", 16), ("mr_service_td", 48)) if kind in (3, 4) else ())
+    report, at = {}, offset
+    for name, size in fields:
+        report[name], at = raw[at:at + size], at + size
+    return {"version": version, "signed": raw[:signed], "report": report, "signature": auth[0:64],
+            "attestation_key": auth[64:128], "qe_report": cert[0:384], "qe_signature": cert[384:448],
+            "qe_auth": cert[450:inner], "pck_chain": chain.rstrip(b"\0")}
+
+
+def tdx_signature(key, signature, data, what):
+    if len(signature) != 64:
+        raise QuoteInvalid(what + ": expected a 64-byte ECDSA P-256 signature")
+    try:
+        key.verify(encode_dss_signature(int.from_bytes(signature[:32], "big"), int.from_bytes(signature[32:], "big")),
+                   data, ec.ECDSA(hashes.SHA256()))
+    except (InvalidSignature, ValueError, TypeError):
+        raise QuoteInvalid(what + ": the signature is invalid") from None
+
+
+def tdx_certificates(text):
+    data = text.encode() if isinstance(text, str) else bytes(text)
+    try:
+        return x509.load_pem_x509_certificates(data.rstrip(b"\0"))
+    except ValueError:
+        raise QuoteInvalid("Unreadable certificate chain") from None
+
+
+def tdx_time(value):
+    try:
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except ValueError:
+        raise QuoteInvalid("Unreadable time " + str(value)[:40]) from None
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+
+
+def tdx_crl(data, issuer, at, what):
+    try:
+        crl = x509.load_der_x509_crl(data)
+    except ValueError:
+        raise QuoteInvalid(what + " is unreadable") from None
+    if crl.issuer != issuer.subject or not crl.is_signature_valid(issuer.public_key()):
+        raise QuoteInvalid(what + " is not signed by " + issuer.subject.rfc4514_string())
+    if crl.last_update_utc > at or crl.next_update_utc is not None and at > crl.next_update_utc:
+        raise QuoteInvalid(what + " is not current at " + at.isoformat())
+    return crl
+
+
+def tdx_chain(chain, root, at, what, crls=None):
+    chain = list(chain)
+    if chain and chain[-1].fingerprint(hashes.SHA256()) == root.fingerprint(hashes.SHA256()):
+        chain = chain[:-1]
+    if not chain:
+        raise QuoteInvalid(what + ": no certificates")
+    for index, certificate in enumerate(chain):
+        issuer = chain[index + 1] if index + 1 < len(chain) else root
+        try:
+            certificate.verify_directly_issued_by(issuer)
+        except (ValueError, TypeError, InvalidSignature):
+            raise QuoteInvalid(what + ": " + certificate.subject.rfc4514_string() + " is not issued by "
+                               + issuer.subject.rfc4514_string()) from None
+        try:
+            constraints = issuer.extensions.get_extension_for_class(x509.BasicConstraints).value
+        except x509.ExtensionNotFound:
+            constraints = None
+        if not constraints or not constraints.ca:
+            raise QuoteInvalid(what + ": " + issuer.subject.rfc4514_string() + " is not a certificate authority")
+        for checked in (certificate, issuer):
+            if not checked.not_valid_before_utc <= at <= checked.not_valid_after_utc:
+                raise QuoteInvalid(what + ": " + checked.subject.rfc4514_string() + " is not valid at " + at.isoformat())
+        if crls is not None:
+            crl = crls.get(issuer.subject.public_bytes())
+            if crl is None:
+                raise QuoteInvalid(what + ": no revocation list from " + issuer.subject.rfc4514_string())
+            if crl.get_revoked_certificate_by_serial_number(certificate.serial_number) is not None:
+                raise QuoteInvalid(what + ": " + certificate.subject.rfc4514_string() + " is revoked")
+    return chain
+
+
+def tdx_pck(certificate):
+    try:
+        data = certificate.extensions.get_extension_for_oid(x509.ObjectIdentifier(SGX_PCK_EXTENSION)).value.value
+    except x509.ExtensionNotFound:
+        raise QuoteInvalid("The PCK certificate has no Intel SGX extension") from None
+    found = {}
+    try:
+        _, start, end = der(data, 0)
+        for _, _, item_start, item_end in children(data, start, end):
+            parts = children(data, item_start, item_end)
+            if len(parts) != 2 or parts[0][0] != 0x06:
+                continue
+            name, (_, _, value_start, value_end) = oid(data, *parts[0][2:]), parts[1]
+            if name == SGX_PCK_EXTENSION + ".2":
+                for _, _, c_start, c_end in children(data, value_start, value_end):
+                    sub = children(data, c_start, c_end)
+                    component, (s_tag, _, s_start, s_end) = oid(data, *sub[0][2:]), sub[1]
+                    value = data[s_start:s_end]
+                    found["tcb." + component.rsplit(".", 1)[1]] = value if s_tag == 0x04 else int.from_bytes(value, "big")
+            else:
+                found[name] = data[value_start:value_end]
+        return {"cpu_svn": bytes(found["tcb." + str(i)] for i in range(1, 17)), "pce_svn": found["tcb.17"],
+                "fmspc": found[SGX_PCK_EXTENSION + ".4"]}
+    except (KeyError, TypeError, ValueError, IndexError):
+        raise QuoteInvalid("The PCK certificate's Intel SGX extension is incomplete") from None
+
+
+def tdx_current(document, at, what):
+    if not tdx_time(document["issueDate"]) <= at <= tdx_time(document["nextUpdate"]):
+        raise QuoteInvalid(what + " is not current at " + at.isoformat() + " (issued " + str(document["issueDate"])
+                           + ", next update " + str(document["nextUpdate"]) + ")")
+
+
+def tdx_document(collateral, name, root, crls, at, what):
+    chain = tdx_chain(tdx_certificates(collateral[name + "_issuer_chain"]), root, at, what, crls)
+    if len(chain) != 1:
+        raise QuoteInvalid(what + " must be signed by a certificate the root issued directly")
+    text = collateral[name]
+    tdx_signature(chain[0].public_key(), bytes.fromhex(collateral[name + "_signature"]), text.encode(), what)
+    return json.loads(text)
+
+
+def tdx_converge(platform, component):
+    if platform not in TDX_STATUSES or component not in TDX_QE_STATUSES:
+        raise QuoteInvalid("Unsupported TCB status convergence: " + str(platform) + ", " + str(component))
+    if component == "Revoked":
+        return "Revoked"
+    if component == "OutOfDate" and platform in ("UpToDate", "SWHardeningNeeded"):
+        return "OutOfDate"
+    if component == "OutOfDate" and platform in ("ConfigurationNeeded", "ConfigurationAndSWHardeningNeeded"):
+        return "OutOfDateConfigurationNeeded"
+    return platform
+
+
+def tdx_relaunch(launch, current):
+    configuration = ("ConfigurationNeeded", "OutOfDateConfigurationNeeded", "ConfigurationAndSWHardeningNeeded",
+                     "TDRelaunchAdvisedConfigurationNeeded")
+    if launch in ("OutOfDate", "OutOfDateConfigurationNeeded") and current in (
+            "UpToDate", "SWHardeningNeeded", "ConfigurationNeeded", "ConfigurationAndSWHardeningNeeded"):
+        return "TDRelaunchAdvisedConfigurationNeeded" if launch in configuration or current in configuration \
+            else "TDRelaunchAdvised"
+    return launch
+
+
+def tdx_components(level, key):
+    return [c["svn"] for c in level["tcb"].get(key) or []]
+
+
+def tdx_module_identity(tcb_info, svn):
+    if svn[1] == 0:
+        return None
+    wanted = "TDX_%02X" % svn[1]
+    for identity in tcb_info.get("tdxModuleIdentities") or []:
+        if identity["id"].upper() == wanted:
+            return identity
+    raise QuoteInvalid("TCB Info has no TDX module identity " + wanted)
+
+
+def tdx_platform_level(tcb_info, cpu_svn, pce_svn, svn):
+    skip = 2 if svn[1] > 0 else 0
+    levels = sorted(tcb_info["tcbLevels"], reverse=True, key=lambda level: (
+        tdx_components(level, "sgxtcbcomponents"), level["tcb"]["pcesvn"], tdx_components(level, "tdxtcbcomponents")))
+    for level in levels:
+        sgx, td = tdx_components(level, "sgxtcbcomponents"), tdx_components(level, "tdxtcbcomponents")
+        if len(sgx) != 16 or len(td) != 16:
+            raise QuoteInvalid("TCB Info has a level without 16 SGX and 16 TDX components")
+        if all(have >= need for have, need in zip(cpu_svn, sgx)) and pce_svn >= level["tcb"]["pcesvn"] and \
+                all(have >= need for have, need in list(zip(svn, td))[skip:]):
+            if level["tcbStatus"] not in TDX_STATUSES:
+                raise QuoteInvalid("Unrecognized TCB status " + str(level["tcbStatus"]))
+            status, advisories, date = level["tcbStatus"], list(level.get("advisoryIDs") or []), level["tcbDate"]
+            identity = tdx_module_identity(tcb_info, svn)
+            if identity:
+                module = next((m for m in identity["tcbLevels"] if svn[0] >= m["tcb"]["isvsvn"]), None)
+                if module is None:
+                    raise QuoteInvalid("The TDX module ISVSVN " + str(svn[0]) + " is below every module TCB level")
+                if module["tcbStatus"] not in TDX_QE_STATUSES:
+                    raise QuoteInvalid("Unrecognized TDX module TCB status " + str(module["tcbStatus"]))
+                status = tdx_converge(status, module["tcbStatus"])
+                advisories += [a for a in module.get("advisoryIDs") or [] if a not in advisories]
+                date = min(date, module["tcbDate"], key=tdx_time)
+            return status, advisories, date
+    raise QuoteInvalid("No TCB level of this platform is listed in Intel's TCB Info")
+
+
+def tdx_check_module(tcb_info, report):
+    base = tcb_info.get("tdxModule")
+    if not base:
+        raise QuoteInvalid("TDX TCB Info has no tdxModule")
+    expected = tdx_module_identity(tcb_info, report["tee_tcb_svn"]) or base
+    if bytes.fromhex(expected["mrsigner"]) != report["mr_signer_seam"]:
+        raise QuoteInvalid("The TDX module is not signed by the signer Intel lists")
+    attributes, mask = bytes.fromhex(expected["attributes"]), bytes.fromhex(expected["attributesMask"])
+    for want, bits, have in zip(attributes, mask, report["seam_attributes"]):
+        if want & bits != have & bits or have & ~bits & 0xFF:
+            raise QuoteInvalid("The TDX module attributes differ from Intel's")
+
+
+def tdx_check_qe(qe_report, identity):
+    if qe_report[128:160] != bytes.fromhex(identity["mrsigner"]):
+        raise QuoteInvalid("The quoting enclave is not signed by Intel")
+    if qe_report[48] & 0x02:
+        raise QuoteInvalid("The quoting enclave runs in debug mode")
+    if struct.unpack_from("<H", qe_report, 256)[0] != identity["isvprodid"]:
+        raise QuoteInvalid("The quoting enclave has the wrong product ID")
+    mask = int.from_bytes(bytes.fromhex(identity["miscselectMask"]), "little")
+    if struct.unpack_from("<I", qe_report, 16)[0] & mask != int.from_bytes(bytes.fromhex(identity["miscselect"]),
+                                                                           "little") & mask:
+        raise QuoteInvalid("The quoting enclave's MISCSELECT differs from Intel's")
+    for want, bits, have in zip(bytes.fromhex(identity["attributes"]), bytes.fromhex(identity["attributesMask"]),
+                                qe_report[48:64]):
+        if want & bits != have & bits:
+            raise QuoteInvalid("The quoting enclave's attributes differ from Intel's")
+    svn = struct.unpack_from("<H", qe_report, 258)[0]
+    for level in identity["tcbLevels"]:
+        if svn >= level["tcb"]["isvsvn"]:
+            if level["tcbStatus"] not in TDX_QE_STATUSES:
+                raise QuoteInvalid("Unrecognized QE TCB status " + str(level["tcbStatus"]))
+            return level["tcbStatus"], list(level.get("advisoryIDs") or [])
+    raise QuoteInvalid("The quoting enclave's SVN is below every level Intel lists")
+
+
+def tdx_problems(report):
+    attributes, problems = int.from_bytes(report["td_attributes"], "little"), []
+    if attributes & 0x01:
+        problems.append("the TD runs in debug mode: the host can read its memory and registers")
+    if attributes & 0x70:
+        problems.append("TD profiling is enabled")
+    if attributes & TDX_RESERVED_ATTRIBUTES:
+        problems.append("reserved TD attribute bits are set")
+    if attributes & (1 << 29):
+        problems.append("the TD can be migrated to another machine")
+    if attributes & (1 << 17):
+        problems.append("service TD extensions are enabled")
+    if not attributes & (1 << 28):
+        problems.append("SEPT_VE_DISABLE is off")
+    if report.get("mr_service_td", bytes(48)) != bytes(48):
+        problems.append("a service TD is bound to this TD")
+    return problems
+
+
+def tdx_tcb(quote, chain, collateral, root, at):
+    crl_data = [bytes.fromhex(collateral[name]) for name in ("root_ca_crl", "pck_crl")]
+    moments = [tdx_time(json.loads(collateral[name])["issueDate"]) for name in ("tcb_info", "qe_identity")]
+    at = max([at] + moments + [x509.load_der_x509_crl(data).last_update_utc for data in crl_data])
+    crls = {root.subject.public_bytes(): tdx_crl(crl_data[0], root, at, "Intel's root revocation list")}
+    pck_ca = tdx_chain(tdx_certificates(collateral["pck_crl_issuer_chain"]), root, at,
+                       "The PCK revocation list issuer", crls)[0]
+    crls[pck_ca.subject.public_bytes()] = tdx_crl(crl_data[1], pck_ca, at, "The PCK revocation list")
+    tcb_info = tdx_document(collateral, "tcb_info", root, crls, at, "Intel's TCB Info")
+    identity = tdx_document(collateral, "qe_identity", root, crls, at, "Intel's QE Identity")
+    tdx_current(tcb_info, at, "Intel's TCB Info")
+    tdx_current(identity, at, "Intel's QE Identity")
+    if tcb_info.get("id") != "TDX" or tcb_info.get("version", 0) < 3:
+        raise QuoteInvalid("The collateral's TCB Info is not for TDX")
+    if identity.get("id") != "TD_QE" or identity.get("version") not in (2, 3):
+        raise QuoteInvalid("The collateral's QE Identity is not for the TDX quoting enclave")
+    chain = tdx_chain(chain, root, at, "The PCK certificate chain", crls)
+    if chain[-1].subject != pck_ca.subject:
+        raise QuoteInvalid("The PCK certificate and the revocation list come from different Intel CAs")
+    qe_status, qe_advisories = tdx_check_qe(quote["qe_report"], identity)
+    platform, report = tdx_pck(chain[0]), quote["report"]
+    if bytes.fromhex(tcb_info["fmspc"]) != platform["fmspc"]:
+        raise QuoteInvalid("Intel's TCB Info is for another platform (FMSPC)")
+    status, advisories, date = tdx_platform_level(tcb_info, platform["cpu_svn"], platform["pce_svn"],
+                                                  report["tee_tcb_svn"])
+    tdx_check_module(tcb_info, report)
+    current = None
+    if "tee_tcb_svn2" in report:
+        current = tdx_converge(tdx_platform_level(tcb_info, platform["cpu_svn"], platform["pce_svn"],
+                                                  report["tee_tcb_svn2"])[0], qe_status)
+    status = tdx_converge(status, qe_status)
+    advisories += [a for a in qe_advisories if a not in advisories]
+    if status == "Revoked" or current == "Revoked":
+        raise QuoteInvalid("Intel has revoked this platform's TCB")
+    if current:
+        status = tdx_relaunch(status, current)
+    return {"status": status, "advisory_ids": advisories, "tcb_date": date, "qe_status": qe_status,
+            "collateral_issued": tcb_info["issueDate"], "evaluated_at": at.isoformat(),
+            "revocation": "PCK chain checked against Intel's revocation lists",
+            "detail": "Intel TCB status " + status + (" with " + ", ".join(advisories[:12]) if advisories else "")
+                      + "; TCB level of " + str(date) + ", quoting enclave " + qe_status + "; Intel collateral issued "
+                      + str(tcb_info["issueDate"]) + ", evaluated at " + at.isoformat()}
+
+
+def tdx_verify(raw, binding, at, collateral=None):
+    from .chain import canonical
+    root, quote, at = tdx_root(), tdx_quote(raw), tdx_time(at)
+    chain = tdx_chain(tdx_certificates(quote["pck_chain"]), root, at, "The PCK certificate chain")
+    names = [", ".join(a.value for a in c.subject.get_attributes_for_oid(x509.NameOID.COMMON_NAME)) for c in chain]
+    if len(chain) != 2 or names[0] != "Intel SGX PCK Certificate" or names[1] not in INTEL_PCK_CAS:
+        raise QuoteInvalid("The quote's certificates are not a PCK certificate under an Intel SGX PCK CA")
+    pck, qe = chain[0], quote["qe_report"]
+    tdx_signature(pck.public_key(), quote["qe_signature"], qe, "The quoting enclave report")
+    if len(quote["qe_auth"]) != 32 or \
+            qe[320:384] != hashlib.sha256(quote["attestation_key"] + quote["qe_auth"]).digest() + bytes(32):
+        raise QuoteInvalid("The quoting enclave report does not name the key that signed the quote")
+    if qe[128:160] != INTEL_TD_QE_SIGNER or struct.unpack_from("<H", qe, 256)[0] != 2 or qe[48] & 0x02:
+        raise QuoteInvalid("The quoting enclave report is not from Intel's TDX quoting enclave in production mode")
+    try:
+        key = ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP256R1(), b"\x04" + quote["attestation_key"])
+    except ValueError:
+        raise QuoteInvalid("The quote's attestation key is not a P-256 point") from None
+    tdx_signature(key, quote["signature"], quote["signed"], "The TD report")
+    report = quote["report"]
+    problems = tdx_problems(report)
+    if problems:
+        raise QuoteInvalid("; ".join(problems))
+    if report["report_data"] != hashlib.sha512(canonical(binding)).digest():
+        raise QuoteInvalid("The quote's report data is not SHA-512 of this record: it vouches for something else")
+    platform, tcb = tdx_pck(pck), None
+    if collateral:
+        try:
+            tcb = tdx_tcb(quote, chain, collateral, root, at)
+        except QuoteInvalid:
+            raise
+        except (KeyError, TypeError, ValueError, IndexError, AttributeError) as exc:
+            raise QuoteInvalid("Intel's collateral is incomplete or unreadable: " + type(exc).__name__) from None
+    return {"quote_version": quote["version"], "pck_ca": names[1], "fmspc": platform["fmspc"].hex(),
+            "pck_sha256": pck.fingerprint(hashes.SHA256()).hex(), "qe_svn": struct.unpack_from("<H", qe, 258)[0],
+            **{name: report[name].hex() for name in TDX_MEASUREMENTS}, "td_attributes": report["td_attributes"].hex(),
+            "tcb": tcb}
+
+
+def tdx_check(evidence, binding, at, source, binds):
+    if evidence.get("error") or not evidence.get("quote"):
+        return {"status": "missing", "detail": "no Intel TDX quote",
+                **({"error": str(evidence["error"])[:200]} if evidence.get("error") else {})}
+    try:
+        found = tdx_verify(bytes.fromhex(evidence["quote"]), binding, at, evidence.get("collateral"))
+    except (ValueError, KeyError, TypeError, IndexError, struct.error) as exc:
+        return {"status": "fail", "detail": str(exc) or type(exc).__name__}
+    if found["tcb"] is None:
+        found["tcb"] = {"status": "not checked", "detail": "TCB status not checked (no collateral in the " + source + ")",
+                        "revocation": "not checked",
+                        **({"collector_error": str(evidence["collateral_error"])[:200]}
+                           if evidence.get("collateral_error") else {})}
+    return {"status": "pass", **found, "binds": binds}
+
+
+def tdx_summary(quotes):
+    return {"status": "pass" if all(q["status"] == "pass" for q in quotes) else "fail", "checked": "offline",
+            "root": "Intel SGX Root CA pinned in this verifier", "root_sha256": INTEL_SGX_ROOT_SHA256,
+            "quotes": quotes, "not_checked": TDX_NOT_CHECKED}
+
+
+def tdx_start_binding(run):
+    value = {"format": "tgwitness-tdx-start-v1", "public_key": run.get("public_key"), "run_id": run.get("run_id"),
+             "source_tree_sha256": run.get("source_tree_sha256"), "host": run.get("host")}
+    if "source_policy" in run:
+        value["source_policy"] = run["source_policy"]
+    return value
+
+
+def verify_tdx_starts(starts, public_key):
+    runs = [(event, event["payload"]["run"] if isinstance(event["payload"].get("run"), dict) else {}) for event in starts]
+    if not any(run.get("tdx_start") for _, run in runs):
+        return None
+    quotes = []
+    for event, run in runs:
+        evidence = run["tdx_start"] if isinstance(run.get("tdx_start"), dict) else {}
+        if evidence.get("quote") and run.get("public_key") != public_key:
+            entry = {"status": "fail", "detail": "the quoted start names another key than this journal's"}
+        else:
+            entry = tdx_check(evidence, tdx_start_binding(run), event["observed_at"], "archive",
+                              "the start record: journal key, run, source tree and host")
+        quotes.append({"record": event["seq"], "at": event["observed_at"], **entry})
+    return tdx_summary(quotes)
+
+
+def verify_collector_attestation(data, expected_fingerprint=None):
+    from .chain import fingerprint
+    record = data.get("format") in ATTESTATION_RECORDS
+    answer = (data.get("collector") or {}).get("statement") if record else data
+    if not isinstance(answer, dict) or "statement" not in answer or "signature" not in answer:
+        raise ValueError("The record carries no signed collector statement")
+    statement = authenticate_statement(answer)
+    if statement.get("format") != "tgwitness-assurance-v1":
+        raise VerifierTooOld("Unsupported collector statement format")
+    fp = fingerprint(statement["public_key"])
+    if statement.get("fingerprint") != fp:
+        raise ValueError("The statement's fingerprint does not belong to its key")
+    if record and data["collector"].get("fingerprint") not in (None, fp):
+        raise ValueError("The record names another collector key than its signed statement")
+    if expected_fingerprint and fp != expected_fingerprint:
+        raise ValueError("Public key differs from the independently trusted fingerprint")
+    result = {"format": statement["format"], "fingerprint": fp, "key_pinned": bool(expected_fingerprint),
+              **{name: statement.get(name) for name in ("created_at", "run_id", "run_event_seq", "version",
+                                                        "source_tree_sha256", "challenge")}}
+    if isinstance(answer.get("tdx"), dict):
+        entry = tdx_check(answer["tdx"], statement, statement.get("created_at"), "file",
+                          "the signed collector statement: key, challenge, run and host")
+        result["tdx"] = tdx_summary([{"at": statement.get("created_at"), **entry}])
+    return result
+
+
+def tdx_lines(tdx):
+    if not tdx:
+        return []
+    lines = []
+    for quote in tdx["quotes"]:
+        where = "Intel TDX quote" + (" at record " + str(quote["record"]) if "record" in quote else "")
+        if quote["status"] != "pass":
+            lines.append(where + ": " + quote["status"] + " · " + quote["detail"]
+                         + (" (" + quote["error"] + ")" if quote.get("error") else ""))
+            continue
+        lines.append(where + ": verified offline; signature, quoting enclave and PCK chain to the pinned Intel SGX "
+                     "Root CA are valid (quote v" + str(quote["quote_version"]) + ", " + quote["pck_ca"] + ", FMSPC "
+                     + quote["fmspc"] + ")")
+        lines += [{"report_data": "REPORTDATA"}.get(name, name.upper()) + ": " + quote[name] for name in TDX_MEASUREMENTS]
+        lines.append("REPORTDATA is SHA-512 of " + quote["binds"])
+        lines.append(quote["tcb"]["detail"])
+    lines.append("Not checked offline: " + tdx["not_checked"])
+    return lines
 
 

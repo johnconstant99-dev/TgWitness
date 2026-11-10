@@ -10,8 +10,12 @@ INTERRUPTIONS = {"transport_disconnected": "connection to Telegram lost",
                  "resume_failed": "observation could not resume after a restart"}
 SESSION_NOTES = {"updates_diverted": "Telegram's update counter grew while no update reached this session",
                  "session_revoked_externally": "this session left Telegram's session list while its connection kept working",
-                 "concurrent_sessions_at_start": "other sessions were signed in when observation started"}
-SESSION_WINDOWS = ("updates_diverted", "session_revoked_externally")
+                 "concurrent_sessions_at_start": "other sessions were signed in when observation started",
+                 "probe_ack_missed_live": "the witness answered a probe, but the answer reached this session only "
+                                          "from history, not live"}
+SESSION_WINDOWS = ("updates_diverted", "session_revoked_externally", "probe_ack_missed_live")
+PROBE_KINDS = {"probe.sent": "sent", "probe.acked": "answered live", "probe.unanswered": "unanswered",
+               "probe.inconclusive": "inconclusive"}
 SOURCE_KINDS = ("message.new", "message.snapshot", "message.recovered", "message.edited")
 SOURCE_GROUPS = (("live observation", ("live_update", "update_recovery")),
                  ("history reads", ("history_snapshot", "baseline_snapshot", "new_chat_snapshot", "history_acquisition",
@@ -96,20 +100,24 @@ class Coverage:
         if kind == "observation.started":
             self.close(self.alive, "observation restarted")
             self.release("updates_diverted", at)
+            self.release("probe_ack_missed_live", at)
             self.open(at)
             self.active, self.run_id = True, payload.get("run_id")
         elif kind == "observation.stopped":
             self.close(at, "observation paused by the operator" if payload.get("reason") == "operator"
                        else "observation stopped: " + str(payload.get("reason") or "unknown"))
             self.release("updates_diverted", at)
+            self.release("probe_ack_missed_live", at)
             self.active = False
         elif kind == "process.stopped":
             self.close(at, "collector process stopped")
             self.release("updates_diverted", at)
+            self.release("probe_ack_missed_live", at)
             self.active = False
         elif kind == "process.started":
             self.close(self.alive, "collector process ended without an orderly stop")
             self.release("updates_diverted", at)
+            self.release("probe_ack_missed_live", at)
             self.active = False
         elif kind == "collector.error":
             self.close(self.alive, "collector error: capture may be incomplete")
@@ -121,6 +129,8 @@ class Coverage:
             self.close(at, "connection to Telegram closed")
         elif kind == "connection.restored" and payload.get("reason") == "updates_resumed":
             self.release("updates_diverted", at, resume=True)
+        elif kind == "connection.restored" and payload.get("reason") == "probe_ack_live":
+            self.release("probe_ack_missed_live", at, resume=True)
         elif kind == "account.authorized":
             self.release("session_revoked_externally", at, resume=True)
         elif kind == "coverage.gap":
@@ -177,6 +187,13 @@ class Coverage:
             s.setdefault("password_changes", []).append({"at": at, "operation": payload.get("operation")})
         elif kind == "account.phone_call":
             s["phone_calls"] = s.get("phone_calls", 0) + 1
+        elif kind in PROBE_KINDS or kind == "coverage.gap" and payload.get("reason") == "probe_ack_missed_live":
+            probes = s.setdefault("probes", {})
+            name = PROBE_KINDS.get(kind, "answer missed live")
+            probes[name] = probes.get(name, 0) + 1
+            delay = payload.get("delay_seconds")
+            if kind == "probe.acked" and isinstance(delay, (int, float)):
+                s["probe_delay_max"] = max(s.get("probe_delay_max", 0), delay)
         elif kind == "session.exclusive_from":
             s.setdefault("only_session", []).append({"from": at, "ended": payload.get("other_sessions_ended"),
                                                     "two_step": payload.get("two_step")})
@@ -456,6 +473,10 @@ def session_lines(coverage):
                      + ": other sessions ended" + (" (" + str(item["ended"]) + ")" if isinstance(item.get("ended"), int) else "")
                      + ", two-step password " + ("set from this workspace" if item.get("two_step") == "set_now"
                                                   else "already on"))
+    if s.get("probes"):
+        lines.append("Witness probes: " + ", ".join(name + " " + str(count) for name, count in s["probes"].items())
+                     + ("; slowest live answer " + str(round(s["probe_delay_max"], 1)) + " s"
+                        if s.get("probe_delay_max") is not None else ""))
     if s.get("phone_calls"):
         lines.append("Phone call updates delivered to this session: " + str(s["phone_calls"]))
     return lines

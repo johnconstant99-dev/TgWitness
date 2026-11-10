@@ -8503,5 +8503,19 @@
   "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "このアカウントの他のすべてのセッションを終了し、2段階認証パスワードがなければ設定しますか？以後、他の場所からのログインにはそのパスワードが必要になります。",
   "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "TgWitness が設定した2段階認証パスワードです。今すぐ保存してください。表示は一度だけで、TgWitness は保持しません。",
   "This is now the only session of this account.": "これがこのアカウントの唯一のセッションになりました。",
-  "Another session signed in after this session was made the only one.": "このセッションを唯一にした後、別のセッションがログインしました。"
+  "Another session signed in after this session was made the only one.": "このセッションを唯一にした後、別のセッションがログインしました。",
+  "Witness probe": "証人プローブ",
+  "Another workspace, signed in with a different Telegram account, answers probe messages in a private group that both accounts belong to. Both accounts need Read-only off, and the witness workspace must be observing.": "別の Telegram アカウントでサインインした別のワークスペースが、両方のアカウントが参加する非公開グループでプローブメッセージに応答します。両方のアカウントで読み取り専用をオフにし、証人ワークスペースは監視中である必要があります。",
+  "Probe chat": "プローブ用チャット",
+  "Witness workspace": "証人ワークスペース",
+  "Send a probe every 60–120 seconds while observing": "監視中は 60～120 秒ごとにプローブを送信",
+  "Last probe: {time}": "最後のプローブ：{time}",
+  "The answer arrived live after {n} s.": "応答は {n} 秒後にリアルタイムで届きました。",
+  "A probe answer reached the probe chat but not this session live. Another client probably uses the same session key.": "プローブへの応答はプローブ用チャットに届きましたが、このセッションにはリアルタイムで届きませんでした。別のクライアントが同じセッションキーを使用している可能性があります。",
+  "No answer. Check that the witness workspace is observing and belongs to the probe chat.": "応答がありません。証人ワークスペースが監視中で、プローブ用チャットのメンバーであることを確認してください。",
+  "No result: the connection was interrupted or the chat history could not be read.": "結果なし：接続が中断されたか、チャット履歴を読み取れませんでした。",
+  "Probe not sent.": "プローブは送信されませんでした。",
+  "This workspace answers probes from: {list}": "このワークスペースは次のワークスペースからのプローブに応答します：{list}",
+  "Choose a witness workspace signed in with a different Telegram account.": "別の Telegram アカウントでサインインした証人ワークスペースを選択してください。",
+  "Watchlist hits from lists set to send an alert": "アラートを送信するよう設定されたウォッチリストの一致"
 }

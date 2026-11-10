@@ -8698,5 +8698,19 @@
   "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "إنهاء كل الجلسات الأخرى لهذا الحساب وتفعيل كلمة مرور التحقق بخطوتين إن لم تكن مفعّلة؟ بعد ذلك يتطلب تسجيل الدخول من أي مكان آخر كلمة المرور هذه.",
   "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "كلمة مرور التحقق بخطوتين التي عيّنها TgWitness. احفظها الآن: تُعرض مرة واحدة فقط ولا يحتفظ بها TgWitness.",
   "This is now the only session of this account.": "هذه الآن الجلسة الوحيدة لهذا الحساب.",
-  "Another session signed in after this session was made the only one.": "سُجّل الدخول في جلسة أخرى بعد جعل هذه الجلسة الوحيدة."
+  "Another session signed in after this session was made the only one.": "سُجّل الدخول في جلسة أخرى بعد جعل هذه الجلسة الوحيدة.",
+  "Witness probe": "مسبار الشاهد",
+  "Another workspace, signed in with a different Telegram account, answers probe messages in a private group that both accounts belong to. Both accounts need Read-only off, and the witness workspace must be observing.": "تردّ مساحة عمل أخرى، مسجّل الدخول فيها بحساب Telegram مختلف، على رسائل المسبار في مجموعة خاصة ينتمي إليها الحسابان. يجب إيقاف وضع للقراءة فقط في الحسابين، ويجب أن تكون مساحة عمل الشاهد قيد المراقبة.",
+  "Probe chat": "محادثة المسبار",
+  "Witness workspace": "مساحة عمل الشاهد",
+  "Send a probe every 60–120 seconds while observing": "إرسال مسبار كل 60–120 ثانية أثناء المراقبة",
+  "Last probe: {time}": "آخر مسبار: {time}",
+  "The answer arrived live after {n} s.": "وصل الرد مباشرة بعد {n} ث.",
+  "A probe answer reached the probe chat but not this session live. Another client probably uses the same session key.": "وصل ردّ على المسبار إلى محادثة المسبار لكنه لم يصل إلى هذه الجلسة مباشرة. من المحتمل أن يستخدم عميل آخر نفس مفتاح الجلسة.",
+  "No answer. Check that the witness workspace is observing and belongs to the probe chat.": "لا يوجد رد. تحقّق من أن مساحة عمل الشاهد قيد المراقبة وأنها عضو في محادثة المسبار.",
+  "No result: the connection was interrupted or the chat history could not be read.": "لا توجد نتيجة: انقطع الاتصال أو تعذّرت قراءة سجل المحادثة.",
+  "Probe not sent.": "لم يُرسل المسبار.",
+  "This workspace answers probes from: {list}": "تردّ مساحة العمل هذه على المسابير الواردة من: {list}",
+  "Choose a witness workspace signed in with a different Telegram account.": "اختر مساحة عمل شاهدة مسجّل الدخول فيها بحساب Telegram مختلف.",
+  "Watchlist hits from lists set to send an alert": "تطابقات من قوائم المراقبة المضبوطة لإرسال تنبيه"
 }

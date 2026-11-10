@@ -8542,5 +8542,19 @@
   "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "Bu akkauntning boshqa barcha seanslari tugatilsinmi va ikki bosqichli tasdiqlash paroli bo'lmasa yoqilsinmi? Shundan keyin boshqa joydan kirish uchun shu parol kerak bo'ladi.",
   "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "TgWitness o'rnatgan ikki bosqichli tasdiqlash paroli. Hozir saqlang: u faqat bir marta ko'rsatiladi va TgWitness uni saqlamaydi.",
   "This is now the only session of this account.": "Endi bu akkauntning yagona seansi.",
-  "Another session signed in after this session was made the only one.": "Bu seans yagona qilinganidan keyin boshqa seans kirdi."
+  "Another session signed in after this session was made the only one.": "Bu seans yagona qilinganidan keyin boshqa seans kirdi.",
+  "Witness probe": "Guvoh tekshiruvi",
+  "Another workspace, signed in with a different Telegram account, answers probe messages in a private group that both accounts belong to. Both accounts need Read-only off, and the witness workspace must be observing.": "Boshqa Telegram hisobi bilan kirilgan boshqa ish maydoni ikkala hisob a'zo bo'lgan yopiq guruhdagi tekshiruv xabarlariga javob beradi. Ikkala hisobda ham Faqat o'qish o'chirilgan bo'lishi, guvoh ish maydoni esa kuzatuvda bo'lishi kerak.",
+  "Probe chat": "Tekshiruv chati",
+  "Witness workspace": "Guvoh ish maydoni",
+  "Send a probe every 60–120 seconds while observing": "Kuzatuv vaqtida har 60–120 soniyada tekshiruv yuborish",
+  "Last probe: {time}": "Oxirgi tekshiruv: {time}",
+  "The answer arrived live after {n} s.": "Javob {n} soniyadan keyin jonli keldi.",
+  "A probe answer reached the probe chat but not this session live. Another client probably uses the same session key.": "Tekshiruvga javob tekshiruv chatiga yetib keldi, lekin bu sessiyaga jonli yetib kelmadi. Ehtimol, boshqa klient xuddi shu sessiya kalitidan foydalanmoqda.",
+  "No answer. Check that the witness workspace is observing and belongs to the probe chat.": "Javob yo'q. Guvoh ish maydoni kuzatuvda ekanini va tekshiruv chati a'zosi ekanini tekshiring.",
+  "No result: the connection was interrupted or the chat history could not be read.": "Natija yo'q: ulanish uzildi yoki chat tarixini o'qib bo'lmadi.",
+  "Probe not sent.": "Tekshiruv yuborilmadi.",
+  "This workspace answers probes from: {list}": "Bu ish maydoni quyidagilarning tekshiruvlariga javob beradi: {list}",
+  "Choose a witness workspace signed in with a different Telegram account.": "Boshqa Telegram hisobi bilan kirilgan guvoh ish maydonini tanlang.",
+  "Watchlist hits from lists set to send an alert": "Ogohlantirish yuborishga sozlangan kuzatuv ro'yxatlaridagi mosliklar"
 }

@@ -273,6 +273,25 @@ password once; TgWitness does not keep it. The journal records `session.exclusiv
 Telegram later lists another session, the journal records `session.exclusive_ended` and the
 panel raises an alert. The verifier prints both.
 
+### Witness probe
+
+**Account security → Witness probe** checks whether another client receives this account's
+updates. Add a second workspace signed in with a different Telegram account and its own
+session key, create a private group with both accounts, then choose that group as **Probe
+chat** and the second workspace as **Witness workspace** and turn the probe on. Both accounts
+need **Read-only** off, and the witness workspace must be observing.
+
+While observing, this workspace sends `probe:<n>:<token>` into the group every 60–120 seconds
+and records `probe.sent`. The witness answers `ack:<n>:<token>` and records `probe.seen` and
+`probe.ack_sent`. An ack that reaches this session as a live update within 20 seconds is
+recorded as `probe.acked`. Otherwise the workspace reads the group's recent history. An ack
+found there but not delivered live is recorded as `coverage.gap` with reason
+`probe_ack_missed_live`: the panel raises an alert and marks event intake as failed until a
+later ack arrives live (`connection.restored`, reason `probe_ack_live`). No ack is recorded as
+`probe.unanswered`; a connection interruption during the wait or an unreadable history as
+`probe.inconclusive`. Read-only, Telegram restrictions and FloodWait pauses are recorded once
+as `probe.skipped`.
+
 ### Telethon `.session`
 
 | | |

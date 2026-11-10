@@ -1099,6 +1099,7 @@ function collectorLines(name,p){
     if(p.reason==="live")return [tr("Events arrive. A quiet chat without new messages is not a fault."),...facts];
     if(p.reason==="session_revoked")return [tr("The session was ended from another device or by Telegram."),...facts];
     if(p.reason==="updates_diverted")return [tr("Updates are going to another session: Telegram's update counter grows, but nothing reaches this one. Another client probably uses the same session key."),...facts];
+    if(p.reason==="probe_ack_missed_live")return [tr("A probe answer reached the probe chat but not this session live. Another client probably uses the same session key."),...facts];
     if(p.reason==="no_heartbeat")return [tr("No collector heartbeat yet."),...facts];
     if(p.reason==="stale")return [tr("No collector heartbeat for longer than expected; the collector may not be responding."),...facts];
     if(p.reason==="disconnected")return [tr("No events can arrive while the connection is down."),...facts];
@@ -3173,7 +3174,7 @@ function renderAlerts(a){
   const s=a.settings;
   if(!state.alertsDirty){
     $("alerts-enabled").checked=s.enabled;$("alerts-problems").checked=s.problems;$("alerts-changes").checked=s.changes;
-    $("alerts-text").checked=!!s.include_text;$("alerts-completions").checked=!!s.completions;
+    $("alerts-text").checked=!!s.include_text;$("alerts-completions").checked=!!s.completions;$("alerts-watchlists").checked=s.watchlists!==false;
     $("alerts-daily").checked=s.daily;$("alerts-hour").value=String(s.daily_hour);formControls?.loaded("alerts-form");
   }
   $("alerts-urls").placeholder=a.destinations.length?tr("Leave empty to keep the saved destinations"):"matrixs://user:password@matrix.example.org/#room";
@@ -3186,7 +3187,7 @@ $("alerts-form").addEventListener("input",()=>{state.alertsDirty=true;});
 async function saveAlerts(urls,add=[]){
   const draft=formControls?.capture("alerts-form");
   const a=await json("alerts",{enabled:$("alerts-enabled").checked,problems:$("alerts-problems").checked,changes:$("alerts-changes").checked,
-    daily:$("alerts-daily").checked,daily_hour:Number($("alerts-hour").value),language:LANG,include_text:$("alerts-text").checked,completions:$("alerts-completions").checked,urls,add_urls:add});
+    daily:$("alerts-daily").checked,daily_hour:Number($("alerts-hour").value),language:LANG,include_text:$("alerts-text").checked,completions:$("alerts-completions").checked,watchlists:$("alerts-watchlists").checked,urls,add_urls:add});
   formControls?.clearSubmitted(draft,["alerts-urls"]);state.alertsDirty=formControls?.changed(draft)||false;renderAlerts(a);formControls?.accepted(draft,state.alertsDirty);return a;
 }
 $("alerts-form").addEventListener("submit",event=>{event.preventDefault();busy(event.submitter,async()=>{
@@ -4578,6 +4579,54 @@ async function showAccountSessions(){
   }
 }
 $("account-sessions-show").addEventListener("click",e=>busy(e.currentTarget,showAccountSessions));
+function probeLines(p){
+  const lines=[],l=p.last;
+  if(p.answers_for?.length)lines.push(tr("This workspace answers probes from: {list}",{list:p.answers_for.map(a=>a.label).join(", ")}));
+  if(!l)return lines;
+  lines.push(tr("Last probe: {time}",{time:fmtFull(l.at)}));
+  if(l.result==="acked")lines.push(tr("The answer arrived live after {n} s.",{n:l.delay_seconds}));
+  else if(l.result==="missed")lines.push(tr("A probe answer reached the probe chat but not this session live. Another client probably uses the same session key."));
+  else if(l.result==="unanswered")lines.push(tr("No answer. Check that the witness workspace is observing and belongs to the probe chat."));
+  else if(l.result==="inconclusive")lines.push(tr("No result: the connection was interrupted or the chat history could not be read."));
+  else lines.push([tr("Probe not sent."),l.reason==="read_only"?tr("This account is read-only. Turn off Read-only on the account page to send, join or press bot buttons."):
+    l.reason==="account_restricted"?restrictionText(l.restriction):
+    l.reason==="telegram_pause"&&l.until?tr("Telegram asked to pause requests until {time}.",{time:fmtFull(new Date(l.until*1000).toISOString())}):
+    l.reason==="chat_unavailable"?tr("Refresh the group list and select an available target."):
+    l.error_type?errorName(l.error_type)||l.error_type:""].filter(Boolean).join(" "));
+  return lines;
+}
+function renderProbe(p,owner){
+  const box=$("account-probe");box.replaceChildren();box.hidden=false;
+  box.append(node("p","hint",tr("Another workspace, signed in with a different Telegram account, answers probe messages in a private group that both accounts belong to. Both accounts need Read-only off, and the witness workspace must be observing.")));
+  const chat=node("select"),witness=node("select"),enabled=node("input"),s=p.settings;
+  chat.append(new Option("—",""));
+  for(const c of p.chats)chat.append(new Option(c.title||String(c.chat_id),String(c.chat_id)));
+  if(s.chat_id!=null&&!p.chats.some(c=>c.chat_id===s.chat_id))chat.append(new Option(String(s.chat_id),String(s.chat_id)));
+  chat.value=s.chat_id==null?"":String(s.chat_id);
+  witness.append(new Option("—",""));
+  for(const w of p.witnesses)witness.append(new Option([w.label,w.username?"@"+w.username:w.account_id?"ID "+w.account_id:tr("Not connected"),
+    termText(w.observing?"observing":"paused")].join(" · "),w.id));
+  witness.value=s.witness||"";enabled.type="checkbox";enabled.checked=s.enabled;
+  const field=(text,control)=>{const label=node("label","",text);label.append(control);return label;};
+  const toggle=node("label","check-label");toggle.append(enabled," "+tr("Send a probe every 60–120 seconds while observing"));
+  const row=node("div","account-tools-row"),save=node("button","secondary",tr("Save")),refresh=node("button","secondary",tr("Refresh chat list"));
+  save.type=refresh.type="button";
+  save.addEventListener("click",e=>busy(e.currentTarget,async()=>{
+    const r=await json("account/probe",{enabled:enabled.checked,chat_id:chat.value?Number(chat.value):null,witness:witness.value||null},{profile:owner.profile,token:owner.token});
+    if(!owner.current())return;renderProbe(r,owner);toast(tr("Saved"));
+  }));
+  refresh.addEventListener("click",e=>busy(e.currentTarget,async()=>{
+    await json("dialogs",undefined,{profile:owner.profile,token:owner.token});
+    if(owner.current())await showProbe();
+  }));
+  row.append(save,refresh);
+  box.append(field(tr("Probe chat"),chat),field(tr("Witness workspace"),witness),toggle,row,...probeLines(p).map(line=>node("p","hint",line)));
+}
+async function showProbe(){
+  const owner=actionOwner(),p=await json("account/probe",undefined,{profile:owner.profile,token:owner.token});
+  if(owner.current())renderProbe(p,owner);
+}
+$("account-probe-show").addEventListener("click",e=>busy(e.currentTarget,showProbe));
 $("account-password").addEventListener("click",e=>busy(e.currentTarget,async()=>{
   const owner=actionOwner();
   const prompt=(label,options={})=>window.TgWitnessDialogs.prompt("",{title:tr("Two-step password"),label:tr(label),maxLength:256,...options});

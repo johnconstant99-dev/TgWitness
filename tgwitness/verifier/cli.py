@@ -36,6 +36,7 @@ from .languages import VERIFIER_LANGUAGES
 from .outside import outside_lines
 from .presentation import producer_line
 from .reports import REPORT_JSON, verify_report, verify_selection
+from .timestamps import ATTESTATION_RECORDS, tdx_lines, verify_collector_attestation
 from .witness import ASSURANCE_TIERS, assurance, assurance_line, channel_head_time, check_channel, cross_check_witness, verify_dossier, verify_history_report, verify_public_proof, verify_witness
 from .witness import (
     CONDITION_LABELS,
@@ -319,6 +320,9 @@ def verification_json(args):
     notes = []
     data = read_json_file(args.bundle)
     kind = data.get("statement", {}).get("format")
+    if data.get("format") in ATTESTATION_RECORDS or kind == "tgwitness-assurance-v1":
+        result = verify_collector_attestation(data, args.fingerprint)
+        return CheckResult("attestation", result, bool(args.fingerprint), tdx_lines(result.get("tdx")))
     if "statement" in data and "signature" in data:
         authenticate_statement(data, "public_key" if "public_key" in data["statement"] else "witness_public_key")
         known = {"tgwitness-board-selection-v1", "tgwitness-case-board-v1", "tgwitness-case-board-disclosure-v1",
@@ -405,7 +409,7 @@ def verification_evidence(args):
     result = verify_bundle(args.bundle, args.fingerprint,
                            read_json_file(args.checkpoint) if args.checkpoint else None, args.tsa_ca,
                            args.check_drand, check_bitcoin=args.check_bitcoin)
-    notes += coverage_lines(result["coverage"]) + outside_lines(result["outside"])
+    notes += coverage_lines(result["coverage"]) + outside_lines(result["outside"]) + tdx_lines(result.get("tdx"))
     pinned = bool(args.fingerprint)
     if any(a.get("kind") == "opentimestamps" and a.get("status") != "confirmed" for a in result.get("anchors", [])):
         notes.append("OpenTimestamps structure only: run ots verify to authenticate the Bitcoin timestamp.")
@@ -457,7 +461,8 @@ def refuse_inapplicable(args, kind):
     implied = getattr(args, "implied_checks", set())
     refused = [flag for name, flag in REQUESTED_CHECKS
                if getattr(args, name, None) and name not in implied and name not in APPLICABLE_CHECKS.get(kind, ())]
-    if getattr(args, "evidence", None) and kind in ("evidence", "chat", "handover", "witness", "account", "distributed"):
+    if getattr(args, "evidence", None) and kind in ("evidence", "chat", "handover", "witness", "account", "distributed",
+                                                    "attestation"):
         refused.append("--evidence")
     if getattr(args, "compare_fingerprint", None):
         refused.append("--compare-fingerprint without --compare")

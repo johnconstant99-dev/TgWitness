@@ -232,6 +232,13 @@ class EndSession(BaseModel):
     hash: str = Field(pattern=r"^-?[0-9]{1,20}$")
 
 
+class WitnessProbe(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    enabled: StrictBool = False
+    chat_id: StrictInt | None = None
+    witness: str | None = Field(default=None, pattern=r"^(default|[a-f0-9]{32})$")
+
+
 class AccountPassword(BaseModel):
     current_password: str | None = Field(default=None, max_length=256)
     new_password: str = Field(min_length=1, max_length=256)

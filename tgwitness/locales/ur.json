@@ -8542,5 +8542,19 @@
   "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "اس اکاؤنٹ کے باقی تمام سیشن ختم کریں اور اگر دو مرحلہ پاس ورڈ نہیں ہے تو اسے آن کریں؟ اس کے بعد کہیں اور سائن اِن کے لیے یہی پاس ورڈ درکار ہوگا۔",
   "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "TgWitness کا مقرر کردہ دو مرحلہ پاس ورڈ۔ اسے ابھی محفوظ کریں: یہ صرف ایک بار دکھایا جاتا ہے اور TgWitness اسے نہیں رکھتا۔",
   "This is now the only session of this account.": "اب یہ اس اکاؤنٹ کا واحد سیشن ہے۔",
-  "Another session signed in after this session was made the only one.": "اس سیشن کو واحد بنانے کے بعد ایک اور سیشن نے سائن اِن کیا۔"
+  "Another session signed in after this session was made the only one.": "اس سیشن کو واحد بنانے کے بعد ایک اور سیشن نے سائن اِن کیا۔",
+  "Witness probe": "گواہ پروب",
+  "Another workspace, signed in with a different Telegram account, answers probe messages in a private group that both accounts belong to. Both accounts need Read-only off, and the witness workspace must be observing.": "ایک اور ورک اسپیس، جس میں کسی دوسرے ٹیلیگرام اکاؤنٹ سے سائن ان کیا گیا ہو، ایک نجی گروپ میں پروب پیغامات کا جواب دیتی ہے جس کے دونوں اکاؤنٹس رکن ہوں۔ دونوں اکاؤنٹس میں صرف پڑھنے کے لیے بند ہونا چاہیے، اور گواہ ورک اسپیس کو مشاہدہ کرنا چاہیے۔",
+  "Probe chat": "پروب چیٹ",
+  "Witness workspace": "گواہ ورک اسپیس",
+  "Send a probe every 60–120 seconds while observing": "مشاہدے کے دوران ہر 60–120 سیکنڈ میں ایک پروب بھیجیں",
+  "Last probe: {time}": "آخری پروب: {time}",
+  "The answer arrived live after {n} s.": "جواب {n} سیکنڈ بعد براہِ راست پہنچا۔",
+  "A probe answer reached the probe chat but not this session live. Another client probably uses the same session key.": "پروب کا جواب پروب چیٹ تک پہنچ گیا لیکن اس سیشن تک براہِ راست نہیں پہنچا۔ شاید کوئی اور کلائنٹ وہی سیشن کلید استعمال کر رہا ہے۔",
+  "No answer. Check that the witness workspace is observing and belongs to the probe chat.": "کوئی جواب نہیں۔ چیک کریں کہ گواہ ورک اسپیس مشاہدہ کر رہی ہے اور پروب چیٹ کی رکن ہے۔",
+  "No result: the connection was interrupted or the chat history could not be read.": "کوئی نتیجہ نہیں: کنکشن منقطع ہوا یا چیٹ کی تاریخ پڑھی نہیں جا سکی۔",
+  "Probe not sent.": "پروب نہیں بھیجا گیا۔",
+  "This workspace answers probes from: {list}": "یہ ورک اسپیس ان کے پروبز کا جواب دیتی ہے: {list}",
+  "Choose a witness workspace signed in with a different Telegram account.": "ایسی گواہ ورک اسپیس منتخب کریں جس میں کسی دوسرے ٹیلیگرام اکاؤنٹ سے سائن ان کیا گیا ہو۔",
+  "Watchlist hits from lists set to send an alert": "واچ لسٹس سے ملنے والے نتائج جن کے لیے الرٹ بھیجنا مقرر ہے"
 }

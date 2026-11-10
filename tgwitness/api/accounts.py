@@ -1,3 +1,4 @@
+from .. import interactions
 from .. import persona
 from .. import tuning
 from ..account_import import check_session
@@ -18,6 +19,7 @@ from ..app import ProfileCreate
 from ..app import ProfileGroup
 from ..app import ProfileGroupAssign
 from ..app import ProfileImport
+from ..app import WitnessProbe
 from ..app import client_languages
 from ..app import panel_language
 from ..network import NetworkConfig
@@ -42,6 +44,11 @@ IMPORT_REFUSED = ("This server runs an attested deployment, so it does not colle
                   "exists outside this server and the recipient cannot tell who else holds it. Use the same file for "
                   "an independent login instead, or sign in by phone or QR. Either way the key is created here and "
                   "the attestation covers it.")
+PROBE_CONFIGURED_MEANING = ("Witness-probe settings of this workspace. While observing with the probe on, it sends a "
+                            "probe message into this chat at random intervals and waits for the witness workspace's "
+                            "ack as a live update.")
+PROBE_WITNESS_MEANING = ("This workspace answers probe messages that the prober workspace's account sends in this chat "
+                         "(enabled true) or no longer answers them (enabled false).")
 
 
 def refuse_imported_session():
@@ -654,6 +661,19 @@ async def make_only_account_session(*, ctx=Depends(current_context)):
     return await ctx.operation(ctx.app.state.collector.make_only_session)
 
 
+async def witness_probe(*, ctx=Depends(current_context)):
+    ctx.require_live()
+    return ctx.probe_view()
+
+
+async def save_witness_probe(body: WitnessProbe, *, ctx=Depends(current_context)):
+    ctx.require_live()
+    try:
+        return ctx.save_probe(body)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from None
+
+
 async def change_account_password(
     body: AccountPassword, *, ctx=Depends(current_context)
 ):
@@ -734,6 +754,93 @@ class AccountsOperations:
         task = asyncio.create_task(cleanup())
         self.action_tasks.add(task)
         task.add_done_callback(self.action_tasks.discard)
+
+    def probe_chats(self):
+        chats = {}
+        for target in self.app.state.store.targets():
+            if target["kind"] in ("group", "supergroup"):
+                chats[target["chat_id"]] = {"chat_id": target["chat_id"], "title": target["title"],
+                                            "kind": target["kind"]}
+        for chat_id, entry in self.app.state.collector.dialog_cache.items():
+            if entry.get("kind") in ("group", "supergroup"):
+                chats[chat_id] = {"chat_id": chat_id, "title": entry.get("title"), "kind": entry["kind"]}
+        return sorted(chats.values(), key=lambda chat: (str(chat["title"] or "").lower(), chat["chat_id"]))
+
+    def probe_view(self):
+        from ..collector import PROBE_ACK_SECONDS, PROBE_INTERVAL, probe_settings
+
+        store, collector = self.app.state.store, self.app.state.collector
+        registry = getattr(self.app.state, "workspace_registry", None)
+        entries = registry.entries if registry else {}
+        settings = probe_settings(store)
+        witnesses = []
+        for profile_id, entry in entries.items():
+            other = entry.get("app")
+            if profile_id == self.profile_id:
+                continue
+            account = (other.state.store.get_setting("account", None) or {}) if other else {}
+            cache = other.state.collector.dialog_cache if other else {}
+            witnesses.append({
+                "id": profile_id, "label": entry.get("label"), "available": other is not None,
+                "account_id": account.get("id"), "username": account.get("username"),
+                "observing": bool(other and other.state.collector.running),
+                "read_only": interactions.read_only(other.state.store) if other else None,
+                "in_probe_chat": settings["chat_id"] in cache if cache and settings["chat_id"] is not None else None,
+            })
+        answers = [{"workspace": key, "label": (entries.get(key) or {}).get("label", key), "chat_id": item.get("chat_id")}
+                   for key, item in (store.get_setting("probe_witness", None) or {}).items() if isinstance(item, dict)]
+        return {"settings": settings, "chats": self.probe_chats(), "witnesses": witnesses, "answers_for": answers,
+                "last": store.get_setting("probe_last", None),
+                "missed": collector.probe_missed if collector.running else None, "observing": collector.running,
+                "read_only": interactions.read_only(store), "interval_seconds": list(PROBE_INTERVAL),
+                "ack_wait_seconds": PROBE_ACK_SECONDS}
+
+    def save_probe(self, body):
+        from ..collector import PROBE_ACK_SECONDS, PROBE_INTERVAL, probe_settings
+
+        store, collector = self.app.state.store, self.app.state.collector
+        registry = getattr(self.app.state, "workspace_registry", None)
+        entries = registry.entries if registry else {}
+        account = (store.get_setting("account", None) or {}).get("id")
+        current = probe_settings(store)
+        chosen = entries.get(body.witness) if body.witness and body.witness != self.profile_id else None
+        other = chosen.get("app") if chosen else None
+        witness_account = (other.state.store.get_setting("account", None) or {}).get("id") if other else None
+        if body.enabled:
+            if account is None:
+                raise ValueError("Sign in to Telegram to continue.")
+            if body.chat_id not in {chat["chat_id"] for chat in self.probe_chats()}:
+                raise ValueError("Refresh the group list and select an available target.")
+            if witness_account is None or witness_account == account:
+                raise ValueError("Choose a witness workspace signed in with a different Telegram account.")
+        saved = {"enabled": body.enabled, "chat_id": body.chat_id, "witness": body.witness if chosen else None,
+                 "witness_account_id": witness_account}
+        for profile_id in dict.fromkeys(p for p in (current["witness"], saved["witness"]) if p):
+            target = (entries.get(profile_id) or {}).get("app")
+            if target is None:
+                continue
+            roles = target.state.store.get_setting("probe_witness", None) or {}
+            role = ({"chat_id": body.chat_id, "account_id": account}
+                    if body.enabled and profile_id == saved["witness"] else None)
+            if roles.get(self.profile_id) == role:
+                continue
+            previous = roles.pop(self.profile_id, None)
+            if role:
+                roles[self.profile_id] = role
+            with target.state.store.transaction():
+                target.state.store.set_setting("probe_witness", roles)
+                target.state.store.append("probe.witness_configured", {
+                    "prober_workspace": self.profile_id, "prober_account_id": account, "enabled": role is not None,
+                    "meaning": PROBE_WITNESS_MEANING}, (role or previous or {}).get("chat_id"))
+        with store.transaction():
+            store.set_setting("witness_probe", saved)
+            store.append("probe.configured", {
+                "enabled": body.enabled, "witness_workspace": saved["witness"], "witness_account_id": witness_account,
+                "account_id": account, "interval_seconds": list(PROBE_INTERVAL),
+                "ack_wait_seconds": PROBE_ACK_SECONDS, "meaning": PROBE_CONFIGURED_MEANING}, body.chat_id)
+        if not body.enabled:
+            collector.probe_missed = None
+        return self.probe_view()
 
     def groups_view(self, principal=None):
         registry = self.app.state.profiles

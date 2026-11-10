@@ -374,6 +374,9 @@ def problem_line(event, titles, words):
     if kind == "coverage.gap" and p.get("reason") == "updates_diverted":
         return tr(words, "Updates are going to another session: Telegram's update counter grows, but nothing "
                          "reaches this one. Another client probably uses the same session key.")
+    if kind == "coverage.gap" and p.get("reason") == "probe_ack_missed_live":
+        return tr(words, "A probe answer reached the probe chat but not this session live. Another client probably "
+                         "uses the same session key.")
     if kind == "coverage.gap":
         return tr(words, "Coverage gap{where}: {reason}", where=" (" + where + ")" if where else "",
                   reason=p.get("reason") or "")

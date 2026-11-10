@@ -8542,5 +8542,19 @@
   "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "Bu hesabın diğer tüm oturumları kapatılsın ve yoksa iki adımlı doğrulama parolası açılsın mı? Bundan sonra başka bir yerden giriş için bu parola gerekir.",
   "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "TgWitness'ın belirlediği iki adımlı doğrulama parolası. Şimdi kaydedin: yalnızca bir kez gösterilir ve TgWitness saklamaz.",
   "This is now the only session of this account.": "Bu artık hesabın tek oturumu.",
-  "Another session signed in after this session was made the only one.": "Bu oturum tek oturum yapıldıktan sonra başka bir oturum giriş yaptı."
+  "Another session signed in after this session was made the only one.": "Bu oturum tek oturum yapıldıktan sonra başka bir oturum giriş yaptı.",
+  "Witness probe": "Tanık yoklaması",
+  "Another workspace, signed in with a different Telegram account, answers probe messages in a private group that both accounts belong to. Both accounts need Read-only off, and the witness workspace must be observing.": "Farklı bir Telegram hesabıyla oturum açmış başka bir çalışma alanı, iki hesabın da üye olduğu özel bir gruptaki yoklama mesajlarını yanıtlar. İki hesapta da Salt okunur kapalı olmalı ve tanık çalışma alanı gözlem yapıyor olmalıdır.",
+  "Probe chat": "Yoklama sohbeti",
+  "Witness workspace": "Tanık çalışma alanı",
+  "Send a probe every 60–120 seconds while observing": "Gözlem sırasında her 60–120 saniyede bir yoklama gönder",
+  "Last probe: {time}": "Son yoklama: {time}",
+  "The answer arrived live after {n} s.": "Yanıt {n} sn sonra canlı olarak ulaştı.",
+  "A probe answer reached the probe chat but not this session live. Another client probably uses the same session key.": "Bir yoklama yanıtı yoklama sohbetine ulaştı ancak bu oturuma canlı olarak ulaşmadı. Muhtemelen başka bir istemci aynı oturum anahtarını kullanıyor.",
+  "No answer. Check that the witness workspace is observing and belongs to the probe chat.": "Yanıt yok. Tanık çalışma alanının gözlem yaptığını ve yoklama sohbetinin üyesi olduğunu kontrol edin.",
+  "No result: the connection was interrupted or the chat history could not be read.": "Sonuç yok: bağlantı kesildi veya sohbet geçmişi okunamadı.",
+  "Probe not sent.": "Yoklama gönderilmedi.",
+  "This workspace answers probes from: {list}": "Bu çalışma alanı şu çalışma alanlarının yoklamalarını yanıtlar: {list}",
+  "Choose a witness workspace signed in with a different Telegram account.": "Farklı bir Telegram hesabıyla oturum açmış bir tanık çalışma alanı seçin.",
+  "Watchlist hits from lists set to send an alert": "Uyarı göndermek üzere ayarlanmış izleme listelerinden eşleşmeler"
 }

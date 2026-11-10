@@ -8542,5 +8542,19 @@
   "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "¿Cerrar todas las demás sesiones de esta cuenta y activar una contraseña de verificación en dos pasos si no la tiene? Después, iniciar sesión en cualquier otro lugar requerirá esa contraseña.",
   "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "Contraseña de verificación en dos pasos establecida por TgWitness. Guárdela ahora: se muestra solo una vez y TgWitness no la conserva.",
   "This is now the only session of this account.": "Esta es ahora la única sesión de esta cuenta.",
-  "Another session signed in after this session was made the only one.": "Otra sesión inició sesión después de que esta pasara a ser la única."
+  "Another session signed in after this session was made the only one.": "Otra sesión inició sesión después de que esta pasara a ser la única.",
+  "Witness probe": "Sonda testigo",
+  "Another workspace, signed in with a different Telegram account, answers probe messages in a private group that both accounts belong to. Both accounts need Read-only off, and the witness workspace must be observing.": "Otro espacio de trabajo, con sesión iniciada en otra cuenta de Telegram, responde a los mensajes de sonda en un grupo privado al que pertenecen ambas cuentas. Ambas cuentas necesitan Solo lectura desactivado y el espacio de trabajo testigo debe estar observando.",
+  "Probe chat": "Chat de sonda",
+  "Witness workspace": "Espacio de trabajo testigo",
+  "Send a probe every 60–120 seconds while observing": "Enviar una sonda cada 60–120 segundos durante la observación",
+  "Last probe: {time}": "Última sonda: {time}",
+  "The answer arrived live after {n} s.": "La respuesta llegó en vivo tras {n} s.",
+  "A probe answer reached the probe chat but not this session live. Another client probably uses the same session key.": "Una respuesta a la sonda llegó al chat de sonda, pero no a esta sesión en vivo. Probablemente otro cliente utiliza la misma clave de sesión.",
+  "No answer. Check that the witness workspace is observing and belongs to the probe chat.": "Sin respuesta. Compruebe que el espacio de trabajo testigo esté observando y sea miembro del chat de sonda.",
+  "No result: the connection was interrupted or the chat history could not be read.": "Sin resultado: la conexión se interrumpió o no se pudo leer el historial del chat.",
+  "Probe not sent.": "Sonda no enviada.",
+  "This workspace answers probes from: {list}": "Este espacio de trabajo responde a sondas de: {list}",
+  "Choose a witness workspace signed in with a different Telegram account.": "Elija un espacio de trabajo testigo con sesión iniciada en otra cuenta de Telegram.",
+  "Watchlist hits from lists set to send an alert": "Coincidencias de listas de vigilancia configuradas para enviar una alerta"
 }

@@ -140,6 +140,34 @@ python -m tgwitness.cloud check-report --report certificate.pdf --verifier-finge
 downloading them from Intel. Gateway DNS is not available here: Phala has no provider firewall
 for outgoing traffic.
 
+### Offline check with verify.py
+
+A recipient without a Phala account checks the quotes with the standalone verifier, offline:
+
+```sh
+python verify.py tgwitness-evidence.zip --fingerprint COLLECTOR_FINGERPRINT
+python verify.py phala-tdx-attestation.json
+```
+
+For the quote of every `process.started` record in an evidence archive, and for the quote of a
+signed collector statement (also inside a deployment record or a published attestation record),
+`verify.py` checks the quote's ECDSA P-256 signature with its attestation key, the quoting
+enclave report's signature with the PCK certificate, that this report names the attestation key
+(SHA-256 of the key and the QE authentication data), that it comes from Intel's TDX quoting
+enclave in production mode, and the chain PCK certificate → Intel SGX PCK Platform or Processor
+CA → Intel SGX Root CA, whose SHA-256 is pinned in `verify.py`. It refuses debuggable or
+migratable TDs, checks that REPORTDATA is SHA-512 of the start record (journal key, run, source
+tree, host) or of the signed statement, and prints MRTD, RTMR0-3 and REPORTDATA.
+
+The collector also stores Intel's collateral (TCB Info, QE Identity, revocation lists and their
+issuer chains) with each quote when Intel's service answers. With it, `verify.py` checks Intel's
+signatures and revocation lists and computes the TCB status as of the recorded time, or as of
+the collateral's issue date when that is later. Without it the result reads "TCB status not
+checked (no collateral in the archive)". Which code the VM ran (the compose RTMR3 measures, the
+OS image behind MRTD and RTMR0-2), the provider log and Intel's current rating remain checks of
+`python -m tgwitness.cloud verify`; the offline check therefore marks the attested collection run
+as partial and does not by itself reach the `sealed` tier or the `attested` profile.
+
 ### Attestation certificate
 
 For a Phala deployment `verify --report certificate.md` also writes the certificate: a

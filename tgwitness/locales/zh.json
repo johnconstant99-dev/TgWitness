@@ -8503,5 +8503,19 @@
   "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "结束此账号的所有其他会话，并在未设置时开启两步验证密码？之后在其他地方登录都需要这个密码。",
   "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "TgWitness 设置的两步验证密码。请立即保存：只显示一次，TgWitness 不会保留。",
   "This is now the only session of this account.": "现在这是此账号唯一的会话。",
-  "Another session signed in after this session was made the only one.": "此会话设为唯一后，有另一个会话登录。"
+  "Another session signed in after this session was made the only one.": "此会话设为唯一后，有另一个会话登录。",
+  "Witness probe": "见证探测",
+  "Another workspace, signed in with a different Telegram account, answers probe messages in a private group that both accounts belong to. Both accounts need Read-only off, and the witness workspace must be observing.": "另一个使用不同 Telegram 账户登录的工作区，会在两个账户都加入的私密群组中回复探测消息。两个账户都需要关闭只读，并且见证工作区必须正在观察。",
+  "Probe chat": "探测聊天",
+  "Witness workspace": "见证工作区",
+  "Send a probe every 60–120 seconds while observing": "观察期间每 60–120 秒发送一次探测",
+  "Last probe: {time}": "最近一次探测：{time}",
+  "The answer arrived live after {n} s.": "回复在 {n} 秒后实时到达。",
+  "A probe answer reached the probe chat but not this session live. Another client probably uses the same session key.": "探测回复已到达探测聊天，但没有实时到达此会话。另一个客户端可能使用了相同的会话密钥。",
+  "No answer. Check that the witness workspace is observing and belongs to the probe chat.": "没有回复。请检查见证工作区是否正在观察并且是探测聊天的成员。",
+  "No result: the connection was interrupted or the chat history could not be read.": "没有结果：连接曾中断，或无法读取聊天历史记录。",
+  "Probe not sent.": "探测未发送。",
+  "This workspace answers probes from: {list}": "此工作区回复以下工作区的探测：{list}",
+  "Choose a witness workspace signed in with a different Telegram account.": "请选择一个使用不同 Telegram 账户登录的见证工作区。",
+  "Watchlist hits from lists set to send an alert": "来自设置为发送提醒的监视列表的命中"
 }

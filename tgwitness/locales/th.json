@@ -8503,5 +8503,19 @@
   "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "ยุติเซสชันอื่นทั้งหมดของบัญชีนี้ และเปิดรหัสผ่านยืนยันสองขั้นตอนหากยังไม่มีหรือไม่? หลังจากนั้น การเข้าสู่ระบบจากที่อื่นต้องใช้รหัสผ่านนี้",
   "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "รหัสผ่านยืนยันสองขั้นตอนที่ TgWitness ตั้งไว้ บันทึกไว้ตอนนี้: จะแสดงเพียงครั้งเดียวและ TgWitness ไม่เก็บไว้",
   "This is now the only session of this account.": "ตอนนี้นี่คือเซสชันเดียวของบัญชีนี้",
-  "Another session signed in after this session was made the only one.": "มีเซสชันอื่นเข้าสู่ระบบหลังจากที่ตั้งให้เซสชันนี้เป็นเซสชันเดียว"
+  "Another session signed in after this session was made the only one.": "มีเซสชันอื่นเข้าสู่ระบบหลังจากที่ตั้งให้เซสชันนี้เป็นเซสชันเดียว",
+  "Witness probe": "การตรวจสอบโดยพยาน",
+  "Another workspace, signed in with a different Telegram account, answers probe messages in a private group that both accounts belong to. Both accounts need Read-only off, and the witness workspace must be observing.": "พื้นที่ทำงานอื่นที่ลงชื่อเข้าใช้ด้วยบัญชี Telegram อื่นจะตอบข้อความตรวจสอบในกลุ่มส่วนตัวที่ทั้งสองบัญชีเป็นสมาชิก ทั้งสองบัญชีต้องปิดอ่านเท่านั้น และพื้นที่ทำงานพยานต้องกำลังสังเกตการณ์",
+  "Probe chat": "แชทสำหรับตรวจสอบ",
+  "Witness workspace": "พื้นที่ทำงานพยาน",
+  "Send a probe every 60–120 seconds while observing": "ส่งข้อความตรวจสอบทุก 60–120 วินาทีระหว่างสังเกตการณ์",
+  "Last probe: {time}": "การตรวจสอบล่าสุด: {time}",
+  "The answer arrived live after {n} s.": "คำตอบมาถึงแบบสดหลังจาก {n} วินาที",
+  "A probe answer reached the probe chat but not this session live. Another client probably uses the same session key.": "คำตอบของการตรวจสอบมาถึงแชทสำหรับตรวจสอบแล้ว แต่ไม่ได้มาถึงเซสชันนี้แบบสด ไคลเอนต์อื่นอาจใช้คีย์เซสชันเดียวกัน",
+  "No answer. Check that the witness workspace is observing and belongs to the probe chat.": "ไม่มีคำตอบ ตรวจสอบว่าพื้นที่ทำงานพยานกำลังสังเกตการณ์และเป็นสมาชิกของแชทสำหรับตรวจสอบ",
+  "No result: the connection was interrupted or the chat history could not be read.": "ไม่มีผลลัพธ์: การเชื่อมต่อถูกขัดจังหวะหรืออ่านประวัติแชทไม่ได้",
+  "Probe not sent.": "ไม่ได้ส่งข้อความตรวจสอบ",
+  "This workspace answers probes from: {list}": "พื้นที่ทำงานนี้ตอบการตรวจสอบจาก: {list}",
+  "Choose a witness workspace signed in with a different Telegram account.": "เลือกพื้นที่ทำงานพยานที่ลงชื่อเข้าใช้ด้วยบัญชี Telegram อื่น",
+  "Watchlist hits from lists set to send an alert": "รายการที่ตรงกันจากรายการเฝ้าดูที่ตั้งค่าให้ส่งการแจ้งเตือน"
 }

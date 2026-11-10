@@ -282,6 +282,12 @@ def register(app, ctx):
     router.post("/api/account/sessions/only", dependencies=[Depends(authenticate)])(
         routes_accounts.make_only_account_session
     )
+    router.get("/api/account/probe", dependencies=[Depends(authenticate)])(
+        routes_accounts.witness_probe
+    )
+    router.post("/api/account/probe", dependencies=[Depends(authenticate)])(
+        routes_accounts.save_witness_probe
+    )
     router.post("/api/account/password", dependencies=[Depends(authenticate)])(
         routes_accounts.change_account_password
     )

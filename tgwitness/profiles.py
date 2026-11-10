@@ -44,6 +44,7 @@ class Profiles:
         self.lock = asyncio.Lock()
         app.state.collector.account_guard = self.check_account
         app.state.group_link = lambda: self.inheritance("default")
+        app.state.workspace_registry = self
 
     def inheritance(self, profile_id):
         from .group_settings import member_view
@@ -152,6 +153,7 @@ class Profiles:
             self.opening.pop(entry["id"], None)
         self.entries[entry["id"]] = {**entry, "app": child, "cm": cm}
         child.state.group_link = lambda: self.inheritance(entry["id"])
+        child.state.workspace_registry = self
 
     async def create(self, label, group=None):
         async with self.lock:

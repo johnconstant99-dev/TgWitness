@@ -8620,5 +8620,19 @@
   "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "Завершити всі інші сесії акаунта й увімкнути пароль двоступеневої аутентифікації, якщо його немає? Після цього для входу з іншого пристрою знадобиться цей пароль.",
   "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "Пароль двоступеневої аутентифікації, заданий TgWitness. Збережіть його зараз: він показується один раз, TgWitness його не зберігає.",
   "This is now the only session of this account.": "Тепер це єдина сесія акаунта.",
-  "Another session signed in after this session was made the only one.": "Після того як ця сесія стала єдиною, увійшла інша сесія."
+  "Another session signed in after this session was made the only one.": "Після того як ця сесія стала єдиною, увійшла інша сесія.",
+  "Witness probe": "Перевірка свідком",
+  "Another workspace, signed in with a different Telegram account, answers probe messages in a private group that both accounts belong to. Both accounts need Read-only off, and the witness workspace must be observing.": "Інша робоча область, у якій виконано вхід з іншого облікового запису Telegram, відповідає на пробні повідомлення в закритій групі, де є обидва облікові записи. Для обох облікових записів має бути вимкнено режим «Тільки для читання», а робоча область-свідок має вести спостереження.",
+  "Probe chat": "Чат для перевірки",
+  "Witness workspace": "Робоча область-свідок",
+  "Send a probe every 60–120 seconds while observing": "Надсилати пробу кожні 60–120 секунд під час спостереження",
+  "Last probe: {time}": "Остання проба: {time}",
+  "The answer arrived live after {n} s.": "Відповідь надійшла в реальному часі через {n} с.",
+  "A probe answer reached the probe chat but not this session live. Another client probably uses the same session key.": "Відповідь на пробу з'явилася в чаті перевірки, але не надійшла до цієї сесії в реальному часі. Ймовірно, інший клієнт використовує той самий ключ сесії.",
+  "No answer. Check that the witness workspace is observing and belongs to the probe chat.": "Відповіді немає. Перевірте, що робоча область-свідок веде спостереження і є учасником чату перевірки.",
+  "No result: the connection was interrupted or the chat history could not be read.": "Результату немає: з'єднання переривалося або історію чату не вдалося прочитати.",
+  "Probe not sent.": "Пробу не надіслано.",
+  "This workspace answers probes from: {list}": "Ця робоча область відповідає на проби від: {list}",
+  "Choose a witness workspace signed in with a different Telegram account.": "Виберіть робочу область-свідка, у якій виконано вхід з іншого облікового запису Telegram.",
+  "Watchlist hits from lists set to send an alert": "Збіги зі списків спостереження, для яких увімкнено сповіщення"
 }

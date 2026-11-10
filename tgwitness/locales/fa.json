@@ -8542,5 +8542,19 @@
   "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "همهٔ نشست‌های دیگر این حساب پایان یابد و اگر گذرواژهٔ تأیید دومرحله‌ای ندارد، روشن شود؟ پس از آن ورود از هر جای دیگر به این گذرواژه نیاز دارد.",
   "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "گذرواژهٔ تأیید دومرحله‌ای که TgWitness تنظیم کرد. همین حالا ذخیره‌اش کنید: فقط یک بار نمایش داده می‌شود و TgWitness آن را نگه نمی‌دارد.",
   "This is now the only session of this account.": "اکنون این تنها نشست این حساب است.",
-  "Another session signed in after this session was made the only one.": "پس از اینکه این نشست تنها نشست شد، نشست دیگری وارد شد."
+  "Another session signed in after this session was made the only one.": "پس از اینکه این نشست تنها نشست شد، نشست دیگری وارد شد.",
+  "Witness probe": "کاوشگر شاهد",
+  "Another workspace, signed in with a different Telegram account, answers probe messages in a private group that both accounts belong to. Both accounts need Read-only off, and the witness workspace must be observing.": "فضای کاری دیگری که با حساب تلگرام متفاوتی وارد شده است، به پیام‌های کاوش در یک گروه خصوصی که هر دو حساب عضو آن هستند پاسخ می‌دهد. حالت فقط خواندنی در هر دو حساب باید خاموش باشد و فضای کاری شاهد باید در حال مشاهده باشد.",
+  "Probe chat": "گفتگوی کاوش",
+  "Witness workspace": "فضای کاری شاهد",
+  "Send a probe every 60–120 seconds while observing": "ارسال کاوش هر 60 تا 120 ثانیه در حین مشاهده",
+  "Last probe: {time}": "آخرین کاوش: {time}",
+  "The answer arrived live after {n} s.": "پاسخ پس از {n} ثانیه به‌صورت زنده رسید.",
+  "A probe answer reached the probe chat but not this session live. Another client probably uses the same session key.": "پاسخ کاوش به گفتگوی کاوش رسید اما به‌صورت زنده به این جلسه نرسید. احتمالاً یک کلاینت دیگر از همان کلید جلسه استفاده می‌کند.",
+  "No answer. Check that the witness workspace is observing and belongs to the probe chat.": "پاسخی نیامد. بررسی کنید که فضای کاری شاهد در حال مشاهده و عضو گفتگوی کاوش باشد.",
+  "No result: the connection was interrupted or the chat history could not be read.": "نتیجه‌ای نیست: اتصال قطع شد یا تاریخچهٔ گفتگو خوانده نشد.",
+  "Probe not sent.": "کاوش ارسال نشد.",
+  "This workspace answers probes from: {list}": "این فضای کاری به کاوش‌های این فضاها پاسخ می‌دهد: {list}",
+  "Choose a witness workspace signed in with a different Telegram account.": "یک فضای کاری شاهد انتخاب کنید که با حساب تلگرام متفاوتی وارد شده باشد.",
+  "Watchlist hits from lists set to send an alert": "موارد منطبق از فهرست‌های پایش که برای ارسال هشدار تنظیم شده‌اند"
 }

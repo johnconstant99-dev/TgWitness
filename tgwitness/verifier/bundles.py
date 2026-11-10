@@ -20,7 +20,7 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
     from .journal import media_reference, verify_checkpoint, verify_events
     from .outside import OutsideRecords, confirm_drand
     from .reports import archive_seal, check_sums, report_companions
-    from .timestamps import verify_anchors
+    from .timestamps import verify_anchors, verify_tdx_starts
     from .witness import assurance
     with open_archive(path, max_gib=max_gib) as archive:
         names = archive.namelist()
@@ -55,11 +55,13 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
             if isinstance(saved_gaps, dict):
                 gap_settings = saved_gaps.get("parameters")
         observed, outside = Coverage(gap_settings), OutsideRecords()
-        hash_files, account_exports = set(), []
+        hash_files, account_exports, starts = set(), [], []
 
         def measured(lines):
             for line in lines:
                 event = strict_json(line)
+                if event["kind"] == "process.started":
+                    starts.append(event)
                 if event["kind"] == "sealed.account_export":
                     item = event["payload"]
                     if (account_exports or item.get("file") != "account-export.zip"
@@ -125,6 +127,9 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
                 result["checkpoint_drand_anchor"] = {**checkpoint_anchor, "confirmed_by_relays": bool(check_drand)}
         result["anchors"] = verify_anchors(archive, names, public, result["events"], hash_at, tsa_ca, check_bitcoin)
         result["board"] = verify_board(archive, manifest, checkpoint)
+        tdx = verify_tdx_starts(starts, public)
+        if tdx:
+            result["tdx"] = tdx
         result["key_pinned"] = bool(expected_fingerprint)
         result["checkpoint_checked"] = checkpoint is not None
         result["assurance"] = assurance(result)

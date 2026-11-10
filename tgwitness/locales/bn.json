@@ -8542,5 +8542,19 @@
   "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "এই অ্যাকাউন্টের অন্য সব সেশন শেষ করে, না থাকলে দুই-ধাপের পাসওয়ার্ড চালু করবেন? এরপর অন্য কোথাও সাইন ইন করতে সেই পাসওয়ার্ড লাগবে।",
   "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "TgWitness দুই-ধাপের পাসওয়ার্ড সেট করেছে। এখনই সংরক্ষণ করুন: এটি শুধু একবার দেখানো হয় এবং TgWitness এটি রাখে না।",
   "This is now the only session of this account.": "এটি এখন এই অ্যাকাউন্টের একমাত্র সেশন।",
-  "Another session signed in after this session was made the only one.": "এই সেশনটিকে একমাত্র করার পর আরেকটি সেশন সাইন ইন করেছে।"
+  "Another session signed in after this session was made the only one.": "এই সেশনটিকে একমাত্র করার পর আরেকটি সেশন সাইন ইন করেছে।",
+  "Witness probe": "সাক্ষী প্রোব",
+  "Another workspace, signed in with a different Telegram account, answers probe messages in a private group that both accounts belong to. Both accounts need Read-only off, and the witness workspace must be observing.": "অন্য একটি টেলিগ্রাম অ্যাকাউন্টে সাইন ইন করা আরেকটি ওয়ার্কস্পেস একটি প্রাইভেট গ্রুপে প্রোব বার্তার উত্তর দেয়, যেখানে দুটি অ্যাকাউন্টই সদস্য। দুটি অ্যাকাউন্টেই শুধুমাত্র পড়ার জন্য বন্ধ থাকতে হবে, এবং সাক্ষী ওয়ার্কস্পেসকে পর্যবেক্ষণ চালু রাখতে হবে।",
+  "Probe chat": "প্রোব চ্যাট",
+  "Witness workspace": "সাক্ষী ওয়ার্কস্পেস",
+  "Send a probe every 60–120 seconds while observing": "পর্যবেক্ষণের সময় প্রতি 60–120 সেকেন্ডে একটি প্রোব পাঠান",
+  "Last probe: {time}": "শেষ প্রোব: {time}",
+  "The answer arrived live after {n} s.": "উত্তর {n} সেকেন্ড পরে লাইভ পৌঁছেছে।",
+  "A probe answer reached the probe chat but not this session live. Another client probably uses the same session key.": "একটি প্রোবের উত্তর প্রোব চ্যাটে পৌঁছেছে, কিন্তু এই সেশনে লাইভ পৌঁছায়নি। সম্ভবত অন্য কোনো ক্লায়েন্ট একই সেশন কী ব্যবহার করছে।",
+  "No answer. Check that the witness workspace is observing and belongs to the probe chat.": "কোনো উত্তর নেই। যাচাই করুন যে সাক্ষী ওয়ার্কস্পেস পর্যবেক্ষণ করছে এবং প্রোব চ্যাটের সদস্য।",
+  "No result: the connection was interrupted or the chat history could not be read.": "কোনো ফলাফল নেই: সংযোগ বিচ্ছিন্ন হয়েছিল বা চ্যাটের ইতিহাস পড়া যায়নি।",
+  "Probe not sent.": "প্রোব পাঠানো হয়নি।",
+  "This workspace answers probes from: {list}": "এই ওয়ার্কস্পেস এদের প্রোবের উত্তর দেয়: {list}",
+  "Choose a witness workspace signed in with a different Telegram account.": "অন্য একটি টেলিগ্রাম অ্যাকাউন্টে সাইন ইন করা একটি সাক্ষী ওয়ার্কস্পেস বেছে নিন।",
+  "Watchlist hits from lists set to send an alert": "সতর্কতা পাঠাতে সেট করা ওয়াচলিস্টের মিল"
 }

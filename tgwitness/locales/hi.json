@@ -8542,5 +8542,19 @@
   "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "इस खाते के बाकी सभी सत्र समाप्त करें और अगर दो-चरणीय पासवर्ड नहीं है तो उसे चालू करें? इसके बाद कहीं और साइन इन करने के लिए वह पासवर्ड चाहिए होगा।",
   "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "TgWitness ने दो-चरणीय पासवर्ड सेट किया है। इसे अभी सहेजें: यह केवल एक बार दिखाया जाता है और TgWitness इसे नहीं रखता।",
   "This is now the only session of this account.": "अब यह इस खाते का एकमात्र सत्र है।",
-  "Another session signed in after this session was made the only one.": "इस सत्र को एकमात्र बनाने के बाद किसी दूसरे सत्र ने साइन इन किया।"
+  "Another session signed in after this session was made the only one.": "इस सत्र को एकमात्र बनाने के बाद किसी दूसरे सत्र ने साइन इन किया।",
+  "Witness probe": "गवाह प्रोब",
+  "Another workspace, signed in with a different Telegram account, answers probe messages in a private group that both accounts belong to. Both accounts need Read-only off, and the witness workspace must be observing.": "किसी दूसरे Telegram खाते से साइन इन किया गया एक अन्य कार्यक्षेत्र, एक निजी समूह में प्रोब संदेशों का जवाब देता है जिसके दोनों खाते सदस्य हैं। दोनों खातों में केवल-पठनीय बंद होना चाहिए, और गवाह कार्यक्षेत्र को निगरानी करनी चाहिए।",
+  "Probe chat": "प्रोब चैट",
+  "Witness workspace": "गवाह कार्यक्षेत्र",
+  "Send a probe every 60–120 seconds while observing": "निगरानी के दौरान हर 60–120 सेकंड में एक प्रोब भेजें",
+  "Last probe: {time}": "अंतिम प्रोब: {time}",
+  "The answer arrived live after {n} s.": "जवाब {n} सेकंड बाद लाइव पहुँचा।",
+  "A probe answer reached the probe chat but not this session live. Another client probably uses the same session key.": "प्रोब का जवाब प्रोब चैट तक पहुँचा, लेकिन इस सत्र तक लाइव नहीं पहुँचा। शायद कोई दूसरा क्लाइंट उसी सत्र कुंजी का उपयोग कर रहा है।",
+  "No answer. Check that the witness workspace is observing and belongs to the probe chat.": "कोई जवाब नहीं। जाँचें कि गवाह कार्यक्षेत्र निगरानी कर रहा है और प्रोब चैट का सदस्य है।",
+  "No result: the connection was interrupted or the chat history could not be read.": "कोई परिणाम नहीं: कनेक्शन बाधित हुआ या चैट इतिहास पढ़ा नहीं जा सका।",
+  "Probe not sent.": "प्रोब नहीं भेजा गया।",
+  "This workspace answers probes from: {list}": "यह कार्यक्षेत्र इनके प्रोब का जवाब देता है: {list}",
+  "Choose a witness workspace signed in with a different Telegram account.": "किसी दूसरे Telegram खाते से साइन इन किया गया गवाह कार्यक्षेत्र चुनें।",
+  "Watchlist hits from lists set to send an alert": "अलर्ट भेजने के लिए सेट की गई निगरानी सूचियों से मिले परिणाम"
 }

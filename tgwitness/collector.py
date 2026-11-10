@@ -10,6 +10,7 @@ import secrets
 import warnings
 import weakref
 from contextlib import asynccontextmanager, suppress
+from contextvars import ContextVar
 from datetime import datetime, timedelta, timezone
 from functools import wraps
 from itertools import islice
@@ -147,6 +148,36 @@ UPDATES_GRACE_SECONDS = 30
 UPDATES_DIVERTED_MEANING = ("Telegram's update counter for this account grew while no update reached this session. "
                             "Another client probably uses the same session key and receives the updates instead; "
                             "new messages, edits and deletions are not recorded live until updates return.")
+PROBE_INTERVAL = (60, 120)
+PROBE_ACK_SECONDS = 20
+PROBE_HISTORY_GRACE = 10
+PROBE_HISTORY_LIMIT = 30
+PROBE_STALE_SECONDS = 60
+PROBE_TEXT = re.compile(r"(probe|ack):([0-9]{1,12}):([A-Za-z0-9_-]{8,64})")
+PROBE_CALL = ContextVar("probe_call", default=False)
+PROBE_SENT_MEANING = ("This workspace sent a probe message into the probe chat. The witness workspace, signed in with "
+                      "another Telegram account and its own session key, answers it with an ack message; this session "
+                      "waits for the ack as a live update.")
+PROBE_ACKED_MEANING = "The witness's ack reached this session as a live update (push)."
+PROBE_MISSED_MEANING = ("The witness's ack is in the probe chat on Telegram, but it did not reach this session as a live "
+                        "update. Telegram delivered it to another connection: another client probably uses the same "
+                        "session key and receives the updates instead.")
+PROBE_UNANSWERED_MEANING = ("No ack for this probe reached this session or the probe chat's recent history: the witness "
+                            "workspace was not observing, is not a member of the probe chat or did not send its ack.")
+PROBE_INCONCLUSIVE_MEANING = ("The probe gave no result: the connection to Telegram was interrupted while waiting for the "
+                              "ack, or the probe chat's history could not be read.")
+PROBE_SEEN_MEANING = ("This workspace, the probe witness, received a probe message from the probing workspace's account "
+                      "in the probe chat. via: push is a live update, difference is an update recovered afterwards.")
+PROBE_ACK_SENT_MEANING = "This workspace answered the probe with an ack message in the probe chat."
+PROBE_ACK_FAILED_MEANING = "This workspace could not send its ack for the probe."
+PROBE_SKIPPED_MEANING = {
+    "read_only": "Read-only is on for this account, so it sends no probe or ack messages.",
+    "account_restricted": "Telegram restricts sending from this account, so it sends no probe or ack messages.",
+    "telegram_pause": "Telegram asked this account to pause requests (FloodWait); no probe was sent in this round.",
+    "chat_unavailable": "The probe chat could not be resolved for this account; no probe was sent.",
+    "send_refused": "Telegram refused the probe message.",
+    "error": "A probe step stopped with an error; observation continues.",
+}
 PROFILE_REQUEST_SECONDS = 300
 PROFILE_CHANGE_MEANING = ("The sender profile delivered with this live message differs from the name last recorded "
                           "for this person in this chat.")
@@ -274,6 +305,14 @@ def connection_change(call):
 
 def recovered_source(update):
     return "update_recovery" if getattr(update, "pts", None) == 0 else None
+
+
+def probe_settings(store):
+    saved = store.get_setting("witness_probe", None) or {}
+    chat, witness, account = saved.get("chat_id"), saved.get("witness"), saved.get("witness_account_id")
+    return {"enabled": saved.get("enabled") is True, "chat_id": chat if type(chat) is int else None,
+            "witness": witness if isinstance(witness, str) else None,
+            "witness_account_id": account if type(account) is int else None}
 
 
 def media_priority(message, size):
@@ -512,6 +551,13 @@ class Collector:
         self.updates_seen = 0
         self.updates_probe = None
         self.updates_diverted = None
+        self.probe_worker = None
+        self.probe_pending = None
+        self.probe_missed = None
+        self.probe_tasks = set()
+        self.probe_answered = deque(maxlen=200)
+        self.probe_skipped = {}
+        self.connection_epoch = 0
         self.max_handler_ms = 0
         self.run_id = None
         self.account_guard = None
@@ -581,6 +627,7 @@ class Collector:
             "source_status": self.source_status_view(),
             "last_update_at": self.last_update_at,
             "updates_diverted": self.updates_diverted if self.running else None,
+            "probe_missed": self.probe_missed if self.running else None,
             "session_revoked": self.session_revoked if self.running else None,
             "max_handler_ms": round(self.max_handler_ms, 2),
             "rpc_backoff_until": self.store.get_setting("rpc_backoff_until", 0),
@@ -891,7 +938,7 @@ class Collector:
         client.tgwitness_client_profile = device
         client.rpc_backoff_getter = lambda: self.store.get_setting("rpc_backoff_until", 0)
         client.rpc_backoff_setter = self.telegram_paused
-        client.updates_listener = lambda: client is self.client and self.updates_arrived()
+        client.updates_listener = lambda: client is self.client and not PROBE_CALL.get() and self.updates_arrived()
         from .rpc_pacing import AccountPacer
         client.bulk_pacer = AccountPacer(self.store)
         def rpc_backoff(details):
@@ -2049,6 +2096,8 @@ class Collector:
             self.recheck_wakeup.set()
 
     def connection_changed(self, client, state):
+        if client is self.client:
+            self.connection_epoch += 1
         if state == "reconnected":
             if client is self.client:
                 if not self.transport_down:
@@ -2369,7 +2418,8 @@ class Collector:
 
     async def start_observation(self):
         if (self.watchdog or self.media_worker or self.urgent_media_worker or self.ephemeral_media_worker
-                or self.reconciler or self.intake_worker or self.chat_state_worker or self.presence_worker):
+                or self.reconciler or self.intake_worker or self.chat_state_worker or self.presence_worker
+                or self.probe_worker):
             await self.stop()
         if scope_settings(self.store)["mode"] == "selected" and not self.store.targets(True):
             raise ValueError("Select at least one group or channel first.")
@@ -2377,6 +2427,8 @@ class Collector:
         self.observed_since = datetime.now(timezone.utc)
         self.buffered, self.buffering, self.buffer_overflow = [], True, False
         self.updates_probe = self.updates_diverted = None
+        self.probe_pending = self.probe_missed = None
+        self.probe_skipped = {}
         self.buffer_limit = self.param("startup_buffer")
         dropped, refetch = await self.rewind_paused_updates()
         try:
@@ -2440,6 +2492,7 @@ class Collector:
         self.intake_worker = asyncio.create_task(self.supervise(self.intake_loop, "new chat intake"))
         self.chat_state_worker = asyncio.create_task(self.supervise(self.chat_state_loop, "chat state snapshots"))
         self.presence_worker = asyncio.create_task(self.supervise(self.presence_loop, "online status watch"))
+        self.probe_worker = asyncio.create_task(self.probe_loop())
         catch_up = getattr(self.client, "catch_up", None)
         if catch_up:
             await catch_up()
@@ -2476,7 +2529,8 @@ class Collector:
 
     async def cancel_workers(self):
         tasks = (self.watchdog, self.media_worker, self.urgent_media_worker, self.ephemeral_media_worker,
-                 self.reconciler, self.intake_worker, self.chat_state_worker, self.presence_worker)
+                 self.reconciler, self.intake_worker, self.chat_state_worker, self.presence_worker, self.probe_worker,
+                 *self.probe_tasks)
         tasks = tuple(task for task in tasks if task and task is not asyncio.current_task())
         for task in tasks:
             task.cancel()
@@ -2498,6 +2552,7 @@ class Collector:
         self.chat_state_worker = None
         self.presence_worker = None
         self.ephemeral_media_worker = None
+        self.probe_worker = self.probe_pending = None
         await self.avatar_history.close()
         if not shutdown:
             self.store.set_setting("resume", False)
@@ -2533,6 +2588,7 @@ class Collector:
             connected = self.client.is_connected()
             if connected != previous:
                 self.transport_down = not connected
+                self.connection_epoch += 1
                 self.store.append("connection.restored" if connected else "coverage.gap", {
                     "reason": "transport_connected" if connected else "transport_disconnected",
                     "completeness": "unknown; intermediate events may be missing"})
@@ -2923,6 +2979,12 @@ class Collector:
         self.updates_arrived()
         if not self.running:
             return
+        if isinstance(update, (types.UpdateNewMessage, types.UpdateNewChannelMessage)) and isinstance(
+                update.message, types.Message) and (update.message.message or "").startswith(("probe:", "ack:")):
+            try:
+                self.probe_update(update)
+            except Exception as exc:
+                self.probe_skip("error", role="update", error_type=type(exc).__name__)
         try:
             settings = monitoring_settings(self.store)
             if isinstance(update, (types.UpdateUserStatus, types.UpdateUserName, types.UpdateUser)):
@@ -3009,6 +3071,221 @@ class Collector:
     async def presence_loop(self):
         from .presence_watch import loop
         await loop(self)
+
+    def probe_skip(self, reason, role="prober", **details):
+        if role == "prober":
+            with suppress(Exception):
+                self.store.set_setting("probe_last", {"at": utcnow(), "result": "skipped", "reason": reason, **details})
+        if self.probe_skipped.get(role) == reason:
+            return
+        self.probe_skipped[role] = reason
+        self.note("probe.skipped", {"role": role, "reason": reason, **details, "meaning": PROBE_SKIPPED_MEANING[reason]})
+
+    def probe_outcome(self, kind, pending, result, payload, message_id=None):
+        self.note(kind, {"n": pending["n"], "token": pending["token"], "probe_message_id": pending["message_id"],
+                         **payload}, pending["chat_id"], message_id or pending["message_id"])
+        with suppress(Exception):
+            self.store.set_setting("probe_last", {"at": utcnow(), "result": result, "n": pending["n"],
+                                                  **{k: v for k, v in payload.items() if k in (
+                                                      "delay_seconds", "reason", "error_type")}})
+
+    async def probe_loop(self):
+        pick = secrets.SystemRandom()
+        while self.running:
+            await asyncio.sleep(pick.uniform(*PROBE_INTERVAL))
+            client = self.client
+            try:
+                await self.probe_round(client)
+            except asyncio.CancelledError:
+                raise
+            except Exception as exc:
+                if self.handle_authorization_error(exc, "witness probe", client=client):
+                    return
+                self.probe_skip("error", error_type=type(exc).__name__)
+            finally:
+                self.probe_pending = None
+
+    async def probe_round(self, client):
+        from . import interactions
+        config = probe_settings(self.store)
+        chat_id = config["chat_id"]
+        if (not self.running or not config["enabled"] or chat_id is None or client is None or self.transport_down
+                or not client.is_connected()):
+            return
+        paused = self.store.get_setting("rpc_backoff_until", 0)
+        if time.time() < paused:
+            return self.probe_skip("telegram_pause", until=paused)
+        if interactions.read_only(self.store):
+            return self.probe_skip("read_only")
+        if restricted := interactions.restriction(self.store):
+            return self.probe_skip("account_restricted", restriction=restricted["kind"])
+        entity = (self.dialog_cache.get(chat_id) or {}).get("entity")
+        if entity is None:
+            try:
+                entity = await asyncio.wait_for(client.get_input_entity(chat_id), CLOCK_TIMEOUT)
+            except (ValueError, TypeError):
+                return self.probe_skip("chat_unavailable")
+        number = self.store.get_setting("probe_counter", 0)
+        n = (number if type(number) is int else 0) + 1
+        self.store.set_setting("probe_counter", n)
+        token = secrets.token_urlsafe(12)
+        pending = self.probe_pending = {"n": n, "token": token, "chat_id": chat_id, "message_id": None, "date": None,
+                                        "ack": None, "arrived": asyncio.Event(), "started": time.monotonic(),
+                                        "epoch": self.connection_epoch}
+        marker = PROBE_CALL.set(chat_id < -1000000000000)
+        try:
+            message = await client.send_message(entity, "probe:" + str(n) + ":" + token, parse_mode=None,
+                                                link_preview=False)
+        except FLOOD_ERRORS as exc:
+            return self.probe_skip("telegram_pause", retry_after_seconds=exc.seconds,
+                                   until=self.store.get_setting("rpc_backoff_until", 0))
+        except RPCError as exc:
+            if isinstance(exc, AUTHORIZATION_ERRORS):
+                raise
+            interactions.note_restriction(self.store, exc)
+            return self.probe_skip("send_refused", error_type=type(exc).__name__)
+        finally:
+            PROBE_CALL.reset(marker)
+        self.probe_skipped.pop("prober", None)
+        pending["message_id"], pending["date"] = message.id, message.date
+        self.note("probe.sent", {"n": n, "token": token, "message_id": message.id, "sent_at": date_string(message.date),
+                                 "witness_workspace": config["witness"], "witness_account_id": config["witness_account_id"],
+                                 "ack_wait_seconds": PROBE_ACK_SECONDS, "meaning": PROBE_SENT_MEANING}, chat_id, message.id)
+        with suppress(TimeoutError):
+            await asyncio.wait_for(pending["arrived"].wait(), PROBE_ACK_SECONDS)
+        if (pending["ack"] or {}).get("via") == "push":
+            return self.probe_acked(pending)
+        if pending["epoch"] != self.connection_epoch or not client.is_connected():
+            return self.probe_outcome("probe.inconclusive", pending, "inconclusive", {
+                "reason": "transport_interrupted", "meaning": PROBE_INCONCLUSIVE_MEANING})
+        found = pending["ack"]
+        if found is None:
+            try:
+                found = await self.probe_history(client, entity, pending, config["witness_account_id"])
+            except asyncio.CancelledError:
+                raise
+            except AUTHORIZATION_ERRORS:
+                raise
+            except Exception as exc:
+                return self.probe_outcome("probe.inconclusive", pending, "inconclusive", {
+                    "reason": "history_unavailable", "error_type": type(exc).__name__,
+                    "meaning": PROBE_INCONCLUSIVE_MEANING})
+            if found is None:
+                return self.probe_outcome("probe.unanswered", pending, "unanswered", {
+                    "waited_seconds": round(time.monotonic() - pending["started"], 3),
+                    "history_checked": PROBE_HISTORY_LIMIT, "meaning": PROBE_UNANSWERED_MEANING})
+            with suppress(TimeoutError):
+                await asyncio.wait_for(pending["arrived"].wait(), PROBE_HISTORY_GRACE)
+            if (pending["ack"] or {}).get("via") == "push":
+                return self.probe_acked(pending)
+            if pending["epoch"] != self.connection_epoch:
+                return self.probe_outcome("probe.inconclusive", pending, "inconclusive", {
+                    "reason": "transport_interrupted", "meaning": PROBE_INCONCLUSIVE_MEANING})
+        self.probe_missed_live(pending, found, config["witness_account_id"])
+
+    async def probe_history(self, client, entity, pending, witness):
+        text = "ack:" + str(pending["n"]) + ":" + pending["token"]
+        messages = await asyncio.wait_for(client.get_messages(entity, limit=PROBE_HISTORY_LIMIT,
+                                                              min_id=pending["message_id"]), PROFILE_TIMEOUT)
+        for message in messages or []:
+            if (getattr(message, "message", None) or "") == text and (
+                    witness is None or getattr(message, "sender_id", None) == witness):
+                return {"message_id": message.id, "sent_at": date_string(message.date), "date": message.date,
+                        "via": None}
+        return None
+
+    def probe_acked(self, pending):
+        ack = pending["ack"]
+        delay = round(ack["monotonic"] - pending["started"], 3)
+        self.probe_outcome("probe.acked", pending, "acked", {
+            "message_id": ack["message_id"], "ack_sent_at": ack["sent_at"], "observed_at": ack["observed_at"],
+            "via": "push", "delay_seconds": delay, "meaning": PROBE_ACKED_MEANING}, ack["message_id"])
+        missed, self.probe_missed = self.probe_missed, None
+        if missed:
+            self.note("connection.restored", {
+                "reason": "probe_ack_live", "missed_since": missed["since"], "n": pending["n"],
+                "completeness": "updates Telegram sent to the other session in between may be missing"})
+
+    def probe_missed_live(self, pending, ack, witness):
+        self.probe_missed = self.probe_missed or {"since": utcnow(), "n": pending["n"]}
+        delay = (ack["date"] - pending["date"]).total_seconds() if ack.get("date") and pending["date"] else None
+        self.note("coverage.gap", {
+            "reason": "probe_ack_missed_live", "n": pending["n"], "token": pending["token"],
+            "probe_chat_id": pending["chat_id"], "probe_message_id": pending["message_id"],
+            "ack_message_id": ack["message_id"], "ack_sent_at": ack["sent_at"],
+            "ack_delay_seconds": round(delay) if delay is not None else None,
+            "waited_seconds": round(time.monotonic() - pending["started"], 3),
+            "found_by": "update_difference" if ack.get("via") == "difference" else "history",
+            "witness_account_id": witness, "meaning": PROBE_MISSED_MEANING,
+            "completeness": "updates in this period may be missing"})
+        with suppress(Exception):
+            self.store.set_setting("probe_last", {"at": utcnow(), "result": "missed", "n": pending["n"]})
+        self.recheck_wakeup.set()
+
+    def probe_update(self, update):
+        message = update.message
+        match = PROBE_TEXT.fullmatch(message.message or "")
+        if not match:
+            return
+        observed, chat_id = utcnow(), utils.get_peer_id(message.peer_id)
+        via = "difference" if getattr(update, "pts", None) == 0 else "push"
+        n, token, sender = int(match[2]), match[3], getattr(message, "sender_id", None)
+        if match[1] == "ack":
+            pending = self.probe_pending
+            if (pending and pending["ack"] is None and pending["n"] == n and pending["token"] == token
+                    and pending["chat_id"] == chat_id):
+                pending["ack"] = {"message_id": message.id, "sent_at": date_string(message.date), "date": message.date,
+                                  "via": via, "observed_at": observed, "monotonic": time.monotonic()}
+                pending["arrived"].set()
+            return
+        if getattr(message, "out", False):
+            return
+        roles = self.store.get_setting("probe_witness", None) or {}
+        prober = next((key for key, entry in roles.items() if isinstance(entry, dict)
+                       and entry.get("chat_id") == chat_id and entry.get("account_id") == sender), None)
+        if prober is None or (sender, n, token) in self.probe_answered:
+            return
+        self.probe_answered.append((sender, n, token))
+        from . import interactions
+        age = (datetime.now(timezone.utc) - message.date).total_seconds() if message.date else 0
+        reason = ("stale" if age > PROBE_STALE_SECONDS else
+                  "read_only" if interactions.read_only(self.store) else
+                  "account_restricted" if interactions.restriction(self.store) else
+                  "telegram_pause" if time.time() < self.store.get_setting("rpc_backoff_until", 0) else None)
+        self.note("probe.seen", {"n": n, "token": token, "message_id": message.id, "sent_at": date_string(message.date),
+                                 "observed_at": observed, "via": via, "prober_workspace": prober,
+                                 "prober_account_id": sender, "answer": "not_sent" if reason else "ack",
+                                 **({"reason": reason} if reason else {}), "meaning": PROBE_SEEN_MEANING},
+                  chat_id, message.id)
+        if reason is None:
+            task = asyncio.get_running_loop().create_task(self.probe_ack(self.client, chat_id, message, n, token))
+            self.probe_tasks.add(task)
+            task.add_done_callback(self.probe_tasks.discard)
+
+    async def probe_ack(self, client, chat_id, message, n, token):
+        from . import interactions
+        marker = PROBE_CALL.set(chat_id < -1000000000000)
+        try:
+            sent = await client.send_message(await client.get_input_entity(message.peer_id),
+                                             "ack:" + str(n) + ":" + token, reply_to=message.id, parse_mode=None,
+                                             link_preview=False)
+        except asyncio.CancelledError:
+            raise
+        except Exception as exc:
+            if self.handle_authorization_error(exc, "witness probe answer", client=client):
+                return
+            if isinstance(exc, RPCError):
+                interactions.note_restriction(self.store, exc)
+            self.note("probe.ack_failed", {
+                "n": n, "token": token, "probe_message_id": message.id, "error_type": type(exc).__name__,
+                **({"retry_after_seconds": exc.seconds} if isinstance(exc, FLOOD_ERRORS) else {}),
+                "meaning": PROBE_ACK_FAILED_MEANING}, chat_id, message.id)
+            return
+        finally:
+            PROBE_CALL.reset(marker)
+        self.note("probe.ack_sent", {"n": n, "token": token, "probe_message_id": message.id, "message_id": sent.id,
+                                     "sent_at": date_string(sent.date), "meaning": PROBE_ACK_SENT_MEANING},
+                  chat_id, sent.id)
 
     async def recheck_loop(self):
         delay, forced, reconnected = self.param("recheck_first_delay_seconds"), True, 0
@@ -3304,9 +3581,9 @@ class Collector:
             return False
         return True
 
-    def note(self, kind, payload, chat_id=None):
+    def note(self, kind, payload, chat_id=None, message_id=None):
         try:
-            self.store.append(kind, payload, chat_id)
+            self.store.append(kind, payload, chat_id, message_id)
         except Exception:
             self.journal_write_failures = getattr(self, "journal_write_failures", 0) + 1
             LOG.exception("Journal record %s was not written", kind)

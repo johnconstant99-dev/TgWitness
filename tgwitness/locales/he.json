@@ -8581,5 +8581,19 @@
   "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "לסיים את כל הסשנים האחרים של החשבון ולהפעיל סיסמת אימות דו-שלבי אם אין? לאחר מכן כל כניסה ממקום אחר תדרוש את הסיסמה הזו.",
   "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "סיסמת אימות דו-שלבי שהגדיר TgWitness. שמרו אותה עכשיו: היא מוצגת פעם אחת בלבד ו-TgWitness לא שומר אותה.",
   "This is now the only session of this account.": "זה עכשיו הסשן היחיד של החשבון.",
-  "Another session signed in after this session was made the only one.": "סשן אחר נכנס לאחר שהסשן הזה הוגדר כיחיד."
+  "Another session signed in after this session was made the only one.": "סשן אחר נכנס לאחר שהסשן הזה הוגדר כיחיד.",
+  "Witness probe": "בדיקת עד",
+  "Another workspace, signed in with a different Telegram account, answers probe messages in a private group that both accounts belong to. Both accounts need Read-only off, and the witness workspace must be observing.": "סביבת עבודה אחרת, המחוברת עם חשבון Telegram אחר, עונה להודעות בדיקה בקבוצה פרטית ששני החשבונות חברים בה. בשני החשבונות יש לכבות את מצב לקריאה בלבד, וסביבת העבודה של העד חייבת להיות במעקב.",
+  "Probe chat": "צ'אט בדיקה",
+  "Witness workspace": "סביבת העבודה של העד",
+  "Send a probe every 60–120 seconds while observing": "שליחת בדיקה כל 60–120 שניות במהלך המעקב",
+  "Last probe: {time}": "בדיקה אחרונה: {time}",
+  "The answer arrived live after {n} s.": "התשובה הגיעה בזמן אמת אחרי {n} שנ׳.",
+  "A probe answer reached the probe chat but not this session live. Another client probably uses the same session key.": "תשובה לבדיקה הגיעה לצ'אט הבדיקה אך לא הגיעה למפגש זה בזמן אמת. ככל הנראה, לקוח אחר משתמש באותו מפתח מפגש.",
+  "No answer. Check that the witness workspace is observing and belongs to the probe chat.": "אין תשובה. ודאו שסביבת העבודה של העד נמצאת במעקב וחברה בצ'אט הבדיקה.",
+  "No result: the connection was interrupted or the chat history could not be read.": "אין תוצאה: החיבור נקטע או שלא ניתן היה לקרוא את היסטוריית הצ'אט.",
+  "Probe not sent.": "הבדיקה לא נשלחה.",
+  "This workspace answers probes from: {list}": "סביבת עבודה זו עונה לבדיקות של: {list}",
+  "Choose a witness workspace signed in with a different Telegram account.": "בחרו סביבת עבודה של עד המחוברת עם חשבון Telegram אחר.",
+  "Watchlist hits from lists set to send an alert": "התאמות מרשימות מעקב שהוגדרו לשלוח התראה"
 }

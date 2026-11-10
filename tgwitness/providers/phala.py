@@ -2,7 +2,9 @@ import http.client
 import json
 import secrets
 import socket
+import time
 
+import requests
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X25519PublicKey
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -13,6 +15,8 @@ from .base import DeployError, Provider, resource_name
 SOCKET = "/var/run/dstack.sock"
 API_VERSION = "2026-06-23"
 COMPOSE_LIMIT = 200 * 1024
+PCS_TIMEOUT = 15
+COLLATERAL = {}
 
 
 class GuestConnection(http.client.HTTPConnection):
@@ -37,6 +41,22 @@ def guest(method, body=None, path=SOCKET, timeout=10):
     if response.status != 200:
         raise OSError("dstack guest agent " + method + ": HTTP " + str(response.status))
     return json.loads(data)
+
+
+class PcsSession(requests.Session):
+    def request(self, method, url, *args, **kwargs):
+        kwargs["timeout"] = min(kwargs.get("timeout") or PCS_TIMEOUT, PCS_TIMEOUT)
+        return super().request(method, url, *args, **kwargs)
+
+
+def intel_collateral(raw):
+    from .. import tdx
+    fmspc = tdx.pck_extension(tdx.pem_chain(tdx.parse_quote(raw)["pck_chain"])[0])["fmspc"]
+    found = COLLATERAL.get(fmspc)
+    if found is None or found[0] < time.monotonic():
+        with PcsSession() as session:
+            found = COLLATERAL[fmspc] = (time.monotonic() + 3600, tdx.fetch_collateral(raw, session))
+    return found[1]
 
 
 def encrypt_environment(values, public_key_hex):
@@ -219,7 +239,12 @@ class Phala(Provider):
         if len(data) != 64:
             raise ValueError("report data must be 64 bytes")
         answer = guest("GetQuote", {"report_data": data.hex()}, timeout=30)
-        return {"quote": answer["quote"], "event_log": answer["event_log"], "vm_config": answer.get("vm_config")}
+        found = {"quote": answer["quote"], "event_log": answer["event_log"], "vm_config": answer.get("vm_config")}
+        try:
+            found["collateral"] = intel_collateral(bytes.fromhex(answer["quote"]))
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            found["collateral_error"] = type(exc).__name__ + ": " + str(exc)[:200]
+        return found
 
 
 PROVIDER = Phala

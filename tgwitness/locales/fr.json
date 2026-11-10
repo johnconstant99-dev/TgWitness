@@ -8542,5 +8542,19 @@
   "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "Fermer toutes les autres sessions de ce compte et activer un mot de passe de validation en deux étapes s'il n'en a pas ? Ensuite, toute connexion ailleurs exigera ce mot de passe.",
   "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "Mot de passe de validation en deux étapes défini par TgWitness. Enregistrez-le maintenant : il n'est affiché qu'une fois et TgWitness ne le conserve pas.",
   "This is now the only session of this account.": "C'est désormais la seule session de ce compte.",
-  "Another session signed in after this session was made the only one.": "Une autre session s'est connectée après que celle-ci est devenue la seule."
+  "Another session signed in after this session was made the only one.": "Une autre session s'est connectée après que celle-ci est devenue la seule.",
+  "Witness probe": "Sonde témoin",
+  "Another workspace, signed in with a different Telegram account, answers probe messages in a private group that both accounts belong to. Both accounts need Read-only off, and the witness workspace must be observing.": "Un autre espace de travail, connecté avec un autre compte Telegram, répond aux messages de sonde dans un groupe privé dont les deux comptes sont membres. Les deux comptes doivent avoir la lecture seule désactivée, et l'espace de travail témoin doit être en observation.",
+  "Probe chat": "Discussion de sonde",
+  "Witness workspace": "Espace de travail témoin",
+  "Send a probe every 60–120 seconds while observing": "Envoyer une sonde toutes les 60 à 120 secondes pendant l'observation",
+  "Last probe: {time}": "Dernière sonde : {time}",
+  "The answer arrived live after {n} s.": "La réponse est arrivée en direct après {n} s.",
+  "A probe answer reached the probe chat but not this session live. Another client probably uses the same session key.": "Une réponse à la sonde est arrivée dans la discussion de sonde, mais pas en direct dans cette session. Un autre client utilise probablement la même clé de session.",
+  "No answer. Check that the witness workspace is observing and belongs to the probe chat.": "Aucune réponse. Vérifiez que l'espace de travail témoin est en observation et membre de la discussion de sonde.",
+  "No result: the connection was interrupted or the chat history could not be read.": "Aucun résultat : la connexion a été interrompue ou l'historique de la discussion n'a pas pu être lu.",
+  "Probe not sent.": "Sonde non envoyée.",
+  "This workspace answers probes from: {list}": "Cet espace de travail répond aux sondes de : {list}",
+  "Choose a witness workspace signed in with a different Telegram account.": "Choisissez un espace de travail témoin connecté avec un autre compte Telegram.",
+  "Watchlist hits from lists set to send an alert": "Correspondances des listes de surveillance configurées pour envoyer une alerte"
 }

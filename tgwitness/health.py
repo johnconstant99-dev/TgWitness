@@ -223,6 +223,8 @@ def intake(c, heartbeat_seconds, now):
         return part("failed", "session_revoked", revoked_since=c["session_revoked"].get("since"), **detail)
     if c.get("updates_diverted"):
         return part("failed", "updates_diverted", diverted_since=c["updates_diverted"].get("since"), **detail)
+    if c.get("probe_missed"):
+        return part("failed", "probe_ack_missed_live", missed_since=c["probe_missed"].get("since"), **detail)
     return part("working", "live", **detail)
 
 

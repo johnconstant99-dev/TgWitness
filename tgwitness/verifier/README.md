@@ -8,7 +8,8 @@ and export declarations without rewriting function bodies or signed formats.
 
 `common`, `chain` and `journal` hold archive bounds, canonical encoding and
 signature checks. Other modules separate timestamps, coverage, reports, exports,
-witnesses and the console. Deferred internal imports make dependencies explicit
+witnesses and the console. `timestamps` also checks Intel TDX quotes offline against
+the pinned Intel SGX Root CA. Deferred internal imports make dependencies explicit
 without an import cycle. Run the CLI through the assembled artifact, which retains
 the original shared namespace and command-line limits.
 

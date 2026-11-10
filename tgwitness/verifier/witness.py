@@ -448,6 +448,7 @@ def assurance(result):
     complete_days = bool(days and not missing and all(d["bitcoin"] == "confirmed" for d in days)
                          and witness.get("head_bitcoin_block_time"))
     runtime = result.get("runtime_attestation") or {}
+    tdx = tdx_condition(result["tdx"]) if result.get("tdx") else None
     ladder = [
         {"tier": "self_attested", "status": "pass", "detail": "signature, hashes and applicable chain/manifest checks"},
         {"tier": "timestamped", "status": "pass" if times else "absent",
@@ -464,7 +465,8 @@ def assurance(result):
          "detail": "Bitcoin-confirmed daily seals: " + str(sum(d["bitcoin"] == "confirmed" for d in days))
                    + "; missing days: " + str(len(missing))},
         {"tier": "sealed", "status": "pass" if runtime.get("verified") is True and runtime.get("key_origin") == "created" else "absent",
-         "detail": runtime.get("limitation") or "no independently checked runtime attestation bound to this export and a created key"},
+         "detail": runtime.get("limitation") or (english(tdx[1], **tdx[2]) if tdx else
+                                                 "no independently checked runtime attestation bound to this export and a created key")},
     ]
     tier = "self_attested"
     for row in ladder:
@@ -524,6 +526,16 @@ def english(text, **values):
     for name, value in values.items():
         text = text.replace("{" + name + "}", str(value))
     return text
+
+
+def tdx_condition(tdx):
+    failed = next((q for q in tdx["quotes"] if q["status"] != "pass"), None)
+    if failed:
+        return "missing", "Intel TDX check failed: {detail}", {"detail": (
+            "record " + str(failed["record"]) + ": " if "record" in failed else "") + failed["detail"]
+            + (" (" + failed["error"] + ")" if failed.get("error") else "")}
+    return ("partial", "{count} Intel TDX quote(s) verified offline and bound to the collector key; the code the VM ran "
+                       "is not checked here", {"count": len(tdx["quotes"])})
 
 
 def condition(cid, status, how, text, **values):
@@ -594,12 +606,16 @@ def evidence_conditions(result, kind="evidence"):
                               "--checkpoint received before this archive, through another channel",
                               "records 1–{through} of {total} match the checkpoint you supplied" if retained
                               else "no checkpoint supplied", **({"through": retained, "total": events} if retained else {})))
-    rows.append(condition("environment", "met" if attested else "missing",
-                          "--sealed-attestation with --sealed-policy for a GitHub Actions run; Intel TDX: python -m tgwitness.cloud verify"
-                          if journal else "in the evidence journal ZIP: --sealed-attestation with --sealed-policy",
-                          "collection ran in the attested workflow {workflow}" if attested
-                          else "no attested collection run checked here",
-                          **({"workflow": runtime.get("workflow")} if attested else {})))
+    if result.get("tdx") and not attested:
+        status, text, values = tdx_condition(result["tdx"])
+        rows.append(condition("environment", status, "compose and OS image: python -m tgwitness.cloud verify", text, **values))
+    else:
+        rows.append(condition("environment", "met" if attested else "missing",
+                              "--sealed-attestation with --sealed-policy for a GitHub Actions run; Intel TDX: python -m tgwitness.cloud verify"
+                              if journal else "in the evidence journal ZIP: --sealed-attestation with --sealed-policy",
+                              "collection ran in the attested workflow {workflow}" if attested
+                              else "no attested collection run checked here",
+                              **({"workflow": runtime.get("workflow")} if attested else {})))
     met = {row["id"] for row in rows if row["status"] == "met"}
     missing = [item for item in ("signer", "external_time") if item not in met]
     minimum = not missing

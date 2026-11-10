@@ -8503,5 +8503,19 @@
   "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "Akhiri semua sesi lain akun ini dan aktifkan kata sandi verifikasi dua langkah jika belum ada? Setelah itu, masuk dari tempat lain memerlukan kata sandi tersebut.",
   "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "Kata sandi verifikasi dua langkah yang dibuat TgWitness. Simpan sekarang: hanya ditampilkan sekali dan TgWitness tidak menyimpannya.",
   "This is now the only session of this account.": "Ini sekarang satu-satunya sesi akun ini.",
-  "Another session signed in after this session was made the only one.": "Sesi lain masuk setelah sesi ini dijadikan satu-satunya."
+  "Another session signed in after this session was made the only one.": "Sesi lain masuk setelah sesi ini dijadikan satu-satunya.",
+  "Witness probe": "Probe saksi",
+  "Another workspace, signed in with a different Telegram account, answers probe messages in a private group that both accounts belong to. Both accounts need Read-only off, and the witness workspace must be observing.": "Ruang kerja lain, yang masuk dengan akun Telegram berbeda, menjawab pesan probe di grup pribadi tempat kedua akun menjadi anggota. Kedua akun harus menonaktifkan Hanya baca, dan ruang kerja saksi harus sedang mengamati.",
+  "Probe chat": "Obrolan probe",
+  "Witness workspace": "Ruang kerja saksi",
+  "Send a probe every 60–120 seconds while observing": "Kirim probe setiap 60–120 detik selama pengamatan",
+  "Last probe: {time}": "Probe terakhir: {time}",
+  "The answer arrived live after {n} s.": "Jawaban tiba secara langsung setelah {n} dtk.",
+  "A probe answer reached the probe chat but not this session live. Another client probably uses the same session key.": "Jawaban probe sampai di obrolan probe, tetapi tidak sampai ke sesi ini secara langsung. Klien lain kemungkinan menggunakan kunci sesi yang sama.",
+  "No answer. Check that the witness workspace is observing and belongs to the probe chat.": "Tidak ada jawaban. Pastikan ruang kerja saksi sedang mengamati dan menjadi anggota obrolan probe.",
+  "No result: the connection was interrupted or the chat history could not be read.": "Tidak ada hasil: koneksi terputus atau riwayat obrolan tidak dapat dibaca.",
+  "Probe not sent.": "Probe tidak dikirim.",
+  "This workspace answers probes from: {list}": "Ruang kerja ini menjawab probe dari: {list}",
+  "Choose a witness workspace signed in with a different Telegram account.": "Pilih ruang kerja saksi yang masuk dengan akun Telegram berbeda.",
+  "Watchlist hits from lists set to send an alert": "Kecocokan dari daftar pantauan yang diatur untuk mengirim peringatan"
 }

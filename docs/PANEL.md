@@ -305,6 +305,7 @@ paste Apprise addresses directly.
 - **Changes**: deleted, edited and missing messages in observed chats, grouped into
   one notification per check (every minute unless changed in Parameters).
 - **Completed tasks**: history, exports and storage copies.
+- **Watchlist hits**: matches from watchlists set to send an alert.
 - **Daily summary** at the chosen hour, server time.
 
 Notifications carry chat names and counts. Message excerpts are off by default; with

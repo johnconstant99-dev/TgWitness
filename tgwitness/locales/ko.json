@@ -8503,5 +8503,19 @@
   "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "이 계정의 다른 모든 세션을 종료하고, 2단계 인증 비밀번호가 없으면 설정할까요? 이후 다른 곳에서 로그인하려면 그 비밀번호가 필요합니다.",
   "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "TgWitness가 설정한 2단계 인증 비밀번호입니다. 지금 저장하세요. 한 번만 표시되며 TgWitness는 보관하지 않습니다.",
   "This is now the only session of this account.": "이제 이 계정의 유일한 세션입니다.",
-  "Another session signed in after this session was made the only one.": "이 세션만 남긴 뒤 다른 세션이 로그인했습니다."
+  "Another session signed in after this session was made the only one.": "이 세션만 남긴 뒤 다른 세션이 로그인했습니다.",
+  "Witness probe": "증인 프로브",
+  "Another workspace, signed in with a different Telegram account, answers probe messages in a private group that both accounts belong to. Both accounts need Read-only off, and the witness workspace must be observing.": "다른 텔레그램 계정으로 로그인한 다른 작업 공간이 두 계정이 모두 속한 비공개 그룹에서 프로브 메시지에 응답합니다. 두 계정 모두 읽기 전용을 꺼야 하며, 증인 작업 공간은 관찰 중이어야 합니다.",
+  "Probe chat": "프로브 채팅",
+  "Witness workspace": "증인 작업 공간",
+  "Send a probe every 60–120 seconds while observing": "관찰 중 60–120초마다 프로브 보내기",
+  "Last probe: {time}": "마지막 프로브: {time}",
+  "The answer arrived live after {n} s.": "응답이 {n}초 후 실시간으로 도착했습니다.",
+  "A probe answer reached the probe chat but not this session live. Another client probably uses the same session key.": "프로브 응답이 프로브 채팅에는 도착했지만 이 세션에는 실시간으로 도착하지 않았습니다. 다른 클라이언트가 동일한 세션 키를 사용하고 있는 것으로 보입니다.",
+  "No answer. Check that the witness workspace is observing and belongs to the probe chat.": "응답이 없습니다. 증인 작업 공간이 관찰 중이고 프로브 채팅의 멤버인지 확인하세요.",
+  "No result: the connection was interrupted or the chat history could not be read.": "결과 없음: 연결이 끊겼거나 채팅 기록을 읽을 수 없었습니다.",
+  "Probe not sent.": "프로브를 보내지 않았습니다.",
+  "This workspace answers probes from: {list}": "이 작업 공간은 다음 작업 공간의 프로브에 응답합니다: {list}",
+  "Choose a witness workspace signed in with a different Telegram account.": "다른 텔레그램 계정으로 로그인한 증인 작업 공간을 선택하세요.",
+  "Watchlist hits from lists set to send an alert": "알림을 보내도록 설정된 감시 목록의 일치 항목"
 }

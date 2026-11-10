@@ -8503,5 +8503,19 @@
   "End every other session of this account and turn on a two-step password if it has none? After that, signing in anywhere else needs that password.": "Kết thúc mọi phiên khác của tài khoản này và bật mật khẩu xác minh hai bước nếu chưa có? Sau đó, đăng nhập ở nơi khác sẽ cần mật khẩu này.",
   "Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it.": "Mật khẩu xác minh hai bước do TgWitness đặt. Hãy lưu ngay: mật khẩu chỉ hiển thị một lần và TgWitness không giữ lại.",
   "This is now the only session of this account.": "Đây giờ là phiên duy nhất của tài khoản này.",
-  "Another session signed in after this session was made the only one.": "Một phiên khác đã đăng nhập sau khi phiên này được đặt là duy nhất."
+  "Another session signed in after this session was made the only one.": "Một phiên khác đã đăng nhập sau khi phiên này được đặt là duy nhất.",
+  "Witness probe": "Thăm dò nhân chứng",
+  "Another workspace, signed in with a different Telegram account, answers probe messages in a private group that both accounts belong to. Both accounts need Read-only off, and the witness workspace must be observing.": "Một không gian làm việc khác, đăng nhập bằng một tài khoản Telegram khác, trả lời các tin nhắn thăm dò trong một nhóm riêng tư mà cả hai tài khoản đều là thành viên. Cả hai tài khoản cần tắt Chỉ đọc, và không gian làm việc nhân chứng phải đang quan sát.",
+  "Probe chat": "Cuộc trò chuyện thăm dò",
+  "Witness workspace": "Không gian làm việc nhân chứng",
+  "Send a probe every 60–120 seconds while observing": "Gửi một tin thăm dò mỗi 60–120 giây khi đang quan sát",
+  "Last probe: {time}": "Lần thăm dò gần nhất: {time}",
+  "The answer arrived live after {n} s.": "Câu trả lời đến trực tiếp sau {n} giây.",
+  "A probe answer reached the probe chat but not this session live. Another client probably uses the same session key.": "Một câu trả lời thăm dò đã đến cuộc trò chuyện thăm dò nhưng không đến phiên này theo thời gian thực. Có thể một ứng dụng khách khác đang sử dụng cùng một khóa phiên.",
+  "No answer. Check that the witness workspace is observing and belongs to the probe chat.": "Không có câu trả lời. Hãy kiểm tra không gian làm việc nhân chứng đang quan sát và là thành viên của cuộc trò chuyện thăm dò.",
+  "No result: the connection was interrupted or the chat history could not be read.": "Không có kết quả: kết nối bị gián đoạn hoặc không thể đọc lịch sử trò chuyện.",
+  "Probe not sent.": "Chưa gửi tin thăm dò.",
+  "This workspace answers probes from: {list}": "Không gian làm việc này trả lời thăm dò từ: {list}",
+  "Choose a witness workspace signed in with a different Telegram account.": "Chọn một không gian làm việc nhân chứng đăng nhập bằng một tài khoản Telegram khác.",
+  "Watchlist hits from lists set to send an alert": "Kết quả khớp từ các danh sách theo dõi được đặt để gửi cảnh báo"
 }
