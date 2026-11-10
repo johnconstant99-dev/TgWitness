@@ -4,7 +4,7 @@
 
 # TgWitness verification
 
-**Updated 8 November 2026.** Results are tied to the revision, environment and
+**Updated 9 November 2026.** Results are tied to the revision, environment and
 workload recorded for each run. [Current capabilities](STATUS.md) describes the
 available workflows; this page records what has actually been checked.
 
@@ -29,6 +29,9 @@ snapshots; current implementation and qualification are recorded separately.
 
 | Latest evidence | Result | Scope |
 | --- | --- | --- |
+| Phala / Intel TDX with live account · 9 Nov | All 6 TDX checks passed; live Telegram collection; export verified | CVM `cvm_mjbvBdjM`; commit `427621d4`; session imported; self-attested tier |
+| drand checkpoint + verify · 9 Nov | `ASSURANCE: timestamped`; drand round 33818717 confirmed via Cloudflare relay | RunPod collector; `--check-drand`; checkpoint `not-before` lifts tier |
+| session.fingerprint in journal · 9 Nov | `auth_key_id` logged at `session.fingerprint` on observation start | Verifier can match session file after revocation |
 | Release audit · 6 Nov | 1,461 core tests passed; 37 platform skips | Source `92e539af40d8`; open findings retained |
 | Fresh exports · 6 Nov | 127.713 and 141.781 records/s, complete cycle | Two accounts per server; text and metadata through WARP |
 | Retained archives · 6 Nov | 48 archives; 3,598,381 records verified | Existing archives checked against pinned workspace keys |
@@ -48,9 +51,121 @@ snapshots; current implementation and qualification are recorded separately.
 - [Live Telegram test · 27 to 29 October 2026](#live-telegram-test--27-to-29-october-2026)
 - [Synthetic local capacity measurement](#synthetic-local-capacity-measurement)
 - [Full-text search on one million messages · 5 November 2026](#full-text-search-on-one-million-messages--5-november-2026)
+- [Phala Cloud with live Telegram account · 9 November 2026](#phala-cloud-with-live-telegram-account--9-november-2026)
+- [drand checkpoint anchoring and verify · 9 November 2026](#drand-checkpoint-anchoring-and-verify--9-november-2026)
 - [Qualification status](#qualification-status)
 
 </details>
+
+## Phala Cloud with live Telegram account · 9 November 2026
+
+A fresh Phala Cloud deployment (`phala-live-6`) ran commit `427621d4` with a live
+Telegram account. The collector imported an existing session (`key_origin: imported`)
+and observed three channels for approximately three minutes. The panel exported a
+password-protected ZIP archive; `tgwitness verify` confirmed its integrity.
+
+| Setup | Recorded value |
+| --- | --- |
+| Provider | Phala Cloud · `tdx.small` · US-WEST-1 |
+| CVM | `cvm_mjbvBdjM` · app `408d07581ad77680b4285b041f5924e52464437a` |
+| Commit | `427621d4740f267e834c5cf754bc1007d6d01750` · v0.9.1 |
+| Collector fingerprint | `fcdbda2d3d69b43937a4883102e579bbd51a5915a1c85baa4ce154417ec7dd0f` |
+| Intel collateral issued | 2026-11-09T20:40:09Z |
+| TCB level | 2025-08-13T00:00:00Z · status UpToDate |
+| dstack OS image | `dstack-0.5.12` · hash `8db40cb23008d6213668b5816702d100b37b859a8a5bfd18d938ae3a1b3715bd` |
+| Account | dedicated test account · key_origin `imported` |
+| Targets | three channels |
+| Journal events | 389 |
+| Export | Password-protected ZIP · 2.9 MB |
+| Report formats | HTML + JSON + PDF (certificate `TgWitness workspace fcdbda2d3d69b439`) |
+| source_tree_sha256 | `8c228874c7cfdd57ffac0184e5f0c12245ecaa0571e65ec84dee5ce08d0cbc6c` |
+
+**Intel TDX attestation — all 6 checks passed:**
+
+| Check | Result |
+| --- | --- |
+| Quote covers signed statement and challenge | PASS |
+| Intel vouches: genuine TDX, TCB UpToDate, v4 quote, not debug, not migratable | PASS |
+| RTMR3 measures the app-compose the collector reports | PASS |
+| Measured compose equals the deployed commit's compose byte for byte | PASS |
+| Quote comes from the deployed CVM with KMS keys and encrypted disk | PASS |
+| MRTD and RTMR0-2 equal values computed from the published dstack-0.5.12 image | PASS |
+
+**Verify output (excerpt):**
+
+```
+ASSURANCE: self_attested — only the collector's own key vouches for this record
+events: 389  files_checked: 35  sha256sums: 34
+Report seal verified: report.html, language en.
+JSON report seal verified: report.json.
+PDF signature and Ed25519 seal verified: report.pdf
+  certificate: TgWitness workspace fcdbda2d3d69b439
+SHA256SUMS matches the signed manifest.
+Chat channel-A: IDs 1-32, 8 not observed in 7 ranges
+Chat channel-B: IDs 1-210, 69 not observed in 35 ranges
+Chat channel-C: IDs 1-122, 2 not observed in 2 ranges
+```
+
+Assurance tier is `self_attested` because the session was imported (not created inside
+the TEE via QR login) and no external checkpoint was supplied. For `sealed` tier, QR
+login through the panel produces `key_origin: created`; the signing key is then generated
+inside the Intel TDX enclave and cannot be extracted. Supplying a retained checkpoint
+with `--checkpoint` adds the drand not-before time and raises the tier to `timestamped`.
+
+**Gap analysis summary:**
+
+| Chat | ID range | Observed | Missing | Ranges |
+| --- | --- | --- | --- | --- |
+| channel-B | 1–210 | 141 | 69 | 35 |
+| channel-A | 1–32 | 24 | 8 | 7 |
+| channel-C | 1–122 | 120 | 2 | 2 |
+
+Gaps are message IDs Telegram assigned that were never visible to this account.
+A gap records what the collector could not observe; attribution and cause are outside what the collector can determine.
+
+
+## drand checkpoint anchoring and verify · 9 November 2026
+
+A RunPod collector connected a dedicated test account.
+The checkpoint API returned a checkpoint signed with the collector key and embedding
+a live drand anchor from Cloudflare's relay. Verification with `--check-drand`
+confirmed the drand round against the network and raised the assurance tier to
+`timestamped`.
+
+| Item | Value |
+| --- | --- |
+| Collector | RunPod CPU instance · session imported · key_origin `imported` |
+| Journal events | 387 |
+| drand chain | `52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971` |
+| drand round in checkpoint | 33818717 · relay `https://drand.cloudflare.com` |
+| drand not-before | 2026-11-09T21:22:51Z |
+| session.fingerprint logged | `auth_key_id` logged at seq 18 |
+| coverage.gap logged | seq 28 · reason `updates delivered while observation was paused` |
+| Verify result | `ASSURANCE: timestamped` · drand not-before in `timestamped.detail` |
+
+**Verify output (excerpt):**
+
+```
+ASSURANCE: timestamped · not fresh · witness not anchored · not sealed
+"tier": "timestamped",
+"detail": "external timestamp covering the export head:
+           2026-11-09T21:40:06.000+00:00 (checkpoint drand not-before)"
+checkpoint_drand_anchor: { round: 33819014, relay: https://drand.cloudflare.com }
+events: 387  files_checked: 74  fingerprint: f304aa2afd49a5f0b7a064bfb01167151387797b4723ceeb90357458a8f35673
+```
+
+**Code changes verified in this run (pending merge):**
+
+| File | Change | Verified |
+| --- | --- | --- |
+| `tgwitness/evidence.py` | `checkpoint()` embeds `drand_anchor` from live Cloudflare relay | ✓ round 33818717 in checkpoint |
+| `tgwitness/verify.py` | `verify_checkpoint(check_drand=True)` confirms round against relay | ✓ raises error on mismatch |
+| `tgwitness/verify.py` | `assurance()` uses `checkpoint_drand_anchor` for `timestamped` tier | ✓ tier raised |
+| `tgwitness/verify.py` | `forgery_cost_section('self_attested')` cites drand binding | ✓ text in CLI output |
+| `tgwitness/collector.py` | `session.fingerprint` event logs `auth_key_id` on observation start | ✓ seq 18 in journal |
+| `tgwitness/store.py` | `session.*` added to `coverage` kind group | ✓ fingerprint visible in coverage |
+| `scripts/id_gap_analysis.py` | Standalone ID gap analysis tool for journal.sqlite3 | ✓ gap map on live data |
+
 
 ## Release audit and fresh exports · 6 November 2026
 
@@ -405,11 +520,26 @@ own `verify.py`.
 
 ## Qualification status
 
+The 9 November run added Phala Intel TDX deployment with a live Telegram account,
+drand checkpoint anchoring, session fingerprint logging, ID gap analysis, and
+verified export with HTML, JSON and PDF report seals.
+
 The retained live journal establishes real collection, edits, deletion notices, attachments,
 rechecks and rate-limit handling. Docker/Compose and installation checks are recorded in
 CI; the real Phala deployment and external timestamp verification are described above.
 Saved MTProto state and catch-up are implemented. The newer backfill commits messages and
 cursors atomically and preserves available Recent Actions, with synthetic coverage today.
+
+The following items remain unqualified:
+
+- **QR login inside the Phala TEE** (`key_origin: created`): the 9 November run imported
+  an existing session. QR login through the panel assigns the session key inside the
+  hardware enclave, satisfying the `sealed` assurance tier.
+- **Message lifecycle matrix** (send, edit, delete, reactions, membership): the 9 November
+  run collected channel history without exercising the write path. Steps 4–8 of the
+  [live acceptance](internal/LIVE_ACCEPTANCE.md) procedure remain unrun.
+- **Proxy and MTProxy paths**, **Bitcoin-anchored OTS seal**, **witness tier**, and
+  **external-key backup restore** were not tested in this run.
 
 Further controlled runs for role visibility, reaction actors, prolonged FloodWait,
 account bans, network and process interruption recovery, mobile QR confirmation,
