@@ -121,6 +121,17 @@ The version badge describes this source tree. Installable builds are listed unde
 
 ## A record someone else can check
 
+Check it without an account or an install. The published sample carries its own verifier:
+
+```sh
+curl -LO https://phishdestroy.github.io/TgWitness/demo/downloads/tgwitness-demo.zip
+unzip -o tgwitness-demo.zip verify.py        # the verifier ships inside the archive
+python verify.py tgwitness-demo.zip          # Python 3.11+, needs only `cryptography`
+```
+
+It prints the signed records, the head hash and the signer fingerprint and exits `0`.
+The sample is fictional; the same verifier runs on any real export.
+
 An export carries the messages, files and the verifier. Send the recipient your
 key fingerprint through another channel and they can check it themselves:
 
