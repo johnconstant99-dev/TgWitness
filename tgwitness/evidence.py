@@ -6,6 +6,7 @@ import json
 import os
 import re
 import tempfile
+import urllib.request
 import uuid
 import zipfile
 from pathlib import Path
@@ -73,6 +74,25 @@ def checkout_commit(root):
     return None
 
 
+DRAND_CHAIN = "52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971"
+DRAND_RELAYS = ("https://drand.cloudflare.com", "https://api.drand.sh", "https://api2.drand.sh")
+
+
+def _fetch_drand_anchor():
+    for relay in DRAND_RELAYS:
+        try:
+            url = f"{relay}/{DRAND_CHAIN}/public/latest"
+            req = urllib.request.Request(url, headers={"User-Agent": "TgWitness"})
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                data = json.loads(resp.read())
+            if isinstance(data.get("round"), int) and isinstance(data.get("randomness"), str):
+                return {"round": data["round"], "randomness": data["randomness"],
+                        "chain": DRAND_CHAIN, "relay": relay}
+        except Exception:
+            continue
+    return None
+
+
 def checkpoint(store, vault):
     from . import board
     with store.snapshot() as snapshot:
@@ -83,6 +103,9 @@ def checkpoint(store, vault):
         annotations = board.head(snapshot.connection)
         if annotations["seq"]:
             statement["annotations_head"] = annotations
+    drand = _fetch_drand_anchor()
+    if drand:
+        statement["drand_anchor"] = drand
     return {"statement": statement, "signature": vault.sign(canonical(statement)),
             "fingerprint": fingerprint(vault.public_key)}
 

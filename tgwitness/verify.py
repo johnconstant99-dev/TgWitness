@@ -1,4 +1,4 @@
-# TgWitness verifier sources SHA-256: 76209b4cd5d9252782a9f316e787247253d8837ef2654b9fd98d3b9baaeb8762
+# TgWitness verifier sources SHA-256: 8b9013d3b6cb89ea81b58eab124aef4cc3d4935dc9da1907b1ad32520cd195fc
 """Standalone verifier"""
 import argparse
 import base64
@@ -1641,7 +1641,7 @@ def media_reference(event):
     return digest, size
 
 
-def verify_checkpoint(checkpoint, public_key, event_count, hash_at):
+def verify_checkpoint(checkpoint, public_key, event_count, hash_at, check_drand=False):
     statement = checkpoint["statement"]
     if not is_format(statement["format"], "checkpoint-v1") or statement["public_key"] != public_key:
         raise ValueError("Checkpoint format or signing key mismatch")
@@ -1653,6 +1653,17 @@ def verify_checkpoint(checkpoint, public_key, event_count, hash_at):
         raise ValueError("Journal is shorter than the retained checkpoint")
     if hash_at(statement["event_count"]) != statement["head_hash"]:
         raise ValueError("Journal disagrees with the retained checkpoint")
+    anchor = statement.get("drand_anchor")
+    if check_drand and anchor and isinstance(anchor.get("round"), int) and isinstance(anchor.get("randomness"), str):
+        try:
+            confirmed = confirm_drand([{"round": anchor["round"], "randomness": anchor["randomness"],
+                                        "seq": statement["event_count"]}])
+        except ValueError as exc:
+            raise ValueError("Checkpoint drand anchor: " + str(exc)) from exc
+        if confirmed["confirmed"] == 0:
+            raise ValueError("Checkpoint drand anchor round " + str(anchor["round"])
+                             + " could not be confirmed against any drand relay")
+    return anchor if anchor else None
 
 
 def read_sealed(stream):
@@ -2411,8 +2422,11 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
                         return event["hash"]
             return None
         if checkpoint:
-            verify_checkpoint(checkpoint, public, result["events"], hash_at)
+            checkpoint_anchor = verify_checkpoint(checkpoint, public, result["events"], hash_at,
+                                                  check_drand=check_drand)
             result["checkpoint_event_count"] = checkpoint["statement"]["event_count"]
+            if checkpoint_anchor:
+                result["checkpoint_drand_anchor"] = checkpoint_anchor
         result["anchors"] = verify_anchors(archive, names, public, result["events"], hash_at, tsa_ca, check_bitcoin)
         result["board"] = verify_board(archive, manifest, checkpoint)
         result["key_pinned"] = bool(expected_fingerprint)
@@ -4010,6 +4024,12 @@ def assurance(result):
         a.get("kind") == "opentimestamps" and a.get("status") == "confirmed")]
     times = [a["time"] for a in stamps]
     times += [witness[name] for name in ("head_bitcoin_block_time", "head_telegram_post_time") if witness.get(name)]
+    cp_anchor = result.get("checkpoint_drand_anchor")
+    if cp_anchor and isinstance(cp_anchor.get("round"), int) and result.get("checkpoint_checked"):
+        try:
+            times.append(drand_time(cp_anchor["round"]) + " (checkpoint drand not-before)")
+        except Exception:
+            pass
     independent = bool(witness.get("witness_key_pinned") and witness.get("export_head_witnessed")
                        and witness.get("witness_fingerprint") != result.get("fingerprint"))
     days = witness.get("days", result.get("days", []))

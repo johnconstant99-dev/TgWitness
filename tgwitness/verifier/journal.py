@@ -66,8 +66,9 @@ def media_reference(event):
     return digest, size
 
 
-def verify_checkpoint(checkpoint, public_key, event_count, hash_at):
+def verify_checkpoint(checkpoint, public_key, event_count, hash_at, check_drand=False):
     from .chain import canonical, is_format
+    from .outside import confirm_drand
     statement = checkpoint["statement"]
     if not is_format(statement["format"], "checkpoint-v1") or statement["public_key"] != public_key:
         raise ValueError("Checkpoint format or signing key mismatch")
@@ -79,5 +80,16 @@ def verify_checkpoint(checkpoint, public_key, event_count, hash_at):
         raise ValueError("Journal is shorter than the retained checkpoint")
     if hash_at(statement["event_count"]) != statement["head_hash"]:
         raise ValueError("Journal disagrees with the retained checkpoint")
+    anchor = statement.get("drand_anchor")
+    if check_drand and anchor and isinstance(anchor.get("round"), int) and isinstance(anchor.get("randomness"), str):
+        try:
+            confirmed = confirm_drand([{"round": anchor["round"], "randomness": anchor["randomness"],
+                                        "seq": statement["event_count"]}])
+        except ValueError as exc:
+            raise ValueError("Checkpoint drand anchor: " + str(exc)) from exc
+        if confirmed["confirmed"] == 0:
+            raise ValueError("Checkpoint drand anchor round " + str(anchor["round"])
+                             + " could not be confirmed against any drand relay")
+    return anchor if anchor else None
 
 

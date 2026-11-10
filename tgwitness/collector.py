@@ -3,6 +3,7 @@ import base64
 import hashlib
 import json
 import logging
+import re
 import shutil
 import time
 import secrets
@@ -77,8 +78,14 @@ class UnreadableHistory(ValueError):
 
 
 SESSIONS_EVERY = 15 * 60
+SECURITY_LOG_EVERY = 60
+SECURITY_LOG_USER = 777000
 SESSIONS_MEANING = ("Signed-in sessions of this account as Telegram lists them. 'current' is this workspace's session; "
                     "its address is stored as a SHA-256 digest with Telegram's country and region.")
+SESSION_REVOKED_EXTERNALLY_MEANING = (
+    "Telegram's session list no longer shows this workspace as the current session. "
+    "auth.resetAuthorizations removes all other sessions from Telegram's list instantly "
+    "while the existing TCP connection continues to work until the next reconnect.")
 
 
 def sessions_snapshot(authorizations):
@@ -436,6 +443,9 @@ class Collector:
         self.foreground = 0
         self.key_locks = {}
         self.sessions_checked_at = -SESSIONS_EVERY
+        self.security_log_checked_at = -SECURITY_LOG_EVERY
+        self.security_log_last_id = 0
+        self.pending_login_method = None
         self.people = {}
         self.profile_requests = {}
         self.avatar_lock = asyncio.Lock()
@@ -1618,6 +1628,7 @@ class Collector:
             self.pending_account_id = expected_user_id
 
             self.pending_key_origin = "imported" if session else "created"
+            self.pending_login_method = "session_import" if session else None
             try:
                 await self.connect_client(candidate)
                 is_authorized = await candidate.is_user_authorized()
@@ -1648,6 +1659,7 @@ class Collector:
             raise
 
     async def start_qr(self, api_id=None, api_hash=None, client_profile=None, languages=None):
+        self.pending_login_method = "qr"
         async def attempt(pair_id, pair_hash):
             await self.connect_login(pair_id, pair_hash, client_profile=client_profile, languages=languages)
             return await self.login_client.qr_login()
@@ -1719,6 +1731,7 @@ class Collector:
     async def confirm_code(self, code):
         if not self.pending_phone or not self.phone_hash:
             raise ValueError("Request a login code first.")
+        self.pending_login_method = "phone_code"
         try:
             await self.login_client.sign_in(self.pending_phone, code, phone_code_hash=self.phone_hash)
         except SessionPasswordNeededError:
@@ -1766,10 +1779,24 @@ class Collector:
                 self.store.set_setting("account", {"id": me.id, "username": me.username,
                                                    "key_origin": self.pending_key_origin})
                 self.store.set_setting("account_loss", None)
+                login_method = self.pending_login_method or ("session_import" if self.pending_key_origin == "imported" else None)
                 self.store.append("account.authorized", {"account_id": me.id, "key_origin": self.pending_key_origin,
                                                          "client": self.client_identity(candidate),
+                                                         **({"login_method": login_method} if login_method else {}),
                                                          **({"session_origin": credentials["session_origin"]}
                                                             if credentials.get("session_origin") else {})})
+                self.pending_login_method = None
+                try:
+                    raw_key = getattr(getattr(getattr(candidate, "session", None), "auth_key", None), "key", None)
+                    if raw_key:
+                        key_id = hashlib.sha1(raw_key).digest()[-8:].hex()
+                        self.store.append("session.fingerprint", {
+                            "auth_key_id": key_id,
+                            "meaning": ("Fingerprint of the MTProto auth_key (last 8 bytes of SHA-1). "
+                                        "After session revocation, verify sha1(auth_key)[-8:] == " + key_id),
+                        })
+                except Exception:
+                    pass
             pending = self.vault.read("independent_login")
             if pending and session_key(pending.get("session")) == session_key(credentials["session"]):
                 self.vault.save("independent_login", {})
@@ -2005,10 +2032,21 @@ class Collector:
         await asyncio.sleep(0)
         try:
             result = await asyncio.wait_for(client(functions.account.GetAuthorizationsRequest()), 30)
+        except AUTHORIZATION_ERRORS:
+            previous = self.store.get_setting("sessions_seen", None)
+            if previous and previous.get("current") is not None:
+                self.store.set_setting("sessions_seen", {**previous, "current": None})
+                self.store.append("coverage.gap", {
+                    "reason": "session_revoked_externally",
+                    "meaning": SESSION_REVOKED_EXTERNALLY_MEANING,
+                    "completeness": "records after this point were captured on a ghost session"})
+            return None
         except Exception:
             return None
         snapshot = sessions_snapshot(result.authorizations)
         previous = self.store.get_setting("sessions_seen", None)
+        had_current = previous is not None and previous.get("current") is not None
+        lost_current = had_current and snapshot["current"] is None
         if previous != snapshot:
             known = {s["hash"] for s in (previous or {}).get("others", [])}
             now = {s["hash"] for s in snapshot["others"]}
@@ -2016,7 +2054,100 @@ class Collector:
             self.store.append("account.sessions", {
                 **snapshot, "added": sorted(now - known) if previous else None,
                 "removed": sorted(known - now) if previous else None, "meaning": SESSIONS_MEANING})
+        if lost_current:
+            self.store.append("coverage.gap", {
+                "reason": "session_revoked_externally",
+                "meaning": SESSION_REVOKED_EXTERNALLY_MEANING,
+                "completeness": "records after this point were captured on a ghost session"})
         return snapshot
+
+    async def poll_security_log(self):
+        client = self.client
+        if not client or not client.is_connected():
+            return
+        try:
+            messages = await asyncio.wait_for(
+                client.get_messages(SECURITY_LOG_USER, limit=20, min_id=self.security_log_last_id), 15)
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            return
+        new_messages = [m for m in (messages or []) if getattr(m, "id", 0) > self.security_log_last_id
+                        and getattr(m, "message", None)]
+        if not new_messages:
+            return
+        self.security_log_last_id = max(m.id for m in new_messages)
+        for m in sorted(new_messages, key=lambda x: x.id):
+            text = m.message or ""
+            kind = ("login_code" if "Login code:" in text else
+                    "new_login" if "logged in" in text.lower() or "new login" in text.lower() else
+                    "2fa_changed" if "Two-Step Verification" in text else
+                    "oauth_login" if "via @" in text or "logged in on" in text.lower() else
+                    "security_notice")
+            if kind == "login_code":
+                text = re.sub(r"\b\d{5,6}\b", "•••••", text)
+            self.store.append("account.security_event", {
+                "source": "telegram_777000", "event_kind": kind,
+                "message_id": m.id, "sent_at": date_string(m.date), "text": text,
+                "meaning": ("Security notice from Telegram (user 777000). "
+                            "login_code: an SMS code was requested for this account. "
+                            "new_login: a new session was authorized. "
+                            "2fa_changed: two-step verification was changed.")})
+
+    async def _snapshot_session_state(self, trigger):
+        client = self.client
+        if not client or not client.is_connected():
+            return
+        try:
+            snapshot = await self.check_sessions(client)
+            account = self.store.get_setting("account", {}) or {}
+            key_origin = account.get("key_origin", "unknown")
+            if key_origin == "imported" and trigger == "observation_start":
+                self.store.append("session.import_warning", {
+                    "trigger": trigger,
+                    "key_origin": key_origin,
+                    "login_method": account.get("login_method"),
+                    "sessions_at_start": snapshot,
+                    "meaning": ("This session was imported. Its auth_key may have been active "
+                                "on other devices before this observation started.")})
+            if snapshot and trigger == "observation_start":
+                others = snapshot.get("others", [])
+                if others:
+                    self.store.append("coverage.gap", {
+                        "reason": "concurrent_sessions_at_start",
+                        "concurrent_sessions": len(others),
+                        "sessions": others,
+                        "meaning": ("%d other session(s) were active in this account when observation began. "
+                                    "These sessions had access to the same account and may have received "
+                                    "push updates (GetDifference) instead of this TgWitness session." % len(others)),
+                        "completeness": "unknown; other sessions may have received updates not visible here"})
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            pass
+        try:
+            raw_key = getattr(getattr(getattr(client, "session", None), "auth_key", None), "key", None)
+            if raw_key:
+                key_id = hashlib.sha1(raw_key).digest()[-8:].hex()
+                self.store.append("session.fingerprint", {
+                    "trigger": trigger,
+                    "auth_key_id": key_id,
+                    "meaning": ("Fingerprint of the MTProto auth_key (last 8 bytes of SHA-1). "
+                                "After session revocation, verify sha1(auth_key)[-8:] == " + key_id)})
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            pass
+        try:
+            await self.poll_security_log()
+            self.store.append("session.security_baseline", {
+                "trigger": trigger,
+                "last_security_event_id": self.security_log_last_id,
+                "meaning": "Security log (Telegram 777000) polled at this point."})
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            pass
 
     async def account_sessions(self):
         await self.restore()
@@ -2049,6 +2180,22 @@ class Collector:
         await self.check_sessions()
         return {"ended": True}
 
+    async def terminate_all_other_sessions(self):
+        await self.restore()
+        snapshot_before = await self.check_sessions()
+        others_before = len((snapshot_before or {}).get("others", []))
+        try:
+            await asyncio.wait_for(self.client(functions.auth.ResetAuthorizationsRequest()), 30)
+        except FreshResetAuthorisationForbiddenError:
+            raise ValueError("Telegram lets a session terminate all others only after it has been signed in for "
+                             "24 hours.") from None
+        snapshot_after = await self.check_sessions()
+        others_after = len((snapshot_after or {}).get("others", []))
+        self.store.append("account.all_other_sessions_terminated", {
+            "sessions_before": others_before, "sessions_after": others_after,
+            "initiated_by": "this workspace"})
+        return {"terminated": others_before, "remaining_others": others_after}
+
     async def change_password(self, current_password, new_password, hint=""):
         await self.restore()
         try:
@@ -2056,10 +2203,12 @@ class Collector:
                                        hint=hint or "")
         except PasswordHashInvalidError:
             raise ValueError("The current two-step password is wrong.") from None
+        had = bool(current_password)
+        operation = "enabled" if not had and new_password else "disabled" if had and not new_password else "changed"
         self.store.append("account.password_changed", {
-            "had_password": bool(current_password), "hint_set": bool(hint),
-            "meaning": "The two-step password was set or changed from this workspace; it is not stored here."})
-        return {"changed": True}
+            "operation": operation, "had_password": had, "hint_set": bool(hint),
+            "initiated_by": "this workspace"})
+        return {"changed": True, "operation": operation}
 
     async def signed_in_devices(self):
         if not (self.running and self.client and self.client.is_connected()):
@@ -2208,7 +2357,7 @@ class Collector:
 
     async def prepare_start(self):
         await self.restore()
-
+        await self._snapshot_session_state("observation_start")
         await self.dialogs()
         await self.apply_scope(refresh=False)
         self.source_status, overview = {}, self.store.chat_overview()
@@ -2264,6 +2413,8 @@ class Collector:
         if not shutdown:
             self.store.set_setting("resume", False)
         if active:
+            with suppress(Exception):
+                await self._snapshot_session_state("observation_stop")
             self.store.append("observation.stopped", {"reason": "shutdown" if shutdown else "operator",
                                                     "media_jobs_preserved": self.store.media_stats()})
             retain_checkpoint(self.store, self.vault)
@@ -2328,6 +2479,9 @@ class Collector:
                 retain_checkpoint(self.store, self.vault)
             if self.running and self.client.is_connected():
                 await self.watch_updates()
+                if now - self.security_log_checked_at >= SECURITY_LOG_EVERY:
+                    self.security_log_checked_at = now
+                    await self.poll_security_log()
             await asyncio.sleep(min(10, interval))
 
     async def note_drop(self):
@@ -2731,6 +2885,8 @@ class Collector:
                         "user_id": update.user_id, "raw": plain(update),
                         "visibility": "only participant updates delivered to this account",
                     }, chat_id, actor_id=update.actor_id, source_at=date_string(update.date))
+            elif hasattr(types, "UpdatePhoneCall") and isinstance(update, types.UpdatePhoneCall):
+                self.store.append("account.phone_call", {"raw": plain(update)})
         except Exception as exc:
             await self.failure(exc, "raw.update", client=client)
 

@@ -53,6 +53,7 @@ snapshots; current implementation and qualification are recorded separately.
 - [Full-text search on one million messages · 5 November 2026](#full-text-search-on-one-million-messages--5-november-2026)
 - [Phala Cloud with live Telegram account · 9 November 2026](#phala-cloud-with-live-telegram-account--9-november-2026)
 - [drand checkpoint anchoring and verify · 9 November 2026](#drand-checkpoint-anchoring-and-verify--9-november-2026)
+- [Parallel session and session integrity tests · 9 November 2026](#parallel-session-and-session-integrity-tests--9-november-2026)
 - [Qualification status](#qualification-status)
 
 </details>
@@ -154,17 +155,15 @@ checkpoint_drand_anchor: { round: 33819014, relay: https://drand.cloudflare.com 
 events: 387  files_checked: 74  fingerprint: f304aa2afd49a5f0b7a064bfb01167151387797b4723ceeb90357458a8f35673
 ```
 
-**Code changes verified in this run (pending merge):**
+**Code changes verified in this run:**
 
 | File | Change | Verified |
 | --- | --- | --- |
 | `tgwitness/evidence.py` | `checkpoint()` embeds `drand_anchor` from live Cloudflare relay | ✓ round 33818717 in checkpoint |
 | `tgwitness/verify.py` | `verify_checkpoint(check_drand=True)` confirms round against relay | ✓ raises error on mismatch |
 | `tgwitness/verify.py` | `assurance()` uses `checkpoint_drand_anchor` for `timestamped` tier | ✓ tier raised |
-| `tgwitness/verify.py` | `forgery_cost_section('self_attested')` cites drand binding | ✓ text in CLI output |
 | `tgwitness/collector.py` | `session.fingerprint` event logs `auth_key_id` on observation start | ✓ seq 18 in journal |
 | `tgwitness/store.py` | `session.*` added to `coverage` kind group | ✓ fingerprint visible in coverage |
-| `scripts/id_gap_analysis.py` | Standalone ID gap analysis tool for journal.sqlite3 | ✓ gap map on live data |
 
 
 ## Release audit and fresh exports · 6 November 2026
@@ -515,6 +514,19 @@ search. Full results, hardware and limits: [Full-text search](SEARCH.md#benchmar
 Private compatibility tests also verify a frozen signed archive made before full-text
 search with the current verifier, and a current archive with the frozen archive's
 own `verify.py`.
+
+## Parallel session and session integrity tests · 9 November 2026
+
+Telethon clients on a RunPod Linux pod, dedicated test accounts, several clients
+sharing one session.
+
+| Test | Result |
+| --- | --- |
+| History reads with two and three clients on one session | Every client read all messages: 10/10 and 15/15 |
+| `auth.resetAuthorizations` while an observer is connected | Session left Telegram's list in 0.23 s; the observer's open connection kept working for over 60 s and completed 36 history requests |
+| Enable, change and disable 2FA while an observer is connected | Observer kept working through the 10 s observed; Telegram 777000 posted each change |
+| `auth.resetAuthorizations` from a session under 24 hours old | Rejected with `FreshResetAuthorisationForbiddenError` |
+| Message to own Saved Messages as a push probe | 0 of 22 delivered as push; the probe was dropped |
 
 <a name="remaining-qualification"></a>
 

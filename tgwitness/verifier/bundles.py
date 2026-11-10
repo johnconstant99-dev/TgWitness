@@ -118,8 +118,11 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
                         return event["hash"]
             return None
         if checkpoint:
-            verify_checkpoint(checkpoint, public, result["events"], hash_at)
+            checkpoint_anchor = verify_checkpoint(checkpoint, public, result["events"], hash_at,
+                                                  check_drand=check_drand)
             result["checkpoint_event_count"] = checkpoint["statement"]["event_count"]
+            if checkpoint_anchor:
+                result["checkpoint_drand_anchor"] = checkpoint_anchor
         result["anchors"] = verify_anchors(archive, names, public, result["events"], hash_at, tsa_ca, check_bitcoin)
         result["board"] = verify_board(archive, manifest, checkpoint)
         result["key_pinned"] = bool(expected_fingerprint)

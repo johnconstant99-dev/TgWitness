@@ -440,6 +440,13 @@ def assurance(result):
         a.get("kind") == "opentimestamps" and a.get("status") == "confirmed")]
     times = [a["time"] for a in stamps]
     times += [witness[name] for name in ("head_bitcoin_block_time", "head_telegram_post_time") if witness.get(name)]
+    cp_anchor = result.get("checkpoint_drand_anchor")
+    if cp_anchor and isinstance(cp_anchor.get("round"), int) and result.get("checkpoint_checked"):
+        try:
+            from .outside import drand_time
+            times.append(drand_time(cp_anchor["round"]) + " (checkpoint drand not-before)")
+        except Exception:
+            pass
     independent = bool(witness.get("witness_key_pinned") and witness.get("export_head_witnessed")
                        and witness.get("witness_fingerprint") != result.get("fingerprint"))
     days = witness.get("days", result.get("days", []))

@@ -27,7 +27,7 @@ JOURNAL_KIND_GROUPS = {"membership": ("membership.",), "media": ("media.",), "ac
     "messages": ("message.new", "message.snapshot", "message.recovered"),
     "coverage": ("coverage.", "connection.", "collector.", "process.", "observation.", "snapshot.", "target.",
                  "capture.", "monitoring.", "source.", "scope.", "telegram.", "clock.", "media.failed",
-                 "media.retry", "media.recovered", "deletion.unscoped")}
+                 "media.retry", "media.recovered", "deletion.unscoped", "session.",)}
 
 def utcnow():
     return datetime.now(timezone.utc).isoformat(timespec="milliseconds")
