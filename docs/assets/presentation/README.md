@@ -22,6 +22,7 @@ README, Wiki and documentation artwork. Screenshots use demo records.
 | `casework-chain*`, `casework-checkpoint*`, `evidence-*` | Evidence diagrams |
 | `casework-assurance*` | Local, audited VM and Phala / Intel TDX deployment checks |
 | `readme-services*`, `readme-card-*` | Alerts and encrypted S3 copies |
+| `readme-gdpr-price*`, `chapter-case.svg` | Case file banner in the README and on the case review |
 | `readme-handbook*`, `wiki-*` | Handbook routes and chapter covers |
 | `identity-meta-*` | Version, languages, test and licence badges |
 | `folder-*`, `readme-button-*`, `*divider*` | Folder headers, links and separators |
