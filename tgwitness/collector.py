@@ -1783,6 +1783,9 @@ class Collector:
                 self.store.append("account.authorized", {"account_id": me.id, "key_origin": self.pending_key_origin,
                                                          "client": self.client_identity(candidate),
                                                          **({"login_method": login_method} if login_method else {}),
+                                                         "meaning": ("Session key created by signing in from this workspace."
+                                                                     if self.pending_key_origin == "created" else
+                                                                     "Session key existed before this workspace imported it."),
                                                          **({"session_origin": credentials["session_origin"]}
                                                             if credentials.get("session_origin") else {})})
                 self.pending_login_method = None
@@ -2886,7 +2889,11 @@ class Collector:
                         "visibility": "only participant updates delivered to this account",
                     }, chat_id, actor_id=update.actor_id, source_at=date_string(update.date))
             elif hasattr(types, "UpdatePhoneCall") and isinstance(update, types.UpdatePhoneCall):
-                self.store.append("account.phone_call", {"raw": plain(update)})
+                call = update.phone_call
+                self.store.append("account.phone_call", {
+                    "call_type": type(call).__name__, "call_id": getattr(call, "id", None),
+                    "admin_id": getattr(call, "admin_id", None), "participant_id": getattr(call, "participant_id", None),
+                    "raw": plain(update), "meaning": "Telegram delivered a phone call update to this session."})
         except Exception as exc:
             await self.failure(exc, "raw.update", client=client)
 
