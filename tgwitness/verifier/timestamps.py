@@ -4,6 +4,8 @@ from .common import (
     OTS_BITCOIN,
     OTS_MAGIC,
     OTS_PENDING,
+    Path,
+    UnsupportedAlgorithm,
     VerifierTooOld,
     authenticate_statement,
     base64,
@@ -13,6 +15,7 @@ from .common import (
     hashes,
     hashlib,
     json,
+    ocsp,
     os,
     padding,
     re,
@@ -544,6 +547,136 @@ def qualified_timestamp(reply):
     return {}
 
 
+def stamp_time(value):
+    return value.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def revocation_subject(reply, extra=()):
+    token = timestamp_token(reply)
+    _, _, start, end = token["signer"]
+    items = children(reply, start, end)
+    if len(items) < 6 or items[3][0] != 0xA0:
+        raise ValueError("The timestamp signer has no signed attributes")
+    algorithm, named, _ = signing_certificate_hash(reply, signed_attributes(reply, items[3][2], items[3][3]))
+    loaded, signer = {}, None
+    for data in token["certificates"]:
+        loaded[data] = x509.load_der_x509_certificate(data)
+    for data in loaded:
+        hasher = hashes.Hash(algorithm())
+        hasher.update(data)
+        if hasher.finalize() == named:
+            signer = loaded[data]
+    certificates = list(loaded.values())
+    if signer is None:
+        raise ValueError("The reply does not carry the certificate the signature names")
+    for candidate in certificates + list(extra):
+        if candidate.subject != signer.issuer:
+            continue
+        try:
+            signer.verify_directly_issued_by(candidate)
+        except (ValueError, TypeError, InvalidSignature):
+            continue
+        return {"signer": signer, "issuer": candidate, "time": tst_info(token["tst"])["time"]}
+    raise ValueError("The issuer of the signing certificate is neither in the reply nor in the given root file")
+
+
+def ocsp_responder(response, issuer):
+    for candidate in [issuer] + list(response.certificates):
+        if response.responder_name is not None:
+            named = candidate.subject == response.responder_name
+        else:
+            named = x509.SubjectKeyIdentifier.from_public_key(candidate.public_key()).digest == response.responder_key_hash
+        if not named:
+            continue
+        if candidate.fingerprint(hashes.SHA256()) != issuer.fingerprint(hashes.SHA256()):
+            try:
+                candidate.verify_directly_issued_by(issuer)
+                usage = candidate.extensions.get_extension_for_class(x509.ExtendedKeyUsage).value
+            except (ValueError, TypeError, InvalidSignature, x509.ExtensionNotFound):
+                continue
+            if (x509.oid.ExtendedKeyUsageOID.OCSP_SIGNING not in usage
+                    or not candidate.not_valid_before_utc <= response.produced_at_utc <= candidate.not_valid_after_utc):
+                continue
+        key = candidate.public_key()
+        try:
+            if isinstance(key, rsa.RSAPublicKey):
+                key.verify(response.signature, response.tbs_response_bytes, padding.PKCS1v15(),
+                           response.signature_hash_algorithm)
+            elif isinstance(key, ec.EllipticCurvePublicKey):
+                key.verify(response.signature, response.tbs_response_bytes, ec.ECDSA(response.signature_hash_algorithm))
+            else:
+                continue
+        except InvalidSignature:
+            continue
+        return candidate
+    raise ValueError("The OCSP response is not signed by the issuer or by a responder it authorised for OCSP signing")
+
+
+def revocation_status(kind, data, subject):
+    signer, issuer, when, source = subject["signer"], subject["issuer"], subject["time"], kind.upper()
+    if kind == "ocsp":
+        response = ocsp.load_der_ocsp_response(data)
+        if response.response_status != ocsp.OCSPResponseStatus.SUCCESSFUL:
+            raise ValueError("The OCSP responder answered " + response.response_status.name)
+        found = None
+        for single in response.responses:
+            query = ocsp.OCSPRequestBuilder().add_certificate(signer, issuer, single.hash_algorithm).build()
+            if (single.serial_number, single.issuer_name_hash, single.issuer_key_hash) == (
+                    query.serial_number, query.issuer_name_hash, query.issuer_key_hash):
+                found = single
+        if found is None:
+            raise ValueError("The OCSP response does not name this signing certificate")
+        ocsp_responder(response, issuer)
+        if found.certificate_status == ocsp.OCSPCertStatus.UNKNOWN:
+            raise ValueError("The OCSP responder does not know this signing certificate")
+        revoked = found.revocation_time_utc if found.certificate_status == ocsp.OCSPCertStatus.REVOKED else None
+        reason, issued, until = found.revocation_reason, found.this_update_utc, found.next_update_utc
+    elif kind == "crl":
+        try:
+            crl = x509.load_der_x509_crl(data)
+        except ValueError:
+            crl = x509.load_pem_x509_crl(data)
+        if crl.issuer != issuer.subject or not crl.is_signature_valid(issuer.public_key()):
+            raise ValueError("The CRL is not signed by the issuer of the signing certificate")
+        entry = crl.get_revoked_certificate_by_serial_number(signer.serial_number)
+        revoked = entry.revocation_date_utc if entry else None
+        reason = next((e.value.reason for e in entry.extensions if isinstance(e.value, x509.CRLReason)), None) if entry else None
+        issued, until = crl.last_update_utc, crl.next_update_utc
+    else:
+        raise ValueError("Unknown revocation evidence: " + kind)
+    if revoked is not None:
+        compromised = reason in (x509.ReasonFlags.key_compromise, x509.ReasonFlags.ca_compromise)
+        state = "revoked" if revoked <= when or compromised else "revoked_after"
+        return {"status": state, "source": source, "revoked_at": stamp_time(revoked),
+                "reason": reason.value if reason else None,
+                "detail": "signing certificate revoked at " + stamp_time(revoked)
+                          + (", before" if revoked <= when else ", after") + " the time stamp"
+                          + (", for key compromise" if compromised else "") + " (" + source + ")"}
+    if issued < when and (until is None or until < when):
+        raise ValueError("The " + source + " answer of " + stamp_time(issued) + " expired before the stamped time")
+    if issued > signer.not_valid_after_utc:
+        raise ValueError("The " + source + " answer was issued after the signing certificate expired")
+    return {"status": "good", "source": source, "as_of": stamp_time(issued),
+            "detail": "signing certificate not revoked as of " + stamp_time(issued) + " (" + source + ")"}
+
+
+def timestamp_revocation(archive, names, base, reply, tsa_ca=None):
+    found = [kind for kind in ("ocsp", "crl") if base + "." + kind in names]
+    if not found:
+        return {"status": "not checked", "detail": "revocation not checked (no OCSP/CRL in the archive)"}
+    try:
+        extra = x509.load_pem_x509_certificates(Path(tsa_ca).read_bytes()) if tsa_ca else []
+    except (OSError, ValueError):
+        extra = []
+    problems = []
+    for kind in found:
+        try:
+            return revocation_status(kind, read_member(archive, base + "." + kind), revocation_subject(reply, extra))
+        except (ValueError, TypeError, IndexError, InvalidSignature, UnsupportedAlgorithm) as exc:
+            problems.append(kind.upper() + ": " + str(exc))
+    return {"status": "failed", "error": "; ".join(problems), "detail": "revocation check failed: " + "; ".join(problems)}
+
+
 def verify_anchors(archive, names, public_key, event_count, hash_at, tsa_ca=None, check_bitcoin=False):
     from .journal import verify_checkpoint
     results = []
@@ -570,6 +703,10 @@ def verify_anchors(archive, names, public_key, event_count, hash_at, tsa_ca=None
                     entry.update(timestamp_certificate_reference(reply))
                 except (ValueError, IndexError, TypeError):
                     entry["certificate_reference"] = "unavailable"
+                entry["revocation"] = timestamp_revocation(archive, names, proof_name[:-4], reply, tsa_ca)
+                if entry["revocation"]["status"] == "revoked":
+                    raise ValueError("The " + service + " timestamp is invalid: its " + entry["revocation"]["detail"]
+                                     + ("; reason " + entry["revocation"]["reason"] if entry["revocation"]["reason"] else ""))
             elif proof_name.endswith(".ots"):
                 proof = read_member(archive, proof_name)
                 entry.update(kind="opentimestamps", **(confirm_ots(proof, digest) if check_bitcoin else ots_summary(proof, digest)))

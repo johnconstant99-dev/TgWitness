@@ -1,18 +1,26 @@
+import base64
 import bisect
 import csv
 import hashlib
 import io
 import json
+import os
 import re
+import shutil
 import unicodedata
 import uuid
 import zipfile
+from contextlib import suppress
 from datetime import datetime, timezone
 from pathlib import Path
 
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+
 from . import indicators, pdf_report, people, report, verification_kit
 from .evidence import producer, report_entry, write_indicators, write_pdf, write_viewer
+from .media_jobs import forget_files
 from .message_selection import Selection
+from .security import private_write
 from .store import canonical, utcnow
 from .verify import fingerprint, message_id_summary
 
@@ -39,6 +47,25 @@ NAMES_MEANING = ("Sender names as the journal of this workspace recorded them: d
                  "received live, otherwise the last name recorded before the message was sent. Messages not listed show "
                  "the name at export: from in chat.json, with its source in from_source.")
 MAX_BUNDLE_BYTES = 4 * 1024**3
+PARTIAL_FORMAT = "tgwitness-chat-partial-v1"
+CHECKPOINT_MESSAGES = 5000
+HISTORY_FILE = re.compile(r"history-[A-Za-z0-9_-]{1,64}\.jsonl")
+FILE_FIELDS = ("file", "file_sha256", "file_size", "file_kind", "file_status", "file_error", "server_hashes",
+               "file_hash_sha256", "file_reused")
+PARTIAL_MEANING = ("Messages read before this export stopped. They stay in the workspace under a statement signed with "
+                   "the collector key; the next export of this chat by the same account checks them and continues.")
+SET_ASIDE_MEANING = ("Messages kept from an earlier stopped export could not be continued and were moved aside unchanged; "
+                     "this export starts from the newest message.")
+PARTIAL_SCOPE = ("Only messages numbered {low}-{high} were read before the export stopped. Numbers outside that range "
+                 "were not read, so their absence says nothing about deletion.")
+SESSIONS_LIMIT = ("This export continued an earlier stopped export of the same chat by the same account; "
+                  "acquisition.sessions lists each session. Messages kept from an earlier session show the version "
+                  "Telegram returned during that session.")
+PARTIAL_LIMIT = ("This export stopped before it finished and holds only the messages read until then; partial names "
+                 "the range read and the reason it stopped.")
+REUSED_MEANING = ("file_reused marks an attachment whose bytes were not downloaded again: Telegram serves a file under a "
+                  "fixed identifier, and the bytes saved earlier for the same identifier and size, in this export or in "
+                  "the workspace journal (media_event), were hashed again before reuse.")
 
 
 def journal_changes(store, chat_id):
@@ -59,9 +86,13 @@ def archive_name(store, chat_id, title):
 
 
 def export_limits(meta):
-    if not (meta or {}).get("journal"):
-        return EXPORT_LIMITS
-    return [EXPORT_LIMITS[0], JOURNAL_LIMIT, *EXPORT_LIMITS[2:]]
+    meta = meta or {}
+    limits = [EXPORT_LIMITS[0], JOURNAL_LIMIT, *EXPORT_LIMITS[2:]] if meta.get("journal") else list(EXPORT_LIMITS)
+    if len((meta.get("acquisition") or {}).get("sessions") or []) > 1:
+        limits.append(SESSIONS_LIMIT)
+    if meta.get("partial"):
+        limits.append(PARTIAL_LIMIT)
+    return limits
 
 
 def records(scratch_path):
@@ -177,7 +208,7 @@ def chat_indicators(scratch_path, meta=None, media_dir=None):
 def json_chunks(meta, scratch_path):
     header = {k: meta[k] for k in ("format", "chat", "account", "observer", "exported_at", "acquisition",
                                    "message_count", "author_count", "message_ids", "sender_names", "recheck", "admin_log",
-                                   "source", "journal", "limitations") if meta.get(k) is not None}
+                                   "source", "journal", "partial", "limitations") if meta.get(k) is not None}
     prefix = json.dumps(header, ensure_ascii=False, indent=1)[:-2]
     yield (prefix + ',\n "messages": [').encode("utf-8")
     first = True
@@ -210,11 +241,12 @@ RENAMES = ("MessageActionChannelCreate", "MessageActionChatCreate", "MessageActi
 
 def chat_stats(scratch_path):
     stats = {"text": 0, "media": 0, "edited": 0, "service": 0, "first_at": None, "last_at": None,
-             "first_id": None, "last_id": None, "renames": [], "found_on_recheck": 0}
+             "first_id": None, "last_id": None, "renames": [], "found_on_recheck": 0, "files_reused": 0}
     for record in records(scratch_path):
         if record.get("action") in RENAMES and isinstance(record.get("action_title"), str) and len(stats["renames"]) < 100:
             stats["renames"].append({"id": record.get("id"), "date": record.get("date"), "title": record["action_title"]})
         stats["found_on_recheck"] += bool(record.get("found_on_recheck"))
+        stats["files_reused"] += bool(record.get("file_reused"))
         if record.get("type") == "service":
             stats["service"] += 1
         elif record.get("media_type"):
@@ -329,6 +361,8 @@ def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES
                 if hashes["media/" + source.name] != source.name:
                     raise ValueError("Attachment changed while the export was written: " + source.name)
             stats = chat_stats(scratch_path)
+            if stats["files_reused"]:
+                meta["attachments_reused"] = {"messages": stats["files_reused"], "meaning": REUSED_MEANING}
             analytics = report.snapshot_analytics.collect(records(scratch_path), "snapshot", meta.get("chat"))
             analytics = report.snapshot_analytics.project(analytics, options)
             write_member("analytics.json", [canonical(analytics)])
@@ -372,3 +406,219 @@ def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES
     except BaseException:
         path.unlink(missing_ok=True)
         raise
+
+
+def linked(path):
+    return path.is_symlink() or bool(getattr(path, "is_junction", lambda: False)())
+
+
+def awaits_file(entry):
+    return bool(entry.get("media_type")) and entry.get("type") != "unparsed" and not any(k in entry for k in FILE_FIELDS)
+
+
+def scan_history(path):
+    digest, size, count, high, low = hashlib.sha256(), 0, 0, None, None
+    with Path(path).open("rb") as stream:
+        for line in stream:
+            digest.update(line)
+            size += len(line)
+            if line.strip():
+                count += 1
+                number = json.loads(line).get("id")
+                if type(number) is int:
+                    high = number if high is None else max(high, number)
+                    low = number if low is None else min(low, number)
+    return size, digest.hexdigest(), count, high, low
+
+
+class HistoryWriter:
+    def __init__(self, partial):
+        self.partial = partial
+        self.stream = partial.file.open("w", encoding="utf-8", newline="\n")
+        self.digest, self.size, self.count, self.checked = hashlib.sha256(), 0, 0, 0
+        self.first = self.last = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *failure):
+        self.stream.close()
+
+    def write(self, text):
+        data = text.encode("utf-8")
+        self.stream.write(text)
+        self.digest.update(data)
+        self.size, self.count, self.last = self.size + len(data), self.count + 1, text
+        self.first = self.first or text
+
+    def flush(self):
+        self.stream.flush()
+        if self.partial.carried and self.count - self.checked >= CHECKPOINT_MESSAGES:
+            os.fsync(self.stream.fileno())
+            self.partial.save(self.partial.file, self.size, self.digest.hexdigest(), self.count,
+                              json.loads(self.first)["id"], json.loads(self.last)["id"])
+            self.checked = self.count
+
+    def carry(self):
+        yield from self.partial.retained()
+        self.partial.carried = True
+
+
+class PartialExport:
+    def __init__(self, store, vault, chat_id, account_id):
+        self.store, self.vault, self.chat_id, self.account_id = store, vault, chat_id, account_id
+        self.root = store.root / "partial-exports"
+        self.directory = self.root / str(chat_id)
+        self.media = self.directory / "media"
+        if linked(self.root) or linked(self.directory) or linked(self.media):
+            raise ValueError("Partial-export storage must not be a link.")
+        self.root.mkdir(mode=0o700, exist_ok=True)
+        self.file = self.session = self.previous = self.statement = self.set_aside = None
+        if self.directory.is_dir():
+            try:
+                self.previous = self.load()
+            except (ValueError, OSError, KeyError, TypeError) as exc:
+                self.set_aside = str(exc) if type(exc) is ValueError else type(exc).__name__
+                forget_files(self.media)
+                self.directory.replace(self.root / (str(chat_id) + ".set-aside-"
+                                                    + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%f")))
+        self.statement, self.carried = self.previous, self.previous is None
+        self.earlier = list((self.previous or {}).get("sessions") or [])
+        self.directory.mkdir(mode=0o700, exist_ok=True)
+        self.media.mkdir(mode=0o700, exist_ok=True)
+        if self.previous is None:
+            forget_files(self.media)
+
+    def load(self):
+        path = self.directory / "partial.json"
+        if not path.exists():
+            if any(self.directory.glob("history-*.jsonl")):
+                raise ValueError("Saved messages have no signed statement.")
+            return None
+        if linked(path) or path.stat().st_size > 16 * 1024**2:
+            raise ValueError("Invalid partial-export statement.")
+        envelope = json.loads(path.read_bytes())
+        if envelope["public_key"] != self.vault.public_key:
+            raise ValueError("Saved messages were signed with a different collector key.")
+        try:
+            Ed25519PublicKey.from_public_bytes(base64.b64decode(envelope["public_key"], validate=True)).verify(
+                base64.b64decode(envelope["signature"], validate=True), canonical(envelope["statement"]))
+        except Exception:
+            raise ValueError("The partial-export statement signature is invalid.") from None
+        statement = envelope["statement"]
+        if statement["format"] != PARTIAL_FORMAT or statement["chat_id"] != self.chat_id:
+            raise ValueError("Saved messages belong to another chat or format.")
+        if statement["account_id"] != self.account_id:
+            raise ValueError("Saved messages were read by another account.")
+        if not isinstance(statement["file"], str) or not HISTORY_FILE.fullmatch(statement["file"]) \
+                or any(type(statement[k]) is not int for k in ("bytes", "messages", "low", "high")) \
+                or not isinstance(statement["sessions"], list) or not isinstance(statement["sha256"], str):
+            raise ValueError("Invalid partial-export statement.")
+        data = self.directory / statement["file"]
+        if linked(data) or data.stat().st_size < statement["bytes"]:
+            raise ValueError("Saved messages are shorter than their signed statement.")
+        digest, left = hashlib.sha256(), statement["bytes"]
+        with data.open("rb") as stream:
+            while left:
+                chunk = stream.read(min(left, 1024 * 1024))
+                if not chunk:
+                    raise ValueError("Saved messages are shorter than their signed statement.")
+                digest.update(chunk)
+                left -= len(chunk)
+        if digest.hexdigest() != statement["sha256"]:
+            raise ValueError("Saved messages differ from their signed statement.")
+        if data.stat().st_size > statement["bytes"]:
+            with data.open("r+b") as stream:
+                stream.truncate(statement["bytes"])
+        for stale in self.directory.glob("history-*.jsonl"):
+            if stale.name != statement["file"]:
+                with suppress(OSError):
+                    stale.unlink()
+        return statement
+
+    def start(self, export_id, started_at, files=None):
+        self.session = {"export_id": export_id, "started_at": started_at, "files": files or "workspace_settings"}
+        self.file = self.directory / ("history-" + export_id + ".jsonl")
+        if not HISTORY_FILE.fullmatch(self.file.name) or linked(self.file):
+            raise ValueError("Invalid export identifier.")
+        return self.file
+
+    def public(self):
+        found = {}
+        if self.previous:
+            found["resumed"] = self.summary(self.previous)
+        if self.set_aside:
+            found["set_aside"] = {"reason": self.set_aside, "meaning": SET_ASIDE_MEANING}
+        return found
+
+    @staticmethod
+    def summary(statement):
+        return {"retained": True, "messages": statement["messages"], "low": statement["low"], "high": statement["high"],
+                "sha256": statement["sha256"], "sessions": len(statement["sessions"]), "meaning": PARTIAL_MEANING,
+                **({"account_loss": statement["account_loss"]} if statement.get("account_loss") else {})}
+
+    def writer(self):
+        return HistoryWriter(self)
+
+    def retained(self):
+        with (self.directory / self.previous["file"]).open(encoding="utf-8") as stream:
+            for line in stream:
+                if line.strip():
+                    entry = json.loads(line)
+                    if entry.get("file") is not None and not self.has_file(entry):
+                        entry = {k: v for k, v in entry.items() if k not in FILE_FIELDS}
+                    yield entry
+
+    def has_file(self, entry):
+        digest = entry.get("file_sha256")
+        if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest) or entry["file"] != "media/" + digest:
+            return False
+        path = self.media / digest
+        return not linked(path) and path.is_file() and path.stat().st_size == entry.get("file_size")
+
+    def save(self, file, size, digest, count, high, low, stop=None, loss=None):
+        session = {**(self.session or {}), **({"stopped_at": utcnow(), "stop": stop} if stop else {})}
+        statement = {"format": PARTIAL_FORMAT, "chat_id": self.chat_id, "account_id": self.account_id,
+                     "file": file.name, "bytes": size, "sha256": digest, "messages": count, "high": high, "low": low,
+                     "saved_at": utcnow(), "sessions": [*self.earlier, session]}
+        if loss:
+            statement["account_loss"] = loss
+        private_write(self.directory / "partial.json", canonical({"statement": statement, "public_key": self.vault.public_key,
+                                                                  "signature": self.vault.sign(canonical(statement))}))
+        if self.previous and self.previous["file"] != file.name:
+            (self.directory / self.previous["file"]).unlink(missing_ok=True)
+        self.statement = statement
+        return statement
+
+    def retain(self, stop, loss=None):
+        try:
+            if not self.carried and self.file is not None:
+                self.file.unlink(missing_ok=True)
+            source = self.file if self.carried else self.directory / self.previous["file"]
+            found = scan_history(source) if source is not None and source.is_file() else (0, None, 0, None, None)
+            if not found[2] or found[3] is None:
+                if self.previous is None:
+                    self.discard()
+                    return None
+                raise ValueError("Saved messages could not be read back.")
+            return self.summary(self.save(source, *found, stop=stop, loss=loss))
+        except Exception as exc:
+            return {"retained": False, "error_type": type(exc).__name__}
+
+    def sessions(self, finished_at):
+        return [*self.earlier, {**self.session, "finished_at": finished_at}]
+
+    def discard(self):
+        forget_files(self.media)
+        shutil.rmtree(self.directory, ignore_errors=True)
+
+    def bundle(self, out_path, meta, max_bytes=MAX_BUNDLE_BYTES, options=None):
+        statement = self.statement
+        path = self.directory / statement["file"]
+        meta = {**meta, "message_count": statement["messages"],
+                "partial": {**self.summary(statement), "complete": False,
+                            "stop": statement["sessions"][-1].get("stop"),
+                            "scope": PARTIAL_SCOPE.format(low=statement["low"], high=statement["high"])},
+                "acquisition": {**(meta.get("acquisition") or {}), "sessions": statement["sessions"]}}
+        return build_bundle(path, meta, self.vault, out_path, max_bytes, options, self.media,
+                            journal_names(self.store, self.chat_id, path))

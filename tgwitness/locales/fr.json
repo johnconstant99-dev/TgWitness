@@ -8556,5 +8556,16 @@
   "Probe not sent.": "Sonde non envoyée.",
   "This workspace answers probes from: {list}": "Cet espace de travail répond aux sondes de : {list}",
   "Choose a witness workspace signed in with a different Telegram account.": "Choisissez un espace de travail témoin connecté avec un autre compte Telegram.",
-  "Watchlist hits from lists set to send an alert": "Correspondances des listes de surveillance configurées pour envoyer une alerte"
+  "Watchlist hits from lists set to send an alert": "Correspondances des listes de surveillance configurées pour envoyer une alerte",
+  "A new session signed in to this account: {device}": "Une nouvelle session s'est connectée à ce compte : {device}",
+  "a device Telegram did not name": "un appareil que Telegram n'a pas nommé",
+  "This workspace's Telegram session key was imported. Copies of it can exist outside Telegram's session list.": "La clé de session Telegram de cet espace de travail a été importée. Des copies peuvent exister en dehors de la liste des sessions de Telegram.",
+  "They can read the same chats while this observation runs.": "Elles peuvent lire les mêmes discussions pendant cette observation.",
+  "Start anyway": "Démarrer quand même",
+  "Open Sessions of this account": "Ouvrir les sessions de ce compte",
+  "Make this the only session when Telegram allows it": "En faire la seule session dès que Telegram l'autorise",
+  "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "Telegram ne l'autorise qu'au bout de 24 heures d'existence de la session. TgWitness réessaie plus tard et affiche le mot de passe à deux étapes qu'il définit.",
+  "Set automatically; open Sessions of this account to see it once.": "Défini automatiquement ; ouvrez les sessions de ce compte pour le voir une seule fois.",
+  "Automatic only-session changed": "Session unique automatique modifiée",
+  "Only-session attempt postponed": "Tentative de session unique reportée"
 }

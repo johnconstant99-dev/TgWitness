@@ -2,7 +2,7 @@
   const t = (text, vars) => (typeof tr === "function" ? tr(text, vars) : text);
   const active = new Set();
 
-  function open({title, message, danger, confirmText, field, expected, choices, choicesLabel}) {
+  function open({title, message, danger, confirmText, field, expected, choices, choicesLabel, alternative}) {
     return new Promise(resolve => {
       const dialog = document.createElement("dialog");
       dialog.className = "export-dialog panel-dialog";
@@ -60,7 +60,16 @@
       accept.type = "submit";
       accept.className = danger ? "danger" : "primary";
       accept.textContent = confirmText || t("OK");
-      actions.append(cancel, accept);
+      actions.append(cancel);
+      if (alternative) {
+        const other = document.createElement("button");
+        other.type = "button";
+        other.className = "secondary";
+        other.textContent = alternative;
+        other.addEventListener("click", () => { result = "alternative"; dialog.close(); });
+        actions.append(other);
+      }
+      actions.append(accept);
       form.append(actions);
       dialog.append(form);
 
@@ -82,7 +91,8 @@
         active.delete(dismiss);
         if (input) input.value = "";
         dialog.remove();
-        if (expected !== undefined) resolve(result === expected);
+        if (result === "alternative") resolve("alternative");
+        else if (expected !== undefined) resolve(result === expected);
         else if (choices) resolve(Array.isArray(result) ? result : null);
         else resolve(input ? result : result === true);
       });

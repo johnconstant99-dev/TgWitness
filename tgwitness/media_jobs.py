@@ -1,8 +1,21 @@
+from contextlib import suppress
 from dataclasses import dataclass
 import hashlib
+import json
+import os
+import shutil
+from pathlib import Path
 
-from . import ephemeral
+from . import ephemeral, file_hashes
+from .journal_index import attachment_key
 from .monitoring import duration_allowed, effective_media_rule, media_action, media_kind
+
+REUSE_MEANING = ("Telegram serves a file under a fixed identifier. These bytes were saved earlier for the same file "
+                 "identifier and size and were hashed again before reuse instead of being downloaded again.")
+ATTACHMENTS = ".attachments.jsonl"
+HEX = frozenset("0123456789abcdef")
+KNOWN_DIRECTORIES = 4
+known_files = {}
 
 
 LANES = {
@@ -97,6 +110,92 @@ def plan_media(job, policy, capture, message):
         elif action == "download" and current_action != "download":
             outcome = MediaOutcome("skipped", {"reason": "media action changed after this attachment was queued"})
     return MediaPlan(action, size, outcome)
+
+
+def attachment(media):
+    info = file_hashes.representation(media)
+    return info, attachment_key(info)
+
+
+def intact(path, digest, size):
+    path = Path(path)
+    if path.is_symlink() or not path.is_file() or path.stat().st_size != size:
+        return False
+    with path.open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest() == digest
+
+
+def stored_copy(store, media_root, media, size):
+    info, key = attachment(media)
+    known = store.stored_media(key) if type(size) is int else None
+    if known and known["bytes"] == size and intact(Path(media_root) / known["sha256"], known["sha256"], size):
+        return info, known
+    return info, None
+
+
+def exported_files(directory):
+    name = str(directory)
+    if name not in known_files:
+        found, path = {}, Path(directory) / ATTACHMENTS
+        if path.is_file() and not path.is_symlink():
+            with path.open(encoding="utf-8") as stream:
+                for line in stream:
+                    try:
+                        item = json.loads(line)
+                        key, digest, size = item["identity"], item["sha256"], item["bytes"]
+                    except (ValueError, KeyError, TypeError):
+                        continue
+                    if isinstance(key, str) and isinstance(digest, str) and len(digest) == 64 and set(digest) <= HEX \
+                            and type(size) is int:
+                        found[key] = (digest, size)
+        while len(known_files) >= KNOWN_DIRECTORIES:
+            known_files.pop(next(iter(known_files)), None)
+        known_files[name] = found
+    return known_files[name]
+
+
+def forget_files(directory):
+    known_files.pop(str(directory), None)
+
+
+def remember_file(directory, media, digest, size):
+    key = attachment(media)[1]
+    found = exported_files(directory)
+    if key and found.get(key) != (digest, size):
+        found[key] = (digest, size)
+        with suppress(OSError), (Path(directory) / ATTACHMENTS).open("a", encoding="utf-8") as stream:
+            stream.write(json.dumps({"identity": key, "sha256": digest, "bytes": size}) + "\n")
+
+
+def reuse_into(store, directory, media, size):
+    key = attachment(media)[1]
+    if key is None or type(size) is not int:
+        return None
+    directory = Path(directory)
+    local = exported_files(directory).get(key)
+    if local and local[1] == size and intact(directory / local[0], local[0], size):
+        return {"sha256": local[0], "source": "this_export"}
+    known = store.stored_media(key)
+    if not known or known["bytes"] != size or not intact(store.root / "media" / known["sha256"], known["sha256"], size):
+        return None
+    source, target = store.root / "media" / known["sha256"], directory / known["sha256"]
+    if not target.exists():
+        temporary = directory / ("reuse-" + known["sha256"])
+        try:
+            temporary.unlink(missing_ok=True)
+            try:
+                os.link(source, temporary)
+            except OSError:
+                shutil.copyfile(source, temporary)
+            temporary.replace(target)
+        except OSError:
+            with suppress(OSError):
+                temporary.unlink(missing_ok=True)
+            return None
+    elif not intact(target, known["sha256"], size):
+        return None
+    remember_file(directory, media, known["sha256"], size)
+    return {"sha256": known["sha256"], "source": {"media_event": known["seq"]}}
 
 
 def failure_outcome(exc, attempts, maximum_attempts, maximum_delay):

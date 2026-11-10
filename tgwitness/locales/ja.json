@@ -8517,5 +8517,16 @@
   "Probe not sent.": "プローブは送信されませんでした。",
   "This workspace answers probes from: {list}": "このワークスペースは次のワークスペースからのプローブに応答します：{list}",
   "Choose a witness workspace signed in with a different Telegram account.": "別の Telegram アカウントでサインインした証人ワークスペースを選択してください。",
-  "Watchlist hits from lists set to send an alert": "アラートを送信するよう設定されたウォッチリストの一致"
+  "Watchlist hits from lists set to send an alert": "アラートを送信するよう設定されたウォッチリストの一致",
+  "A new session signed in to this account: {device}": "このアカウントに新しいセッションがログインしました：{device}",
+  "a device Telegram did not name": "Telegram が名前を示さない端末",
+  "This workspace's Telegram session key was imported. Copies of it can exist outside Telegram's session list.": "このワークスペースの Telegram セッションキーはインポートされたものです。その複製が Telegram のセッション一覧の外に存在する可能性があります。",
+  "They can read the same chats while this observation runs.": "この観察の実行中、同じチャットを読むことができます。",
+  "Start anyway": "それでも開始",
+  "Open Sessions of this account": "このアカウントのセッションを開く",
+  "Make this the only session when Telegram allows it": "Telegram が許可したら、これを唯一のセッションにする",
+  "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "Telegram はセッションの作成から 24 時間後にのみこれを許可します。TgWitness は後で再試行し、設定した 2 段階認証パスワードを表示します。",
+  "Set automatically; open Sessions of this account to see it once.": "自動的に設定されました。一度だけ確認するには、このアカウントのセッションを開いてください。",
+  "Automatic only-session changed": "自動の唯一セッション設定を変更",
+  "Only-session attempt postponed": "唯一セッションの試行を延期"
 }

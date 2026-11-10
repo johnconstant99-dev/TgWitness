@@ -8556,5 +8556,16 @@
   "Probe not sent.": "پروب نہیں بھیجا گیا۔",
   "This workspace answers probes from: {list}": "یہ ورک اسپیس ان کے پروبز کا جواب دیتی ہے: {list}",
   "Choose a witness workspace signed in with a different Telegram account.": "ایسی گواہ ورک اسپیس منتخب کریں جس میں کسی دوسرے ٹیلیگرام اکاؤنٹ سے سائن ان کیا گیا ہو۔",
-  "Watchlist hits from lists set to send an alert": "واچ لسٹس سے ملنے والے نتائج جن کے لیے الرٹ بھیجنا مقرر ہے"
+  "Watchlist hits from lists set to send an alert": "واچ لسٹس سے ملنے والے نتائج جن کے لیے الرٹ بھیجنا مقرر ہے",
+  "A new session signed in to this account: {device}": "اس اکاؤنٹ میں ایک نیا سیشن سائن ان ہوا: {device}",
+  "a device Telegram did not name": "ایسا آلہ جس کا نام ٹیلیگرام نے نہیں دیا",
+  "This workspace's Telegram session key was imported. Copies of it can exist outside Telegram's session list.": "اس ورک اسپیس کی ٹیلیگرام سیشن کلید درآمد کی گئی تھی۔ اس کی نقول ٹیلیگرام کی سیشن فہرست سے باہر موجود ہو سکتی ہیں۔",
+  "They can read the same chats while this observation runs.": "یہ اس مشاہدے کے دوران وہی چیٹس پڑھ سکتے ہیں۔",
+  "Start anyway": "پھر بھی شروع کریں",
+  "Open Sessions of this account": "اس اکاؤنٹ کے سیشنز کھولیں",
+  "Make this the only session when Telegram allows it": "جب ٹیلیگرام اجازت دے تو اسے واحد سیشن بنائیں",
+  "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "ٹیلیگرام اس کی اجازت سیشن کے 24 گھنٹے پرانا ہونے کے بعد ہی دیتا ہے۔ TgWitness بعد میں دوبارہ کوشش کرتا ہے اور مقرر کردہ دو مرحلوں والا پاس ورڈ دکھاتا ہے۔",
+  "Set automatically; open Sessions of this account to see it once.": "خودکار طور پر مقرر ہوا؛ ایک بار دیکھنے کے لیے اس اکاؤنٹ کے سیشنز کھولیں۔",
+  "Automatic only-session changed": "خودکار واحد سیشن کی ترتیب تبدیل ہوئی",
+  "Only-session attempt postponed": "واحد سیشن کی کوشش مؤخر کر دی گئی"
 }

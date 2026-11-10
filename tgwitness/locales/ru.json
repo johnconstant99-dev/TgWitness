@@ -8604,5 +8604,16 @@
   "Probe not sent.": "Проба не отправлена.",
   "This workspace answers probes from: {list}": "Эта рабочая область отвечает на пробы от: {list}",
   "Choose a witness workspace signed in with a different Telegram account.": "Выберите рабочую область-свидетеля, вошедшую под другим аккаунтом Telegram.",
-  "Watchlist hits from lists set to send an alert": "Совпадения из списков наблюдения, для которых включены оповещения"
+  "Watchlist hits from lists set to send an alert": "Совпадения из списков наблюдения, для которых включены оповещения",
+  "A new session signed in to this account: {device}": "В аккаунт вошёл новый сеанс: {device}",
+  "a device Telegram did not name": "устройство без названия в Telegram",
+  "This workspace's Telegram session key was imported. Copies of it can exist outside Telegram's session list.": "Ключ сеанса Telegram этой рабочей области импортирован. Его копии могут существовать вне списка сеансов Telegram.",
+  "They can read the same chats while this observation runs.": "Они могут читать те же чаты, пока идёт это наблюдение.",
+  "Start anyway": "Всё равно начать",
+  "Open Sessions of this account": "Открыть сеансы аккаунта",
+  "Make this the only session when Telegram allows it": "Оставить только этот сеанс, когда Telegram разрешит",
+  "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "Telegram разрешает это только через 24 часа после входа сеанса. TgWitness повторит попытку позже и покажет заданный им облачный пароль (2FA).",
+  "Set automatically; open Sessions of this account to see it once.": "Задан автоматически; откройте «Сеансы аккаунта», чтобы увидеть его один раз.",
+  "Automatic only-session changed": "Автоматический режим единственного сеанса изменён",
+  "Only-session attempt postponed": "Попытка оставить только этот сеанс отложена"
 }

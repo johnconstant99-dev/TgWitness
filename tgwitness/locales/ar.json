@@ -8712,5 +8712,16 @@
   "Probe not sent.": "لم يُرسل المسبار.",
   "This workspace answers probes from: {list}": "تردّ مساحة العمل هذه على المسابير الواردة من: {list}",
   "Choose a witness workspace signed in with a different Telegram account.": "اختر مساحة عمل شاهدة مسجّل الدخول فيها بحساب Telegram مختلف.",
-  "Watchlist hits from lists set to send an alert": "تطابقات من قوائم المراقبة المضبوطة لإرسال تنبيه"
+  "Watchlist hits from lists set to send an alert": "تطابقات من قوائم المراقبة المضبوطة لإرسال تنبيه",
+  "A new session signed in to this account: {device}": "سجّلت جلسة جديدة الدخول إلى هذا الحساب: {device}",
+  "a device Telegram did not name": "جهاز لم يسمّه تيليجرام",
+  "This workspace's Telegram session key was imported. Copies of it can exist outside Telegram's session list.": "مفتاح جلسة تيليجرام لمساحة العمل هذه مستورد. قد توجد نسخ منه خارج قائمة جلسات تيليجرام.",
+  "They can read the same chats while this observation runs.": "يمكنها قراءة المحادثات نفسها أثناء تشغيل هذه المراقبة.",
+  "Start anyway": "ابدأ على أي حال",
+  "Open Sessions of this account": "فتح جلسات هذا الحساب",
+  "Make this the only session when Telegram allows it": "اجعلها الجلسة الوحيدة عندما يسمح تيليجرام بذلك",
+  "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "لا يسمح تيليجرام بذلك إلا بعد مرور 24 ساعة على الجلسة. يعيد TgWitness المحاولة لاحقًا ويعرض كلمة مرور التحقق بخطوتين التي يحددها.",
+  "Set automatically; open Sessions of this account to see it once.": "حُددت تلقائيًا؛ افتح جلسات هذا الحساب لرؤيتها مرة واحدة.",
+  "Automatic only-session changed": "تغيّر إعداد الجلسة الوحيدة التلقائي",
+  "Only-session attempt postponed": "تأجلت محاولة الجلسة الوحيدة"
 }

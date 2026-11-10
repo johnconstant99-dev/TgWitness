@@ -25,7 +25,7 @@ CHANGES = {"message.deleted": "deleted", "message.edited": "edited", "message.mi
 PROBLEM_KINDS = ("storage.low", "storage.ok", "coverage.gap", "collector.error", "connection.retry_failed",
                  "source.access_unconfirmed", "export.failed", "chat_export.interrupted", "replica.completed",
                  "anchor.completed", "profile.unavailable", "host.state", "storage.completed", "account.security_event",
-                 "session.exclusive_ended")
+                 "session.exclusive_ended", "account.sessions")
 COMPLETION_KINDS = ("account_export.completed", "chat_export.completed", "snapshot.completed", "storage.completed")
 
 CHANGE_SCAN = 5000
@@ -361,6 +361,14 @@ def account_loss_line(cause, words):
     return tr(words, "Telegram signed this account out. Sign in again to resume observation.")
 
 
+def added_sessions(payload, words):
+    added = set(payload.get("added") or [])
+    found = [s for s in payload.get("others") or [] if isinstance(s, dict) and s.get("hash") in added]
+    names = [" · ".join(str(s[key]) for key in ("device_model", "app_name", "country") if s.get(key))
+             or tr(words, "a device Telegram did not name") for s in found]
+    return "; ".join(names)
+
+
 def problem_line(event, titles, words):
     p, kind = event["payload"], event["kind"]
     where = titles.get(event["chat_id"], str(event["chat_id"])) if event["chat_id"] is not None else ""
@@ -405,6 +413,8 @@ def problem_line(event, titles, words):
         return host_line(p, words)
     if kind == "session.exclusive_ended":
         return tr(words, "Another session signed in after this session was made the only one.")
+    if kind == "account.sessions" and p.get("added"):
+        return tr(words, "A new session signed in to this account: {device}", device=added_sessions(p, words))
     if kind == "account.security_event" and p.get("during_observation") is True:
         if p.get("event_kind") == "login_code":
             return tr(words, "Telegram sent a sign-in code for this account during observation.")
@@ -559,6 +569,7 @@ def notice_destination(event, level):
         "replica.completed": ("replica", "replica"), "anchor.completed": ("timestamps", "timestamps"),
         "profile.unavailable": ("accounts", "accounts"), "host.state": ("server", "server"),
         "account.security_event": ("connection", "connection"), "session.exclusive_ended": ("connection", "connection"),
+        "account.sessions": ("connection", "connection"),
     }.get(kind, ("collection", None))
     if kind == "coverage.gap" and p.get("reason") == "authorization_required":
         category, part = "connection", "connection"

@@ -20,7 +20,7 @@ from telethon import errors as telegram_errors, utils
 from telethon.errors import TypeNotFoundError
 from telethon.tl import types
 
-from . import chat_export, replica, report, tuning
+from . import chat_export, message_details, replica, report, tuning
 from .account_export import durable_write, linked, read_json
 from .collector import AUTHORIZATION_ERRORS, message_record, unparsed_record
 from .export_timing import ExportTiming
@@ -614,7 +614,7 @@ class Run:
                         stored = json.loads(index.db.execute(
                             "SELECT record FROM messages WHERE id=?", (record["id"],)).fetchone()[0])
                         stored.pop("found_on_recheck", None)
-                        if message and message_record(message) == stored:
+                        if message and message_details.stable(message_record(message)) == message_details.stable(stored):
                             record.update(await collector.export_attachment(message, directory / "media"))
                         else:
                             record["file_status"] = "message_changed_or_unavailable_at_media_read"

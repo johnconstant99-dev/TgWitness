@@ -6,6 +6,7 @@ from ..account_import import import_accounts
 from ..account_import import session_key
 from ..app import AccountImport
 from ..app import AccountPassword
+from ..app import AutoOnlySession
 from ..app import Code
 from ..app import Credentials
 from ..app import EndSession
@@ -659,6 +660,21 @@ async def end_other_account_sessions(*, ctx=Depends(current_context)):
 
 async def make_only_account_session(*, ctx=Depends(current_context)):
     return await ctx.operation(ctx.app.state.collector.make_only_session)
+
+
+async def set_auto_only_account_session(
+    body: AutoOnlySession, *, ctx=Depends(current_context)
+):
+    ctx.require_live()
+    try:
+        return ctx.app.state.collector.set_auto_only_session(body.enabled)
+    except ValueError as exc:
+        raise HTTPException(409, str(exc)) from None
+
+
+async def only_account_session_password(*, ctx=Depends(current_context)):
+    ctx.require_live()
+    return ctx.app.state.collector.take_only_session_password()
 
 
 async def witness_probe(*, ctx=Depends(current_context)):

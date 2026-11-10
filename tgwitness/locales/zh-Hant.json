@@ -8517,5 +8517,16 @@
   "Probe not sent.": "探測未傳送。",
   "This workspace answers probes from: {list}": "此工作區回覆下列工作區的探測：{list}",
   "Choose a witness workspace signed in with a different Telegram account.": "請選擇以不同 Telegram 帳戶登入的見證工作區。",
-  "Watchlist hits from lists set to send an alert": "來自設定為傳送提醒之監看清單的命中"
+  "Watchlist hits from lists set to send an alert": "來自設定為傳送提醒之監看清單的命中",
+  "A new session signed in to this account: {device}": "有新的工作階段登入了此帳號：{device}",
+  "a device Telegram did not name": "Telegram 未命名的裝置",
+  "This workspace's Telegram session key was imported. Copies of it can exist outside Telegram's session list.": "此工作區的 Telegram 工作階段金鑰是匯入的。其副本可能存在於 Telegram 的工作階段清單之外。",
+  "They can read the same chats while this observation runs.": "在這次觀察進行期間，它們可以讀取相同的聊天。",
+  "Start anyway": "仍然開始",
+  "Open Sessions of this account": "開啟此帳戶的連線",
+  "Make this the only session when Telegram allows it": "在 Telegram 允許時設為唯一的工作階段",
+  "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "Telegram 只有在工作階段滿 24 小時後才允許。TgWitness 稍後會再試一次，並顯示它設定的兩步驟驗證密碼。",
+  "Set automatically; open Sessions of this account to see it once.": "已自動設定；開啟此帳戶的連線即可檢視一次。",
+  "Automatic only-session changed": "自動唯一工作階段設定已變更",
+  "Only-session attempt postponed": "唯一工作階段的嘗試已延後"
 }

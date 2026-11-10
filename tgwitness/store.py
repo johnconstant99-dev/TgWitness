@@ -399,6 +399,27 @@ class Store:
                 " AND json_extract(payload,'$.media_sha256')=? LIMIT 1",
                 (*MEDIA_KINDS, *sorted(chat_ids), sha256)).fetchone() is not None
 
+    def stored_media(self, identity):
+        if not identity:
+            return None
+        with self.lock:
+            row = self.db.execute("SELECT sha256,bytes,seq FROM media_identity_index WHERE identity=?",
+                                  (identity,)).fetchone()
+        return dict(row) if row else None
+
+    def account_loss_statement(self, since=None):
+        with self.lock:
+            row = self.db.execute(
+                "SELECT seq,hash,observed_at,payload FROM events WHERE kind='coverage.gap' AND observed_at>=? "
+                "AND json_extract(payload,'$.reason')='authorization_required' ORDER BY seq DESC LIMIT 1",
+                (since or "",)).fetchone()
+        if row is None:
+            return None
+        payload = json.loads(row["payload"])
+        return {"cause": payload.get("cause"), "telegram_error": payload.get("telegram_error"),
+                "operation": payload.get("operation"), "observed_at": row["observed_at"],
+                "meaning": payload.get("meaning"), "journal_record": {"seq": row["seq"], "hash": row["hash"]}}
+
     def sender_in_chats(self, sender_id, chat_ids):
         marks = ",".join("?" * len(chat_ids))
         with self.lock:

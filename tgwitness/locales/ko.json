@@ -8517,5 +8517,16 @@
   "Probe not sent.": "프로브를 보내지 않았습니다.",
   "This workspace answers probes from: {list}": "이 작업 공간은 다음 작업 공간의 프로브에 응답합니다: {list}",
   "Choose a witness workspace signed in with a different Telegram account.": "다른 텔레그램 계정으로 로그인한 증인 작업 공간을 선택하세요.",
-  "Watchlist hits from lists set to send an alert": "알림을 보내도록 설정된 감시 목록의 일치 항목"
+  "Watchlist hits from lists set to send an alert": "알림을 보내도록 설정된 감시 목록의 일치 항목",
+  "A new session signed in to this account: {device}": "이 계정에 새 세션이 로그인했습니다: {device}",
+  "a device Telegram did not name": "Telegram이 이름을 제공하지 않은 기기",
+  "This workspace's Telegram session key was imported. Copies of it can exist outside Telegram's session list.": "이 작업 공간의 Telegram 세션 키는 가져온 것입니다. 그 사본이 Telegram 세션 목록 밖에 존재할 수 있습니다.",
+  "They can read the same chats while this observation runs.": "이 관찰이 진행되는 동안 같은 대화를 읽을 수 있습니다.",
+  "Start anyway": "그래도 시작",
+  "Open Sessions of this account": "이 계정의 세션 열기",
+  "Make this the only session when Telegram allows it": "Telegram이 허용하면 이 세션만 남기기",
+  "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "Telegram은 세션이 24시간이 지난 뒤에만 이를 허용합니다. TgWitness는 나중에 다시 시도하고 설정한 2단계 비밀번호를 보여 줍니다.",
+  "Set automatically; open Sessions of this account to see it once.": "자동으로 설정됨. 한 번만 확인하려면 이 계정의 세션을 여세요.",
+  "Automatic only-session changed": "자동 단독 세션 설정 변경",
+  "Only-session attempt postponed": "단독 세션 시도 연기"
 }

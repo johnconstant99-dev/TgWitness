@@ -309,6 +309,8 @@ const labels = {
   "account.sessions": [tr("Account sessions recorded"), "account", "system"],
   "account.session_ended": [tr("Account session ended"), "account", "system"],
   "account.password_changed": [tr("Two-step password changed"), "lock", "system"],
+  "session.exclusive_automatic": [tr("Automatic only-session changed"), "lock", "system"],
+  "session.exclusive_postponed": [tr("Only-session attempt postponed"), "clock", "system"],
   "account.forgotten": [tr("Session forgotten on this computer"), "account", "system"],
   "account.restricted": [tr("Telegram restricted the account"), "alert", "coverage"],
   "account.restriction_expired": [tr("Account restriction ended"), "refresh", "system"],
@@ -880,6 +882,25 @@ function openWorkflowSignIn(){
   if(state.view==='connection'&&['code-form','password-form','qr-state'].every(id=>$(id).hidden))
     setAuthStep('credentials');
   return entered;
+}
+async function openIndependentSignIn(){
+  $('account-export-dialog').close();
+  $('export-dialog').close('cancel');
+  await openWorkflowSignIn();
+  if(state.view!=='connection')return;
+  setAuthMethod('files');
+  $('import-new-session').checked=true;
+  $('import-account').focus();
+}
+function importedKeyNotice(id){
+  const box=$(id);if(!box)return;
+  const account=state.status?.collector?.account||{};
+  const imported=!!account.key_origin&&account.key_origin!=='created';
+  box.replaceChildren();box.hidden=!imported;
+  if(!imported)return;
+  const open=node('button','text-link',tr("Create an independent authorization"));open.type='button';
+  open.addEventListener('click',()=>{void openIndependentSignIn();});
+  box.append(node('span','',tr("This workspace's Telegram session key was imported. Copies of it can exist outside Telegram's session list."))," ",open);
 }
 async function openAccountWorkflow(){
   if(!state.me?.admin||!viewAllowed('evidence'))return;
@@ -1759,9 +1780,36 @@ const journalReady=import('./components/journal.js?v=layout1').then(({createJour
   return window.TgWitnessJournal;
 });
 $("refresh").addEventListener("click",e=>busy(e.currentTarget,async()=>{await refreshStatus();await refreshEvents();}));
+const EVIDENCE_MODES=["witnessed","court","github","mossad"];
+function evidenceWorkspace(){
+  return state.status?.setup_goal==='evidence'||EVIDENCE_MODES.includes(modesUI?.mode());
+}
+async function confirmOtherSessions(){
+  if(state.status?.demo||!evidenceWorkspace())return true;
+  const owner=actionOwner();
+  let others=0;
+  try{
+    const r=await json("account/sessions",undefined,{profile:owner.profile,token:owner.token});
+    others=(r.sessions||[]).filter(s=>!s.current).length;
+  }catch(error){
+    if(error instanceof StaleView)throw error;
+    return owner.current();
+  }
+  if(!owner.current())return false;
+  if(!others)return true;
+  const answer=await askConfirm(tr("Other sessions signed in to this account: {n}",{n:others})+"\n\n"+
+    tr("They can read the same chats while this observation runs."),
+    {confirmText:tr("Start anyway"),alternative:tr("Open Sessions of this account")});
+  if(answer==="alternative"){
+    if(owner.current()){await navigate("connection");if(owner.current())await showAccountSessions();}
+    return false;
+  }
+  return answer===true&&owner.current();
+}
 $("collector-toggle").addEventListener("click",e=>busy(e.currentTarget,async()=>{
   const profile=state.profile,revision=state.workspaceRevision,action=state.status.collector.running?'stop':'start';
   if(action==='stop'&&!await (await collectionReady).confirmPause())return;
+  if(action==='start'&&!await confirmOtherSessions())return;
   if(profile!==state.profile||revision!==state.workspaceRevision)return;
   await json("collector/"+action,{},{profile});
   await refreshStatus();await refreshEvents();
@@ -2486,7 +2534,9 @@ $("account-export-configure").addEventListener("click",e=>busy(e.currentTarget,a
     state.workflow={profile:state.profile,kind:'account'};
     await openWorkflowSignIn();return;
   }
-  await loadAccountExport();if(!current())return;$('account-export-dialog').showModal();
+  await loadAccountExport();if(!current())return;
+  importedKeyNotice('account-export-imported-key');
+  $('account-export-dialog').showModal();
   $("account-export-dialog-title").focus?.();
 }));
 $("account-export-refresh").addEventListener("click",e=>busy(e.currentTarget,()=>loadAccountExport()));
@@ -4222,6 +4272,8 @@ function renderSeenBy(){
     [tr("Session in Telegram's device list"),device||tr("Telethon's default description of this computer")]];
   if(id.meaning)rows.push(["",tr("This public pair belongs to Telegram Desktop; the session is described as Telegram Desktop.")]);
   show("independent-session-pending",!!c.pending_new_session);
+  if(c.pending_only_session_password)rows.push([tr("Two-step password"),
+    tr("Set automatically; open Sessions of this account to see it once.")]);
   if(c.session_origin?.method==="qr_from_import")rows.push([tr("Authorization origin"),tr("Independent QR login approved by an imported session")]);
   const checked=c.client_checks;
   const backoff=c.rpc_backoff;
@@ -4558,6 +4610,17 @@ async function showAccountSessions(){
     toast(tr("This is now the only session of this account."));await showAccountSessions();
   }));
   box.append(only);
+  if(r.key_origin==="created"){
+    const auto=node("label","check-label"),box_=node("input");
+    box_.type="checkbox";box_.checked=!!r.auto_only_session;box_.disabled=state.status.demo||!may("account");
+    box_.addEventListener("change",()=>busy(box_,async()=>{
+      await json("account/sessions/only/automatic",{enabled:box_.checked},{profile:owner.profile,token:owner.token});
+      if(!owner.current())return;
+      toast(tr("Saved"));await showAccountSessions();
+    }));
+    auto.append(box_," "+tr("Make this the only session when Telegram allows it"));
+    box.append(auto,node("p","hint",tr("Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.")));
+  }
   for(const s of [...r.sessions].sort((a,b)=>Number(b.current)-Number(a.current)||String(b.active_at).localeCompare(String(a.active_at)))){
     const row=node("div","account-session"+(s.current?" current":""));
     row.append(node("span","account-session-device",[s.device_model,[s.app_name,s.app_version].filter(Boolean).join(" ")].filter(Boolean).join(" · ")+
@@ -4576,6 +4639,12 @@ async function showAccountSessions(){
       row.append(end);
     }
     box.append(row);
+  }
+  if(r.pending_only_session_password){
+    const kept=await json("account/sessions/only/password",{},{profile:owner.profile,token:owner.token});
+    if(!owner.current()||!kept.password)return;
+    await window.TgWitnessDialogs.prompt(kept.password,{title:tr("Two-step password"),label:tr("Two-step password set by TgWitness. Save it now: it is shown only once and TgWitness does not keep it."),required:false});
+    await refreshStatus();
   }
 }
 $("account-sessions-show").addEventListener("click",e=>busy(e.currentTarget,showAccountSessions));
@@ -4858,7 +4927,7 @@ function renderChatStatus(){
   else if(!info.enabled){say("warn",tr("Chat paused"),tr("This chat is paused — nothing in it is being saved."));if(viewAllowed("sources"))action("text-link",tr("Choose chats"),async()=>navigate("sources"));}
   else if(!c.has_session){say("warn",tr("Account not connected"));if(viewAllowed("connection"))action("text-link",tr("Connect account"),async()=>navigate("connection"));}
   else if(!c.running){say("warn",tr("Observation off"),tr("Observation is off — new messages, edits and deletions are not being saved."));
-    if(may("collect")&&!s.chats_limited)action("text-link",tr("Start observation"),async()=>{await json("collector/start",{});await refreshStatus();toast(tr("Observation started. New messages, edits and deletions will appear here."));});}
+    if(may("collect")&&!s.chats_limited)action("text-link",tr("Start observation"),async()=>{if(!await confirmOtherSessions())return;await json("collector/start",{});await refreshStatus();toast(tr("Observation started. New messages, edits and deletions will appear here."));});}
   else if(c.storage_low)say("warn",tr("Files paused: low disk space"),tr("Observing, but the disk is almost full ({size} free): photos & files are paused until space is freed. Messages are still saved.",{size:humanSize(c.disk_free_bytes)}));
   else say(c.connected?"ok":"warn",c.connected?tr("Observing"):tr("Reconnecting to Telegram"),c.connected?tr("Observing — new messages, edits and deletions are saved as they happen.")+recheckText(c):tr("Reconnecting to Telegram — missed changes are requested again once connected."));
   const mode=node("div","chat-mode-chips");
@@ -5525,6 +5594,7 @@ async function openExportDialog(){
     }
   }
   $("export-dialog-cancel").onclick=()=>dialog.close("cancel");
+  importedKeyNotice("export-imported-key");
   dialog.returnValue="";dialog.showModal();
   const choice=await new Promise(resolve=>dialog.addEventListener("close",()=>resolve(dialog.returnValue),{once:true}));
   if(choice!=="start"||revision!==state.workspaceRevision||generation!==chatGeneration)return;

@@ -232,6 +232,11 @@ class EndSession(BaseModel):
     hash: str = Field(pattern=r"^-?[0-9]{1,20}$")
 
 
+class AutoOnlySession(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    enabled: StrictBool = False
+
+
 class WitnessProbe(BaseModel):
     model_config = ConfigDict(extra="forbid")
     enabled: StrictBool = False

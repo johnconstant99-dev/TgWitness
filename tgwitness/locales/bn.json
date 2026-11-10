@@ -8556,5 +8556,16 @@
   "Probe not sent.": "প্রোব পাঠানো হয়নি।",
   "This workspace answers probes from: {list}": "এই ওয়ার্কস্পেস এদের প্রোবের উত্তর দেয়: {list}",
   "Choose a witness workspace signed in with a different Telegram account.": "অন্য একটি টেলিগ্রাম অ্যাকাউন্টে সাইন ইন করা একটি সাক্ষী ওয়ার্কস্পেস বেছে নিন।",
-  "Watchlist hits from lists set to send an alert": "সতর্কতা পাঠাতে সেট করা ওয়াচলিস্টের মিল"
+  "Watchlist hits from lists set to send an alert": "সতর্কতা পাঠাতে সেট করা ওয়াচলিস্টের মিল",
+  "A new session signed in to this account: {device}": "এই অ্যাকাউন্টে একটি নতুন সেশন সাইন ইন করেছে: {device}",
+  "a device Telegram did not name": "টেলিগ্রাম নাম দেয়নি এমন একটি ডিভাইস",
+  "This workspace's Telegram session key was imported. Copies of it can exist outside Telegram's session list.": "এই কর্মক্ষেত্রের টেলিগ্রাম সেশন কী আমদানি করা হয়েছিল। এর অনুলিপি টেলিগ্রামের সেশন তালিকার বাইরেও থাকতে পারে।",
+  "They can read the same chats while this observation runs.": "এই পর্যবেক্ষণ চলাকালীন তারা একই চ্যাটগুলি পড়তে পারে।",
+  "Start anyway": "তবুও শুরু করুন",
+  "Open Sessions of this account": "এই অ্যাকাউন্টের সেশনসমূহ খুলুন",
+  "Make this the only session when Telegram allows it": "টেলিগ্রাম অনুমতি দিলে এটিকে একমাত্র সেশন করুন",
+  "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "সেশনটি ২৪ ঘণ্টা পুরনো হলে তবেই টেলিগ্রাম এটি অনুমোদন করে। TgWitness পরে আবার চেষ্টা করে এবং নির্ধারিত দুই-ধাপের পাসওয়ার্ড দেখায়।",
+  "Set automatically; open Sessions of this account to see it once.": "স্বয়ংক্রিয়ভাবে নির্ধারিত; একবার দেখতে এই অ্যাকাউন্টের সেশনসমূহ খুলুন।",
+  "Automatic only-session changed": "স্বয়ংক্রিয় একমাত্র-সেশন সেটিং বদলেছে",
+  "Only-session attempt postponed": "একমাত্র-সেশন চেষ্টা স্থগিত"
 }

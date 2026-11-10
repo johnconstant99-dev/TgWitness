@@ -8556,5 +8556,16 @@
   "Probe not sent.": "प्रोब नहीं भेजा गया।",
   "This workspace answers probes from: {list}": "यह कार्यक्षेत्र इनके प्रोब का जवाब देता है: {list}",
   "Choose a witness workspace signed in with a different Telegram account.": "किसी दूसरे Telegram खाते से साइन इन किया गया गवाह कार्यक्षेत्र चुनें।",
-  "Watchlist hits from lists set to send an alert": "अलर्ट भेजने के लिए सेट की गई निगरानी सूचियों से मिले परिणाम"
+  "Watchlist hits from lists set to send an alert": "अलर्ट भेजने के लिए सेट की गई निगरानी सूचियों से मिले परिणाम",
+  "A new session signed in to this account: {device}": "इस खाते में एक नया सत्र साइन इन हुआ: {device}",
+  "a device Telegram did not name": "एक उपकरण जिसका नाम Telegram ने नहीं दिया",
+  "This workspace's Telegram session key was imported. Copies of it can exist outside Telegram's session list.": "इस कार्यक्षेत्र की Telegram सत्र कुंजी आयात की गई थी। इसकी प्रतियाँ Telegram की सत्र सूची के बाहर मौजूद हो सकती हैं।",
+  "They can read the same chats while this observation runs.": "यह निरीक्षण चलने के दौरान वे वही चैट पढ़ सकते हैं।",
+  "Start anyway": "फिर भी शुरू करें",
+  "Open Sessions of this account": "इस खाते के सत्र खोलें",
+  "Make this the only session when Telegram allows it": "जब Telegram अनुमति दे तब इसे एकमात्र सत्र बनाएँ",
+  "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "Telegram इसकी अनुमति सत्र के 24 घंटे पुराना होने के बाद ही देता है। TgWitness बाद में फिर कोशिश करता है और अपने द्वारा सेट किया गया दो-चरणीय पासवर्ड दिखाता है।",
+  "Set automatically; open Sessions of this account to see it once.": "स्वतः सेट; इसे एक बार देखने के लिए इस खाते के सत्र खोलें।",
+  "Automatic only-session changed": "स्वचालित एकमात्र-सत्र सेटिंग बदली",
+  "Only-session attempt postponed": "एकमात्र-सत्र का प्रयास स्थगित"
 }

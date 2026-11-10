@@ -8517,5 +8517,16 @@
   "Probe not sent.": "探测未发送。",
   "This workspace answers probes from: {list}": "此工作区回复以下工作区的探测：{list}",
   "Choose a witness workspace signed in with a different Telegram account.": "请选择一个使用不同 Telegram 账户登录的见证工作区。",
-  "Watchlist hits from lists set to send an alert": "来自设置为发送提醒的监视列表的命中"
+  "Watchlist hits from lists set to send an alert": "来自设置为发送提醒的监视列表的命中",
+  "A new session signed in to this account: {device}": "有新会话登录了该账户：{device}",
+  "a device Telegram did not name": "Telegram 未命名的设备",
+  "This workspace's Telegram session key was imported. Copies of it can exist outside Telegram's session list.": "该工作区的 Telegram 会话密钥是导入的。其副本可能存在于 Telegram 会话列表之外。",
+  "They can read the same chats while this observation runs.": "在本次观察运行期间，它们可以读取相同的聊天。",
+  "Start anyway": "仍然开始",
+  "Open Sessions of this account": "打开该账户的会话",
+  "Make this the only session when Telegram allows it": "在 Telegram 允许时设为唯一会话",
+  "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "Telegram 只有在会话满 24 小时后才允许此操作。TgWitness 稍后会重试，并显示它设置的两步验证密码。",
+  "Set automatically; open Sessions of this account to see it once.": "已自动设置；打开该账户的会话可查看一次。",
+  "Automatic only-session changed": "自动唯一会话设置已更改",
+  "Only-session attempt postponed": "唯一会话尝试已推迟"
 }

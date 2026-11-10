@@ -8,6 +8,10 @@ import uuid
 from contextlib import suppress
 from urllib.parse import urlsplit
 
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.x509 import ocsp
+from cryptography.x509.oid import AuthorityInformationAccessOID
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .anchor import timestamp_request
@@ -18,7 +22,8 @@ from .security import private_write
 from .store import canonical, utcnow
 from .tsa_roots import QUALIFIED_TSA, trusted_roots
 from .verify import (DRAND_CHAIN, DRAND_GENESIS, DRAND_PERIOD, DRAND_RELAYS, OTS_BITCOIN, OTS_MAGIC, OTS_PENDING,
-                     drand_beacon, drand_time, ots_summary, timestamp_reply_summary, timestamp_signature)
+                     drand_beacon, drand_time, ots_summary, revocation_status, revocation_subject,
+                     timestamp_reply_summary, timestamp_signature)
 
 
 DEFAULT_TSA = [QUALIFIED_TSA, "https://freetsa.org/tsr", "https://timestamp.sectigo.com"]
@@ -31,6 +36,7 @@ LOOP_SECONDS = 30
 OTS_UPGRADE_AGE = 3600
 OTS_UPGRADE_FILES = 8
 OTS_TREE_LIMIT = 1024 * 1024
+REVOCATION_LIMITS = {"ocsp": 64 * 1024, "crl": 4 * 1024 * 1024}
 
 
 class OTSReader:
@@ -338,6 +344,48 @@ async def ots_stamp(digest: bytes, calendars, folder, name: str, network) -> lis
     return results
 
 
+def revocation_sources(certificate):
+    found = {}
+    for kind, extension in (("ocsp", x509.AuthorityInformationAccess), ("crl", x509.CRLDistributionPoints)):
+        try:
+            value = certificate.extensions.get_extension_for_class(extension).value
+        except x509.ExtensionNotFound:
+            continue
+        names = ([item.access_location for item in value if item.access_method == AuthorityInformationAccessOID.OCSP]
+                 if kind == "ocsp" else [name for point in value for name in point.full_name or []])
+        found[kind] = next((name.value for name in names if isinstance(name, x509.UniformResourceIdentifier)
+                            and urlsplit(name.value).scheme in ("http", "https")), None)
+    return [(kind, url) for kind, url in found.items() if url]
+
+
+async def revocation_evidence(reply, target, network):
+    try:
+        subject = revocation_subject(reply, trusted_roots())
+        sources = revocation_sources(subject["signer"])
+    except Exception as exc:
+        return {"status": "unavailable", "error": problem(exc)}
+    errors = []
+    for kind, url in sources:
+        try:
+            async with asyncio.timeout(20 if kind == "ocsp" else 30):
+                if kind == "ocsp":
+                    query = ocsp.OCSPRequestBuilder().add_certificate(
+                        subject["signer"], subject["issuer"], hashes.SHA1()).build().public_bytes(serialization.Encoding.DER)
+                    answer = await post(url, query, {"Content-Type": "application/ocsp-request",
+                                                     "Accept": "application/ocsp-response"}, network,
+                                        timeout=15, limit=REVOCATION_LIMITS[kind])
+                else:
+                    answer = (await request("GET", url, network, {"Accept": "application/pkix-crl"},
+                                            timeout=20, limit=REVOCATION_LIMITS[kind]))[2]
+            state = revocation_status(kind, answer, subject)
+            private_write(target.with_suffix("." + kind), answer)
+            return {"url": url, "file": target.with_suffix("." + kind).name, **state, **({"errors": errors} if errors else {})}
+        except Exception as exc:
+            errors.append(kind.upper() + " " + url + ": " + problem(exc))
+    return {"status": "unavailable",
+            "error": "; ".join(errors)[:600] if errors else "The signing certificate names no OCSP or CRL address"}
+
+
 async def anchor_latest(store, network, settings):
     found = latest_checkpoint(store)
     if not found:
@@ -363,7 +411,9 @@ async def anchor_latest(store, network, settings):
             signed = timestamp_signature(reply, trusted_roots())
             private_write(folder / (name + "." + service_name(url) + ".tsq"), query)
             private_write(target, reply)
-            results.append({"service": url, "kind": "rfc3161", "ok": True, "time": summary["time"], **signed})
+            revocation = await revocation_evidence(reply, target, network)
+            results.append({"service": url, "kind": "rfc3161", "ok": True, "time": summary["time"], **signed,
+                            "revocation": revocation})
         except Exception as exc:
             results.append({"service": url, "kind": "rfc3161", "ok": False, "received": received, "error": problem(exc)})
     for outcome in await ots_stamp(digest, settings["ots_calendars"], folder, name, network):

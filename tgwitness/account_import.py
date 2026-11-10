@@ -35,6 +35,11 @@ def string_session(dc, key):
     return session.save()
 
 
+def hex_dc_session(value):
+    found = re.fullmatch(r"([a-fA-F0-9]{512}):([1-5])", (value or "").strip()) if isinstance(value, str) else None
+    return string_session(int(found.group(2)), bytes.fromhex(found.group(1))) if found else None
+
+
 def session_key(value):
     try:
         session = StringSession((value or "").strip())
@@ -46,6 +51,9 @@ def session_key(value):
 def validate_string(value):
     if not isinstance(value, str) or len(value) > 4096:
         raise ValueError("Expected a Telethon StringSession of at most 4 KiB.")
+    converted = hex_dc_session(value)
+    if converted:
+        return converted
     try:
         session = StringSession(value.strip())
         if not session.auth_key:
@@ -188,9 +196,12 @@ def import_accounts(files, passcode="", include_password=False):
             if len(content) > 4096:
                 raise ValueError("Unsupported account file. Expected SQLite, TData ZIP, account JSON, or StringSession text.")
             try:
-                result = {"session": validate_string(content.decode("utf-8-sig")), "format": "Telethon StringSession"}
+                text = content.decode("utf-8-sig")
             except UnicodeError:
                 raise ValueError("Unsupported binary account file.") from None
+            keyed = hex_dc_session(text)
+            result = ({"session": keyed, "format": "Auth key HEX and DC"} if keyed else
+                      {"session": validate_string(text), "format": "Telethon StringSession"})
         converted.append(result)
     merged = {"formats": [item["format"] for item in converted]}
     for result in converted:

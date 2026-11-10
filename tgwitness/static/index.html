@@ -507,6 +507,7 @@
       <div class="account-export-dialog-head"><div><span class="eyebrow">NEW ACCOUNT EXPORT</span><h2 id="account-export-dialog-title" tabindex="-1">Choose what to save</h2></div><button class="quiet" id="account-export-close" type="button" aria-label="Close export settings">×</button></div>
       <p class="muted">Every accessible chat and its full visible history are selected by default. Observation sources are separate from this export.</p>
       <p class="hint">For a personal backup, describe that purpose. You can prepare a separate sharing copy after the export finishes.</p>
+      <p class="hint" hidden id="account-export-imported-key"></p>
       <div class="export-language"><label for="account-export-language">Report language</label><select id="account-export-language" data-no-translate></select><p class="hint">Report labels use this language. Original messages stay unchanged.</p></div>
       <div class="export-language"><label for="account-export-format">Export format</label><select id="account-export-format"><option value="tgwitness">TgWitness signed archive</option><option value="telegram_json">Telegram Desktop compatible JSON</option><option value="telegram_html">Telegram Desktop compatible HTML</option><option value="telegram_both">Telegram Desktop compatible JSON and HTML</option></select><p class="hint">Compatible views include the signed source records and file hash references. TgWitness generates these views; Telegram Desktop does not.</p></div>
       <div class="account-export-purpose"><label for="account-export-purpose">Collection purpose</label><textarea id="account-export-purpose" rows="2" maxlength="1000" required placeholder="Why this account snapshot is being collected"></textarea><p class="hint">The purpose is included in the signed export. Describe the specific investigation or request.</p><button class="secondary account-export-preset" id="account-export-minimize" type="button">Minimize collection</button><p class="hint">Turns off media and optional account data. Chat and sender filters remain yours to set.</p></div>
@@ -1654,6 +1655,7 @@
   <form method="dialog" id="export-dialog-form">
     <h2 id="export-dialog-title">Export chat messages</h2>
     <div id="export-dialog-facts"></div>
+    <p class="hint" hidden id="export-imported-key"></p>
     <div id="export-saved-jobs"></div>
     <label>History acquisition <select id="export-transport"><option value="regular">Regular session</option><option value="takeout">Telegram Takeout session</option></select></label>
     <p class="hint">Takeout can accelerate public channel and supergroup history. Telegram may require export approval. Server-requested waits still apply.</p>

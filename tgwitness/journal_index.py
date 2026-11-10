@@ -16,7 +16,41 @@ READ_GROUPS = {
     "search": ("event_text_search",),
     "payload_search": ("event_payload_search",),
     "people_v1": PEOPLE_TABLES,
+    "media_identity": ("media_identity_index",),
 }
+
+
+def attachment_key(info):
+    if not isinstance(info, dict) or info.get("kind") not in ("document", "photo") or type(info.get("id")) is not int \
+            or not isinstance(info.get("variant"), str):
+        return None
+    return info["kind"] + ":" + str(info["id"]) + ":" + info["variant"]
+
+
+def raw_attachment(media):
+    if not isinstance(media, dict):
+        return None
+    if media.get("_") == "MessageMediaWebPage":
+        page = media.get("webpage") if isinstance(media.get("webpage"), dict) else {}
+        photo, document = page.get("photo"), page.get("document")
+        item = photo if isinstance(photo, dict) and photo.get("_") == "Photo" else document
+    elif media.get("_") in ("MessageMediaPhoto", "MessageMediaDocument"):
+        item = media.get("document") or media.get("photo")
+    else:
+        return None
+    if not isinstance(item, dict) or type(item.get("id")) is not int:
+        return None
+    if item.get("_") == "Document":
+        return {"kind": "document", "id": item["id"], "variant": "original"}
+    sizes = []
+    for size in item.get("sizes") if item.get("_") == "Photo" and isinstance(item.get("sizes"), list) else []:
+        if isinstance(size, dict) and size.get("_") in ("PhotoSize", "PhotoSizeProgressive"):
+            counts = size.get("sizes") if isinstance(size.get("sizes"), list) and size["sizes"] else [size.get("size", 0)]
+            if all(type(count) is int for count in counts):
+                sizes.append((max(counts), size))
+    if not sizes:
+        return None
+    return {"kind": "photo", "id": item["id"], "variant": max(sizes, key=lambda pair: pair[0])[1].get("type")}
 
 
 def search_text(value):
@@ -59,6 +93,8 @@ class JournalIndex:
             "CREATE INDEX IF NOT EXISTS event_media ON events("
             "json_extract(payload,'$.media_sha256'),chat_id,kind)",
             "CREATE INDEX IF NOT EXISTS event_text_nul ON events(seq) WHERE " + NUL_PAYLOAD,
+            "CREATE TABLE IF NOT EXISTS media_identity_index (identity TEXT PRIMARY KEY, sha256 TEXT NOT NULL,"
+            "bytes INTEGER NOT NULL, seq INTEGER NOT NULL) WITHOUT ROWID",
         ):
             db.execute(sql)
         self.search_enabled = self.create_search()
@@ -83,6 +119,9 @@ class JournalIndex:
             if self.payload_search_enabled and row["seq"] > payload_seq:
                 self.search_payload(row["seq"], row["payload"])
         self.initialize_counts()
+        for row in db.execute("SELECT seq,kind,payload FROM events WHERE kind='media.saved' AND seq>? ORDER BY seq",
+                              (self.position("media_identity"),)):
+            self.media_identity({"seq": row["seq"], "kind": row["kind"], "payload": json.loads(row["payload"])})
         if not self.position("missing_recovery"):
             db.execute("UPDATE message_state_index SET missing=0 WHERE missing=1 AND text_seq > "
                        "(SELECT max(seq) FROM events WHERE events.chat_id=message_state_index.chat_id "
@@ -134,6 +173,24 @@ class JournalIndex:
             self.search_payload(event["seq"], payload)
         self.count(event["chat_id"], event["kind"], 1)
         self.advance("counts", event["seq"])
+        self.media_identity(event)
+
+    def media_identity(self, event):
+        if event["kind"] != "media.saved":
+            return
+        payload = event["payload"] if isinstance(event["payload"], dict) else {}
+        digest, size = payload.get("media_sha256"), payload.get("size")
+        info = payload.get("attachment")
+        if not isinstance(info, dict) and type(payload.get("message_event")) is int:
+            row = self.db.execute("SELECT CASE WHEN json_type(payload,'$.raw.media')='object' "
+                                  "THEN json_extract(payload,'$.raw.media') END FROM events WHERE seq=?",
+                                  (payload["message_event"],)).fetchone()
+            info = raw_attachment(json.loads(row[0]) if row and isinstance(row[0], str) else None)
+        key = attachment_key(info)
+        if key and isinstance(digest, str) and len(digest) == 64 and set(digest) <= set("0123456789abcdef") \
+                and type(size) is int:
+            self.db.execute("INSERT OR IGNORE INTO media_identity_index VALUES (?,?,?,?)", (key, digest, size, event["seq"]))
+        self.advance("media_identity", event["seq"])
 
     def count(self, chat, kind, total):
         self.db.execute("INSERT INTO event_kind_counts VALUES (?,?) "

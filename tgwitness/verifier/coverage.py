@@ -197,6 +197,10 @@ class Coverage:
         elif kind == "session.exclusive_from":
             s.setdefault("only_session", []).append({"from": at, "ended": payload.get("other_sessions_ended"),
                                                     "two_step": payload.get("two_step")})
+        elif kind == "session.exclusive_automatic":
+            s["only_session_automatic"] = {"at": at, "enabled": payload.get("enabled") is True}
+        elif kind == "session.exclusive_postponed":
+            s["only_session_postponed"] = s.get("only_session_postponed", 0) + 1
         elif kind == "session.exclusive_ended" and s.get("only_session"):
             s["only_session"][-1]["until"] = at
         elif kind == "session.security_baseline" and payload.get("trigger") == "observation_start" \
@@ -473,6 +477,11 @@ def session_lines(coverage):
                      + ": other sessions ended" + (" (" + str(item["ended"]) + ")" if isinstance(item.get("ended"), int) else "")
                      + ", two-step password " + ("set from this workspace" if item.get("two_step") == "set_now"
                                                   else "already on"))
+    if s.get("only_session_automatic"):
+        item = s["only_session_automatic"]
+        lines.append("Automatic only-session " + ("on" if item["enabled"] else "off") + " from " + item["at"]
+                     + (", postponed by Telegram " + str(s["only_session_postponed"]) + " time(s)"
+                        if s.get("only_session_postponed") else ""))
     if s.get("probes"):
         lines.append("Witness probes: " + ", ".join(name + " " + str(count) for name, count in s["probes"].items())
                      + ("; slowest live answer " + str(round(s["probe_delay_max"], 1)) + " s"

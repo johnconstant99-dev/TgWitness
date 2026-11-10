@@ -8634,5 +8634,16 @@
   "Probe not sent.": "Sonda nie została wysłana.",
   "This workspace answers probes from: {list}": "Ten obszar roboczy odpowiada na sondy z: {list}",
   "Choose a witness workspace signed in with a different Telegram account.": "Wybierz obszar roboczy świadka zalogowany na inne konto Telegram.",
-  "Watchlist hits from lists set to send an alert": "Trafienia z list obserwacyjnych ustawionych na wysyłanie alertu"
+  "Watchlist hits from lists set to send an alert": "Trafienia z list obserwacyjnych ustawionych na wysyłanie alertu",
+  "A new session signed in to this account: {device}": "Nowa sesja zalogowała się na tym koncie: {device}",
+  "a device Telegram did not name": "urządzenie, którego Telegram nie nazwał",
+  "This workspace's Telegram session key was imported. Copies of it can exist outside Telegram's session list.": "Klucz sesji Telegrama tego obszaru roboczego został zaimportowany. Jego kopie mogą istnieć poza listą sesji Telegrama.",
+  "They can read the same chats while this observation runs.": "Mogą one czytać te same czaty, dopóki trwa ta obserwacja.",
+  "Start anyway": "Rozpocznij mimo to",
+  "Open Sessions of this account": "Otwórz sesje tego konta",
+  "Make this the only session when Telegram allows it": "Ustaw jako jedyną sesję, gdy Telegram na to pozwoli",
+  "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "Telegram pozwala na to dopiero po 24 godzinach od zalogowania sesji. TgWitness spróbuje ponownie później i pokaże ustawione hasło dwuetapowe.",
+  "Set automatically; open Sessions of this account to see it once.": "Ustawione automatycznie; otwórz sesje tego konta, aby zobaczyć je jeden raz.",
+  "Automatic only-session changed": "Zmieniono automatyczną jedyną sesję",
+  "Only-session attempt postponed": "Odłożono próbę ustawienia jedynej sesji"
 }

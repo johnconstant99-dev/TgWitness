@@ -8556,5 +8556,16 @@
   "Probe not sent.": "Sonda não enviada.",
   "This workspace answers probes from: {list}": "Este espaço de trabalho responde a sondas de: {list}",
   "Choose a witness workspace signed in with a different Telegram account.": "Escolha um espaço de trabalho testemunha conectado com outra conta do Telegram.",
-  "Watchlist hits from lists set to send an alert": "Ocorrências de listas de observação configuradas para enviar um alerta"
+  "Watchlist hits from lists set to send an alert": "Ocorrências de listas de observação configuradas para enviar um alerta",
+  "A new session signed in to this account: {device}": "Uma nova sessão entrou nesta conta: {device}",
+  "a device Telegram did not name": "um dispositivo que o Telegram não nomeou",
+  "This workspace's Telegram session key was imported. Copies of it can exist outside Telegram's session list.": "A chave de sessão do Telegram deste espaço de trabalho foi importada. Podem existir cópias fora da lista de sessões do Telegram.",
+  "They can read the same chats while this observation runs.": "Elas podem ler os mesmos chats enquanto esta observação estiver em andamento.",
+  "Start anyway": "Iniciar mesmo assim",
+  "Open Sessions of this account": "Abrir Sessões desta conta",
+  "Make this the only session when Telegram allows it": "Tornar esta a única sessão quando o Telegram permitir",
+  "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "O Telegram só permite isso depois que a sessão completa 24 horas. O TgWitness tenta de novo mais tarde e mostra a senha de duas etapas que definir.",
+  "Set automatically; open Sessions of this account to see it once.": "Definida automaticamente; abra Sessões desta conta para vê-la uma única vez.",
+  "Automatic only-session changed": "Sessão única automática alterada",
+  "Only-session attempt postponed": "Tentativa de sessão única adiada"
 }

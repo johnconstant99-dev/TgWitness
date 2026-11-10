@@ -282,6 +282,12 @@ def register(app, ctx):
     router.post("/api/account/sessions/only", dependencies=[Depends(authenticate)])(
         routes_accounts.make_only_account_session
     )
+    router.post("/api/account/sessions/only/automatic", dependencies=[Depends(authenticate)])(
+        routes_accounts.set_auto_only_account_session
+    )
+    router.post("/api/account/sessions/only/password", dependencies=[Depends(authenticate)])(
+        routes_accounts.only_account_session_password
+    )
     router.get("/api/account/probe", dependencies=[Depends(authenticate)])(
         routes_accounts.witness_probe
     )

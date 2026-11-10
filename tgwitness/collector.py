@@ -54,7 +54,8 @@ from .monitoring import (capture_settings, media_kind, monitoring_settings, dura
                          effective_media_rule)
 from . import file_hashes
 from . import ephemeral
-from .media_jobs import MediaAttempt, MediaOutcome, failure_outcome, lane_limits, plan_media, validate_observation
+from .media_jobs import (MediaAttempt, MediaOutcome, REUSE_MEANING, failure_outcome, lane_limits, plan_media,
+                         remember_file, reuse_into, stored_copy, validate_observation)
 from . import secret_chats
 from .scope import allowed, folder_rule, in_folder, kind_of, recheck_settings, scope_settings, visibility
 from .verify import fingerprint
@@ -101,6 +102,13 @@ ONLY_SESSION_MEANING = ("All other sessions of this account were ended from this
                         "notices (777000) and its session list keep being recorded.")
 ONLY_SESSION_ENDED_MEANING = ("Telegram's session list shows a session other than this workspace's after this "
                               "session was made the only one.")
+AUTO_ONLY_SESSION_AFTER = 24 * 3600
+AUTO_ONLY_SESSION_EVERY = 300
+AUTO_ONLY_SESSION_MEANING = ("Setting of this workspace: end every other session of the account automatically once "
+                             "Telegram allows it, 24 hours after the session key created here signed in. Telegram "
+                             "refuses auth.resetAuthorizations before that.")
+AUTO_ONLY_SESSION_POSTPONED_MEANING = ("Telegram did not let this workspace become the only session of the account. "
+                                       "Other sessions are still signed in; the collector tries again later.")
 
 
 def sessions_snapshot(authorizations):
@@ -521,6 +529,11 @@ class Collector:
         self.sessions_checked_at = -SESSIONS_EVERY
         self.sessions_checking = 0
         self.session_revoked = None
+        self.only_session_password = None
+        self.auto_only_checked_at = -AUTO_ONLY_SESSION_EVERY
+        self.auto_only_retry_at = 0
+        self.auto_only_failures = 0
+        self.auto_only_reason = None
         self.security_log_checked_at = -SECURITY_LOG_EVERY
         self.security_log_last_id = 0
         self.observed_since = None
@@ -618,6 +631,7 @@ class Collector:
             "client_checks": self.store.get_setting("client_checks", None),
             "session_origin": credentials.get("session_origin"),
             "pending_new_session": bool(self.vault.read("independent_login")),
+            "pending_only_session_password": bool(self.only_session_password),
             "last_error": self.last_error, "last_heartbeat": self.last_heartbeat,
             "journal_write_failures": getattr(self, "journal_write_failures", 0),
             "media_pending": sum(n for s, n in self.store.media_stats().items()
@@ -2270,12 +2284,17 @@ class Collector:
         await self.restore()
         result = await asyncio.wait_for(self.client(functions.account.GetAuthorizationsRequest()), 30)
         await self.check_sessions()
-        return {"sessions": [{
-            "hash": str(a.hash), "current": bool(a.current), "device_model": a.device_model, "platform": a.platform,
-            "app_name": a.app_name, "app_version": a.app_version, "official_app": bool(a.official_app),
-            "country": a.country, "region": a.region, "created_at": date_string(a.date_created),
-            "active_at": date_string(a.date_active), "password_pending": bool(a.password_pending)}
-            for a in result.authorizations], "inactive_ttl_days": getattr(result, "authorization_ttl_days", None)}
+        return {"key_origin": (self.store.get_setting("account", None) or {}).get("key_origin"),
+                "auto_only_session": bool(self.store.get_setting("auto_only_session", False)),
+                "only_session": self.store.get_setting("only_session", None),
+                "pending_only_session_password": bool(self.only_session_password),
+                "sessions": [{
+                    "hash": str(a.hash), "current": bool(a.current), "device_model": a.device_model,
+                    "platform": a.platform, "app_name": a.app_name, "app_version": a.app_version,
+                    "official_app": bool(a.official_app), "country": a.country, "region": a.region,
+                    "created_at": date_string(a.date_created), "active_at": date_string(a.date_active),
+                    "password_pending": bool(a.password_pending)} for a in result.authorizations],
+                "inactive_ttl_days": getattr(result, "authorization_ttl_days", None)}
 
     async def end_session(self, session_hash):
         await self.restore()
@@ -2332,6 +2351,59 @@ class Collector:
             self.store.set_setting("only_session", {"since": utcnow()})
             self.store.append("session.exclusive_from", record)
         return {"other_sessions_ended": ended["terminated"], "two_step": record["two_step"], "password": password}
+
+    def set_auto_only_session(self, enabled):
+        enabled = bool(enabled)
+        if (self.store.get_setting("account", None) or {}).get("key_origin") != "created":
+            raise ValueError("This session key was imported, so copies of it can exist outside Telegram's session "
+                             "list. Sign in again from this workspace first.")
+        if enabled != bool(self.store.get_setting("auto_only_session", False)):
+            with self.store.transaction():
+                self.store.set_setting("auto_only_session", enabled)
+                self.store.append("session.exclusive_automatic", {"enabled": enabled,
+                                                                  "meaning": AUTO_ONLY_SESSION_MEANING})
+        self.auto_only_failures, self.auto_only_reason, self.auto_only_retry_at = 0, None, 0
+        return {"auto_only_session": enabled}
+
+    def take_only_session_password(self):
+        password, self.only_session_password = self.only_session_password, None
+        return {"password": password}
+
+    def authorized_age(self):
+        from .health import age, now_utc
+        found = self.store.events_of(("account.authorized",), limit=1)
+        if not found or (found[0]["payload"] or {}).get("key_origin") != "created":
+            return None
+        return age(found[0]["observed_at"], now_utc())
+
+    async def auto_only_session(self):
+        if not self.store.get_setting("auto_only_session", False) or self.store.get_setting("only_session", None):
+            return
+        if (self.store.get_setting("account", None) or {}).get("key_origin") != "created":
+            return
+        if time.monotonic() < self.auto_only_retry_at:
+            return
+        waited = self.authorized_age()
+        if waited is None or waited < AUTO_ONLY_SESSION_AFTER:
+            return
+        try:
+            result = await self.make_only_session()
+        except asyncio.CancelledError:
+            raise
+        except Exception as exc:
+            self.auto_only_failures = min(self.auto_only_failures + 1, 8)
+            delay = min(6 * 3600, 900 * 2 ** (self.auto_only_failures - 1))
+            self.auto_only_retry_at = time.monotonic() + delay
+            reason = str(exc) if isinstance(exc, ValueError) else type(exc).__name__
+            if reason != self.auto_only_reason:
+                self.auto_only_reason = reason
+                self.store.append("session.exclusive_postponed", {
+                    "reason": reason, "attempt": self.auto_only_failures, "retry_after_seconds": delay,
+                    "meaning": AUTO_ONLY_SESSION_POSTPONED_MEANING})
+            return
+        self.auto_only_failures, self.auto_only_reason, self.auto_only_retry_at = 0, None, 0
+        if result.get("password"):
+            self.only_session_password = result["password"]
 
     async def change_password(self, current_password, new_password, hint=""):
         await self.restore()
@@ -2628,6 +2700,10 @@ class Collector:
                 if now - self.security_log_checked_at >= SECURITY_LOG_EVERY:
                     self.security_log_checked_at = now
                     await self.poll_security_log()
+                if (time.monotonic() - self.auto_only_checked_at >= AUTO_ONLY_SESSION_EVERY
+                        and time.time() >= self.store.get_setting("rpc_backoff_until", 0)):
+                    self.auto_only_checked_at = time.monotonic()
+                    await self.auto_only_session()
             await asyncio.sleep(min(10, interval))
 
     async def note_drop(self):
@@ -3656,25 +3732,27 @@ class Collector:
     async def run_export(self, entity, info, record, report_options=None):
         client = self.client
         directory = self.store.root / "temporary-exports"
-        scratch = directory / ("tgwitness-export-chat-" + record["id"] + ".jsonl")
         out_path = directory / ("tgwitness-export-chat-" + record["id"] + ".zip")
-        media_dir = directory / ("tgwitness-export-chat-" + record["id"] + "-media")
         chat_id = record["chat_id"]
+        partial, clock, profile, observer, problems = None, None, {}, {}, None
         try:
 
             directory.mkdir(mode=0o700, exist_ok=True)
-            media_dir.mkdir(mode=0o700, exist_ok=True)
             files = record.get("files")
             settings = capture_settings(self.store)
+            partial = await complete_in_thread(chat_export.PartialExport, self.store, self.vault, chat_id,
+                                               (self.store.get_setting("account", None) or {}).get("id"))
+            scratch, media_dir = partial.start(record["id"], record.get("started_at"), files), partial.media
+            record.update(partial.public())
             self.store.append("chat_export.started", {"chat_id": chat_id, "title": info.get("title"),
                                                       "meaning": "full visible history snapshot",
                                                       "attachments": files or ("within the workspace's attachment settings"
-                                                      if settings["download_media"] else "off")},
+                                                      if settings["download_media"] else "off"), **partial.public()},
                               chat_id)
             clock = await self.telegram_clock()
             profile, observer, problems = await self.chat_profile(entity, media_dir,
                 include_photo=files not in ("skip", "hashes") and settings["download_media"] and settings["include_avatars"])
-            count = await self.stream_history(entity, scratch, record, media_dir, files)
+            count = await self.stream_history(entity, scratch, record, media_dir, files, partial=partial)
             recheck = None
             if chat_id < -1000000000000:
                 absent = absent_numbers(scratch)
@@ -3701,6 +3779,7 @@ class Collector:
                     "acquisition": {"started_at": record.get("started_at"), "finished_at": utcnow(),
                                     "files": files or "workspace_settings",
                                     "clock_at_start": clock, "clock_at_end": await self.telegram_clock()}}
+            meta["acquisition"]["sessions"] = partial.sessions(meta["acquisition"]["finished_at"])
             names = await complete_in_thread(chat_export.journal_names, self.store, chat_id, scratch)
             await complete_in_thread(chat_export.build_bundle, scratch, meta, self.vault, out_path,
                                     self.param("export_max_gib") * 1024**3, report_options, media_dir, names)
@@ -3710,25 +3789,52 @@ class Collector:
                           filename=chat_export.archive_name(self.store, chat_id, info.get("title")))
             self.store.append("chat_export.completed", {"chat_id": chat_id, "message_count": count,
                 "fingerprint": fingerprint(self.vault.public_key),
-                "reconstructed_missed_events": False}, chat_id)
+                "reconstructed_missed_events": False, "sessions": len(meta["acquisition"]["sessions"])}, chat_id)
+            await complete_in_thread(partial.discard)
         except asyncio.CancelledError:
             record.update(phase="cancelled")
+            if partial:
+                record["partial"] = await complete_in_thread(partial.retain, "cancelled")
             self.note("chat_export.interrupted", {"chat_id": chat_id, "captured": record["captured"],
-                                                  "reason": "cancelled"}, chat_id)
+                                                  "reason": "cancelled",
+                                                  **({"partial": record["partial"]} if record.get("partial") else {})},
+                      chat_id)
             with suppress(OSError):
                 out_path.unlink(missing_ok=True)
             raise
         except BaseException as exc:
             record.update(phase="failed", error=type(exc).__name__)
             self.handle_authorization_error(exc, "chat export", client=client)
+            loss = (self.store.account_loss_statement(record.get("started_at"))
+                    if isinstance(exc, AUTHORIZATION_ERRORS) else None)
+            if partial:
+                record["partial"] = await complete_in_thread(partial.retain, type(exc).__name__, loss)
             self.note("chat_export.interrupted", {"chat_id": chat_id, "captured": record["captured"],
-                                                  "error_type": type(exc).__name__}, chat_id)
+                                                  "error_type": type(exc).__name__,
+                                                  **({"partial": record["partial"]} if record.get("partial") else {})},
+                      chat_id)
             with suppress(OSError):
                 out_path.unlink(missing_ok=True)
-        finally:
-            with suppress(OSError):
-                scratch.unlink(missing_ok=True)
-            shutil.rmtree(media_dir, ignore_errors=True)
+            if loss and (record.get("partial") or {}).get("retained"):
+                try:
+                    await complete_in_thread(partial.bundle, out_path, {
+                        "chat": {"id": chat_id, "title": info.get("title"), "kind": info.get("kind"),
+                                 "visibility": info.get("visibility"), "profile": profile,
+                                 **({"profile_errors": problems} if problems else {})},
+                        "observer": observer, "journal": chat_export.journal_changes(self.store, chat_id),
+                        "account": self.store.get_setting("account", None), "client": self.client_identity(),
+                        "route": self.route_receipt(),
+                        "acquisition": {"started_at": record.get("started_at"), "finished_at": utcnow(),
+                                        "files": record.get("files") or "workspace_settings", "clock_at_start": clock}},
+                        self.param("export_max_gib") * 1024**3, report_options)
+                    replica.outbox(self.store, out_path)
+                    self.export_path = out_path
+                    record.update(ready=True, filename=chat_export.archive_name(
+                        self.store, chat_id, info.get("title")).removesuffix(".zip") + "_partial.zip")
+                except Exception as error:
+                    record["partial"]["archive_error"] = type(error).__name__
+                    with suppress(OSError):
+                        out_path.unlink(missing_ok=True)
 
     async def read_numbers(self, entity, numbers, client=None):
         found = {}
@@ -3903,6 +4009,10 @@ class Collector:
         if size is None or size > limit:
             return {"file_status": "above_limit" if size else "unknown_size", "file_kind": kind,
                     **({"file_size": size} if size else {})}
+        reused = await complete_in_thread(reuse_into, self.store, directory, downloadable_media(message), size)
+        if reused:
+            return {"file": "media/" + reused["sha256"], "file_sha256": reused["sha256"], "file_size": size,
+                    "file_kind": kind, "file_reused": reused["source"]}
         if shutil.disk_usage(directory).free < size + self.param("media_min_free_mb") * 1024**2:
             raise ValueError("Not enough free disk space for the attachments of this export. Free space or turn "
                              "attachment downloads off under Sources → Recording.")
@@ -3934,6 +4044,7 @@ class Collector:
                             raise ValueError("existing_content_addressed_file_is_corrupt")
                     else:
                         temp.replace(destination)
+                    await complete_in_thread(remember_file, directory, media, digest, written)
                     return {"file": "media/" + digest, "file_sha256": digest, "file_size": written, "file_kind": kind}
                 except FLOOD_ERRORS as exc:
                     if attempt == 2:
@@ -3950,9 +4061,10 @@ class Collector:
         finally:
             temp.unlink(missing_ok=True)
 
-    async def stream_history(self, entity, scratch, record, media_dir=None, files=None):
-        count, started, attached = 0, time.monotonic(), []
-        with scratch.open("w", encoding="utf-8") as handle:
+    async def stream_history(self, entity, scratch, record, media_dir=None, files=None, partial=None):
+        count, started, attached, base = 0, time.monotonic(), [], 0
+        previous = partial.previous if partial else None
+        with (partial.writer() if partial else scratch.open("w", encoding="utf-8")) as handle:
             async def write(message, entry=None):
                 nonlocal count
                 if entry is None:
@@ -3965,8 +4077,8 @@ class Collector:
                 record["captured"] = count
                 if count % 100 == 0:
                     elapsed = time.monotonic() - started
-                    if record.get("total") and elapsed > 0:
-                        record["eta_seconds"] = round(max(0, record["total"] - count) / (count / elapsed))
+                    if record.get("total") and elapsed > 0 and count > base:
+                        record["eta_seconds"] = round(max(0, record["total"] - count) / ((count - base) / elapsed))
                 if count % 200 == 0:
                     handle.flush()
                     await asyncio.sleep(0)
@@ -3974,7 +4086,16 @@ class Collector:
             async def unparsed(number, error):
                 await write(None, unparsed_record(number, error))
             async with self.history_reader(entity) as (reader, wait):
-                await self.iterate_history(entity, write, on_unparsed=unparsed, client=reader, wait_time=wait)
+                if previous:
+                    await self.iterate_history(entity, write, min_id=previous["high"], on_unparsed=unparsed,
+                                               client=reader, wait_time=wait)
+                    for entry in handle.carry():
+                        await write(None, entry)
+                        if media_dir is not None and chat_export.awaits_file(entry):
+                            attached.append(entry["id"])
+                    base, started = count, time.monotonic()
+                await self.iterate_history(entity, write, offset_id=previous["low"] if previous else 0,
+                                           on_unparsed=unparsed, client=reader, wait_time=wait)
         if attached:
             await self.export_files(entity, scratch, record, media_dir, attached, files)
         return count
@@ -3992,7 +4113,7 @@ class Collector:
                 for line in source:
                     entry = json.loads(line)
                     if entry.get("id") in wanted:
-                        expected[entry["id"]] = hashlib.sha256(canonical(entry)).digest()
+                        expected[entry["id"]] = hashlib.sha256(canonical(message_details.stable(entry))).digest()
         for low in range(0, len(ids), 100):
             batch = ids[low:low + 100]
             for message in await self.client.get_messages(entity, ids=batch):
@@ -4001,7 +4122,8 @@ class Collector:
                 if message.id not in batch or message.id in found:
                     continue
                 if (utils.get_peer_id(message.peer_id) != utils.get_peer_id(entity)
-                        or hashlib.sha256(canonical(message_record(message))).digest() != expected.get(message.id)):
+                        or hashlib.sha256(canonical(message_details.stable(message_record(message)))).digest()
+                        != expected.get(message.id)):
                     found[message.id] = {"file_status": "message_changed_or_unavailable_at_media_read"}
                 else:
                     found[message.id] = await self.export_attachment(message, media_dir, files)
@@ -4293,6 +4415,18 @@ class Collector:
         timeout = self.param("media_timeout_seconds") + size // (self.param("media_min_speed_kbps") * 1024)
         media = downloadable_media(message)
         refreshed = False
+        info, known = await complete_in_thread(stored_copy, self.store, media_root, media, size)
+        if known:
+            attempt.advance("fetching")
+            attempt.advance("hashed_bytes")
+            attempt.advance("stored")
+            attempt.finish(MediaOutcome("done", {
+                "media_sha256": known["sha256"], "size": size,
+                "original_name": getattr(message.file, "name", None),
+                "mime_type": getattr(message.file, "mime_type", None),
+                "file_reference_refreshed": False, "attachment": info, "downloaded_bytes": 0,
+                "bytes_reused": {"media_event": known["seq"], "meaning": REUSE_MEANING}}))
+            return
 
         async def download(media):
             with temp.open("wb") as stream:
@@ -4329,6 +4463,7 @@ class Collector:
             "original_name": getattr(message.file, "name", None),
             "mime_type": getattr(message.file, "mime_type", None),
             "file_reference_refreshed": refreshed,
+            **({"attachment": info} if info else {}),
         }))
 
     async def attachment_hashes(self, message, *, job=None, client=None):

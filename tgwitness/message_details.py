@@ -160,6 +160,13 @@ def media_info(media, unread=None):
     return {k: v for k, v in info.items() if v not in (None, "")}
 
 
+COUNTERS = ("views", "forwards", "replies", "reactions")
+
+
+def stable(record):
+    return {key: value for key, value in record.items() if key not in COUNTERS}
+
+
 def details(raw):
     if not isinstance(raw, dict):
         return {}

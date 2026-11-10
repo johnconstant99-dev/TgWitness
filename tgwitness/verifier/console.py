@@ -262,6 +262,20 @@ class Console:
                            point + " · " + anchor.get("time", "?").replace("T", " ").replace("Z", " UTC"))
                 self.say("  " + " " * 27 + self.paint(self.t("signature chained to your root" if checked
                                                                else "signature not checked: add --tsa-ca"), "dim"))
+                revocation = anchor.get("revocation") or {}
+                status = revocation.get("status")
+                if status == "good":
+                    self.say("  " + " " * 27 + self.paint(self.t(
+                        "signing certificate not revoked as of {time} ({source})", source=revocation["source"],
+                        time=revocation["as_of"].replace("T", " ").replace("Z", " UTC")), "dim"))
+                elif status == "revoked_after":
+                    self.check("warn", "Timestamp warning", self.t(
+                        "signing certificate revoked at {time}, after the time stamp ({source})", source=revocation["source"],
+                        time=revocation["revoked_at"].replace("T", " ").replace("Z", " UTC")))
+                elif status == "failed":
+                    self.check("warn", "Timestamp warning", self.t("revocation check failed: {reason}", reason=revocation["error"]))
+                elif status:
+                    self.say("  " + " " * 27 + self.paint(self.t("revocation not checked (no OCSP/CRL in the archive)"), "dim"))
                 if anchor.get("certificate_reference"):
                     self.say("  " + self.t("Signing certificate reference") + ": " + anchor["certificate_reference"])
                 for warning in anchor.get("warnings") or []:

@@ -8517,5 +8517,16 @@
   "Probe not sent.": "Chưa gửi tin thăm dò.",
   "This workspace answers probes from: {list}": "Không gian làm việc này trả lời thăm dò từ: {list}",
   "Choose a witness workspace signed in with a different Telegram account.": "Chọn một không gian làm việc nhân chứng đăng nhập bằng một tài khoản Telegram khác.",
-  "Watchlist hits from lists set to send an alert": "Kết quả khớp từ các danh sách theo dõi được đặt để gửi cảnh báo"
+  "Watchlist hits from lists set to send an alert": "Kết quả khớp từ các danh sách theo dõi được đặt để gửi cảnh báo",
+  "A new session signed in to this account: {device}": "Một phiên mới đã đăng nhập vào tài khoản này: {device}",
+  "a device Telegram did not name": "thiết bị Telegram không đặt tên",
+  "This workspace's Telegram session key was imported. Copies of it can exist outside Telegram's session list.": "Khóa phiên Telegram của không gian làm việc này được nhập vào. Bản sao của nó có thể tồn tại ngoài danh sách phiên của Telegram.",
+  "They can read the same chats while this observation runs.": "Chúng có thể đọc cùng những cuộc trò chuyện trong khi quá trình quan sát này chạy.",
+  "Start anyway": "Vẫn bắt đầu",
+  "Open Sessions of this account": "Mở Các phiên của tài khoản này",
+  "Make this the only session when Telegram allows it": "Chỉ giữ phiên này khi Telegram cho phép",
+  "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "Telegram chỉ cho phép điều này sau khi phiên đủ 24 giờ. TgWitness sẽ thử lại sau và hiển thị mật khẩu xác thực hai bước mà nó đặt.",
+  "Set automatically; open Sessions of this account to see it once.": "Được đặt tự động; mở Các phiên của tài khoản này để xem một lần.",
+  "Automatic only-session changed": "Cài đặt phiên duy nhất tự động đã thay đổi",
+  "Only-session attempt postponed": "Đã hoãn lần thử giữ phiên duy nhất"
 }

@@ -99,7 +99,7 @@ input file had different whitespace.
 | Request | With `--request`, the original query and nonce are verified |
 | TSA signature | OpenSSL verifies the signature and chain to the explicit CA |
 | Collector signature | Separately verified by the journal verifier with a pinned key |
-| Revocation | No automatic OCSP/CRL retrieval |
+| Revocation | Manual procedure: not checked. Evidence mode stores OCSP/CRL evidence that `verify.py` checks |
 | Long-term validity | No archival validation after certificate expiry |
 | Scheduled submission | Evidence mode, off by default |
 
@@ -115,6 +115,22 @@ the selected mode. Evidence mode includes the Belgian government's qualified TSA
 weaken them). With that provider's root passed to `--tsa-ca`, `verify.py` reports a
 qualified eIDAS time stamp and its time stamping unit; Regulation (EU) No 910/2014,
 article 41(2), presumes the accuracy of its time and the integrity of the bound data.
+
+### Signing certificate revocation
+
+Right after each reply, evidence mode fetches revocation evidence for the TSA signing
+certificate: an OCSP response from the certificate's AIA OCSP address, otherwise the CRL
+from its distribution point (at most 4 MiB). It is stored next to the reply as
+`checkpoint-N.<service>.ocsp` or `.crl` and exported with it. A failed fetch never holds
+back the time stamp; the `anchor.completed` record lists it as `unavailable` with the reason.
+
+`verify.py` checks the OCSP response signature (by the issuer, or by a responder certificate
+the issuer gave the OCSP signing purpose), the certificate ID and the status, and that the
+answer was issued at or after genTime or was still current then (nextUpdate). For a CRL it
+checks the issuer's signature, the same time window and that the serial number is not listed.
+It then reports `signing certificate not revoked as of <time> (OCSP|CRL)`, the failed check,
+or `revocation not checked (no OCSP/CRL in the archive)`. A signing certificate revoked at or
+before genTime fails verification; a later revocation is shown as a warning.
 
 ## Handoff record
 
@@ -136,3 +152,7 @@ One RFC 3161 request was sent to each default service. Both granted it.
 The Belgian signing certificate carries the qcStatements compliance statement and
 matches the unit recorded in the verifier. Local tests also use a synthetic CA/TSA to
 check rejection of changed data, a changed nonce and a wrong CA.
+
+On 10 November 2026 the Belgian OCSP responder, a delegated responder certificate, answered
+"good" for Timestamp Unit 202301. FreeTSA's OCSP address (port 2560) did not answer within
+40 seconds from the test host; its CRL (PEM, 1 KB) was used instead.

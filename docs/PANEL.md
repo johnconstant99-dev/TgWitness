@@ -82,6 +82,11 @@ Choose a task. **Export my account** downloads what the account can read now.
 **Follow an investigation** records new messages, observed edits and deletion notices
 from the chats you choose. While observation is paused, Chats, Journal and Sources
 show the setup card: connect the account, choose sources, start observation.
+With the goal **Evidence for a case**, or in the Witnessed, Case preparation,
+GitHub-verified or Mossad [protection mode](#protection-modes), starting observation
+first reads Telegram's session list. If other sessions are signed in, the panel names
+their number and offers **Start anyway** or **Open Sessions of this account**. Other
+goals and modes start without that question.
 The goal question stays on this page until you
 answer or skip it. A new workspace opens the [first setup](SETTINGS.md) instead.
 
@@ -227,6 +232,11 @@ Progress survives a restart; attachments follow your media settings. See
 - **Encrypt the downloads above with a password** (12 characters or more) saves an
   AES-256 ZIP that 7-Zip or WinRAR opens. The signed file inside is unchanged. The
   password is not stored.
+- When the session key of this workspace was imported, the account export and chat
+  export dialogs say so in one line: copies of that key can exist outside Telegram's
+  session list. The same line offers **Create an independent authorization**, which
+  opens the sign-in page with that option selected. See
+  [accounts](ACCOUNTS.md#create-an-independent-authorization).
 - **Prepared exports** keeps up to 20 files within 2 GiB, plus the latest one, for
   repeat downloads, each with its SHA-256 for the recipient to compare.
 - When the browser refuses its save dialog, the panel falls back to an ordinary download.
@@ -246,6 +256,11 @@ Progress survives a restart; attachments follow your media settings. See
   profile, your own proxy, the public MTProto pool or WARP; prepare and check a route,
   then apply it to this account, a group or all accounts. See
   [connection and proxies](CONNECTION-SECURITY.md) and [proxies](wiki/Proxies.md).
+  **Account security → Sessions of this account** lists Telegram's sessions, ends one
+  or all of them, and — for a key created in this workspace — offers **Make this the
+  only session when Telegram allows it**, which repeats that action after the 24 hours
+  Telegram requires and shows the two-step password it sets once. See
+  [account security](ACCOUNTS.md#create-an-independent-authorization).
 
 ## Extras
 
@@ -301,7 +316,9 @@ Notifications go through Apprise to Telegram, Discord, Slack, ntfy, email, Matri
 paste Apprise addresses directly.
 
 - **Problems**: disk almost full, account signed out, collection, copy or timestamp
-  errors. On a sealed server, an opened SSH port or a login is a problem too.
+  errors, a new session signed in to the account with the device, application and
+  country Telegram lists. On a sealed server, an opened SSH port or a login is a
+  problem too.
 - **Changes**: deleted, edited and missing messages in observed chats, grouped into
   one notification per check (every minute unless changed in Parameters).
 - **Completed tasks**: history, exports and storage copies.

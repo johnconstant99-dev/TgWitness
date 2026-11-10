@@ -1049,6 +1049,7 @@ class AccountExport:
                     + "HTML is a readable derivative. Media names are content hashes.\n").encode()])
                 write("verify.py", chunks(Path(__file__).with_name("verify.py")))
                 write("SHA256SUMS", ["".join(f"{digest}  {name}\n" for name, digest in sorted(hashes.items())).encode()])
+                loss = None if self.complete() else self.store.account_loss_statement(job["created_at"])
                 manifest = {"format": "tgwitness-account-export-v1", "public_key": self.vault.public_key,
                     "report_language": report_context["report_language"],
                     "fingerprint": fingerprint(self.vault.public_key), "job_id": job["job_id"], "account_id": job["account_id"],
@@ -1057,7 +1058,8 @@ class AccountExport:
                     "complete_within_scope": self.complete(), "coverage": self.current["coverage"],
                     "counts": self.current["counts"], "receipt_count": len(self.receipts), "receipt_head_sha256": self.head,
                     "files": hashes, "limitations": LIMITATIONS, "producer": producer(),
-                    "case_assessment": account_report.case_assessment.snapshot(report_context)}
+                    "case_assessment": account_report.case_assessment.snapshot(report_context),
+                    **({"account_loss": loss} if loss else {})}
                 archive.writestr(zipfile.ZipInfo("manifest.json"), canonical(manifest))
                 archive.writestr(zipfile.ZipInfo("manifest.sig"), self.vault.sign(canonical(manifest)))
             with out.open("r+b") as stream:

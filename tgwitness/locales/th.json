@@ -8517,5 +8517,16 @@
   "Probe not sent.": "ไม่ได้ส่งข้อความตรวจสอบ",
   "This workspace answers probes from: {list}": "พื้นที่ทำงานนี้ตอบการตรวจสอบจาก: {list}",
   "Choose a witness workspace signed in with a different Telegram account.": "เลือกพื้นที่ทำงานพยานที่ลงชื่อเข้าใช้ด้วยบัญชี Telegram อื่น",
-  "Watchlist hits from lists set to send an alert": "รายการที่ตรงกันจากรายการเฝ้าดูที่ตั้งค่าให้ส่งการแจ้งเตือน"
+  "Watchlist hits from lists set to send an alert": "รายการที่ตรงกันจากรายการเฝ้าดูที่ตั้งค่าให้ส่งการแจ้งเตือน",
+  "A new session signed in to this account: {device}": "มีเซสชันใหม่ลงชื่อเข้าใช้บัญชีนี้: {device}",
+  "a device Telegram did not name": "อุปกรณ์ที่ Telegram ไม่ได้ระบุชื่อ",
+  "This workspace's Telegram session key was imported. Copies of it can exist outside Telegram's session list.": "คีย์เซสชัน Telegram ของพื้นที่ทำงานนี้ถูกนำเข้ามา สำเนาของคีย์นี้อาจมีอยู่นอกรายการเซสชันของ Telegram",
+  "They can read the same chats while this observation runs.": "เซสชันเหล่านั้นสามารถอ่านแชทเดียวกันได้ขณะที่การสังเกตนี้ทำงาน",
+  "Start anyway": "เริ่มต่อไป",
+  "Open Sessions of this account": "เปิดเซสชันของบัญชีนี้",
+  "Make this the only session when Telegram allows it": "ให้เหลือเซสชันนี้เพียงเซสชันเดียวเมื่อ Telegram อนุญาต",
+  "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "Telegram อนุญาตให้ทำได้หลังจากเซสชันมีอายุครบ 24 ชั่วโมงเท่านั้น TgWitness จะลองใหม่ภายหลังและแสดงรหัสผ่านสองขั้นตอนที่ตั้งไว้",
+  "Set automatically; open Sessions of this account to see it once.": "ตั้งค่าโดยอัตโนมัติ เปิดเซสชันของบัญชีนี้เพื่อดูเพียงครั้งเดียว",
+  "Automatic only-session changed": "การตั้งค่าเซสชันเดียวอัตโนมัติเปลี่ยนแปลง",
+  "Only-session attempt postponed": "เลื่อนการพยายามให้เหลือเซสชันเดียว"
 }

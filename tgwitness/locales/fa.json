@@ -8556,5 +8556,16 @@
   "Probe not sent.": "کاوش ارسال نشد.",
   "This workspace answers probes from: {list}": "این فضای کاری به کاوش‌های این فضاها پاسخ می‌دهد: {list}",
   "Choose a witness workspace signed in with a different Telegram account.": "یک فضای کاری شاهد انتخاب کنید که با حساب تلگرام متفاوتی وارد شده باشد.",
-  "Watchlist hits from lists set to send an alert": "موارد منطبق از فهرست‌های پایش که برای ارسال هشدار تنظیم شده‌اند"
+  "Watchlist hits from lists set to send an alert": "موارد منطبق از فهرست‌های پایش که برای ارسال هشدار تنظیم شده‌اند",
+  "A new session signed in to this account: {device}": "نشست جدیدی وارد این حساب شد: {device}",
+  "a device Telegram did not name": "دستگاهی که تلگرام نامی برای آن ندارد",
+  "This workspace's Telegram session key was imported. Copies of it can exist outside Telegram's session list.": "کلید نشست تلگرام این فضای کاری وارد شده است. نسخه‌هایی از آن می‌تواند بیرون از فهرست نشست‌های تلگرام وجود داشته باشد.",
+  "They can read the same chats while this observation runs.": "آن‌ها می‌توانند همان گفت‌وگوها را در زمان اجرای این مشاهده بخوانند.",
+  "Start anyway": "به هر حال شروع کن",
+  "Open Sessions of this account": "باز کردن جلسات این حساب",
+  "Make this the only session when Telegram allows it": "وقتی تلگرام اجازه داد، این را تنها نشست کن",
+  "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "تلگرام این کار را تنها پس از ۲۴ ساعت از آغاز نشست اجازه می‌دهد. TgWitness بعداً دوباره تلاش می‌کند و رمز عبور دو مرحله‌ای تعیین‌شده را نشان می‌دهد.",
+  "Set automatically; open Sessions of this account to see it once.": "به‌طور خودکار تنظیم شد؛ برای دیدن یک‌باره آن، جلسات این حساب را باز کنید.",
+  "Automatic only-session changed": "تنظیم خودکار تنها نشست تغییر کرد",
+  "Only-session attempt postponed": "تلاش برای تنها نشست به تعویق افتاد"
 }

@@ -8556,5 +8556,16 @@
   "Probe not sent.": "Yoklama gönderilmedi.",
   "This workspace answers probes from: {list}": "Bu çalışma alanı şu çalışma alanlarının yoklamalarını yanıtlar: {list}",
   "Choose a witness workspace signed in with a different Telegram account.": "Farklı bir Telegram hesabıyla oturum açmış bir tanık çalışma alanı seçin.",
-  "Watchlist hits from lists set to send an alert": "Uyarı göndermek üzere ayarlanmış izleme listelerinden eşleşmeler"
+  "Watchlist hits from lists set to send an alert": "Uyarı göndermek üzere ayarlanmış izleme listelerinden eşleşmeler",
+  "A new session signed in to this account: {device}": "Bu hesapta yeni bir oturum açıldı: {device}",
+  "a device Telegram did not name": "Telegram'ın adlandırmadığı bir cihaz",
+  "This workspace's Telegram session key was imported. Copies of it can exist outside Telegram's session list.": "Bu çalışma alanının Telegram oturum anahtarı içe aktarıldı. Kopyaları Telegram'ın oturum listesi dışında bulunabilir.",
+  "They can read the same chats while this observation runs.": "Bu gözlem sürerken aynı sohbetleri okuyabilirler.",
+  "Start anyway": "Yine de başlat",
+  "Open Sessions of this account": "Bu hesabın oturumlarını aç",
+  "Make this the only session when Telegram allows it": "Telegram izin verdiğinde tek oturum yap",
+  "Telegram allows this only after the session is 24 hours old. TgWitness tries again later and shows the two-step password it sets.": "Telegram buna yalnızca oturum 24 saatlik olduktan sonra izin verir. TgWitness daha sonra yeniden dener ve belirlediği iki aşamalı şifreyi gösterir.",
+  "Set automatically; open Sessions of this account to see it once.": "Otomatik olarak belirlendi; bir kez görmek için bu hesabın oturumlarını açın.",
+  "Automatic only-session changed": "Otomatik tek oturum ayarı değişti",
+  "Only-session attempt postponed": "Tek oturum denemesi ertelendi"
 }
