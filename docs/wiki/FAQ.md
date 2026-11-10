@@ -154,9 +154,10 @@ vault key, for restoring the installation.
 ## How independent is a witness?
 
 A witness has its own process and key and records checkpoints and rollback on any host.
-Run it on another host under another operator for full independence. The verifier sees
-only a second key; who controls it is a custody fact you record. External time comes
-from Telegram's dates on the witness posts, read live from the public t.me page.
+Run it on another host under another operator for full independence. The verifier checks
+the witness signature; the custodian's key-control record, kept with the key's fingerprint,
+shows who holds it. External time comes from Telegram's dates on the witness posts, read
+live from the public t.me page.
 
 <picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture>
 
