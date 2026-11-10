@@ -63,7 +63,11 @@ def excerpt(notice, licence, raw):
 def document(ethical, *, wiki=False):
     prefix = '../' if wiki else ''
     root = '../../' if wiki else '../'
-    return f'''# NOTICE — Operator Incompatibility
+    return f'''[TgWitness]({root}README.md) / [Documentation]({prefix}README.md)
+
+![Operator notice]({prefix}assets/presentation/chapter-notice.svg)
+
+# NOTICE — Operator Incompatibility
 
 **PhishDestroy · TgWitness project notice**
 

@@ -1,3 +1,7 @@
+[TgWitness](../README.md) / [Documentation](README.md)
+
+![Operator notice](assets/presentation/chapter-notice.svg)
+
 # NOTICE — Operator Incompatibility
 
 **PhishDestroy · TgWitness project notice**

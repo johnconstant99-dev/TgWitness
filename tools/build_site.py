@@ -55,7 +55,7 @@ ASSETS = {
 
 WIKI_ASSETS = {
     **{f"assets/chapter-{name}.svg": f"docs/assets/presentation/chapter-{name}.svg"
-       for name in ("start", "collect", "investigate", "evidence", "operate", "develop", "project", "capture", "integrations")},
+       for name in ("start", "collect", "investigate", "evidence", "operate", "develop", "project", "capture", "integrations", "notice")},
     "assets/performance.svg": "website/validation/performance.svg",
     "assets/case-board.png": "docs/assets/case-board.png",
     "assets/dossier-en.png": "docs/assets/reports/dossier-en.png",

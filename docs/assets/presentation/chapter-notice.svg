@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="200" viewBox="0 0 960 200" role="img" aria-labelledby="title desc">
+<title id="title">TgWitness · Operator notice</title>
+<desc id="desc">Operator incompatibility notice. Section illustration, not a test result.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#122536"/><stop offset="1" stop-color="#0b1722"/></linearGradient></defs>
+<rect x="1" y="1" width="958" height="198" rx="16" fill="url(#bg)" stroke="#294253"/>
+<path d="M36 46h44" stroke="#e5bf83" stroke-width="4" stroke-linecap="round"/>
+<text x="94" y="52" fill="#b7c8d4" font-family="Arial,Helvetica,sans-serif" font-size="17" letter-spacing="2">TGWITNESS / NOTICE</text>
+<text x="36" y="121" fill="#edf5f9" font-family="Arial,Helvetica,sans-serif" font-size="42" font-weight="600">Operator notice</text>
+<path d="M36 158h580" stroke="#294253"/>
+<g fill="none" stroke="#e5bf83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M680 42h58l18 18v96h-76zM738 42v18h18M694 80h46m-46 15h46m-46 15h30"/><circle cx="732" cy="136" r="13"/><path d="m726 136 4 4 8-9"/><rect x="784" y="58" width="48" height="24" rx="12"/><rect x="814" y="76" width="48" height="24" rx="12"/><rect x="844" y="94" width="48" height="24" rx="12"/></g>
+<text x="784" y="150" fill="#9db3c3" font-family="Arial,Helvetica,sans-serif" font-size="12" letter-spacing="1.2">SHA-256 · ED25519</text>
+</svg>
