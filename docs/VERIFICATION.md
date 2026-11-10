@@ -54,6 +54,7 @@ snapshots; current implementation and qualification are recorded separately.
 - [Phala Cloud with live Telegram account · 9 November 2026](#phala-cloud-with-live-telegram-account--9-november-2026)
 - [drand checkpoint anchoring and verify · 9 November 2026](#drand-checkpoint-anchoring-and-verify--9-november-2026)
 - [Parallel session and session integrity tests · 9 November 2026](#parallel-session-and-session-integrity-tests--9-november-2026)
+- [Session key created inside the TDX VM · 9 November 2026](#session-key-created-inside-the-tdx-vm--9-november-2026)
 - [Qualification status](#qualification-status)
 
 </details>
@@ -527,6 +528,27 @@ sharing one session.
 | Enable, change and disable 2FA while an observer is connected | Observer kept working through the 10 s observed; Telegram 777000 posted each change |
 | `auth.resetAuthorizations` from a session under 24 hours old | Rejected with `FreshResetAuthorisationForbiddenError` |
 | Message to own Saved Messages as a push probe | 0 of 22 delivered as push; the probe was dropped |
+| Two clients on one `auth_key` for 90 s, a request every 2 s | Both kept working; no `AUTH_KEY_DUPLICATED` |
+| Import of Telethon SQLite, Pyrogram SQLite, TData ZIP and Account JSON | All four connected; Pyrogram files are converted by TgWitness |
+| Requests after `auth.logOut` | `get_me()` returned `None`; reconnect reported not authorized; `GetDialogs` raised `AuthKeyUnregisteredError`. The collector takes the refusal cause from a real request |
+| Telegram 777000 during login and 2FA changes | Posted new logins with client and IP, login codes, logins through external services and each 2FA change; no push update reached a parallel session |
+| Telegram's session list for an imported session | Shows the client the session was created with, for example Telegram Widgets |
+| Leaving a basic group | History stayed readable after leaving |
+
+## Session key created inside the TDX VM · 9 November 2026
+
+A separate run deployed commit `206fef76` to Phala Cloud `tdx.small`; all six
+attestation checks passed. The panel signed in by phone code inside the VM. A second
+session read the code from Telegram 777000 and passed it straight to the VM.
+
+| Item | Result |
+| --- | --- |
+| Journal record 6 `account.authorized` | `key_origin: created` |
+| Telegram's date for the new session | 5 min 9 s after the attested collector start, no restart in between |
+| History of five sources | 131 messages, 25 attachment jobs |
+| External time on two evidence passes | FreeTSA and Sectigo RFC 3161 replies; four OTS calendars pending at the end of the run |
+| Second session on the same account | Worked at the same time as the VM session |
+| Secret Chats in the VM | Unavailable: the Phala installer installs the hash lock without the `secret-chats` extra |
 
 <a name="remaining-qualification"></a>
 
@@ -544,9 +566,10 @@ cursors atomically and preserves available Recent Actions, with synthetic covera
 
 The following items remain unqualified:
 
-- **QR login inside the Phala TEE** (`key_origin: created`): the 9 November run imported
-  an existing session. QR login through the panel assigns the session key inside the
-  hardware enclave, satisfying the `sealed` assurance tier.
+- **Sealed export**: a key was created inside the VM (see above). Verifying an export
+  from such a run at the `sealed` tier, and QR login from a phone, remain open.
+- **Secret Chats in the Phala image**: the installer needs a hash-locked source for the
+  `secret-chats` extra.
 - **Message lifecycle matrix** (send, edit, delete, reactions, membership): the 9 November
   run collected channel history without exercising the write path. Steps 4–8 of the
   [live acceptance](internal/LIVE_ACCEPTANCE.md) procedure remain unrun.
