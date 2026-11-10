@@ -71,9 +71,7 @@ The [Markdown companion](../HOW-IT-WORKS.md) uses native Mermaid and math for Gi
 
 ## Implemented metadata
 
-The [page keyword map](SEO-KEYWORDS.md) assigns a separate search intent to every
-canonical page family. It is an editorial map based on the actual content, not a
-claim about measured search volume. `tools/site_seo.py` owns the English titles,
+`tools/site_seo.py` owns the English titles,
 descriptions and primary queries, with explicit Russian titles and the existing
 translated labels and descriptions for other languages. Telegram, Phala, Intel TDX,
 MCP and RFC 3161 appear where the corresponding subject is covered.
