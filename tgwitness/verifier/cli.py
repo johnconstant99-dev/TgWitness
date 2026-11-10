@@ -42,6 +42,7 @@ from .witness import (
     EVIDENCE_PROFILES,
     evidence_conditions,
     evidence_line,
+    forgery_lines,
     next_lines,
     requested_checks_unavailable,
 )
@@ -581,6 +582,10 @@ def verification_output(args, checked, console, mode):
                            + "): " + row["detail"] + ("" if row["status"] == "met" else " · " + row["how"]))
     for line in next_lines(evidence):
         verification_print(line)
+    if shown == "evidence":
+        verification_print("What changing this archive would take:")
+        for line in forgery_lines(result):
+            verification_print("  - " + line)
     verification_print(json.dumps(result, indent=2))
     verification_print(producer_line(result.get("producer")))
     seal = result.get("report_seal")

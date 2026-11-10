@@ -1,4 +1,4 @@
-# TgWitness verifier sources SHA-256: 3a4e9dc3740fefea1bbb395688bb46bc8111e89be165eadc1d0d79de13ec3310
+# TgWitness verifier sources SHA-256: 513f85bad5b6f34b458ddf0a1d8f7860ebfb219a1f0f80b4087707baabdd46b0
 """Standalone verifier"""
 import argparse
 import base64
@@ -2476,7 +2476,7 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
                                                   check_drand=check_drand)
             result["checkpoint_event_count"] = checkpoint["statement"]["event_count"]
             if checkpoint_anchor:
-                result["checkpoint_drand_anchor"] = checkpoint_anchor
+                result["checkpoint_drand_anchor"] = {**checkpoint_anchor, "confirmed_by_relays": bool(check_drand)}
         result["anchors"] = verify_anchors(archive, names, public, result["events"], hash_at, tsa_ca, check_bitcoin)
         result["board"] = verify_board(archive, manifest, checkpoint)
         result["key_pinned"] = bool(expected_fingerprint)
@@ -4074,12 +4074,6 @@ def assurance(result):
         a.get("kind") == "opentimestamps" and a.get("status") == "confirmed")]
     times = [a["time"] for a in stamps]
     times += [witness[name] for name in ("head_bitcoin_block_time", "head_telegram_post_time") if witness.get(name)]
-    cp_anchor = result.get("checkpoint_drand_anchor")
-    if cp_anchor and isinstance(cp_anchor.get("round"), int) and result.get("checkpoint_checked"):
-        try:
-            times.append(drand_time(cp_anchor["round"]) + " (checkpoint drand not-before)")
-        except Exception:
-            pass
     independent = bool(witness.get("witness_key_pinned") and witness.get("export_head_witnessed")
                        and witness.get("witness_fingerprint") != result.get("fingerprint"))
     days = witness.get("days", result.get("days", []))
@@ -4125,6 +4119,38 @@ def assurance_line(result):
     limits = [text for tier, text in (("fresh", "not fresh"), ("witness_anchored", "witness not anchored"),
                                     ("sealed", "not sealed")) if tier in absent]
     return "ASSURANCE: " + value["tier"] + detail + (" · " + " · ".join(limits) if limits else "")
+
+
+def forgery_lines(result):
+    lines, anchors = [], result.get("anchors") or []
+    tsa = [a for a in anchors if a.get("kind") == "rfc3161" and a.get("time")
+           and str(a.get("signature", "")).startswith("checked against")]
+    if tsa:
+        top = max(a["event_count"] for a in tsa)
+        names = sorted({(a.get("qualified") or {}).get("service") or str(a.get("service")) for a in tsa if a["event_count"] == top})
+        lines.append("Records 1-" + str(top) + " existed by " + min(a["time"] for a in tsa if a["event_count"] == top)
+                     + ": changing them needs a new time stamp signed by " + ", ".join(names) + ".")
+    ots = [a for a in anchors if a.get("kind") == "opentimestamps" and a.get("status") == "confirmed" and a.get("blocks")]
+    if ots:
+        top = max(a["event_count"] for a in ots)
+        block = min((b for a in ots if a["event_count"] == top for b in a["blocks"]), key=lambda b: b["height"])
+        lines.append("Records 1-" + str(top) + " are committed in Bitcoin block " + str(block["height"]) + " ("
+                     + str(block["time"]) + "): changing them means rewriting Bitcoin from that block.")
+    ladder = {row["tier"]: row for row in (result.get("assurance") or {}).get("ladder", [])}
+    if ladder.get("witnessed", {}).get("status") == "pass":
+        lines.append("A separate witness key retained the head (" + ladder["witnessed"]["detail"]
+                     + "): changing those records also needs that key.")
+    if ladder.get("sealed", {}).get("status") == "pass":
+        lines.append("The collector key was created inside an attested Intel TDX VM: signing elsewhere needs a break of Intel TDX.")
+    if not lines:
+        lines.append("Only the collector key binds this journal: its holder could produce a different journal from the start. "
+                     "External time or a witness ties it to a moment.")
+    cp = result.get("checkpoint_drand_anchor") or {}
+    if isinstance(cp.get("round"), int):
+        lines.append("The checkpoint at record " + str(result.get("checkpoint_event_count")) + " was signed no earlier than "
+                     + drand_time(cp["round"]) + " (drand round " + str(cp["round"]) + ", "
+                     + ("confirmed by relays" if cp.get("confirmed_by_relays") else "run with --check-drand to confirm") + ").")
+    return ["Any change to a record breaks the hash chain and the Ed25519 signatures."] + lines
 
 
 def english(text, **values):
@@ -7122,6 +7148,10 @@ def verification_output(args, checked, console, mode):
                            + "): " + row["detail"] + ("" if row["status"] == "met" else " · " + row["how"]))
     for line in next_lines(evidence):
         verification_print(line)
+    if shown == "evidence":
+        verification_print("What changing this archive would take:")
+        for line in forgery_lines(result):
+            verification_print("  - " + line)
     verification_print(json.dumps(result, indent=2))
     verification_print(producer_line(result.get("producer")))
     seal = result.get("report_seal")

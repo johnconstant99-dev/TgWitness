@@ -30,7 +30,7 @@ snapshots; current implementation and qualification are recorded separately.
 | Latest evidence | Result | Scope |
 | --- | --- | --- |
 | Phala / Intel TDX with live account · 9 Nov | All 6 TDX checks passed; live Telegram collection; export verified | CVM `cvm_mjbvBdjM`; commit `427621d4`; session imported; self-attested tier |
-| drand checkpoint + verify · 9 Nov | `ASSURANCE: timestamped`; drand round 33818717 confirmed via Cloudflare relay | RunPod collector; `--check-drand`; checkpoint `not-before` lifts tier |
+| drand checkpoint + verify · 9 Nov | drand round 33818717 in a signed checkpoint, confirmed via Cloudflare relay | RunPod collector; `--check-drand`; lower time bound for the checkpoint |
 | session.fingerprint in journal · 9 Nov | `auth_key_id` logged at `session.fingerprint` on observation start | Verifier can match session file after revocation |
 | Release audit · 6 Nov | 1,461 core tests passed; 37 platform skips | Source `92e539af40d8`; open findings retained |
 | Fresh exports · 6 Nov | 127.713 and 141.781 records/s, complete cycle | Two accounts per server; text and metadata through WARP |
@@ -108,11 +108,9 @@ Chat channel-B: IDs 1-210, 69 not observed in 35 ranges
 Chat channel-C: IDs 1-122, 2 not observed in 2 ranges
 ```
 
-Assurance tier is `self_attested` because the session was imported (not created inside
-the TEE via QR login) and no external checkpoint was supplied. For `sealed` tier, QR
-login through the panel produces `key_origin: created`; the signing key is then generated
-inside the Intel TDX enclave and cannot be extracted. Supplying a retained checkpoint
-with `--checkpoint` adds the drand not-before time and raises the tier to `timestamped`.
+Assurance tier is `self_attested`: the session was imported and the archive carried no
+external timestamp. Signing in by QR code or phone code through the panel creates the
+Telegram session key inside the TDX VM (`key_origin: created`).
 
 **Gap analysis summary:**
 
@@ -129,40 +127,28 @@ A gap records what the collector could not observe; attribution and cause are ou
 ## drand checkpoint anchoring and verify · 9 November 2026
 
 A RunPod collector connected a dedicated test account.
-The checkpoint API returned a checkpoint signed with the collector key and embedding
-a live drand anchor from Cloudflare's relay. Verification with `--check-drand`
-confirmed the drand round against the network and raised the assurance tier to
-`timestamped`.
+The checkpoint API returned a checkpoint signed with the collector key that embeds a
+live drand round from Cloudflare's relay; `--check-drand` confirmed the round against
+the network. A drand round is a lower time bound: the checkpoint was signed no earlier
+than that round. Existence by a time comes from RFC 3161, Bitcoin or a witness, so the
+tier stays as those checks set it.
 
 | Item | Value |
 | --- | --- |
 | Collector | RunPod CPU instance · session imported · key_origin `imported` |
 | Journal events | 387 |
 | drand chain | `52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971` |
-| drand round in checkpoint | 33818717 · relay `https://drand.cloudflare.com` |
-| drand not-before | 2026-11-09T21:22:51Z |
+| drand rounds in checkpoints | 33818717 (not before 2026-11-09T21:25:15Z) and 33819014 (not before 21:40:06Z) |
 | session.fingerprint logged | `auth_key_id` logged at seq 18 |
 | coverage.gap logged | seq 28 · reason `updates delivered while observation was paused` |
-| Verify result | `ASSURANCE: timestamped` · drand not-before in `timestamped.detail` |
-
-**Verify output (excerpt):**
-
-```
-ASSURANCE: timestamped · not fresh · witness not anchored · not sealed
-"tier": "timestamped",
-"detail": "external timestamp covering the export head:
-           2026-11-09T21:40:06.000+00:00 (checkpoint drand not-before)"
-checkpoint_drand_anchor: { round: 33819014, relay: https://drand.cloudflare.com }
-events: 387  files_checked: 74  fingerprint: f304aa2afd49a5f0b7a064bfb01167151387797b4723ceeb90357458a8f35673
-```
+| Archive fingerprint | `f304aa2afd49a5f0b7a064bfb01167151387797b4723ceeb90357458a8f35673` |
 
 **Code changes verified in this run:**
 
 | File | Change | Verified |
 | --- | --- | --- |
 | `tgwitness/evidence.py` | `checkpoint()` embeds `drand_anchor` from live Cloudflare relay | ✓ round 33818717 in checkpoint |
-| `tgwitness/verify.py` | `verify_checkpoint(check_drand=True)` confirms round against relay | ✓ raises error on mismatch |
-| `tgwitness/verify.py` | `assurance()` uses `checkpoint_drand_anchor` for `timestamped` tier | ✓ tier raised |
+| `tgwitness/verifier/journal.py` | `verify_checkpoint(check_drand=True)` confirms the round against relays | ✓ raises error on mismatch |
 | `tgwitness/collector.py` | `session.fingerprint` event logs `auth_key_id` on observation start | ✓ seq 18 in journal |
 | `tgwitness/store.py` | `session.*` added to `coverage` kind group | ✓ fingerprint visible in coverage |
 

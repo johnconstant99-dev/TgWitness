@@ -122,7 +122,7 @@ def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None,
                                                   check_drand=check_drand)
             result["checkpoint_event_count"] = checkpoint["statement"]["event_count"]
             if checkpoint_anchor:
-                result["checkpoint_drand_anchor"] = checkpoint_anchor
+                result["checkpoint_drand_anchor"] = {**checkpoint_anchor, "confirmed_by_relays": bool(check_drand)}
         result["anchors"] = verify_anchors(archive, names, public, result["events"], hash_at, tsa_ca, check_bitcoin)
         result["board"] = verify_board(archive, manifest, checkpoint)
         result["key_pinned"] = bool(expected_fingerprint)
