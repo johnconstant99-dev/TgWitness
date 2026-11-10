@@ -100,3 +100,104 @@ jobs:
         run: |
           python -I -c "import tgwitness.app, tgwitness.verify, tgwitness_capture.service"
           python -I -m tgwitness --check --json --data-dir "$RUNNER_TEMP/installer-readiness"
+  run-installer:
+    name: Run the installer (${{ matrix.os }})
+    if: ${{ !inputs.artifact && !inputs.published }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --require-hashes -r deploy/build.lock
+      - run: 'python -m pip install --require-hashes --only-binary=:all: -r deploy/installer.lock'
+      - name: Build with an ephemeral test key for a local HTTPS origin
+        run: python tools/build_installer.py --base-url https://installer.invalid:8443 --test-signing-key
+      - name: Create a throwaway CA and server certificate
+        shell: bash
+        run: |
+          python -I - "$RUNNER_TEMP" <<'PY'
+          import datetime, sys
+          from pathlib import Path
+          from cryptography import x509
+          from cryptography.hazmat.primitives import hashes, serialization
+          from cryptography.hazmat.primitives.asymmetric import ec
+          from cryptography.x509.oid import ExtendedKeyUsageOID, NameOID
+          out, now = Path(sys.argv[1]), datetime.datetime.now(datetime.timezone.utc)
+          ca_key, key = ec.generate_private_key(ec.SECP256R1()), ec.generate_private_key(ec.SECP256R1())
+          ca_name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "TgWitness installer test CA")])
+          window = dict(not_valid_before=now - datetime.timedelta(minutes=5), not_valid_after=now + datetime.timedelta(days=1))
+          ca = (x509.CertificateBuilder(issuer_name=ca_name, subject_name=ca_name, public_key=ca_key.public_key(),
+                                        serial_number=x509.random_serial_number(), **window)
+                .add_extension(x509.BasicConstraints(ca=True, path_length=0), critical=True)
+                .add_extension(x509.KeyUsage(digital_signature=True, content_commitment=False, key_encipherment=False,
+                                             data_encipherment=False, key_agreement=False, key_cert_sign=True,
+                                             crl_sign=True, encipher_only=False, decipher_only=False), critical=True)
+                .sign(ca_key, hashes.SHA256()))
+          server = (x509.CertificateBuilder(issuer_name=ca_name, public_key=key.public_key(),
+                                            subject_name=x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "installer.invalid")]),
+                                            serial_number=x509.random_serial_number(), **window)
+                    .add_extension(x509.SubjectAlternativeName([x509.DNSName("installer.invalid")]), critical=False)
+                    .add_extension(x509.ExtendedKeyUsage([ExtendedKeyUsageOID.SERVER_AUTH]), critical=False)
+                    .sign(ca_key, hashes.SHA256()))
+          (out / "installer-ca.crt").write_bytes(ca.public_bytes(serialization.Encoding.PEM))
+          (out / "installer-server.pem").write_bytes(server.public_bytes(serialization.Encoding.PEM) + key.private_bytes(
+              serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption()))
+          (out / "serve-installer.py").write_text(
+              "import functools, http.server, ssl, sys\n"
+              "handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=sys.argv[1])\n"
+              "server = http.server.ThreadingHTTPServer(('127.0.0.1', 8443), handler)\n"
+              "context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)\n"
+              "context.load_cert_chain(sys.argv[2])\n"
+              "server.socket = context.wrap_socket(server.socket, server_side=True)\n"
+              "server.serve_forever()\n")
+          PY
+      - name: Trust the CA and serve the site (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          sudo cp "$RUNNER_TEMP/installer-ca.crt" /usr/local/share/ca-certificates/tgwitness-installer-test.crt
+          sudo update-ca-certificates
+          echo "127.0.0.1 installer.invalid" | sudo tee -a /etc/hosts
+          nohup python -I "$RUNNER_TEMP/serve-installer.py" dist/installer-site "$RUNNER_TEMP/installer-server.pem" > "$RUNNER_TEMP/serve.log" 2>&1 &
+          for attempt in $(seq 30); do curl -fsS https://installer.invalid:8443/manifest.json -o /dev/null && exit 0; sleep 1; done
+          cat "$RUNNER_TEMP/serve.log"; exit 1
+      - name: Trust the CA and serve the site (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Import-Certificate -FilePath "$env:RUNNER_TEMP\installer-ca.crt" -CertStoreLocation Cert:\LocalMachine\Root | Out-Null
+          Add-Content -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Value "`r`n127.0.0.1 installer.invalid"
+          Start-Process -FilePath python -ArgumentList '-I', "$env:RUNNER_TEMP\serve-installer.py", 'dist\installer-site', "$env:RUNNER_TEMP\installer-server.pem" -WindowStyle Hidden
+          foreach ($attempt in 1..30) {
+            try { Invoke-WebRequest -Uri https://installer.invalid:8443/manifest.json -UseBasicParsing | Out-Null; exit 0 } catch { Start-Sleep 1 }
+          }
+          exit 1
+      - name: Install twice with the shell installer and check the launcher
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          TGWITNESS_NO_LINK: '1'
+        run: |
+          export TGWITNESS_INSTALL_DIR="$RUNNER_TEMP/tgwitness-install"
+          bash dist/installer-site/install.sh --no-start
+          bash dist/installer-site/install.sh --no-start
+          "$TGWITNESS_INSTALL_DIR/bin/tgwitness" --check --json --data-dir "$RUNNER_TEMP/tgwitness-data"
+      - name: Install twice with the PowerShell installer and check the launcher
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $Root = Join-Path $env:RUNNER_TEMP 'tgwitness-install'
+          foreach ($attempt in 1..2) {
+            powershell -NoProfile -ExecutionPolicy Bypass -File dist\installer-site\install.ps1 -InstallDir $Root -NoStart
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          & (Join-Path $Root 'bin\tgwitness.cmd') --check --json --data-dir (Join-Path $env:RUNNER_TEMP 'tgwitness-data')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
