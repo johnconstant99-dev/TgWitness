@@ -453,12 +453,14 @@ verification steps for a signed TgWitness archive.
 
 <!-- operator-notice:start -->
 
-<a href="docs/OPERATOR-INCOMPATIBILITY.md"><picture>
+<a href="docs/OPERATOR-INCOMPATIBILITY.md">
+<picture>
   <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-gdpr-impunity-mobile-static.svg">
   <source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/presentation/readme-gdpr-impunity-static.svg">
   <source media="(max-width: 640px)" srcset="docs/assets/presentation/readme-gdpr-impunity-mobile.svg">
   <img src="docs/assets/presentation/readme-gdpr-impunity.svg" width="1200" alt="GDPR, violated. Doctors, unpunished. Read the operator notice.">
-</picture></a>
+</picture>
+</a>
 
 [Read the operator notice →](docs/OPERATOR-INCOMPATIBILITY.md) · [Source record](https://phishdestroy.io/steam_dossier/taylor_wessing)
 

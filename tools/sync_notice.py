@@ -43,12 +43,14 @@ def quoted_html(text):
 
 def readme_excerpt():
     art = 'docs/assets/presentation/readme-gdpr-impunity'
-    return f'''<a href="docs/OPERATOR-INCOMPATIBILITY.md"><picture>
+    return f'''<a href="docs/OPERATOR-INCOMPATIBILITY.md">
+<picture>
   <source media="(max-width: 640px) and (prefers-reduced-motion: reduce)" srcset="{art}-mobile-static.svg">
   <source media="(prefers-reduced-motion: reduce)" srcset="{art}-static.svg">
   <source media="(max-width: 640px)" srcset="{art}-mobile.svg">
   <img src="{art}.svg" width="1200" alt="GDPR, violated. Doctors, unpunished. Read the operator notice.">
-</picture></a>
+</picture>
+</a>
 
 [Read the operator notice →](docs/OPERATOR-INCOMPATIBILITY.md) · [Source record]({SOURCE})'''
 
