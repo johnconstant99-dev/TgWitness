@@ -86,10 +86,10 @@ The minimum for evidence is integrity, a confirmed signer key (`--fingerprint`) 
 
 ## Project history
 
+- TgWitness is not two weeks old. The collector, the signed journal and the verifier have been developed and tested for about six months; the web panel and the add-on modules were built on them later. This repository was created new on 29 October 2026 for publication, so its creation date and commit count do not give the project's age ([limits and objections](https://github.com/phishdestroy/TgWitness/blob/main/docs/LIMITS-AND-OBJECTIONS.md#the-project-is-only-two-weeks-old)).
 - The public repository starts with a squashed import: `8fb40fe0e` "Initial version" already contains 658 files and 134,944 lines (author date 2026-10-30). Check: `git show --shortstat --format=fuller 8fb40fe0e`. The size of the first commit shows the code existed before publication.
 - Earlier releases are independently recorded: [TRUST.md](https://github.com/phishdestroy/TgWitness/blob/main/docs/TRUST.md#release-source-archive) lists the original commits named by the 0.7.1–0.8.1 release attestations, whose Sigstore log entries and GitHub Actions run records are kept by third parties. The squash of 3 November 2026 changed commit IDs, not those records.
-- The [changelog](https://github.com/phishdestroy/TgWitness/blob/main/docs/CHANGELOG.md) lists versions from 0.5.0 (26 October 2026) to 0.9.1 preview (5 November 2026). [OVERVIEW.md](https://github.com/phishdestroy/TgWitness/blob/main/docs/OVERVIEW.md#testing-history-and-duration) describes the earlier development and testing history.
-- Development before publication: [MAINTAINER: development start date, testing history]. PhishDestroy founding year: [MAINTAINER: PhishDestroy founding year].
+- The [changelog](https://github.com/phishdestroy/TgWitness/blob/main/docs/CHANGELOG.md) starts at version 0.5.0 (26 October 2026), before this repository was created, and continues to 0.9.2. [OVERVIEW.md](https://github.com/phishdestroy/TgWitness/blob/main/docs/OVERVIEW.md#testing-history-and-duration) describes the development and testing before publication.
 
 ## Taylor Wessing record (facts)
 

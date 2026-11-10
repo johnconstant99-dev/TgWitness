@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>تقریباً چھ ماہ تک تیار اور آزمایا گیا: پہلے کلیکٹر، دستخط شدہ جرنل اور ویریفائر، پھر پینل اور اضافی ماڈیولز۔ یہ ریپوزیٹری اشاعت کے لیے 29 اکتوبر 2026 کو بنائی گئی تھی، لہٰذا اس کی عمر منصوبے کی عمر نہیں ہے۔</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

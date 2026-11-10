@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>Développement et tests menés pendant environ six mois : d’abord le collecteur, le journal signé et le vérificateur, puis le panneau et les modules complémentaires. Ce dépôt a été créé le 29 octobre 2026 en vue de sa publication ; son âge ne correspond donc pas à celui du projet.</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

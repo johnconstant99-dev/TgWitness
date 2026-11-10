@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>लगभग छह महीनों तक विकसित और परीक्षण किया गया: पहले कलेक्टर, हस्ताक्षरित जर्नल और सत्यापनकर्ता, फिर पैनल और ऐड-ऑन मॉड्यूल। यह रिपॉजिटरी 29 अक्टूबर 2026 को प्रकाशन के लिए बनाई गई थी, इसलिए इसकी आयु परियोजना की आयु नहीं है।</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>약 6개월 동안 개발 및 테스트를 진행했습니다: 먼저 수집기, 서명된 저널, 검증기를 개발하고 테스트한 뒤, 패널과 추가 모듈을 개발 및 테스트했습니다. 이 저장소는 2026년 10월 29일 공개를 위해 생성되었으므로, 저장소의 생성일은 프로젝트의 개발 기간과 일치하지 않습니다.</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

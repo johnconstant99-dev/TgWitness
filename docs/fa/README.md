@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>برای حدود شش ماه توسعه و آزمایش شد: ابتدا گردآورنده، دفترچهٔ امضا شده و اعتبارسنج، سپس پنل و ماژول‌های افزایشی. این مخزن در تاریخ ۲۹ اکتبر ۲۰۲۶ برای انتشار ایجاد شد، بنابراین سن آن سن پروژه نیست.</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

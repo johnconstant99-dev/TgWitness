@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>Opracowywano i testowano przez około sześć miesięcy: najpierw moduł zbierający, podpisany dziennik i moduł weryfikujący, a następnie panel oraz moduły dodatkowe. Niniejsze repozytorium zostało utworzone 29 października 2026 r. w celu publikacji, więc jego wiek nie odpowiada wiekowi projektu.</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

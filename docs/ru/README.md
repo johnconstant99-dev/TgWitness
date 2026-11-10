@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>Разрабатывается и тестируется около полугода: сначала сборщик, подписанный журнал и верификатор, затем панель и дополнительные модули. Этот репозиторий создан 29 октября 2026 года для публикации, поэтому его возраст — не возраст проекта.</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>הפיתוח והבדיקות נמשכו כשישה חודשים: תחילה האספן, היומן החתום והמאמת, ולאחר מכן הפאנל ומודולי ההרחבה. מאגר זה נוצר ב-29 באוקטובר 2026 לצורך פרסום, ולכן גילו אינו תואם את גיל הפרויקט.</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>約6か月間にわたり開発およびテストが行われました。まずコレクター、署名付きジャーナル、検証ツールが、次にパネルおよびアドオンモジュールが開発・テストされました。このリポジトリは公開のために2026年10月29日に作成されたため、その作成日はプロジェクトの開始時期とは異なります。</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

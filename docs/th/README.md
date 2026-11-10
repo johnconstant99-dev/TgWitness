@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>พัฒนาและทดสอบมาประมาณหกเดือน: เริ่มจากตัวเก็บข้อมูล (collector), บันทึกที่ลงนาม (signed journal) และตัวตรวจสอบ (verifier) ก่อน แล้วตามด้วยแผงควบคุม (panel) และโมดูลเสริม (add-on modules) ที่เก็บนี้ถูกสร้างขึ้นเมื่อวันที่ 29 ตุลาคม 2026 เพื่อเผยแพร่ ดังนั้นอายุของที่เก็บนี้จึงไม่เท่ากับอายุของโครงการ</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

@@ -53,6 +53,8 @@
 </tr>
 </table>
 
+<p align="center"><sub>Sviluppo e test sono durati circa sei mesi: prima il collettore, il registro firmato e il verificatore, poi il pannello e i moduli aggiuntivi. Questo repository è stato creato il 29 ottobre 2026 a scopo di pubblicazione, pertanto la sua data di creazione non corrisponde all’età del progetto.</sub></p>
+
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-divider-static.svg"><img src="../assets/presentation/readme-divider.svg" width="1200" height="28" alt=""></picture></p>
 
 <a name="quick-start"></a>

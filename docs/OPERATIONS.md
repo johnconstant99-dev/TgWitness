@@ -221,8 +221,7 @@ The account list is a load-time snapshot;
 the selected workspace refreshes periodically. This is not a multi-process SLA monitor.
 
 The UI uses local assets and text rendering for source content. Desktop and narrow
-Chromium layouts are tested. This is not a complete accessibility certification;
-screen-reader and human usability evaluation remain separate work.
+Chromium layouts are tested.
 
 ## Deployment environments
 
@@ -313,9 +312,7 @@ relationship to retained checkpoints.
 
 Priority rechecks already exist: starred sources are rechecked every 15 minutes by default,
 others every 6 hours (see [recheck tiers](COLLECTION.md#recheck-tiers)). Password-protected
-exports exist as described above. Live Telegram/proxy acceptance, durable replay,
-admin-log and reaction polling, isolated workers, encryption of the local journal and media
-by TgWitness itself and independent review remain separate work. Scoped access is
+exports exist as described above. Scoped access is
 documented in [access and permissions](ACCESS.md). See
 [READINESS.md](internal/READINESS.md), [LIVE_ACCEPTANCE.md](internal/LIVE_ACCEPTANCE.md) and
 [VERIFICATION.md](VERIFICATION.md).
