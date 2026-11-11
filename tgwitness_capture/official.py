@@ -338,7 +338,7 @@ class OfficialBrowser(BrowserCapture):
         if value["round"] > previous:
             self.journal.append("official.drand", {**value, "chain": CHAIN,
                                 "round_time": round_time(value["round"]),
-                                "meaning": "not-before bound after independent relay comparison; no upper time bound"})
+                                "meaning": "not-before bound after independent relay comparison"})
             self.beacon_round = value["round"]
             await self.page.evaluate("""round => {
               let el=document.getElementById('tgwitness-beacon');

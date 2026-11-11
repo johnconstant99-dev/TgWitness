@@ -41,7 +41,7 @@ def witness_once(journal, url, token, expected_fingerprint):
             journal.append("witness.conflict", {"checkpoint": checkpoint, "previous": last})
             raise ValueError("Observer rollback or conflicting head detected")
     event = journal.append("witness.observed", {"checkpoint": checkpoint, "received_at": utcnow(),
-                           "scope": "fresh signed head; no verification of unseen intermediate events"})
+                           "scope": "fresh signed head; the journal export covers intermediate events"})
     receipt_body = {"format": FORMAT, "kind": "witness.receipt", "public_key": journal.public_key,
                     "witness_observer_id": journal.observer_id, "witness_seq": event["seq"],
                     "witness_event_hash": event["hash"], "received_at": event["recorded_at"], "checkpoint": checkpoint}

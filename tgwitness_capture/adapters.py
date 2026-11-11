@@ -191,5 +191,5 @@ def sqlite_snapshot(journal, source_path, client_version, limit=512 * 1024 * 102
     return {"source": "ayugram", "method": "sqlite-online-backup", "client_version": client_version,
             "source_filename": source_path.name, "schema_sha256": digest(canonical(schema)),
             "user_version": user_version, "quick_check": "ok", "snapshot_started_at": started,
-            "snapshot_finished_at": utcnow(), "scope": "configured SQLite database only; not account history or media",
+            "snapshot_finished_at": utcnow(), "scope": "configured SQLite database",
             "message_schema_interpreted": False}, [artifact], started

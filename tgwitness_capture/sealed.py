@@ -66,7 +66,7 @@ def create_sealed_app(root, output, session):
                                 "context": session["context"], "deadline_reached": time.monotonic() >= deadline,
                                 "logout_confirmed": recorder.official.logout_confirmed,
                                 "profile_context_closed": recorder.official.page is None,
-                                "scope": "observed rendered material; not a full-account export"})
+                                "scope": "observed rendered material"})
                             await asyncio.to_thread(export_zip, recorder.journal, output / "evidence.zip")
                             durable_write(output / "result.json", b'{"phase":"sealed"}', exclusive=True)
                         return

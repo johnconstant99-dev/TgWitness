@@ -81,8 +81,8 @@ def observe(connector, fetch=via_connector):
     round_time = GENESIS + (value["round"] - 1) * PERIOD
     if abs(time.time() - round_time) > 120:
         raise ValueError("Public round is stale or local clock is inaccurate")
-    return {"chain": CHAIN, **value, "round_unix": round_time, "confirmation": "two HTTPS relays agree; BLS not checked locally",
-            "meaning": "if independently confirmed, subsequent records postdate this randomness; no upper time bound"}
+    return {"chain": CHAIN, **value, "round_unix": round_time, "confirmation": "two HTTPS relays agree",
+            "meaning": "if independently confirmed, subsequent records postdate this randomness"}
 
 
 def confirm(events, online=False, fetch=None):

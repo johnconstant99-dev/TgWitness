@@ -39,10 +39,10 @@ the collector or get the Telegram session.
 </picture>
 
 An export can be longer than a checkpoint. Check the checkpoint signature, then compare
-the hash at its record count. A shorter export can't match it, and a matching boundary
-doesn't replace checking every event. The collector key signs the checkpoint, so it only
-counts if the recipient got it before the archive, through another channel. It is a
-supporting check, not the minimum for evidence.
+the hash at its record count. A shorter export can't match it; a matching boundary
+confirms the prefix, and verification checks every event. The collector key signs the
+checkpoint, so it counts when the recipient got it before the archive, through another
+channel. It is an optional supporting check.
 
 [Open the full-size animation](../assets/presentation/casework-checkpoint.svg) · [Static diagram](../assets/presentation/casework-checkpoint-static.svg) · [Exact checkpoint formula](../HOW-IT-WORKS.md#what-an-earlier-checkpoint-adds)
 
@@ -81,7 +81,7 @@ The witness journal is a supporting check. Its posts give external time: with
 skipping edited posts. Dates in a Telegram Desktop `result.json` are supplied metadata,
 not independent time.
 
-A growing counter doesn't mean nothing was missed. Compare proof receipts with the
+A growing counter shows that the witness is active. Compare proof receipts with the
 matching evidence archive, and use a controlled test for specific events.
 
 **Next:** [Witness reference](../WITNESS.md) · [Evidence limits](FAQ.md)

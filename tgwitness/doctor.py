@@ -103,7 +103,7 @@ def inspect_environment(root, host="127.0.0.1", port=8787):
         add("timestamp_verifier", "warning", "OpenSSL not found; only external timestamp verification needs it")
     return {"ready": not any(c["status"] == "fail" for c in checks), "platform": platform.platform(),
             "interpreter": sys.executable, "data_directory": str(root), "checks": checks,
-            "scope": "Local startup prerequisites only; no Telegram, proxy, coverage or forensic certification test"}
+            "scope": "Local startup prerequisites"}
 
 
 def print_report(report, as_json=False):

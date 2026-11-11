@@ -172,9 +172,9 @@ def verification_html(result, fixed, say, stamps=None, documents=(), files=None)
                                                            hash=head.get("hash")), head.get("hash")), "wide"),
         ("lock", say("Hidden records"), marked(say("{n} sealed; open them with keys handed over separately.",
                                                    n=len(result["still_sealed"]))), ""),
-        ("timer", say("Timestamp receipts (not verified)"),
-         marked(say("Included files: {files}. Their signatures, timestamp chains and binding to this document "
-                    "have not been verified.", files=", ".join(receipts)), *receipts)
+        ("timer", say("Timestamp receipts (for independent verification)"),
+         marked(say("Included files: {files}. Check their signatures, timestamp chains and binding to this document "
+                    "independently.", files=", ".join(receipts)), *receipts)
          if receipts else marked(say("No timestamp receipts are included.")), "wide"),
     )
     return ('<!doctype html><html lang="' + e(getattr(say, "language", "en")) + '"><meta charset="utf-8">'

@@ -182,7 +182,7 @@ def html(data):
         parts.append('<h3>Local-language summary</h3><p>' + e(local["notice"]) + '</p><p lang="'
                      + e(local["language"]) + '" dir="' + direction + '">' + e(local["text"]) + '</p>')
     if data.get("safeguards"):
-        parts.append('<h3>Collection safeguards</h3><p>Possible measures to discuss and document. Inclusion here does not mean a measure was used or verified.</p><div class="assessment-grid">')
+        parts.append('<h3>Collection safeguards</h3><p>Possible measures to discuss and document; record which ones the collection used.</p><div class="assessment-grid">')
         for method in data["safeguards"]:
             parts.append('<article class="assessment-item"><h3>' + e(method["name"]) + '</h3><p>' + e(method["helps"])
                          + '</p><p><strong>Retain: </strong>' + e(method["retain"]) + '</p><p class="assessment-limit"><strong>Strengthen: </strong>' + e(method["strengthen"]) + '</p></article>')
@@ -228,7 +228,7 @@ def pdf(lay, data):
         lay.text(local["text"], align="R" if local["language"] in ("ar", "fa", "ur") else "L")
     if data.get("safeguards"):
         lay.heading("Collection safeguards")
-        lay.text("Possible measures to discuss and document. Inclusion here does not mean a measure was used or verified.")
+        lay.text("Possible measures to discuss and document; record which ones the collection used.")
         for method in data["safeguards"]:
             lay.heading(method["name"])
             lay.text(method["helps"])

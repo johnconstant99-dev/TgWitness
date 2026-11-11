@@ -61,5 +61,5 @@ def observe(journal, config, token, request=fetch):
         except Exception as exc:
             outcomes["dns"] = {"status": "unavailable", "error": type(exc).__name__, "window": variables}
     return journal.append("network_witness.observed", {"account": account, "connector_id": connector, "outcomes": outcomes,
-                          "polled_at": observed, "scope": "provider samples; no proof of continuous presence, egress binding, or Telegram content",
+                          "polled_at": observed, "scope": "provider state sampled at the polled time",
                           "binding": "resource IDs supplied by operator; verifier must establish relation to case"}, artifacts)

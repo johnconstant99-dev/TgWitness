@@ -66,7 +66,7 @@ class LinuxClient:
         egress = egress_probe(connector, self.egress_ip)
         self.egress_ip = egress.get("ip", self.egress_ip)
         return {"guard_receipt_sha256": digest(raw), "endpoint_reachable": True,
-                "egress_sample": egress, "scope": "namespace policy, TCP reachability and sampled egress; not account identity"}
+                "egress_sample": egress, "scope": "namespace policy, TCP reachability and sampled egress"}
 
     def launch(self, choice, connector, profile):
         if os.name != "posix" or not Path("/proc").exists():

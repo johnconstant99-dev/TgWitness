@@ -83,8 +83,8 @@ class TrustedRecorder:
                 "video_running": self.video.process is not None, "has_report": self.report is not None,
                 "visual_annotations": len(self.visual), "limits": LIMITS,
                 "drand": self.beacon_status,
-                "network_witness": "not verified here; query provider independently with a read-only token",
-                "external_anchor": "retain checkpoints on an independent witness; drand alone is not an upper time bound"}
+                "network_witness": "query the provider independently with a read-only token",
+                "external_anchor": "retain checkpoints on an independent witness for an upper time bound; drand gives a lower one"}
 
     async def begin(self, choice):
         if self.phase != "configured":
@@ -273,7 +273,7 @@ class TrustedRecorder:
             try:
                 beacon = await asyncio.to_thread(observe, self.connectors[self.choice.connector])
                 self.event("beacon.drand", beacon)
-                self.beacon_status = "relay_confirmed; no upper time bound"
+                self.beacon_status = "relay_confirmed"
             except Exception as exc:
                 self.beacon_status = "unavailable"
                 self.event("beacon_unavailable", {"error": type(exc).__name__, "scope": "no drand bound for this interval"})

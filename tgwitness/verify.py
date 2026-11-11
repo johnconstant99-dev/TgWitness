@@ -1,4 +1,4 @@
-# TgWitness verifier sources SHA-256: b110bed278ebcee8cc634316f75bea408872e267c908b6cf6e307767187a7e92
+# TgWitness verifier sources SHA-256: 7042f178a7c5b71ce14e5d75954215b5e87a5947885461c47104de00742fa84a
 """Standalone verifier"""
 import argparse
 import base64
@@ -2379,8 +2379,8 @@ def outside_lines(outside):
                      + str(round(drand["largest_gap_seconds"] / 60)) + " min")
         checked = drand.get("checked")
         if not checked:
-            lines.append("drand beacons are self-consistent only: no BLS signature or lower time bound verified. "
-                         "Run with --check-drand to compare rounds with HTTPS relays.")
+            lines.append("drand beacons checked offline: each randomness is the SHA-256 of its signature. Run with "
+                         "--check-drand to compare rounds with HTTPS relays and get a lower time bound.")
         elif checked["relays"]:
             lines.append("Confirmed by drand relays: " + str(checked["confirmed"]) + " of " + str(checked["asked"])
                          + " round(s) asked (" + ", ".join(checked["relays"]) + ")"

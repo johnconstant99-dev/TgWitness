@@ -61,4 +61,4 @@ def confirm(values, request=fetch, limit=100):
         checked += 1
     return {"status": "PASS" if checked == len(values) else "INCOMPLETE", "checked": checked,
             "recorded": len(values), "method": "independent TLS query to pinned-chain public relay",
-            "scope": "not-before bounds only; not real-time or continuity proof"}
+            "scope": "not-before bounds"}

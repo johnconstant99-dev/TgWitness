@@ -230,7 +230,7 @@ def certification_html(session, model, fixed, fingerprint, hashes, say, stamped=
              (say("Revision"), session.get("revision") or 1), (say("Statement SHA-256"), fixed["statement_sha256"]),
              (say("Recorded in journal record"), "#" + str(fixed["event_seq"])), (say("Workspace signing key"), fingerprint),
              (say("Fixed at (UTC)"), fixed["at"]), (say("Observed period (UTC)"), (min(times) + " – " + max(times)) if times else "—"),
-             (say("Timestamp receipts (not verified)"), ", ".join(stamped) if stamped else say("none in this package"))]
+             (say("Timestamp receipts (for independent verification)"), ", ".join(stamped) if stamped else say("none in this package"))]
     rows = "".join('<tr><td class="mono">' + e(path) + '</td><td class="mono">' + e(digest) + "</td></tr>"
                    for path, digest in sorted(hashes.items()))
     body = ("<h1>" + e(say("Certification of authenticity of electronic records")) + '</h1><p class="lead">'

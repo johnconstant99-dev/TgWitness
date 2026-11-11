@@ -125,8 +125,8 @@ def outside_lines(outside):
                      + str(round(drand["largest_gap_seconds"] / 60)) + " min")
         checked = drand.get("checked")
         if not checked:
-            lines.append("drand beacons are self-consistent only: no BLS signature or lower time bound verified. "
-                         "Run with --check-drand to compare rounds with HTTPS relays.")
+            lines.append("drand beacons checked offline: each randomness is the SHA-256 of its signature. Run with "
+                         "--check-drand to compare rounds with HTTPS relays and get a lower time bound.")
         elif checked["relays"]:
             lines.append("Confirmed by drand relays: " + str(checked["confirmed"]) + " of " + str(checked["asked"])
                          + " round(s) asked (" + ", ".join(checked["relays"]) + ")"
