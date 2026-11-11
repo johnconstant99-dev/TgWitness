@@ -296,36 +296,43 @@ catalog or your own route.
 **Objection.** TgWitness signs in with API pairs it did not register and presents itself
 as Telegram Desktop.
 
-**Facts.**
+**Facts.** The [dedicated account guide](https://phishdestroy.github.io/TgWitness/docs/dedicated-account/#api)
+explains the choice and links Telegram's documentation for each point.
 
-- An API ID and API hash "identify the application to Telegram; they do not authorize
-  an account by themselves" ([API ID and API hash](ACCOUNTS.md#before-you-start-api-id-and-api-hash)).
-  A pair is not linked to anyone's account or data and gives no access to them. Access
-  to an account comes only from its own sign-in: a login code and 2FA password, or a
-  session that account already authorized.
-- [`tgwitness/api_pool.py`](../tgwitness/api_pool.py) contains 50 public API pairs
-  already used by open-source clients ([project guide](PROJECT-GUIDE.md#connect-a-telegram-account)).
-  A fresh login tries Telegram Desktop's pair (2040) first, then up to seven shuffled
-  others (`login_order`). "Only the Telegram Desktop pair (2040) is sent with a
-  matching Telegram Desktop client description"
+- **The pair is a name, not a key.** An API ID and API hash "identify the application
+  and give no access to any account; Telethon's documentation notes that one pair works
+  with any phone number". Access to an account comes only from its own sign-in: a login
+  code and 2FA password, or a session that account already authorized.
+- **Nobody sees anything of yours through a pair.** Signing in creates an authorization
+  key by a Diffie–Hellman exchange; the key is never sent, and "other programs with the
+  same pair have their own keys and cannot use yours". Traffic is encrypted with that
+  key, not with the API hash. "Telegram has no method that lists accounts, sessions or
+  messages by API ID"; the owner of a pair sees only its app settings.
+- **Why public pairs.** The pairs of official Telegram apps (Desktop 2040, Android 6,
+  Telegram X 21724, iOS 10840, macOS 2834, Web 2496) are public and built into many
+  independent programs and libraries, such as opentele, opentele2 and Grampo. More than a
+  million accounts have been registered through them, and they have worked for more than
+  five years. A new pair created at my.telegram.org is tied to one account, and in the
+  project's experience about 99% of such accounts get logged out
+  ([why not your main account](https://phishdestroy.github.io/TgWitness/docs/dedicated-account/#why)).
+- [`tgwitness/api_pool.py`](../tgwitness/api_pool.py) contains 50 public pairs. A fresh
+  login tries Telegram Desktop's pair (2040) first, then up to seven shuffled others
+  (`login_order`); if Telegram refuses a pair, the next one is tried. "Only the Telegram Desktop pair (2040) is sent with a matching
+  Telegram Desktop client description"
   ([authentication methods](CONNECTION-SECURITY.md#authentication-methods)).
   Missing device fields come from bundled opentele2 catalogs
   ([API ID and API hash](ACCOUNTS.md#before-you-start-api-id-and-api-hash)).
-- This lets someone sign in without creating a Telegram API application. If you enter
-  your own pair from [my.telegram.org](https://my.telegram.org), TgWitness uses it
-  instead.
+- **Your own pair works too.** Enter it under **API ID + Hash** and TgWitness uses it
+  instead of the pool ([API ID and API hash](ACCOUNTS.md#before-you-start-api-id-and-api-hash)).
 - Each `observation.started` record names the `api_id` (never the hash), whether the
   pair is built-in or the operator's own, the client description and the route type.
   Reports and `custody.json` list them ([producer](EVIDENCE.md#producer)), so a
   recipient can see which client observed.
-- Telegram's [API terms](https://core.telegram.org/api/obtaining_api_id) apply to
-  every client ([project guide](PROJECT-GUIDE.md)). Telegram can refuse a published
-  pair (`API_ID_PUBLISHED_FLOOD`) or restrict an account, and the guide recommends "a
-  dedicated account you can afford to lose".
 
 **Scope.** The pair that signed in does not change what the account receives or what
 the record proves. "Telegram decides restrictions on its side, whichever client profile
-is used" ([accounts](ACCOUNTS.md#before-you-start-api-id-and-api-hash)).
+is used" ([accounts](ACCOUNTS.md#before-you-start-api-id-and-api-hash)); that is why the
+guide says to use a separate account, never your main one.
 
 ## The installer pipes curl into bash
 
