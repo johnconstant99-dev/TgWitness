@@ -45,7 +45,7 @@ First time? Do it in this order:
 
 1. [Try the demo](QUICKSTART.md#explore-the-interface), fake data, no Telegram login
 2. [Connect and collect](wiki/Getting-Started.md) a message from a chat you control
-3. [Read how the record works](HOW-IT-WORKS.md) and what a signature does and doesn't prove
+3. [Read how the record works](HOW-IT-WORKS.md) and what each check establishes
 
 ## Find your workflow
 
@@ -104,7 +104,7 @@ First time? Do it in this order:
 | Fix a problem | [Operations](OPERATIONS.md) |
 
 Also: [panel safeguards](PANEL-SAFETY.md), [storage and recovery](STORAGE.md),
-[what's been tested](VERIFICATION.md), [limits and objections](LIMITS-AND-OBJECTIONS.md), [wiki](wiki/Home.md), [glossary](wiki/Glossary.md).
+[what's been tested](VERIFICATION.md), [questions and checks](QUESTIONS-AND-CHECKS.md), [wiki](wiki/Home.md), [glossary](wiki/Glossary.md).
 
 <details>
 <summary>Technical reference</summary>

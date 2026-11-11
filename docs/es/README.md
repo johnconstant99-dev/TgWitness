@@ -17,7 +17,7 @@
 
 <p align="center"><strong>Espacio de trabajo autoalojado para investigaciones en Telegram.</strong><br>Guarde chats, conserve ediciones y eliminaciones, vea quién está conectado con quién<br>y entregue exportaciones firmadas que cualquiera puede comprobar.</p>
 
-<p align="center"><strong>CONFIANZA CERO.</strong> TgWitness no toma partido: las mismas comprobaciones se aplican al operador, a PhishDestroy y a cualquier otro.<br>Solo cuenta lo que confirma un tercero o las matemáticas. <a href="../LIMITS-AND-OBJECTIONS.md">Límites y objeciones</a></p>
+<p align="center"><strong>CONFIANZA CERO.</strong> TgWitness no toma partido: las mismas comprobaciones se aplican al operador, a PhishDestroy y a cualquier otro.<br>Solo cuenta lo que confirma un tercero o las matemáticas. <a href="../QUESTIONS-AND-CHECKS.md">Preguntas y comprobaciones</a></p>
 
 <p align="center">
   <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · versión preliminar"></a>
@@ -285,7 +285,7 @@ el diario.
 | [Listas de vigilancia](../INVESTIGATION-MODE.md#watchlists) | Palabras, patrones, carteras, @nombres de usuario, ID, dominios, teléfonos y enlaces, detectados en el texto, las ediciones, los destinos de enlaces ocultos, los botones de bots, los códigos QR y el OCR |
 | [Seguimiento del estado en línea](../INVESTIGATION-MODE.md#online-watch) | Comprobaciones cada 1–60 minutos, hasta 100 cuentas por solicitud, con un patrón por hora y día de la semana |
 | [Códigos y carteras](../INVESTIGATION-MODE.md#codes-in-images) | Códigos QR de pago; direcciones EVM comprobadas según EIP-55, TON en formato bruto, sumas de comprobación de XRP Ledger, enlaces de pago con cadena, importe y token |
-| [Rastros del cliente](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-can-and-cannot-show) | Rastros del codificador en videomensajes redondos y mensajes de voz; comparar la hora de subida con la de envío delata pruebas «en directo» pregrabadas |
+| [Rastros del cliente](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-show) | Rastros del codificador en videomensajes redondos y mensajes de voz; comparar la hora de subida con la de envío delata pruebas «en directo» pregrabadas |
 | [Identidad encubierta y autorización](../INVESTIGATION-MODE.md#cover-and-authority) | Perfiles ficticios, autorizaciones y un registro de actividad encubierta que señala los mensajes fuera de los chats o del periodo autorizados |
 | [Control de la cuenta](../INVESTIGATION-MODE.md#account-control) | Edición del perfil y la privacidad con registros de antes y después, una comprobación de exposición y desconexión inmediata tras cada acción |
 | [Documentos judiciales](../INVESTIGATION-MODE.md#documents-for-court) | Paquete del caso BagIt con una plantilla de certificación según la Rule 902(13)/(14), índice de pruebas documentales, anexo de solicitud y subtítulos WebVTT/SRT para grabaciones de pantalla |

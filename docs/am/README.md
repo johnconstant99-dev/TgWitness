@@ -17,7 +17,7 @@
 
 <p align="center"><strong>በራስዎ አገልጋይ የሚሠራ የTelegram ምርመራ የሥራ ቦታ።</strong><br>ውይይቶችን ያስቀምጡ፣ ማስተካከያዎችንና ስረዛዎችን ይያዙ፣ ማን ከማን ጋር እንደተገናኘ ይመልከቱ<br>እና ማንም ሊያረጋግጣቸው የሚችሉ የተፈረሙ የወጡ ፋይሎችን ያስረክቡ።</p>
 
-<p align="center"><strong>ዜሮ እምነት።</strong> TgWitness ወገን አይዝም፦ ተመሳሳይ ምርመራዎች በኦፕሬተሩ፣ በPhishDestroy እና በማንኛውም ሰው ላይ ይተገበራሉ።<br>የሚቆጠረው ሦስተኛ ወገን ወይም ሒሳብ የሚያረጋግጠው ብቻ ነው። <a href="../LIMITS-AND-OBJECTIONS.md">ገደቦችና ተቃውሞዎች</a></p>
+<p align="center"><strong>ዜሮ እምነት።</strong> TgWitness ወገን አይዝም፦ ተመሳሳይ ምርመራዎች በኦፕሬተሩ፣ በPhishDestroy እና በማንኛውም ሰው ላይ ይተገበራሉ።<br>የሚቆጠረው ሦስተኛ ወገን ወይም ሒሳብ የሚያረጋግጠው ብቻ ነው። <a href="../QUESTIONS-AND-CHECKS.md">ጥያቄዎችና ማረጋገጫዎች</a></p>
 
 <p align="center">
   <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · ቅድመ-ልቀት"></a>
@@ -285,7 +285,7 @@ python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --tsa-ca TS
 | [የክትትል ዝርዝሮች](../INVESTIGATION-MODE.md#watchlists) | ቃላት፣ ቅጦች፣ ዋሌቶች፣ የተጠቃሚ ስሞች (@)፣ IDዎች፣ ዶሜኖች፣ ስልኮችና አገናኞች፤ በጽሑፍ፣ በማስተካከያዎች፣ በተደበቁ የአገናኝ መድረሻዎች፣ በቦት ቁልፎች፣ በQR ኮዶችና በOCR ውስጥ ይዛመዳሉ |
 | [የመስመር ላይ ክትትል](../INVESTIGATION-MODE.md#online-watch) | በየ1–60 ደቂቃው ምርመራ፣ በአንድ ጥያቄ እስከ 100 መለያዎች፣ በሰዓትና በሳምንቱ ቀን የሚታይ ንድፍ |
 | [ኮዶችና ዋሌቶች](../INVESTIGATION-MODE.md#codes-in-images) | የክፍያ QR ኮዶች፤ በEIP-55 የተረጋገጡ የEVM አድራሻዎች፣ TON በጥሬ ቅርጽ፣ የXRP Ledger ቼክሰሞች፣ ሰንሰለት፣ መጠንና ቶከን ያላቸው የክፍያ አገናኞች |
-| [የደንበኛ መተግበሪያ ዱካዎች](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-can-and-cannot-show) | በክብ ቪዲዮዎችና በድምፅ መልእክቶች ውስጥ የኢንኮደር ዱካዎች፤ የመጫኛ ጊዜን ከመላኪያ ጊዜ ጋር ማነጻጸር አስቀድሞ የተቀረጸ «ቀጥታ» ማስረጃን ያጋልጣል |
+| [የደንበኛ መተግበሪያ ዱካዎች](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-show) | በክብ ቪዲዮዎችና በድምፅ መልእክቶች ውስጥ የኢንኮደር ዱካዎች፤ የመጫኛ ጊዜን ከመላኪያ ጊዜ ጋር ማነጻጸር አስቀድሞ የተቀረጸ «ቀጥታ» ማስረጃን ያጋልጣል |
 | [ሽፋንና ሥልጣን](../INVESTIGATION-MODE.md#cover-and-authority) | የሽፋን ማንነቶች፣ ፈቃዶች እና ከተፈቀዱ ውይይቶች ወይም ጊዜ ውጭ ያሉ መልእክቶችን የሚጠቁም የድብቅ እንቅስቃሴ ሰነድ |
 | [የመለያ ቁጥጥር](../INVESTIGATION-MODE.md#account-control) | የመገለጫና የግላዊነት ማስተካከያ ከለውጡ በፊትና በኋላ ግቤቶች ጋር፣ የተጋላጭነት ምርመራ፣ እና ከእያንዳንዱ ድርጊት በኋላ ወዲያውኑ ከመስመር ውጭ መሆን |
 | [ለፍርድ ቤት ሰነዶች](../INVESTIGATION-MODE.md#documents-for-court) | የBagIt የጉዳይ ጥቅል ከRule 902(13)/(14) የማረጋገጫ አብነት፣ የማስረጃ ሰነዶች ማውጫ፣ የጥያቄ አባሪ እና ለስክሪን ቀረጻዎች የWebVTT/SRT ንዑስ ጽሑፎች ጋር |

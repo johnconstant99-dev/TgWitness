@@ -20,25 +20,25 @@ PROCEDURES = {"civil": "Civil / commercial", "criminal": "Criminal"}
 METHODS = [
     {"id": "signing", "name": "Collector signature", "helps": "Detect changes to signed bytes when the trusted key is known independently.",
      "retain": "Original signed ZIP, verification output, separately retained key fingerprint and checkpoints.",
-     "limit": "An operator holding the key can sign fabricated records or a replacement journal. Zero independent witnesses leaves that risk open."},
+     "strengthen": "Hand the fingerprint to the recipient through a separate channel before the archive, and add third-party time and a witness with its own key: together they fix the journal beyond the key holder."},
     {"id": "time", "name": "Independent timestamps", "helps": "Bound when a particular checkpoint or archive hash already existed.",
      "retain": "Original receipt, exact checkpoint binding and verification against independent trust roots; confirmed Bitcoin proof for OTS.",
-     "limit": "The verified time bound applies to the records covered by that receipt. Review the checkpoint binding and acquisition interval."},
+     "strengthen": "Stamp checkpoints on a schedule so every record falls under a receipt; the verifier names the records each receipt covers."},
     {"id": "storage", "name": "Encrypted storage with retention", "helps": "Preserve separately held copies and restrict deletion during an enforced retention period.",
      "retain": "Object versions, retention mode and dates, access policy, custody and independent retrieval checks. Keep decryption keys available to the authorized recipient.",
-     "limit": "Encryption protects confidentiality, not immutability. S3 compatibility or versioning alone is not Object Lock. Governance bypass and shared administrator control weaken independence."},
+     "strengthen": "Use S3 Object Lock in compliance mode with a retention date, under an administrator separate from the operator: each copy stays undeletable until that date."},
     {"id": "witness", "name": "Independent witness", "helps": "Compare independently held observations or signed checkpoints and explain gaps and disagreements.",
      "retain": "Witness identity or independently trusted key, scope, signed records, challenge responses and explicit coverage gaps.",
-     "limit": "A second signature under the same control is not independence. Closed-source daily scoring is a proposed service, not a verified capability in this report. A silent witness cannot attest to its own outage."},
+     "strengthen": "Run the witness on another operator's machine with its own key and keep its key-control record; daily Bitcoin seals and live t.me posts fix its time, and a late check-in is flagged as overdue."},
     {"id": "tee", "name": "Attested collection (TEE / Phala)", "helps": "Support claims about a measured execution environment within a stated threat model.",
      "retain": "Verifiable quote, fresh challenge, certificate chain, measurements, deployed code or reproducible build mapping, key binding and output hashes.",
-     "limit": "Verify the quote, expected measurements, collector-key binding and freshness. Review those results with the corresponding acquisition records."},
+     "strengthen": "Verify the quote, expected measurements, collector-key binding and freshness, and keep the results with the corresponding acquisition records."},
     {"id": "visual", "name": "Browser capture, screenshots and video", "helps": "Show visible context and the steps a person or capture process observed.",
      "retain": "Original media and metadata, capture method and environment, source identifiers, session timing, hashes and links to the corresponding structured records.",
-     "limit": "Visual recordings can be incomplete or manipulated and do not replace source data. A TEE recording binds only what the attested process actually captured and signed."},
+     "strengthen": "Link each recording to the structured records it shows; inside a TEE the attested process signs exactly what it captured."},
     {"id": "human", "name": "Human witness, expert or notary", "helps": "Explain collection, identity and custody, answer challenges and complete route-specific certifications or formalities.",
      "retain": "Who did what and when, qualifications, signed declaration or applicable certificate, custody transfers and the exact material examined.",
-     "limit": "Professional status covers the operator's role in the collection. A separately owned provider account reduces operator control over the host and hypervisor."},
+     "strengthen": "A declaration covers the operator's role in the collection; a provider account owned by a separate party takes the host and hypervisor out of the operator's control."},
 ]
 
 
@@ -185,7 +185,7 @@ def html(data):
         parts.append('<h3>Collection safeguards</h3><p>Possible measures to discuss and document. Inclusion here does not mean a measure was used or verified.</p><div class="assessment-grid">')
         for method in data["safeguards"]:
             parts.append('<article class="assessment-item"><h3>' + e(method["name"]) + '</h3><p>' + e(method["helps"])
-                         + '</p><p><strong>Retain: </strong>' + e(method["retain"]) + '</p><p class="assessment-limit"><strong>Limits: </strong>' + e(method["limit"]) + '</p></article>')
+                         + '</p><p><strong>Retain: </strong>' + e(method["retain"]) + '</p><p class="assessment-limit"><strong>Strengthen: </strong>' + e(method["strengthen"]) + '</p></article>')
         parts.append('</div>')
     return ''.join(parts) + '</section>'
 
@@ -233,4 +233,4 @@ def pdf(lay, data):
             lay.heading(method["name"])
             lay.text(method["helps"])
             lay.text("Retain: " + method["retain"])
-            lay.text("Limits: " + method["limit"])
+            lay.text("Strengthen: " + method["strengthen"])

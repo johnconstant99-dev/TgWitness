@@ -115,7 +115,7 @@ TgWitness has been developed and tested for about six months. The collector, the
 signed journal and the verifier came first; the web panel and the add-on modules
 were built on them later. This repository was created new on 29 October 2026 for
 publication and began with the existing code, so its age is not the project's age
-([limits and objections](LIMITS-AND-OBJECTIONS.md#the-project-is-only-two-weeks-old)).
+([development history](QUESTIONS-AND-CHECKS.md#development-history)).
 The cumulative exercised workload is on the order of 100 million, including earlier
 runs, failures, fixes and repeated validation. The dated public measurements
 document selected runs with their own revisions, methods and results.

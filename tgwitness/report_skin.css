@@ -110,7 +110,7 @@ pre.cmd .copy{background:#1e293b;border-color:#334155;color:#cbd5e1;border-radiu
 .drop{border-radius:16px;border-color:var(--line2)}
 .brief-cols>div{padding:16px 18px;border:1px solid var(--line);border-radius:16px;background:var(--bg2)}
 .brief-cols>div:first-child{border-color:var(--line);border-top:3px solid var(--ok);background:var(--bg2)}
-.brief-cols>div:last-child{border-color:var(--line);border-top:3px solid var(--warn);background:var(--bg2)}
+.brief-cols>div:last-child{border-color:var(--line);border-top:3px solid var(--teal);background:var(--bg2)}
 .brief-cols h3{margin:0 0 4px}
 section.brief>h2{font-size:20px}
 .records-pointer{padding:20px 22px;border:1px solid var(--tint-line);border-radius:12px;background:var(--tint)}

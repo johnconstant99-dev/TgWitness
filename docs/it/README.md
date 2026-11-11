@@ -17,7 +17,7 @@
 
 <p align="center"><strong>Area di lavoro self-hosted per le indagini su Telegram.</strong><br>Salva le chat, conserva modifiche e cancellazioni, scopri chi è collegato a chi<br>e consegna esportazioni firmate che chiunque può verificare.</p>
 
-<p align="center"><strong>ZERO TRUST.</strong> TgWitness non si schiera: gli stessi controlli valgono per l'operatore, per PhishDestroy e per chiunque altro.<br>Conta solo ciò che conferma una terza parte o la matematica. <a href="../LIMITS-AND-OBJECTIONS.md">Limiti e obiezioni</a></p>
+<p align="center"><strong>ZERO TRUST.</strong> TgWitness non si schiera: gli stessi controlli valgono per l'operatore, per PhishDestroy e per chiunque altro.<br>Conta solo ciò che conferma una terza parte o la matematica. <a href="../QUESTIONS-AND-CHECKS.md">Domande e verifiche</a></p>
 
 <p align="center">
   <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · versione preliminare"></a>
@@ -285,7 +285,7 @@ nel registro.
 | [Watchlist](../INVESTIGATION-MODE.md#watchlists) | Parole, pattern, portafogli, @nomi utente, ID, domini, telefoni e link, rilevati in testo, modifiche, destinazioni di link nascosti, pulsanti dei bot, codici QR e OCR |
 | [Monitoraggio online](../INVESTIGATION-MODE.md#online-watch) | Controlli ogni 1–60 minuti, fino a 100 account per richiesta, con un andamento per ora e giorno della settimana |
 | [Codici e portafogli](../INVESTIGATION-MODE.md#codes-in-images) | Codici QR di pagamento; indirizzi EVM verificati secondo EIP-55, TON in formato grezzo, checksum XRP Ledger, link di pagamento con rete, importo e token |
-| [Tracce del client](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-can-and-cannot-show) | Tracce dell'encoder nei videomessaggi circolari e nei messaggi vocali; il confronto tra ora di caricamento e ora di invio smaschera prove «dal vivo» preregistrate |
+| [Tracce del client](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-show) | Tracce dell'encoder nei videomessaggi circolari e nei messaggi vocali; il confronto tra ora di caricamento e ora di invio smaschera prove «dal vivo» preregistrate |
 | [Identità di copertura e autorizzazioni](../INVESTIGATION-MODE.md#cover-and-authority) | Identità fittizie, autorizzazioni e un resoconto delle attività sotto copertura che segnala i messaggi fuori dalle chat o dal periodo autorizzati |
 | [Controllo dell'account](../INVESTIGATION-MODE.md#account-control) | Modifica di profilo e privacy con record prima/dopo, verifica dell'esposizione e passaggio offline subito dopo ogni azione |
 | [Documenti per il tribunale](../INVESTIGATION-MODE.md#documents-for-court) | Pacchetto del caso BagIt con modello di certificazione Rule 902(13)/(14), indice delle prove, allegato alla richiesta e sottotitoli WebVTT/SRT per le registrazioni dello schermo |

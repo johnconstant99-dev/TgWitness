@@ -17,7 +17,7 @@
 
 <p align="center"><strong>Environnement auto-hébergé pour les enquêtes sur Telegram.</strong><br>Enregistrez les discussions, conservez les modifications et les suppressions, voyez qui est lié à qui<br>et remettez des exports signés que chacun peut vérifier.</p>
 
-<p align="center"><strong>CONFIANCE ZÉRO.</strong> TgWitness ne prend parti pour personne : les mêmes vérifications s'appliquent à l'opérateur, à PhishDestroy et à tous les autres.<br>Seul compte ce qu'un tiers ou les mathématiques confirment. <a href="../LIMITS-AND-OBJECTIONS.md">Limites et objections</a></p>
+<p align="center"><strong>CONFIANCE ZÉRO.</strong> TgWitness ne prend parti pour personne : les mêmes vérifications s'appliquent à l'opérateur, à PhishDestroy et à tous les autres.<br>Seul compte ce qu'un tiers ou les mathématiques confirment. <a href="../QUESTIONS-AND-CHECKS.md">Questions et vérifications</a></p>
 
 <p align="center">
   <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · préversion"></a>
@@ -285,7 +285,7 @@ le journal.
 | [Listes de surveillance](../INVESTIGATION-MODE.md#watchlists) | Mots, motifs, portefeuilles, @noms d'utilisateur, ID, domaines, téléphones et liens, recherchés dans le texte, les modifications, les cibles de liens masquées, les boutons de bots, les codes QR et l'OCR |
 | [Suivi en ligne](../INVESTIGATION-MODE.md#online-watch) | Vérification toutes les 1–60 minutes, jusqu'à 100 comptes par requête, avec une répartition par heure et par jour de la semaine |
 | [Codes et portefeuilles](../INVESTIGATION-MODE.md#codes-in-images) | Codes QR de paiement ; adresses EVM vérifiées selon EIP-55, TON sous forme brute, sommes de contrôle XRP Ledger, liens de paiement avec chaîne, montant et jeton |
-| [Traces du client](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-can-and-cannot-show) | Traces d'encodeur des vidéos rondes et des messages vocaux ; comparer l'heure de téléversement à l'heure d'envoi révèle une preuve « en direct » préenregistrée |
+| [Traces du client](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-show) | Traces d'encodeur des vidéos rondes et des messages vocaux ; comparer l'heure de téléversement à l'heure d'envoi révèle une preuve « en direct » préenregistrée |
 | [Couverture et autorisation](../INVESTIGATION-MODE.md#cover-and-authority) | Identités d'emprunt, autorisations et registre d'activité sous couverture qui signale les messages hors des discussions ou de la période autorisées |
 | [Contrôle du compte](../INVESTIGATION-MODE.md#account-control) | Modification du profil et de la confidentialité avec enregistrements avant/après, contrôle d'exposition et passage hors ligne juste après chaque action |
 | [Documents pour le tribunal](../INVESTIGATION-MODE.md#documents-for-court) | Dossier BagIt avec modèle de certification Rule 902(13)/(14), index des pièces, annexe de requête et sous-titres WebVTT/SRT pour les enregistrements d'écran |

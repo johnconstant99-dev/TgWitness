@@ -92,8 +92,8 @@ python -m tgwitness.sealed_verify evidence.zip --bundle attestation.jsonl --repo
   включения. Просмотреть её можно в [поиске Sigstore](https://search.sigstore.dev/). Запись журнала
   фиксирует время обязательства, а не сообщений Telegram ([Rekor](https://docs.sigstore.dev/logging/overview/)).
 - **Scorecard.** [Отчёт OpenSSF Scorecard](https://securityscorecards.dev/viewer/?uri=github.com/phishdestroy/TgWitness)
-  формируется каждый понедельник и при push в `main`. Смотрите на дату, коммит и замечания,
-  а не только на оценку. Это автоматический анализ, а не аудит, выполненный человеком.
+  формируется каждый понедельник и при push в `main`. Смотрите на дату, коммит и замечания
+  вместе с оценкой.
 - **Аудит рабочих процессов.** [workflow-audit.yml](../../.github/workflows/workflow-audit.yml) запускает zizmor
   при изменениях рабочих процессов и каждый понедельник; результаты сохраняются в артефакте
   `workflow-audit-sarif`.

@@ -73,7 +73,7 @@ html[data-template=editorial] .dossier{--dossier-navy:#382c2a;--dossier-gold:#e7
 .dossier section.brief{border-top:3px solid var(--dossier-gold)}
 .dossier .brief>p{font-size:19px;line-height:1.6;max-width:78ch;color:var(--ink)}
 .dossier .brief-cols>div{background:transparent;border-radius:0;padding:18px 20px;border:0;border-inline-start:2px solid var(--line)}
-.dossier .brief-cols>div:first-child{border-inline-start-color:var(--ok)}.dossier .brief-cols>div:last-child{border-inline-start-color:var(--warn)}
+.dossier .brief-cols>div:first-child{border-inline-start-color:var(--ok)}.dossier .brief-cols>div:last-child{border-inline-start-color:var(--teal)}
 .dossier .brief-cols h3{font-size:12px;letter-spacing:.04em}.dossier .brief-cols li{font-size:13px;line-height:1.7}
 .dossier .case-assessment .assessment-grid{gap:20px}
 .dossier .assessment-item{border:1px solid var(--line);border-radius:2px;padding:24px}

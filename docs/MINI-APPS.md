@@ -43,7 +43,7 @@ and `sockets` lists `ws://` and `wss://` addresses. Reading stops after 4 MiB or
 Addresses found this way become URL and domain indicators in reports, listed
 under the source **mini app**.
 
-## What this does and does not show
+## What this records
 
 One response, fetched at one moment, from this workspace's address. A mini
 application can serve different addresses later, to another visitor, or after

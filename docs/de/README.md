@@ -17,7 +17,7 @@
 
 <p align="center"><strong>Selbst gehostete Arbeitsumgebung für Telegram-Ermittlungen.</strong><br>Chats sichern, Bearbeitungen und Löschungen festhalten, sehen, wer mit wem verbunden ist,<br>und signierte Exporte übergeben, die jeder prüfen kann.</p>
 
-<p align="center"><strong>ZERO TRUST.</strong> TgWitness ergreift keine Partei: Für den Betreiber, für PhishDestroy und für alle anderen gelten dieselben Prüfungen.<br>Es zählt nur, was ein Dritter oder die Mathematik bestätigt. <a href="../LIMITS-AND-OBJECTIONS.md">Grenzen und Einwände</a></p>
+<p align="center"><strong>ZERO TRUST.</strong> TgWitness ergreift keine Partei: Für den Betreiber, für PhishDestroy und für alle anderen gelten dieselben Prüfungen.<br>Es zählt nur, was ein Dritter oder die Mathematik bestätigt. <a href="../QUESTIONS-AND-CHECKS.md">Fragen und Prüfungen</a></p>
 
 <p align="center">
   <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · Vorabversion"></a>
@@ -285,7 +285,7 @@ in das Journal.
 | [Beobachtungslisten](../INVESTIGATION-MODE.md#watchlists) | Wörter, Muster, Wallets, @Benutzernamen, IDs, Domains, Telefonnummern und Links, abgeglichen in Text, Bearbeitungen, versteckten Linkzielen, Bot-Schaltflächen, QR-Codes und OCR |
 | [Online-Überwachung](../INVESTIGATION-MODE.md#online-watch) | Prüfungen alle 1–60 Minuten, bis zu 100 Konten pro Anfrage, mit einem Muster nach Stunde und Wochentag |
 | [Codes und Wallets](../INVESTIGATION-MODE.md#codes-in-images) | Zahlungs-QR-Codes; EVM-Adressen gegen EIP-55 geprüft, TON in Rohform, Prüfsummen für XRP Ledger, Zahlungslinks mit Chain, Betrag und Token |
-| [Client-Spuren](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-can-and-cannot-show) | Encoder-Spuren von runden Videos und Sprachnachrichten; der Vergleich von Upload- und Sendezeit entlarvt vorab aufgezeichnete „Live“-Beweise |
+| [Client-Spuren](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-show) | Encoder-Spuren von runden Videos und Sprachnachrichten; der Vergleich von Upload- und Sendezeit entlarvt vorab aufgezeichnete „Live“-Beweise |
 | [Legende und Befugnis](../INVESTIGATION-MODE.md#cover-and-authority) | Personas, Genehmigungen und ein Nachweis verdeckter Tätigkeit, der Nachrichten außerhalb der genehmigten Chats oder des genehmigten Zeitraums markiert |
 | [Kontosteuerung](../INVESTIGATION-MODE.md#account-control) | Bearbeitung von Profil und Privatsphäre mit Vorher-/Nachher-Einträgen, eine Expositionsprüfung und Offline-Schalten direkt nach jeder Aktion |
 | [Dokumente für Gerichte](../INVESTIGATION-MODE.md#documents-for-court) | BagIt-Fallpaket mit Vorlage für eine Zertifizierung nach Rule 902(13)/(14), Beweismittelverzeichnis, Anfrageanhang und WebVTT/SRT-Untertiteln für Bildschirmaufnahmen |

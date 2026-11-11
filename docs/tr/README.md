@@ -17,7 +17,7 @@
 
 <p align="center"><strong>Telegram araştırmaları için kendi sunucunuzda barındırdığınız çalışma alanı.</strong><br>Sohbetleri kaydedin, düzenlemeleri ve silmeleri saklayın, kimin kiminle bağlantılı olduğunu görün<br>ve herkesin kontrol edebileceği imzalı dışa aktarımlar teslim edin.</p>
 
-<p align="center"><strong>SIFIR GÜVEN.</strong> TgWitness taraf tutmaz: aynı kontroller operatöre, PhishDestroy'a ve diğer herkese uygulanır.<br>Yalnızca üçüncü bir tarafın veya matematiğin doğruladığı şey geçerlidir. <a href="../LIMITS-AND-OBJECTIONS.md">Sınırlar ve itirazlar</a></p>
+<p align="center"><strong>SIFIR GÜVEN.</strong> TgWitness taraf tutmaz: aynı kontroller operatöre, PhishDestroy'a ve diğer herkese uygulanır.<br>Yalnızca üçüncü bir tarafın veya matematiğin doğruladığı şey geçerlidir. <a href="../QUESTIONS-AND-CHECKS.md">Sorular ve kontroller</a></p>
 
 <p align="center">
   <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · ön sürüm"></a>
@@ -285,7 +285,7 @@ günlüğe yazılır.
 | [İzleme listeleri](../INVESTIGATION-MODE.md#watchlists) | Kelimeler, kalıplar, cüzdanlar, @kullanıcı adları, ID'ler, alan adları, telefonlar ve bağlantılar; metinde, düzenlemelerde, gizli bağlantı hedeflerinde, bot düğmelerinde, QR kodlarında ve OCR'da eşleştirilir |
 | [Çevrimiçi takip](../INVESTIGATION-MODE.md#online-watch) | 1–60 dakikada bir kontrol, istek başına en fazla 100 hesap, saate ve haftanın gününe göre örüntü |
 | [Kodlar ve cüzdanlar](../INVESTIGATION-MODE.md#codes-in-images) | Ödeme QR kodları; EIP-55'e göre kontrol edilen EVM adresleri, ham biçimde TON, XRP Ledger sağlama toplamları, zincir, tutar ve token içeren ödeme bağlantıları |
-| [İstemci izleri](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-can-and-cannot-show) | Yuvarlak videolarda ve sesli mesajlarda kodlayıcı izleri; yükleme zamanının gönderme zamanıyla karşılaştırılması önceden kaydedilmiş “canlı” kanıtları ortaya çıkarır |
+| [İstemci izleri](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-show) | Yuvarlak videolarda ve sesli mesajlarda kodlayıcı izleri; yükleme zamanının gönderme zamanıyla karşılaştırılması önceden kaydedilmiş “canlı” kanıtları ortaya çıkarır |
 | [Gizli kimlik ve yetki](../INVESTIGATION-MODE.md#cover-and-authority) | Kurgusal kimlikler, yetkilendirmeler ve yetkili sohbetlerin veya dönemin dışındaki mesajları işaretleyen bir gizli faaliyet kaydı |
 | [Hesap denetimi](../INVESTIGATION-MODE.md#account-control) | Önce/sonra kayıtlarıyla profil ve gizlilik düzenleme, ifşa kontrolü ve her işlemden hemen sonra çevrimdışına geçme |
 | [Mahkeme belgeleri](../INVESTIGATION-MODE.md#documents-for-court) | Rule 902(13)/(14) sertifikasyon şablonu, delil dizini, talep eki ve ekran kayıtları için WebVTT/SRT altyazıları içeren BagIt dava paketi |

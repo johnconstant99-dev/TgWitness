@@ -1,4 +1,4 @@
-# TgWitness verifier sources SHA-256: 0be08a0cf79ee755c204352df66102dbe250cbd8364c11a508dc9b77b543cfed
+# TgWitness verifier sources SHA-256: 2048584a3253170ddc8ca903b4c618150b28b1a1b65b3e787400b5f8ec91c8b3
 """Standalone verifier"""
 import argparse
 import base64
@@ -7925,7 +7925,7 @@ def verification_parser():
                         choices=("auto", *VERIFIER_LANGUAGES), help="Language of the readable answer")
     parser.add_argument("--choose-language", action="store_true", help="Show all languages before interactive verification")
     parser.add_argument("--pause", action="store_true", help="Wait for Enter after an interactive check (for launchers)")
-    parser.add_argument("--explain", action="store_true", help="Explain what the readable checks mean and do not mean")
+    parser.add_argument("--explain", action="store_true", help="Explain what each readable check establishes")
     parser.add_argument("--interactive", action="store_true", help="Ask for the original ZIP and trusted key; save a readable transcript")
     return parser
 

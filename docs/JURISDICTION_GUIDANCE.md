@@ -83,23 +83,18 @@ repair past collection. Included TDX quotes still require independent validation
 The design preview does not invent these findings; they are added during export.
 This task list guides package preparation and records the checks performed.
 
-## Research status and trust limits
+## Research status
 
-Catalog version `2026-11-06.1` is a **research draft**, not a jurisdiction-specific
-legal opinion, exhaustive minimum filing checklist or promise of acceptance.
-Iran's criminal route is expressly marked `needs_local_review`. All routes require
-checking current law and the actual court, acquisition authority, disclosure,
-authentication, hearsay where applicable, translation and formalities. The
-catalog records source links; it does not archive or continuously monitor statutes.
-English guidance and native summaries need professional review before relying
-on them for a particular filing.
+Catalog version `2026-11-06.1` is a **research draft** with source links for every
+route; Iran's criminal route is marked `needs_local_review`. For each filing, confirm
+current law and the actual court, acquisition authority, disclosure, authentication,
+hearsay where applicable, translation and formalities, and have the English guidance
+and native summary reviewed by a practitioner admitted there.
 
-Selecting a safeguard adds an explanation of its benefit, what to retain and its
-scope. Journal verification uses the trusted collector key; retained witness checkpoints
-allow comparison with an earlier independently observed journal boundary. Provider ownership separation reduces
-some operator powers without proving that a hosting provider cannot access the
-host. The proposed closed-source daily witness is described as a proposal, not an
-implemented verification result.
+Selecting a safeguard adds an explanation of its benefit, what to retain and how to
+strengthen it. Journal verification uses the trusted collector key; retained witness checkpoints
+allow comparison with an earlier independently observed journal boundary. A provider account
+owned by a separate party takes the host and hypervisor out of the operator's control.
 
 Retention must be established for the actual object versions and permissions;
 encryption, an S3 endpoint or versioning alone is insufficient. See

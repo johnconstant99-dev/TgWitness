@@ -9,7 +9,7 @@ scope, saved changes, charts, findings and source references. Each report gives
 the recipient a way to check the delivered material and inspect its collection
 coverage.
 
-The **Basis of trust and limitations** section appears in journal, handover, chat,
+The **Basis of trust** section appears in journal, handover, chat,
 account and sharing reports. Journal and handover PDFs use the same assessment as
 their signed `report.json`. ZIP manifests carry `case_assessment` in the signed
 manifest. This assessment travels with the exported material. The original
@@ -109,7 +109,7 @@ not all participants. Full-journal charts keep their separately stated scope.
 | Custom report | Your own combination of charts, transcript and previews. |
 
 Changing a preset keeps your design, case details and written analysis. Integrity
-checks, coverage, limitations and verification instructions remain in every design.
+checks, coverage, reading notes and verification instructions remain in every design.
 Source records in the ZIP stay unchanged when a chart or transcript is hidden.
 
 The optional **Examination notes** contain the question, method, findings and
@@ -133,7 +133,7 @@ This is not a complete PDF preview. **Save report settings** applies the choices
 future exports; existing signed files are immutable. PDF uses the chosen cover,
 typography, chapter layout and the same selected aggregates as HTML and signed JSON.
 
-Trust assessment, coverage limitations and verification instructions stay present.
+Trust assessment, coverage and verification instructions stay present.
 Hiding charts or the readable transcript does not remove authoritative source rows
 from the ZIP. Disabled chart series are omitted from the analytical JSON; use a
 minimized export to restrict disclosure of source records.

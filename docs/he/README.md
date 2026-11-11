@@ -17,7 +17,7 @@
 
 <p align="center"><strong>סביבת עבודה באירוח עצמי לחקירות ב-Telegram.</strong><br>שמרו צ'אטים ואת העריכות והמחיקות שבהם, ראו מי קשור למי<br>ומסרו ייצואים חתומים שכל אחד יכול לבדוק.</p>
 
-<p align="center"><strong>אפס אמון.</strong> TgWitness אינו נוקט צד: אותן בדיקות חלות על המפעיל, על PhishDestroy ועל כל אחד אחר.<br>נחשב רק מה שצד שלישי או המתמטיקה מאשרים. <a href="../LIMITS-AND-OBJECTIONS.md">מגבלות והשגות</a></p>
+<p align="center"><strong>אפס אמון.</strong> TgWitness אינו נוקט צד: אותן בדיקות חלות על המפעיל, על PhishDestroy ועל כל אחד אחר.<br>נחשב רק מה שצד שלישי או המתמטיקה מאשרים. <a href="../QUESTIONS-AND-CHECKS.md">שאלות ובדיקות</a></p>
 
 <p align="center">
   <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · גרסה מקדימה"></a>
@@ -285,7 +285,7 @@ python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --tsa-ca TS
 | [רשימות מעקב](../INVESTIGATION-MODE.md#watchlists) | מילים, תבניות, ארנקים, שמות משתמש (@), מזהים, דומיינים, טלפונים וקישורים, עם התאמה בטקסט, בעריכות, ביעדי קישורים מוסתרים, בכפתורי בוטים, בקודי QR וב-OCR |
 | [מעקב מצב מקוון](../INVESTIGATION-MODE.md#online-watch) | בדיקה כל 1–60 דקות, עד 100 חשבונות לבקשה, עם דפוס לפי שעה ויום בשבוע |
 | [קודים וארנקים](../INVESTIGATION-MODE.md#codes-in-images) | קודי QR לתשלום; כתובות EVM שנבדקות מול EIP-55, כתובות TON בצורה גולמית, סכומי ביקורת של XRP Ledger, קישורי תשלום עם רשת, סכום וטוקן |
-| [עקבות הלקוח](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-can-and-cannot-show) | עקבות מקודד בסרטוני עיגול ובהודעות קוליות; השוואת זמן ההעלאה לזמן השליחה חושפת הוכחה “חיה” שהוקלטה מראש |
+| [עקבות הלקוח](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-show) | עקבות מקודד בסרטוני עיגול ובהודעות קוליות; השוואת זמן ההעלאה לזמן השליחה חושפת הוכחה “חיה” שהוקלטה מראש |
 | [כיסוי והרשאה](../INVESTIGATION-MODE.md#cover-and-authority) | זהויות בדויות, הרשאות ותיעוד פעילות סמויה שמסמן הודעות מחוץ לצ'אטים או לתקופה המורשים |
 | [שליטה בחשבון](../INVESTIGATION-MODE.md#account-control) | עריכת פרופיל ופרטיות עם רשומות לפני ואחרי, בדיקת חשיפה ומעבר למצב לא מקוון מיד אחרי כל פעולה |
 | [מסמכים לבית המשפט](../INVESTIGATION-MODE.md#documents-for-court) | חבילת תיק BagIt עם תבנית אישור לפי Rule 902(13)/(14), אינדקס מוצגים, נספח בקשה וכתוביות WebVTT/SRT להקלטות מסך |

@@ -17,7 +17,7 @@
 
 <p align="center"><strong>مساحة عمل ذاتية الاستضافة للتحقيقات في Telegram.</strong><br>احفظ المحادثات، واحتفظ بالتعديلات وعمليات الحذف، واعرف من يرتبط بمن<br>وسلّم ملفات تصدير موقّعة يستطيع أي شخص التحقق منها.</p>
 
-<p align="center"><strong>الثقة الصفرية.</strong> لا ينحاز TgWitness إلى أي طرف: تنطبق الفحوص نفسها على المشغّل وعلى PhishDestroy وعلى أي شخص آخر.<br>لا يُعتدّ إلا بما يؤكده طرف ثالث أو تؤكده الرياضيات. <a href="../LIMITS-AND-OBJECTIONS.md">الحدود والاعتراضات</a></p>
+<p align="center"><strong>الثقة الصفرية.</strong> لا ينحاز TgWitness إلى أي طرف: تنطبق الفحوص نفسها على المشغّل وعلى PhishDestroy وعلى أي شخص آخر.<br>لا يُعتدّ إلا بما يؤكده طرف ثالث أو تؤكده الرياضيات. <a href="../QUESTIONS-AND-CHECKS.md">الأسئلة والتحقق</a></p>
 
 <p align="center">
   <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · إصدار تمهيدي"></a>
@@ -285,7 +285,7 @@ python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --tsa-ca TS
 | [قوائم المراقبة](../INVESTIGATION-MODE.md#watchlists) | كلمات وأنماط ومحافظ وأسماء مستخدمين (@) ومعرّفات ونطاقات وأرقام هواتف وروابط، تُطابَق في النص والتعديلات ووجهات الروابط المخفية وأزرار البوتات ورموز QR وOCR |
 | [مراقبة حالة الاتصال](../INVESTIGATION-MODE.md#online-watch) | فحص كل 1–60 دقيقة، حتى 100 حساب لكل طلب، مع نمط حسب الساعة ويوم الأسبوع |
 | [الرموز والمحافظ](../INVESTIGATION-MODE.md#codes-in-images) | رموز QR للدفع؛ عناوين EVM يُتحقق منها وفق EIP-55، وعناوين TON بالصيغة الخام، ومجاميع تحقق XRP Ledger، وروابط دفع مع السلسلة والمبلغ والرمز |
-| [آثار العميل](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-can-and-cannot-show) | آثار المُرمِّز في الفيديوهات الدائرية والرسائل الصوتية؛ ومقارنة وقت الرفع بوقت الإرسال تكشف الإثبات «المباشر» المسجّل مسبقًا |
+| [آثار العميل](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-show) | آثار المُرمِّز في الفيديوهات الدائرية والرسائل الصوتية؛ ومقارنة وقت الرفع بوقت الإرسال تكشف الإثبات «المباشر» المسجّل مسبقًا |
 | [الغطاء والتفويض](../INVESTIGATION-MODE.md#cover-and-authority) | الشخصيات المستعارة، والتفويضات، وتوثيق للنشاط السري يُعلِّم الرسائل الواقعة خارج المحادثات أو الفترة المصرّح بها |
 | [التحكم في الحساب](../INVESTIGATION-MODE.md#account-control) | تعديل الملف الشخصي والخصوصية مع قيود قبل التعديل وبعده، وفحص للانكشاف، والظهور بحالة غير متصل فور كل إجراء |
 | [وثائق للمحكمة](../INVESTIGATION-MODE.md#documents-for-court) | حزمة قضية BagIt مع قالب شهادة وفق Rule 902(13)/(14)، وفهرس للمستندات المقدّمة، وملحق للطلب، ونصوص مصاحبة بصيغة WebVTT/SRT لتسجيلات الشاشة |

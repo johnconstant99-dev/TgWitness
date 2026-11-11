@@ -24,7 +24,7 @@ LIMITS = (
     "journal instead.",
     "Actions in another Telegram app appear only through the messages this account sent or received; inline "
     "button presses there are not visible.",
-    "Indicators are strings found in messages. Who controls a wallet, link or account is a separate question.",
+    "Indicators are strings found in the recorded messages.",
     "Each step cites its journal record. Verify the signed journal before relying on this protocol.",
 )
 RISKS = {"telegram_proxy": "Telegram proxy link: opening it in a Telegram app contacts that server and reveals "

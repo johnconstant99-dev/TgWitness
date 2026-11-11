@@ -385,7 +385,7 @@ def standards(say, kind="evidence", stamps=0):
         ("ISO/IEC 27037:2012", say("Identification, collection, acquisition and preservation of digital evidence"),
          say("Capture time, tool, method and account are recorded; every record is hashed and signed when it is captured.")),
         ("ISO/IEC 27042:2015", say("Analysis and interpretation of digital evidence"),
-         say("Authoritative files and readable derivatives are kept apart; limitations are stated with the results.")),
+         say("Authoritative files and readable derivatives are kept apart; each result states its scope.")),
         ("NIST SP 800-86", say("Integrating forensic techniques into incident response"),
          say("Collection, examination, analysis and reporting are separate, documented steps.")),
         ("Berkeley Protocol (OHCHR, 2022)", say("Digital open source investigations"),
@@ -651,7 +651,7 @@ def icon(name, cls="i"):
 SECTION_ICONS = {"case": ("files", "blue"), "minimisation": ("eye", "violet"), "changes": ("edit", "orange"),
                  "actions": ("route", "violet"), "integrity": ("fingerprint", "blue"), "timestamps": ("seal", "teal"),
                  "coverage": ("layers", "teal"), "custody": ("route", "green"), "verify": ("check", "green"),
-                 "files": ("zip", "slate"), "standards": ("journal", "slate"), "limits": ("alert", "orange"),
+                 "files": ("zip", "slate"), "standards": ("journal", "slate"), "limits": ("info", "blue"),
                  "records": ("journal", "blue"), "messages": ("message", "blue"), "people": ("users", "violet"),
                  "ids": ("tag", "red"), "indicators": ("tag", "red"), "source": ("telegram", "blue"),
                  "admin-log": ("trash", "red"), "seal": ("lock", "green")}
@@ -1086,13 +1086,12 @@ def evidence_brief(say, digest, count, anchors, coverage, account_text, handover
         shows.append(say("That the journal up to record #{n} existed by {time}: an independent timestamp by {service}.",
                          n=latest.get("event_count"), time=utc_text(latest.get("time")), service=latest.get("service")))
     gaps = len((coverage or {}).get("gaps") or [])
-    hidden = [say("Who is behind an account or a chat: Telegram shows names and IDs, not identities."),
-              say("That Telegram delivered everything: gaps in observation ({n}) are listed under Coverage.", n=gaps)
-              if gaps else say("Activity outside the observed periods: the Coverage section lists those periods."),
-              say("Messages deleted before observation began, and the deleting person where no admin log names one."),
-              say("Exact times after record #{n}: they come from the collector's clock.", n=latest.get("event_count"))
-              if latest else say("Independently fixed times: observed times come from the collector clock until a timestamp or witness covers them.")]
-    return summary, shows, hidden
+    includes = [say("Each sender by the Telegram ID and name delivered with the message."),
+                say("Observed periods and gaps in observation ({n}), listed under Coverage.", n=gaps)
+                if gaps else say("Observed periods, listed under Coverage.")]
+    if not handover:
+        includes.append(say("Each saved version of an edited message, and the text kept after a deletion notice."))
+    return summary, shows, includes
 
 
 def chat_brief(say, meta, stats, ids, account_text):
@@ -1111,19 +1110,18 @@ def chat_brief(say, meta, stats, ids, account_text):
     labels = [say(text) for flag, text, _ in LABELS if profile.get(flag)]
     if labels:
         shows.append(say("Telegram's own label at export time: {labels}.", labels="; ".join(labels)))
-    hidden = [say("Who is behind an account or a chat: Telegram shows names and IDs, not identities."),
-              say("Earlier versions of edited messages, or who deleted a message (only an admin log says that).")
-              if not meta.get("admin_log") else say("Earlier versions of edited messages older than the admin log."),
-              say("Messages hidden from this account: the export holds what Telegram returned to it.")]
-    return summary, shows, hidden
+    includes = [say("Each sender by the Telegram ID and name delivered with the message.")]
+    if meta.get("admin_log"):
+        includes.append(say("Edits and deletions from the chat's admin log, with the account that made them and the content."))
+    return summary, shows, includes
 
 
-def brief_section(say, summary, shows, hidden):
+def brief_section(say, summary, shows, includes):
     items = lambda values: "<ul>" + "".join("<li>" + e(v) + "</li>" for v in values) + "</ul>"
     return ('<section class="card brief" id="brief"><h2><span class="sec-icon tone-blue">' + icon("info") + "</span>"
             + e(say("In brief")) + '</h2><p class="lead">' + e(summary)
             + '</p><div class="brief-cols"><div><h3>' + e(say("What this shows")) + "</h3>" + items(shows)
-            + "</div><div><h3>" + e(say("What this does not show")) + "</h3>" + items(hidden) + "</div></div></section>")
+            + "</div><div><h3>" + e(say("What the record includes")) + "</h3>" + items(includes) + "</div></div></section>")
 
 
 def case_section(say, number, options, extra_rows):

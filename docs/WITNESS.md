@@ -34,7 +34,7 @@ flowchart LR
 <details>
 <summary>On this page</summary>
 
-- [What the witness gets, and what it does not](#what-the-witness-gets-and-what-it-does-not)
+- [What the witness holds](#what-the-witness-holds)
 - [What it checks and records](#what-it-checks-and-records)
 - [Run a witness](#run-a-witness)
 - [Public proof page for several workspaces](#public-proof-page-for-several-workspaces)
@@ -42,7 +42,7 @@ flowchart LR
 
 </details>
 
-## What the witness gets, and what it does not
+## What the witness holds
 
 | The witness has | The witness never has |
 | --- | --- |

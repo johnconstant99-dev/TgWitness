@@ -17,7 +17,7 @@
 
 <p align="center"><strong>Samodzielnie hostowane środowisko do dochodzeń w Telegramie.</strong><br>Zapisuj czaty, zachowuj edycje i usunięcia, sprawdzaj, kto jest z kim powiązany,<br>i przekazuj podpisane eksporty, które każdy może zweryfikować.</p>
 
-<p align="center"><strong>ZERO ZAUFANIA.</strong> TgWitness nie staje po żadnej stronie: te same kontrole obowiązują operatora, PhishDestroy i każdego innego.<br>Liczy się tylko to, co potwierdza strona trzecia albo matematyka. <a href="../LIMITS-AND-OBJECTIONS.md">Ograniczenia i zastrzeżenia</a></p>
+<p align="center"><strong>ZERO ZAUFANIA.</strong> TgWitness nie staje po żadnej stronie: te same kontrole obowiązują operatora, PhishDestroy i każdego innego.<br>Liczy się tylko to, co potwierdza strona trzecia albo matematyka. <a href="../QUESTIONS-AND-CHECKS.md">Pytania i weryfikacja</a></p>
 
 <p align="center">
   <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · wersja przedpremierowa"></a>
@@ -285,7 +285,7 @@ w dzienniku.
 | [Listy obserwacyjne](../INVESTIGATION-MODE.md#watchlists) | Słowa, wzorce, portfele, @nazwy użytkowników, ID, domeny, telefony i linki, dopasowywane w tekście, edycjach, ukrytych celach linków, przyciskach botów, kodach QR i OCR |
 | [Obserwacja aktywności online](../INVESTIGATION-MODE.md#online-watch) | Sprawdzanie co 1–60 minut, do 100 kont na zapytanie, z rozkładem według godzin i dni tygodnia |
 | [Kody i portfele](../INVESTIGATION-MODE.md#codes-in-images) | Płatnicze kody QR; adresy EVM sprawdzane według EIP-55, TON w postaci surowej, sumy kontrolne XRP Ledger, linki płatnicze z siecią, kwotą i tokenem |
-| [Ślady klienta](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-can-and-cannot-show) | Ślady kodera w okrągłych wideo i wiadomościach głosowych; porównanie czasu przesłania z czasem wysłania ujawnia wcześniej nagrane dowody „na żywo” |
+| [Ślady klienta](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-show) | Ślady kodera w okrągłych wideo i wiadomościach głosowych; porównanie czasu przesłania z czasem wysłania ujawnia wcześniej nagrane dowody „na żywo” |
 | [Przykrywka i upoważnienia](../INVESTIGATION-MODE.md#cover-and-authority) | Persony, upoważnienia i rejestr działań pod przykryciem, który oznacza wiadomości spoza upoważnionych czatów lub okresu |
 | [Kontrola konta](../INVESTIGATION-MODE.md#account-control) | Edycja profilu i prywatności z zapisami przed/po, kontrolą ekspozycji i przejściem offline zaraz po każdej czynności |
 | [Dokumenty dla sądu](../INVESTIGATION-MODE.md#documents-for-court) | Pakiet sprawy BagIt z szablonem certyfikacji Rule 902(13)/(14), wykazem dowodów, załącznikiem do wniosku i napisami WebVTT/SRT do nagrań ekranu |

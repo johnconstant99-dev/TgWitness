@@ -250,7 +250,7 @@ def verification_parser():
                         choices=("auto", *VERIFIER_LANGUAGES), help="Language of the readable answer")
     parser.add_argument("--choose-language", action="store_true", help="Show all languages before interactive verification")
     parser.add_argument("--pause", action="store_true", help="Wait for Enter after an interactive check (for launchers)")
-    parser.add_argument("--explain", action="store_true", help="Explain what the readable checks mean and do not mean")
+    parser.add_argument("--explain", action="store_true", help="Explain what each readable check establishes")
     parser.add_argument("--interactive", action="store_true", help="Ask for the original ZIP and trusted key; save a readable transcript")
     return parser
 

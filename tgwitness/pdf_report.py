@@ -378,7 +378,7 @@ class Layout:
             pdf.rect(x + pdf.epw - 1.2 if self.rtl else x, y, 1.2, max(pdf.get_y() - y, 4.4), style="F")
         self.gap(2)
 
-    def brief(self, summary, shows, hidden):
+    def brief(self, summary, shows, includes):
         say = self.say
         if self.pdf.page_no() == 1 and not report_composition_pdf.active(self):
             self.pdf.add_page()
@@ -390,8 +390,8 @@ class Layout:
         self.text(say("What this shows"), size=9, style="B", color=OK)
         self.bullets(shows, size=8.6)
         self.gap(1)
-        self.text(say("What this does not show"), size=9, style="B", color=BAD)
-        self.bullets(hidden, size=8.6)
+        self.text(say("What the record includes"), size=9, style="B", color=INK)
+        self.bullets(includes, size=8.6)
         self.gap(2)
 
     def assessment_overview(self, data):
@@ -440,7 +440,7 @@ class Layout:
         self.text(say(item["basis"]), size=8.5, color=MUTED)
         self.gap(2)
         self.kv([(say(assessment.LABELS.get(k, k)), assessment.fact_text(v, say)) for k, v in item["facts"].items()])
-        self.text(say("Limits of this conclusion").upper(), size=7, style="B", color=MUTED)
+        self.text(say("Scope of this conclusion").upper(), size=7, style="B", color=MUTED)
         self.text(say(item["limitation"]), size=8.5)
         self.gap(2)
         self.text(say("Independent review").upper(), size=7, style="B", color=MUTED)

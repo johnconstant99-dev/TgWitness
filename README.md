@@ -33,7 +33,7 @@
 
 > **3,598,381 records · 48 verified archives.** A documented public-history run on 6 November 2026. [Read the measurements, setup and verification results →](docs/EXPORT-BENCHMARK-2026-11-06.md)
 
-<p align="center"><strong>ZERO TRUST.</strong> TgWitness takes no side: the same checks apply to the operator, to PhishDestroy and to anyone else.<br>Only what a third party or the math confirms counts. <a href="docs/LIMITS-AND-OBJECTIONS.md">Limits and objections</a></p>
+<p align="center"><strong>ZERO TRUST.</strong> TgWitness takes no side: the same checks apply to the operator, to PhishDestroy and to anyone else.<br>Only what a third party or the math confirms counts. <a href="docs/QUESTIONS-AND-CHECKS.md">Questions and checks</a></p>
 
 ## See it in action
 
@@ -279,7 +279,7 @@ the journal.
 | [Watchlists](docs/INVESTIGATION-MODE.md#watchlists) | Words, patterns, wallets, @usernames, IDs, domains, phones and links, matched in text, edits, hidden link targets, bot buttons, QR codes and OCR |
 | [Online watch](docs/INVESTIGATION-MODE.md#online-watch) | Checks every 1–60 minutes, up to 100 accounts per request, with a pattern by hour and weekday |
 | [Codes and wallets](docs/INVESTIGATION-MODE.md#codes-in-images) | Payment QR codes; EVM addresses checked against EIP-55, TON in raw form, XRP Ledger checksums, payment links with chain, amount and token |
-| [Client traces](docs/INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-can-and-cannot-show) | Encoder traces of round videos and voice messages; upload time against send time exposes pre-recorded "live" proof |
+| [Client traces](docs/INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-show) | Encoder traces of round videos and voice messages; upload time against send time exposes pre-recorded "live" proof |
 | [Cover and authority](docs/INVESTIGATION-MODE.md#cover-and-authority) | Personas, authorisations and an undercover activity record that flags messages outside the authorised chats or period |
 | [Account control](docs/INVESTIGATION-MODE.md#account-control) | Profile and privacy editing with before/after records, an exposure check and offline right after each action |
 | [Documents for court](docs/INVESTIGATION-MODE.md#documents-for-court) | BagIt case package with a Rule 902(13)/(14) certification template, exhibit index, request annex and WebVTT/SRT captions for screen recordings |

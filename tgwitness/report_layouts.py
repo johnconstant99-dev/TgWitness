@@ -30,7 +30,7 @@ def chapter_plan(design, kind="journal"):
             Chapter("journal", "Observation journal" if kind != "chat" else "Message transcript", ("journal",)),
             Chapter("artifacts", "Files, relationships & indicators", ("relations", "files", "indicators", "admin_log", "actions")),
             Chapter("assurance", "Custody, integrity & verification", ("integrity", "timestamps", "custody", "verify", "standards", "seal")),
-            Chapter("limitations", "Limits & reading notes", ("limitations",)),
+            Chapter("limitations", "Reading this record", ("limitations",)),
         )
     if design == "ledger_margin":
         return (
@@ -46,7 +46,7 @@ def chapter_plan(design, kind="journal"):
             Chapter("indicators", "Extracted indicators", ("indicators",)),
             Chapter("assurance", "Provenance, custody & integrity", ("integrity", "timestamps", "custody", "verify", "standards", "seal")),
             Chapter("journal", "Observation journal" if kind != "chat" else "Message transcript", ("journal",)),
-            Chapter("limitations", "Limitations & uncertainties", ("limitations",)),
+            Chapter("limitations", "Reading this record", ("limitations",)),
         )
     return ()
 

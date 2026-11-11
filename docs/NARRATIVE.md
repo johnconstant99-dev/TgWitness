@@ -11,7 +11,7 @@ python -m tgwitness.narrative evidence.zip --lang de --jurisdiction DE --out nar
 python -m tgwitness.narrative evidence.zip --lang ru --fingerprint COLLECTOR_FP --witness witness.zip --witness-fingerprint WITNESS_FP --check-drand --check-bitcoin --out narrative-ru/
 ```
 
-Obtain fingerprints independently. An unpinned package can be described, but its missing pin is visible as a limitation. Instructions in the report use `TRUSTED_COLLECTOR_FP` and `TRUSTED_WITNESS_FP`; they never turn an embedded key into an independent trust decision. `--tsa-ca ROOT.pem` enables the existing RFC 3161 root check. External checks use the verifier's existing trust model; see [FOR-THE-RECORD.md](FOR-THE-RECORD.md).
+Obtain fingerprints independently. An unpinned package can be described, and the report shows that its pin is missing. Instructions in the report use `TRUSTED_COLLECTOR_FP` and `TRUSTED_WITNESS_FP`; they never turn an embedded key into an independent trust decision. `--tsa-ca ROOT.pem` enables the existing RFC 3161 root check. External checks use the verifier's existing trust model; see [FOR-THE-RECORD.md](FOR-THE-RECORD.md).
 
 The destination must be empty. Generation stages all outputs before publishing them into that directory. It does not overwrite another report, contact Telegram, submit timestamps, send mail or publish anything. Network checks run only when requested. The input ZIP remains unchanged. The output is a derived report, not a new independently witnessed evidence package.
 
@@ -47,11 +47,11 @@ Every successful run also writes **`narrative-run.json`**: effective presentatio
 
 Exit codes: **0** generated successfully; **1** package verification, record-limit or rendering failure; **2** invalid configuration or unmet pin/tier requirements. Unknown fields, duplicate JSON keys, invalid types and configurations over 64 KiB are rejected. There are no settings to skip signature verification, suppress limitations, raise a verdict or mark translations reviewed. Saved profiles and CLI settings do not change the signed input archive.
 
-Configuration tests cover precedence and paths, selective output, intact limitations/references without diagrams, bounded grouping, record overflow, invalid settings, archive tampering and CLI exit codes. Signed collector/witness fixtures test a required `witness_anchored` profile with confirmed, absent and mismatched commitments; external network responses in those tests are synthetic.
+Configuration tests cover precedence and paths, selective output, intact notes/references without diagrams, bounded grouping, record overflow, invalid settings, archive tampering and CLI exit codes. Signed collector/witness fixtures test a required `witness_anchored` profile with confirmed, absent and mismatched commitments; external network responses in those tests are synthetic.
 
 ## Reading the report
 
-Read the introduction, chronology, assurance checks, limitations and verification commands in that order. Jurisdiction terms are optional. The appendix identifies every cited record by journal, sequence number and full SHA-256. The source package SHA-256 appears at the front. Collector and witness sequence numbers have separate namespaces.
+Read the introduction, chronology, assurance checks, notes on the recorded data and verification commands in that order. Jurisdiction terms are optional. The appendix identifies every cited record by journal, sequence number and full SHA-256. The source package SHA-256 appears at the front. Collector and witness sequence numbers have separate namespaces.
 
 A recorded claim is described as a recorded claim. A document event containing `signature_claimed: qualified` and `signature_objects: 0` does **not** become a finding that the PDF is unsigned, forged or legally invalid. The renderer does not independently inspect PDF signatures, validate QES or DKIM, or reconstruct an earlier receipt date. External anchor files receive credit only when the verifier actually checks them. A pending OTS submission remains unconfirmed.
 

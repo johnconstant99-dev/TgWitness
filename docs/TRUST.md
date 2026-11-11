@@ -90,8 +90,8 @@ python -m tgwitness.sealed_verify evidence.zip --bundle attestation.jsonl --repo
   [Sigstore search](https://search.sigstore.dev/). A log entry timestamps a commitment,
   not Telegram messages ([Rekor](https://docs.sigstore.dev/logging/overview/)).
 - **Scorecard.** [OpenSSF Scorecard report](https://securityscorecards.dev/viewer/?uri=github.com/phishdestroy/TgWitness),
-  runs every Monday and on pushes to `main`. Look at the date, commit and findings, not just
-  the score. It's automated, not a human audit.
+  runs every Monday and on pushes to `main`. Look at the date, commit and findings along
+  with the score.
 - **Workflow audit.** [workflow-audit.yml](../.github/workflows/workflow-audit.yml) runs zizmor
   on workflow changes and every Monday, results in the `workflow-audit-sarif` artifact.
 - **Dependencies.** `sbom.spdx.json` combines what Syft finds with the exact Python versions

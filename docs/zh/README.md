@@ -17,7 +17,7 @@
 
 <p align="center"><strong>自托管的 Telegram 调查工作区。</strong><br>保存聊天，留存编辑和删除，查看谁与谁有关联，<br>并交付任何人都能核验的签名导出文件。</p>
 
-<p align="center"><strong>零信任。</strong>TgWitness 不偏袒任何一方：同样的检查适用于操作员、PhishDestroy 以及其他任何人。<br>只有第三方或数学能够证实的内容才算数。<a href="../LIMITS-AND-OBJECTIONS.md">局限与异议</a></p>
+<p align="center"><strong>零信任。</strong>TgWitness 不偏袒任何一方：同样的检查适用于操作员、PhishDestroy 以及其他任何人。<br>只有第三方或数学能够证实的内容才算数。<a href="../QUESTIONS-AND-CHECKS.md">问题与核查</a></p>
 
 <p align="center">
   <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · 预发布版"></a>
@@ -238,7 +238,7 @@ python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --tsa-ca TS
 | [监控列表](../INVESTIGATION-MODE.md#watchlists) | 关键词、模式、钱包、@用户名、ID、域名、电话和链接，可在文本、编辑、隐藏的链接目标、机器人按钮、二维码和 OCR 中匹配 |
 | [在线状态监测](../INVESTIGATION-MODE.md#online-watch) | 每 1–60 分钟检查一次，每次请求最多 100 个账户，并按小时和星期几给出规律 |
 | [二维码与钱包](../INVESTIGATION-MODE.md#codes-in-images) | 付款二维码；按 EIP-55 校验的 EVM 地址、原始格式的 TON 地址、XRP Ledger 校验和，以及包含链、金额和代币的付款链接 |
-| [客户端痕迹](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-can-and-cannot-show) | 圆形视频和语音消息中的编码器痕迹；对比上传时间与发送时间，可以揭穿预先录制的“实时”证明 |
+| [客户端痕迹](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-show) | 圆形视频和语音消息中的编码器痕迹；对比上传时间与发送时间，可以揭穿预先录制的“实时”证明 |
 | [掩护身份与授权](../INVESTIGATION-MODE.md#cover-and-authority) | 人设、授权，以及卧底活动记录，后者会标记授权聊天范围或授权期限之外的消息 |
 | [账户控制](../INVESTIGATION-MODE.md#account-control) | 编辑资料和隐私设置并留下修改前后的记录，进行暴露检查，每次操作后立即离线 |
 | [法庭文件](../INVESTIGATION-MODE.md#documents-for-court) | BagIt 案件包，附 Rule 902(13)/(14) 认证模板、证物索引、请求附件以及屏幕录像的 WebVTT/SRT 字幕 |

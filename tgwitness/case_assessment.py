@@ -4,7 +4,7 @@ import re
 from . import jurisdiction_guidance
 
 FORMAT = "tgwitness-case-assessment-v1"
-TITLE = "Basis of trust and limitations"
+TITLE = "Basis of trust"
 OVERVIEW = "Evidence at a glance"
 INTRO = ("This assessment describes this archive. The recipient repeats the checks with verify.py and the collector "
          "fingerprint received separately.")
@@ -18,8 +18,8 @@ CONDITIONS_INTRO = "verify.py checks the same conditions. Each row states what t
 CONDITIONS = {"integrity": ("Integrity", "The archive is unchanged since the collector signed it."),
               "signer": ("Signer key", "The signing key is the collector key the recipient retained."),
               "external_time": ("External time", "A third party confirms that the covered records existed by the stated time."),
-              "head_binding": ("Witness with its own key", "A second key retained the journal head. Who controls that key is a custody "
-                               "fact the verifier cannot check."),
+              "head_binding": ("Witness with its own key", "A second key retained the journal head. Who holds that key is shown by the "
+                               "custodian's key-control record, kept with its fingerprint."),
               "checkpoint": ("Retained checkpoint", "Records up to the checkpoint match a journal state signed with the collector key. "
                              "They are bound only if the recipient obtained it before this archive, through another channel."),
               "environment": ("Attested collection run", "The signing key was created inside the attested collection run.")}
@@ -45,8 +45,8 @@ RESULTS = {
     "time_unknown": "No independently validated time bound is included in this copy.",
     "coverage": "Recorded gaps: {gaps}. Message numbers not observed: {missing}.",
     "witness": "Recorded drand rounds: {drand}; starts carrying TDX: {tdx}. Independent validation is not supplied.",
-    "custody": "Operator declarations supplied: {n}. Identity and custody still need confirmation.",
-    "meaning": "Authorship and meaning are read from the cited records together with other material.",
+    "custody": "Operator declarations supplied: {n}. The custody record of who acquired, held and transferred the original ZIP completes them.",
+    "meaning": "Each statement cites the archive, file and record it rests on.",
     "complete": "Acquisition completed within the selected scope: {done} of {total} tasks.",
     "partial": "Acquisition is incomplete or its completion cannot be established from this copy.",
     "sharing": "This is a transformed selection; original completeness cannot be inferred.",
@@ -159,8 +159,8 @@ def common(kind, reference, fingerprint, rows, operator_fields=0, *, archive=Fal
             {"operator_fields": operator_fields}, ("manifest.json",)),
         row("meaning", "not_checked", "Source and acquisition record",
             "The collector records data visible to a Telegram account. The report identifies observations and their selected scope.",
-            "The records show what this Telegram account received and when it was observed; signatures, retained checkpoints, witness records and attested collection bind them to the collector and to outside parties. Who stands behind an account and whether a message is true are matters of interpretation, supported by the records and other material.",
-            "Corroborate disputed content, authorship and collection conditions with independent material. Cite the archive, file and record reference for each claim."),
+            "The records show what this Telegram account received and when it was observed; signatures, retained checkpoints, witness records and attested collection bind them to the collector and to outside parties.",
+            "Cite the archive, file and record reference for each claim; an export of the same chat from a second account corroborates disputed content."),
     ])
     result(rows[-2], "custody", n=operator_fields)
     result(rows[-1], "meaning")
@@ -300,7 +300,7 @@ def html(data, say):
                      + f'{number:02d}' + '</span><h3>' + e(say(item["title"])) + '</h3></div><div class="assessment-state">' + e(say(STATUSES[item["status"]]))
                      + '</div><p class="assessment-result">' + e(say(conclusion["text"], **conclusion["values"])) + '</p><p class="assessment-basis">' + e(say(item["basis"])) + '</p><dl>')
         parts.extend('<dt>' + e(say(LABELS.get(k, k))) + '</dt><dd dir="auto">' + e(fact_text(v, say)) + '</dd>' for k, v in item["facts"].items())
-        parts.append('</dl><p class="assessment-limit"><strong>' + e(say("Limits of this conclusion")) + '</strong>' + e(say(item["limitation"])) + '</p><p class="assessment-review"><strong>' + e(say("Independent review")) + '</strong>' + e(say(item["verification"])) + '</p>')
+        parts.append('</dl><p class="assessment-limit"><strong>' + e(say("Scope of this conclusion")) + '</strong>' + e(say(item["limitation"])) + '</p><p class="assessment-review"><strong>' + e(say("Independent review")) + '</strong>' + e(say(item["verification"])) + '</p>')
         if item["references"]:
             parts.append('<p class="assessment-references">' + e(say("Evidence references")) + ': ' + e(', '.join(item["references"])) + '</p>')
         parts.append('</article>')
@@ -336,7 +336,7 @@ def text_keys():
         evidence_conditions("evidence", {"journal_verified": True, "anchors": [{}]}, 2, {"event_count": 1}, {"tdx": 1}),
         evidence_conditions("evidence", {"anchors": [{}]}, 2, {"event_count": 2}),
         evidence_conditions("evidence", {"anchors": [{}]}, 2)]
-    return list(dict.fromkeys([TITLE, INTRO, OVERVIEW, "Limits of this conclusion", "Independent review", "Evidence references", "Not recorded",
+    return list(dict.fromkeys([TITLE, INTRO, OVERVIEW, "Scope of this conclusion", "Independent review", "Evidence references", "Not recorded",
                               CONDITIONS_TITLE, CONDITIONS_INTRO, "Condition", "What it establishes", "In this archive",
                               "How the recipient checks it", *(text for pair in CONDITIONS.values() for text in pair), *ROLES.values(),
                               *(c[k] for c in conditions for k in ("minimum", "outcome")),

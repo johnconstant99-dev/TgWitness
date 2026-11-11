@@ -28,7 +28,7 @@ can inspect that code and verify the delivered archive against its recorded run.
 - [Local decryption and verification](#local-decryption-and-verification)
 - [How the fork is kept outside the capture process](#how-the-fork-is-kept-outside-the-capture-process)
 - [Cryptographic handoff](#cryptographic-handoff)
-- [Limits and validation](#limits-and-validation)
+- [Scope and validation](#scope-and-validation)
 - [Maintainer release sequence](#maintainer-release-sequence)
 
 </details>
@@ -303,8 +303,9 @@ header, ciphertext, and a 16-byte GCM tag. The header has exactly `algorithm`,
 through the header is GCM additional authenticated data. Header size is bounded
 at 8192 bytes. The CLI streams payloads up to 8 GiB and authenticates before
 installing the requested output; it refuses overwriting an existing destination.
-This is a project-specific envelope around standard cryptographic primitives,
-not an independently audited encryption format.
+This is a project-specific envelope around standard cryptographic primitives:
+RSA-OAEP with SHA-256 and AES-256-GCM, available in OpenSSL and every major
+cryptography library.
 
 The original evidence bytes are attested **before** placing the evidence and
 attestation in the encrypted outer package. This avoids a circular dependency
@@ -312,7 +313,7 @@ between the archive's hash and a certificate included inside that same archive.
 For public repositories, attestation metadata (repository, workflow, commit,
 artifact name and digest) is public. Never put chat names in public metadata.
 
-## Limits and validation
+## Scope and validation
 
 This mode uses the signed journal and account-export engine. Secret Chats,
 deleted history from before collection and data inaccessible to the account are

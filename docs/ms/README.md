@@ -17,7 +17,7 @@
 
 <p align="center"><strong>Ruang kerja hos sendiri untuk siasatan Telegram.</strong><br>Simpan sembang, kekalkan suntingan dan pemadaman, lihat siapa berkait dengan siapa<br>dan serahkan eksport bertandatangan yang boleh disemak oleh sesiapa sahaja.</p>
 
-<p align="center"><strong>ZERO TRUST.</strong> TgWitness tidak memihak: semakan yang sama terpakai kepada operator, PhishDestroy dan sesiapa sahaja.<br>Hanya perkara yang disahkan oleh pihak ketiga atau matematik diambil kira. <a href="../LIMITS-AND-OBJECTIONS.md">Had dan bantahan</a></p>
+<p align="center"><strong>ZERO TRUST.</strong> TgWitness tidak memihak: semakan yang sama terpakai kepada operator, PhishDestroy dan sesiapa sahaja.<br>Hanya perkara yang disahkan oleh pihak ketiga atau matematik diambil kira. <a href="../QUESTIONS-AND-CHECKS.md">Soalan dan semakan</a></p>
 
 <p align="center">
   <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · pra-keluaran"></a>
@@ -285,7 +285,7 @@ jurnal.
 | [Senarai pantau](../INVESTIGATION-MODE.md#watchlists) | Perkataan, corak, dompet, @nama pengguna, ID, domain, nombor telefon dan pautan, dipadankan dalam teks, suntingan, sasaran pautan tersembunyi, butang bot, kod QR dan OCR |
 | [Pemantauan dalam talian](../INVESTIGATION-MODE.md#online-watch) | Semakan setiap 1–60 minit, sehingga 100 akaun bagi setiap permintaan, dengan corak mengikut jam dan hari dalam minggu |
 | [Kod dan dompet](../INVESTIGATION-MODE.md#codes-in-images) | Kod QR pembayaran; alamat EVM yang disemak terhadap EIP-55, TON dalam bentuk mentah, checksum XRP Ledger, pautan pembayaran dengan rantaian, jumlah dan token |
-| [Kesan klien](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-can-and-cannot-show) | Kesan pengekod dalam video bulat dan mesej suara; perbandingan masa muat naik dengan masa hantar mendedahkan bukti “langsung” yang sebenarnya dirakam lebih awal |
+| [Kesan klien](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-show) | Kesan pengekod dalam video bulat dan mesej suara; perbandingan masa muat naik dengan masa hantar mendedahkan bukti “langsung” yang sebenarnya dirakam lebih awal |
 | [Penyamaran dan kuasa](../INVESTIGATION-MODE.md#cover-and-authority) | Persona, kebenaran dan rekod aktiviti penyamaran yang menandakan mesej di luar sembang atau tempoh yang dibenarkan |
 | [Kawalan akaun](../INVESTIGATION-MODE.md#account-control) | Penyuntingan profil dan privasi dengan rekod sebelum/selepas, semakan pendedahan dan status luar talian sejurus selepas setiap tindakan |
 | [Dokumen untuk mahkamah](../INVESTIGATION-MODE.md#documents-for-court) | Pakej kes BagIt dengan templat pensijilan Rule 902(13)/(14), indeks ekshibit, lampiran permintaan dan sari kata WebVTT/SRT untuk rakaman skrin |

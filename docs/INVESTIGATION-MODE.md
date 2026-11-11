@@ -18,7 +18,7 @@ is unchanged; everything here cites it.
 - [Watchlists](#watchlists)
 - [Online watch](#online-watch)
 - [Codes in images](#codes-in-images)
-- [What a client and an upload time can and cannot show](#what-a-client-and-an-upload-time-can-and-cannot-show)
+- [What a client and an upload time show](#what-a-client-and-an-upload-time-show)
 - [Cover and authority](#cover-and-authority)
 - [Account control](#account-control)
 - [Report settings](#report-settings)
@@ -146,7 +146,7 @@ intent clear, otherwise they are left alone. Payment links are parsed for the
 chain, amount and token, and for a token transfer the recipient is recorded,
 not the token contract.
 
-## What a client and an upload time can and cannot show
+## What a client and an upload time show
 
 Round videos and voice messages carry traces of the program that produced them:
 the file name of a round video, its recording size, and the encoder named in the

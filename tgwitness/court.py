@@ -249,7 +249,7 @@ def certification_html(session, model, fixed, fingerprint, hashes, say, stamped=
             + "</li><li>" + e(say("Included timestamp receipts are listed in section 1 and stored under data/timestamps/. "
                                   "Their signatures, timestamp chains and binding to this document have not been verified."))
             + "</li></ul><h2>5. " + e(say("Files and their SHA-256")) + "</h2><table><tr><th>" + e(say("File")) + "</th><th>SHA-256</th></tr>"
-            + rows + "</table><h2>6. " + e(say("Limitations disclosed")) + "</h2><ul>"
+            + rows + "</table><h2>6. " + e(say("Scope of the records")) + "</h2><ul>"
             + "".join("<li>" + e(say(limit)) + "</li>" for limit in limits)
             + ("<li>" + e(say("{n} documented steps are hidden for a stated reason and sealed.", n=hidden)) + "</li>" if hidden else "")
             + '</ul><h2>7. ' + e(say("Declaration")) + '</h2><div class="sign"><p>' + e(say("I, the undersigned, declare that I am "

@@ -17,7 +17,7 @@
 
 <p align="center"><strong>Telegram 調査のためのセルフホスト型ワークスペース。</strong><br>チャットを保存し、編集と削除を残し、誰が誰とつながっているかを把握して、<br>誰でも検証できる署名付きエクスポートを引き渡せます。</p>
 
-<p align="center"><strong>ゼロトラスト。</strong>TgWitness はどの側にも立ちません。オペレーターにも、PhishDestroy にも、それ以外の誰にも同じ検証を適用します。<br>認められるのは、第三者または数学が裏付けるものだけです。<a href="../LIMITS-AND-OBJECTIONS.md">限界と反論</a></p>
+<p align="center"><strong>ゼロトラスト。</strong>TgWitness はどの側にも立ちません。オペレーターにも、PhishDestroy にも、それ以外の誰にも同じ検証を適用します。<br>認められるのは、第三者または数学が裏付けるものだけです。<a href="../QUESTIONS-AND-CHECKS.md">質問と検証</a></p>
 
 <p align="center">
   <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · プレリリース"></a>
@@ -238,7 +238,7 @@ python -m tgwitness.verify evidence.zip --fingerprint TRUSTED_SHA256 --tsa-ca TS
 | [ウォッチリスト](../INVESTIGATION-MODE.md#watchlists) | 単語、パターン、ウォレット、@ユーザー名、ID、ドメイン、電話番号、リンクを、テキスト、編集、隠しリンク先、ボットのボタン、QR コード、OCR から照合 |
 | [オンライン監視](../INVESTIGATION-MODE.md#online-watch) | 1–60 分ごとにチェック、1 回のリクエストで最大 100 アカウント、時間帯と曜日ごとのパターン付き |
 | [コードとウォレット](../INVESTIGATION-MODE.md#codes-in-images) | 支払い QR コード。EIP-55 で確認する EVM アドレス、raw 形式の TON、XRP Ledger のチェックサム、チェーン・金額・トークンを含む支払いリンク |
-| [クライアントの痕跡](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-can-and-cannot-show) | 丸型動画とボイスメッセージに残るエンコーダーの痕跡。アップロード時刻と送信時刻を比べると、事前に録画された「ライブ」の証拠が明らかになります |
+| [クライアントの痕跡](../INVESTIGATION-MODE.md#what-a-client-and-an-upload-time-show) | 丸型動画とボイスメッセージに残るエンコーダーの痕跡。アップロード時刻と送信時刻を比べると、事前に録画された「ライブ」の証拠が明らかになります |
 | [偽装身分と権限](../INVESTIGATION-MODE.md#cover-and-authority) | ペルソナ、承認、そして承認されたチャットや期間の外にあるメッセージにフラグを付ける潜入活動記録 |
 | [アカウント管理](../INVESTIGATION-MODE.md#account-control) | 変更前後の記録を残すプロフィールとプライバシーの編集、露出チェック、各操作直後のオフライン化 |
 | [裁判用書類](../INVESTIGATION-MODE.md#documents-for-court) | Rule 902(13)/(14) 証明書テンプレート、証拠物一覧、要請書の別紙、画面録画用の WebVTT/SRT 字幕を含む BagIt 事件パッケージ |
