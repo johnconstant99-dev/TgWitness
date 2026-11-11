@@ -109,7 +109,7 @@ def outputs(root):
 
 ---
 
-[MIT License](../../LICENSE) · [Technical notice](../OPERATOR-INCOMPATIBILITY.md) · [Original NOTICE](../../NOTICE)
+[MIT License](../../LICENSE) · [Technical notice](../OPERATOR-INCOMPATIBILITY.md) · [The 106-day GDPR file](../TAYLOR-WESSING-GDPR-FILE.md) · [Original NOTICE](../../NOTICE)
 
 [Project](../../README.md) · [Documentation](../README.md) · [Wiki](Home.md)
 ''',

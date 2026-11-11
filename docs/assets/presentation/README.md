@@ -39,6 +39,7 @@ Grotesk font files. Font licences: [Manrope](OFL-Manrope.txt), [Space Grotesk](O
 python website/render_casework.py --display-font /path/to/SpaceGrotesk.ttf --text-font /path/to/Manrope.ttf
 python website/render_readme_navigation.py --font /path/to/Manrope.ttf
 python website/render_readme_panels.py --font /path/to/Manrope.ttf
+python website/render_notice_banner.py --font /path/to/Manrope.ttf
 python website/render_wiki_headers.py --font /path/to/Manrope.ttf
 python website/render_identity.py --font /path/to/Manrope.ttf
 python website/render_directory_headers.py --font /path/to/Manrope.ttf
