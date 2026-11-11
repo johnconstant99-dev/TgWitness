@@ -1,4 +1,4 @@
-# TgWitness verifier sources SHA-256: 2048584a3253170ddc8ca903b4c618150b28b1a1b65b3e787400b5f8ec91c8b3
+# TgWitness verifier sources SHA-256: b110bed278ebcee8cc634316f75bea408872e267c908b6cf6e307767187a7e92
 """Standalone verifier"""
 import argparse
 import base64
@@ -1976,8 +1976,8 @@ GAP_DEFAULTS = {"gap_analysis": True, "gap_account_sequence": True, "gap_cluster
 WIDE_TYPES = ("private", "groups", "bots")
 GAP_MEANING = ("A gap is a message number between two observed messages that this collector never saw. Telegram assigns "
            "these numbers; a gap may be a message Telegram never showed to this account.")
-ESTIMATE_MEANING = ("Estimate from the share of service messages among observed numbers. It does not explain any "
-                    "particular gap and is never subtracted from the missing count.")
+ESTIMATE_MEANING = ("Estimate from the share of service messages among observed numbers. It describes the range "
+                    "as a whole; the missing count stays as observed.")
 
 
 def account_numbered(chat_id):
@@ -2337,10 +2337,9 @@ class OutsideRecords:
                           "last": self.rounds[-1] if self.rounds else None,
                           "largest_gap_seconds": round(self.largest_gap),
                           "clock_behind_seconds": round(self.clock_behind, 1) if self.clock_behind > 0 else 0,
-                          "meaning": "Offline checks establish only the recorded beacon's self-consistency, "
-                                     "not its BLS signature or a lower time bound. --check-drand compares "
-                                     "selected rounds with HTTPS relays. Only authenticated rounds can support "
-                                     "a lower time bound for subsequent records; unchecked rounds cannot."},
+                          "meaning": "Offline checks confirm the recorded beacon's self-consistency. --check-drand "
+                                     "compares selected rounds with HTTPS relays; authenticated rounds give a lower "
+                                     "time bound for subsequent records."},
                 "devices": {"checks": len(self.checks), "first_check": self.checks[0] if self.checks else None,
                             "last_check": self.checks[-1] if self.checks else None, "changes": self.changes[:200],
                             "changes_total": len(self.changes),
@@ -3169,7 +3168,7 @@ def verify_board_disclosure(archive, manifest):
         report = strict_json(read_member(archive, "report.json", MAX_JSON_BYTES))
         if report["report"].get("case_board") != statement["material"]:
             raise ValueError("Readable report and board disclosure differ")
-    return {"cards": len(cards), "meaning": "Minimised team notes, signed by the collector; not the original annotations chain"}
+    return {"cards": len(cards), "meaning": "Minimised copy of the team notes, signed by the collector"}
 
 
 def verify_board_document(path, expected_fingerprint=None, evidence=None):
@@ -3210,7 +3209,7 @@ def verify_board_document(path, expected_fingerprint=None, evidence=None):
     elif evidence:
         raise ValueError("Verify a minimized board with its containing handover ZIP")
     return {"format": statement["format"], "fingerprint": fp, "key_pinned": bool(expected_fingerprint),
-            "annotations_checked": bool(evidence), "meaning": "Team opinions; signature authenticates the signed document, not the truth of a conclusion"}
+            "annotations_checked": bool(evidence), "meaning": "Team opinions; the signature authenticates the document as the team signed it"}
 
 
 def verify_bundle(path, expected_fingerprint=None, checkpoint=None, tsa_ca=None, check_drand=False, max_gib=None,
@@ -3523,12 +3522,11 @@ def verify_chat_export(path, expected_fingerprint=None, max_gib=None):
 
 COMPARE_MEANING = {
     "number": "Both archives record the same chat and account, so messages are matched by their number. "
-              "Unchanged means equality of the complete saved message record. Differences may include "
-              "observation metadata and do not by themselves prove a Telegram edit.",
+              "Unchanged means equality of the complete saved message record. A difference shows that the saved "
+              "records differ, in content or in observation metadata.",
     "content": "The archives come from different chats or accounts (for example both sides of a private chat), "
                "or their scope identity is missing. Possible matches use time, sender, full text and file hash. "
-               "Unchanged counts identical saved records among these pairs, not proven message identity. "
-               "Differences describe the paired records, not necessarily edits of the same Telegram message.",
+               "Unchanged counts identical saved records among these pairs; differences describe the paired records.",
 }
 
 
@@ -4207,7 +4205,7 @@ class AccountExportCheck:
                 "complete_within_scope": complete, "source_completeness_established": False,
                 "html_index_signed_by_manifest": "index.html" in self.files,
                 "meaning": "Integrity is checked relative to the signing key. Completion covers the frozen selected "
-                           "tasks and observed outcomes, not all Telegram data, a simultaneous snapshot or trusted time."}
+                           "tasks and their observed outcomes."}
 
 
 
@@ -4386,8 +4384,8 @@ class AccountDisclosureCheck:
                 "source_reference_checked": source_checked, "derivation_correctness_established": False,
                 "html_index_signed_by_manifest": True, "producer": self.manifest.get("producer"),
                 "meaning": "The signature protects this disclosure's bytes and policy statement. "
-                           "Source linkage names the original archive and collector key. It does not show that filtering and "
-                           "redaction followed that policy."}
+                           "Source linkage names the original archive and collector key; review filtering and redaction "
+                           "against that archive."}
 
 
 
@@ -4954,7 +4952,7 @@ def assurance(result):
         if row["status"] != "pass":
             break
         tier = row["tier"]
-    return {"tier": tier, "ladder": ladder, "scope": "complete exported head; no claim of continuous or complete Telegram observation"}
+    return {"tier": tier, "ladder": ladder, "scope": "complete exported head; coverage reports observation continuity"}
 
 
 def assurance_line(result):

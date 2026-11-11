@@ -410,7 +410,7 @@
     <p class="hint" id="history-media"></p>
     <p class="hint" id="history-wait"></p>
     <ul id="history-sources"></ul>
-    <p class="hint">Use Export evidence to hand over the journal and saved attachments. Finishing history reads does not mean every attachment was downloaded.</p>
+    <p class="hint">Use Export evidence to hand over the journal and saved attachments. Attachments waiting to be saved are counted separately from history reads.</p>
   </section>
   </div>
   <div id="sources-panel-recording" role="tabpanel" aria-labelledby="sources-tab-recording" hidden>
@@ -862,7 +862,7 @@
       <label class="check-label"><input id="report-guidance-include" type="checkbox" checked> Include guidance in the report</label>
       <label class="check-label"><input id="report-guidance-local" type="checkbox"> Add the local-language summary</label>
       <label class="check-label"><input id="report-guidance-methods" type="checkbox"> Explain collection safeguards</label>
-      <p class="hint">Legal guidance is supplied in English. Local summaries are not certified translations. Sources and research dates travel with the report.</p>
+      <p class="hint">Legal guidance is supplied in English with local summaries. Sources and research dates travel with the report.</p>
       <p class="hint">These choices belong to this workspace, not to saved layout configurations. Sharing copies do not inherit this selection.</p>
       <div id="report-guidance-detail" data-no-translate lang="en" dir="ltr" aria-live="polite"></div>
     </details>
@@ -1327,7 +1327,7 @@
     <p>The saved configuration is a setup file. Run it on the witness host to begin checks and publication.</p>
     <p class="hint">On the witness host, save the read-only token in witness-token.txt. For Telegram, save the BotFather token in bot-token.txt; for Discord, the webhook URL in discord-webhook.txt. Keep these files next to witness.json. Publishing credentials stay on the witness host.</p>
     <pre id="witness-start-command"></pre>
-    <p class="hint">Keep the witness key fingerprint separately. Confirm the first signed post in your channel; a downloaded file does not mean the bot is running.</p>
+    <p class="hint">Keep the witness key fingerprint separately. The first signed post in your channel confirms that the bot is running.</p>
   </details>
   <details class="card padded witness-explainer extra-detail"><summary>What does the bot actually prove?</summary>
     <div class="witness-flow" aria-label="How the witness works"><span id="witness-step-collector">Collector signs a checkpoint</span><b aria-hidden="true">→</b><span id="witness-step-verify">Witness verifies and signs</span><b aria-hidden="true">→</b><span id="witness-step-post">Bot publishes to your channel</span></div>
@@ -1408,7 +1408,7 @@
         <div id="connect-login-fields" class="connect-fields"><label>Username (optional)<input id="connect-user" maxlength="255" autocomplete="off"></label><label>Password (optional)<input type="password" id="connect-password" maxlength="255" autocomplete="off"></label></div>
         <label id="connect-secret-wrap" hidden>MTProxy secret<input id="connect-secret" type="password" maxlength="512" autocomplete="off"></label>
       </div>
-      <div id="connect-vpn-fields" hidden><label>WireGuard profile<textarea id="connect-wireguard" maxlength="16384" spellcheck="false" autocomplete="off" placeholder="[Interface]&#10;PrivateKey = …&#10;Address = …&#10;&#10;[Peer]&#10;PublicKey = …&#10;Endpoint = …&#10;AllowedIPs = 0.0.0.0/0, ::/0"></textarea></label><p class="hint">One profile per account. OpenVPN and IPsec can run outside TgWitness; use Direct through that host VPN or enter its SOCKS5 gateway. Host VPN status is not verified here.</p></div>
+      <div id="connect-vpn-fields" hidden><label>WireGuard profile<textarea id="connect-wireguard" maxlength="16384" spellcheck="false" autocomplete="off" placeholder="[Interface]&#10;PrivateKey = …&#10;Address = …&#10;&#10;[Peer]&#10;PublicKey = …&#10;Endpoint = …&#10;AllowedIPs = 0.0.0.0/0, ::/0"></textarea></label><p class="hint">One profile per account. OpenVPN and IPsec can run outside TgWitness; use Direct through that host VPN or enter its SOCKS5 gateway, and check the VPN status on that host.</p></div>
       <div id="connect-setup-fields"><label class="check-label"><input type="checkbox" id="connect-consent">Allow direct setup connections to download the pinned helpers from GitHub and, for WARP, register a device with Cloudflare under its terms.</label><p class="hint"><a href="https://www.cloudflare.com/application/terms/" target="_blank" rel="noopener noreferrer">Cloudflare application terms</a>. Setup reveals this machine's IP to those services. Helpers are checked against SHA-256 hashes bundled with TgWitness. Existing helpers and WARP registration are reused.</p></div>
       <p id="connect-warp-note" class="hint">Each selected account gets its own local tunnel. Cloudflare chooses the exit address and country; separate tunnels may share an exit IP.</p>
       <details><summary>External requests</summary><label class="check-label"><input type="checkbox" id="connect-outside" checked>Use this route for timestamps, notifications and other requests outside Telegram</label><p class="hint">Applying replaces a separately configured external proxy. MTProxy carries only Telegram, so external requests stay off until you configure their own proxy under Advanced. Proxied routes never fall back to Direct.</p></details>

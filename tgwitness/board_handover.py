@@ -108,7 +108,7 @@ def prepare(snapshot, records_path, vault, options, minimiser):
                            for item in state["items"] if item["kind"] == "board.collection" and item["id"] in collection_ids and not item["removed"]]
             material = {"meaning": board_report.MEANING, "annotations_head": state["annotations_head"],
                         "mode": options.case_board, "cards": cards, "collections": collections,
-                        "disclosure": "Minimised team notes; not the original annotations chain. Free-text names may require manual review."}
+                        "disclosure": "Minimised copy of the team notes; review free-text names before sharing."}
         finally:
             db.close()
     statement = {"format": "tgwitness-case-board-handover-v1", "public_key": vault.public_key,

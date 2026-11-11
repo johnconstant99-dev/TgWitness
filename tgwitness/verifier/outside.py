@@ -83,10 +83,9 @@ class OutsideRecords:
                           "last": self.rounds[-1] if self.rounds else None,
                           "largest_gap_seconds": round(self.largest_gap),
                           "clock_behind_seconds": round(self.clock_behind, 1) if self.clock_behind > 0 else 0,
-                          "meaning": "Offline checks establish only the recorded beacon's self-consistency, "
-                                     "not its BLS signature or a lower time bound. --check-drand compares "
-                                     "selected rounds with HTTPS relays. Only authenticated rounds can support "
-                                     "a lower time bound for subsequent records; unchecked rounds cannot."},
+                          "meaning": "Offline checks confirm the recorded beacon's self-consistency. --check-drand "
+                                     "compares selected rounds with HTTPS relays; authenticated rounds give a lower "
+                                     "time bound for subsequent records."},
                 "devices": {"checks": len(self.checks), "first_check": self.checks[0] if self.checks else None,
                             "last_check": self.checks[-1] if self.checks else None, "changes": self.changes[:200],
                             "changes_total": len(self.changes),

@@ -60,8 +60,8 @@ local queue stay at the old destination.
 
 ## Retention and recovery
 
-Object Lock has to be supported and set up on the bucket. Check the reported retention, an
-accepted upload doesn't prove it.
+Object Lock has to be supported and set up on the bucket. TgWitness reads back the mode and
+retention of each uploaded object; check that reported retention.
 
 Recover into an empty directory with a TgWitness install you trust. Commands are in the
 [S3 guide](https://phishdestroy.github.io/TgWitness/docs/exports/#s3-restore). Recovery

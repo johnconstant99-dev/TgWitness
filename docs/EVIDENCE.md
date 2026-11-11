@@ -515,7 +515,7 @@ python verify.py tgwitness-dossier-CHAT.json --fingerprint TRUSTED_SHA256 --evid
 
 checks the signature, verifies the evidence export itself (signature, hash chain and files)
 and that every referenced record exists unchanged in that export of the same workspace. Avatar hashes are labeled as coming from the local cache
-(not journal records). Mentions are pattern matches — leads to check, not verified facts.
+(not journal records). Mentions are pattern matches and leads to check.
 Profiles are switched on per chat, can be exported as an AES-256 ZIP with a password, and
 are deleted when switched off or when the chat is removed from sources.
 

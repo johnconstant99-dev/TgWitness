@@ -376,7 +376,7 @@ def verify_board_disclosure(archive, manifest):
         report = strict_json(read_member(archive, "report.json", MAX_JSON_BYTES))
         if report["report"].get("case_board") != statement["material"]:
             raise ValueError("Readable report and board disclosure differ")
-    return {"cards": len(cards), "meaning": "Minimised team notes, signed by the collector; not the original annotations chain"}
+    return {"cards": len(cards), "meaning": "Minimised copy of the team notes, signed by the collector"}
 
 
 def verify_board_document(path, expected_fingerprint=None, evidence=None):
@@ -419,6 +419,6 @@ def verify_board_document(path, expected_fingerprint=None, evidence=None):
     elif evidence:
         raise ValueError("Verify a minimized board with its containing handover ZIP")
     return {"format": statement["format"], "fingerprint": fp, "key_pinned": bool(expected_fingerprint),
-            "annotations_checked": bool(evidence), "meaning": "Team opinions; signature authenticates the signed document, not the truth of a conclusion"}
+            "annotations_checked": bool(evidence), "meaning": "Team opinions; the signature authenticates the document as the team signed it"}
 
 

@@ -25,7 +25,7 @@ METADATA = ('profile', 'contacts', 'profile_photos', 'stories', 'session_metadat
 WARNINGS = [
     'This is a minimized derivative, not the complete original account export.',
     'Pseudonymization is not anonymization. Dates, context and message content can still identify people.',
-    'Automatic text masking cannot find every personal detail. Review the disclosed content before sharing.',
+    'Automatic text masking replaces the identifiers it recognizes; review the disclosed content for other personal details before sharing.',
     'A signature protects this derivative and names the source archive and the collector key.',
     'Purpose and settings are recorded as the operator stated them for this disclosure.',
 ]

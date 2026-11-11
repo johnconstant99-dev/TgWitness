@@ -12,7 +12,7 @@ export function createPeopleTimeline({root, json, tr, owner, active, record, for
   function mount(){
     root.replaceChildren();const box=node('section','','people-timeline padded'),heading=node('div','','people-timeline-toolbar');
     box.append(node('h3',tr('Participant timeline')),
-      node('p',tr('Observed profiles, membership and activity. Online status is account-wide and does not show which chat a person reads.'),'hint'));
+      node('p',tr('Observed profiles, membership and activity. Online status is account-wide, across all chats.'),'hint'));
     const filter=node('select');filter.setAttribute('aria-label',tr('Filter participants'));filter.id='people-timeline-filter';
     for(const [key,text] of [['all','All observed users'],['quiet','No recent messages observed'],['departed','Left, removed or banned'],['deleted','Account marked deleted'],['never_posted','No saved messages']])filter.append(new Option(tr(text),key));
     filter.value=mode;filter.addEventListener('change',()=>{mode=filter.value;offset=0;person=null;load(true);});

@@ -281,8 +281,8 @@ The supervisor stops the network-facing containers before the attest action
 reads the final fixed `evidence.zip` or `evidence.parts.json`. The packaging container has no network.
 The upload steps name only `connection.tgwsealed` and `delivery*.tgwsealed`;
 neither plaintext evidence nor Telegram credentials are uploaded as artifacts.
-Cleanup removes the private directories and containers, with no claim of
-physical disk erasure. Artifact retention is one day; download before expiry.
+Cleanup removes the private directories and containers, and GitHub discards the
+hosted runner VM after the job. Artifact retention is one day; download before expiry.
 
 A fork owner can replace the caller or create a different signed file. The
 strict verifier must reject the resulting **different signer workflow/digest**.

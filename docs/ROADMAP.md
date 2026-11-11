@@ -100,9 +100,9 @@ looks right in the offline bundle.
   observers run by other people.
 - Longer live runs, recovery tests, Linux/macOS installs and containers on real targets.
 
-Signed receipts catch changes to history someone already witnessed. They can't prove a
-compromised collector was honest before signing, and several containers on one host
-are still one admin.
+Signed receipts catch changes to history someone already witnessed. The next step
+extends that trust to the collector itself: the build that signed the record, and
+witnesses on separate hosts run by separate admins.
 
 ## Proposed: trust in the build
 

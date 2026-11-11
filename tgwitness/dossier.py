@@ -26,7 +26,7 @@ LIMITS = [
     "Forwarded and re-uploaded files carry the encoder of whoever produced them first.",
     "Deleted and edited counts cover saved messages; the chat's admin log names the acting administrator "
     "where the account can read it.",
-    "Mentions are found by patterns in saved text and links; they are leads to check, not verified facts.",
+    "Mentions are found by patterns in saved text and links; they are leads to check.",
     "The legacy cached avatar field comes from the panel cache, not journal records.",
     "Avatar history cites saved photos in this source; first and last times are observation times. "
     "Similar photos are investigation leads.",

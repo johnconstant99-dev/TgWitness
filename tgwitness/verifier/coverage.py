@@ -260,8 +260,8 @@ GAP_DEFAULTS = {"gap_analysis": True, "gap_account_sequence": True, "gap_cluster
 WIDE_TYPES = ("private", "groups", "bots")
 GAP_MEANING = ("A gap is a message number between two observed messages that this collector never saw. Telegram assigns "
            "these numbers; a gap may be a message Telegram never showed to this account.")
-ESTIMATE_MEANING = ("Estimate from the share of service messages among observed numbers. It does not explain any "
-                    "particular gap and is never subtracted from the missing count.")
+ESTIMATE_MEANING = ("Estimate from the share of service messages among observed numbers. It describes the range "
+                    "as a whole; the missing count stays as observed.")
 
 
 def account_numbered(chat_id):

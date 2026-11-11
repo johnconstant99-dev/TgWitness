@@ -470,7 +470,7 @@ class AccountExportCheck:
                 "complete_within_scope": complete, "source_completeness_established": False,
                 "html_index_signed_by_manifest": "index.html" in self.files,
                 "meaning": "Integrity is checked relative to the signing key. Completion covers the frozen selected "
-                           "tasks and observed outcomes, not all Telegram data, a simultaneous snapshot or trusted time."}
+                           "tasks and their observed outcomes."}
 
 
 
@@ -649,8 +649,8 @@ class AccountDisclosureCheck:
                 "source_reference_checked": source_checked, "derivation_correctness_established": False,
                 "html_index_signed_by_manifest": True, "producer": self.manifest.get("producer"),
                 "meaning": "The signature protects this disclosure's bytes and policy statement. "
-                           "Source linkage names the original archive and collector key. It does not show that filtering and "
-                           "redaction followed that policy."}
+                           "Source linkage names the original archive and collector key; review filtering and redaction "
+                           "against that archive."}
 
 
 

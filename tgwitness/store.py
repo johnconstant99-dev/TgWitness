@@ -649,8 +649,7 @@ class Store:
             if count:
                 self.db.execute("UPDATE media_jobs SET state='retry',next_attempt=0,"
                                 "last_error='interrupted' WHERE state='running'")
-                self.append("media.recovered", {"jobs": count, "reason": "previous attempt interrupted",
-                                               "content_recoverability": "not guaranteed"})
+                self.append("media.recovered", {"jobs": count, "reason": "previous attempt interrupted"})
             return count
 
     def ephemeral_outcome(self, message_event, status):

@@ -1679,7 +1679,7 @@ class Collector:
             client = self.make_client(api_id, api_hash)
             await self.connect_client(client)
             self.store.append("network.probe", {**self.route_receipt(), "connected": True,
-                              "meaning": "Telegram transport connected; capture completeness is not tested"})
+                              "meaning": "Telegram transport connected through this route"})
             return {"connected": True, "route": self.route_status()}
         except Exception as exc:
             self.store.append("network.probe", {**self.route_receipt(), "connected": False,

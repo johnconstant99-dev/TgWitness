@@ -110,7 +110,7 @@ python -m tgwitness.verify minimized-disclosure.zip --fingerprint TRUSTED_SHA256
 python -m tgwitness.verify minimized-disclosure.zip --fingerprint TRUSTED_SHA256 --evidence account-export.zip
 ```
 
-Source linkage does not independently prove that the transformation selected every required item or removed every identifying detail. Original plaintext is not embedded as a proof. A fresh review is needed for that judgment.
+Source linkage shows which archive and collector key the disclosure came from. The disclosure carries only the selected content; review the selection and the removal of identifying details against the original export.
 
 ## Sharing and hosted capture
 

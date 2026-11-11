@@ -55,12 +55,11 @@ def verify_chat_export(path, expected_fingerprint=None, max_gib=None):
 
 COMPARE_MEANING = {
     "number": "Both archives record the same chat and account, so messages are matched by their number. "
-              "Unchanged means equality of the complete saved message record. Differences may include "
-              "observation metadata and do not by themselves prove a Telegram edit.",
+              "Unchanged means equality of the complete saved message record. A difference shows that the saved "
+              "records differ, in content or in observation metadata.",
     "content": "The archives come from different chats or accounts (for example both sides of a private chat), "
                "or their scope identity is missing. Possible matches use time, sender, full text and file hash. "
-               "Unchanged counts identical saved records among these pairs, not proven message identity. "
-               "Differences describe the paired records, not necessarily edits of the same Telegram message.",
+               "Unchanged counts identical saved records among these pairs; differences describe the paired records.",
 }
 
 

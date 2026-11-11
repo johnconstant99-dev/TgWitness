@@ -473,7 +473,7 @@ def assurance(result):
         if row["status"] != "pass":
             break
         tier = row["tier"]
-    return {"tier": tier, "ladder": ladder, "scope": "complete exported head; no claim of continuous or complete Telegram observation"}
+    return {"tier": tier, "ladder": ladder, "scope": "complete exported head; coverage reports observation continuity"}
 
 
 def assurance_line(result):

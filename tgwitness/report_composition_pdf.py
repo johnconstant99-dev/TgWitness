@@ -234,7 +234,7 @@ def index_basis(lay, index):
         lay.text(say("Reading index of the first {n} included records. Counts below describe this index only; the signed source and transcript remain unchanged.",
                      n=index["records_examined"]), size=8, color=lay.design.muted)
     else:
-        lay.text(say("Reading index of {n} included records. Account names are saved observations, not verified identities.",
+        lay.text(say("Reading index of {n} included records. Account names are the profiles Telegram showed when the records were saved.",
                      n=index["records_examined"]), size=8, color=lay.design.muted)
 
 

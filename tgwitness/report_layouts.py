@@ -194,7 +194,7 @@ def journal_replacements(event_factory, context, say, options, total=None, viewe
         titles = digest.get("titles") or {}
         yield report.section(1, "observed-directory", say("Observed accounts and chats"))
         yield basis()
-        yield '<p>' + escape(say("These are observed account references, not verified identities or a complete member list.")) + '</p>'
+        yield '<p>' + escape(say("These are the account references observed in the saved records.")) + '</p>'
         if index["chats"]:
             yield report.table([say("Chat"), say("Records")], [[escape(str(titles.get(item["chat_id"]) or item["chat_id"])),
                 report.num(item["records"])] for item in index["chats"]])
