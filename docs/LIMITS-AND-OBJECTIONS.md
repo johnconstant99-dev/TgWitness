@@ -28,9 +28,9 @@ It needs Python 3.11+ and `cryptography`.
 - [The checkpoint and witness are not independent](#the-checkpoint-and-witness-are-not-independent)
 - [A Desktop export with a qualified eIDAS timestamp is just as good](#a-desktop-export-with-a-qualified-eidas-timestamp-is-just-as-good)
 - [Rule 902 is US law](#rule-902-is-us-law)
-- [Deleted messages are kept despite GDPR Article 17](#deleted-messages-are-kept-despite-gdpr-article-17)
-- [Data goes to third parties through public MTProxy servers](#data-goes-to-third-parties-through-public-mtproxy-servers)
-- [It uses public API pairs and a Telegram Desktop profile](#it-uses-public-api-pairs-and-a-telegram-desktop-profile)
+- [A deleted message stays in the record](#a-deleted-message-stays-in-the-record)
+- [A public MTProxy relays encrypted traffic only](#a-public-mtproxy-relays-encrypted-traffic-only)
+- [Built-in API pairs identify a client, not an account](#built-in-api-pairs-identify-a-client-not-an-account)
 - [The installer pipes curl into bash](#the-installer-pipes-curl-into-bash)
 - [The benchmark dates look like the future](#the-benchmark-dates-look-like-the-future)
 - [The project is only two weeks old](#the-project-is-only-two-weeks-old)
@@ -230,14 +230,19 @@ from the moment it is stamped, after it could be edited.
 **Scope.** Outside US federal courts, the template is a starting point. Admissibility
 and weight are for the court.
 
-## Deleted messages are kept despite GDPR Article 17
+## A deleted message stays in the record
 
-**Objection.** TgWitness keeps text that its author deleted, contrary to the right to erasure.
+**Objection.** Keeping text that its author deleted conflicts with the GDPR right to erasure.
 
 **Facts.**
 
-- Live observation keeps a message's text after a deletion notice by design ([README](../README.md)).
-- The operator decides what is collected and is usually the controller. The project
+- TgWitness "records content delivered to the connected Telegram account"
+  ([README](../README.md)): the messages that account's own Telegram app receives,
+  and nothing beyond them. When a deletion notice arrives, live observation records
+  the notice and keeps the text by design.
+- The software has no telemetry and no hosted service ([README](../README.md)), so
+  it holds no one's data on its own behalf. As with a screenshot or a Telegram Desktop
+  export, data protection duties fall on whoever collects and uses the record. The project
   guide names the legitimate interests commonly relied on (GDPR Art. 6(1)(f),
   Recitals 47 and 49; Art. 9(2)(f) for legal claims) and the erasure exception "for
   the establishment or defence of legal claims (Art. 17(3)(e))"
@@ -249,11 +254,11 @@ and weight are for the court.
 - People profiles are off by default and switched on per chat. Exports make it
   possible to answer access requests under Art. 15 (same section).
 
-**Scope.** Whether keeping a deleted message is lawful is decided for the case, not by
-the software. The operator needs a purpose and a legal basis, and Art. 17(3)(e) applies
-where its conditions are met.
+**Scope.** GDPR governs people and organisations that process data, not a program.
+A deleted message stays in the record the way it stays in any copy saved before the
+deletion; the guide lists the legal bases used for legal claims.
 
-## Data goes to third parties through public MTProxy servers
+## A public MTProxy relays encrypted traffic only
 
 **Objection.** Default connections run through proxies operated by unknown people.
 
@@ -282,17 +287,24 @@ where its conditions are met.
   ([connection security](CONNECTION-SECURITY.md)).
 
 **Scope.** A public proxy sees connection metadata: that the server connects to
-Telegram, when and how much. It cannot read or change messages, and it can drop the
-connection. Where metadata matters, use an operator catalog or your own route.
+Telegram, when and how much, as any proxy or VPN does. It cannot read or change
+messages, and it can drop the connection. Where metadata matters, use an operator
+catalog or your own route.
 
-## It uses public API pairs and a Telegram Desktop profile
+## Built-in API pairs identify a client, not an account
 
-**Objection.** TgWitness signs in with other applications' API pairs and presents itself
+**Objection.** TgWitness signs in with API pairs it did not register and presents itself
 as Telegram Desktop.
 
 **Facts.**
 
-- [`tgwitness/api_pool.py`](../tgwitness/api_pool.py) contains 50 public API pairs.
+- An API ID and API hash "identify the application to Telegram; they do not authorize
+  an account by themselves" ([API ID and API hash](ACCOUNTS.md#before-you-start-api-id-and-api-hash)).
+  A pair is not linked to anyone's account or data and gives no access to them. Access
+  to an account comes only from its own sign-in: a login code and 2FA password, or a
+  session that account already authorized.
+- [`tgwitness/api_pool.py`](../tgwitness/api_pool.py) contains 50 public API pairs
+  already used by open-source clients ([project guide](PROJECT-GUIDE.md#connect-a-telegram-account)).
   A fresh login tries Telegram Desktop's pair (2040) first, then up to seven shuffled
   others (`login_order`). "Only the Telegram Desktop pair (2040) is sent with a
   matching Telegram Desktop client description"
@@ -311,8 +323,9 @@ as Telegram Desktop.
   pair (`API_ID_PUBLISHED_FLOOD`) or restrict an account, and the guide recommends "a
   dedicated account you can afford to lose".
 
-**Scope.** Whether a published pair suits the account and Telegram's terms is the
-operator's decision; entering your own pair avoids the question.
+**Scope.** The pair that signed in does not change what the account receives or what
+the record proves. "Telegram decides restrictions on its side, whichever client profile
+is used" ([accounts](ACCOUNTS.md#before-you-start-api-id-and-api-hash)).
 
 ## The installer pipes curl into bash
 
