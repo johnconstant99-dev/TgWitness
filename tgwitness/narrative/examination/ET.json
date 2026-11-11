@@ -1,0 +1,128 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "ET",
+  "name_en": "Ethiopia",
+  "name_local": "ኢትዮጵያ",
+  "court_languages": [
+    "am",
+    "en"
+  ],
+  "local_language": "am",
+  "legal_family": "mixed",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "ልዩ አዋቂ; ባለሙያ",
+    "en": "expert giving scientific, technical or specialised professional opinion, or a professional who carried out a laboratory examination (Criminal Procedure and Evidence Proclamation No. 1410/2018 E.C. Art. 99)"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Criminal Procedure and Evidence Proclamation No. 1410/2018 E.C. (2026), Arts. 97, 99; Computer Crime Proclamation No. 958/2016 Arts. 23(2), 26(1)",
+        "summary_en": "Under the new Criminal Procedure and Evidence Code, when further examination of collected evidence is needed, the investigating police and other professionals involved in the investigation have it examined in a laboratory (Art. 97(1)). The laboratory examination serves to establish how and in what environment the crime was committed, identify objects, analyse the link between scene evidence and the crime, reconstruct or compare events against witness statements, and compare witness accounts (Art. 97(2)). An expert giving scientific, technical or specialised professional opinion, or a professional who carried out a laboratory examination, prepares a report (Art. 99(1)). For computer crimes, the public prosecutor and police investigate jointly, led by the prosecutor; on request, the Agency (Information Network Security) provides technical support, analyses collected information and provides evidence (Proc. 958/2016 Art. 23). The Agency, with the investigatory organ and on a court warrant, may conduct digital forensic investigation of suspected computers or systems (Art. 26(1)).",
+        "source": "https://justice.gov.et/wp-content/uploads/2026/10/Criminal-procedure-and-evidence-law-New-published-2019-compressed.pdf"
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": "Criminal Procedure and Evidence Proclamation No. 1410/2018 E.C. Art. 99(2)",
+        "items_en": [
+          "Inputs (materials) the expert used to give the opinion or carry out the examination",
+          "Examination method followed",
+          "Why that method was chosen",
+          "Result of the examination",
+          "Whether or not an alternative conclusion exists"
+        ],
+        "items_local": [
+          "ባለሙያው የሙያ አስተያየቱን ለመስጠት ወይም ለምርመራው የተጠቀመበት ግብአት",
+          "የተከተለው የምርመራ ዘዴ",
+          "ዘዴው ለምን እንደተመረጠ",
+          "የምርመራው ውጤት",
+          "ሌላ አማራጭ ማጠቃለያ መኖሩ ወይም አለመኖሩ"
+        ],
+        "source": "https://justice.gov.et/wp-content/uploads/2026/10/Criminal-procedure-and-evidence-law-New-published-2019-compressed.pdf"
+      },
+      "rights_duties": {
+        "basis": "Criminal Procedure and Evidence Proclamation No. 1410/2018 E.C. Arts. 99(3), 254, 255, 256(2)(a); Computer Crime Proclamation No. 958/2016 Arts. 33-35",
+        "summary_en": "When necessary, the professional who took part in the technical or laboratory examination and prepared the result is made to testify in court on the opinion (Art. 99(3)). Before testifying, a prosecution witness takes an oath or gives an affirmation to tell the truth according to their religion, belief or custom (Art. 254(1)). The court establishes the witness's identity, asks about relationships or other factors that could influence the testimony, and tells the witness that false testimony entails criminal liability (Art. 255). An expert witness may be allowed to use notes, documents or devices while testifying (Art. 256(2)(a)). For computer crimes: certified printouts of electronic records seized under the Proclamation are admissible (Proc. 958/2016 Art. 33). The party producing such evidence bears the burden of proving its authenticity (Art. 34). An electronic record obtained on proof of the authenticity of the records system is presumed an original electronic document (Art. 35). The new Code similarly defines electronic evidence and sets authenticity rules (Arts. 275-276).",
+        "source": "https://justice.gov.et/wp-content/uploads/2026/10/Criminal-procedure-and-evidence-law-New-published-2019-compressed.pdf"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": null,
+        "items_en": [],
+        "items_local": [],
+        "source": null
+      },
+      "rights_duties": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": "No statute on forensic expert activity found. Sectoral: Criminal Procedure and Evidence Proclamation No. 1410/2018 E.C. Arts. 97-99; Computer Crime Proclamation No. 958/2016 Part Four (evidentiary provisions)",
+    "source": "https://justice.gov.et/en/news/the-house-of-peoples-representatives-has-adopted-the-new-criminal-procedure-and-evidence-code-as-proclamation-no-1410-2026/"
+  },
+  "liability": [
+    {
+      "route": "criminal",
+      "norm": "Criminal Code of the FDRE (Proclamation No. 414/2004): article on false testimony or false expert reports NOT VERIFIED; warning duty in Criminal Procedure and Evidence Proclamation No. 1410/2018 E.C. Art. 255(3)",
+      "summary_en": "The court must tell a witness that false testimony entails criminal liability (Art. 255(3)). The offence and maximum penalty in the Criminal Code were not verified (see open questions).",
+      "warning_local": "የምሰጠው የምስክርነት ቃል ሐሰተኛ ከሆነ በወንጀል እንደምጠየቅ ተረድቻለሁ።",
+      "warning_en": "I understand that if the testimony I give is false, I will be held criminally liable.",
+      "wording": "composed",
+      "source": "https://justice.gov.et/wp-content/uploads/2026/10/Criminal-procedure-and-evidence-law-New-published-2019-compressed.pdf"
+    }
+  ],
+  "declaration": {
+    "basis": "Criminal Procedure and Evidence Proclamation No. 1410/2018 E.C. Art. 254(1): oath or affirmation to tell the truth before testifying, according to religion, belief or custom; no fixed text prescribed",
+    "text_local": null,
+    "text_en": null,
+    "wording": null,
+    "source": "https://justice.gov.et/wp-content/uploads/2026/10/Criminal-procedure-and-evidence-law-New-published-2019-compressed.pdf"
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "የኤሌክትሮኒክ ፊርማ አዋጅ ቁጥር 1072/2010 (Electronic Signature Proclamation No. 1072/2018), as amended by Proclamation No. 1358/2017 E.C. (1358/2024); Electronic Signature Regulation No. 582/2018 E.C. (582/2025)",
+    "law_en": "Electronic Signature Proclamation No. 1072/2018 (Federal Negarit Gazette No. 25, 16 February 2018). A 'digital signature' is an electronic signature using an asymmetric cryptosystem that is uniquely linked to and identifies the signatory, is created with a private key under the signatory's sole control, and is linked to the message so that later changes are detectable (Art. 2(4)). In civil proceedings involving a message signed with a reliable electronic signature, it is presumed, unless the contrary is proved, that the signature is the subscriber's, was affixed with intent to approve, and that message and signature are unaltered since signing (Art. 7). A digital signature supported by a valid certificate is deemed a reliable electronic signature and enjoys that presumption (Art. 8). Proclamation No. 1358/2024 added powers for the Council of Ministers and the Information Network Security Administration to issue regulations and directives.",
+    "qualified_term_local": "ዲጂታል ፊርማ (digital signature supported by a valid certificate = reliable electronic signature)",
+    "source": "https://justice.gov.et/wp-content/uploads/2025/02/%E1%8A%A0%E1%8B%8B%E1%8C%85-%E1%89%81%E1%8C%A5%E1%88%AD-1072-2010.pdf"
+  },
+  "timestamp": {
+    "basis": "Electronic Signature Proclamation No. 1072/2018 Arts. 2(18), 22, 23",
+    "qualified_recognition": "Certificate providers may provide a time stamp service declaration confirming the correct date and time of an act on an electronic message, digital signature or certificate; the Root Certificate Authority may recognise other providers and sets requirements and standards (Art. 23(1)-(3)). 'Time stamp service evidence produced in accordance with sub-article (1) and (2) of this Article shall be taken as trusted and adequate evidence' (Art. 23(4)).",
+    "source": "https://justice.gov.et/wp-content/uploads/2025/02/%E1%8A%A0%E1%8B%8B%E1%8C%85-%E1%89%81%E1%8C%A5%E1%88%AD-1072-2010.pdf"
+  },
+  "open_questions": [
+    "Entry into force of the Criminal Procedure and Evidence Proclamation No. 1410/2018 E.C.: adopted by the House of Peoples' Representatives on Megabit 24, 2018 E.C. (about 2 April 2026) and signed by the President on Sene 17, 2018 E.C. (about 24 June 2026). Its Art. 4 provides entry into force 180 days after publication in the Federal Negarit Gazeta. The Gazette publication date was not verified, so it may not be in force on 2026-11-11 (if published on the signature date, about 21 December 2026). Until then the Criminal Procedure Code of 1961 applies; its expert provisions were not verified. Gregorian dates are the researcher's conversions.",
+    "The Proclamation 1410 text was read from the Ministry of Justice's Amharic-only publication (PDF), whose text layer uses a legacy font mapping. Article numbers and meaning were read from it, but the Amharic items_local are normalised spellings, not verbatim copies. Verify against the Federal Negarit Gazeta Amharic/English text. The English translation was not available.",
+    "Not verified for the 1410 Code: the repeal and transitional provisions, and whether they affect the evidentiary provisions of the Computer Crime Proclamation No. 958/2016 (Arts. 33-35).",
+    "Not verified for the 1410 Code: the article numbers of the investigation provisions that let the investigator receive a special expert's opinion and summon a person able to give professional analysis (around Arts. 64-66).",
+    "Who formulates the questions to the expert, whether the expert may decline questions or report facts not asked about: not found in the parts of Proclamation 1410 reviewed.",
+    "Civil route not verified: the Civil Procedure Code 1965 (Decree No. 52/1965) articles on experts and commissions were not found on an official portal (Ministry of Justice site search returned no Civil Procedure Code; fsc.gov.et returned HTTP 503).",
+    "Criminal liability not verified: the Criminal Code (Proclamation No. 414/2004) article(s) on false testimony and false expert reports, and their penalties. The only Criminal Code file on justice.gov.et is an Amharic PDF in a legacy non-Unicode font, which could not be read reliably.",
+    "Not found: any oath or affirmation formula for experts. Art. 254 leaves the form to religion, belief or custom. The warning text in 'liability' is composed, not official.",
+    "Not found: any Ethiopian Standards Agency adoption of ISO/IEC 27037/27041/27042/27043, or an official digital forensic standard or ISO/IEC 17025 requirement. Check INSA and Federal Police forensic directives.",
+    "Not checked: the Electronic Signature Regulation No. 582/2025 and Directive No. 1157/2026 (Electronic Signature Implementation Directive), including any requirements on qualified time-stamps or signature tiers.",
+    "Electronic Signature Proclamation Art. 7 presumption is stated for 'civil proceedings'. Not verified: its application in criminal proceedings."
+  ]
+}

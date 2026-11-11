@@ -1,0 +1,101 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "VN",
+  "name_en": "Vietnam",
+  "name_local": "Việt Nam",
+  "court_languages": [
+    "vi"
+  ],
+  "local_language": "vi",
+  "legal_family": "socialist law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": null,
+    "en": null
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": null,
+        "items_en": [],
+        "items_local": [],
+        "source": null
+      },
+      "rights_duties": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": null,
+        "items_en": [],
+        "items_local": [],
+        "source": null
+      },
+      "rights_duties": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": null,
+    "source": null
+  },
+  "liability": [],
+  "declaration": {
+    "basis": null,
+    "text_local": null,
+    "text_en": null,
+    "wording": null,
+    "source": null
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": null,
+    "law_en": null,
+    "qualified_term_local": null,
+    "source": null
+  },
+  "timestamp": {
+    "basis": null,
+    "qualified_recognition": null,
+    "source": null
+  },
+  "open_questions": [
+    "No Vietnamese provision could be verified on an official portal in this session: vbpl.vn pages render dynamically (no text returned) or were refused by the fetch tool, vanban.chinhphu.vn and congbao.chinhphu.vn search pages return no results to the fetch tool, thuvienphapluat.vn returned HTTP 403, and the web-search budget for this session was exhausted before Vietnam could be researched.",
+    "Bộ luật Tố tụng hình sự 2015 (Luật số 101/2015/QH13) Điều 205-216 on requesting expert examination, rights and duties of the parties and of the expert, time limits, supplementary and repeat examination and the kết luận giám định were not verified. WIPO Lex lists the Code as adopted 27 November 2015, in force 1 July 2016 and amended by Law No. 34/2024/QH15; later amendments (including any 2025 amendments) were not checked.",
+    "Bộ luật Tố tụng dân sự 2015 (Luật số 92/2015/QH13, adopted 25 November 2015 per WIPO Lex) Điều 102 and related articles on expert examination were not verified.",
+    "Luật Giám định tư pháp 2012 as amended in 2020 (law numbers not verified), including the required contents of the kết luận giám định, the rights and obligations of judicial experts and refusal grounds, was not verified.",
+    "Bộ luật Hình sự 2015 Điều 382 (named in the task as the offence for false expert conclusions), its title, elements and penalties were not verified; the wording of any warning or undertaking the expert signs was not verified.",
+    "Luật Giao dịch điện tử 2023 provisions on electronic signatures, the qualified/secure signature category and time-stamp services, and its law number, were not verified; implementing decrees were not checked.",
+    "Vietnamese national standards (TCVN) adopting ISO/IEC 27037/27041/27042/27043 and any Ministry of Public Security digital-forensic regulations were not verified."
+  ]
+}

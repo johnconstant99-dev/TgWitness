@@ -1,0 +1,101 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "IT",
+  "name_en": "Italy",
+  "name_local": "Italia",
+  "court_languages": [
+    "it"
+  ],
+  "local_language": "it",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": null,
+    "en": null
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": null,
+        "items_en": [],
+        "items_local": [],
+        "source": null
+      },
+      "rights_duties": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": null,
+        "items_en": [],
+        "items_local": [],
+        "source": null
+      },
+      "rights_duties": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": null,
+    "source": null
+  },
+  "liability": [],
+  "declaration": {
+    "basis": null,
+    "text_local": null,
+    "text_en": null,
+    "wording": null,
+    "source": null
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "Regolamento (UE) n. 910/2014 modificato dal Regolamento (UE) 2024/1183",
+    "law_en": "eIDAS Regulation (EU) No 910/2014 as amended by Regulation (EU) 2024/1183; national implementing act not verified",
+    "qualified_term_local": null,
+    "source": "https://eur-lex.europa.eu/eli/reg/2014/910/oj/eng"
+  },
+  "timestamp": {
+    "basis": "Regulation (EU) No 910/2014, art. 41 (as amended by Regulation (EU) 2024/1183)",
+    "qualified_recognition": "A qualified electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which they are bound; it is recognised as qualified in all Member States. National implementing rules not verified.",
+    "source": "https://eur-lex.europa.eu/eli/reg/2014/910/oj/eng"
+  },
+  "open_questions": [
+    "Research not completed for Italy: normattiva.it article pages are rendered client-side and returned only the table of contents to the fetch tool; a follow-up attempt to retrieve c.p.p. art. 226 was blocked by the session's permission classifier, and the session's web-search budget (200 calls) was then exhausted. Every national field below remains unverified.",
+    "Criminal route to verify on normattiva.it: c.p.p. art. 220-233 (perizia and consulenza tecnica), in particular art. 221 (appointment from the albo), 222-223 (incapacity, abstention, challenge), 225-226 (party consultants; conferment of the task and the expert's undertaking formula), 227 (report, oral opinion in the record or written report within the time limit), 228 (expert's activity), 230 (party consultants' activity), 233 (consultancy outside perizia); also art. 359-360 (prosecutor's consultants; non-repeatable technical checks).",
+    "Civil route to verify: c.p.c. art. 61-64 (consulente tecnico; art. 64 liability including the reference to the criminal-code provisions on experts and any penalty for gross negligence) and art. 191-201 (appointment, challenge, oath under art. 193 including any written oath option, report and exchange of observations under art. 195); disp. att. c.p.c. on the albo dei consulenti tecnici.",
+    "Liability to verify: codice penale art. 373 (falsa perizia o interpretazione; penalty by reference to art. 372 and ancillary disqualification) and any provision on unfaithful party consultants (e.g. art. 380).",
+    "Electronic signature: the Codice dell'amministrazione digitale (D.Lgs. 7 marzo 2005, n. 82) is the expected national act (firma elettronica qualificata / firma digitale, validazione temporale); not verified on an official source in this session.",
+    "Standards: UNI national adoption of EN ISO/IEC 27037/27041/27042/27043 not verified; statutory digital-evidence preservation duties introduced by legge 18 marzo 2008, n. 48 (Budapest Convention ratification) into the c.p.p. not verified.",
+    "Court languages: Italian; minority-language use in courts of certain regions (e.g. German in Alto Adige/Südtirol) not verified."
+  ]
+}

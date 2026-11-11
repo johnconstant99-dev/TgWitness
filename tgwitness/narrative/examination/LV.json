@@ -1,0 +1,124 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "LV",
+  "name_en": "Latvia",
+  "name_local": "Latvija",
+  "court_languages": [
+    "lv"
+  ],
+  "local_language": "lv",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "tiesu eksperts (valsts tiesu eksperts; valsts atzīts privātais tiesu eksperts)",
+    "en": "court expert certified by the Council of Court Experts and entered in the Register of Court Experts"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Kriminālprocesa likums (section numbers not verified)",
+        "summary_en": "The decision to order an expert examination is taken by the person directing the proceedings (procesa virzītājs); the examination is ordered to establish facts and circumstances relevant to the criminal proceedings, on which the expert gives an opinion.",
+        "source": "https://e-justice.europa.eu/topics/find-legal-professional/find-expert/lv_lv"
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": "Not verified for criminal proceedings.",
+        "source": null
+      },
+      "report_contents": {
+        "basis": null,
+        "items_en": [],
+        "items_local": [],
+        "source": null
+      },
+      "rights_duties": {
+        "basis": "Tiesu ekspertu likums, V nodaļa (liability)",
+        "summary_en": "Liability of court experts is governed by Chapter V of the Law on Court Experts. The Council of Court Experts opens disciplinary proceedings for non-compliance with rules on expert activity, failure to perform professional duties, gross negligence, abuse of office, improper conduct or breach of ethics, loss of or wilful damage to objects submitted, and disclosure of information obtained in the examination.",
+        "source": "https://e-justice.europa.eu/topics/find-legal-professional/find-expert/lv_lv"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Civilprocesa likums (section numbers not verified)",
+        "summary_en": "In civil proceedings the court orders an expert examination at the request of the parties; it is carried out by persons specified in the Law on Court Experts. The parties choose the expert by agreement; failing agreement within the court's time limit, the court chooses. Several experts may be appointed.",
+        "source": "https://e-justice.europa.eu/topics/find-legal-professional/find-expert/lv_lv"
+      },
+      "questions": {
+        "basis": "Civilprocesa likums (section not verified)",
+        "summary_en": "The opinion must give reasoned answers to the questions put by the court. If during the examination the expert finds circumstances relevant to the case on which no questions were put, the expert may point them out in the opinion.",
+        "source": "https://e-justice.europa.eu/topics/find-legal-professional/find-expert/lv_lv"
+      },
+      "report_contents": {
+        "basis": "Civilprocesa likums (section not verified)",
+        "items_en": [
+          "precise description of the examinations carried out",
+          "conclusions drawn from them",
+          "reasoned answers to the questions put by the court",
+          "optionally, relevant circumstances found on which no questions were put",
+          "signature of all experts for a joint opinion; separate opinions where experts disagree"
+        ],
+        "items_local": [
+          "precīzs veikto pētījumu apraksts",
+          "to rezultātā izdarītie secinājumi",
+          "motivētas atbildes uz tiesas uzdotajiem jautājumiem",
+          "norāde uz apstākļiem, kuriem ir nozīme lietā un par kuriem jautājumi nav uzdoti",
+          "kopīgu atzinumu paraksta visi eksperti; ja domas nesaskan, katrs eksperts raksta atsevišķu atzinumu"
+        ],
+        "source": "https://e-justice.europa.eu/topics/find-legal-professional/find-expert/lv_lv"
+      },
+      "rights_duties": {
+        "basis": "Civilprocesa likums; Tiesu ekspertu likums (sections not verified)",
+        "summary_en": "The opinion must be reasoned and substantiated; the expert gives an objective opinion in his or her own name and is personally responsible for it. The expert must appear when summoned. The court assesses the opinion by inner conviction; it has no predetermined force.",
+        "source": "https://e-justice.europa.eu/topics/find-legal-professional/find-expert/lv_lv"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": "Tiesu ekspertu likums",
+    "title_en": "Law on Court Experts (certification by the Council of Court Experts, certificate valid five years, public register at eksperti.ta.gov.lv)",
+    "source": "https://e-justice.europa.eu/topics/find-legal-professional/find-expert/lv_lv"
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Krimināllikums 300. pants (as given in the task brief; not verified); Tiesu ekspertu likums V nodaļa (disciplinary liability)",
+      "summary_en": "Criminal liability for a knowingly false expert opinion and unjustified refusal exists under the Criminal Law; the exact section, elements and maximum penalty were not verified.",
+      "warning_local": "Tiesu eksperts, saņemot tiesu eksperta sertifikātu, ar parakstu apliecina, ka ir brīdināts, ka par nepamatotu atteikšanos veikt ekspertīzi vai apzināti nepatiesa tiesu eksperta atzinuma sniegšanu ir saucams pie atbildības saskaņā ar Krimināllikumu.",
+      "warning_en": "On receiving the court expert certificate, the court expert confirms by signature that he or she has been warned that an unjustified refusal to carry out an expert examination or the giving of a knowingly false court expert opinion entails liability under the Criminal Law.",
+      "wording": "customary",
+      "source": "https://e-justice.europa.eu/topics/find-legal-professional/find-expert/lv_lv"
+    }
+  ],
+  "declaration": {
+    "basis": null,
+    "text_local": null,
+    "text_en": null,
+    "wording": null,
+    "source": null
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "Eiropas Parlamenta un Padomes Regula (ES) Nr. 910/2014 (eIDAS), kas grozīta ar Regulu (ES) 2024/1183",
+    "law_en": "Regulation (EU) No 910/2014 (eIDAS) as amended by Regulation (EU) 2024/1183; national implementing act not verified",
+    "qualified_term_local": "kvalificēts elektroniskais paraksts",
+    "source": "https://eur-lex.europa.eu/eli/reg/2014/910/oj"
+  },
+  "timestamp": {
+    "basis": "Regulation (EU) No 910/2014, art. 41 (Latvian version: 'kvalificēts elektroniskais laika zīmogs'), as amended by Regulation (EU) 2024/1183",
+    "qualified_recognition": "A qualified electronic time stamp enjoys the presumption of accuracy of the date and time it indicates and of the integrity of the data bound to them.",
+    "source": "https://eur-lex.europa.eu/eli/reg/2014/910/oj"
+  },
+  "open_questions": [
+    "likumi.lv refused connections from this environment (TCP connection refused); no Latvian statute was read on the official portal. Content above comes from the European e-Justice Portal page maintained by Latvia (Find an expert, last updated 19/08/2024) and must be verified on likumi.lv.",
+    "Kriminālprocesa likums: section numbers and text on ordering an examination, content of the decision and questions, content of the expert opinion, rights and duties of the expert, and the warning procedure - not verified.",
+    "Civilprocesa likums: section numbers for ordering an examination, choice of expert, content of the opinion (including the right to point out circumstances not asked about) - not verified.",
+    "Krimināllikums 300. pants: wording (false testimony, opinion, translation) and maximum penalty - not verified; the same applies to any separate section on unjustified refusal by an expert.",
+    "Tiesu ekspertu likums: date and number of the law, articles on certification, the signed warning, independence and Chapter V liability - not verified; the warning text is reproduced from e-Justice and marked customary.",
+    "No rule found requiring a declaration or statement of truth inside the written expert opinion; declaration left null.",
+    "National implementing act for eIDAS and any national rule on electronic expert opinions (e-signature or time stamp) were not verified.",
+    "Latvian adoptions of ISO/IEC 27037/27041/27042/27043 (LVS EN ISO/IEC ...) were not verified in the LVS catalogue."
+  ]
+}

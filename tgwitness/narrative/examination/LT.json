@@ -1,0 +1,130 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "LT",
+  "name_en": "Lithuania",
+  "name_local": "Lietuva",
+  "court_languages": [
+    "lt"
+  ],
+  "local_language": "lt",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "ekspertas (teismo ekspertas)",
+    "en": "court expert appointed by the pre-trial officer, prosecutor or court; experts on the List of Court Experts of the Republic of Lithuania take an oath on entry"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Baudžiamojo proceso kodeksas (BPK) 84-88, 210, 211, 286 straipsniai (appointment article for the pre-trial stage not verified)",
+        "summary_en": "BPK arts. 84-88 set out the concept of expert, rights, duties, liability and the content of the expert report. Art. 210 covers assigning an examination to a person not on the list of experts; art. 211 covers acquainting participants with the expert report; art. 286 covers ordering an examination during the trial stage, including re-examination if the report is insufficiently complete or reasoned.",
+        "source": "https://www.e-tar.lt/portal/lt/legalAct/TAR.EC588C321777/asr"
+      },
+      "questions": {
+        "basis": "BPK 88, 286 straipsniai",
+        "summary_en": "The questions are set in the ruling ordering the examination and listed in the report's introductory part. The expert's conclusions may not exceed the expert's special knowledge (art. 88). Where the material is insufficient or the questions fall outside the expert's competence, the expert draws up an act stating that a conclusion cannot be given (art. 286). Whether the expert may report facts not asked about was not verified.",
+        "source": "https://www.e-tar.lt/portal/lt/legalAct/TAR.EC588C321777/asr"
+      },
+      "report_contents": {
+        "basis": "BPK 88 straipsnis (Ekspertizės akto turinys)",
+        "items_en": [
+          "introductory part: date and place of the report; the ruling ordering the examination; material and questions submitted; expert's name, education, speciality, qualification and length of service as expert; start and end dates of the examination; persons present during the examination",
+          "research part: condition of the objects examined; results of their inspection; examinations carried out, methods and tools used; results obtained and their evaluation",
+          "conclusions (must not exceed the expert's special knowledge)"
+        ],
+        "items_local": [
+          "įžanginė dalis",
+          "tiriamoji dalis",
+          "išvados"
+        ],
+        "source": "https://www.e-tar.lt/portal/lt/legalAct/TAR.EC588C321777/asr"
+      },
+      "rights_duties": {
+        "basis": "BPK 84-87 straipsniai",
+        "summary_en": "Rights, duties and liability of the expert are set in BPK arts. 84-87; details not verified on the official portal.",
+        "source": "https://www.e-tar.lt/portal/lt/legalAct/TAR.EC588C321777/asr"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Civilinio proceso kodeksas (CPK) 192-217 straipsniai (rules on witnesses and experts); exact article numbers not verified",
+        "summary_en": "An expert opinion is given only on the court's assignment and set out in writing as an expert report (ekspertizės aktas). If the court requests an opinion without an expert report, it is treated as written evidence.",
+        "source": "https://e-justice.europa.eu/topics/court-procedures/civil-cases/taking-evidence/lt_lt"
+      },
+      "questions": {
+        "basis": "CPK (article not verified)",
+        "summary_en": "The report must give reasoned answers to the questions put by the court. At the hearing, questions to explain or supplement the opinion are first put by the person who requested the examination, then by other participants (by the plaintiff first if the court ordered it on its own motion); judges may ask at any time.",
+        "source": "https://e-justice.europa.eu/topics/court-procedures/civil-cases/taking-evidence/lt_lt"
+      },
+      "report_contents": {
+        "basis": "CPK (article not verified)",
+        "items_en": [
+          "detailed description of the examinations carried out",
+          "conclusions drawn from them",
+          "reasoned answers to the questions put by the court",
+          "where the examination is done outside a hearing: the oath text signed by the expert, which forms an integral part of the report (not required from experts on the List of Court Experts)"
+        ],
+        "items_local": [
+          "smulkiai aprašomi atlikti tyrimai",
+          "jų pagrindu padarytos išvados",
+          "pagrįsti atsakymai į teismo iškeltus klausimus",
+          "eksperto pasirašytas priesaikos tekstas yra ekspertizės akto sudedamoji dalis"
+        ],
+        "source": "https://e-justice.europa.eu/topics/court-procedures/civil-cases/taking-evidence/lt_lt"
+      },
+      "rights_duties": {
+        "basis": "CPK (article not verified); CPK 248 straipsnis (fine for non-appearance)",
+        "summary_en": "Experts on the List of Court Experts who took the oath on entry need not take it in court and are deemed warned of liability for a false opinion and explanations. An expert who fails to appear without good reason may be fined (amount on the e-Justice page is stated in litas and is outdated).",
+        "source": "https://e-justice.europa.eu/topics/court-procedures/civil-cases/taking-evidence/lt_lt"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": "Lietuvos Respublikos teismo ekspertizės įstatymas",
+    "title_en": "Law on Forensic Examination of the Republic of Lithuania",
+    "source": null
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Baudžiamasis kodeksas (BK) 235 straipsnis (as given in the task brief; not verified)",
+      "summary_en": null,
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": null
+    }
+  ],
+  "declaration": {
+    "basis": "CPK (article not verified): civil-procedure expert oath; when the examination is carried out outside a hearing the signed oath text is an integral part of the expert report",
+    "text_local": "Aš, (vardas, pavardė), garbingai prisiekiu, kad sąžiningai vykdysiu savo pareigą remiantis visomis turimomis žiniomis pateikti objektyvią ir pagrįstą išvadą byloje",
+    "text_en": "I, (name, surname), solemnly swear that I will honestly perform my duty to give, on the basis of all my knowledge, an objective and reasoned opinion in the case.",
+    "wording": "customary",
+    "source": "https://e-justice.europa.eu/topics/court-procedures/civil-cases/taking-evidence/lt_lt"
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "Europos Parlamento ir Tarybos reglamentas (ES) Nr. 910/2014 (eIDAS), iš dalies pakeistas reglamentu (ES) 2024/1183",
+    "law_en": "Regulation (EU) No 910/2014 (eIDAS) as amended by Regulation (EU) 2024/1183; national implementing act not verified",
+    "qualified_term_local": "kvalifikuotas elektroninis parašas",
+    "source": "https://eur-lex.europa.eu/eli/reg/2014/910/oj"
+  },
+  "timestamp": {
+    "basis": "Regulation (EU) No 910/2014, art. 41 (Lithuanian version: 'kvalifikuota elektroninė laiko žyma'), as amended by Regulation (EU) 2024/1183",
+    "qualified_recognition": "A qualified electronic time stamp enjoys the presumption of accuracy of the date and time it indicates and of the integrity of the data bound to them.",
+    "source": "https://eur-lex.europa.eu/eli/reg/2014/910/oj"
+  },
+  "open_questions": [
+    "e-tar.lt and e-seimas.lrs.lt returned HTTP 403 from this environment; no Lithuanian statute was read on the official portal. BPK content above comes from search-engine extracts of the official portal; CPK content comes from the European e-Justice Portal page maintained by the Lithuanian EJN contact point (last updated 01/08/2025). All article numbers and quotations must be verified on e-tar.lt.",
+    "BK 235 straipsnis: wording of the offence (false testimony, report, conclusion or translation) and maximum penalty not verified.",
+    "BPK article on ordering an examination in pre-trial investigation, the content of the ruling, the expert warning formula and whether experts sign a warning on criminal liability - not verified.",
+    "CPK article numbers for appointment of experts, the expert oath and the content of the expert report - not verified; oath text is reproduced from e-Justice (customary), not from the statute.",
+    "Lietuvos Respublikos teismo ekspertizės įstatymas: TAR identifier, current version, articles on the List of Court Experts, the oath on entry, independence and disciplinary liability - not verified.",
+    "Whether the BPK document identifier TAR.EC588C321777 (taken from a search result titled as the BPK approval law and Code) points to the current consolidated BPK was not confirmed.",
+    "National implementing act for eIDAS (believed to be the Law on Electronic Identification and Trust Services for Electronic Transactions) and any national rule on expert-report e-signatures were not verified.",
+    "Lithuanian adoptions of ISO/IEC 27037/27041/27042/27043 (LST EN ISO/IEC ...) were not verified in the LST catalogue."
+  ]
+}

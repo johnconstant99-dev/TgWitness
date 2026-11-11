@@ -1,0 +1,158 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "EE",
+  "name_en": "Estonia",
+  "name_local": "Eesti",
+  "court_languages": [
+    "et"
+  ],
+  "local_language": "et",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "ekspert (kohtuekspert; registreeritud eraekspert)",
+    "en": "expert appointed by the investigative body, prosecutor or court: a forensic expert of a state forensic institution, a registered private expert, or another person with specific expertise"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Kriminaalmenetluse seadustik (KrMS), section on ordering an expert assessment not verified",
+        "summary_en": "In the pre-trial stage the investigative body (police) or the prosecutor appoints the expert; at trial the court. There is no obligation to appoint an expert from the official lists; on request, the Estonian Forensic Science Institute (EKEI) assigns a forensic expert.",
+        "source": "https://e-justice.europa.eu/topics/find-legal-professional/find-expert/ee_et"
+      },
+      "questions": {
+        "basis": "KrMS § 98 lg 1 p 4, § 108",
+        "summary_en": "The expert may refuse the assessment if the material provided is insufficient, if the tasks in the order fall outside the expert's expertise, or if answering does not require expert research or conclusions based on specialist knowledge (§ 98(1) p 4); a refusal is recorded in a refusal act stating the data of § 107(1) p 1-9 and the reasons (§ 108). Whether the expert may report facts not asked about was not verified.",
+        "source": "https://www.riigiteataja.ee/akt/krms"
+      },
+      "report_contents": {
+        "basis": "KrMS § 107 (Ekspertiisiakti koostamine), as amended by RT I, 03.02.2023, 1 (in force 01.05.2023 per search extract)",
+        "items_en": [
+          "identification and procedural data listed in § 107(1) points 1-8 (not verified individually)",
+          "measures applied to the physical evidence, comparison material or examination object submitted (point 9)",
+          "reasoning: description of the research, analyses, tests or other work needed to form the opinion (point 10)",
+          "the expert opinion (point 11)",
+          "in a commission, the dissenting expert's opinion attached; the report is confirmed by the expert or experts who performed the assessment"
+        ],
+        "items_local": [],
+        "source": "https://www.riigiteataja.ee/akt/krms"
+      },
+      "rights_duties": {
+        "basis": "KrMS § 98 (rights and duties of expert; detail not verified); Kohtuekspertiisiseadus",
+        "summary_en": "Court-appointed experts have a statutory duty to disclose conflicts of interest; experts must notify all parties of the start of the assessment and must work thoroughly, completely and objectively with scientifically reasoned opinions (per Estonian contact-point information on e-Justice).",
+        "source": "https://e-justice.europa.eu/topics/find-legal-professional/find-expert/ee_et"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Tsiviilkohtumenetluse seadustik (TsMS), expert-assessment provisions (section numbers not verified)",
+        "summary_en": "At a participant's request the court may order an expert assessment for circumstances requiring specific expertise (and on its own motion for foreign or international law). The assessment is done by a forensic expert or other specialist of a state forensic institution, an officially certified expert, or another person with specific expertise appointed by the court; others only with good reason where a certified expert is available; an expert agreed by the parties is appointed if legally eligible. Instead, the court may use an expert opinion ordered in other court, criminal or misdemeanour proceedings.",
+        "source": "https://e-justice.europa.eu/topics/court-procedures/civil-cases/taking-evidence/ee_et"
+      },
+      "questions": {
+        "basis": "TsMS (section not verified)",
+        "summary_en": "Participants may pose questions to the expert through the court; the court determines which questions require an expert opinion and gives reasons for rejecting questions. At the hearing the court excludes questions that are irrelevant or outside the expert's competence. Reporting facts not asked about was not verified.",
+        "source": "https://e-justice.europa.eu/topics/court-procedures/civil-cases/taking-evidence/ee_et"
+      },
+      "report_contents": {
+        "basis": "TsMS (section not verified)",
+        "items_en": [
+          "detailed description of the examinations carried out",
+          "conclusions reached as a result of the examinations",
+          "reasoned answers to the court's questions"
+        ],
+        "items_local": [
+          "uuringute üksikasjalik kirjeldus",
+          "uuringute tulemusena tehtud järeldused",
+          "põhjendatud vastused kohtu küsimustele"
+        ],
+        "source": "https://e-justice.europa.eu/topics/court-procedures/civil-cases/taking-evidence/ee_et"
+      },
+      "rights_duties": {
+        "basis": "TsMS (section not verified)",
+        "summary_en": "The expert must give a correct and reasoned opinion on the questions; may examine the case materials as needed, take part in examining evidence in court and request reference material and additional data from the court. The opinion is written unless the court orders otherwise; the expert may be summoned for questioning, and must be if a party requests. Witness-hearing rules apply to hearing experts.",
+        "source": "https://e-justice.europa.eu/topics/court-procedures/civil-cases/taking-evidence/ee_et"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": "Kohtuekspertiisiseadus (KES), in force from 01.09.2023 (Riigi Teataja akt 103022023001)",
+    "title_en": "Forensic Examination Act; EKEI keeps the list of registered private experts (entry for three years, after taking the registered private expert's oath)",
+    "source": "https://www.riigiteataja.ee/akt/103022023001"
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Karistusseadustik (KarS) § 321",
+      "summary_en": "Giving a knowingly false expert opinion is a criminal offence under KarS § 321; maximum penalty not verified. Experts are also liable under general contract and tort law; no mandatory professional indemnity insurance.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "https://www.riigiteataja.ee/akt/KarS"
+    }
+  ],
+  "declaration": {
+    "basis": null,
+    "text_local": null,
+    "text_en": null,
+    "wording": null,
+    "source": null
+  },
+  "standards": [
+    {
+      "id": "ISO/IEC 27037:2012",
+      "national_id": "EVS-EN ISO/IEC 27037:2016",
+      "title_en": "Guidelines for identification, collection, acquisition and preservation of digital evidence",
+      "status": "national adoption",
+      "issuer": "Eesti Standardimis- ja Akrediteerimiskeskus (EVS)",
+      "source": "https://www.evs.ee/en/evs-en-iso-iec-27037-2016"
+    },
+    {
+      "id": "ISO/IEC 27041:2015",
+      "national_id": "EVS-EN ISO/IEC 27041:2016",
+      "title_en": "Guidance on assuring suitability and adequacy of incident investigative method",
+      "status": "national adoption",
+      "issuer": "Eesti Standardimis- ja Akrediteerimiskeskus (EVS)",
+      "source": "https://www.evs.ee/en/evs-en-iso-iec-27041-2016"
+    },
+    {
+      "id": "ISO/IEC 27042:2015",
+      "national_id": "EVS-EN ISO/IEC 27042:2016",
+      "title_en": "Guidelines for the analysis and interpretation of digital evidence",
+      "status": "national adoption",
+      "issuer": "Eesti Standardimis- ja Akrediteerimiskeskus (EVS)",
+      "source": "https://www.evs.ee/en/evs-en-iso-iec-27042-2016"
+    },
+    {
+      "id": "ISO/IEC 27043:2015",
+      "national_id": "EVS-EN ISO/IEC 27043:2016",
+      "title_en": "Incident investigation principles and processes",
+      "status": "national adoption",
+      "issuer": "Eesti Standardimis- ja Akrediteerimiskeskus (EVS)",
+      "source": "https://www.evs.ee/en/evs-en-iso-iec-27043-2016"
+    }
+  ],
+  "esignature": {
+    "law_local": "Euroopa Parlamendi ja nõukogu määrus (EL) nr 910/2014 (eIDAS), muudetud määrusega (EL) 2024/1183",
+    "law_en": "Regulation (EU) No 910/2014 (eIDAS) as amended by Regulation (EU) 2024/1183; national implementing act not verified",
+    "qualified_term_local": "kvalifitseeritud e-allkiri",
+    "source": "https://eur-lex.europa.eu/eli/reg/2014/910/oj"
+  },
+  "timestamp": {
+    "basis": "Regulation (EU) No 910/2014, art. 41 (Estonian version: 'kvalifitseeritud e-ajatempel'), as amended by Regulation (EU) 2024/1183",
+    "qualified_recognition": "A qualified electronic time stamp enjoys the presumption of accuracy of the date and time it indicates and of the integrity of the data bound to them.",
+    "source": "https://eur-lex.europa.eu/eli/reg/2014/910/oj"
+  },
+  "open_questions": [
+    "riigiteataja.ee served a JavaScript challenge to this environment; no Estonian statute was read on the official portal. KrMS content comes from search-engine extracts of Riigi Teataja; TsMS and general content from the European e-Justice Portal (Estonian EJN pages, taking evidence last updated 18/04/2023, predating the 2023 KES reform); KES facts from the EKEI website. All must be verified on Riigi Teataja.",
+    "KrMS: section on ordering an expert assessment and the content of the order; § 107(1) points 1-8; § 98 rights and duties; any warning given to experts about KarS § 321 - not verified.",
+    "TsMS: section numbers for ordering an expert assessment, choice of expert, questions, content of the opinion and duties of the expert - not verified; the e-Justice summary may predate amendments made with the 2023 KES.",
+    "KarS § 321: exact title, elements and maximum penalty - not verified.",
+    "Kohtuekspertiisiseadus (2023): text of the forensic expert's oath and of the registered private expert's oath, independence and liability provisions - not verified.",
+    "No rule found requiring a declaration or statement of truth inside the written expert report; declaration left null.",
+    "National implementing act for eIDAS (believed to be the Electronic Identification and Trust Services for Electronic Transactions Act) and any rule on electronic expert reports were not verified."
+  ]
+}

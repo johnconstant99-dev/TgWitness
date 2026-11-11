@@ -1,0 +1,133 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "KR",
+  "name_en": "South Korea",
+  "name_local": "대한민국",
+  "court_languages": [
+    "ko"
+  ],
+  "local_language": "ko",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "감정인",
+    "en": "expert ordered by the court to give an expert opinion; investigators may also commission an expertise (감정 위촉), and courts may commission institutions (감정의 촉탁)"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "형사소송법 제169조, 제177조, 제179조의2, 제221조",
+        "summary_en": "The court may order a person with learning and experience to give an expert opinion (art. 169). Witness provisions apply to experts except those on compulsory appearance (art. 177). The court may commission public offices, schools, hospitals or other bodies or institutions with adequate facilities; the oath provisions do not apply and a person designated by the institution may be made to explain the report (art. 179-2). During investigation a prosecutor or judicial police officer may commission an expertise (art. 221).",
+        "source": "https://www.law.go.kr/법령/형사소송법"
+      },
+      "questions": {
+        "basis": "형사소송법 제169조, 제171조",
+        "summary_en": "The court defines the matters for expertise; no verified article details how questions are framed. The report must state the reasons for the judgment (art. 171(3)). No verified provision addresses declining questions or reporting facts not asked about in the criminal route.",
+        "source": "https://www.law.go.kr/법령/형사소송법"
+      },
+      "report_contents": {
+        "basis": "형사소송법 제171조",
+        "items_en": [
+          "the process and results of the expertise, submitted in writing by the expert",
+          "where there are several experts, reports may be submitted separately or jointly",
+          "the reasons for the expert's judgment must be stated in the results",
+          "the expert may be required to explain the report when necessary"
+        ],
+        "items_local": [
+          "감정의 경과와 결과를 서면으로 제출",
+          "감정인이 여러 명인 경우 각각 또는 공동으로 제출",
+          "감정의 결과에 판단의 이유를 명시",
+          "필요한 때에는 감정인의 설명"
+        ],
+        "source": "https://www.law.go.kr/법령/형사소송법"
+      },
+      "rights_duties": {
+        "basis": "형사소송법 제170조, 제172조, 제174조",
+        "summary_en": "The expert takes an oath in writing before the expertise (art. 170). The court may have the expertise conducted outside the court and hand over the objects examined (art. 172). With the presiding judge's permission the expert may inspect or copy documents and exhibits and take part in the questioning of the defendant or witnesses (art. 174).",
+        "source": "https://www.law.go.kr/법령/형사소송법"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "민사소송법 제333조, 제334조, 제335조, 제336조, 제341조",
+        "summary_en": "Witness-examination provisions apply to expertise with listed exceptions (art. 333). A person with the learning and experience necessary for the expertise has a duty to give it; persons who may refuse testimony or the oath and certain others cannot be experts (art. 334). The expert is designated by the trial court, a commissioned judge or a requested judge (art. 335). A party may challenge an expert where there are circumstances preventing a sincere expertise (art. 336). The court may commission public institutions, schools, other bodies with adequate facilities or foreign public institutions and have their designee explain the report (art. 341).",
+        "source": "https://www.law.go.kr/법령/민사소송법"
+      },
+      "questions": {
+        "basis": "민사소송법 제335조의2, 제339조, 제339조의2",
+        "summary_en": "If the matters for expertise fall outside the expert's field, or require another expert as well, the expert must immediately ask the court to cancel the designation or designate an additional expert; the expert may not delegate the expertise to another person (art. 335-2). The presiding judge has the expert state the opinion in writing or orally and the court must give the parties an opportunity to comment (art. 339). The presiding judge examines the expert; panel members and parties may question with notice (art. 339-2). No verified provision addresses reporting facts not asked about.",
+        "source": "https://www.law.go.kr/법령/민사소송법"
+      },
+      "report_contents": {
+        "basis": "민사소송법 제339조",
+        "items_en": [
+          "the opinion, stated in writing or orally as directed by the presiding judge",
+          "where several experts are ordered, opinions may be stated jointly or separately",
+          "the parties must be given an opportunity to comment on the expert statement in writing or orally"
+        ],
+        "items_local": [
+          "재판장의 명에 따라 서면이나 말로써 의견 진술",
+          "여러 감정인에게 감정을 명하는 경우 다 함께 또는 따로따로 의견 진술",
+          "감정진술에 관하여 당사자에게 서면이나 말로써 의견을 진술할 기회 부여"
+        ],
+        "source": "https://www.law.go.kr/법령/민사소송법"
+      },
+      "rights_duties": {
+        "basis": "민사소송법 제334조, 제335조의2, 제338조, 제342조",
+        "summary_en": "Duty to give an expertise (art. 334). Duty to flag lack of expertise and prohibition on delegation (art. 335-2). Written oath with a prescribed formula (art. 338). With the court's permission the expert may enter land, dwellings, buildings, aircraft, vessels, vehicles and other facilities where necessary and may request police assistance if resisted (art. 342).",
+        "source": "https://www.law.go.kr/법령/민사소송법"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": null,
+    "source": null
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "형법 제154조(허위의 감정, 통역, 번역), 제152조, 제153조",
+      "summary_en": "An expert, interpreter or translator sworn under law who gives a false expertise, interpretation or translation is punished as for perjury (art. 154 applying arts. 152–153): imprisonment of up to 5 years or a fine of up to KRW 10 million; up to 10 years' imprisonment if done to harm a defendant, suspect or person subject to disciplinary proceedings; the punishment is reduced or remitted on confession or surrender before the judgment or disciplinary decision becomes final.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "https://www.law.go.kr/법령/형법"
+    }
+  ],
+  "declaration": {
+    "basis": "형사소송법 제170조(선서); 민사소송법 제338조(선서의 방식)",
+    "text_local": null,
+    "text_en": null,
+    "wording": null,
+    "source": "https://www.law.go.kr/법령/민사소송법"
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "전자서명법",
+    "law_en": "Digital Signature Act",
+    "qualified_term_local": null,
+    "source": "https://www.law.go.kr/법령/전자서명법"
+  },
+  "timestamp": {
+    "basis": null,
+    "qualified_recognition": null,
+    "source": null
+  },
+  "open_questions": [
+    "law.go.kr could not be machine-read: article bodies load by script, the DRF Open API requires a registered key, and the KLRI English service could not be searched. Every article number and summary in this file was checked only against older consolidated texts reproduced on Korean Wikisource (형사소송법 Act No. 16850 of 2019-12-31; 민사소송법 Act No. 14966, in force 2017-10-31; 형법 Act No. 17571, promulgated 2020-12-08) and against the article numbers in the brief. law.go.kr shows the current 형사소송법 as Act No. 22009 (amended 2026-09-29, in force 2026-10-02). All points must be re-verified against law.go.kr.",
+    "Expert oath formula, criminal (형사소송법 제170조 제3항), in the 2019 text: 「양심에 따라 성실히 감정하고 만일 거짓이 있으면 허위감정의 벌을 받기로 맹서합니다」. Current wording not verified, so warning_local and declaration are null.",
+    "Expert oath formula, civil (민사소송법 제338조), in the 2017 text: 「양심에 따라 성실히 감정하고, 만일 거짓이 있으면 거짓감정의 벌을 받기로 맹세합니다.」. Current wording not verified.",
+    "형법 제152조–제154조 wording and penalties were checked only on Wikisource (Act No. 17571); the penalty (up to 5 years or KRW 10 million; 10 years for the aggravated form) should be confirmed on law.go.kr.",
+    "전자서명법 was fully revised in 2020 (Act No. 17354, in force 2020-12-10, as understood), abolishing the former 공인전자서명 regime; the current effect provision (제3조) and any term for a recognised signature were not verified, so qualified_term_local is null. Wikisource only has the 2014 text.",
+    "대검찰청 예규 「디지털 증거의 수집·분석 및 관리 규정」 (Supreme Prosecutors' Office) could not be retrieved; its current number, version and content are unverified, so it is not listed in standards.",
+    "Whether ISO/IEC 27037 has been adopted as KS X ISO/IEC 27037 (and its year) could not be verified; the same applies to KS adoptions of ISO/IEC 27041, 27042 and 27043.",
+    "No provision on electronic timestamps or their legal effect was verified (for example under 전자문서 및 전자거래 기본법).",
+    "민사소송규칙 and 형사소송규칙 (Supreme Court rules) on 감정서 contents, 감정인 선서서 forms and the Supreme Court established rules on expert selection were not retrieved.",
+    "Not verified whether an expert may report facts not asked about in either route, or who drafts the questions in the criminal route.",
+    "No statute specific to forensic expert activity was identified; statute is null."
+  ]
+}

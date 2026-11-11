@@ -1,0 +1,140 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "SA",
+  "name_en": "Saudi Arabia",
+  "name_local": "المملكة العربية السعودية",
+  "court_languages": [
+    "ar"
+  ],
+  "local_language": "ar",
+  "legal_family": "Islamic law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "الخبير",
+    "en": "licensed expert appointed by the court to give an opinion on technical questions (Law of Evidence, Chapter 10; Rules Organising Expertise before the Courts)"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": null,
+        "items_en": [],
+        "items_local": [],
+        "source": null
+      },
+      "rights_duties": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "نظام الإثبات (Law of Evidence), Royal Decree No. M/43 dated 26/5/1443H, Arts. 1, 110-112, 123-124; الأدلة الإجرائية لنظام الإثبات (Procedural Guides) Arts. 108-111; القواعد الخاصة بتنظيم شؤون الخبرة أمام المحاكم (Rules Organising Expertise before the Courts) Art. 3",
+        "summary_en": "The Law of Evidence applies to civil and commercial transactions (Art. 1); the Procedural Guides extend it to personal status and labour disputes (Guides Art. 2). The court may appoint one or more experts on its own motion or at a party's request, to give an opinion on technical matters needed to decide the case. The expert's knowledge must match the subject, and the court approves an expert agreed by the parties (Art. 110). The competent administration nominates an expert if the parties do not agree, and the appointment decision is final (Guides Arts. 110-111). Only experts on the Ministry of Justice list of licensed experts may act; expertise may also be assigned to a government body (Rules Art. 3). The court may take an oral opinion on a simple technical question (Art. 123) or rely on an expert report from another case (Art. 124). Digital evidence (الدليل الرقمي) is defined in Arts. 53-54. The court may use an expert to verify digital evidence under Chapter 10 (Guides Art. 68).",
+        "source": "https://www.uqn.gov.sa/details?p=18818"
+      },
+      "questions": {
+        "basis": "Law of Evidence Arts. 111, 116(2); Procedural Guides Arts. 108(1), 113, 123",
+        "summary_en": "The court frames the mission. The appointment decision must state precisely the expert's mission, powers and authorised urgent measures (Art. 111; Guides Art. 108(1)). Expert opinion is limited to technical matters and may not extend to any legal (نظامية) question. If the mission includes legal questions the expert must notify the competent administration at once. Where the technical answer depends on how the court decides a legal point, the expert must identify that point and give the technical opinion for each possibility (Guides Art. 113). The expert must refer to the court if an obstacle arises, if the mission needs widening, or if assigned work is unnecessary; the expert may not widen the mission alone (Art. 116(2); Guides Art. 123). No provision was found expressly allowing the expert to report facts outside the mission.",
+        "source": "https://www.uqn.gov.sa/details?p=20767"
+      },
+      "report_contents": {
+        "basis": "Law of Evidence Art. 117; Procedural Guides Art. 124",
+        "items_en": [
+          "Name of the court, case details, date of assignment, date of report, and the deadline for the report",
+          "Summary of the dispute and the assigned tasks",
+          "Parties concerned and their capacities, noting who attended or was represented and the document of representation",
+          "Name of the expert and of any experts consulted, with their qualifications and experience",
+          "Procedures and work carried out, in chronological order: parties' statements and observations and statements of persons heard, signed by them (or the reason for refusing to sign); books, records, documents, papers or things examined or received; inspections of premises, places and things; questions and requests for information, and any inquiry or discussion related to the mission",
+          "Rules, regulations, standards or scientific sources relied on",
+          "Parties' comments or objections to the preliminary report, the expert's view on them and their effect on the result",
+          "List of documents relied on, distinguishing those submitted by the parties from those collected by the expert, with copies attached",
+          "The technical opinion and its basis: an opinion on each issue in the mission with its own basis; if several technical views exist, a summary of them and reasons for preferring one; for several experts, one report stating agreed points first, then each expert's separate opinion and response, with all experts signing every page"
+        ],
+        "items_local": [
+          "اسم المحكمة، وبيانات القضية، وتاريخ التكليف، وتاريخ التقرير، والتاريخ المحدد لتقديم التقرير.",
+          "ملخص المنازعة، والمهام المكلف بها.",
+          "الأطراف ذوي الصلة، وصفاتهم، مع الإشارة إلى من كان حاضرًا منهم، أو ممثلاً، ومستند التمثيل.",
+          "اسم الخبير، وأي خبراء تمت الاستعانة بهم، مع ذكر مؤهلاتهم وخبراتهم.",
+          "الإجراءات والأعمال التي قام بها الخبير حسب تسلسلها الزمني، بما في ذلك ما يأتي: أ- أقوال الخصوم وملحوظاتهم، وأقوال الأشخاص الذين سمعهم، موقعة منهم، وفي حال عدم التوقيع يذكر سبب الامتناع. ب- ما اطلع عليه أو تسلمه من دفاتر أو سجلات أو مستندات أو الأوراق أو الأشياء التي كانت ضرورية لأداء مهمته. ج- ما قام به من معاينة للمنشآت والأماكن والأشياء. د- الأسئلة وطلب الإفادات التي تم طلبها، وأي تحقيق أو مناقشة تتصل بمهمته.",
+          "أي قواعد أو أنظمة أو معايير أو مصادر علمية استند إليها.",
+          "الملاحظات أو الاعتراضات المقدمة من الأطراف على التقرير الأولي -إن وجدت-، مع بيان رأيه بشأنها، وأثرها على النتيجة.",
+          "قائمة بالوثائق التي استند إليها في التقرير، مع التمييز بين الوثائق المقدمة من الأطراف وتلك التي جمعها الخبير، مع إرفاق نسخة منها.",
+          "الرأي الفني الذي انتهى إليه الخبير ومستنده، وذلك على النحو الآتي: أ- يجب أن يشتمل التقرير على بيان رأي الخبير في كل مسألة من المسائل التي تضمنتها المهام المسندة إليه، ومستند هذا الرأي على استقلال. ب- إذا كان هناك عدد من الآراء بخصوص المسألة الفنية، فعلى الخبير أن يذكر ملخص هذه الآراء، وأسباب ترجيح الخبير للرأي الذي اختاره. ج- إذا تعدد الخبراء فيعدون تقريراً واحداً، فإن تعددت آراء الخبراء فيذكر في التقرير ما أجمعوا عليه أولاً، ثم يذكر كل خبير رأيه الذي انفرد به، ورده على آراء الخبراء الآخرين واحداً تلو الآخر في التقرير نفسه، ويوقع الخبراء على جميع أوراق التقرير."
+        ],
+        "source": "https://www.uqn.gov.sa/details?p=20767"
+      },
+      "rights_duties": {
+        "basis": "Law of Evidence Arts. 113-121; Procedural Guides Arts. 112, 114(3), 119-122, 125-126; Rules Organising Expertise Arts. 19-21",
+        "summary_en": "Before starting, the expert must disclose any relationship with the parties or interest in the case, in writing (Art. 113; Guides Art. 112). Non-disclosure leads to removal and refund of amounts received. A party may seek recusal on grounds of likely partiality: kinship to the fourth degree, agency, guardianship, employment, or a dispute with a party (Art. 114). The expert may hear the parties, request books, records and documents, and inspect premises (Art. 115). The expert must perform the mission personally, assisted by staff under their supervision (Guides Art. 120). The expert may not refuse to complete the work for any reason, including an insufficient fee (Guides Art. 114(3)). Parties may put written questions on the preliminary report within five days; the expert must answer them and file the final report within ten days (Guides Art. 126). The expert must work with accuracy, honesty, sincerity, impartiality and objectivity, keep the information confidential, keep a true copy of each report, and return documents (Rules Art. 19). The expert may not act where they have an interest, a kinship to the fourth degree, or have previously given an opinion in the case (Rules Art. 20). The expert is independent and may not be interfered with in a way that affects their opinion (Rules Art. 21). The court is not bound by the opinion and must give reasons if it departs from it (Art. 121(2)).",
+        "source": "https://www.uqn.gov.sa/details?p=20766"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": "القواعد الخاصة بتنظيم شؤون الخبرة أمام المحاكم (قرار وزير العدل رقم 921 وتاريخ 16/03/1444هـ)",
+    "title_en": "Rules Organising Expertise before the Courts (Minister of Justice Decision No. 921 of 16/3/1444H, issued under Law of Evidence Art. 126; published 28-10-2022): licensing, list of experts, duties, inspection and discipline",
+    "source": "https://www.uqn.gov.sa/details?p=20766"
+  },
+  "liability": [
+    {
+      "route": "civil",
+      "norm": "القواعد الخاصة بتنظيم شؤون الخبرة أمام المحاكم المادة 26 (disciplinary)",
+      "summary_en": "Without prejudice to penalties under any other law, a disciplinary committee may impose on the expert: a warning; a fine not exceeding SAR 10,000; suspension of the licence for up to two years; or cancellation of the licence (Rules Art. 26(1)). The decision becomes final only after approval by the Minister and may be challenged before the Administrative Court within thirty days (Arts. 27-28).",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "https://www.uqn.gov.sa/details?p=20766"
+    },
+    {
+      "route": "civil",
+      "norm": "نظام الإثبات المواد 113 و118 و121(3) (removal, refund, compensation)",
+      "summary_en": "The court removes an expert who failed to disclose a relationship or interest (Art. 113), or who did not start, fell short, or filed late and did not respond within five days of a warning (Art. 118); in both cases the expert must refund the amounts received. Removal decisions are final. If the court rejects the report in whole or in part because of the expert's negligence or error, it may order a full or partial refund (Art. 121(3)). These measures are without prejudice to disciplinary penalties and to the right of the persons concerned to claim compensation. Compensation claims arising from the expertise are heard by the appointing court and must be filed within ninety days after the judgment becomes final (Guides Art. 133).",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "https://www.uqn.gov.sa/details?p=18818"
+    }
+  ],
+  "declaration": {
+    "basis": "Law of Evidence Art. 113 and Procedural Guides Art. 112(1): written disclosure, before appointment, of any relationship with the parties or interest in the case",
+    "text_local": "أقر بأنه لا توجد لي أي علاقة بأطراف الدعوى ولا أي مصلحة فيها، وألتزم بأداء المهمة بدقة وأمانة وإخلاص وحياد وموضوعية.",
+    "text_en": "I declare that I have no relationship with the parties to the case and no interest in it, and I undertake to perform the mission with accuracy, honesty, sincerity, impartiality and objectivity.",
+    "wording": "composed",
+    "source": "https://www.uqn.gov.sa/details?p=20767"
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "نظام التعاملات الإلكترونية، الصادر بالمرسوم الملكي رقم (م/18) وتاريخ 8/3/1428هـ، المادة 14؛ اللائحة التنفيذية لنظام التعاملات الإلكترونية (قرار مجلس إدارة هيئة الحكومة الرقمية رقم م-8-6 وتاريخ 03/09/1445هـ) المادة 10",
+    "law_en": "Electronic Transactions Law (Royal Decree No. M/18 of 8/3/1428H, as amended by Council of Ministers Resolution No. 293 of 9/4/1445H, which makes the Digital Government Authority the competent authority). Art. 14: where a signature is required, an electronic signature made in accordance with the Law satisfies the requirement and has the effect of a handwritten signature. In legal proceedings it is deemed, unless proven otherwise, that the signature belongs to the person named in the digital certificate, was given for the purpose stated, and that the transaction has not been altered since signing; the presumption does not apply to signatures that fail the Law's requirements. Implementing Regulation Art. 10/1: an electronic signature or seal is valid if linked to a digital certificate issued by the National Information Center or a licensed certification service provider, valid at the time of signing, and matching the signatory's identity. Law of Evidence Art. 57: unofficial digital evidence issued under the Electronic Transactions Law is binding on the parties unless proven otherwise.",
+    "qualified_term_local": "التوقيع الإلكتروني المرتبط بشهادة تصديق رقمي",
+    "source": "https://www.uqn.gov.sa/details?p=25092"
+  },
+  "timestamp": {
+    "basis": "اللائحة التنفيذية لنظام التعاملات الإلكترونية المادة 1/2(7) (تعريف الختم الزمني) والمادة 5/1(4)",
+    "qualified_recognition": "Where an electronic record must prove the correctness of time, it must contain a time-stamp issued by the National Information Center or a certification service provider, in accordance with what the Authority issues (Reg. Art. 5/1(4)). A time-stamp is defined as electronic data in, added to or linked with an electronic record to establish the date and time of an action on the record and detect any later modification (Art. 1/2(7)). No explicit statutory presumption attached to time-stamps was found.",
+    "source": "https://www.uqn.gov.sa/details?p=25092"
+  },
+  "open_questions": [
+    "Criminal route not verified: laws.boe.gov.sa and the Public Prosecution and Board of Grievances sites were unreachable from the research environment. The Law of Criminal Procedure (Royal Decree No. M/2 of 22/1/1435H, cited as in force in Royal Order A/303 of 30/7/1446H on uqn.gov.sa) and its Implementing Regulation were not available on uqn.gov.sa; their articles on experts (appointment by the investigator or court, oath, report) are unverified.",
+    "Criminal liability for a knowingly false expert report or false testimony was not verified. Saudi law has no general penal code; check the Law of Criminal Procedure, the Anti-Forgery Law (Royal Decree M/11 of 18/2/1435H, unverified) and ta'zir practice. The Law of Evidence Art. 80 (referral of a false witness to the Public Prosecution) applies to witnesses, not expressly to experts.",
+    "Not found: any oath or fixed declaration formula for experts. The declaration text is composed from Law of Evidence Art. 113 and Rules Art. 19 and is not an official form. Check the Ministry of Justice expertise unit's forms (Rules Art. 5(8)) and the Najiz platform.",
+    "Not found: any national adoption (Saudi Standards, Metrology and Quality Organization) or official guidance on ISO/IEC 27037/27041/27042/27043, or any ISO/IEC 17025 requirement for digital forensic reports.",
+    "Electronic Transactions Law Art. 14 was verified only in the English translation on WIPO Lex. The Arabic original (BOE) was not accessible, and the WIPO Arabic PDF is a scan without a text layer. The WIPO translation gives the decree as 'M/8'; uqn.gov.sa (Council of Ministers Resolution 293) gives 'م/18'. The latter is used here.",
+    "Not checked: whether the Ministry of Justice expertise unit has published the list of licensed experts and the practice guides envisaged by Rules Arts. 5-6, including any category for digital forensics.",
+    "Not verified: the date the Law of Evidence entered into force (Art. 129: 180 days after publication). Publication on uqn.gov.sa is dated 4/6/1443H (7 January 2022)."
+  ]
+}

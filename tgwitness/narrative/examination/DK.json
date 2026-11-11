@@ -1,0 +1,145 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "DK",
+  "name_en": "Denmark",
+  "name_local": "Danmark",
+  "court_languages": [
+    "da"
+  ],
+  "local_language": "da",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "skønsmand (syn og skøn)",
+    "en": "expert appointed by the court to carry out a court-ordered expert examination and answer the parties' questions (syn og skøn)"
+  },
+  "procedures": [
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Retsplejeloven (LBK nr. 1298 af 07/11/2025) §§ 196, 198, 199, 200, 201, 209 a",
+        "summary_en": "A party requests syn og skøn, stating the object and purpose; the court decides after hearing the other party (§ 196). After receiving the questions the court appoints one or more skønsmænd; parties may propose candidates but the court is not bound; the court must tell the parties whom it intends to appoint and let them comment (§ 198). Only persons of good repute ('uberygtede') may be appointed; persons excluded as judges under § 60(1)(1)-(2) may not be appointed and others listed in § 60 only if no equally suitable person can be found (§ 199). A person with a duty to testify can be required to accept appointment (§ 200). Before appointment the intended expert receives the request and questions and gives a cost and time estimate, on which the parties may comment (§ 201). On the parties' joint request the court may instead or additionally allow party-commissioned expert statements (§ 209 a).",
+        "source": "https://www.retsinformation.dk/eli/lta/2025/1298"
+      },
+      "questions": {
+        "basis": "Retsplejeloven §§ 197, 202, 203, 205",
+        "summary_en": "The requesting party, then the other party, submit the questions to the court within a court-set deadline; supplementary questions may follow (§ 197(1)). The court may reject questions outside the expert's professional competence or outside its decision ordering syn og skøn, irrelevant questions, questions that improperly try to lead the expert, and questions that require the expert to decide matters for the court (§ 197(2)). The court sends the questions and sets the deadline for the statement (§ 202). After the statement, supplementary questions may be put with the court's permission, answered in writing or orally (§ 205). Complaints about the expert's procedure go to the appointing court, which may order the examination redone or supplemented (§ 203(2)). No express rule was found on the expert reporting facts not asked about.",
+        "source": "https://www.retsinformation.dk/eli/lta/2025/1298"
+      },
+      "report_contents": {
+        "basis": "Retsplejeloven § 204; Bekendtgørelse nr. 1442 af 04/12/2015 om anvendelse af blanketter i forbindelse med syn og skøn §§ 1-2",
+        "items_en": [
+          "Written statement to the court answering the questions (§ 204(1))",
+          "If two or more experts disagree or represent different fields, each expert's opinion must appear in the statement (§ 204(2))",
+          "Questions and answers on the form issued by Domstolsstyrelsen (the Danish Court Administration), sent digitally unless the court decides otherwise (BEK 1442/2015 §§ 1-2)",
+          "If deficient, the court may order a further written statement redoing or supplementing it (§ 204(1))"
+        ],
+        "items_local": [
+          "Skønsmanden besvarer i en borgerlig sag spørgsmålene ved en skriftlig erklæring til retten.",
+          "Afgives erklæring af to eller flere skønsmænd, skal hver enkelts mening fremgå af erklæringen, hvis der ikke er enighed, eller hvis skønsmændene repræsenterer forskellige fagområder.",
+          "I forbindelse med syn og skøn skal der ved spørgsmål til og svar fra skønsmanden anvendes den blanket, som er udfærdiget af Domstolsstyrelsen. Blanketten med spørgsmål og svar sendes digitalt.",
+          "Er erklæringen mangelfuld, kan retten pålægge skønsmanden at omgøre eller supplere den i en yderligere skriftlig erklæring."
+        ],
+        "source": "https://www.retsinformation.dk/eli/lta/2015/1442"
+      },
+      "rights_duties": {
+        "basis": "Retsplejeloven §§ 199, 202(2), 203(1), 206, 207, 208, 181",
+        "summary_en": "Eligibility and impartiality as in § 199. The expert notifies the parties of the place and time of the examination (§ 203(1)). If the deadline is missed the court may revoke the appointment and appoint another expert (§ 202(2)), and the delay may be taken into account in fixing the fee (§ 208(2)). Experts may be summoned to answer questions in court; examination follows the rules for witnesses (§ 206(3)), and the witness rules apply with the modifications following from the nature of the role (§ 207). Before examination the court seriously enjoins a witness to tell the truth and informs them of criminal liability for false testimony (§ 181).",
+        "source": "https://www.retsinformation.dk/eli/lta/2025/1298"
+      }
+    },
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Retsplejeloven § 210",
+        "summary_en": "In criminal cases the court may order syn og skøn on the request of the accused or the prosecution (§ 210(1)). §§ 197, 198(1)-(3), 199-204, 207, 208(1) first and second sentences and (2), and 209 apply with the modifications following from the nature of the case (§ 210(2)).",
+        "source": "https://www.retsinformation.dk/eli/lta/2025/1298"
+      },
+      "questions": {
+        "basis": "Retsplejeloven § 210(2)-(3), applying § 197",
+        "summary_en": "Questions are submitted and filtered as under § 197. After the statement, the accused and the prosecution may put supplementary questions within a court-set deadline (§ 210(3)).",
+        "source": "https://www.retsinformation.dk/eli/lta/2025/1298"
+      },
+      "report_contents": {
+        "basis": "Retsplejeloven § 210(2), applying § 204",
+        "items_en": [
+          "Written statement to the court answering the questions",
+          "Separate opinions where experts disagree or represent different fields"
+        ],
+        "items_local": [
+          "Skønsmanden besvarer i en borgerlig sag spørgsmålene ved en skriftlig erklæring til retten. [§ 204, stk. 1, anvendt i straffesager efter § 210, stk. 2]",
+          "Afgives erklæring af to eller flere skønsmænd, skal hver enkelts mening fremgå af erklæringen, hvis der ikke er enighed, eller hvis skønsmændene repræsenterer forskellige fagområder."
+        ],
+        "source": "https://www.retsinformation.dk/eli/lta/2025/1298"
+      },
+      "rights_duties": {
+        "basis": "Retsplejeloven § 210(4); § 206(2)-(3); § 207",
+        "summary_en": "The expert may be summoned to the main hearing to go through the statement and answer related questions; § 206(2)-(3) apply (examination under the witness rules).",
+        "source": "https://www.retsinformation.dk/eli/lta/2025/1298"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": null,
+    "source": null
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Straffeloven (LBK nr. 1294 af 07/11/2025) § 158",
+      "summary_en": "Giving false testimony before the court, including by telecommunication (also before a foreign court): imprisonment up to 4 years; may be reduced to a fine if the false statement concerns only something of no importance (§ 158(3)). Applies to experts examined under the witness rules (retsplejeloven §§ 206(3), 207).",
+      "warning_local": "Retten pålægger derefter alvorligt vidnet at tale sandhed og gør vidnet bekendt med strafansvaret for afgivelse af falsk forklaring.",
+      "warning_en": "The court then seriously enjoins the witness to tell the truth and informs the witness of the criminal liability for giving false testimony. (Statutory instruction in retsplejeloven § 181; no fixed formula is prescribed.)",
+      "wording": "official",
+      "source": "https://www.retsinformation.dk/eli/lta/2025/1294"
+    },
+    {
+      "route": "all",
+      "norm": "Straffeloven § 160",
+      "summary_en": "Gross negligence in giving an incorrect statement in a case that would otherwise be punishable under § 158 or § 159(2): fine or imprisonment up to 4 months.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "https://www.retsinformation.dk/eli/lta/2025/1294"
+    },
+    {
+      "route": "all",
+      "norm": "Straffeloven § 163",
+      "summary_en": "Otherwise giving, in writing or by another readable medium, an incorrect declaration, or attesting to something one has no knowledge of, for use in legal relations concerning the public: fine or imprisonment up to 4 months. Applicability to a written skønserklæring was not verified.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "https://www.retsinformation.dk/eli/lta/2025/1294"
+    }
+  ],
+  "declaration": {
+    "basis": "None found: retsplejeloven kapitel 19 prescribes no oath, affirmation or written declaration for skønsmænd. Before oral examination the court gives the witness admonition under § 181 (applied via §§ 206(3), 207).",
+    "text_local": null,
+    "text_en": null,
+    "wording": null,
+    "source": "https://www.retsinformation.dk/eli/lta/2025/1298"
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "Europa-Parlamentets og Rådets forordning (EU) nr. 910/2014 (eIDAS), ændret ved forordning (EU) 2024/1183; Lov nr. 617 af 08/06/2016 om supplerende bestemmelser til forordning om elektronisk identifikation og tillidstjenester til brug for elektroniske transaktioner på det indre marked",
+    "law_en": "eIDAS Regulation (EU) No 910/2014 as amended by Regulation (EU) 2024/1183; Act no. 617 of 8 June 2016 on supplementary provisions to the Regulation on electronic identification and trust services",
+    "qualified_term_local": "kvalificeret elektronisk signatur (artikel 25, stk. 2: samme retsvirkning som en håndskreven underskrift); avanceret elektronisk signatur (artikel 26)",
+    "source": "https://www.retsinformation.dk/eli/lta/2016/617"
+  },
+  "timestamp": {
+    "basis": "eIDAS artikel 41, stk. 1-2 (konsolideret udgave; artikel 41, stk. 3, udgået ved forordning (EU) 2024/1183); term: kvalificeret elektronisk tidsstempel",
+    "qualified_recognition": "An electronic time stamp may not be denied legal effect or admissibility as evidence solely because it is electronic or not qualified; a qualified electronic time stamp enjoys a presumption of the accuracy of the date and time it indicates and of the integrity of the data to which they are bound (Art. 41(1)-(2)). Danish text: 'For et kvalificeret elektronisk tidsstempel gælder der en formodning for nøjagtigheden af den dato og det tidspunkt, som det angiver, og integriteten af de data, som dato- og tidsangivelsen er knyttet til.'",
+    "source": "https://eur-lex.europa.eu/legal-content/DA/TXT/?uri=CELEX:02014R0910-20241018"
+  },
+  "open_questions": [
+    "Expert statements obtained by the police or prosecution during a criminal investigation (outside court-ordered syn og skøn under § 210) are not governed by kapitel 19; the provisions governing them were not researched.",
+    "Whether straffeloven § 163 (or § 161) applies to a knowingly false written skønserklæring was not verified in case law or official commentary.",
+    "The current Domstolsstyrelsen syn og skøn form and guidance on domstol.dk could not be fetched (bot challenge); whether the form contains an independence or truth declaration for the expert is unknown.",
+    "National adoption numbers for ISO/IEC 27037, 27041, 27042 and 27043 (expected DS/EN ISO/IEC ...:2016) could not be verified on Dansk Standard's webshop (JavaScript-only); standards list left empty.",
+    "No Danish statute on forensic expert activity was identified (Retslægerådet and police forensic units not researched); statute fields left null.",
+    "Amending acts after LBK nr. 1298/2025 (lov nr. 1765 af 29/12/2025, nr. 263 af 11/02/2026, nr. 764 af 08/09/2026) were screened only for references to §§ 196-210 and straffeloven §§ 158-163; none were found, but a full consolidation check was not performed.",
+    "Civil or disciplinary liability of skønsmænd is not codified in kapitel 19 beyond fee consequences (§ 208(2)) and revocation (§ 202(2)); tort liability was not researched."
+  ]
+}

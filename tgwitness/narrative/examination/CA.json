@@ -1,0 +1,240 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "CA",
+  "name_en": "Canada",
+  "name_local": "Canada",
+  "court_languages": [
+    "en",
+    "fr"
+  ],
+  "local_language": "en",
+  "legal_family": "mixed",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "expert witness / témoin expert",
+    "en": "expert witness, normally named by a party; court-appointed experts exist in civil procedure (e.g. Ontario r. 52.03)"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Canada Evidence Act, R.S.C. 1985, c. C-5, s. 7; Criminal Code, R.S.C. 1985, c. C-46, s. 657.3(1) and (3)",
+        "summary_en": "Experts are called by the prosecution or the defence; not more than five experts may be called on either side without leave of the court (CEA s. 7, applies to criminal and civil proceedings under federal jurisdiction). A party intending to call an expert must give notice at least 30 days before trial (or another period fixed by the judge) with the expert's name, a description of the area of expertise and a statement of qualifications (Cr.C. s. 657.3(3)(a)). The court must recognise the person as an expert before a written report is received under s. 657.3(1).",
+        "source": "https://laws-lois.justice.gc.ca/eng/acts/C-46/section-657.3.html"
+      },
+      "questions": {
+        "basis": "Criminal Code s. 657.3(3)(b)",
+        "summary_en": "No statutory list of questions; the calling party defines the issues and the prosecutor must provide a copy of the report or, if none, a summary of the anticipated opinion and its grounds. The Criminal Code does not regulate whether the expert may decline questions or volunteer unasked findings; limits of expert evidence derive from case law (not researched here).",
+        "source": "https://laws-lois.justice.gc.ca/eng/acts/C-46/section-657.3.html"
+      },
+      "report_contents": {
+        "basis": "Criminal Code s. 657.3(1) and (3)",
+        "items_en": [
+          "Report of the expert accompanied by the expert's affidavit or solemn declaration",
+          "The affidavit or solemn declaration sets out, in particular, the qualifications of the person as an expert",
+          "Notice: name of the proposed witness",
+          "Notice: description of the area of expertise sufficient to permit the other parties to inform themselves about it",
+          "Notice: statement of the qualifications of the proposed witness as an expert",
+          "Prosecutor: copy of the report, if any, or a summary of the anticipated opinion and the grounds on which it is based"
+        ],
+        "items_local": [
+          "\"the evidence of a person as an expert may be given by means of a report accompanied by the affidavit or solemn declaration of the person\"",
+          "\"setting out, in particular, the qualifications of the person as an expert\"",
+          "\"the name of the proposed witness\"",
+          "\"a description of the area of expertise of the proposed witness that is sufficient to permit the other parties to inform themselves about that area of expertise\"",
+          "\"a statement of the qualifications of the proposed witness as an expert\"",
+          "\"a copy of the report, if any, prepared by the proposed witness for the case\" or \"if no report is prepared, a summary of the opinion anticipated to be given by the proposed witness and the grounds on which it is based\""
+        ],
+        "source": "https://laws-lois.justice.gc.ca/eng/acts/C-46/section-657.3.html"
+      },
+      "rights_duties": {
+        "basis": "Criminal Code s. 657.3(2), (4)-(7); Canada Evidence Act ss. 31.1-31.8",
+        "summary_en": "The court may require the expert who swore the affidavit to attend for examination or cross-examination (s. 657.3(2)). Where notice was not given the court may adjourn, order disclosure or recall witnesses (s. 657.3(4)). Defence expert material cannot be used by the prosecution without the accused's consent if the expert does not testify (s. 657.3(6)). Electronic documents: the proponent must prove authenticity by evidence capable of supporting a finding that the document is what it purports to be (CEA s. 31.1); best evidence is satisfied by proof of the integrity of the electronic documents system (s. 31.2), presumed on evidence that the computer system was operating properly (s. 31.3); evidence of any standard, procedure, usage or practice for recording or storing electronic documents may be presented (s. 31.5); these matters may be proved by affidavit (s. 31.6).",
+        "source": "https://laws-lois.justice.gc.ca/eng/acts/C-5/page-3.html"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Example jurisdiction: Ontario Rules of Civil Procedure, R.R.O. 1990, Reg. 194, r. 53.03(1)-(2) (party experts) and r. 52.03 (court-appointed experts). Civil procedure is provincial; Ontario is used as the example.",
+        "summary_en": "A party intending to call an expert at trial serves a report signed by the expert at least 90 days before the pre-trial conference (responding report: 60 days) (r. 53.03(1)-(2)). On motion or on its own initiative a judge may appoint one or more independent experts to inquire into and report on any question of fact or opinion; the expert is named by the judge and, where possible, agreed on by the parties; the order contains the instructions to the expert; the judge fixes remuneration (r. 52.03(1)-(5)). A court-appointed expert sends the report to the registrar with the r. 53.03(2.1) information other than Form 53 (r. 52.03(7)).",
+        "source": "https://www.ontario.ca/laws/regulation/900194"
+      },
+      "questions": {
+        "basis": "Ontario r. 53.03(2.1) paras. 3-4; r. 52.03(3); r. 4.1.01(1)(b)",
+        "summary_en": "The engaging party gives instructions, which must be disclosed in the report together with the nature of the opinion sought and each issue it addresses. For a court-appointed expert the instructions are set in the court's order. The expert must give opinion evidence only on matters within the expert's area of expertise (r. 4.1.01(1)(b)) and must give such additional assistance as the court may reasonably require to determine a matter in issue (r. 4.1.01(1)(c)). An expert may not testify on an issue not set out in a served report or supplementary report without leave (r. 53.03(3)).",
+        "source": "https://www.ontario.ca/laws/regulation/900194"
+      },
+      "report_contents": {
+        "basis": "Ontario Rules of Civil Procedure r. 53.03(2.1) paras. 1-7 (as amended by O. Reg. 384/24 and O. Reg. 275/26, in force 1 September 2026) and r. 53.03(2.1.1)",
+        "items_en": [
+          "Expert's name, address and area of expertise",
+          "Qualifications and employment and educational experience in the area of expertise",
+          "Instructions provided to the expert in relation to the proceeding",
+          "Nature of the opinion sought and each issue to which it relates",
+          "Opinion on each issue and, where there is a range of opinions, a summary of the range and reasons for the expert's own opinion within it",
+          "Reasons for the opinion: factual assumptions, research conducted, and list of every document relied on",
+          "Signed statement certifying the authenticity of every authority, document or record referred to (with stated exceptions)",
+          "Details of any doubts about the authenticity of authorities, documents or records",
+          "Signed statement certifying that every quotation accurately reproduces the source text",
+          "Acknowledgment of expert's duty (Form 53) signed by the expert",
+          "Report signed by the expert (r. 53.03(1))"
+        ],
+        "items_local": [
+          "1. The expert's name, address and area of expertise.",
+          "2. The expert's qualifications and employment and educational experiences in his or her area of expertise.",
+          "3. The instructions provided to the expert in relation to the proceeding.",
+          "4. The nature of the opinion being sought and each issue in the proceeding to which the opinion relates.",
+          "5. The expert's opinion respecting each issue and, where there is a range of opinions given, a summary of the range and the reasons for the expert's own opinion within that range.",
+          "6. The expert's reasons for his or her opinion, including, i. a description of the factual assumptions on which the opinion is based, ii. a description of any research conducted by the expert that led him or her to form the opinion, and iii. a list of every document, if any, relied on by the expert in forming the opinion.",
+          "6.1 A statement signed by the expert certifying that the expert is satisfied as to the authenticity of every authority or other document or record referred to in the report, other than, i. a document or record consisting of evidence or potential evidence in the action that the expert analysed or interpreted in the report, if the document or record was provided to the expert by or on behalf of the party intending to call the expert as a witness, ii. an authority or other document or record cited by the expert in the report only because it was referenced in a report prepared by another expert witness in the action and the expert is commenting on the reference, and iii. an authority or other document or record referred to in the report the authenticity of which the expert doubts.",
+          "6.2 Details of the doubts the expert has respecting the authenticity of an authority, document or record described in subparagraph 6.1 iii, and of any doubts the expert may have respecting the authenticity of an authority, document or record described in subparagraph 6.1 i or ii.",
+          "6.3 A statement signed by the expert certifying that the expert is satisfied that every quotation from an authority, document or record that appears in the report accurately reproduces the text of the authority, document or record.",
+          "7. An acknowledgment of expert's duty (Form 53) signed by the expert.",
+          "\"a report, signed by the expert, containing the information listed in subrule (2.1)\""
+        ],
+        "source": "https://www.ontario.ca/laws/regulation/900194"
+      },
+      "rights_duties": {
+        "basis": "Ontario Rules of Civil Procedure r. 4.1.01; r. 53.03(3); r. 39.01(7); r. 76.09.1",
+        "summary_en": "Every expert engaged by or on behalf of a party must provide opinion evidence that is fair, objective and non-partisan, related only to matters within the expert's area of expertise, and provide such additional assistance as the court may reasonably require; this duty prevails over any obligation owed to the engaging party (r. 4.1.01(1)-(2)). Opinion evidence on motions and applications must contain the r. 53.03(2.1) information (r. 39.01(7)). Under simplified procedure the report is appended to an affidavit of the expert adopting it (r. 76.09.1).",
+        "source": "https://www.ontario.ca/laws/regulation/900194"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Federal Courts Rules, SOR/98-106, rr. 52, 52.1, 52.2 (Federal Court and Federal Court of Appeal)",
+        "summary_en": "A party may name an expert witness, and two or more parties may jointly name one (r. 52.1). The Court may call on an assessor to assist in understanding technical evidence or to provide a written opinion, after allowing submissions on the form and content of the question (r. 52). The Court may require experts to testify as a panel (r. 282.1).",
+        "source": "https://laws-lois.justice.gc.ca/eng/regulations/SOR-98-106/FullText.html"
+      },
+      "questions": {
+        "basis": "Federal Courts Rules r. 52(4); Code of Conduct for Expert Witnesses (Schedule), s. 3(a), (j)",
+        "summary_en": "For party experts the report states the issues addressed; for assessors the Court frames the question after submissions by the parties. The report must indicate any matters that fall outside the expert's field of expertise and any caveats needed to render it complete and accurate (Code s. 3(j)).",
+        "source": "https://laws-lois.justice.gc.ca/eng/regulations/SOR-98-106/FullText.html"
+      },
+      "report_contents": {
+        "basis": "Federal Courts Rules r. 52.2(1); Code of Conduct for Expert Witnesses (Schedule to the Rules), s. 3",
+        "items_en": [
+          "Affidavit or statement setting out in full the proposed evidence of the expert",
+          "Expert's qualifications and the areas in which the expert is proposed to be qualified",
+          "Certificate in Form 52.2 acknowledging the Code of Conduct",
+          "Statement of the issues addressed",
+          "Qualifications of the expert on those issues",
+          "Current curriculum vitae as a schedule",
+          "Facts and assumptions on which the opinions are based (letter of instructions may be attached)",
+          "Summary of the opinions",
+          "For responding reports: points of agreement and disagreement with the other expert",
+          "Reasons for each opinion",
+          "Literature or other materials specifically relied on",
+          "Summary of methodology, including examinations, tests or investigations relied on, qualifications of the person who carried them out, and whether a representative of another party was present",
+          "Caveats or qualifications, including insufficiency of data or research and matters outside the expert's field",
+          "Particulars of any relationship with a party or the subject matter that might affect the duty to the Court"
+        ],
+        "items_local": [
+          "\"set out in full the proposed evidence of the expert\"",
+          "\"set out the expert's qualifications and the areas in respect of which it is proposed that he or she be qualified as an expert\"",
+          "\"be accompanied by a certificate in Form 52.2 signed by the expert acknowledging that the expert has read the Code of Conduct for Expert Witnesses set out in the schedule and agrees to be bound by it\"",
+          "(a) a statement of the issues addressed in the report;",
+          "(b) a description of the qualifications of the expert on the issues addressed in the report;",
+          "(c) the expert's current curriculum vitae attached to the report as a schedule;",
+          "(d) the facts and assumptions on which the opinions in the report are based; in that regard, a letter of instructions, if any, may be attached to the report as a schedule;",
+          "(e) a summary of the opinions expressed;",
+          "(f) in the case of a report that is provided in response to another expert's report, an indication of the points of agreement and of disagreement with the other expert's opinions;",
+          "(g) the reasons for each opinion expressed;",
+          "(h) any literature or other materials specifically relied on in support of the opinions;",
+          "(i) a summary of the methodology used, including any examinations, tests or other investigations on which the expert has relied, including details of the qualifications of the person who carried them out, and whether a representative of any other party was present;",
+          "(j) any caveats or qualifications necessary to render the report complete and accurate, including those relating to any insufficiency of data or research and an indication of any matters that fall outside the expert's field of expertise; and",
+          "(k) particulars of any aspect of the expert's relationship with a party to the proceeding or the subject matter of his or her proposed evidence that might affect his or her duty to the Court."
+        ],
+        "source": "https://laws-lois.justice.gc.ca/eng/regulations/SOR-98-106/FullText.html"
+      },
+      "rights_duties": {
+        "basis": "Code of Conduct for Expert Witnesses (Schedule to the Federal Courts Rules), ss. 1, 2, 4, 5; r. 52.2(2)",
+        "summary_en": "Overriding duty to assist the Court impartially on matters relevant to the expert's area of expertise; this duty overrides any duty to a party, including the retaining party; the expert is to be independent and objective and is not an advocate (ss. 1-2). Material changes affecting qualifications, opinions or data must be reported without delay (s. 4). In court-ordered expert conferences the expert must exercise independent, impartial and objective judgment and clarify points of agreement and disagreement (s. 5). Non-compliance may lead to exclusion of some or all of the affidavit or statement (r. 52.2(2)).",
+        "source": "https://laws-lois.justice.gc.ca/eng/regulations/SOR-98-106/FullText.html"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": "No federal statute on forensic expert activity; expert evidence is governed by the Canada Evidence Act (s. 7; ss. 31.1-31.8), the Criminal Code (s. 657.3), the Federal Courts Rules (rr. 52-52.2 and Schedule) and provincial rules of court and evidence acts",
+    "source": "https://laws-lois.justice.gc.ca/eng/acts/C-5/FullText.html"
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Criminal Code ss. 131(1) and 132 (perjury)",
+      "summary_en": "Making, with intent to mislead, a false statement under oath or solemn affirmation, by affidavit, solemn declaration or deposition or orally, knowing it to be false, before a person authorised by law to permit it. Indictable offence, imprisonment for a term not exceeding fourteen years (s. 132). Applies to the affidavit or solemn declaration accompanying a s. 657.3 report and to expert affidavits in civil proceedings.",
+      "warning_local": "I, (name), solemnly declare that (state the fact or facts declared to), and I make this solemn declaration conscientiously believing it to be true, and knowing that it is of the same force and effect as if made under oath.",
+      "warning_en": "I, (name), solemnly declare that (state the fact or facts declared to), and I make this solemn declaration conscientiously believing it to be true, and knowing that it is of the same force and effect as if made under oath.",
+      "wording": "official",
+      "source": "https://laws-lois.justice.gc.ca/eng/acts/C-46/section-131.html"
+    },
+    {
+      "route": "civil",
+      "norm": "Federal Courts Rules r. 52.2(2) and Form 52.2",
+      "summary_en": "If an expert fails to comply with the Code of Conduct for Expert Witnesses, the Court may exclude some or all of the expert's affidavit or statement. Procedural sanction, not a penalty.",
+      "warning_local": "I, (name), having been named as an expert witness by the (party), certify that I have read the Code of Conduct for Expert Witnesses set out in the schedule to the Federal Courts Rules and agree to be bound by it. (Date) (Signature of expert witness) (Name, address, telephone and fax number of expert witness)",
+      "warning_en": "I, (name), having been named as an expert witness by the (party), certify that I have read the Code of Conduct for Expert Witnesses set out in the schedule to the Federal Courts Rules and agree to be bound by it. (Date) (Signature of expert witness) (Name, address, telephone and fax number of expert witness)",
+      "wording": "official",
+      "source": "https://laws-lois.justice.gc.ca/eng/regulations/SOR-98-106/FullText.html"
+    },
+    {
+      "route": "civil",
+      "norm": "Ontario Rules of Civil Procedure r. 53.03(3)",
+      "summary_en": "An expert may not testify on an issue, except with leave of the trial judge, unless the substance of the testimony is set out in a served report or supplementary report. Procedural sanction only; no codified civil or disciplinary liability of the expert in the Rules.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": "official",
+      "source": "https://www.ontario.ca/laws/regulation/900194"
+    }
+  ],
+  "declaration": {
+    "basis": "Ontario Rules of Civil Procedure r. 53.03(2.1) paras. 6.1, 6.3 and 7; Form 53 'Acknowledgment of Expert's Duty' (RCP-E 53, version dated June 1, 2026, effective 1 September 2026), which must be attached to any expert report under r. 53.03(1) or (2) and any opinion evidence on a motion or application. Federal Court equivalent: Form 52.2 certificate (see liability). Criminal route: affidavit or solemn declaration under Cr.C. s. 657.3(1) (CEA s. 41 form, see liability).",
+    "text_local": "ACKNOWLEDGMENT OF EXPERT'S DUTY\n1. My name is (name). I live at (city), in the (province/state) of (name of province/state).\n2. I have been engaged by or on behalf of (name of party/parties) to provide evidence in relation to the above-noted court proceeding.\n3. I acknowledge that it is my duty to provide evidence in relation to this proceeding as follows:\n(a) to provide opinion evidence that is fair, objective and non-partisan;\n(b) to provide opinion evidence that is related only to matters that are within my area of expertise; and\n(c) to provide such additional assistance as the court may reasonably require, to determine a matter in issue.\n4. I acknowledge that the duty referred to above prevails over any obligation which I may owe to any party by whom or on whose behalf I am engaged.\n5. I certify that I am satisfied as to the authenticity of every authority or other document or record to which I have referred in the expert report accompanying this form, other than:\n(a) documents and records provided to me by or on behalf of the party intending to call me as a witness and consisting of evidence or potential evidence in the court proceeding that I have analysed or interpreted in my report;\n(b) authorities and other documents and records to which I have referred in my report only in order to address how another expert witness in the same court proceeding has used them in their report; and\n(c) the following authorities, documents and records, for which I have doubts as to their authenticity as detailed within my report: [List authorities, documents and records.]\n6. I certify that I am satisfied that every quotation in this report accurately reproduces the text of the authority or other document or record from which the quotation is stated to be drawn.\nDate / Signature",
+    "text_en": "Same as text_local (English is a court language). Paragraph lettering (a)-(c) is as rendered from the official Word form; the form's paragraph 5 refers to item '5.c.'",
+    "wording": "official",
+    "source": "https://ontariocourtforms.on.ca/en/rules-of-civil-procedure-forms/"
+  },
+  "standards": [
+    {
+      "id": "ISO/IEC 27037:2012",
+      "national_id": "CAN/CSA-ISO/IEC 27037:18 (R2023)",
+      "title_en": "Information technology — Security techniques — Guidelines for identification, collection, acquisition, and preservation of digital evidence (adopted ISO/IEC 27037:2012)",
+      "status": "national adoption",
+      "issuer": "CSA Group (National Standard of Canada)",
+      "source": "https://www.csagroup.org/store/product/2426401/"
+    },
+    {
+      "id": "CAN/CGSB-72.34-2017",
+      "national_id": "CAN/CGSB-72.34-2017 (reaffirmed March 2022)",
+      "title_en": "Electronic records as documentary evidence (National Standard of Canada; relevant to evidence of standards under Canada Evidence Act s. 31.5)",
+      "status": "official guidance",
+      "issuer": "Canadian General Standards Board",
+      "source": "https://publications.gc.ca/site/eng/9.909920/publication.html"
+    }
+  ],
+  "esignature": {
+    "law_local": "Personal Information Protection and Electronic Documents Act, S.C. 2000, c. 5, Part 2 (ss. 31-51); Secure Electronic Signature Regulations, SOR/2005-30; Canada Evidence Act s. 31.4",
+    "law_en": "PIPEDA Part 2 (Electronic Documents). 'Secure electronic signature' means an electronic signature resulting from a technology or process prescribed under s. 48(1) (s. 31(1)); the prescribed process is a digital signature with hash function, private-key encryption and a digital signature certificate from a certification authority listed by the Treasury Board Secretariat (SOR/2005-30, s. 2). Data so signed is presumed, absent evidence to the contrary, to have been signed by the person identified in the certificate (SOR/2005-30, s. 5). Statements under oath and statements declaring truth may be made electronically with a secure electronic signature only where the federal law or provision is listed in Schedule 2 or 3 of PIPEDA (ss. 44-45).",
+    "qualified_term_local": "secure electronic signature / signature électronique sécurisée",
+    "source": "https://laws-lois.justice.gc.ca/eng/regulations/SOR-2005-30/FullText.html"
+  },
+  "timestamp": {
+    "basis": null,
+    "qualified_recognition": "No federal statutory provision on electronic timestamps was identified. Integrity of electronic documents is presumed under Canada Evidence Act s. 31.3 on evidence that the system was operating properly; data signed with a prescribed secure electronic signature is presumed signed by the certificate holder (SOR/2005-30, s. 5).",
+    "source": "https://laws-lois.justice.gc.ca/eng/acts/C-5/page-3.html"
+  },
+  "open_questions": [
+    "Civil procedure is provincial; only Ontario (as the requested example) and the Federal Courts Rules were researched. Other provinces (e.g. BC Supreme Court Civil Rules Part 11, Quebec Code of Civil Procedure arts. 231-241) differ and are not covered.",
+    "Ontario e-Laws HTML could not be fetched directly; the Ontario rule texts were taken from the official e-Laws Word consolidation (www.ontario.ca/laws/docs/900194_e.doc, consolidation period from 1 September 2026, last amendment O. Reg. 275/26). Form 53 text was taken from the official Word form RCP-E 53 (June 1, 2026).",
+    "Ontario Civil Rules Review (proposed replacement of the Rules, including a sworn expert attestation replacing Form 53) had no confirmed commencement date as of 2026-11-11; recheck before use.",
+    "The CSA Group and Standards Council of Canada pages for CAN/CSA-ISO/IEC 27037:18 (R2023) returned HTTP 403; the adoption is confirmed only by search results and reseller listings.",
+    "Whether a newer edition of CAN/CGSB-72.34 (a 2024 edition was mentioned in a secondary source) supersedes the 2017 (R2022) edition was not verified.",
+    "French-language versions of the federal provisions were not retrieved; items_local are given in English, which is an official court language.",
+    "No federal statute on electronic timestamps was found; confirm none exists (provincial electronic commerce acts were not researched).",
+    "Judicial limits on criminal expert evidence (R. v. Mohan; White Burgess Langille Inman v. Abbott and Haliburton, 2015 SCC 23) are case law and were not verified on an official portal."
+  ]
+}

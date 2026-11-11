@@ -39,6 +39,7 @@ Precedence is built-in defaults → file `defaults` → named `profiles` entry �
 | `check_drand`, `check_bitcoin` | `--check-drand`, `--check-bitcoin` | `false`; the corresponding `--no-check-…` option overrides a profile's `true` |
 | `require_tier` | `--require-tier` | `self_attested`; requirements do not create proofs or enable network requests implicitly |
 | `require_pinned_signer` | `--require-pinned-signer` / `--no-require-pinned-signer` | `false`; if required, an independently pinned collector or a verified matching pinned witness must be supplied |
+| `expert`, `procedure` | `--expert` / `--no-expert`, `--procedure criminal\|civil` | `false`, `criminal`; adds the [expert examination protocol](#expert-examination-protocol) for the selected jurisdiction and procedure |
 
 The `de-proof` example requests external checks and requires `witness_anchored` plus a trusted pin. It will refuse an archive that lacks these proofs. Merely specifying a witness fingerprint without a matching witness archive does not satisfy the pin requirement. JSON-only output avoids PDF font requirements. Diagram choices do not remove the textual assurance ladder, limitations or event references. Formats and languages do not change the machine scene model; changing scene size changes grouping only. A gap scene also cites the next recorded restart, even if that extra cross-reference exceeds the grouping cap.
 
@@ -58,9 +59,40 @@ Counts describe event kinds. New messages, edits, deletion notices and absence o
 
 The HTML timeline has keyboard-focusable and hoverable event references. Every SVG has a title and description. The PDF uses selectable text and the same drawing geometry; it does not depend on a browser or an SVG conversion service. Japanese PDF generation uses the project's existing CJK font discovery; a suitable installed font is required. No new package dependency was added.
 
+## Expert examination protocol
+
+`--expert` adds a draft of the expert's report to the narrative. The examiner runs it on their own computer, with their own copy of the package and their own installation: the verifier checks the package first, and the protocol records only what this run established. A protocol written by the collector would be the collecting side describing its own material; the examiner's run is the one that counts.
+
+```sh
+python -m tgwitness.narrative evidence.zip --lang pl --jurisdiction PL --expert --procedure criminal --fingerprint COLLECTOR_FP --out protocol-pl/
+python -m tgwitness.narrative evidence.zip --lang ja --jurisdiction JP --expert --procedure civil --fingerprint COLLECTOR_FP --tsa-ca tsa-root.pem --out protocol-ja/
+```
+
+The run writes `expert-protocol.html`, `expert-protocol.pdf` and `expert-protocol.json` next to the narrative, following `--outputs`. The protocol contains:
+
+| Part | Contents |
+| --- | --- |
+| Introductory part | Blank fields for the case, the appointing authority, the expert's name, education, specialty, experience and the examination period; the legal basis for appointment, questions, report contents and expert duties; the report contents the jurisdiction requires, as a checklist; the liability warning in the court language with a signature line; the declaration where the rules require one; the SHA-256 of the package computed during the examination |
+| Methods and standards | TgWitness version and the SHA-256 of the verifier source used; SHA-256 (FIPS 180-4), Ed25519 (RFC 8032), time-stamp tokens (RFC 3161) and certificate paths (RFC 5280), OpenTimestamps against Bitcoin block headers; the digital-evidence standards issued or adopted in the jurisdiction. The expert states which standards the examination followed |
+| Course of the examination | Commands that repeat each check on another copy. Fingerprints the examiner supplied are filled in; otherwise the commands keep `TRUSTED_COLLECTOR_FP` and `TRUSTED_WITNESS_FP`, because a fingerprint taken from the package would only repeat the package's own claim |
+| Findings | Three groups. **Established by computation**: integrity and time confirmed by a third party. **Established subject to a stated condition**: the collector key (fingerprint obtained in advance through another channel), a retained checkpoint, an independent witness and an attested collection run, each with its condition. **Outside the scope of this examination**: authorship, completeness outside the recorded periods, truth of the content, lawfulness of the collection and the identity of account users. The third group is always printed |
+| Signature | Blank name, date and signature. The expert may add a signature with their own certificate; the collector key signs the journal, never the expert's report |
+| Annex A | Questions for the order appointing the examination: the questions the package answers, each with the check that answers it, and the questions it cannot answer, each with the reason |
+| Annex B | The SHA-256 of `narrative-run.json` for this run |
+
+The HTML and JSON files contain no generation time. The same TgWitness version, package and inputs produce byte-identical HTML and JSON, so a second expert can repeat the examination and compare files. The PDF carries its creation date in its metadata.
+
+### Examination catalog
+
+[`tgwitness/narrative/examination/`](../tgwitness/narrative/examination/README.md) holds one file per jurisdiction: appointment of the expert, questions, required report contents, expert duties, the law on expert activity, liability for a knowingly false opinion with the warning the expert signs, any required declaration, digital-evidence standards, electronic signature and timestamp law. Every entry names its official source, the date it was checked and the review status, and lists in `open_questions` the points that could not be confirmed from an official text. The entries are machine-assisted research, not reviewed by local counsel; the protocol prints that status and asks the expert to confirm each reference against the current official text.
+
+The catalog covers 53 jurisdictions: AE, AT, AU, BD, BE, BG, BR, CA, CH, CN, CZ, DE, DK, EE, ES, ET, FI, FR, GR, HK, HU, ID, IE, IL, IN, IR, IT, JP, KR, LT, LV, MX, MY, NL, NO, PH, PK, PL, PT, RO, RU, SA, SE, SG, SK, TH, TR, TW, UA, UK, US-federal, UZ, VN. `UK` is England and Wales; `US-federal` covers the federal courts. Where official portals could not be read, the entries for AE, BG, GR, IT, SG, TH and VN consist mostly of open questions, and the protocol prints those questions for the expert to check.
+
+`--jurisdiction` accepts the codes of both catalogs. The terminology section of the narrative appears for the 14 terminology catalogs listed below; the expert protocol uses the examination catalog. Without `--jurisdiction`, the protocol leaves the legal basis, warning and local standards for the expert to add.
+
 ## Templates and jurisdictions
 
-There are 25 complete phrase catalogs and matching glossaries. Supported languages: en, de, fr, es, it, pt, nl, pl, cs, sk, uk, ru, ro, bg, hu, el, sv, da, fi, no, lt, lv, et, tr, ja. `no` uses Bokmål wording. `pt` uses the generic CLDR Portuguese cardinal rule. Templates support the bounded ICU **plural subset** used in these catalogs, including nested placeholders and exact-number branches; this is not a general implementation of every ICU formatter. Cardinal rules follow [Unicode CLDR](https://www.unicode.org/cldr/charts/48/supplemental/language_plural_rules.html).
+There are 39 complete phrase catalogs and matching glossaries. Supported languages: en, de, fr, es, it, pt, nl, pl, cs, sk, uk, ru, ro, bg, hu, el, sv, da, fi, no, lt, lv, et, tr, ja, zh, zh-Hant, ko, ar, he, fa, hi, ur, bn, id, ms, vi, th, uz. Arabic, Hebrew, Persian and Urdu reports run right to left. Chinese and Korean PDFs need an installed CJK font, as Japanese does; HTML and JSON need none. In the 14 languages added for court use, the scene count is written as "journal records: N", which needs no plural forms. `no` uses Bokmål wording. `pt` uses the generic CLDR Portuguese cardinal rule. Templates support the bounded ICU **plural subset** used in these catalogs, including nested placeholders and exact-number branches; this is not a general implementation of every ICU formatter. Cardinal rules follow [Unicode CLDR](https://www.unicode.org/cldr/charts/48/supplemental/language_plural_rules.html).
 
 The checker compares keys and placeholders, renders plural cases, checks phrase lengths and applies any supplied forbidden-word lists. Every language, including English and German, is visibly marked **machine-assisted, not reviewed**. Passing mechanical tests is not legal or native-language review.
 

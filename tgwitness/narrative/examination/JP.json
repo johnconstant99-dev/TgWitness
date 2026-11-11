@@ -1,0 +1,141 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "JP",
+  "name_en": "Japan",
+  "name_local": "日本",
+  "court_languages": [
+    "ja"
+  ],
+  "local_language": "ja",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "鑑定人",
+    "en": "expert ordered by the court to give an expert opinion (criminal and civil); a person commissioned by investigators under Code of Criminal Procedure art. 223 is customarily called 鑑定受託者 (commissioned expert)"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "刑事訴訟法 第165条、第166条、第171条、第223条第1項",
+        "summary_en": "The court may order a person with learning and experience to give an expert opinion (art. 165); the expert must be sworn (art. 166). The witness provisions apply to experts except those on compulsory appearance (art. 171). During investigation, a public prosecutor, prosecutor's assistant officer or judicial police official may commission persons other than the suspect to give an expert opinion (art. 223(1)).",
+        "source": "https://laws.e-gov.go.jp/law/323AC0000000131"
+      },
+      "questions": {
+        "basis": "刑事訴訟法 第165条、第174条",
+        "summary_en": "The court (or the commissioning investigator under art. 223) defines the matters for expertise; no verified article details how questions are framed in the criminal route. Questions on past facts learnt through special knowledge are handled as witness testimony, not expertise (art. 174). No verified provision addresses declining questions or reporting facts not asked about.",
+        "source": "https://laws.e-gov.go.jp/law/323AC0000000131"
+      },
+      "report_contents": {
+        "basis": "刑事訴訟規則 第129条；刑事訴訟法 第321条第4項",
+        "items_en": [
+          "the process and the results of the expertise (鑑定の経過及び結果), reported in a written expert report or orally",
+          "several experts may be made to report jointly",
+          "when a written report is ordered, the court must tell the expert that the expert may be examined at trial on the matters stated in the report",
+          "a written report prepared by the expert stating the process and results is admissible if the expert testifies at trial as a witness that it was genuinely prepared (CCP art. 321(4))"
+        ],
+        "items_local": [
+          "鑑定の経過及び結果は、鑑定人に鑑定書により又は口頭でこれを報告させなければならない",
+          "鑑定人が数人あるときは、共同して報告をさせることができる",
+          "鑑定の経過及び結果を鑑定書により報告させる場合には、鑑定人に対し、鑑定書に記載した事項に関し公判期日において尋問を受けることがある旨を告げなければならない",
+          "鑑定の経過及び結果を記載した書面で鑑定人の作成したもの（その供述者が公判期日において証人として尋問を受け、その真正に作成されたものであることを供述したとき）"
+        ],
+        "source": "https://www.japaneselawtranslation.go.jp/ja/laws/view/3893/ja"
+      },
+      "rights_duties": {
+        "basis": "刑事訴訟法 第166条、第171条；刑事訴訟規則 第128条",
+        "summary_en": "The expert must take the oath before the expertise, in writing; the written oath must state that the expert swears to give the expert opinion sincerely in accordance with conscience (Rules art. 128). Witness rules, including those on refusal and sanctions, apply mutatis mutandis except compulsory appearance (art. 171).",
+        "source": "https://www.japaneselawtranslation.go.jp/ja/laws/view/3893/ja"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "民事訴訟法 第212条、第213条、第214条、第218条",
+        "summary_en": "A person with the learning and experience necessary for the expertise has a duty to give it; persons who could refuse testimony or the oath, and certain others, cannot be experts (art. 212). The expert is designated by the trial court, a commissioned judge or a requested judge (art. 213). A party may challenge an expert where circumstances would prevent a sincere expertise, before the expert states an opinion or later if the ground arises or becomes known later (art. 214). The court may commission public offices, foreign public offices or juridical persons with adequate facilities; oath provisions then do not apply and the court may have a designated person explain the result (art. 218).",
+        "source": "https://laws.e-gov.go.jp/law/408AC0000000109"
+      },
+      "questions": {
+        "basis": "民事訴訟規則 第129条、第129条の2、第132条の2；民事訴訟法 第215条第3項",
+        "summary_en": "A party applying for an expertise submits a document stating the matters on which an opinion is sought; the opponent may submit comments; the court then fixes the matters for expertise and sends them to the expert in writing (Rules art. 129). The court may confer with the parties and the expert on the matters, materials and other necessary points (Rules art. 129-2). The court may ask the expert for a further opinion to clarify its content or confirm its basis (CCP art. 215(3); Rules art. 132-2). The expert may refuse on the grounds applicable to witnesses (CCP art. 216 applying arts. 197–199). No verified provision addresses reporting facts not asked about.",
+        "source": "https://www.courts.go.jp/assets/misekouminnsokisoku.pdf"
+      },
+      "report_contents": {
+        "basis": "民事訴訟法 第215条；民事訴訟規則 第132条",
+        "items_en": [
+          "the presiding judge may have the expert state the opinion in writing or orally (art. 215(1)); several experts jointly or separately (Rules art. 132(1))",
+          "instead of a paper document, the expert may record the contents in a file through the court's electronic system or submit a recording medium; this counts as a written opinion (art. 215(2))",
+          "the court may fix a deadline for submitting the written opinion after hearing the expert (Rules art. 132(2))",
+          "the court must show the parties the contents of the written or electronic opinion (art. 215(4))"
+        ],
+        "items_local": [
+          "裁判長は、鑑定人に、書面又は口頭で、意見を述べさせることができる",
+          "当該書面に記載すべき事項を最高裁判所規則で定める電子情報処理組織を使用してファイルに記録する方法又は当該書面に記載すべき事項に係る電磁的記録を記録した記録媒体を提出する方法により意見を述べることができる",
+          "裁判長は、鑑定人に書面で意見を述べさせる場合には、鑑定人の意見を聴いて、当該書面を提出すべき期間を定めることができる",
+          "裁判所は、当事者に対し、第一項の書面に記載された事項又は第二項の規定によりファイルに記録された事項若しくは同項の記録媒体に記録された事項の提示をしなければならない"
+        ],
+        "source": "https://laws.e-gov.go.jp/law/408AC0000000109"
+      },
+      "rights_duties": {
+        "basis": "民事訴訟法 第212条、第214条、第216条（第201条第1項準用）；民事訴訟規則 第131条",
+        "summary_en": "Duty to give an expertise (art. 212). Mandatory oath (art. 216 applying art. 201(1)). Under Rules art. 131 as amended by Supreme Court Rule No. 14 of 2024 (in force 21 May 2026), the presiding judge has the expert state that the expert swears to give the expertise sincerely in accordance with conscience; alternatively the expert may sign and submit a written oath or upload its image online, in which case the explanation of the oath and notice of the penalty for false expertise are sent in writing or electronically. Non-appearance or refusal without justification is sanctioned as for witnesses (art. 216 applying arts. 192–193).",
+        "source": "https://www.courts.go.jp/assets/misekouminnsokisoku.pdf"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": null,
+    "source": null
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "刑法 第171条（虚偽鑑定等）、第169条、第170条",
+      "summary_en": "An expert, interpreter or translator sworn under law who gives a false expert opinion, interpretation or translation is punished as for perjury (art. 171 applying arts. 169–170): confinement (拘禁刑) from 3 months to 10 years; punishment may be reduced or remitted on confession before the judgment in the case becomes final or before disciplinary action. Applies only to experts sworn under law; CCP art. 223(2) applies only parts of art. 198 to investigative commissions and contains no oath provision.",
+      "warning_local": "良心に従つて誠実に鑑定をすることを誓う",
+      "warning_en": "I swear to give the expert opinion sincerely in accordance with my conscience",
+      "wording": "official",
+      "source": "https://laws.e-gov.go.jp/law/140AC0000000045"
+    }
+  ],
+  "declaration": {
+    "basis": "刑事訴訟法 第166条、刑事訴訟規則 第128条（宣誓書に「良心に従つて誠実に鑑定をすることを誓う旨」を記載）；民事訴訟法 第216条・第201条第1項、民事訴訟規則 第131条（「良心に従って誠実に鑑定することを誓う旨」）",
+    "text_local": "宣誓　良心に従って誠実に鑑定することを誓います。",
+    "text_en": "Oath: I swear to give the expert opinion sincerely in accordance with my conscience.",
+    "wording": "composed",
+    "source": "https://www.japaneselawtranslation.go.jp/ja/laws/view/3893/ja"
+  },
+  "standards": [
+    {
+      "id": "証拠保全ガイドライン 第10版 (2025)",
+      "national_id": null,
+      "title_en": "Evidence Preservation Guidelines, 10th edition (May 2025), including reference information on cloud forensics",
+      "status": "professional guidance",
+      "issuer": "Institute of Digital Forensics (特定非営利活動法人デジタル・フォレンジック研究会)",
+      "source": "https://digitalforensic.jp/home/act/products/df-guideline-10th/"
+    }
+  ],
+  "esignature": {
+    "law_local": "電子署名及び認証業務に関する法律（平成十二年法律第百二号）",
+    "law_en": "Act on Electronic Signatures and Certification Business (Act No. 102 of 2000)",
+    "qualified_term_local": "特定認証業務（電子署名のうち、その方式に応じて本人だけが行うことができるものとして主務省令で定める基準に適合するものについて行われる認証業務）",
+    "source": "https://laws.e-gov.go.jp/law/412AC0000000102"
+  },
+  "timestamp": {
+    "basis": null,
+    "qualified_recognition": null,
+    "source": null
+  },
+  "open_questions": [
+    "民事訴訟規則 and 刑事訴訟規則 are Supreme Court rules not available through the e-Gov API. Rules arts. 129, 129-2, 131, 132, 132-2 (civil, version in force 21 May 2026) were verified only from search-index excerpts of the courts.go.jp PDF; Rules arts. 128–129 (criminal) from the Ministry of Justice Japanese Law Translation database excerpt. Re-check against the official courts.go.jp texts.",
+    "The customary court form of the expert's written oath (宣誓書) was not obtained; the declaration text is composed from the content required by the Rules.",
+    "No JIS adoption of ISO/IEC 27037, 27041, 27042 or 27043 was verified (JISC could not be searched).",
+    "The legal basis and effect of national accreditation of time-stamping services (believed to be a Ministry of Internal Affairs and Communications notice of 2021) could not be verified; the soumu.go.jp page did not decode. The Electronic Signatures Act does not regulate timestamps.",
+    "No verified article states who drafts the questions for a criminal expertise or whether an expert may decline questions outside the expertise or report facts not asked about.",
+    "Whether CCP art. 321(4) applies to written reports of experts commissioned by investigators under art. 223 depends on case law that was not verified.",
+    "The presumption in Electronic Signatures Act art. 3 applies to electronic records bearing the principal's own electronic signature where the necessary codes and objects are properly managed so that only the principal can sign; how this applies to an expert report filed electronically under CCP art. 215(2) was not verified.",
+    "No statute specific to forensic expert activity was identified; statute is null."
+  ]
+}

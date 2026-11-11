@@ -1,0 +1,101 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "BG",
+  "name_en": "Bulgaria",
+  "name_local": "България",
+  "court_languages": [
+    "bg"
+  ],
+  "local_language": "bg",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": null,
+    "en": null
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": null,
+        "items_en": [],
+        "items_local": [],
+        "source": null
+      },
+      "rights_duties": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": null,
+        "items_en": [],
+        "items_local": [],
+        "source": null
+      },
+      "rights_duties": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": null,
+    "source": null
+  },
+  "liability": [],
+  "declaration": {
+    "basis": null,
+    "text_local": null,
+    "text_en": null,
+    "wording": null,
+    "source": null
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "Регламент (ЕС) № 910/2014, изменен с Регламент (ЕС) 2024/1183",
+    "law_en": "eIDAS Regulation (EU) No 910/2014 as amended by Regulation (EU) 2024/1183; national implementing act not verified",
+    "qualified_term_local": null,
+    "source": "https://eur-lex.europa.eu/eli/reg/2014/910/oj/eng"
+  },
+  "timestamp": {
+    "basis": "Regulation (EU) No 910/2014, art. 41 (as amended by Regulation (EU) 2024/1183)",
+    "qualified_recognition": "A qualified electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which they are bound; it is recognised as qualified in all Member States. National implementing rules not verified.",
+    "source": "https://eur-lex.europa.eu/eli/reg/2014/910/oj/eng"
+  },
+  "open_questions": [
+    "Research not completed for Bulgaria: lex.bg pages for НПК, НК and the e-signature law are single long documents that the fetch tool truncated (around art. 60-65), one fetch returned unreliable text, the EU e-Justice 'find an expert' page for Bulgaria is still untranslated, and the session's web-search budget (200 calls) was exhausted. Every national field below remains unverified.",
+    "Criminal route to verify: Наказателно-процесуален кодекс, чл. 144-154 (назначаване на експертиза, вещи лица, въпроси, съдържание на заключението, разпит на вещото лице, отвод).",
+    "Civil route to verify: Граждански процесуален кодекс, чл. 195-203 (съдебна експертиза, задачи, заключение, изслушване, отвод, повторна и допълнителна експертиза), including any statutory promise or warning given to the вещо лице at the hearing.",
+    "Liability to verify: Наказателен кодекс, чл. 291 (false expert opinion) - exact wording and maximum penalty; any civil or disciplinary liability of listed experts.",
+    "Statute on experts to verify: Закон за съдебната власт provisions on вещи лица and the ordinance on registration, qualification and remuneration of court experts (Наредба № 2 от 29.06.2015 г.), including any declaration form.",
+    "Electronic signature: national act (expected: Закон за електронния документ и електронните удостоверителни услуги; terms квалифициран електронен подпис, квалифициран електронен времеви печат) not verified on an official source.",
+    "Standards: БИС national adoption of EN ISO/IEC 27037/27041/27042/27043 (expected designation БДС EN ISO/IEC ...) not verified."
+  ]
+}

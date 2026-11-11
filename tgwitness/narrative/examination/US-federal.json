@@ -1,0 +1,200 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "US-federal",
+  "name_en": "United States (federal courts)",
+  "name_local": "United States (federal courts)",
+  "court_languages": [
+    "en"
+  ],
+  "local_language": "en",
+  "legal_family": "common law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "expert witness",
+    "en": "witness qualified as an expert by knowledge, skill, experience, training, or education (FRE 702); normally retained by a party, exceptionally appointed by the court (FRE 706)"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Fed. R. Evid. 702 and 706; 18 U.S.C. § 3006A(e)(1); Fed. R. Crim. P. 16(a)(1)(G) and 16(b)(1)(C)",
+        "summary_en": "Experts are normally chosen and called by the government or the defence. The court may, on a party's motion or on its own, order the parties to show cause why expert witnesses should not be appointed and may ask for nominations (FRE 706(a)); the court must inform a court-appointed expert of the expert's duties, in writing filed with the clerk or orally at a conference (FRE 706(b)). Counsel for a defendant who is financially unable to obtain expert services may request them ex parte, and the court authorises them if necessary (18 U.S.C. § 3006A(e)(1)). Admissibility requires the proponent to show the court that it is more likely than not that the four FRE 702 conditions are met (as amended 1 December 2023).",
+        "source": "https://www.law.cornell.edu/rules/fre/rule_706"
+      },
+      "questions": {
+        "basis": "Fed. R. Evid. 702, 703, 704(b), 705; Fed. R. Crim. P. 16(a)(1)(G)(iii)",
+        "summary_en": "There is no court-formulated list of questions for party experts; the calling party defines the engagement and the disclosure must contain a complete statement of all opinions the party will elicit, with bases and reasons. The opinion must stay within the expert's specialised knowledge, be based on sufficient facts or data, and reflect a reliable application of reliable principles and methods (FRE 702(a)-(d)). In a criminal case an expert must not state an opinion on whether the defendant did or did not have a mental state or condition that is an element of the crime or a defence (FRE 704(b)). An opinion may embrace an ultimate issue (FRE 704(a)). No rule entitles or obliges the expert to volunteer opinions beyond the disclosed ones; undisclosed opinions risk exclusion.",
+        "source": "https://www.law.cornell.edu/rules/fre/rule_704"
+      },
+      "report_contents": {
+        "basis": "Fed. R. Crim. P. 16(a)(1)(G)(iii) and (v) (amended effective 1 December 2022); defendant's reciprocal disclosure under 16(b)(1)(C)",
+        "items_en": [
+          "Written disclosure for each expert witness",
+          "Complete statement of all opinions that the party will elicit from the witness in its case-in-chief (or rebuttal)",
+          "The bases and reasons for those opinions",
+          "The witness's qualifications, including a list of all publications authored in the previous 10 years",
+          "A list of all other cases in which, during the previous 4 years, the witness has testified as an expert at trial or by deposition",
+          "Signature of the witness approving the disclosure, unless the party states why the signature could not be obtained through reasonable efforts or has previously provided a signed report containing all opinions, bases and reasons",
+          "Supplementation and correction under Rule 16(c)"
+        ],
+        "items_local": [
+          "\"the information required by (iii)\" disclosed \"in writing\"",
+          "\"a complete statement of all opinions that the government will elicit from the witness in its case-in-chief\"",
+          "\"the bases and reasons for them\"",
+          "\"the witness's qualifications, including a list of all publications authored in the previous 10 years\"",
+          "\"a list of all other cases in which, during the previous 4 years, the witness has testified as an expert at trial or by deposition\"",
+          "\"The witness must approve and sign the disclosure, unless the government: states in the disclosure why it could not obtain the witness's signature through reasonable efforts\" or \"has previously provided under (F) a report, signed by the witness, that contains all the opinions and the bases and reasons for them required by (iii)\"",
+          "Supplementing and Correcting a Disclosure (Rule 16(a)(1)(G)(vi), by reference to Rule 16(c))"
+        ],
+        "source": "https://www.law.cornell.edu/rules/frcrmp/rule_16"
+      },
+      "rights_duties": {
+        "basis": "Fed. R. Evid. 702-706; Fed. R. Crim. P. 16(c)",
+        "summary_en": "The opinion must be helpful to the trier of fact, based on sufficient facts or data, and the product of reliable principles and methods reliably applied (FRE 702). The expert may rely on facts or data that experts in the field would reasonably rely on even if inadmissible (FRE 703) and may give the opinion without first testifying to the underlying facts, but may be required to disclose them on cross-examination (FRE 705). A court-appointed expert is entitled to reasonable compensation set by the court, paid in criminal cases from funds provided by law (FRE 706(c)). Authentication of digital evidence: evidence describing a process or system and showing that it produces an accurate result (FRE 901(b)(9)); self-authentication of machine-generated records (FRE 902(13)) and of data copied from an electronic device, storage medium or file authenticated by a process of digital identification (FRE 902(14)), each by certification of a qualified person complying with FRE 902(11)/(12) and with advance written notice.",
+        "source": "https://www.law.cornell.edu/rules/fre/rule_902"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Fed. R. Civ. P. 26(a)(2)(A); Fed. R. Evid. 702 and 706",
+        "summary_en": "Each party must disclose the identity of any witness it may use to present evidence under FRE 702, 703 or 705 (FRCP 26(a)(2)(A)). Experts are retained by the parties; the court may appoint its own expert under FRE 706, and compensation in ordinary civil cases is paid by the parties in the proportion and at the time the court directs (FRE 706(c)(2)). Disclosure timing is set by the court or, absent an order, at least 90 days before trial (FRCP 26(a)(2)(D)).",
+        "source": "https://www.law.cornell.edu/rules/frcp/rule_26"
+      },
+      "questions": {
+        "basis": "Fed. R. Civ. P. 26(a)(2)(B)(i), 26(b)(4)(C); Fed. R. Evid. 702",
+        "summary_en": "The retaining party defines the scope; the report must contain a complete statement of all opinions the witness will express. Communications with the party's attorney are protected except those relating to compensation, facts or data the attorney provided and the expert considered, and assumptions the attorney provided and the expert relied on (FRCP 26(b)(4)(C)). The rules do not provide for the expert to decline questions or to report unasked facts; opinions not disclosed may be excluded (FRCP 37(c)(1)).",
+        "source": "https://www.law.cornell.edu/rules/frcp/rule_26"
+      },
+      "report_contents": {
+        "basis": "Fed. R. Civ. P. 26(a)(2)(B)(i)-(vi)",
+        "items_en": [
+          "Written report prepared and signed by the witness (required for retained or specially employed experts and for employees whose duties regularly involve giving expert testimony, unless otherwise stipulated or ordered)",
+          "Complete statement of all opinions the witness will express and the basis and reasons for them",
+          "The facts or data considered by the witness in forming them",
+          "Any exhibits that will be used to summarize or support them",
+          "The witness's qualifications, including a list of all publications authored in the previous 10 years",
+          "A list of all other cases in which, during the previous 4 years, the witness testified as an expert at trial or by deposition",
+          "A statement of the compensation to be paid for the study and testimony in the case"
+        ],
+        "items_local": [
+          "\"this disclosure must be accompanied by a written report—prepared and signed by the witness—if the witness is one retained or specially employed to provide expert testimony in the case or one whose duties as the party's employee regularly involve giving expert testimony\"",
+          "\"a complete statement of all opinions the witness will express and the basis and reasons for them\"",
+          "\"the facts or data considered by the witness in forming them\"",
+          "\"any exhibits that will be used to summarize or support them\"",
+          "\"the witness's qualifications, including a list of all publications authored in the previous 10 years\"",
+          "\"a list of all other cases in which, during the previous 4 years, the witness testified as an expert at trial or by deposition\"",
+          "\"a statement of the compensation to be paid for the study and testimony in the case\""
+        ],
+        "source": "https://www.law.cornell.edu/rules/frcp/rule_26"
+      },
+      "rights_duties": {
+        "basis": "Fed. R. Civ. P. 26(b)(4)(A)-(E), 26(e)(2), 37(c)(1); Fed. R. Evid. 702",
+        "summary_en": "The expert may be deposed (26(b)(4)(A)); drafts of the report are protected (26(b)(4)(B)); the party must supplement the report and deposition testimony by the time pretrial disclosures are due (26(e)(2)); failure to disclose bars use of the information or witness unless substantially justified or harmless (37(c)(1)); the party seeking discovery pays the expert a reasonable fee for time spent responding (26(b)(4)(E)). Reliability and helpfulness requirements of FRE 702 apply equally.",
+        "source": "https://www.law.cornell.edu/rules/frcp/rule_26"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": "No federal statute on forensic expert activity; expert evidence is governed by the Federal Rules of Evidence (Article VII, Rules 701-706), the Federal Rules of Civil Procedure (Rule 26) and the Federal Rules of Criminal Procedure (Rule 16)",
+    "source": "https://www.law.cornell.edu/rules/fre"
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "18 U.S.C. § 1621 (perjury generally)",
+      "summary_en": "Wilfully stating or subscribing, under oath or in a declaration, certificate, verification or statement under penalty of perjury, any material matter one does not believe to be true. Fine and/or imprisonment of not more than five years, except as otherwise provided by law.",
+      "warning_local": "I declare (or certify, verify, or state) under penalty of perjury that the foregoing is true and correct. Executed on (date). (Signature)",
+      "warning_en": "I declare (or certify, verify, or state) under penalty of perjury that the foregoing is true and correct. Executed on (date). (Signature)",
+      "wording": "official",
+      "source": "https://www.law.cornell.edu/uscode/text/18/1621"
+    },
+    {
+      "route": "all",
+      "norm": "18 U.S.C. § 1623(a) (false declarations before grand jury or court)",
+      "summary_en": "Knowingly making a false material declaration under oath, or in a declaration, certificate, verification or statement under penalty of perjury as permitted under 28 U.S.C. § 1746, in any proceeding before or ancillary to a US court or grand jury, or using any record knowing it contains such a declaration. Fine and/or imprisonment of not more than five years (ten years for proceedings before or ancillary to the FISA courts).",
+      "warning_local": "I declare (or certify, verify, or state) under penalty of perjury that the foregoing is true and correct. Executed on (date). (Signature)",
+      "warning_en": "I declare (or certify, verify, or state) under penalty of perjury that the foregoing is true and correct. Executed on (date). (Signature)",
+      "wording": "official",
+      "source": "https://www.law.cornell.edu/uscode/text/18/1623"
+    },
+    {
+      "route": "civil",
+      "norm": "Fed. R. Civ. P. 37(c)(1)",
+      "summary_en": "Procedural sanction against the party: information or a witness not disclosed as required by Rule 26(a) or (e) may not be used on a motion, at a hearing or at trial unless the failure was substantially justified or harmless. No codified federal rule on the civil or disciplinary liability of the expert personally was identified.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": "official",
+      "source": "https://www.law.cornell.edu/rules/frcp/rule_37"
+    }
+  ],
+  "declaration": {
+    "basis": "28 U.S.C. § 1746 (unsworn declarations under penalty of perjury). FRCP 26(a)(2)(B) requires only that the report be prepared and signed by the witness; a § 1746 declaration is used where a sworn statement is required, e.g. declarations under FRCP 56(c)(4) and certifications under FRE 902(11), (13) and (14) (2000 Committee Note to FRE 902: 'A declaration that satisfies 28 U.S.C. §1746 would satisfy the declaration requirement of Rule 902(11), as would any comparable certification under oath.'). Form (2) applies when executed within the United States; form (1), executed outside the United States, reads: 'I declare (or certify, verify, or state) under penalty of perjury under the laws of the United States of America that the foregoing is true and correct. Executed on (date). (Signature)'.",
+    "text_local": "I declare (or certify, verify, or state) under penalty of perjury that the foregoing is true and correct. Executed on (date). (Signature)",
+    "text_en": "I declare (or certify, verify, or state) under penalty of perjury that the foregoing is true and correct. Executed on (date). (Signature)",
+    "wording": "official",
+    "source": "https://www.law.cornell.edu/uscode/text/28/1746"
+  },
+  "standards": [
+    {
+      "id": "NIST SP 800-86",
+      "national_id": null,
+      "title_en": "Guide to Integrating Forensic Techniques into Incident Response (August 2006)",
+      "status": "official guidance",
+      "issuer": "National Institute of Standards and Technology",
+      "source": "https://csrc.nist.gov/pubs/sp/800/86/final"
+    },
+    {
+      "id": "NIST IR 8354",
+      "national_id": null,
+      "title_en": "Digital Investigation Techniques: A NIST Scientific Foundation Review (21 November 2022)",
+      "status": "official guidance",
+      "issuer": "National Institute of Standards and Technology",
+      "source": "https://www.nist.gov/publications/digital-investigation-techniques-nist-scientific-foundation-review"
+    },
+    {
+      "id": "NIST IR 8387",
+      "national_id": null,
+      "title_en": "Digital Evidence Preservation: Considerations for Evidence Handlers (September 2022)",
+      "status": "official guidance",
+      "issuer": "National Institute of Standards and Technology",
+      "source": "https://www.nist.gov/publications/digital-evidence-preservation-considerations-evidence-handlers"
+    },
+    {
+      "id": "SWGDE 18-Q-002-1.0",
+      "national_id": null,
+      "title_en": "SWGDE Requirements for Report Writing in Digital and Multimedia Forensics (20 November 2018)",
+      "status": "professional guidance",
+      "issuer": "Scientific Working Group on Digital Evidence",
+      "source": "https://www.swgde.org/documents/published-complete-listing/18-q-002-swgde-requirements-for-report-writing-in-digital-and-multimedia-forensics/"
+    },
+    {
+      "id": "SWGDE 18-F-002-2.0",
+      "national_id": null,
+      "title_en": "Best Practices for Digital Evidence Collection (version 2.0, 20 November 2025)",
+      "status": "professional guidance",
+      "issuer": "Scientific Working Group on Digital Evidence",
+      "source": "https://www.swgde.org/documents/published-complete-listing/18-f-002-best-practices-for-digital-evidence-collection/"
+    }
+  ],
+  "esignature": {
+    "law_local": "Electronic Signatures in Global and National Commerce Act (ESIGN), 15 U.S.C. § 7001 et seq.",
+    "law_en": "Electronic Signatures in Global and National Commerce Act (ESIGN), 15 U.S.C. § 7001 et seq. An electronic signature is 'an electronic sound, symbol, or process, attached to or logically associated with a contract or other record and executed or adopted by a person with the intent to sign the record' (§ 7006(5)). Section 7001 does not apply to 'court orders or notices, or official court documents (including briefs, pleadings, and other writings) required to be executed in connection with court proceedings' (§ 7003(b)(1)); signatures on electronically filed papers are governed by court rules, e.g. FRCP 5(d)(3)(C): 'A filing made through a person's electronic-filing account and authorized by that person, together with that person's name on a signature block, constitutes the person's signature.'",
+    "qualified_term_local": null,
+    "source": "https://www.law.cornell.edu/uscode/text/15/7001"
+  },
+  "timestamp": {
+    "basis": null,
+    "qualified_recognition": "No federal statute giving electronic timestamps a legal presumption was identified; ESIGN contains no timestamp provision. Timestamps and hash values are proved like other machine output, e.g. under FRE 901(b)(9) or by certification under FRE 902(13)/(14); the 2017 Committee Note to FRE 902 states that data copied from electronic devices are ordinarily authenticated by hash value.",
+    "source": "https://www.law.cornell.edu/rules/fre/rule_902"
+  },
+  "open_questions": [
+    "The complete verbatim text of Fed. R. Crim. P. 16(a)(1)(G)(iii) after 'case-in-chief' (rebuttal clause) was not retrieved in full; items_local quote only the verified fragments.",
+    "No federal statute or rule conferring a presumption on electronic timestamps (RFC 3161 or similar) was located; confirm that none exists.",
+    "Civil liability and immunity of expert witnesses is case law (not codified) and was not researched; no codified federal rule on expert civil or disciplinary liability was found.",
+    "Whether specific district courts' local rules or standing orders require expert reports to be sworn or to carry a 28 U.S.C. § 1746 declaration was not surveyed.",
+    "OSAC Registry listing status of the cited SWGDE documents was not verified on osac.gov."
+  ]
+}

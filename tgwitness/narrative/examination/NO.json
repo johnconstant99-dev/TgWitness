@@ -1,0 +1,145 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "NO",
+  "name_en": "Norway",
+  "name_local": "Norge",
+  "court_languages": [
+    "no"
+  ],
+  "local_language": "no",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "sakkyndig (partsoppnevnt: sakkyndig vitne)",
+    "en": "court-appointed expert (sakkyndig); experts called by a party without appointment are expert witnesses (sakkyndige vitner)"
+  },
+  "procedures": [
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Tvisteloven (LOV-2005-06-17-90) §§ 25-1, 25-2, 25-3, 25-6",
+        "summary_en": "Expert evidence is a professional assessment of factual matters in the case (§ 25-1). The court may appoint an expert on a party's request or of its own motion under § 21-3(2) when necessary for a sound factual basis, and also to secure balance where a party's case has wider significance and that party will call expert witnesses (§ 25-2). One expert is appointed unless more are justified without disproportionate cost or delay; experts must have the necessary competence and experience; appointment from an expert panel where one exists; an expert requested by both parties and willing is appointed unless special reasons speak against it; a person who would be disqualified as a judge may not be appointed (§ 25-3). Parties may call their own expert witnesses (§ 25-6).",
+        "source": "https://lovdata.no/dokument/NL/lov/2005-06-17-90/KAPITTEL_5-5"
+      },
+      "questions": {
+        "basis": "Tvisteloven §§ 25-4, 25-5(3)",
+        "summary_en": "The court determines what the expert is to investigate (mandate) and gives the necessary instructions, and may order the parties to prepare a draft mandate (§ 25-4). The expert may follow the proceedings, consult other experts and be allowed to put questions to parties, witnesses and other experts when necessary for the assignment (§ 25-5(3)). No express rule was found on the expert declining questions outside the expertise or reporting facts not asked about.",
+        "source": "https://lovdata.no/dokument/NL/lov/2005-06-17-90/KAPITTEL_5-5"
+      },
+      "report_contents": {
+        "basis": "Tvisteloven § 25-5(1)",
+        "items_en": [
+          "Written statement unless the court decides otherwise (§ 25-5(1))",
+          "Several experts may give a joint statement unless the court decides otherwise (§ 25-5(1))",
+          "Supplementary statement where the court so decides (§ 25-5(1))"
+        ],
+        "items_local": [
+          "Den sakkyndige skal avgi en skriftlig erklæring hvis ikke retten har bestemt noe annet.",
+          "Flere sakkyndige kan avgi felles erklæring om ikke retten har bestemt annet.",
+          "Retten kan bestemme at den sakkyndige skal avgi en tilleggserklæring."
+        ],
+        "source": "https://lovdata.no/dokument/NL/lov/2005-06-17-90/KAPITTEL_5-5"
+      },
+      "rights_duties": {
+        "basis": "Tvisteloven §§ 25-3(3), 25-5(2)-(4), 25-6(2)",
+        "summary_en": "Impartiality: no one who would be disqualified as a judge in the case may be appointed (§ 25-3(3)). The expert must appear to give evidence when summoned; the court should normally grant a party's request to summon (§ 25-5(2)). Before oral evidence the expert confirms with an assurance on honour and conscience that the assignment has been and will be completed conscientiously and to the best of their conviction; examination otherwise follows the witness rules (§ 25-5(4)). Expert witnesses called by a party may follow the whole hearing and may be allowed to question parties, witnesses and experts; otherwise ordinary witness rules apply (§ 25-6(2)).",
+        "source": "https://lovdata.no/dokument/NL/lov/2005-06-17-90/KAPITTEL_5-5"
+      }
+    },
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Straffeprosessloven (LOV-1981-05-22-25) kapittel 11, §§ 138-142, 148, 149",
+        "summary_en": "Anyone the court appoints as expert must accept; the court should normally ask whether the person is willing (§ 138). One expert unless the case requires more; additional experts may be appointed (§ 139). The King may engage standing experts (§ 140). The parties are heard before appointment where possible; experts proposed by both parties are normally appointed if willing (§ 141). Persons who would be disqualified as judges under domstolloven § 106 or § 108, or who are mutually dependent, should not be appointed where avoidable (§ 142). During the investigation the prosecuting authority may engage experts and set their mandate (§ 148). Persons presented by the parties as experts without appointment testify under the witness rules but give the expert assurance (§ 149).",
+        "source": "https://lovdata.no/dokument/NL/lov/1981-05-22-25/KAPITTEL_3-2"
+      },
+      "questions": {
+        "basis": "Straffeprosessloven §§ 142 a, 143(1), 148",
+        "summary_en": "The court sets a written mandate stating what the expert is to investigate, and any changes in writing; it may order the prosecution, defence counsel or counsel for the aggrieved party to draft a mandate (§ 142 a). In the investigation the prosecuting authority sets the mandate in line with § 142 a (§ 148). Experts may ask the court for help obtaining information from parties or others; information gathered on their own must be stated in the statement (§ 143(1)).",
+        "source": "https://lovdata.no/dokument/NL/lov/1981-05-22-25/KAPITTEL_3-2"
+      },
+      "report_contents": {
+        "basis": "Straffeprosessloven § 143; § 147",
+        "items_en": [
+          "As a rule a written statement, jointly or separately (§ 143(2))",
+          "Information the experts obtained on their own must appear in the statement (§ 143(1))",
+          "Experts in forensic medical questions send a copy of the written statement to the Norwegian Board of Forensic Medicine (Den rettsmedisinske kommisjon), which reviews it (§ 147)"
+        ],
+        "items_local": [
+          "De sakkyndige avgir som regel skriftlig erklæring, enten i forening eller hver for seg.",
+          "Har de innhentet opplysninger på egen hånd, skal dette gå fram av erklæringen.",
+          "Enhver som tjenestegjør som sakkyndig i rettsmedisinske spørsmål, skal straks sende den rettsmedisinske kommisjon avskrift av den skriftlige erklæring som denne gir retten eller påtalemyndigheten."
+        ],
+        "source": "https://lovdata.no/dokument/NL/lov/1981-05-22-25/KAPITTEL_3-2"
+      },
+      "rights_duties": {
+        "basis": "Straffeprosessloven §§ 138, 143(3), 144, 145, 146, 147",
+        "summary_en": "Duty to accept appointment (§ 138); duty to appear on the same terms as witnesses (§ 143(3)); examined under the witness rules but may be present throughout and, with permission, question parties, witnesses and other experts (§ 144). Before testifying the expert confirms with an assurance that the task has been and will be completed conscientiously and to the best of their conviction (§ 145). Den rettsmedisinske kommisjon reviews forensic-medical statements and notifies the court or prosecution of significant deficiencies (§§ 146-147; Forskrift om Den rettsmedisinske kommisjon § 3).",
+        "source": "https://lovdata.no/dokument/NL/lov/1981-05-22-25/KAPITTEL_3-2"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": "Forskrift om Den rettsmedisinske kommisjon (FOR-2018-02-13-240), gitt med hjemmel i straffeprosessloven § 146",
+    "title_en": "Regulation on the Norwegian Board of Forensic Medicine (review of expert statements in forensic medical questions under Criminal Procedure Act § 147; mandate templates and training of experts). Not shown to apply to digital-forensic reports.",
+    "source": "https://lovdata.no/dokument/SF/forskrift/2018-02-13-240"
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Straffeloven (LOV-2005-05-20-28) § 221 (uriktig forklaring)",
+      "summary_en": "Anyone who in writing or orally gives false information to a court (or to a notary public, a public authority under a duty to give evidence, a public authority where the statement is intended as evidence, the EFTA Court or the International Criminal Court): fine or imprisonment up to 2 years. Covers written expert statements submitted to the court as well as oral testimony.",
+      "warning_local": "Forsikrer De på ære og samvittighet at oppdraget som sakkyndig er utført og vil bli fullført samvittighetsfullt og etter beste overbevisning? – Det forsikrer jeg.",
+      "warning_en": "Do you affirm on your honour and conscience that the expert assignment has been carried out and will be completed conscientiously and to the best of your conviction? - I so affirm.",
+      "wording": "composed",
+      "source": "https://lovdata.no/dokument/NL/lov/2005-05-20-28/KAPITTEL_2-7"
+    },
+    {
+      "route": "criminal",
+      "norm": "Straffeloven § 222 (uriktig anklage); § 223 (grov uriktig anklage)",
+      "summary_en": "Creating a false basis for criminal liability by giving false information to the court, police or another public authority, by fabricating evidence or by other conduct, thereby causing someone to be charged or convicted: fine or imprisonment up to 3 years (§ 222); aggravated: imprisonment up to 10 years (§ 223). Note: § 222 is false accusation, not an aggravated form of false statement.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "https://lovdata.no/dokument/NL/lov/2005-05-20-28/KAPITTEL_2-7"
+    }
+  ],
+  "declaration": {
+    "basis": "Civil route: tvisteloven § 25-5(4) (assurance on honour and conscience before oral evidence), given in the form of domstolloven § 141 (oral: 'Forsikrer De at ...' answered 'Det forsikrer jeg.'; written: 'Det forsikrer jeg.'). The question text is composed by inserting the statutory content of § 25-5(4) into the § 141 form; no statutory declaration is required in the written statement.",
+    "text_local": "Forsikrer De på ære og samvittighet at oppdraget som sakkyndig er utført og vil bli fullført samvittighetsfullt og etter beste overbevisning? – Det forsikrer jeg.",
+    "text_en": "Do you affirm on your honour and conscience that the expert assignment has been carried out and will be completed conscientiously and to the best of your conviction? - I so affirm.",
+    "wording": "composed",
+    "source": "https://lovdata.no/dokument/NL/lov/2005-06-17-90/KAPITTEL_5-5"
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "Lov 15. juni 2018 nr. 44 om gjennomføring av EUs forordning om elektronisk identifikasjon og tillitstjenester for elektroniske transaksjoner i det indre marked (lov om elektroniske tillitstjenester) § 1 (forordning (EU) nr. 910/2014 gjelder som lov, EØS-avtalen vedlegg XI nr. 5l); forskrift 21. november 2019 nr. 1577 om tillitstjenester for elektroniske transaksjoner",
+    "law_en": "Electronic Trust Services Act 2018 (implements eIDAS Regulation (EU) No 910/2014 through the EEA Agreement, Annex XI no. 5l); Regulation of 21 November 2019 no. 1577 on trust services",
+    "qualified_term_local": "kvalifisert elektronisk signatur",
+    "source": "https://lovdata.no/dokument/NL/lov/2018-06-15-44"
+  },
+  "timestamp": {
+    "basis": "eIDAS Regulation (EU) No 910/2014 art. 41, made part of Norwegian law by lov om elektroniske tillitstjenester § 1",
+    "qualified_recognition": "Per art. 41 as incorporated: an electronic time stamp may not be denied legal effect or admissibility solely because it is electronic or not qualified, and a qualified electronic time stamp enjoys a presumption of the accuracy of the date and time and of the integrity of the bound data. The Norwegian-language text was not verified.",
+    "source": "https://lovdata.no/dokument/NL/lov/2018-06-15-44"
+  },
+  "open_questions": [
+    "The Norwegian-language text of eIDAS art. 41 and the Norwegian term for a qualified electronic time stamp were not verified.",
+    "Whether the eIDAS amendments in Regulation (EU) 2024/1183 have been incorporated into the EEA Agreement and Norwegian law was not verified; lov om elektroniske tillitstjenester § 1 refers to Regulation (EU) No 910/2014.",
+    "The assurance texts are composed from tvisteloven § 25-5(4) / straffeprosessloven § 145 and domstolloven § 141; the exact phrasing used in court practice was not verified.",
+    "Den rettsmedisinske kommisjon reviews statements in forensic medical questions (straffeprosessloven § 147); no source was found showing that it reviews digital-forensic reports.",
+    "No regulation under straffeprosessloven § 142 a on the form of expert mandates was found among current central regulations; its existence and content were not verified.",
+    "National adoption numbers for ISO/IEC 27037, 27041, 27042 and 27043 (expected NS-EN ISO/IEC ...:2016) could not be verified on Standard Norge; standards list left empty.",
+    "Court language is Norwegian (bokmål and nynorsk); the extended right to use Sami (sameloven § 3-4, referenced in domstolloven § 136a) was not detailed.",
+    "The task brief lists straffeloven § 222 alongside § 221; in the current act § 222 is 'uriktig anklage' (false accusation). No aggravated or negligent false-statement offence was found in chapter 22.",
+    "Civil or disciplinary liability of experts is not codified in tvisteloven or straffeprosessloven; tort liability was not researched."
+  ],
+  "declaration_criminal": {
+    "basis": "Criminal route: straffeprosessloven § 145 (assurance before testifying; in a judicial examination before it starts), applied to party-presented experts by § 149; form per domstolloven § 141. Question text composed from the statutory content.",
+    "text_local": "Forsikrer De at De har utført og vil fullføre Deres verv samvittighetsfullt og etter beste overbevisning? – Det forsikrer jeg.",
+    "text_en": "Do you affirm that you have carried out and will complete your assignment conscientiously and to the best of your conviction? - I so affirm.",
+    "wording": "composed",
+    "source": "https://lovdata.no/dokument/NL/lov/1981-05-22-25/KAPITTEL_3-2"
+  }
+}

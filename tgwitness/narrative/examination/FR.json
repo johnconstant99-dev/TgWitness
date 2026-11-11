@@ -1,0 +1,181 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "FR",
+  "name_en": "France",
+  "name_local": "France",
+  "court_languages": [
+    "fr"
+  ],
+  "local_language": "fr",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "expert (expert judiciaire); in civil procedure: technicien commis / expert",
+    "en": "expert appointed by an investigating or trial court (criminal) or technician appointed by the judge (civil)"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Code de procédure pénale, art. 156, 157, 158, 160, 161, 161-1",
+        "summary_en": "Any investigating or trial court may order an expert examination where a technical question arises, at the request of the prosecutor or the parties or of its own motion (art. 156). Experts are chosen from the national list kept by the Cour de cassation or from the lists of the courts of appeal; a reasoned decision may exceptionally choose an unlisted expert (art. 157). Unlisted experts swear the oath of loi n° 71-498 each time they are appointed (art. 160). The appointing decision sets a deadline (art. 161).",
+        "source": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006071154/LEGISCTA000006167429/"
+      },
+      "questions": {
+        "basis": "Code de procédure pénale, art. 158, 161-1, 162",
+        "summary_en": "The appointing court defines the mission in its decision; the mission may only concern technical questions (art. 158). A copy of the decision goes to the prosecutor, the parties and assisted witnesses, who have ten days to ask the investigating judge to modify or supplement the questions or to add an expert of their choice from the official lists (art. 161-1). If the experts need clarification on a question outside their specialty, the judge may authorise them to add named, specially qualified persons; their report is annexed in full (art. 162). The CPP section does not expressly state whether the expert may report facts outside the questions asked.",
+        "source": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006071154/LEGISCTA000006167429/"
+      },
+      "report_contents": {
+        "basis": "Code de procédure pénale, art. 166 (also art. 162 and 163)",
+        "items_en": [
+          "Description of the expert operations performed",
+          "The experts' conclusions",
+          "Signature of each expert",
+          "Names and qualifications of the persons who assisted the experts under their control and responsibility",
+          "Where several experts disagree or have reservations about joint conclusions, each states and gives reasons for his opinion or reservations",
+          "Mention of any opening or reopening of sealed exhibits (scellés) and of any new seals made after repackaging the examined objects",
+          "Report of any specialist added under art. 162 annexed in full"
+        ],
+        "items_local": [
+          "les experts rédigent un rapport qui doit contenir la description desdites opérations",
+          "ainsi que leurs conclusions",
+          "Les experts signent leur rapport",
+          "et mentionnent les noms et qualités des personnes qui les ont assistés, sous leur contrôle et leur responsabilité, pour la réalisation des opérations jugées par eux nécessaires à l'exécution de la mission qui leur a été confiée",
+          "Lorsque plusieurs experts ont été désignés et s'ils sont d'avis différents ou s'ils ont des réserves à formuler sur des conclusions communes, chacun d'eux indique son opinion ou ses réserves en les motivant",
+          "les experts sont habilités à procéder à l'ouverture ou à la réouverture des scellés, et à confectionner de nouveaux scellés après avoir, le cas échéant, procédé au reconditionnement des objets qu'ils étaient chargés d'examiner ; dans ce cas, ils en font mention dans leur rapport",
+          "Leur rapport sera annexé intégralement au rapport mentionné à l'article 166"
+        ],
+        "source": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006071154/LEGISCTA000006167429/"
+      },
+      "rights_duties": {
+        "basis": "Code de procédure pénale, art. 160, 161, 162, 164, 166, 167-2, 168; loi n° 71-498, art. 6",
+        "summary_en": "Oath to perform the mission, report and give an opinion on honour and conscience (listed experts once on listing, unlisted experts at each appointment). Experts must keep to the deadline, work in liaison with the investigating judge and keep the judge informed (art. 161). They may receive statements from persons other than the person under investigation, assisted witness or civil party for the sole purpose of the mission (art. 164). The judge may request an interim pre-report on which the parties may comment before the final report (art. 167-2). The report and seals are deposited with the court clerk (art. 166). At trial the expert testifies after swearing to assist justice on honour and conscience (art. 168).",
+        "source": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006071154/LEGISCTA000006167429/"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Code de procédure civile, art. 232, 233, 263, 265",
+        "summary_en": "The judge may appoint any person of his choice to inform him, by findings (constatations), a consultation or an expert examination, on a question of fact requiring a technician (art. 232). An expert examination is ordered only where findings or a consultation would not suffice (art. 263). The order states the circumstances, names the expert(s), sets out the mission and the deadline (art. 265). The technician must perform the mission personally; a legal person submits the natural person(s) who will perform it for the judge's approval (art. 233).",
+        "source": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006070716/LEGISCTA000006149657/"
+      },
+      "questions": {
+        "basis": "Code de procédure civile, art. 236, 238, 244, 245",
+        "summary_en": "The judge defines and may extend or restrict the mission (art. 236). The technician gives an opinion only on the points for which he was appointed, may not answer other questions without the parties' written agreement, and must never give legal assessments (art. 238). He must disclose in his opinion all information that sheds light on the questions, may not reveal other information learned during the mission, and may rely only on lawfully obtained information (art. 244). The judge may ask him to complete or explain his findings (art. 245).",
+        "source": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006070716/LEGISCTA000006149657/"
+      },
+      "report_contents": {
+        "basis": "Code de procédure civile, art. 238, 244, 276, 278, 282",
+        "items_en": [
+          "Opinion limited to the points of the mission; no legal assessments",
+          "All information that sheds light on the questions examined; only lawfully obtained information",
+          "Statement of the follow-up given to the parties' observations or claims; written observations annexed if the parties ask",
+          "A single report even where there are several experts; in case of divergence each states his opinion",
+          "Opinion of any other technician consulted in a distinct specialty attached",
+          "Report deposited at the court registry (greffe), accompanied by the fee request"
+        ],
+        "items_local": [
+          "Le technicien doit donner son avis sur les points pour l'examen desquels il a été commis. Il ne peut répondre à d'autres questions, sauf accord écrit des parties. Il ne doit jamais porter d'appréciations d'ordre juridique.",
+          "Le technicien doit faire connaître dans son avis toutes les informations qui apportent un éclaircissement sur les questions à examiner. [...] Il ne peut faire état que des informations légitimement recueillies.",
+          "L'expert doit faire mention, dans son avis, de la suite qu'il aura donnée aux observations ou réclamations présentées.",
+          "Il n'est rédigé qu'un seul rapport, même s'il y a plusieurs experts ; en cas de divergence, chacun indique son opinion.",
+          "Si l'expert a recueilli l'avis d'un autre technicien dans une spécialité distincte de la sienne, cet avis est joint, selon le cas, au rapport, au procès-verbal d'audience ou au dossier.",
+          "Dans les autres cas, l'expert doit déposer un rapport au greffe de la juridiction."
+        ],
+        "source": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006070716/LEGISCTA000006149657/"
+      },
+      "rights_duties": {
+        "basis": "Code de procédure civile, art. 233, 234, 235, 237, 239, 242, 243, 248; loi n° 71-498, art. 6",
+        "summary_en": "Mission performed personally (art. 233), with conscience, objectivity and impartiality (art. 237), within the deadlines set (art. 239). The technician may be challenged on the same grounds as judges (art. 234) and may be replaced if challenged, if he refuses the mission, has a legitimate impediment or fails in his duties (art. 235). He may take oral or written information from any person (art. 242) and request documents from parties and third parties (art. 243). He may not receive payment directly from a party without a court decision (art. 248). Unlisted experts swear the statutory oath at each appointment (loi n° 71-498, art. 6).",
+        "source": "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006070716/LEGISCTA000006149657/"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": "Loi n° 71-498 du 29 juin 1971 relative aux experts judiciaires",
+    "title_en": "Law no. 71-498 of 29 June 1971 on court experts (lists, oath, discipline)",
+    "source": "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000000874942"
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Code pénal, art. 434-20 (penalties by reference to art. 434-13 and 434-14)",
+      "summary_en": "An expert, in any matter, who falsifies the data or results of the expert examination in written reports or oral statements: 5 years' imprisonment and EUR 75,000 fine, or 7 years' imprisonment and EUR 100,000 fine in the aggravated cases of art. 434-14 (falsehood induced by a gift or reward, or where the person concerned faces a criminal (crime-level) penalty).",
+      "warning_local": "d'accomplir leur mission, de faire leur rapport et de donner leur avis en leur honneur et conscience",
+      "warning_en": "to perform their mission, make their report and give their opinion on their honour and conscience (statutory oath; no separate criminal-liability warning is prescribed for the report)",
+      "wording": "official",
+      "source": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006418656"
+    },
+    {
+      "route": "all",
+      "norm": "Loi n° 71-498 du 29 juin 1971, art. 6-2 (disciplinary liability)",
+      "summary_en": "Breach of the laws and regulations on the expert's profession or mission, or any breach of probity or honour, exposes a listed expert to disciplinary proceedings; sanctions: warning, temporary removal from the list for up to three years, or removal with permanent loss of the right to be listed (or withdrawal of honorary status).",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": "official",
+      "source": "https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000023276678"
+    }
+  ],
+  "declaration": {
+    "basis": "No statutory statement of truth is prescribed for the written report. The oath of loi n° 71-498, art. 6 is sworn on first listing by a court of appeal, or at each appointment by unlisted experts (CPP art. 160; for unlisted experts the oath may be given in writing by an oath letter annexed to the file). A report may recall that oath; the first-person wording below adapts the statutory formula.",
+    "text_local": "Je soussigné(e), [nom], expert [inscrit sur la liste de la cour d'appel de ... / ayant prêté serment le ...], atteste avoir accompli ma mission, fait mon rapport et donné mon avis en mon honneur et conscience.",
+    "text_en": "I, the undersigned, [name], expert [registered on the list of the court of appeal of ... / having sworn the oath on ...], attest that I have performed my mission, made my report and given my opinion on my honour and conscience.",
+    "wording": "composed",
+    "source": "https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000006492482"
+  },
+  "standards": [
+    {
+      "id": "ISO/IEC 27037:2012",
+      "national_id": "NF EN ISO/IEC 27037 (August 2017; adopts EN ISO/IEC 27037:2016)",
+      "title_en": "Guidelines for identification, collection, acquisition and preservation of digital evidence",
+      "status": "national adoption",
+      "issuer": "AFNOR",
+      "source": "https://www.boutique.afnor.org/en-gb/standard/nf-en-iso-iec-27037/information-technology-security-techniques-guidelines-for-identification-co/fa188082/73740"
+    },
+    {
+      "id": "ISO/IEC 27041:2015",
+      "national_id": "NF EN ISO/IEC 27041 (August 2017; adopts EN ISO/IEC 27041:2016)",
+      "title_en": "Guidance on assuring suitability and adequacy of incident investigative method",
+      "status": "national adoption",
+      "issuer": "AFNOR",
+      "source": "https://www.boutique.afnor.org/en-gb/standard/nf-en-iso-iec-27041/information-technology-security-techniques-guidance-on-assuring-suitability/fa188085/73759"
+    },
+    {
+      "id": "ISO/IEC 27042:2015",
+      "national_id": "NF EN ISO/IEC 27042 (August 2017; adopts EN ISO/IEC 27042:2016)",
+      "title_en": "Guidelines for the analysis and interpretation of digital evidence",
+      "status": "national adoption",
+      "issuer": "AFNOR",
+      "source": "https://www.boutique.afnor.org/en-gb/standard/nf-en-iso-iec-27042/information-technology-security-techniques-guidelines-for-the-analysis-and-/fa188086/73758"
+    },
+    {
+      "id": "ISO/IEC 27043:2015",
+      "national_id": "NF EN ISO/IEC 27043 (July 2017; adopts EN ISO/IEC 27043:2016; French index Z74-243)",
+      "title_en": "Incident investigation principles and processes",
+      "status": "national adoption",
+      "issuer": "AFNOR",
+      "source": "https://m.boutique.afnor.org/en-gb/standard/nf-en-iso-iec-27043/information-technology-security-techniques-incident-investigation-principle/fa188087/73741"
+    }
+  ],
+  "esignature": {
+    "law_local": "Règlement (UE) n° 910/2014 (eIDAS) modifié par le règlement (UE) 2024/1183 ; Code civil, art. 1366 et 1367 ; décret n° 2017-1416 du 28 septembre 2017 relatif à la signature électronique",
+    "law_en": "eIDAS Regulation (EU) No 910/2014 as amended by Regulation (EU) 2024/1183; Civil Code art. 1366-1367; Decree no. 2017-1416 of 28 September 2017 on electronic signatures (reliability of a signature process is presumed, until proven otherwise, when it uses a qualified electronic signature)",
+    "qualified_term_local": "signature électronique qualifiée (advanced: signature électronique avancée)",
+    "source": "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000035676246"
+  },
+  "timestamp": {
+    "basis": "Regulation (EU) No 910/2014, art. 41 and 42, as amended by Regulation (EU) 2024/1183",
+    "qualified_recognition": "A qualified electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which they are bound; it is recognised as qualified in all Member States. A non-qualified time stamp may not be denied legal effect or admissibility solely because it is electronic or not qualified.",
+    "source": "https://eur-lex.europa.eu/eli/reg/2014/910/oj/eng"
+  },
+  "open_questions": [
+    "No French national act specific to electronic time stamps was identified; confirm whether any French provision supplements eIDAS art. 41 for court evidence.",
+    "The CPP expertise section does not state whether a criminal expert may report findings outside the questions asked; practice and case law not verified.",
+    "Civil liability of court experts is not specifically codified in the texts checked; the general tort rules of the Code civil were not verified for this point.",
+    "EUR-Lex pages could not be rendered by the fetch tool; the eIDAS art. 41 wording was confirmed through search results citing EUR-Lex and should be re-read on the consolidated text (CELEX 02014R0910).",
+    "Whether accreditation (ISO/IEC 17025) is required for any category of digital-forensic expert reports in France was not verified."
+  ]
+}

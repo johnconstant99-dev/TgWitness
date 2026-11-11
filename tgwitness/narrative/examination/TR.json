@@ -1,0 +1,148 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "TR",
+  "name_en": "Türkiye",
+  "name_local": "Türkiye",
+  "court_languages": [
+    "tr"
+  ],
+  "local_language": "tr",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "bilirkişi",
+    "en": "court-appointed expert selected from the regional expert lists"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "5271 sayılı Ceza Muhakemesi Kanunu md. 63, 64, 66; 6754 sayılı Bilirkişilik Kanunu md. 12",
+        "summary_en": "Where the matter requires expertise or special or technical knowledge, an expert opinion may be ordered ex officio or on request of the prosecutor, the intervening party, the suspect or accused, or counsel. Appointment and the number of experts are for the judge or court; during the investigation the public prosecutor may also exercise these powers (CMK art. 63). Experts are selected from the lists of the regional expert boards for the regional appeal court's district; if no expert in the field is listed, from other regions' lists, and failing that from outside the lists subject to the conditions of 6754 art. 10 (CMK art. 64(1)-(2); 6754 art. 12(5)-(6)).",
+        "source": "https://www.mevzuat.gov.tr/mevzuat?MevzuatNo=5271&MevzuatTur=1&MevzuatTertip=5"
+      },
+      "questions": {
+        "basis": "CMK md. 66(1), md. 67(3); 6754 sayılı Kanun md. 3(2), (3), (6)",
+        "summary_en": "The appointing decision states the questions requiring expertise, special or technical knowledge, the subject of the examination and the time limit (CMK art. 66(1)). An expert may not be appointed without the problem being clearly stated and the scope and limits of the examination defined (6754 art. 3(6)); no expert may be used for matters resolvable by general knowledge or the judge's legal knowledge (6754 art. 3(3)). The expert may only address matters requiring expertise and may not make legal characterisations or assessments (CMK art. 67(3); 6754 art. 3(2)). No provision expressly allowing the expert to report on matters not asked was found.",
+        "source": "https://www.mevzuat.gov.tr/mevzuat?MevzuatNo=6754&MevzuatTur=1&MevzuatTertip=5"
+      },
+      "report_contents": {
+        "basis": "CMK md. 67(1)-(2); Bilirkişilik Yönetmeliği (RG 03.08.2017, 30143) md. 55",
+        "items_en": [
+          "authority that made the appointment",
+          "file number",
+          "information on the parties to the proceedings",
+          "date and duration of the appointment",
+          "subject of the examination",
+          "material items the expert was asked to observe and examine",
+          "examination method",
+          "scientific and technical bases",
+          "reasoned conclusion",
+          "date the report was drawn up",
+          "for a natural person: name and surname, title, registry number and signature",
+          "for a legal person: trade name, name of the legal representative, name, registry number and signature of the natural-person expert who drew up the report",
+          "where several experts differ, the differing views with reasons",
+          "attached diagrams, maps, sketches, photographs, tables and other records documenting the material items",
+          "no legal characterisation or assessment in the report or oral explanations"
+        ],
+        "items_local": [
+          "Görevlendirmeyi yapan merci.",
+          "Dosya numarası.",
+          "Yargılamanın taraflarına ait bilgiler.",
+          "Görevlendirme tarihi ve süresi.",
+          "İncelemenin konusu.",
+          "Kendisinden gözlemlenmesi ve incelenmesi istenen maddi unsurlar.",
+          "İnceleme yöntemi.",
+          "Bilimsel ve teknik dayanaklar.",
+          "Gerekçeli sonuç.",
+          "Raporun düzenlenme tarihi.",
+          "Bilirkişi gerçek kişi ise adı ve soyadı, unvanı, sicil numarası ve imzası.",
+          "Bilirkişi tüzel kişi ise ticaret unvanı, kanuni temsilcisinin adı ve soyadı, tüzel kişi adına raporu tanzim eden gerçek kişi bilirkişinin adı ve soyadı ile sicil numarası ve imzası.",
+          "Birden fazla bilirkişi görevlendirilen durumlarda, farklı görüşler varsa raporda ayrı ayrı açıklanır.",
+          "Bilirkişi raporuna, incelemeye esas maddi unsurları belgeleyen ve sonuçların açıklanmasına yardımcı olan şema, harita, kroki, fotoğraf, tablo ile diğer kayıt ve belgeler de eklenir.",
+          "Bilirkişi, raporunda ve sözlü açıklamaları sırasında hukuki nitelendirme ve değerlendirmelerde bulunamaz."
+        ],
+        "source": "https://www.mevzuat.gov.tr/mevzuat?MevzuatNo=23818&MevzuatTur=7&MevzuatTertip=5"
+      },
+      "rights_duties": {
+        "basis": "6754 sayılı Kanun md. 3; CMK md. 62, 65; Bilirkişilik Yönetmeliği md. 9, 53",
+        "summary_en": "The expert performs the task independently, impartially and objectively in good faith (6754 art. 3(1)); must perform it personally and may not delegate it (art. 3(4)); must keep information and secrets confidential, also after the task ends (art. 3(5)); as a rule only one report is obtained on the same matter, with supplementary reports to cure gaps (art. 3(7)). Witness provisions apply to experts unless contrary to the expert articles (CMK art. 62); listed experts and persons practising the relevant profession must accept appointments (CMK art. 65). An expert with an excuse justifying withdrawal must notify the appointing authority within one week at the latest (Regulation art. 53).",
+        "source": "https://www.mevzuat.gov.tr/mevzuat?MevzuatNo=6754&MevzuatTur=1&MevzuatTertip=5"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "6100 sayılı Hukuk Muhakemeleri Kanunu md. 266–287 (bilirkişi incelemesi); 6754 sayılı Kanun md. 12",
+        "summary_en": "The civil court appoints the expert from the regional expert board lists (6754 art. 12(5)); article-level HMK provisions could not be retrieved, see open_questions.",
+        "source": "https://www.mevzuat.gov.tr/mevzuat?MevzuatNo=6100&MevzuatTur=1&MevzuatTertip=5"
+      },
+      "questions": {
+        "basis": "6754 sayılı Kanun md. 3(2), (3), (6)",
+        "summary_en": "Same statutory principles as the criminal route: the problem and the scope of the examination must be clearly defined; no legal characterisation or assessment by the expert; no expert for matters within general knowledge or the judge's legal knowledge.",
+        "source": "https://www.mevzuat.gov.tr/mevzuat?MevzuatNo=6754&MevzuatTur=1&MevzuatTertip=5"
+      },
+      "report_contents": {
+        "basis": "Bilirkişilik Yönetmeliği md. 55 (applies to civil, administrative and criminal proceedings)",
+        "items_en": [
+          "same list as the criminal route (Regulation art. 55)"
+        ],
+        "items_local": [
+          "Bilirkişilik Yönetmeliği md. 55 (1) a–i, (2), (3), (4)"
+        ],
+        "source": "https://www.mevzuat.gov.tr/mevzuat?MevzuatNo=23818&MevzuatTur=7&MevzuatTertip=5"
+      },
+      "rights_duties": {
+        "basis": "6754 sayılı Kanun md. 3; Bilirkişilik Yönetmeliği md. 9, 53",
+        "summary_en": "Independence, impartiality, objectivity, personal performance, confidentiality; withdrawal excuse to be notified within one week.",
+        "source": "https://www.mevzuat.gov.tr/mevzuat?MevzuatNo=6754&MevzuatTur=1&MevzuatTertip=5"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": "6754 sayılı Bilirkişilik Kanunu",
+    "title_en": "Law No. 6754 on Expert Witnesses (Bilirkişilik Kanunu), with the Bilirkişilik Yönetmeliği (RG 03.08.2017, No. 30143)",
+    "source": "https://www.mevzuat.gov.tr/mevzuat?MevzuatNo=6754&MevzuatTur=1&MevzuatTertip=5"
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "5237 sayılı Türk Ceza Kanunu md. 276 (Gerçeğe aykırı bilirkişi mütalaası); Bilirkişilik Yönetmeliği md. 58",
+      "summary_en": "An expert who knowingly gives an opinion contrary to the truth is liable under TCK art. 276 (Regulation art. 58(2)); the expert is a public official for the purposes of the Penal Code (art. 58(1)). Persons harmed by a report contrary to the truth made intentionally or with gross negligence and relied on in a judgment may sue the State, which has recourse against the expert (art. 58(3)-(4)). The penalty range of TCK art. 276 was not verified.",
+      "warning_local": "Görevimi adalete bağlı kalarak, bilim ve fenne uygun olarak, tarafsızlıkla yerine getireceğime namusum ve vicdanım üzerine yemin ederim.",
+      "warning_en": "I swear upon my honour and conscience that I will perform my duty faithful to justice, in accordance with science and technique, and impartially.",
+      "wording": "official",
+      "source": "https://www.mevzuat.gov.tr/mevzuat?MevzuatNo=5271&MevzuatTur=1&MevzuatTertip=5"
+    }
+  ],
+  "declaration": {
+    "basis": "CMK md. 64(5); HMK md. 271(1) (referenced by Bilirkişilik Yönetmeliği md. 44): listed experts take the oath once before the regional expert board or the provincial judicial commission; no separate declaration in each report was found",
+    "text_local": "Görevimi adalete bağlı kalarak, bilim ve fenne uygun olarak, tarafsızlıkla yerine getireceğime namusum ve vicdanım üzerine yemin ederim.",
+    "text_en": "I swear upon my honour and conscience that I will perform my duty faithful to justice, in accordance with science and technique, and impartially.",
+    "wording": "official",
+    "source": "https://www.mevzuat.gov.tr/mevzuat?MevzuatNo=5271&MevzuatTur=1&MevzuatTertip=5"
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "5070 sayılı Elektronik İmza Kanunu",
+    "law_en": "Electronic Signature Law No. 5070",
+    "qualified_term_local": "güvenli elektronik imza",
+    "source": "https://www.mevzuat.gov.tr/mevzuat?MevzuatNo=5070&MevzuatTur=1&MevzuatTertip=5"
+  },
+  "timestamp": {
+    "basis": "5070 sayılı Elektronik İmza Kanunu md. 3(h) (zaman damgası); md. 5(1)",
+    "qualified_recognition": "A time stamp (zaman damgası) is defined as a record verified with the electronic signature of an electronic certificate service provider to establish the time at which electronic data was produced, changed, sent, received and/or recorded. A secure electronic signature has the same legal effect as a handwritten signature (art. 5(1)). No separate statutory presumption for time stamps was found in Law 5070.",
+    "source": "https://www.mevzuat.gov.tr/mevzuat?MevzuatNo=5070&MevzuatTur=1&MevzuatTertip=5"
+  },
+  "open_questions": [
+    "TCK md. 276: text and penalty range could not be retrieved from mevzuat.gov.tr (the consolidated page is truncated before art. 276; tbmm.gov.tr failed TLS). Penalty left unverified.",
+    "HMK md. 266–287: the consolidated HMK page on mevzuat.gov.tr is truncated before these articles; appointment, question-setting, report and oath provisions of HMK (incl. md. 271(1), 279, 280) were not verified article by article. Civil-route summary relies on 6754 and the Bilirkişilik Yönetmeliği.",
+    "Bilirkişilik Yönetmeliği md. 58 (public-official status, TCK 276 reference, State liability with recourse) was read through a single automated extraction of the mevzuat.gov.tr page; re-check against the official text.",
+    "CMK md. 67(1) wording differs between two extractions (one includes 'kendisinden istenen incelemeleri yaptığını ayrıca belirterek'); not quoted verbatim.",
+    "The Ministry of Justice guidance 'Bilirkişilerin Uyacağı Rehber İlkeler ve Bilirkişi Raporlarında Bulunması Gereken Standartlar' (bilirkisilik.adalet.gov.tr) and the official report templates (Word/UDF) could not be parsed; their mandatory headings and any fixed statements were not verified.",
+    "No TSE national adoption (TS ISO/IEC 27037/27041/27042/27043) could be verified; the TSE catalogue was not searched.",
+    "Whether a ISO/IEC 17025 accreditation requirement applies to forensic (e.g. Adli Tıp Kurumu, police criminal laboratories) digital-evidence reports was not checked.",
+    "Implementing regulation on electronic signature procedures (time-stamp rules) was not checked."
+  ]
+}

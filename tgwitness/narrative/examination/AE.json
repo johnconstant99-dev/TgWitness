@@ -1,0 +1,103 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "AE",
+  "name_en": "United Arab Emirates (federal)",
+  "name_local": "الإمارات العربية المتحدة",
+  "court_languages": [
+    "ar"
+  ],
+  "local_language": "ar",
+  "legal_family": "mixed",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "الخبير",
+    "en": "expert appointed by a judicial authority (term in common use; the statutory definition was not verified)"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": null,
+        "items_en": [],
+        "items_local": [],
+        "source": null
+      },
+      "rights_duties": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": null,
+        "items_en": [],
+        "items_local": [],
+        "source": null
+      },
+      "rights_duties": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": null,
+    "source": null
+  },
+  "liability": [],
+  "declaration": {
+    "basis": null,
+    "text_local": null,
+    "text_en": null,
+    "wording": null,
+    "source": null
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": null,
+    "law_en": null,
+    "qualified_term_local": null,
+    "source": null
+  },
+  "timestamp": {
+    "basis": null,
+    "qualified_recognition": null,
+    "source": null
+  },
+  "open_questions": [
+    "Access blocked: uaelegislation.gov.ae returned HTTP 403 to every request (WebFetch and direct). moj.gov.ae returned 'Request Rejected'. elaws.moj.gov.ae, u.ae, tdra.gov.ae, uaecabinet.ae, dc.gov.ae and dlp.dubai.gov.ae were unreachable or refused. The web-search quota was exhausted before alternative official copies could be located. No federal text could be verified, so every field is null.",
+    "Federal Decree-Law No. 35 of 2022 promulgating the Law of Evidence in Civil and Commercial Transactions: the articles on expertise (الخبرة), covering appointment, mission, the expert's oath, report contents, objections, recusal and fees, are unverified. So are the provisions on electronic or digital evidence (الدليل الإلكتروني).",
+    "Federal Law No. 7 of 2023 Regulating Expertise before Judicial Authorities: registration of experts, duties, prohibitions, the expert's oath formula, disciplinary penalties and any criminal penalty are unverified. Not confirmed whether it repealed Federal Law No. 7 of 2012.",
+    "Federal Decree-Law No. 38 of 2022 (Criminal Procedure Law): articles on the use of experts by judicial police, the Public Prosecution and the courts, the expert's oath before the prosecutor or court, and report requirements are unverified.",
+    "Federal Decree-Law No. 31 of 2021 (Crimes and Penalties Law): the article(s) punishing a false expert opinion or report, and the maximum penalty, are unverified.",
+    "Federal Decree-Law No. 46 of 2021 on Electronic Transactions and Trust Services: the term for the qualified signature (التوقيع الإلكتروني المعتمد or similar), qualified electronic time-stamps, and their presumptions or legal effect are unverified.",
+    "No UAE national adoption or official guidance on ISO/IEC 27037/27041/27042/27043 or ISO/IEC 17025 for digital forensic reports was verified (Ministry of Industry and Advanced Technology / UAE standards; Dubai Police and Abu Dhabi Police forensic laboratory requirements).",
+    "Abu Dhabi Judicial Department (adjd.gov.ae, reachable) publishes bilingual judicial expertise forms: a final/preliminary expert report form with sections Mission, Disputed Claim, Expert Procedures, Case Analysis and Responding to objections, plus a minutes-of-expertise form. These are local Abu Dhabi forms (2020 edition, commercial court) and were not used as federal sources. Check whether they reflect Federal Law No. 7 of 2023.",
+    "Legal family 'mixed' (civil law with Islamic law elements) is a general classification, not taken from a cited source."
+  ]
+}

@@ -1,0 +1,205 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "DE",
+  "name_en": "Germany",
+  "name_local": "Deutschland",
+  "court_languages": [
+    "de"
+  ],
+  "local_language": "de",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "Sachverständiger",
+    "en": "expert appointed by the court (or summoned by the public prosecutor in criminal investigations)"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Strafprozessordnung (StPO) §§ 72, 73, 161a",
+        "summary_en": "The judge selects the experts and determines their number and should agree with them on a deadline for the opinion (§ 73(1)). Where experts are publicly appointed for a type of opinion, others are chosen only if special circumstances require it (§ 73(2)). In the investigation stage experts must appear before the public prosecutor on summons and give their opinion; sworn examination is reserved to the judge (§ 161a(1)). The rules on witnesses apply to experts unless the expert provisions differ (§ 72).",
+        "source": "https://www.gesetze-im-internet.de/stpo/__73.html"
+      },
+      "questions": {
+        "basis": "StPO §§ 78, 80",
+        "summary_en": "The judge directs the expert's activity insofar as necessary (§ 78). At the expert's request, further clarification can be provided by examining witnesses or the accused; the expert may be allowed to inspect the files, attend examinations and put questions directly (§ 80). The StPO contains no express rule on declining questions outside the expertise or on reporting facts not asked about.",
+        "source": "https://www.gesetze-im-internet.de/stpo/__78.html"
+      },
+      "report_contents": {
+        "basis": "StPO §§ 79, 82 (no statutory list of report sections)",
+        "items_en": [
+          "Opinion given in writing or orally as ordered by the judge in the preliminary proceedings (§ 82)",
+          "If the court orders an oath: oath after the opinion that it was rendered impartially and to the best of knowledge and conscience (§ 79(2))",
+          "A generally sworn expert may refer to the oath already taken (§ 79(3))"
+        ],
+        "items_local": [
+          "Im Vorverfahren hängt es von der Anordnung des Richters ab, ob die Sachverständigen ihr Gutachten schriftlich oder mündlich zu erstatten haben.",
+          "Der Eid ist nach Erstattung des Gutachtens zu leisten; er geht dahin, daß der Sachverständige das Gutachten unparteiisch und nach bestem Wissen und Gewissen erstattet habe.",
+          "Ist der Sachverständige für die Erstattung von Gutachten der betreffenden Art im allgemeinen vereidigt, so genügt die Berufung auf den geleisteten Eid."
+        ],
+        "source": "https://www.gesetze-im-internet.de/stpo/__82.html"
+      },
+      "rights_duties": {
+        "basis": "StPO §§ 74, 75, 76, 77",
+        "summary_en": "An expert may be challenged on the same grounds as a judge; prior testimony as a witness is not a ground (§ 74). A person publicly appointed for the type of opinion, or who publicly practises the relevant science, art or trade, or who declared readiness before the court, must accept the appointment (§ 75). The grounds that entitle a witness to refuse testimony entitle the expert to refuse the opinion; release on other grounds is possible (§ 76). Non-appearance or unjustified refusal leads to costs and an administrative fine (Ordnungsgeld); the same applies where the expert refuses to agree a reasonable deadline or misses it after warning (§ 77).",
+        "source": "https://www.gesetze-im-internet.de/stpo/__74.html"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Zivilprozessordnung (ZPO) §§ 402, 403, 404",
+        "summary_en": "Expert evidence is offered by designating the points to be assessed (§ 403). The trial court selects the experts and their number and may replace them; the parties may be heard on the person beforehand; publicly appointed experts are preferred unless special circumstances require otherwise; if the parties agree on particular persons, the court must follow that agreement (§ 404).",
+        "source": "https://www.gesetze-im-internet.de/zpo/__404.html"
+      },
+      "questions": {
+        "basis": "ZPO §§ 359, 403, 404a, 407a(1) and (4)",
+        "summary_en": "The order for evidence (Beweisbeschluss) states the disputed facts and names the expert (§ 359). The court directs the expert and may give instructions; it determines which facts the expert must assume where facts are disputed, and to what extent the expert may investigate and contact the parties; instructions are communicated to the parties (§ 404a). The expert must check without delay whether the assignment falls within the expert's field and can be done without further experts and within the deadline, and must inform the court if not (§ 407a(1)); doubts about content and scope must be clarified with the court without delay (§ 407a(4)). No statutory rule addresses reporting facts not asked about.",
+        "source": "https://www.gesetze-im-internet.de/zpo/__404a.html"
+      },
+      "report_contents": {
+        "basis": "ZPO §§ 411(1), 407a(3), 404a(3), 410(2) (no statutory list of report sections)",
+        "items_en": [
+          "Written opinion signed by the expert and delivered within the court's deadline (§ 411(1))",
+          "Names of any other persons who assisted and the extent of their work, unless only subordinate auxiliary services (§ 407a(3))",
+          "Opinion based on the facts the court directed the expert to assume where facts are disputed (§ 404a(3))",
+          "Optional: a generally sworn expert may declare in the written opinion that the expert relies on the oath already taken (§ 410(2))"
+        ],
+        "items_local": [
+          "Wird schriftliche Begutachtung angeordnet, setzt das Gericht dem Sachverständigen eine Frist, innerhalb derer er das von ihm unterschriebene Gutachten zu übermitteln hat.",
+          "Soweit er sich der Mitarbeit einer anderen Person bedient, hat er diese namhaft zu machen und den Umfang ihrer Tätigkeit anzugeben, falls es sich nicht um Hilfsdienste von untergeordneter Bedeutung handelt.",
+          "Bei streitigem Sachverhalt bestimmt das Gericht, welche Tatsachen der Sachverständige der Begutachtung zugrunde legen soll.",
+          "Ist der Sachverständige für die Erstattung von Gutachten der betreffenden Art im Allgemeinen beeidigt, so genügt die Berufung auf den geleisteten Eid; sie kann auch in einem schriftlichen Gutachten erklärt werden."
+        ],
+        "source": "https://www.gesetze-im-internet.de/zpo/__411.html"
+      },
+      "rights_duties": {
+        "basis": "ZPO §§ 406, 407, 407a, 408, 411(2)",
+        "summary_en": "Challenge on the same grounds as a judge (§ 406). Duty to accept the appointment for publicly appointed or practising experts or those who declared readiness (§ 407). Duty to check without delay for grounds that could justify distrust of impartiality and to disclose them to the court, failing which an Ordnungsgeld may be imposed (§ 407a(2)); no delegation of the assignment (§ 407a(3)); warn of disproportionate costs (§ 407a(4)); hand over files and results on request (§ 407a(5)); the court should inform the expert of these duties (§ 407a(6)). Same refusal grounds as witnesses (§ 408). Missing the deadline: Ordnungsgeld after warning, each up to EUR 3,000 (§ 411(2)).",
+        "source": "https://www.gesetze-im-internet.de/zpo/__407a.html"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": "No federal statute dedicated to forensic expert activity was identified. Public appointment of experts in economic fields is governed by § 36 Gewerbeordnung (Öffentliche Bestellung von Sachverständigen).",
+    "source": "https://www.gesetze-im-internet.de/gewo/__36.html"
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Strafgesetzbuch (StGB) § 153 (Falsche uneidliche Aussage)",
+      "summary_en": "An expert who gives false unsworn testimony before a court or another body competent to examine witnesses or experts under oath: imprisonment from three months to five years.",
+      "warning_local": "Vor der Vernehmung werden die Zeugen zur Wahrheit ermahnt und über die strafrechtlichen Folgen einer unrichtigen oder unvollständigen Aussage belehrt.",
+      "warning_en": "Before the examination, witnesses are admonished to tell the truth and instructed on the criminal consequences of an incorrect or incomplete statement. (StPO § 57 first sentence, applied to experts by StPO § 72; this is an instruction given by the court, not a form the expert signs.)",
+      "wording": "official",
+      "source": "https://www.gesetze-im-internet.de/stgb/__153.html"
+    },
+    {
+      "route": "all",
+      "norm": "StGB § 154 (Meineid)",
+      "summary_en": "Swearing falsely before a court or other body competent to administer oaths: imprisonment of not less than one year (statutory maximum for fixed-term imprisonment is 15 years under StGB § 38(2)); in less serious cases six months to five years. Applies where the expert is sworn under StPO § 79 or ZPO § 410, including reliance on a general oath.",
+      "warning_local": "Die Eidesnorm geht dahin, dass der Sachverständige das von ihm erforderte Gutachten unparteiisch und nach bestem Wissen und Gewissen erstatten werde oder erstattet habe.",
+      "warning_en": "The oath states that the expert will render or has rendered the required opinion impartially and to the best of knowledge and conscience. (ZPO § 410(1) second sentence; StPO § 79(2) has equivalent wording.)",
+      "wording": "official",
+      "source": "https://www.gesetze-im-internet.de/stgb/__154.html"
+    },
+    {
+      "route": "all",
+      "norm": "StGB § 161 (Fahrlässiger Falscheid; fahrlässige falsche Versicherung an Eides Statt)",
+      "summary_en": "Negligent commission of the acts in §§ 154 to 156: imprisonment up to one year or a fine; no punishment if the false statement is corrected in time.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": "official",
+      "source": "https://www.gesetze-im-internet.de/stgb/__161.html"
+    },
+    {
+      "route": "civil",
+      "norm": "Bürgerliches Gesetzbuch (BGB) § 839a (Haftung des gerichtlichen Sachverständigen)",
+      "summary_en": "A court-appointed expert who intentionally or with gross negligence produces an incorrect opinion is liable for the damage a party suffers through a court decision based on that opinion; § 839(3) (failure to use a legal remedy) applies accordingly.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": "official",
+      "source": "https://www.gesetze-im-internet.de/bgb/__839a.html"
+    }
+  ],
+  "declaration": {
+    "basis": "ZPO § 410(2) and StPO § 79(3): a generally sworn expert may rely on the oath already taken; under ZPO § 410(2) this may be declared in the written opinion. No statute prescribes the wording of the declaration.",
+    "text_local": "Ich versichere unter Berufung auf meinen allgemein geleisteten Sachverständigeneid, dass ich dieses Gutachten unparteiisch und nach bestem Wissen und Gewissen erstattet habe.",
+    "text_en": "Relying on my general expert's oath, I affirm that I have rendered this opinion impartially and to the best of my knowledge and conscience.",
+    "wording": "composed",
+    "source": "https://www.gesetze-im-internet.de/zpo/__410.html"
+  },
+  "standards": [
+    {
+      "id": "ISO/IEC 27037:2012",
+      "national_id": "DIN EN ISO/IEC 27037:2016-12",
+      "title_en": "Guidelines for identification, collection, acquisition and preservation of digital evidence (German version EN ISO/IEC 27037:2016)",
+      "status": "national adoption",
+      "issuer": "DIN",
+      "source": "https://www.dinmedia.de/en/standard/din-en-iso-iec-27037/258473984"
+    },
+    {
+      "id": "ISO/IEC 27041:2015",
+      "national_id": "DIN EN ISO/IEC 27041:2016-12",
+      "title_en": "Guidance on assuring suitability and adequacy of incident investigative method",
+      "status": "national adoption",
+      "issuer": "DIN",
+      "source": "https://www.dinmedia.de/en/standard/din-en-iso-iec-27041/258475000"
+    },
+    {
+      "id": "ISO/IEC 27042:2015",
+      "national_id": "DIN EN ISO/IEC 27042:2016-12",
+      "title_en": "Guidelines for the analysis and interpretation of digital evidence",
+      "status": "national adoption",
+      "issuer": "DIN",
+      "source": "https://www.dinmedia.de/en/standard/din-en-iso-iec-27042/258475069"
+    },
+    {
+      "id": "ISO/IEC 27043:2015",
+      "national_id": "DIN EN ISO/IEC 27043:2016-12",
+      "title_en": "Incident investigation principles and processes",
+      "status": "national adoption",
+      "issuer": "DIN",
+      "source": "https://www.dinmedia.de/en/standard/din-en-iso-iec-27043/258475187"
+    },
+    {
+      "id": "BSI Leitfaden IT-Forensik v1.0.1 (2011)",
+      "national_id": null,
+      "title_en": "BSI guideline for IT forensics",
+      "status": "official guidance",
+      "issuer": "Bundesamt für Sicherheit in der Informationstechnik (BSI)",
+      "source": "https://www.bsi.bund.de/DE/Themen/Oeffentliche-Verwaltung/Sicherheitspruefungen/IT-Forensik/forensik_node.html"
+    },
+    {
+      "id": "BSI IT-Grundschutz DER.2.2",
+      "national_id": null,
+      "title_en": "Preparing for IT forensics (IT-Grundschutz module)",
+      "status": "official guidance",
+      "issuer": "Bundesamt für Sicherheit in der Informationstechnik (BSI)",
+      "source": "https://www.bsi.bund.de/SharedDocs/Downloads/DE/BSI/Grundschutz/IT-GS-Kompendium_Einzel_PDFs_2023/05_DER_Detektion_und_Reaktion/DER_2_2_Vorsorge_fuer_die_IT_Forensik_2023.pdf?__blob=publicationFile&v=3"
+    }
+  ],
+  "esignature": {
+    "law_local": "Verordnung (EU) Nr. 910/2014 (eIDAS) in der Fassung der Verordnung (EU) 2024/1183; Vertrauensdienstegesetz (VDG); § 371a ZPO (Beweiskraft elektronischer Dokumente)",
+    "law_en": "Regulation (EU) No 910/2014 (eIDAS) as amended by Regulation (EU) 2024/1183; Trust Services Act (VDG), which implements the eIDAS trust-service provisions; ZPO § 371a on the evidential value of electronic documents bearing a qualified electronic signature",
+    "qualified_term_local": "qualifizierte elektronische Signatur",
+    "source": "https://www.gesetze-im-internet.de/vdg/__1.html"
+  },
+  "timestamp": {
+    "basis": "Regulation (EU) No 910/2014 Art. 41 as amended by Regulation (EU) 2024/1183 (Art. 41(3) deleted; cross-border recognition moved to Art. 24a)",
+    "qualified_recognition": "A qualified electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which they are bound (Art. 41(2)). An electronic time stamp may not be denied legal effect or admissibility as evidence solely because it is electronic or not qualified (Art. 41(1)). A qualified electronic time stamp provided in one Member State is recognised as qualified in all other Member States (Art. 24a). No separate German statutory presumption for time stamps was identified.",
+    "source": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02014R0910-20241018"
+  },
+  "open_questions": [
+    "EUR-Lex could not be loaded directly by the research tool; the wording of eIDAS Art. 25, 41 and 24a after Regulation (EU) 2024/1183 was checked only through search-index excerpts of the EUR-Lex documents. The paragraph number of Art. 24a covering time stamps was not confirmed.",
+    "Neither StPO nor ZPO lists mandatory sections of an expert report; any further structure (findings, method, answers to questions, limitations) comes from case law or professional rules (e.g. IHK expert regulations), which were not verified.",
+    "Whether an expert may decline questions outside the expertise or report facts not asked about is not expressly regulated; relevant case law was not verified.",
+    "StGB § 153 refers to giving false testimony (aussagt) before a court; whether a purely written opinion not presented orally falls under § 153 was not verified.",
+    "The maximum Ordnungsgeld under StPO § 77 is not stated in the section itself; the general limit in the Introductory Act to the Criminal Code (EGStGB Art. 6) was not verified.",
+    "No official or court-documented model wording for an expert's declaration or statement of truth in a written report was found; the declaration text is composed.",
+    "No German statute, regulation or court rule was found that makes any digital-forensics standard binding for court experts."
+  ]
+}

@@ -10,7 +10,9 @@
     "check_drand": false,
     "check_bitcoin": false,
     "require_tier": "self_attested",
-    "require_pinned_signer": false
+    "require_pinned_signer": false,
+    "expert": false,
+    "procedure": "criminal"
   },
   "profiles": {
     "ru-html": {
@@ -24,6 +26,13 @@
       "require_pinned_signer": true,
       "check_drand": true,
       "check_bitcoin": true
+    },
+    "pl-expert": {
+      "lang": "pl",
+      "jurisdiction": "PL",
+      "expert": true,
+      "procedure": "criminal",
+      "require_pinned_signer": true
     },
     "json-only": {
       "outputs": ["json"],

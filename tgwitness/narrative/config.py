@@ -4,6 +4,7 @@ import re
 
 from ..verify import ASSURANCE_TIERS
 from .text import LANGUAGES, ROOT
+from .expert import PROCEDURES, codes as examination_codes
 
 FORMAT = 'tgwitness-narrative-config-v1'
 OUTPUTS = ('pdf', 'html', 'json', 'svg')
@@ -15,6 +16,7 @@ DEFAULTS = {
     'fingerprint': None, 'witness': None, 'witness_fingerprint': None, 'tsa_ca': None,
     'check_drand': False, 'check_bitcoin': False,
     'require_tier': 'self_attested', 'require_pinned_signer': False,
+    'expert': False, 'procedure': 'criminal',
 }
 PATHS = ('witness', 'tsa_ca')
 
@@ -36,7 +38,7 @@ def validate(values):
     result = {**DEFAULTS, **values}
     if result['lang'] not in LANGUAGES:
         raise ValueError('Unsupported narrative language')
-    jurisdictions = {p.stem for p in (ROOT / 'jurisdictions').glob('*.json')}
+    jurisdictions = {p.stem for p in (ROOT / 'jurisdictions').glob('*.json')} | examination_codes()
     if result['jurisdiction'] is not None and (
             not isinstance(result['jurisdiction'], str) or result['jurisdiction'] not in jurisdictions):
         raise ValueError('Unsupported narrative jurisdiction')
@@ -53,7 +55,9 @@ def validate(values):
     for key, ceiling in (('max_records', 1000000), ('scene_max_records', 10000)):
         if type(result[key]) is not int or not 1 <= result[key] <= ceiling:
             raise ValueError(key + ' must be an integer from 1 to ' + str(ceiling))
-    for key in ('check_drand', 'check_bitcoin', 'require_pinned_signer'):
+    if result['procedure'] not in PROCEDURES:
+        raise ValueError('procedure must be one of: ' + ', '.join(PROCEDURES))
+    for key in ('check_drand', 'check_bitcoin', 'require_pinned_signer', 'expert'):
         if type(result[key]) is not bool:
             raise ValueError(key + ' must be a boolean')
     for key in ('fingerprint', 'witness_fingerprint'):
@@ -118,6 +122,8 @@ def example():
         'ru-html': {'lang': 'ru', 'outputs': ['html', 'json', 'svg']},
         'de-proof': {'lang': 'de', 'jurisdiction': 'DE', 'require_tier': 'witness_anchored',
                      'require_pinned_signer': True, 'check_drand': True, 'check_bitcoin': True},
+        'pl-expert': {'lang': 'pl', 'jurisdiction': 'PL', 'expert': True, 'procedure': 'criminal',
+                      'require_pinned_signer': True},
     }}
 
 

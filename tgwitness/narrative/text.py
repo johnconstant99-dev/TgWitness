@@ -4,7 +4,8 @@ from pathlib import Path
 import re
 
 LANGUAGES = ('en', 'de', 'fr', 'es', 'it', 'pt', 'nl', 'pl', 'cs', 'sk', 'uk', 'ru', 'ro', 'bg',
-             'hu', 'el', 'sv', 'da', 'fi', 'no', 'lt', 'lv', 'et', 'tr', 'ja')
+             'hu', 'el', 'sv', 'da', 'fi', 'no', 'lt', 'lv', 'et', 'tr', 'ja', 'zh', 'zh-Hant', 'ko',
+             'ar', 'he', 'fa', 'hi', 'ur', 'bn', 'id', 'ms', 'vi', 'th', 'uz')
 ROOT = Path(__file__).parent
 
 
@@ -13,7 +14,7 @@ def category(number, lang):
     if not number.is_finite():
         raise ValueError('Plural count must be finite')
     integer, visible = int(number), max(0, -number.as_tuple().exponent)
-    if lang == 'ja':
+    if lang in ('ja', 'zh', 'zh-Hant', 'ko', 'id', 'ms', 'vi', 'th'):
         return 'other'
     if lang in ('ru', 'uk'):
         if visible:

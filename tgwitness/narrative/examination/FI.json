@@ -1,0 +1,149 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "FI",
+  "name_en": "Finland",
+  "name_local": "Suomi / Finland",
+  "court_languages": [
+    "fi",
+    "sv"
+  ],
+  "local_language": "fi",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "asiantuntija (sv: sakkunnig)",
+    "en": "expert heard on rules of experience requiring special knowledge and their application to the facts; nominated by a party or by the court of its own motion"
+  },
+  "procedures": [
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Oikeudenkäymiskaari (4/1734) 17 luku 7 § 1 mom., 9 § 1 mom., 34 §, 66 §; 5 luku 25 §",
+        "summary_en": "The parties must obtain the necessary evidence, but the court always has the right to obtain an expert opinion on its own motion regardless of the nature of the case (17:7). Experts may be nominated by a party or by the court; fee liability follows the nominator, and the private parties are jointly liable for a court-nominated expert's fee (17:66). The decision to obtain an expert opinion is taken during preparation where needed to have all evidence available at the main hearing (5:25). The duty to act as an expert is regulated separately (17:9). Experts are heard on rules of experience requiring special knowledge and on their application to the facts of the case (17:34).",
+        "source": "https://www.finlex.fi/fi/lainsaadanto/1734/4"
+      },
+      "questions": {
+        "basis": "Oikeudenkäymiskaari 17 luku 34 §, 36 § 2 mom., 49 §",
+        "summary_en": "The subject matter of expert evidence is defined by 17:34 (rules of experience requiring special knowledge and their application). Chapter 17 contains no express rule on who formulates the questions or on the expert declining questions outside the expertise or reporting unasked facts (not found). The expert must be heard orally if needed to remove ambiguities, gaps or contradictions in the statement, if the court finds it necessary for another reason, or if a party requests it and the hearing is not manifestly pointless (17:36(2)); examination follows 17:49 and 17:48(3)-(6).",
+        "source": "https://www.finlex.fi/fi/lainsaadanto/1734/4"
+      },
+      "report_contents": {
+        "basis": "Oikeudenkäymiskaari 17 luku 36 § 1 mom. (and 34 § on subject matter)",
+        "items_en": [
+          "The expert gives the statement in writing (17:36(1))",
+          "Subject matter: rules of experience requiring special knowledge and their application to the facts of the case (17:34)"
+        ],
+        "items_local": [
+          "Asiantuntija antaa lausuntonsa kirjallisesti.",
+          "Asiantuntijaa kuullaan erityisiä tietoja vaativista kokemussäännöistä sekä niiden soveltamisesta asiassa ilmenneisiin seikkoihin."
+        ],
+        "items_local_sv": [
+          "En sakkunnig ska ge sitt utlåtande skriftligt.",
+          "Sakkunniga hörs om erfarenhetssatser som kräver särskild kunskap och om tillämpningen av dessa erfarenhetssatser på de omständigheter som framkommit i ärendet."
+        ],
+        "source": "https://www.finlex.fi/fi/lainsaadanto/1734/4"
+      },
+      "rights_duties": {
+        "basis": "Oikeudenkäymiskaari 17 luku 35 §, 36 § 2 mom., 43 §, 45 §, 46 §, 66 §",
+        "summary_en": "The expert must be known as honest and skilled in the field; a person whose relationship to the case or a party endangers impartiality may not act as expert (17:35). Before oral examination the presiding judge checks identity and obstacles to the assurance (17:43); the expert gives the statutory assurance (17:45) and is reminded of the duty of truth and the importance of the assurance (17:46). Right to reasonable fee and necessary costs, and to an advance (17:66).",
+        "source": "https://www.finlex.fi/fi/lainsaadanto/1734/4"
+      }
+    },
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Oikeudenkäymiskaari 17 luku 7 § 1 mom., 34-37 §",
+        "summary_en": "Chapter 17 applies to criminal cases. In criminal cases the court may obtain evidence only if it is likely not to support the charge, but it always has the right to obtain an expert opinion on its own motion (17:7). The prosecutor and the defence may nominate experts. 17:37 governs court-ordered examination of the defendant's mental state.",
+        "source": "https://www.finlex.fi/fi/lainsaadanto/1734/4"
+      },
+      "questions": {
+        "basis": "Oikeudenkäymiskaari 17 luku 34 §, 36 § 2 mom.",
+        "summary_en": "Same as the civil route; no express rule found on question formulation by the court or on volunteering facts.",
+        "source": "https://www.finlex.fi/fi/lainsaadanto/1734/4"
+      },
+      "report_contents": {
+        "basis": "Oikeudenkäymiskaari 17 luku 36 § 1 mom.",
+        "items_en": [
+          "The expert gives the statement in writing (17:36(1))"
+        ],
+        "items_local": [
+          "Asiantuntija antaa lausuntonsa kirjallisesti."
+        ],
+        "items_local_sv": [
+          "En sakkunnig ska ge sitt utlåtande skriftligt."
+        ],
+        "source": "https://www.finlex.fi/fi/lainsaadanto/1734/4"
+      },
+      "rights_duties": {
+        "basis": "Oikeudenkäymiskaari 17 luku 35 §, 45 §, 46 §",
+        "summary_en": "Same honesty, competence and impartiality requirements and the same assurance as in the civil route.",
+        "source": "https://www.finlex.fi/fi/lainsaadanto/1734/4"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": null,
+    "source": null
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Rikoslaki (39/1889) 15 luku 1 § (perätön lausuma tuomioistuimessa; 12.6.2015/735)",
+      "summary_en": "A witness or expert before a court, or another person before a court under oath or assurance, who gives false information in the case or without lawful reason conceals a relevant fact: imprisonment up to three years. Also applies to hearings by video link or other remote means under OK 17:52 or 17:56.",
+      "warning_local": "Minä N. N. lupaan ja vakuutan kunniani ja omantuntoni kautta, että täytän parhaan ymmärrykseni mukaan minulle annetun asiantuntijatehtävän.",
+      "warning_local_sv": "Jag N.N. lovar och försäkrar på heder och samvete att jag enligt bästa förstånd ska fullgöra det sakkunniguppdrag som jag fått.",
+      "warning_en": "I, N.N., promise and affirm on my honour and conscience that I will perform the expert assignment given to me to the best of my understanding.",
+      "wording": "official",
+      "source": "https://www.finlex.fi/fi/lainsaadanto/1889/39"
+    },
+    {
+      "route": "all",
+      "norm": "Rikoslaki 15 luku 3 § (törkeä perätön lausuma tuomioistuimessa)",
+      "summary_en": "Aggravated false statement in court (serious danger of an innocent person being convicted or of a seriously harmful wrong decision, a particularly significant fact, or particular planning, and aggravated as a whole): imprisonment from four months to six years.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "https://www.finlex.fi/fi/lainsaadanto/1889/39"
+    },
+    {
+      "route": "all",
+      "norm": "Rikoslaki 15 luku 4 § (tuottamuksellinen perätön lausuma; 12.6.2015/735)",
+      "summary_en": "A witness or expert in court (or a person under oath or assurance in court or comparable proceedings) who negligently gives false information or conceals a relevant fact: fine or imprisonment up to six months.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "https://www.finlex.fi/fi/lainsaadanto/1889/39"
+    }
+  ],
+  "declaration": {
+    "basis": "Oikeudenkäymiskaari 17 luku 45 § (assurance before oral examination); 46 § (reminder of the duty of truth). No statutory declaration is prescribed for the written statement (17:36).",
+    "text_local": "Minä N. N. lupaan ja vakuutan kunniani ja omantuntoni kautta, että täytän parhaan ymmärrykseni mukaan minulle annetun asiantuntijatehtävän.",
+    "text_local_sv": "Jag N.N. lovar och försäkrar på heder och samvete att jag enligt bästa förstånd ska fullgöra det sakkunniguppdrag som jag fått.",
+    "text_en": "I, N.N., promise and affirm on my honour and conscience that I will perform the expert assignment given to me to the best of my understanding.",
+    "wording": "official",
+    "source": "https://www.finlex.fi/sv/lagstiftning/1734/4"
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "Euroopan parlamentin ja neuvoston asetus (EU) N:o 910/2014 (eIDAS-asetus), muutettu asetuksella (EU) 2024/1183; laki eräistä rajat ylittävän sähköisen asioinnin mahdollistavista palveluista (810/2026), jossa säädetään eIDAS-asetuksen valvonnasta ja sitä täydentävistä säännöksistä (sv: lag om vissa tjänster som möjliggör gränsöverskridande e-tjänster); laki vahvasta sähköisestä tunnistamisesta (617/2009, muutettu 811/2026)",
+    "law_en": "eIDAS Regulation (EU) No 910/2014 as amended by Regulation (EU) 2024/1183; Act 810/2026 on certain services enabling cross-border e-services (supervision and supplementary provisions to eIDAS); Act 617/2009 on strong electronic identification (trust-service chapter 4 a repealed by Act 811/2026)",
+    "qualified_term_local": "hyväksytty sähköinen allekirjoitus (sv: kvalificerad elektronisk underskrift); kehittynyt sähköinen allekirjoitus (sv: avancerad elektronisk underskrift)",
+    "source": "https://www.finlex.fi/fi/lainsaadanto/2026/810"
+  },
+  "timestamp": {
+    "basis": "eIDAS 41 artikla 1-2 kohta (konsolidoitu versio; 3 kohta poistettu asetuksella (EU) 2024/1183); term: hyväksytty sähköinen aikaleima (sv: kvalificerad elektronisk tidsstämpling)",
+    "qualified_recognition": "An electronic time stamp may not be denied legal effect or admissibility as evidence solely because it is electronic or not qualified; a qualified electronic time stamp carries a presumption of the accuracy of the date and time it indicates and of the integrity of the data bound to them (Art. 41(1)-(2)). Finnish text: 'Hyväksyttyyn sähköiseen aikaleimaan liitetään olettama aikaleiman osoittaman päivän ja ajankohdan oikeellisuudesta sekä päivään ja ajankohtaan sidottujen tietojen eheydestä.'",
+    "source": "https://eur-lex.europa.eu/legal-content/FI/TXT/?uri=CELEX:02014R0910-20241018"
+  },
+  "open_questions": [
+    "Expert reports obtained by the police during the pre-trial investigation (esitutkintalaki 805/2011) were not researched.",
+    "Whether RL 15:1 covers a knowingly false written expert statement that is not confirmed in an oral hearing was not verified (the provision refers to a witness or expert 'tuomioistuimessa').",
+    "Chapter 17 contains no express rule found on who formulates the expert's questions or on declining questions outside the expertise; practice and case law were not researched.",
+    "National adoption numbers for ISO/IEC 27037, 27041, 27042 and 27043 by SFS (expected SFS-EN ISO/IEC ...:2016) were not verified; standards list left empty. Whether ISO/IEC 17025 accreditation is required for forensic reports was not verified.",
+    "No Finnish statute on forensic expert activity was identified; statute fields left null.",
+    "The entry-into-force date of Act 810/2026 and of the amendment 811/2026 (which repealed chapter 4 a on trust services in Act 617/2009) was not verified.",
+    "The Swedish-language name 'Suomi / Finland' is used for name_local; court-language rights under the Language Act (kielilaki) were not researched."
+  ]
+}

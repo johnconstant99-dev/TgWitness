@@ -1,0 +1,101 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "TH",
+  "name_en": "Thailand",
+  "name_local": "ประเทศไทย",
+  "court_languages": [
+    "th"
+  ],
+  "local_language": "th",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": null,
+    "en": null
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": null,
+        "items_en": [],
+        "items_local": [],
+        "source": null
+      },
+      "rights_duties": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": null,
+        "items_en": [],
+        "items_local": [],
+        "source": null
+      },
+      "rights_duties": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": null,
+    "source": null
+  },
+  "liability": [],
+  "declaration": {
+    "basis": null,
+    "text_local": null,
+    "text_en": null,
+    "wording": null,
+    "source": null
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "พระราชบัญญัติว่าด้วยธุรกรรมทางอิเล็กทรอนิกส์ พ.ศ. ๒๕๔๔ แก้ไขเพิ่มเติมโดย (ฉบับที่ ๒) พ.ศ. ๒๕๕๑, (ฉบับที่ ๓) พ.ศ. ๒๕๖๒ และ (ฉบับที่ ๔) พ.ศ. ๒๕๖๒",
+    "law_en": "Electronic Transactions Act B.E. 2544 (2001), Royal Gazette vol. 118 part 112 Kor p. 26 (4 December 2001), in force 3 April 2002, as amended by the Electronic Transactions Act (No. 2) B.E. 2551 and (No. 3) and (No. 4) B.E. 2562",
+    "qualified_term_local": "ลายมือชื่ออิเล็กทรอนิกส์ที่เชื่อถือได้",
+    "source": "https://www.etda.or.th/getattachment/534770e3-1873-430a-8a12-95180258739a/Electronic-Transactions-Act-B-E-2544-(Amendment).aspx"
+  },
+  "timestamp": {
+    "basis": "No time-stamp provision in the Electronic Transactions Act B.E. 2544 as amended to (No. 4) B.E. 2562; ETDA Recommendation ขมธอ. 33-2566 การประทับเวลาอิเล็กทรอนิกส์ (Electronic Time-Stamping, announced 24 January B.E. 2566) is non-statutory guidance",
+    "qualified_recognition": "No statutory presumption for electronic time stamps was found. Electronic data may not be refused as evidence in civil, criminal or other proceedings merely because it is electronic; its weight is assessed by the reliability of the manner of creation, storage or communication, integrity and unaltered content, the manner of identifying the sender and all circumstances, and this applies to printouts (ETA s. 11). A signature requirement is met by a method that identifies the signer and shows intent and is reliable as appropriate, or otherwise confirms identity and intent (s. 9). An electronic signature is deemed reliable (ลายมือชื่ออิเล็กทรอนิกส์ที่เชื่อถือได้) if the creation data is linked to the signer alone, under the signer's sole control at signing, alterations to the signature after creation are detectable, and, where the law requires integrity of the message, alterations to the message after signing are detectable (s. 26).",
+    "source": "https://www.etda.or.th/getattachment/534770e3-1873-430a-8a12-95180258739a/Electronic-Transactions-Act-B-E-2544-(Amendment).aspx"
+  },
+  "open_questions": [
+    "Criminal Procedure Code (ประมวลกฎหมายวิธีพิจารณาความอาญา) ss. 243-244 and related sections on experts were not verified: krisdika.go.th (self-signed certificate), ocs.go.th (certificate error), lawforasean.krisdika.go.th (connection reset), law.go.th and ratchakitcha.soc.go.th (HTTP 403) and library.coj.go.th (HTTP 502) could not be read, and the web-search budget for this session was exhausted.",
+    "Civil Procedure Code (ประมวลกฎหมายวิธีพิจารณาความแพ่ง) ss. 98-104 and related sections on court-appointed and party experts, expert reports and questions were not verified.",
+    "Criminal Code (ประมวลกฎหมายอาญา) ss. 177 and 179 (false statements and false evidence, including by experts) and current maximum penalties were not verified; any provision on false expert opinions specifically was not verified.",
+    "The Thai term for expert used in the procedure codes and any oath or declaration formula for experts (court oath regulations) were not verified.",
+    "Required contents of an expert report and any regulation of the Office of the Judiciary or the Central Institute of Forensic Science on expert reports were not verified.",
+    "No statute on forensic expert activity and no Thai Industrial Standard (มอก.) adoption of ISO/IEC 27037/27041/27042/27043, and no police or DSI digital evidence guidance, could be verified.",
+    "Electronic Transactions Act text was read from ETDA's consolidated text (amended up to No. 4 B.E. 2562); later amendments and the Royal Decree on secure methods B.E. 2553 were not checked."
+  ]
+}

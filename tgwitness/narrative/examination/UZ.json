@@ -1,0 +1,115 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "UZ",
+  "name_en": "Uzbekistan",
+  "name_local": "Oʻzbekiston / Узбекистан",
+  "court_languages": [
+    "uz",
+    "ru"
+  ],
+  "local_language": "ru",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "судебный эксперт (sud eksperti)",
+    "en": "forensic expert appointed by the investigator, prosecutor or court"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Уголовно-процессуальный кодекс Республики Узбекистан, глава 22 «Экспертиза»: ст. 172 (Основания для назначения экспертизы), ст. 173 (Обязательное назначение и производство экспертизы), ст. 174 (Лица, назначаемые экспертами), ст. 180 (Постановление или определение о назначении экспертизы), ст. 182 (Производство экспертизы в государственном судебно-экспертном учреждении), ст. 183 (Производство экспертизы вне экспертного учреждения)",
+        "summary_en": "The examination is appointed by resolution (постановление) of the investigating authority or by court ruling (определение) (art. 180 title) and performed in a state forensic institution or outside one (arts. 182–183). Only article numbers and titles were verified; article bodies could not be retrieved.",
+        "source": "https://lex.uz/ru/docs/111463"
+      },
+      "questions": {
+        "basis": "Закон РУз от 11.06.2026 № ЗРУ-1152 «О судебно-экспертной деятельности», ст. 25 (in force from 13.12.2026)",
+        "summary_en": "Under the new law the expert may set out in the conclusion opinions not only on the questions put but also on other questions relating to the subject of the examination (art. 25). Rules on who formulates questions and on refusal under the Criminal Procedure Code were not verified (see art. 185 'Акт о невозможности дачи заключения').",
+        "source": "https://www.lex.uz/ru/docs/8265779"
+      },
+      "report_contents": {
+        "basis": "УПК РУз ст. 184 «Заключение эксперта или комиссии экспертов»; ЗРУ-1152 ст. 39 «Заключение судебного эксперта»",
+        "items_en": null,
+        "items_local": null,
+        "source": "https://lex.uz/ru/docs/111463"
+      },
+      "rights_duties": {
+        "basis": "УПК РУз ст. 67 «Эксперт», ст. 68 «Права и обязанности эксперта»; ЗРУ-1152 ст. 24–26",
+        "summary_en": "Under ЗРУ-1152 (from 13.12.2026) the head of the forensic institution must warn the expert of criminal liability for a knowingly false conclusion, obtain a signed receipt (расписка) and send it with the conclusion to the appointing body (art. 24). The expert may study case materials, request additional materials and give opinions on related questions not asked (art. 25), and must conduct a comprehensive and complete examination and keep information confidential (art. 26). Code-level text not verified.",
+        "source": "https://www.lex.uz/ru/docs/8265779"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Гражданский процессуальный кодекс Республики Узбекистан от 22.01.2018: ст. 58 «Эксперт», ст. 95 «Экспертиза», ст. 97 «Определение круга вопросов, по которым требуется заключение экспертов»",
+        "summary_en": "The court appoints the examination (art. 95) and determines the range of questions on which an expert opinion is required (art. 97 title). Only article numbers and titles were verified.",
+        "source": "https://lex.uz/ru/docs/3517334"
+      },
+      "questions": {
+        "basis": "ГПК РУз ст. 97",
+        "summary_en": "The range of questions is determined under art. 97; whether the parties may propose questions, whether the expert may decline, and whether he may report facts not asked about under the GPK was not verified.",
+        "source": "https://lex.uz/ru/docs/3517334"
+      },
+      "report_contents": {
+        "basis": "ГПК РУз ст. 98 «Заключение эксперта (комиссии экспертов)»",
+        "items_en": null,
+        "items_local": null,
+        "source": "https://lex.uz/ru/docs/3517334"
+      },
+      "rights_duties": {
+        "basis": "ГПК РУз ст. 59 «Права эксперта», ст. 60 «Обязанности и ответственность эксперта»",
+        "summary_en": null,
+        "source": "https://lex.uz/ru/docs/3517334"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": "Закон Республики Узбекистан от 11.06.2026 № ЗРУ-1152 «О судебно-экспертной деятельности» (вступает в силу 13.12.2026)",
+    "title_en": "Law of the Republic of Uzbekistan No. ZRU-1152 of 11 June 2026 on Forensic Expert Activity (enters into force 13 December 2026)",
+    "source": "https://www.lex.uz/ru/docs/8265779"
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Уголовный кодекс Республики Узбекистан ст. 238 «Ёлғон гувоҳлик бериш» (false testimony); ЗРУ-1152 ст. 24",
+      "summary_en": "Art. 238 of the Criminal Code is titled 'giving false testimony'; whether it expressly covers a knowingly false expert conclusion and its penalties were not verified. ЗРУ-1152 art. 24 requires the expert to be warned of criminal liability for a knowingly false conclusion and to sign a receipt.",
+      "warning_local": "Об уголовной ответственности за дачу заведомо ложного заключения предупрежден.",
+      "warning_en": "I have been warned of criminal liability for giving a knowingly false conclusion.",
+      "wording": "composed",
+      "source": "https://lex.uz/ru/docs/111453"
+    }
+  ],
+  "declaration": {
+    "basis": "ЗРУ-1152 ст. 24 (from 13.12.2026): the head of the forensic institution, on instruction of the appointing body, warns the expert of criminal liability for a knowingly false conclusion, obtains a signed receipt (расписка) and sends it with the conclusion",
+    "text_local": "Об уголовной ответственности за дачу заведомо ложного заключения предупрежден.",
+    "text_en": "I have been warned of criminal liability for giving a knowingly false conclusion.",
+    "wording": "composed",
+    "source": "https://www.lex.uz/ru/docs/8265779"
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "Закон Республики Узбекистан от 12.10.2022 № ЗРУ-793 «Об электронной цифровой подписи»",
+    "law_en": "Law of the Republic of Uzbekistan No. ZRU-793 of 12 October 2022 on Electronic Digital Signature",
+    "qualified_term_local": "электронная цифровая подпись (the law defines a single ЭЦП tier; no separate qualified tier found)",
+    "source": "https://lex.uz/ru/docs/6234906"
+  },
+  "timestamp": {
+    "basis": "ЗРУ-793 ст. 20 (registration centres provide a time-stamping service, штамп времени)",
+    "qualified_recognition": "A time stamp is described as an attribute confirming the existence of the signed electronic document at the stated time; no separate statutory presumption was found. An electronic digital signature is equivalent to a handwritten signature if its authenticity is confirmed, the certificate was valid at signing and it is used for its stated purpose (art. 4).",
+    "source": "https://lex.uz/ru/docs/6234906"
+  },
+  "open_questions": [
+    "lex.uz pages load only the table of contents within the fetch limit; bodies of УПК ст. 67, 68, 172–187, ГПК ст. 58–60, 95–101 and УК ст. 238–240 could not be read. Only article numbers and titles are verified.",
+    "Report contents: УПК ст. 184 and ГПК ст. 98 (and ЗРУ-1152 ст. 39) bodies not verified; items left null.",
+    "The forensic-expertise law in force until 13.12.2026 (believed to be Закон «О судебной экспертизе» of 2010) was not identified on lex.uz; its report and warning provisions were not checked. ЗРУ-1152 ст. 55 repeals earlier acts but the repealed acts were not readable.",
+    "ЗРУ-1152 ст. 39 element list was returned inconsistently by the extraction tool and is not relied on.",
+    "УК РУз ст. 238: whether it covers expert conclusions, its exact text and penalties were not verified; the Russian-language title was not captured (Uzbek title from table of contents).",
+    "Exact warning/receipt wording used by Uzbek forensic institutions (Республиканский центр судебной экспертизы им. Х. Сулаймановой) not found; text_local is composed.",
+    "Uzbek-language (uz) versions of all quoted items were not retrieved; local items are given in the official Russian text only.",
+    "Legal basis for Russian as a language of court proceedings was not verified (user-specified court languages uz and ru).",
+    "No national adoption of ISO/IEC 27037/27041/27042/27043 (O'z DSt) could be verified.",
+    "Whether ЗРУ-1152 or the procedural codes allow electronic expert conclusions signed with ЭЦП was not checked."
+  ]
+}

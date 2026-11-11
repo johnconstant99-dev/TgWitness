@@ -1,0 +1,161 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "HK",
+  "name_en": "Hong Kong SAR",
+  "name_local": "香港特別行政區",
+  "court_languages": [
+    "en",
+    "zh-Hant"
+  ],
+  "local_language": "en",
+  "legal_family": "common law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "expert witness",
+    "en": "expert witness instructed by a party or appointed as a single joint expert, owing an overriding duty to the court"
+  },
+  "procedures": [
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Rules of the High Court (Cap. 4A) Order 38 Part IV, in particular rr. 4A, 35A, 37A, 37B, 37C (Rules of the District Court Cap. 336H contain parallel rules with the code in Appendix E)",
+        "summary_en": "Parties instruct their own expert witnesses; the court may order two or more parties to appoint a single joint expert (O.38 r.4A(1)). The instructing party must give the expert a copy of the Code of Conduct in Appendix D as soon as practicable, and a written instruction must be accompanied by it (r.37B). Expert evidence is admitted under the court's directions in O.38 Part IV.",
+        "source": "https://www.elegislation.gov.hk/hk/cap4A!en/s38"
+      },
+      "questions": {
+        "basis": "RHC Appendix D (Code of Conduct for Expert Witnesses) paras 8(b), 8(d), 9, 10",
+        "summary_en": "The instructing party frames the instructions; the letter of instructions may be annexed to the report (para 8(b)). The report must state, where applicable, that a particular question or issue falls outside the expert's field of expertise (para 8(d)), any qualification without which the report may be incomplete or inaccurate (para 9), and if an opinion is not concluded because of insufficient research or data (para 10). No verified rule addresses reporting facts not asked about.",
+        "source": "https://www.civiljustice.hk/gaz_sub_leg/documents/rhc/RHC_Appendix_D.pdf"
+      },
+      "report_contents": {
+        "basis": "RHC O.38 r.37A, r.37C; Appendix D paras 5, 7, 8, 9, 10; O.41A rr.3–5, 7",
+        "items_en": [
+          "declaration that the expert has read the Code of Conduct and agrees to be bound by it, understands the duty to the Court, and has complied and will continue to comply with that duty (para 5; O.38 r.37C - otherwise the report is not admissible)",
+          "statement of truth under Order 41A, signed by the maker of the report (para 7; O.38 r.37A; O.41A rr.3, 5)",
+          "the person's qualifications as an expert (para 8(a))",
+          "the facts, matters and assumptions on which the opinions are based; a letter of instructions may be annexed (para 8(b))",
+          "the reasons for each opinion expressed (para 8(c))",
+          "if applicable, that a particular question or issue falls outside the expert's field of expertise (para 8(d))",
+          "any literature or other materials utilized in support of the opinions (para 8(e))",
+          "any examinations, tests or other investigations relied on, and the identity and qualifications of the person who carried them out (para 8(f))",
+          "any qualification without which the report may be incomplete or inaccurate (para 9)",
+          "a statement where an opinion is not a concluded opinion because of insufficient research or data or another reason (para 10)"
+        ],
+        "items_local": [
+          "declaration that he has read this code of conduct and agrees to be bound by it; he understands his duty to the Court; and he has complied with and will continue to comply with that duty",
+          "statement of truth in accordance with Order 41A",
+          "the person's qualifications as an expert",
+          "the facts, matters and assumptions on which the opinions in the report are based (a letter of instructions may be annexed)",
+          "the reasons for each opinion expressed",
+          "if applicable, that a particular question or issue falls outside his field of expertise",
+          "any literature or other materials utilized in support of the opinions",
+          "any examinations, tests or other investigations on which he has relied, and the identity and details of the qualifications of the person who carried them out",
+          "any qualification without which the report may be incomplete or inaccurate",
+          "that the opinion is not a concluded opinion because of insufficient research or insufficient data or for any other reason"
+        ],
+        "source": "https://www.civiljustice.hk/gaz_sub_leg/documents/rhc/RHC_Appendix_D.pdf"
+      },
+      "rights_duties": {
+        "basis": "RHC O.38 r.35A; Appendix D paras 2–4, 11–13",
+        "summary_en": "The expert's duty is to help the Court on matters within the expertise; this duty overrides any obligation to the person instructing or paying the expert (r.35A). The expert must help the Court impartially and independently, owes a paramount duty to the Court and is not an advocate for a party (paras 2–4). A changed opinion on a material matter must be communicated forthwith by a supplementary report (para 11). The expert must follow court directions to confer with other experts, try to reach agreement and file a joint report, exercising independent judgment and not acting on any instruction to withhold or avoid agreement (paras 12–13).",
+        "source": "https://www.elegislation.gov.hk/hk/cap4A!en/s38"
+      }
+    },
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Criminal Procedure Ordinance (Cap. 221) s.65DA; common law; Department of Justice Prosecution Code chapter 20",
+        "summary_en": "Each party engages its own experts. After committal or transfer for trial (Court of First Instance or District Court), a party intending to adduce expert evidence must give notice to the other parties as soon as practicable; failing that, the evidence may be adduced only with leave (s.65DA). The prosecution engages experts under the Prosecutions Division's guidelines; experts must have the requisite qualifications, knowledge and experience.",
+        "source": "https://www.elegislation.gov.hk/hk/cap221"
+      },
+      "questions": {
+        "basis": "common law; Prosecution Code chapter 20",
+        "summary_en": "Questions are framed by the instructing party (prosecution or defence). No statutory rule was verified on declining questions or reporting facts not asked about in criminal proceedings; the civil Appendix D does not apply directly.",
+        "source": "https://www.doj.gov.hk/en/publications/prosecution_ch20.html"
+      },
+      "report_contents": {
+        "basis": "No statutory list verified for criminal expert reports; Evidence Ordinance (Cap. 8) s.22A(5) for computer-produced statements",
+        "items_en": [
+          "no statutory list of report contents was verified for criminal proceedings",
+          "where a statement in a computer-produced document is tendered under Evidence Ordinance s.22A, a certificate identifying the document, describing how it was produced and dealing with the s.22A(2) conditions (computer used regularly for the activities, information supplied in the course of those activities, appropriate measures against unauthorised interference and the computer operating properly), signed by a person occupying a responsible position in relation to the operation of the computer (s.22A(5))"
+        ],
+        "items_local": [
+          "no statutory list verified",
+          "certificate under section 22A(5) of the Evidence Ordinance identifying the document containing the statement and describing the manner in which it was produced, signed by a person occupying a responsible position in relation to the operation of the relevant computer"
+        ],
+        "source": "https://www.elegislation.gov.hk/hk/cap8"
+      },
+      "rights_duties": {
+        "basis": "common law; Prosecution Code chapter 20",
+        "summary_en": "An expert witness has an overriding duty to assist the court and must give independent evidence in the form of objective, unbiased opinion (Prosecution Code ch. 20). Prosecution experts are engaged on terms requiring compliance with the Prosecutions Division's guidelines for expert witnesses.",
+        "source": "https://www.doj.gov.hk/en/publications/prosecution_ch20.html"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": null,
+    "source": null
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Crimes Ordinance (Cap. 200) s.31 (perjury)",
+      "summary_en": "A person lawfully sworn as a witness or interpreter who wilfully makes a statement in a judicial proceeding that is material and that he knows to be false or does not believe to be true commits perjury: on conviction on indictment, imprisonment for 7 years and a fine. Applies to an expert giving sworn oral evidence.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "https://www.elegislation.gov.hk/hk/cap200"
+    },
+    {
+      "route": "civil",
+      "norm": "Rules of the High Court (Cap. 4A) O.41A r.9 (contempt)",
+      "summary_en": "Proceedings for contempt of court may be brought against a person who makes, or causes to be made, a false statement in a document verified by a statement of truth without an honest belief in its truth; only by the Secretary for Justice or a person aggrieved, and with the leave of the Court.",
+      "warning_local": "I believe that the facts stated in this expert report are true and (if applicable) the opinion expressed in it is honestly held.",
+      "warning_en": "I believe that the facts stated in this expert report are true and (if applicable) the opinion expressed in it is honestly held.",
+      "wording": "official",
+      "source": "https://www.civiljustice.hk/gaz_sub_leg/documents/rhc/RHC_Order_41A.pdf"
+    },
+    {
+      "route": "criminal",
+      "norm": "Evidence Ordinance (Cap. 8) s.22A(8)",
+      "summary_en": "A person who in a certificate tendered under s.22A(5) (computer records) makes a statement he knows to be false or does not believe to be true commits an offence; penalty stated in an older copy as a fine of HK$50,000 and imprisonment for 2 years (not confirmed on e-Legislation).",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "https://www.elegislation.gov.hk/hk/cap8"
+    }
+  ],
+  "declaration": {
+    "basis": "RHC O.38 r.37A and r.37C; Appendix D paras 5 and 7; O.41A rr.4–5 (form of statement of truth for an expert report)",
+    "text_local": "I confirm that I have read the Code of Conduct for Expert Witnesses set out in Appendix D to the Rules of the High Court (Cap. 4A) and agree to be bound by it; I understand my duty to the Court; and I have complied with and will continue to comply with that duty. I believe that the facts stated in this expert report are true and (if applicable) the opinion expressed in it is honestly held.",
+    "text_en": "I confirm that I have read the Code of Conduct for Expert Witnesses set out in Appendix D to the Rules of the High Court (Cap. 4A) and agree to be bound by it; I understand my duty to the Court; and I have complied with and will continue to comply with that duty. I believe that the facts stated in this expert report are true and (if applicable) the opinion expressed in it is honestly held.",
+    "wording": "composed",
+    "source": "https://www.civiljustice.hk/gaz_sub_leg/documents/rhc/RHC_Order_41A.pdf"
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "Electronic Transactions Ordinance (Cap. 553) / 《電子交易條例》",
+    "law_en": "Electronic Transactions Ordinance (Cap. 553)",
+    "qualified_term_local": "digital signature supported by a recognized certificate (認可證書); required by s.6(1A) where a government entity signs or receives the signature, otherwise any electronic signature meeting s.6(1) suffices",
+    "source": "https://www.elegislation.gov.hk/hk/cap553"
+  },
+  "timestamp": {
+    "basis": null,
+    "qualified_recognition": null,
+    "source": null
+  },
+  "open_questions": [
+    "elegislation.gov.hk could not be machine-read (JavaScript loading page), and the Judiciary's gazetted PDFs on civiljustice.hk could not be text-extracted. Order 38 rr.4A, 35A, 37A–37C, Appendix D paras 2–13 and Order 41A rr.3–5, 7, 9 were verified only from search-index excerpts of those official PDFs; items 8(c)–(f) of Appendix D, the numbering of para 11 (supplementary report on change of opinion, inferred from position) and the exact r.5(2) wording should be re-checked against the consolidated Cap. 4A.",
+    "The authentic Chinese (zh-Hant) texts of the Appendix D declaration, the O.41A statement of truth and the Chinese title of the Code were not obtained; items_local and declaration are given in English only.",
+    "Appendix D para 6 (oral evidence) is reported as requiring a written declaration, while O.38 r.37C(2) is reported as allowing a declaration orally, in writing or otherwise; the current wording was not confirmed.",
+    "The content and wording of the DPP's Code of Practice for Expert Witnesses Engaged by the Prosecution Authority (2005) and the Prosecutions Division's Guidelines for Expert Witnesses were not obtained; any required declaration in criminal expert reports is unverified.",
+    "Criminal Procedure Ordinance s.65DA, Crimes Ordinance s.31 and Evidence Ordinance s.22A were verified only from secondary or older copies (HKLII listing, third-party PDF, HKIB-hosted consolidation as at 18-08-2024); the s.22A(8) penalty comes from an older unofficial copy.",
+    "No Hong Kong national standard or official adoption of ISO/IEC 27037/27041/27042/27043 for digital evidence was identified, and no rule requiring ISO/IEC 17025 (HKAS) accreditation for forensic expert reports was verified; standards is empty.",
+    "No statute on electronic timestamps was identified.",
+    "Not verified whether ETO s.6 applies to documents in court proceedings (Schedule exclusions) or how the Court Proceedings (Electronic Technology) Ordinance (Cap. 638) affects electronic signing of expert reports.",
+    "No verified rule addresses whether an expert may report facts not asked about.",
+    "No statute specific to forensic expert activity was identified; statute is null."
+  ]
+}

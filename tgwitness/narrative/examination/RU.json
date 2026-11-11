@@ -1,0 +1,269 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "RU",
+  "name_en": "Russia",
+  "name_local": "Россия",
+  "court_languages": [
+    "ru"
+  ],
+  "local_language": "ru",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "эксперт",
+    "en": "forensic expert appointed by the court or investigator"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "УПК РФ ст. 57 ч. 1–2, ст. 195 ч. 1–2, ст. 199 ч. 1, 2, 4",
+        "summary_en": "The investigator (or inquiry officer; the court at trial) issues a resolution (постановление) appointing the examination, stating the grounds, the expert or institution, the questions and the materials (art. 195(1)). Examinations are performed by state forensic experts and other persons with special knowledge (art. 195(2)). In an expert institution the head assigns a specific expert and, except for heads of state forensic institutions, explains the rights and liability under art. 57 (art. 199(2)); outside an institution the investigator hands the resolution and materials to the expert and explains those rights and liability (art. 199(4)).",
+        "source": "https://www.consultant.ru/document/cons_doc_LAW_34481/"
+      },
+      "questions": {
+        "basis": "УПК РФ ст. 195 ч. 1 п. 3; ст. 57 ч. 3 п. 4 и п. 6; ст. 204 ч. 2",
+        "summary_en": "The questions are set by the official appointing the examination in the resolution. The expert may refuse to give an opinion on questions beyond his special knowledge or where the materials are insufficient; the refusal must be in writing with reasons (art. 57(3)(6)). The expert may give an opinion within his competence on questions not posed in the resolution but related to the subject of the examination (art. 57(3)(4)), and may state in the conclusion circumstances relevant to the case on which no questions were asked (art. 204(2)).",
+        "source": "https://www.consultant.ru/document/cons_doc_LAW_34481/"
+      },
+      "report_contents": {
+        "basis": "УПК РФ ст. 204 ч. 1 и 3",
+        "items_en": [
+          "date, time and place of the forensic examination",
+          "grounds for the examination",
+          "the official who appointed the examination",
+          "details of the expert institution, and the expert's full name, education, specialty, length of service, academic degree and/or title, position",
+          "statement that the expert was warned of liability for a knowingly false opinion",
+          "questions put to the expert",
+          "objects examined and materials provided for the examination",
+          "details of persons present during the examination",
+          "content and results of the examination, stating the methods used",
+          "conclusions on the questions put to the expert and their justification",
+          "illustrative materials (photographs, diagrams, charts, etc.) are attached and form an integral part of the conclusion"
+        ],
+        "items_local": [
+          "дата, время и место производства судебной экспертизы",
+          "основания производства судебной экспертизы",
+          "должностное лицо, назначившее судебную экспертизу",
+          "сведения об экспертном учреждении, а также фамилия, имя и отчество эксперта, его образование, специальность, стаж работы, ученая степень и (или) ученое звание, занимаемая должность",
+          "сведения о предупреждении эксперта об ответственности за дачу заведомо ложного заключения",
+          "вопросы, поставленные перед экспертом",
+          "объекты исследований и материалы, представленные для производства судебной экспертизы",
+          "данные о лицах, присутствовавших при производстве судебной экспертизы",
+          "содержание и результаты исследований с указанием примененных методик",
+          "выводы по поставленным перед экспертом вопросам и их обоснование",
+          "Материалы, иллюстрирующие заключение эксперта (фотографии, схемы, графики и т.п.), прилагаются к заключению и являются его составной частью."
+        ],
+        "source": "https://www.consultant.ru/document/cons_doc_LAW_34481/2df1a669ef600720edab36ae59d4c099a5e86284/"
+      },
+      "rights_duties": {
+        "basis": "УПК РФ ст. 57 ч. 3–6; Федеральный закон от 31.05.2001 № 73-ФЗ ст. 25",
+        "summary_en": "The expert may study case materials relating to the subject of the examination, request additional materials or other experts, take part in procedural actions with permission, and refuse in writing (art. 57(3)). The expert may not negotiate with participants without the knowledge of the investigator or court, collect materials independently, conduct research that may destroy objects without permission, give a knowingly false opinion, disclose investigation data, or evade summonses (art. 57(4)). Liability: art. 307 Criminal Code for a knowingly false opinion (art. 57(5)); art. 310 Criminal Code for disclosure of preliminary investigation data (art. 57(6)). In state forensic institutions the expert gives the written conclusion in his own name and signs it; signatures are certified by the institution's seal (73-ФЗ art. 25).",
+        "source": "https://www.consultant.ru/document/cons_doc_LAW_34481/"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "ГПК РФ ст. 79 ч. 1, ст. 80 ч. 1–2",
+        "summary_en": "The court appoints an examination by ruling (определение) when questions requiring special knowledge arise. The ruling names the court, the dates, the parties, the type of examination, the facts to be confirmed or refuted, the questions, the expert or institution, the materials and the paying party. The ruling also states that the expert is warned, by the court or by the head of the forensic institution, of liability under the Criminal Code for a knowingly false opinion (art. 80(2)).",
+        "source": "https://www.consultant.ru/document/cons_doc_LAW_39570/"
+      },
+      "questions": {
+        "basis": "ГПК РФ ст. 79 ч. 2; ст. 85 ч. 1; ст. 86 ч. 2",
+        "summary_en": "Each party may submit questions; the court determines the final set of questions and must give reasons for rejecting proposed questions (art. 79(2)). Where questions are beyond the expert's special knowledge or the materials are unsuitable or insufficient, the expert must send the court a reasoned written notice that the opinion cannot be given (art. 85(1)). If the expert establishes circumstances relevant to the case on which no questions were asked, he may include conclusions about them (art. 86(2)).",
+        "source": "https://www.consultant.ru/document/cons_doc_LAW_39570/"
+      },
+      "report_contents": {
+        "basis": "ГПК РФ ст. 86 ч. 1–2; Федеральный закон № 73-ФЗ ст. 25 (for state forensic institutions)",
+        "items_en": [
+          "opinion given in writing",
+          "detailed description of the research performed",
+          "conclusions drawn from the research",
+          "answers to the questions put by the court",
+          "optional: conclusions on relevant circumstances on which no questions were asked"
+        ],
+        "items_local": [
+          "Эксперт дает заключение в письменной форме.",
+          "подробное описание проведенного исследования",
+          "сделанные в результате его выводы",
+          "ответы на поставленные судом вопросы",
+          "выводы об обстоятельствах, имеющих значение для рассмотрения и разрешения дела, по поводу которых эксперту не были поставлены вопросы (право эксперта)"
+        ],
+        "source": "https://www.consultant.ru/document/cons_doc_LAW_39570/13f4d5fb011e421b0822adc6ce1f0524495e5efb/"
+      },
+      "rights_duties": {
+        "basis": "ГПК РФ ст. 85 ч. 1–3",
+        "summary_en": "The expert must accept the assigned examination, conduct a complete study of the materials, give a reasoned and objective opinion, send it to the court and appear when summoned. The expert may not collect materials independently, enter into personal contacts with participants if this casts doubt on his impartiality, or disclose information or results to anyone except the appointing court. The expert may study case materials, request additional materials, question participants and witnesses at the hearing, and request other experts.",
+        "source": "https://www.consultant.ru/document/cons_doc_LAW_39570/"
+      }
+    },
+    {
+      "route": "commercial",
+      "appointment": {
+        "basis": "АПК РФ ст. 82 ч. 1, 2, 4; ст. 55 ч. 5",
+        "summary_en": "The arbitrazh court appoints an examination on a party's motion or with the parties' consent, by ruling; the ruling also states that the expert is warned of criminal liability for a knowingly false opinion (art. 82(4)). The expert is warned by the court and gives a written undertaking (подписка) (art. 55(5)).",
+        "source": "https://www.consultant.ru/document/cons_doc_LAW_37800/"
+      },
+      "questions": {
+        "basis": "АПК РФ ст. 82 ч. 2; ст. 55 ч. 4; ст. 86 ч. 2",
+        "summary_en": "The range and content of the questions are determined by the arbitrazh court (art. 82(2)). The expert may refuse to answer questions beyond his special knowledge or where the materials are insufficient (art. 55(4)). The expert may include conclusions on relevant circumstances on which no questions were asked (art. 86(2)).",
+        "source": "https://www.consultant.ru/document/cons_doc_LAW_37800/"
+      },
+      "report_contents": {
+        "basis": "АПК РФ ст. 86 ч. 1–2",
+        "items_en": [
+          "written opinion given and signed by the expert in his own name (or by the commission)",
+          "time and place of the examination",
+          "grounds for the examination",
+          "details of the state forensic institution and the expert (full name, education, specialty, length of service, academic degree and title, position)",
+          "record of the warning of the expert of criminal liability for a knowingly false opinion",
+          "questions put to the expert or commission",
+          "objects examined and case materials provided",
+          "content and results of the research, stating the methods used",
+          "assessment of the results, conclusions on the questions and their justification",
+          "other information required by federal law",
+          "illustrative materials and documents are attached and form an integral part of the conclusion"
+        ],
+        "items_local": [
+          "эксперт от своего имени или комиссия экспертов дает заключение в письменной форме и подписывает его",
+          "время и место проведения судебной экспертизы",
+          "основания для проведения судебной экспертизы",
+          "сведения о государственном судебно-экспертном учреждении, об эксперте (фамилия, имя, отчество, образование, специальность, стаж работы, ученая степень и ученое звание, занимаемая должность), которым поручено проведение судебной экспертизы",
+          "записи о предупреждении эксперта в соответствии с законодательством Российской Федерации об уголовной ответственности за дачу заведомо ложного заключения",
+          "вопросы, поставленные перед экспертом или комиссией экспертов",
+          "объекты исследований и материалы дела, предоставленные эксперту для проведения судебной экспертизы",
+          "содержание и результаты исследований с указанием примененных методов",
+          "оценка результатов исследований, выводы по поставленным вопросам и их обоснование",
+          "иные сведения в соответствии с федеральным законом",
+          "Материалы и документы, иллюстрирующие заключение эксперта или комиссии экспертов, прилагаются к заключению и служат его составной частью."
+        ],
+        "source": "https://www.consultant.ru/document/cons_doc_LAW_37800/ffd15777ef8d55f39de7114ccfee4316dc8417a3/"
+      },
+      "rights_duties": {
+        "basis": "АПК РФ ст. 55 ч. 2–6",
+        "summary_en": "The expert must appear when summoned and give an objective opinion; may, with the court's permission, study case materials, attend hearings, question participants and request additional materials; may refuse questions beyond his special knowledge or where materials are insufficient; bears criminal liability for a knowingly false opinion; a court fine may be imposed for failing to submit the opinion on time.",
+        "source": "https://www.consultant.ru/document/cons_doc_LAW_37800/"
+      }
+    },
+    {
+      "route": "administrative",
+      "appointment": {
+        "basis": "КоАП РФ ст. 26.4 ч. 1–2",
+        "summary_en": "The judge, body or official handling an administrative-offence case issues a ruling appointing an examination when special knowledge is needed. The ruling must record that the expert's rights and duties were explained and that he was warned of administrative liability for a knowingly false opinion.",
+        "source": "https://www.consultant.ru/document/cons_doc_LAW_34661/a51ab7ec50452cd0a2d08a5a54a1d48cac6f3468/"
+      },
+      "questions": {
+        "basis": "КоАП РФ ст. 26.4",
+        "summary_en": "The questions are set in the ruling by the judge, body or official. Questions put to the expert and the opinion may not go beyond the expert's special knowledge.",
+        "source": "https://www.consultant.ru/document/cons_doc_LAW_34661/a51ab7ec50452cd0a2d08a5a54a1d48cac6f3468/"
+      },
+      "report_contents": {
+        "basis": "КоАП РФ ст. 26.4 ч. 5",
+        "items_en": [
+          "written opinion in the expert's own name; may be on paper or electronic, including an electronic document signed with the expert's qualified electronic signature",
+          "who performed the research and on what basis",
+          "content of the research",
+          "reasoned answers to the questions put to the expert",
+          "conclusions"
+        ],
+        "items_local": [
+          "Эксперт дает заключение в письменной форме от своего имени.",
+          "кем и на каком основании проводились исследования",
+          "их содержание",
+          "обоснованные ответы на поставленные перед экспертом вопросы",
+          "выводы"
+        ],
+        "source": "https://www.consultant.ru/document/cons_doc_LAW_34661/a51ab7ec50452cd0a2d08a5a54a1d48cac6f3468/"
+      },
+      "rights_duties": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      }
+    }
+  ],
+  "statute": {
+    "title_local": "Федеральный закон от 31.05.2001 № 73-ФЗ «О государственной судебно-экспертной деятельности в Российской Федерации»",
+    "title_en": "Federal Law No. 73-FZ of 31 May 2001 on State Forensic Expert Activity in the Russian Federation",
+    "source": "https://base.garant.ru/12123142/"
+  },
+  "liability": [
+    {
+      "route": "criminal",
+      "norm": "УК РФ ст. 307; УПК РФ ст. 57 ч. 5",
+      "summary_en": "Knowingly false expert opinion or testimony: fine up to 80,000 RUB (or income for up to 6 months), compulsory works up to 480 hours, correctional labour up to 2 years, or arrest up to 3 months (part 1). If combined with accusing a person of a grave or especially grave crime: forced labour or imprisonment up to 5 years (part 2). The expert is exempt if he voluntarily declares the falsity before the judgment or decision (note).",
+      "warning_local": "Права и обязанности эксперта, предусмотренные статьей 57 УПК РФ, мне разъяснены. Об уголовной ответственности за дачу заведомо ложного заключения по статье 307 УК РФ предупрежден.",
+      "warning_en": "The rights and duties of an expert under Article 57 of the Code of Criminal Procedure have been explained to me. I have been warned of criminal liability under Article 307 of the Criminal Code for giving a knowingly false opinion.",
+      "wording": "customary",
+      "source": "https://base.garant.ru/12123142/888134b28b1397ffae87a0ab1e117954/"
+    },
+    {
+      "route": "civil",
+      "norm": "УК РФ ст. 307; ГПК РФ ст. 80 ч. 2",
+      "summary_en": "Same offence and penalties as above. In civil cases the warning is given by the court or by the head of the forensic institution and recorded in the court's ruling.",
+      "warning_local": "Об уголовной ответственности за дачу заведомо ложного заключения по статье 307 УК РФ предупрежден.",
+      "warning_en": "I have been warned of criminal liability under Article 307 of the Criminal Code for giving a knowingly false opinion.",
+      "wording": "customary",
+      "source": "https://www.consultant.ru/document/cons_doc_LAW_39570/"
+    },
+    {
+      "route": "commercial",
+      "norm": "УК РФ ст. 307; АПК РФ ст. 55 ч. 5; Инструкция по делопроизводству в арбитражных судах (Постановление Пленума ВАС РФ от 25.12.2013 № 100), Приложение № 14",
+      "summary_en": "Same offence and penalties as above. The arbitrazh court warns the expert and takes a written undertaking on the official form.",
+      "warning_local": "Я, нижеподписавшийся ___ (фамилия, имя, отчество, паспортные данные), вызванный в Арбитражный суд ___ (наименование суда) по делу N ___ по иску ___ к ___ о ___ в качестве эксперта, даю настоящую подписку в том, что в судебном заседании мне разъяснена ответственность за дачу заведомо ложного заключения по статье 307 УК РФ.",
+      "warning_en": "I, the undersigned ___ (full name, passport details), summoned to the Arbitrazh Court ___ in case No. ___ on the claim of ___ against ___ concerning ___ as an expert, give this undertaking that liability for giving a knowingly false opinion under Article 307 of the Criminal Code has been explained to me at the court hearing.",
+      "wording": "official",
+      "source": "https://www.consultant.ru/document/cons_doc_LAW_159645/ec55fd5fcce4b459ece56fa01e74ef1550f75107/"
+    },
+    {
+      "route": "administrative",
+      "norm": "КоАП РФ ст. 17.9; ст. 26.4 ч. 2",
+      "summary_en": "Knowingly false expert opinion in administrative-offence or enforcement proceedings: administrative fine of 1,000 to 1,500 RUB.",
+      "warning_local": "Об административной ответственности за дачу заведомо ложного заключения по статье 17.9 КоАП РФ предупрежден.",
+      "warning_en": "I have been warned of administrative liability under Article 17.9 of the Code of Administrative Offences for giving a knowingly false opinion.",
+      "wording": "composed",
+      "source": "https://www.consultant.ru/document/cons_doc_LAW_34661/"
+    }
+  ],
+  "declaration": {
+    "basis": "УПК РФ ст. 204 ч. 1 п. 5; АПК РФ ст. 86 ч. 2 п. 4; Федеральный закон № 73-ФЗ ст. 14 (head of a state forensic institution warns the expert, takes the подписка and sends it with the conclusion) and ст. 25",
+    "text_local": "Права и обязанности эксперта, предусмотренные статьей 57 УПК РФ, мне разъяснены. Об уголовной ответственности за дачу заведомо ложного заключения по статье 307 УК РФ предупрежден.",
+    "text_en": "The rights and duties of an expert under Article 57 of the Code of Criminal Procedure have been explained to me. I have been warned of criminal liability under Article 307 of the Criminal Code for giving a knowingly false opinion.",
+    "wording": "customary",
+    "source": "https://base.garant.ru/12123142/888134b28b1397ffae87a0ab1e117954/"
+  },
+  "standards": [
+    {
+      "id": "ISO/IEC 27037:2012",
+      "national_id": "ГОСТ Р ИСО/МЭК 27037-2014",
+      "title_en": "Information technology. Security techniques. Guidelines for identification, collection, acquisition and preservation of digital evidence (identical adoption)",
+      "status": "national adoption",
+      "issuer": "Росстандарт (Federal Agency on Technical Regulation and Metrology), order of 09.09.2014 No. 1028-ст",
+      "source": "https://protect.gost.ru/document.aspx?control=7&id=187854"
+    }
+  ],
+  "esignature": {
+    "law_local": "Федеральный закон от 06.04.2011 № 63-ФЗ «Об электронной подписи»",
+    "law_en": "Federal Law No. 63-FZ of 6 April 2011 on Electronic Signature",
+    "qualified_term_local": "усиленная квалифицированная электронная подпись",
+    "source": "https://www.consultant.ru/document/cons_doc_LAW_112701/"
+  },
+  "timestamp": {
+    "basis": "Федеральный закон № 63-ФЗ ст. 2 п. 19 (метка доверенного времени), ст. 11 п. 2, ст. 18.1 (доверенная третья сторона)",
+    "qualified_recognition": "No eIDAS-style statutory presumption. A trusted time stamp (метка доверенного времени) is defined as reliable electronic information on the date and time of signing, created and verified by a trusted third party, certification authority or information-system operator. Under art. 11(2) a qualified certificate must be valid at the moment of signing where reliable information on that moment exists; otherwise validity is checked on the date of verification.",
+    "source": "https://www.consultant.ru/document/cons_doc_LAW_112701/9670f310a331667a5be5a0add1c63355b0703e1d/"
+  },
+  "open_questions": [
+    "pravo.gov.ru, publication.pravo.gov.ru, actual.pravo.gov.ru and sozd.duma.gov.ru refused connections or timed out from the research environment. Article texts were checked against ConsultantPlus, Garant and legalacts.ru consolidated texts (УПК ed. 26.07.2026, ГПК ed. 04.08.2026, АПК ed. 15.12.2025, УК ed. 04.08.2026), not against the official publication.",
+    "The criminal-route undertaking text ('Права и обязанности ... статьей 57 УПК РФ, мне разъяснены. Об уголовной ответственности ... по статье 307 УК РФ предупрежден') is the customary practice formula; no official form with this exact wording was found. 73-ФЗ ст. 14 requires the undertaking but prescribes no text. Приказ МВД России от 29.06.2005 № 511 (Instruction, p. 30) and Приказ Минюста России от 28.12.2023 № 404 were not checked verbatim.",
+    "The civil-route warning wording is customary practice; no official form for courts of general jurisdiction was verified.",
+    "Bill No. 306504-6 'О судебно-экспертной деятельности в Российской Федерации' was recommended for second reading on 13.04.2026 (press reports); its status after that date and any replacement of 73-ФЗ (proposed entry into force 01.09.2028) could not be verified.",
+    "No Russian national adoption (ГОСТ Р) of ISO/IEC 27041, 27042 or 27043 was found; the Rosstandart catalogue was not searched directly.",
+    "УК РФ ст. 307: the exact current wording of the disposition ('в ходе досудебного производства' vs 'при производстве предварительного расследования') was not confirmed against the official text; penalties are taken from the legalacts.ru consolidated edition of 04.08.2026.",
+    "КоАП РФ ст. 26.4 ч. 5: mirrors differ on whether the conjunction 'и' precedes 'сделаны выводы'; items are therefore listed as elements, not as a verbatim sentence.",
+    "КоАП РФ ст. 25.9 (rights and duties of the expert in administrative-offence proceedings) was not verified.",
+    "УПК РФ ст. 198 (participants' right to propose additional questions) was not verified."
+  ]
+}

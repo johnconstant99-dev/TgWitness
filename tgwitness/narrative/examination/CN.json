@@ -1,0 +1,248 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "CN",
+  "name_en": "China (mainland)",
+  "name_local": "中华人民共和国（大陆）",
+  "court_languages": [
+    "zh"
+  ],
+  "local_language": "zh",
+  "legal_family": "socialist law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "鉴定人；司法鉴定人",
+    "en": "forensic expert (judicial appraiser) appointed or engaged by the investigating authority, procuratorate or court; registered judicial appraisers work within a registered judicial expertise institution"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "刑事诉讼法（2018修正）第146条、第147条、第148条；全国人大常委会关于司法鉴定管理问题的决定 第10条",
+        "summary_en": "Art. 146: where specialised questions must be resolved to establish the facts, persons with specialised knowledge shall be assigned or engaged (指派、聘请) to carry out an expertise; in practice this is done by the investigating organ, the procuratorate or the court. Art. 147: after the expertise the expert writes an expert opinion and signs it. Art. 148: the investigating organ informs the suspect and victim of expert opinions used as evidence; on their application a supplementary or new expertise may be ordered. Art. 32 extends the recusal rules to experts.",
+        "source": "https://fgk.chinatax.gov.cn/zcfgk/c100009/c5212254/content.html"
+      },
+      "questions": {
+        "basis": "司法鉴定程序通则（司法部令第132号）第15条、第29条；最高人民法院关于适用《中华人民共和国刑事诉讼法》的解释（法释〔2021〕1号）第97条",
+        "summary_en": "The commissioning authority states the expertise requirements (鉴定要求) in the commission; the report must record the reason for the expertise, the commissioning party and the requirements (Interpretation art. 97(4)). A registered institution must refuse a commission that is outside its registered scope, exceeds its technical capability, or where the material is not genuine, incomplete, insufficient or unlawfully obtained (Rules art. 15), and may terminate an accepted expertise on the grounds in art. 29 (e.g. material damaged and cannot be supplemented). No verified provision addresses reporting facts not asked about.",
+        "source": "https://www.gov.cn/gongbao/content/2016/content_5079881.htm"
+      },
+      "report_contents": {
+        "basis": "刑事诉讼法 第147条；刑诉法解释（法释〔2021〕1号）第97条第（四）项、第98条第（七）项；司法鉴定程序通则 第36–38条；司法部《司法鉴定文书格式》（司发通〔2016〕112号）",
+        "items_en": [
+          "reason for which the expertise was initiated",
+          "commissioning party",
+          "expertise institution",
+          "expertise requirements (questions)",
+          "expertise process",
+          "methods used",
+          "date of the expertise",
+          "the expert opinion, stated clearly",
+          "signature of each expert; differing opinions of co-experts must be noted",
+          "seal of the expertise institution (judicial expertise special seal); a report lacking signatures or seal cannot be the basis of a judgment (Interpretation art. 98(7))",
+          "registered judicial expertise institutions use the MOJ uniform format: 1 basic information, 2 case background, 3 summary of materials, 4 expertise process, 5 analysis and explanation, 6 expert opinion, 7 attachments, followed by the experts' printed and handwritten signatures, practising certificate numbers, special seal and date"
+        ],
+        "items_local": [
+          "提起鉴定的事由",
+          "鉴定委托人",
+          "鉴定机构",
+          "鉴定要求",
+          "鉴定过程",
+          "鉴定方法",
+          "鉴定日期",
+          "鉴定意见（应当明确）",
+          "司法鉴定人签名；多人参加的鉴定，对鉴定意见有不同意见的，应当注明",
+          "鉴定机构盖章（司法鉴定专用章）；鉴定文书缺少签名、盖章的，不得作为定案的根据",
+          "司法鉴定意见书正文：一、基本情况 二、基本案情 三、资料摘要 四、鉴定过程 五、分析说明 六、鉴定意见 七、附件；落款：司法鉴定人签名（打印文本和亲笔签名）及《司法鉴定人执业证》证号、司法鉴定专用章、日期"
+        ],
+        "source": "https://www.court.gov.cn/fabu/xiangqing/286491.html"
+      },
+      "rights_duties": {
+        "basis": "司法鉴定程序通则 第5条、第20–21条、第43条；全国人大常委会关于司法鉴定管理问题的决定 第10条、第11条；刑事诉讼法 第32条、第192条",
+        "summary_en": "Expert-responsibility system: the expert carries out the expertise independently, objectively and impartially and is responsible for the opinion (Rules art. 5; Decision item 10). Recusal where the expert has an interest or took part in the same matter (Rules arts. 20–21; CPL art. 32). When a party objects to the opinion and the court considers it necessary, the expert must testify; if the expert refuses after notice, the opinion cannot be the basis of a judgment (CPL art. 192). Under the Rules art. 43 the expert must appear when notified by the court.",
+        "source": "https://www.gov.cn/gongbao/content/2016/content_5079881.htm"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "民事诉讼法（2023修正）第79条；最高人民法院关于民事诉讼证据的若干规定（法释〔2019〕19号）第32条",
+        "summary_en": "A party may apply to the court for an expertise on specialised factual questions; the parties agree on a qualified expert, failing which the court designates one. If no party applies and the court considers an expertise necessary, it commissions a qualified expert. The court's commission states the expertise matter, scope, purpose and time limit (Evidence Provisions art. 32).",
+        "source": "http://www.npc.gov.cn/npc/yhcslm/cslm12/202310/t20231025_432575.html"
+      },
+      "questions": {
+        "basis": "最高人民法院关于民事诉讼证据的若干规定 第32条；司法鉴定程序通则 第15条",
+        "summary_en": "The court defines the expertise matter, scope and purpose in the commission after hearing the parties. A registered institution must decline commissions outside its scope or capability or with insufficient or unlawfully obtained material (Rules art. 15). No verified provision addresses reporting facts not asked about.",
+        "source": "https://www.court.gov.cn/fabu/xiangqing/212721.html"
+      },
+      "report_contents": {
+        "basis": "民事诉讼法 第80条第2款；最高人民法院关于民事诉讼证据的若干规定 第36条",
+        "items_en": [
+          "name of the commissioning court",
+          "content and requirements of the commissioned expertise",
+          "expertise materials",
+          "principles and methods on which the expertise is based",
+          "explanation of the expertise process",
+          "expert opinion",
+          "the signed undertaking (承诺书)",
+          "signature or seal of the expert, with proof of the expert's qualification; where an institution is commissioned, the institution's seal and the signatures of the persons who performed the expertise"
+        ],
+        "items_local": [
+          "委托法院的名称",
+          "委托鉴定的内容、要求",
+          "鉴定材料",
+          "鉴定所依据的原理、方法",
+          "对鉴定过程的说明",
+          "鉴定意见",
+          "承诺书",
+          "鉴定书应当由鉴定人签名或者盖章，并附鉴定人的相应资格证明；委托机构鉴定的，鉴定书应当由鉴定机构盖章，并由从事鉴定的人员签名"
+        ],
+        "source": "https://www.court.gov.cn/fabu/xiangqing/212721.html"
+      },
+      "rights_duties": {
+        "basis": "民事诉讼法 第80条、第81条、第82条；最高人民法院关于民事诉讼证据的若干规定 第33条、第35条、第81条",
+        "summary_en": "The expert may access the case materials needed and, where necessary, question the parties and witnesses, and must give a written opinion signed or sealed (CPL art. 80). The expert must testify when a party objects or the court considers it necessary; refusal after notice makes the opinion unusable and the paying party may reclaim the fee (CPL art. 81; Evidence Provisions art. 81). Parties may call a person with specialised knowledge to comment on the opinion (CPL art. 82). Before starting, the expert signs an undertaking (Evidence Provisions art. 33).",
+        "source": "http://www.npc.gov.cn/npc/yhcslm/cslm12/202310/t20231025_432575.html"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": "全国人民代表大会常务委员会关于司法鉴定管理问题的决定（2005年通过，2015年修正）；司法鉴定程序通则（司法部令第132号，2016年5月1日施行）",
+    "title_en": "NPC Standing Committee Decision on the Administration of Judicial Expertise (2005, amended 2015); General Rules on Judicial Expertise Procedure (MOJ Order No. 132, in force 1 May 2016)",
+    "source": "https://www.gov.cn/gongbao/content/2016/content_5079881.htm"
+  },
+  "liability": [
+    {
+      "route": "criminal",
+      "norm": "刑法 第305条（伪证罪）",
+      "summary_en": "In criminal proceedings, an expert who intentionally gives a false expertise on circumstances important to the case, intending to frame another person or conceal criminal evidence: up to 3 years' fixed-term imprisonment or criminal detention; in serious cases 3 to 7 years.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "https://fgk.chinatax.gov.cn/zcfgk/c100009/c5212248/content.html"
+    },
+    {
+      "route": "all",
+      "norm": "全国人大常委会关于司法鉴定管理问题的决定 第13条；刑事诉讼法 第147条",
+      "summary_en": "Administrative liability of registered experts and institutions: warning and order to rectify; suspension from expertise work for 3 months to 1 year, or revocation of registration in serious cases, inter alia for gross irresponsibility causing major loss or refusing to testify after court notice. An expert who intentionally gives a false expertise is criminally liable where it constitutes a crime, otherwise punished as above. CPL art. 147: an expert who intentionally gives a false expertise bears legal liability.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "http://www.npc.gov.cn/wxzl/gongbao/2005-04/25/content_5337645.htm"
+    },
+    {
+      "route": "civil",
+      "norm": "最高人民法院关于民事诉讼证据的若干规定 第33条；民事诉讼法 第114条、第118条",
+      "summary_en": "Before the expertise the court requires the expert to sign an undertaking. An expert who intentionally gives a false expertise must refund the fee and may be sanctioned for obstructing civil proceedings (Evidence Provisions art. 33 refers to former CPL art. 111, now art. 114); fines for individuals up to RMB 100,000 (CPL art. 118); criminal liability where a crime is constituted.",
+      "warning_local": "保证客观、公正、诚实地进行鉴定，保证出庭作证，如作虚假鉴定应当承担法律责任",
+      "warning_en": "undertakes to conduct the expertise objectively, impartially and honestly, to appear and testify in court, and to bear legal liability for any false expertise",
+      "wording": "official",
+      "source": "https://www.court.gov.cn/fabu/xiangqing/212721.html"
+    }
+  ],
+  "declaration": {
+    "basis": "最高人民法院关于民事诉讼证据的若干规定 第33条第1款（承诺书，民事）；司法鉴定程序通则 第37条（签名）",
+    "text_local": "本人保证客观、公正、诚实地进行鉴定，保证出庭作证，如作虚假鉴定，愿意承担法律责任。",
+    "text_en": "I undertake to conduct the expertise objectively, impartially and honestly and to appear and testify in court; if I give a false expertise I will bear legal liability.",
+    "wording": "composed",
+    "source": "https://www.court.gov.cn/fabu/xiangqing/212721.html"
+  },
+  "standards": [
+    {
+      "id": "GB/T 29360-2023",
+      "national_id": "GB/T 29360-2023",
+      "title_en": "Forensic sciences - Code of practice for electronic data recovery examination (法庭科学 电子数据恢复检验规程); replaces GB/T 29360-2012, in force 2023-10-01",
+      "status": "official guidance",
+      "issuer": "SAMR / SAC (competent department: Ministry of Public Security, TC179)",
+      "source": "https://std.samr.gov.cn/gb/search/gbDetailed?id=F78920661038B223E05397BE0A0AE533"
+    },
+    {
+      "id": "GB/T 29361-2023",
+      "national_id": "GB/T 29361-2023",
+      "title_en": "Forensic sciences - Code of practice for identification of electronic data file consistency (法庭科学 电子数据文件一致性检验规程); replaces GB/T 29361-2012, in force 2023-10-01",
+      "status": "official guidance",
+      "issuer": "SAMR / SAC (competent department: Ministry of Public Security, TC179)",
+      "source": "https://std.samr.gov.cn/gb/search/gbDetailed?id=F78920661037B223E05397BE0A0AE533"
+    },
+    {
+      "id": "GB/T 29362-2023",
+      "national_id": "GB/T 29362-2023",
+      "title_en": "Forensic sciences - Code of practice for electronic data search examination (法庭科学 电子数据搜索检验规程); replaces GB/T 29362-2012, in force 2023-10-01",
+      "status": "official guidance",
+      "issuer": "SAMR / SAC (competent department: Ministry of Public Security, TC179)",
+      "source": "https://std.samr.gov.cn/gb/search/gbDetailed?id=F7892066103AB223E05397BE0A0AE533"
+    },
+    {
+      "id": "GB/T 31500-2024",
+      "national_id": "GB/T 31500-2024",
+      "title_en": "Cybersecurity technology - Security specification of data recovery service for storage media (网络安全技术 存储介质数据恢复服务安全规范); replaces GB/T 31500-2015, in force 2025-05-01",
+      "status": "official guidance",
+      "issuer": "SAMR / SAC (TC260)",
+      "source": "https://std.samr.gov.cn/gb/search/gbDetailed?id=25940C3CEEB18A9AE06397BE0A0A525A"
+    },
+    {
+      "id": "SF/Z JD0400001-2014",
+      "national_id": "SF/Z JD0400001-2014",
+      "title_en": "General implementation specification for electronic data judicial expertise (电子数据司法鉴定通用实施规范)",
+      "status": "official guidance",
+      "issuer": "Ministry of Justice, Judicial Expertise Administration Bureau",
+      "source": "https://www.moj.gov.cn/pub/sfbgw/zwfw/zwfwbgxz/202101/1565869585542018751.pdf"
+    },
+    {
+      "id": "SF/T 0076-2020",
+      "national_id": "SF/T 0076-2020",
+      "title_en": "Technical specification for electronic data preservation (电子数据存证技术规范)",
+      "status": "official guidance",
+      "issuer": "Ministry of Justice (judicial administration industry standard)",
+      "source": "https://sft.hubei.gov.cn/bsfw/ztbs/sfjd/zcfg/202212/P020201022599162615212.pdf"
+    },
+    {
+      "id": "SF/T 0157-2023",
+      "national_id": "SF/T 0157-2023",
+      "title_en": "Technical specification for forensic examination of electronic data on mobile terminals (移动终端电子数据鉴定技术规范); replaces SF/Z JD0401002-2015",
+      "status": "official guidance",
+      "issuer": "Ministry of Justice (judicial administration industry standard)",
+      "source": "https://www.moj.gov.cn/pub/sfbgw/zwxxgk/fdzdgknr/fdzdgknrlzyj/lzyjsfhybzj/202310/W020231020646402528307.pdf"
+    },
+    {
+      "id": "SF/T 0156-2023",
+      "national_id": "SF/T 0156-2023",
+      "title_en": "Technical specification for e-mail forensic examination (电子邮件鉴定技术规范); replaces SF/Z JD0402001-2014",
+      "status": "official guidance",
+      "issuer": "Ministry of Justice (judicial administration industry standard)",
+      "source": "https://www.moj.gov.cn/pub/sfbgw/zwfw/zwfwbgxz/202401/W020240110412872614076.pdf"
+    },
+    {
+      "id": "SF/T 0158-2023",
+      "national_id": "SF/T 0158-2023",
+      "title_en": "Technical specification for software similarity forensic examination (软件相似性鉴定技术规范); replaces SF/Z JD0403001-2014",
+      "status": "official guidance",
+      "issuer": "Ministry of Justice (judicial administration industry standard)",
+      "source": "https://www.moj.gov.cn/pub/sfbgw/zwfw/zwfwbgxz/202401/W020240110412873151814.pdf"
+    }
+  ],
+  "esignature": {
+    "law_local": "中华人民共和国电子签名法（2019修正）",
+    "law_en": "Electronic Signature Law of the People's Republic of China (as amended 2019)",
+    "qualified_term_local": "可靠的电子签名",
+    "source": "https://www.miit.gov.cn/jgsj/zfs/fl/art/2022/art_e3f623f70c23497e88a941170093446a.html"
+  },
+  "timestamp": {
+    "basis": "最高人民法院关于互联网法院审理案件若干问题的规定（法释〔2018〕16号）第11条第2款；最高人民法院关于民事诉讼证据的若干规定 第93条、第94条",
+    "qualified_recognition": "No statute regulates qualified timestamps. Under the SPC Internet Courts Provisions art. 11(2), electronic data whose authenticity can be proven by electronic signatures, trusted timestamps, hash verification, blockchain or certification by an electronic evidence platform shall be confirmed by an Internet court; authenticity is still reviewed against the factors in art. 11(1). Evidence Provisions art. 94 lets courts confirm the authenticity of electronic data provided or confirmed by a neutral third-party platform, absent sufficient contrary evidence. Electronic signatures meeting Electronic Signature Law art. 13 have the same effect as handwritten signatures or seals (art. 14).",
+    "source": "https://www.court.gov.cn/fabu/xiangqing/116981.html"
+  },
+  "open_questions": [
+    "flk.npc.gov.cn and npc.gov.cn could not be machine-read (JavaScript / TLS failure). Statute texts were verified against government-hosted reprints: SPC Gazette and State Taxation Administration law database (Criminal Procedure Law 2018, Criminal Law), WIPO Lex copy of the 2023 Civil Procedure Law, gov.cn State Council Gazette (MOJ Order 132), court.gov.cn (SPC interpretations). Re-check against flk.npc.gov.cn before publication.",
+    "The 声明 (statement) page of the 2016 MOJ template 司法鉴定意见书 (司发通〔2016〕112号) could not be read: the moj.gov.cn template download returned a redirect loop. Only the section headings and signature block were verified (Wuhan Municipal Justice Bureau reproduction). The 4-item 声明 widely quoted online comes from the superseded 2007 format (司发通〔2007〕71号).",
+    "No verified rule prescribes a warning or undertaking that the expert signs in the criminal route (for example in 公安机关办理刑事案件程序规定 or 人民检察院刑事诉讼规则); warning_local for 刑法 第305条 is therefore null.",
+    "Not verified: 最高人民法院 最高人民检察院 公安部《关于办理刑事案件收集提取和审查判断电子数据若干问题的规定》(法发〔2016〕22号) and 公安部《公安机关办理刑事案件电子数据取证规则》(2019), which govern electronic data in criminal cases and refer electronic data questions to judicial expertise institutions or institutions designated by the Ministry of Public Security.",
+    "No national adoption of ISO/IEC 27037, 27041, 27042 or 27043 as GB/T was identified; not confirmed either way.",
+    "Not verified whether CNAS ISO/IEC 17025 accreditation or certification is mandatory for electronic-data judicial expertise institutions under MOJ rules.",
+    "The SF/T 0156-2023, SF/T 0157-2023 and SF/T 0158-2023 numbers and replaced norms come from moj.gov.cn PDF headers; their Chinese titles were taken from secondary listings. MOJ standard announcements of 2025–2026 and the current status of SF/Z JD0400001-2014 and of SF/Z JD0402003-2015 (即时通讯记录检验操作规范, relevant to messenger evidence) were not checked.",
+    "The caller listed GB/T 29360/29361/29362-2012 and GB/T 31500-2015; std.samr.gov.cn shows all four replaced (2012 versions by the 2023 editions on 2023-10-01; GB/T 31500-2015 by GB/T 31500-2024 on 2025-05-01). The current editions are listed instead.",
+    "Article 305 of the Criminal Law was checked against the consolidated text up to Amendment XII (2023); later amendments, if any, were not checked.",
+    "Whether an expert may report facts not asked about is not addressed by any provision found.",
+    "No statute or national rule on qualified electronic timestamps was verified (for example GB/T 20520 on PKI timestamps was not checked)."
+  ]
+}

@@ -7,6 +7,7 @@ from .. import pdf_report
 from .diagrams import diagrams, svg
 from .config import DIAGRAMS, OUTPUTS
 from .text import Texts
+from .expert import RTL, codes as examination_codes
 
 
 def references(model):
@@ -23,6 +24,8 @@ def jurisdiction(code):
         return None
     root = Path(__file__).parent / 'jurisdictions'
     if code not in {p.stem for p in root.glob('*.json')}:
+        if code in examination_codes():
+            return None
         raise ValueError('Unsupported jurisdiction')
     return json.loads((root / (code + '.json')).read_text(encoding='utf-8'))
 
@@ -50,7 +53,7 @@ def fact_refs(fact):
 
 def html_report(model, text, pictures, local):
     e = escape
-    out = ['<!doctype html><html lang="' + text.lang + '"><meta charset="utf-8">',
+    out = ['<!doctype html><html lang="' + text.lang + '" dir="' + ('rtl' if text.lang in RTL else 'ltr') + '"><meta charset="utf-8">',
            '<meta name="viewport" content="width=device-width,initial-scale=1">',
            '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; img-src \'self\' data:; base-uri \'none\'">',
            '<title>' + e(text('title')) + '</title><style>body{font:17px/1.6 system-ui,sans-serif;color:#163844;max-width:1050px;margin:40px auto;padding:0 24px;overflow-wrap:anywhere}h1,h2{line-height:1.2}article{border-top:1px solid #cad6d6;padding:20px 0}.limit{color:#65523a}svg{width:100%;height:auto}code,pre{white-space:pre-wrap;overflow-wrap:anywhere}a{color:#165c74}table{border-collapse:collapse;width:100%}td,th{text-align:left;border-bottom:1px solid #ddd;padding:6px;overflow-wrap:anywhere}footer{border-top:1px solid #ddd;margin-top:30px}</style><body>',
@@ -136,7 +139,8 @@ def pdf_diagram(pdf, diagram):
 
 
 def pdf_report_bytes(model, text, pictures, local):
-    pdf = pdf_report.document(SimpleNamespace(language=text.lang, direction='ltr'), text('limit.review'))
+    pdf = pdf_report.document(SimpleNamespace(language=text.lang, direction='rtl' if text.lang in RTL else 'ltr'),
+                              text('limit.review'))
     pdf.set_title(text('title'))
     pdf.add_page()
     pdf.line_text('1. ' + text('title'), size=20, style='B')

@@ -1,0 +1,155 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "SK",
+  "name_en": "Slovakia",
+  "name_local": "Slovenská republika",
+  "court_languages": [
+    "sk"
+  ],
+  "local_language": "sk",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "znalec",
+    "en": "expert entered in the Ministry of Justice list of experts, interpreters and translators (or ad hoc expert) engaged by the court or criminal-justice authority"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Zákon č. 301/2005 Z. z., Trestný poriadok (time version from 18.08.2026), § 141, § 142, § 143, § 147, § 152",
+        "summary_en": "Where an expert statement (§ 141) is not sufficient because of complexity, the criminal-justice authority, and in court the presiding judge, engages an expert by resolution (uznesenie), which can be challenged by complaint (§ 142(1), (3)); two experts for especially complex facts and autopsies. Preference for an expert organisation specialised in the field; a non-listed person may be engaged if no listed expert is available, after taking the statutory oath (§ 143). Expert institutes in exceptional cases or for review (§ 147). Appointment, eligibility, exclusion, refusal and oath are governed by the special act (§ 152(1)).",
+        "source": "https://static.slov-lex.sk/static/SK/ZZ/2005/301/20260818.html"
+      },
+      "questions": {
+        "basis": "TP § 145(1), § 146",
+        "summary_en": "The tasks are as a rule set in the resolution engaging the expert, in the form of questions; the expert is not entitled to resolve legal questions, evaluate evidence or draw legal conclusions (§ 145(1)). The expert may propose taking evidence needed for the report and may question persons at that hearing. Doubts, unclarity or incompleteness lead to explanation or supplementation, otherwise another expert (§ 146). No provision found expressly permitting the expert to report facts not asked about.",
+        "source": "https://static.slov-lex.sk/static/SK/ZZ/2005/301/20260818.html"
+      },
+      "report_contents": {
+        "basis": "Zákon č. 382/2004 Z. z. o znalcoch, tlmočníkoch a prekladateľoch, § 17(2)-(6); vyhláška č. 228/2018 Z. z. § 19 and príloha č. 6 (osnova znaleckého posudku)",
+        "items_en": [
+          "title page: identification of expert and commissioning party, file or order number, label 'znalecký posudok', serial number, brief description of the subject, number of pages and copies",
+          "introduction: task of the expert and subject of examination, purpose, reference date, source materials, regulations and literature used",
+          "opinion (posudok): description of the subject and facts considered, and the procedure leading to the answers",
+          "conclusion (záver): the commissioning party's questions quoted with brief answers",
+          "annexes needed for reviewability",
+          "expert clause (znalecká doložka): identification of expert, field and branch, register (denník) entry number, and declaration of awareness of the consequences of a knowingly false report",
+          "place and date, official stamp imprint, signature; paper version bound with cord sealed by stamp; electronic version signed with a qualified electronic signature or qualified electronic seal and bearing a qualified electronic time stamp"
+        ],
+        "items_local": [
+          "titulná strana",
+          "úvod",
+          "posudok",
+          "záver",
+          "prílohy potrebné na zabezpečenie preskúmateľnosti znaleckého posudku",
+          "znalecká doložka"
+        ],
+        "source": "https://static.slov-lex.sk/static/SK/ZZ/2004/382/20220701.html"
+      },
+      "rights_duties": {
+        "basis": "Zákon č. 382/2004 Z. z. § 11, § 12, § 13, § 16(2), § 17(7); TP § 144",
+        "summary_en": "Expert must perform personally, properly and on time, purposefully, economically and impartially (§ 16(2)). Excluded where impartiality may be doubted; must notify the commissioning party without delay; a court or public authority decides (§ 11). A listed expert appointed by a court may not refuse without reason and must refuse when excluded, not registered for the field, prevented by serious reasons, or suspended; refusal must be notified in writing with reasons (§ 12). Confidentiality (§ 13). Must confirm, supplement or explain the report on request (§ 17(7)). On engagement the expert is warned of the duty to report exclusion grounds and instructed on the public-interest significance of the report and the criminal consequences of a knowingly false report (TP § 144(1)); if a party procures the report, the authority gives the same instruction (§ 144(2)).",
+        "source": "https://static.slov-lex.sk/static/SK/ZZ/2004/382/20220701.html"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Zákon č. 160/2015 Z. z., Civilný sporový poriadok (time version from 15.07.2026), § 206, § 207, § 208, § 209",
+        "summary_en": "The court, on a motion, requests an expert statement from a qualified person (§ 206); where scientific knowledge is needed and § 206 is insufficient, the court on a motion orders expert evidence and appoints an expert (§ 207(1)); an expert institute only in especially serious cases or where expert conclusions clearly conflict (§ 207(3)). A private report submitted with the action that has all statutory requirements and contains the clause that the expert is aware of the consequences of a knowingly false report is treated as a report of a court-appointed expert (§ 209(2)).",
+        "source": "https://static.slov-lex.sk/static/SK/ZZ/2015/160/20260715.html"
+      },
+      "questions": {
+        "basis": "CSP § 207(2), § 208(3)",
+        "summary_en": "In a written report the expert answers the questions put and does not comment on the legal assessment of the case (§ 207(2)); the court may hear the expert on the report (§ 208(3)). Refusal and exclusion follow zákon č. 382/2004 Z. z. §§ 11-12. No provision found on reporting facts not asked about.",
+        "source": "https://static.slov-lex.sk/static/SK/ZZ/2015/160/20260715.html"
+      },
+      "report_contents": {
+        "basis": "Zákon č. 382/2004 Z. z. § 17; vyhláška č. 228/2018 Z. z. príloha č. 6; CSP § 209(2)",
+        "items_en": [
+          "same structure as in the criminal route",
+          "the expert clause with the declaration of awareness of the consequences of a knowingly false report (required for a private report to be treated as court-ordered, CSP § 209(2))"
+        ],
+        "items_local": [
+          "titulná strana, úvod, posudok, záver, prílohy, znalecká doložka",
+          "doložka o tom, že znalec si je vedomý následkov vedome nepravdivého znaleckého posudku"
+        ],
+        "source": "https://static.slov-lex.sk/static/SK/ZZ/2015/160/20260715.html"
+      },
+      "rights_duties": {
+        "basis": "Zákon č. 382/2004 Z. z. § 11-13, § 16-17",
+        "summary_en": "Same duties as in the criminal route.",
+        "source": "https://static.slov-lex.sk/static/SK/ZZ/2004/382/20220701.html"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": "Zákon č. 382/2004 Z. z. o znalcoch, tlmočníkoch a prekladateľoch a o zmene a doplnení niektorých zákonov; vyhláška Ministerstva spravodlivosti SR č. 228/2018 Z. z., ktorou sa vykonáva zákon č. 382/2004 Z. z.",
+    "title_en": "Act No. 382/2004 Coll. on experts, interpreters and translators; Ministry of Justice Decree No. 228/2018 Coll. implementing it (report outline in Annex 6)",
+    "source": "https://static.slov-lex.sk/static/SK/ZZ/2004/382/20220701.html"
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Zákon č. 300/2005 Z. z., Trestný zákon, § 347 (time version from 18.08.2026)",
+      "summary_en": "An expert, interpreter or translator who, before a court, prosecutor or police in criminal proceedings, a court in civil or administrative-court proceedings, enforcement proceedings, a public administration body or an arbitral tribunal, states an untruth about a circumstance of essential importance for the decision or conceals it, or who causes small damage by such untruth in a contractual report: 1 to 5 years' imprisonment; 3 to 8 years for more serious manner or special motive; 4 to 10 years for substantial damage or other particularly serious consequence.",
+      "warning_local": "Zároveň vyhlasujem, že som si vedomý/á následkov vedome nepravdivého znaleckého posudku/znaleckého úkonu.",
+      "warning_en": "I also declare that I am aware of the consequences of a knowingly false expert report/expert act.",
+      "wording": "official",
+      "source": "https://static.slov-lex.sk/pdf/prilohy/SK/ZZ/2018/228/20260501_5529567-2.pdf"
+    },
+    {
+      "route": "criminal",
+      "norm": "TP § 144(1)",
+      "summary_en": "Instruction given to the expert on engagement.",
+      "warning_local": "Musí byť tiež poučený o význame znaleckého posudku z hľadiska všeobecného záujmu a o trestných následkoch vedome nepravdivého znaleckého posudku.",
+      "warning_en": "The expert must also be instructed on the significance of the expert report from the point of view of the public interest and on the criminal consequences of a knowingly false expert report.",
+      "wording": "official",
+      "source": "https://static.slov-lex.sk/static/SK/ZZ/2005/301/20260818.html"
+    },
+    {
+      "route": "all",
+      "norm": "Zákon č. 382/2004 Z. z. § 26 (administrative offences), § 9 (mandatory liability insurance), § 5(7) (oath on entry in the list)",
+      "summary_en": "Breach of statutory duties or delays over 30 days: fine EUR 50-2 000 for a natural person (EUR 50-20 000 for a legal person), prohibition of activity up to 1 year, or removal from the list (§ 26). Listed experts may act only with liability insurance for damage caused by their activity (§ 9). Oath taken before the Minister of Justice on registration (§ 5(7)).",
+      "warning_local": "Sľubujem na svoju česť a svedomie, že pri výkone svojej činnosti budem dodržiavať Ústavu Slovenskej republiky, ústavné zákony, zákony a ostatné všeobecne záväzné právne predpisy a morálne a etické zásady výkonu tejto činnosti, že svoju činnosť budem vykonávať osobne, nestranne a nezaujato podľa svojho najlepšieho svedomia a vedomia, že budem plne využívať všetky svoje odborné znalosti a že zachovám mlčanlivosť o skutočnostiach, o ktorých sa pri výkone činnosti dozviem.",
+      "warning_en": "I promise on my honour and conscience that in performing my activity I will comply with the Constitution of the Slovak Republic, constitutional acts, acts and other generally binding legal regulations and the moral and ethical principles of this activity, that I will perform my activity personally, impartially and without bias to the best of my conscience and knowledge, that I will make full use of all my expert knowledge and that I will keep confidential the facts I learn in performing the activity.",
+      "wording": "official",
+      "source": "https://static.slov-lex.sk/static/SK/ZZ/2004/382/20220701.html"
+    }
+  ],
+  "declaration": {
+    "basis": "Zákon č. 382/2004 Z. z. § 17(6) (expert clause including the declaration of awareness of consequences); vyhláška č. 228/2018 Z. z. príloha č. 6 (official wording for natural-person experts); CSP § 209(2)",
+    "text_local": "Znalecký posudok/znalecký úkon som vypracoval/a ako znalec/znalkyňa zapísaný/á v zozname znalcov, tlmočníkov a prekladateľov, ktorý vedie Ministerstvo spravodlivosti Slovenskej republiky, v odbore ______________, odvetví/odvetviach _____________, pod evidenčným číslom ________.\nZnalecký posudok/znalecký úkon je zapísaný v denníku pod číslom ______.\nZároveň vyhlasujem, že som si vedomý/á následkov vedome nepravdivého znaleckého posudku/znaleckého úkonu.",
+    "text_en": "I prepared this expert report/expert act as an expert entered in the list of experts, interpreters and translators kept by the Ministry of Justice of the Slovak Republic, in the field ______, branch(es) ______, under registration number ______.\nThe expert report/expert act is recorded in the journal under number ______.\nI also declare that I am aware of the consequences of a knowingly false expert report/expert act.",
+    "wording": "official",
+    "source": "https://static.slov-lex.sk/pdf/prilohy/SK/ZZ/2018/228/20260501_5529567-2.pdf"
+  },
+  "standards": [
+    {
+      "id": "ISO/IEC 27037:2012",
+      "national_id": "STN EN ISO/IEC 27037 (36 9762), február 2017",
+      "title_en": "Guidelines for identification, collection, acquisition and preservation of digital evidence",
+      "status": "national adoption",
+      "issuer": "Úrad pre normalizáciu, metrológiu a skúšobníctvo SR (ÚNMS SR)",
+      "source": "https://normy.normoff.gov.sk/norma/124050/nahlad/"
+    }
+  ],
+  "esignature": {
+    "law_local": "Nariadenie (EÚ) č. 910/2014 (eIDAS) v znení nariadenia (EÚ) 2024/1183; zákon č. 272/2016 Z. z. o dôveryhodných službách pre elektronické transakcie na vnútornom trhu a o zmene a doplnení niektorých zákonov (zákon o dôveryhodných službách); zákon č. 382/2004 Z. z. § 17(3)",
+    "law_en": "Regulation (EU) No 910/2014 (eIDAS) as amended by Regulation (EU) 2024/1183; Act No. 272/2016 Coll. on trust services (national implementing act); Expert Act § 17(3): each copy of an electronic report must bear a qualified electronic signature or qualified electronic seal and a qualified electronic time stamp",
+    "qualified_term_local": "kvalifikovaný elektronický podpis",
+    "source": "https://static.slov-lex.sk/static/SK/ZZ/2016/272/20250101.html"
+  },
+  "timestamp": {
+    "basis": "Regulation (EU) No 910/2014, art. 41 (as amended by Regulation (EU) 2024/1183); zákon č. 382/2004 Z. z. § 17(3) and (10) (qualified electronic time stamp mandatory for electronic reports; retention 10 years)",
+    "qualified_recognition": "Qualified electronic time stamp (kvalifikovaná elektronická časová pečiatka): presumption of accuracy of date and time and integrity of the bound data (eIDAS art. 41(2)); formal requirement for electronic expert reports.",
+    "source": "https://eur-lex.europa.eu/eli/reg/2014/910/oj"
+  },
+  "open_questions": [
+    "Slov-Lex static portal returned version 20220701 of Act No. 382/2004 as the version in force on 2026-11-11; whether a later amendment exists that the static index did not show was not cross-checked on the dynamic portal.",
+    "Slovak adoptions of ISO/IEC 27041, 27042 and 27043 (STN EN ISO/IEC) were not verified; only STN EN ISO/IEC 27037 is confirmed.",
+    "Slov-Lex notes that its HTML text is informative and the legally binding text is the PDF version; quotations were taken from the HTML time versions and not compared with the PDF."
+  ]
+}

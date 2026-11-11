@@ -1,0 +1,165 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "CZ",
+  "name_en": "Czechia",
+  "name_local": "Česká republika",
+  "court_languages": [
+    "cs"
+  ],
+  "local_language": "cs",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "znalec",
+    "en": "expert entered in the Ministry of Justice list (or ad hoc expert) appointed by the court or criminal-justice authority"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Zákon č. 141/1961 Sb., trestní řád (version effective 2026-11-01), § 105, § 110, § 111",
+        "summary_en": "Where expert knowledge is needed the authority first requests an expert statement (odborné vyjádření); if insufficient because of complexity, it engages an expert (přibere znalce): in pre-trial the authority that needs the report, in court the presiding judge (§ 105(1)). Two experts for especially important facts and autopsies (§ 105(4)). An expert institute may be engaged in exceptional, especially difficult cases (§ 110). Ad hoc experts are covered by § 111.",
+        "source": "https://e-sbirka.gov.cz/sb/1961/141/2026-11-01"
+      },
+      "questions": {
+        "basis": "TŘ § 105(3), § 107(1); zákon č. 254/2019 Sb. § 25(1), § 28(5); vyhláška č. 503/2020 Sb. § 40, § 41(5)",
+        "summary_en": "The authority defines the expert's tasks; the expert must not evaluate evidence or resolve legal questions (TŘ § 107(1)). Objections may be raised against the formulation of questions (§ 105(3)). The authority discusses the assignment (zadání) and deadline with the expert in advance (zákon 254/2019 § 25(1)). The conclusion must quote each question and answer it unambiguously, or state the facts reducing accuracy (§ 28(5); vyhláška § 41(5)). The expert may propose that other evidence first clarify needed circumstances (TŘ § 107(1)). No provision found expressly allowing the expert to report facts not asked about.",
+        "source": "https://e-sbirka.gov.cz/sb/1961/141/2026-11-01"
+      },
+      "report_contents": {
+        "basis": "Zákon č. 254/2019 Sb. § 27, § 28(2), (5), (7); vyhláška č. 503/2020 Sb. § 39-49",
+        "items_en": [
+          "title page (expert and commissioning party, file number, label 'znalecký posudek' with register entry number, brief subject, field/branch/specialisation, copy number, date)",
+          "assignment (the expert question, purpose of use, facts communicated by the commissioning party affecting accuracy)",
+          "list of source materials (selection of data sources; note if credibility could not be verified)",
+          "findings (nález): data collection/creation and processing",
+          "opinion (posudek): analysis of the data and results",
+          "reasoning sufficient to make the report reviewable, including interpretation and self-check of the procedure",
+          "conclusion quoting each question with an unambiguous answer or the conditions limiting accuracy",
+          "annexes needed for reviewability, where possible",
+          "last page: consultant used or not, contractual fee, clause on awareness of consequences of a knowingly false report (if given) placed before the expert clause",
+          "expert clause (znalecká doložka): list in which the expert is entered, field and branch (and specialisation), register entry number",
+          "expert seal imprint; date and signature (electronic version: qualified electronic signature, certificate marked 'znalec', qualified electronic time stamp, PDF/A)"
+        ],
+        "items_local": [
+          "titulní strana",
+          "zadání",
+          "výčet podkladů",
+          "nález",
+          "posudek",
+          "odůvodnění v rozsahu umožňujícím přezkoumatelnost znaleckého posudku",
+          "závěr",
+          "je-li to možné, přílohy potřebné k zajištění přezkoumatelnosti znaleckého posudku",
+          "doložka znalce o tom, že si je vědom následků vědomě nepravdivého znaleckého posudku, umístěná před znaleckou doložkou (vyhláška č. 503/2020 Sb. § 46 odst. 1 písm. f)",
+          "znalecká doložka",
+          "otisk znalecké pečeti"
+        ],
+        "source": "https://e-sbirka.gov.cz/sb/2019/254/2026-01-01"
+      },
+      "rights_duties": {
+        "basis": "TŘ § 105(2), § 106, § 108, § 109; zákon č. 254/2019 Sb. § 1(3)-(4), § 18, § 19, § 20, § 28(1), (6)",
+        "summary_en": "Expert must act only within the registered field, with professional care, independently, impartially, personally and on time (zákon § 1(3)-(4)); report must be complete, true and reviewable (§ 28(1)). Must disclose grounds of bias without delay (§ 18; TŘ § 106). Must refuse if suspended, not authorised for the field, overloaded, or working through an expert firm; towards public authorities may refuse only on those grounds or serious health/family/work reasons (§ 19); TŘ § 105(2) adds refusal grounds of §§ 99-100. Confidentiality (§ 20). Must confirm, supplement or explain the report on request (§ 28(6)); unclear or incomplete reports lead to explanation or another expert (TŘ § 109). The summons warns of the criminal consequences of false testimony and knowingly false expert reports (TŘ § 106).",
+        "source": "https://e-sbirka.gov.cz/sb/2019/254/2026-01-01"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Zákon č. 99/1963 Sb., občanský soudní řád (version effective 2026-11-01), § 127, § 127a",
+        "summary_en": "The court first requests an expert statement from a public authority or qualified person; if insufficient or doubtful, it appoints an expert (ustanoví znalce), hears the expert and may order a written report (§ 127(1)). Institutions may be appointed in exceptional cases (§ 127(3)). A report submitted by a party that meets all statutory requirements and contains the expert's clause on awareness of the consequences of a knowingly false report is taken as if commissioned by the court (§ 127a(1)).",
+        "source": "https://e-sbirka.gov.cz/sb/1963/99/2026-11-01"
+      },
+      "questions": {
+        "basis": "OSŘ § 127(2), § 127a(2); zákon č. 254/2019 Sb. § 25(1), § 28(5)",
+        "summary_en": "The court sets the assignment and agrees it and the deadline with the expert in advance (zákon § 25(1)). Doubts, unclarity or incompleteness lead to explanation, supplementation or review by another expert (OSŘ § 127(2)); other parties may comment on a party report including the assignment (§ 127a(2)). Refusal grounds as in zákon § 19. No provision found on reporting facts not asked about.",
+        "source": "https://e-sbirka.gov.cz/sb/1963/99/2026-11-01"
+      },
+      "report_contents": {
+        "basis": "Same as criminal route: zákon č. 254/2019 Sb. § 27-28; vyhláška č. 503/2020 Sb. § 39-49",
+        "items_en": [
+          "same structure as in the criminal route",
+          "for a party-submitted report to be treated as court-ordered: the clause on awareness of the consequences of a knowingly false report (OSŘ § 127a(1))"
+        ],
+        "items_local": [
+          "náležitosti podle § 28 zákona č. 254/2019 Sb.",
+          "doložka znalce o tom, že si je vědom následků vědomě nepravdivého znaleckého posudku"
+        ],
+        "source": "https://e-sbirka.gov.cz/sb/1963/99/2026-11-01"
+      },
+      "rights_duties": {
+        "basis": "Zákon č. 254/2019 Sb. § 1(3), § 18-21, § 28(6)",
+        "summary_en": "Same duties as in criminal route; exclusion for bias decided by the appointing authority (§ 18(2)).",
+        "source": "https://e-sbirka.gov.cz/sb/2019/254/2026-01-01"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": "Zákon č. 254/2019 Sb., o znalcích, znaleckých kancelářích a znaleckých ústavech (ve znění zákonů č. 448/2024 Sb. a č. 285/2025 Sb.); vyhláška č. 503/2020 Sb., o výkonu znalecké činnosti (ve znění vyhlášky č. 286/2025 Sb.)",
+    "title_en": "Act No. 254/2019 Coll. on experts, expert offices and expert institutes; Decree No. 503/2020 Coll. on the performance of expert activity",
+    "source": "https://e-sbirka.gov.cz/sb/2019/254/2026-01-01"
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Zákon č. 40/2009 Sb., trestní zákoník, § 346 (version effective 2026-01-01)",
+      "summary_en": "An expert who gives a false, grossly distorted or incomplete expert report: imprisonment up to 2 years or prohibition of activity (§ 346(1)); false statement or concealment by an expert before a court, prosecutor or police in pre-trial: up to 3 years (§ 346(2)); aggravated forms 1-5 years, 2-8 years, and 3-10 years for damage or benefit of large extent (§ 346(3)-(5)).",
+      "warning_local": "Jsem si vědom(a) následků vědomě nepravdivého znaleckého posudku.",
+      "warning_en": "I am aware of the consequences of a knowingly false expert report.",
+      "wording": "composed",
+      "source": "https://e-sbirka.gov.cz/sb/2009/40/2026-01-01"
+    },
+    {
+      "route": "all",
+      "norm": "Zákon č. 254/2019 Sb. § 21 (civil liability), § 39 (administrative offences)",
+      "summary_en": "Expert must compensate harm caused in connection with expert activity, unless it could not be prevented with all reasonable effort (§ 21). Offences such as lack of professional care, independence or impartiality, acting despite exclusion, breach of confidentiality, or missing report requirements: fines up to CZK 75 000, 250 000 or 500 000 depending on the offence (§ 39).",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "https://e-sbirka.gov.cz/sb/2019/254/2026-01-01"
+    },
+    {
+      "route": "criminal",
+      "norm": "TŘ § 106",
+      "summary_en": "The expert must be instructed in the summons on the public-interest significance of the report and the criminal consequences of false testimony and of a knowingly false expert report; this also applies to an expert engaged by a party under § 89(2).",
+      "warning_local": "Znalec musí být též poučen o významu znaleckého posudku z hlediska obecného zájmu a o trestních následcích křivé výpovědi a vědomě nepravdivého znaleckého posudku",
+      "warning_en": "The expert must also be instructed on the significance of the expert report from the point of view of the public interest and on the criminal consequences of false testimony and of a knowingly false expert report.",
+      "wording": "official",
+      "source": "https://e-sbirka.gov.cz/sb/1961/141/2026-11-01"
+    }
+  ],
+  "declaration": {
+    "basis": "OSŘ § 127a(1) and TŘ § 110a (party-submitted reports); vyhláška č. 503/2020 Sb. § 46(1)(f) (clause placed before the expert clause); zákon č. 254/2019 Sb. § 28(2)(i), (7) (mandatory expert clause). The expert clause wording follows the Ministry of Justice illustrative template (znalci.justice.cz).",
+    "text_local": "Jsem si vědom(a) následků vědomě nepravdivého znaleckého posudku.\nZNALECKÁ DOLOŽKA\nZnalecký posudek jsem podal(a) jako znalec zapsaný v seznamu znalců vedeném Ministerstvem spravedlnosti pro obor [obor], odvětví [odvětví], specializaci [specializace]. Znalecký úkon je zapsán v evidenci posudků pod pořadovým číslem [XX/YYYY].",
+    "text_en": "I am aware of the consequences of a knowingly false expert report.\nEXPERT CLAUSE\nI have given this expert report as an expert entered in the list of experts kept by the Ministry of Justice for the field [field], branch [branch], specialisation [specialisation]. The expert act is recorded in the register of expert reports under serial number [XX/YYYY].",
+    "wording": "customary",
+    "source": "https://znalci.justice.cz/wp-content/uploads/2023/03/Ilustrativni-znalecka-dolozka.docx"
+  },
+  "standards": [
+    {
+      "id": "ISO/IEC 27037:2012",
+      "national_id": "ČSN EN ISO/IEC 27037 (36 9846)",
+      "title_en": "Guidelines for identification, collection, acquisition and preservation of digital evidence",
+      "status": "national adoption",
+      "issuer": "Česká agentura pro standardizaci (ČAS) / ÚNMZ",
+      "source": "http://csnonlinefirmy.agentura-cas.cz/html_nahledy/36/518320/518320_nahled.htm"
+    }
+  ],
+  "esignature": {
+    "law_local": "Nařízení (EU) č. 910/2014 (eIDAS) ve znění nařízení (EU) 2024/1183; zákon č. 297/2016 Sb., o službách vytvářejících důvěru pro elektronické transakce; zákon č. 254/2019 Sb. § 27 odst. 2",
+    "law_en": "Regulation (EU) No 910/2014 (eIDAS) as amended by Regulation (EU) 2024/1183; Act No. 297/2016 Coll. on trust services for electronic transactions; Expert Act § 27(2) requires an electronic report to bear a qualified electronic signature with a certificate naming the expert and marked 'znalec', and a qualified electronic time stamp",
+    "qualified_term_local": "kvalifikovaný elektronický podpis (uznávaný elektronický podpis = zaručený podpis založený na kvalifikovaném certifikátu nebo kvalifikovaný podpis, § 6 zákona č. 297/2016 Sb.)",
+    "source": "https://e-sbirka.gov.cz/sb/2016/297"
+  },
+  "timestamp": {
+    "basis": "Regulation (EU) No 910/2014, art. 41 (as amended by Regulation (EU) 2024/1183); zákon č. 254/2019 Sb. § 27(2) (qualified electronic time stamp mandatory on electronic expert reports; certificate valid at least 3 years); vyhláška č. 503/2020 Sb. § 49(2) (re-time-stamping during the 10-year retention period); zákon č. 297/2016 Sb. § 11",
+    "qualified_recognition": "Qualified electronic time stamp: presumption of accuracy of date and time and integrity of the bound data (eIDAS art. 41(2)); for expert reports filed electronically it is a formal validity requirement.",
+    "source": "https://eur-lex.europa.eu/eli/reg/2014/910/oj"
+  },
+  "open_questions": [
+    "No official verbatim wording of the clause on awareness of the consequences of a knowingly false expert report was found; the sentence used is composed from OSŘ § 127a / TŘ § 110a. The expert clause text is the Ministry of Justice illustrative template (customary), not a statutory form.",
+    "Whether courts treat the awareness clause as mandatory for court-appointed reports (vyhláška § 46(1)(f) says 'případně') was not verified in case law.",
+    "Czech adoptions of ISO/IEC 27041, 27042 and 27043 (ČSN EN ISO/IEC) were not verified in the ČAS catalogue; only ČSN EN ISO/IEC 27037 (36 9846) is confirmed via a ČAS preview page listing related standards.",
+    "TZ § 346 text taken from the version effective 2026-01-01 as returned by e-Sbírka; a later time version, if any, was not checked."
+  ]
+}

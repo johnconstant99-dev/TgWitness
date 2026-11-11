@@ -1,0 +1,173 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "PK",
+  "name_en": "Pakistan",
+  "name_local": "پاکستان",
+  "court_languages": [
+    "en",
+    "ur"
+  ],
+  "local_language": "en",
+  "legal_family": "mixed",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "expert",
+    "en": "person specially skilled in foreign law, science or art, bomb disposal, handwriting or finger impressions, or the functioning, specifications, programming and operations of information systems (Qanun-e-Shahadat Order 1984 Art. 59)"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Qanun-e-Shahadat Order 1984 (P.O. No. X of 1984) Art. 59; Code of Criminal Procedure 1898 s. 510; Prevention of Electronic Crimes Act 2016 (Act XL of 2016) ss. 29, 40, 46; Prevention of Electronic Crimes Investigation Rules 2018 rr. 11-13",
+        "summary_en": "Opinions of persons specially skilled are relevant facts (QSO Art. 59). Since Ordinance LI of 2002 this covers the authenticity and integrity of electronic documents made by or through an information system, and the functioning, specifications, programming and operations of information systems. A report under the hand of a Government-appointed Chemical Examiner, Serologist, finger-print or firearm expert, chemist, pharmacist, Forensic Scientist or Hand-writing expert, on matter duly submitted to them for examination or analysis in a CrPC proceeding, may be used as evidence without calling the expert. The court may summon the author if necessary in the interest of justice (CrPC s. 510, as amended by Act XXXIII of 2022). For PECA offences, the Federal Government must establish or designate a forensic laboratory, independent of the investigation agency, to give expert opinion on electronic evidence (PECA s. 40). The court may also seek independent expert opinion on any matter in a pending case (PECA s. 46). The investigation agency is the National Cyber Crime Investigation Agency (PECA s. 29 as substituted by Act II of 2025).",
+        "source": "https://pakistancode.gov.pk/pdffiles/administrator7db1e56f0f1d39a6e67573ec6b0944e2.pdf"
+      },
+      "questions": {
+        "basis": "CrPC 1898 s. 510; PECA Investigation Rules 2018 r. 11(3) and Schedule VI",
+        "summary_en": "CrPC s. 510 refers to 'any matter or thing duly submitted to him for examination or analysis and report'; it does not say who frames the questions. PECA Investigation Rules Schedule VI (case assessment) tells the examiner to review the case investigator's request for service and to read the requirements of the investigation officer or reporting agency. Digital evidence is to be 'thoroughly assessed with respect to scope of the case' (r. 11(3)). No provision was found on declining questions or on reporting facts not asked about.",
+        "source": "https://sja.gos.pk/assets/Updated_Laws/Prevention%20of%20Electronic%20Crimes%20Act,%20Rules%20(Amendments%20upto%20date).pdf"
+      },
+      "report_contents": {
+        "basis": "CrPC 1898 s. 510 (report 'under the hand of' the expert); PECA Investigation Rules 2018 r. 12(1)-(3) and Schedule VI paras 8.4-8.8 (Examiner's report)",
+        "items_en": [
+          "Report under the hand (signature) of the expert (CrPC s. 510)",
+          "Name and designation of the expert who conducted the examination (PECA Rules r. 12(2))",
+          "Identity of the reporting agency",
+          "Case identifier or submission number",
+          "Case investigator",
+          "Identity of the submitter",
+          "Date of receipt",
+          "Date of report",
+          "Descriptive list of items submitted for examination, including serial number, make and model",
+          "Identity and signature of the examiner",
+          "Brief description of steps taken during examination (e.g. string searches, graphics image searches, recovering erased files)",
+          "Results/conclusions",
+          "Summary of findings (all findings in the summary also appear in the details)",
+          "Details of findings (specific files, deleted files supporting findings, keyword searches, Internet-related evidence, graphic image analysis, indicators of ownership, data analysis, relevant programs, data-hiding techniques)",
+          "Supporting materials (printouts, digital copies of evidence, chain of custody documentation)",
+          "Glossary (optional)"
+        ],
+        "items_local": [
+          "report, under the hand of",
+          "An expert opinion shall carry the name and designation of the expert who conducted the examination.",
+          "Identity of the reporting agency.",
+          "Case identifier or submission number.",
+          "Case investigator.",
+          "Identity of the submitter.",
+          "Date of receipt.",
+          "Date of report.",
+          "Descriptive list of items submitted for examination, including serial number, make, and model.",
+          "Identity and signature of the examiner.",
+          "Brief description of steps taken during examination, such as string searches, graphics image searches, and recovering erased files.",
+          "Results/conclusions.",
+          "Summary of findings",
+          "Details of findings",
+          "Supporting materials",
+          "Glossary"
+        ],
+        "source": "https://sja.gos.pk/assets/Updated_Laws/Prevention%20of%20Electronic%20Crimes%20Act,%20Rules%20(Amendments%20upto%20date).pdf"
+      },
+      "rights_duties": {
+        "basis": "PECA Investigation Rules 2018 rr. 11(4), 12(3), 13; PECA 2016 s. 40",
+        "summary_en": "Forensic experts must be duly qualified and are responsible for complete and accurate reporting of the results, including the steps taken during the examination (r. 11(4)). Findings are due within fifteen days of the request; extensions go through the Lab Supervisor to the Additional Director General (r. 12(3)). An affected person may apply, for sufficient cause, for re-examination by another zonal forensic laboratory; the Director General may allow a second re-examination (r. 13). The PECA forensic laboratory must be independent of the investigation agency (s. 40).",
+        "source": "https://sja.gos.pk/assets/Updated_Laws/Prevention%20of%20Electronic%20Crimes%20Act,%20Rules%20(Amendments%20upto%20date).pdf"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Code of Civil Procedure 1908 First Schedule Order XXVI rr. 9-10; Qanun-e-Shahadat Order 1984 Art. 59",
+        "summary_en": "The court may issue a commission to 'such person as it thinks fit' to make a local investigation and report (O. XXVI r. 9); the court is bound by Provincial Government rules on who may be commissioned. The Pakistani CPC has no rule equivalent to the Indian O. XXVI r. 10A (commission for scientific investigation). Expert evidence is otherwise given by witnesses whose opinions are relevant under QSO Art. 59.",
+        "source": "https://pakistancode.gov.pk/pdffiles/administrator6598dabbad120033d4d42d717dcf9755.pdf"
+      },
+      "questions": {
+        "basis": "CPC O. XXVI r. 9",
+        "summary_en": "The commission directs the person 'to make such investigation and to report thereon'. No provision was found on declining questions or on reporting facts not asked about.",
+        "source": "https://pakistancode.gov.pk/pdffiles/administrator6598dabbad120033d4d42d717dcf9755.pdf"
+      },
+      "report_contents": {
+        "basis": "CPC O. XXVI r. 10(1)",
+        "items_en": [
+          "Report in writing signed by the Commissioner",
+          "Evidence taken by the Commissioner, reduced to writing and returned with the report"
+        ],
+        "items_local": [
+          "his report in writing signed by him",
+          "after reducing to writing the evidence taken by him, shall return such evidence, together with his report"
+        ],
+        "source": "https://pakistancode.gov.pk/pdffiles/administrator6598dabbad120033d4d42d717dcf9755.pdf"
+      },
+      "rights_duties": {
+        "basis": "CPC O. XXVI r. 10(2)-(3)",
+        "summary_en": "The report and the evidence (not the evidence without the report) are evidence in the suit. The court, or a party with the court's permission, may examine the Commissioner personally in open court. If dissatisfied, the court may direct further inquiry.",
+        "source": "https://pakistancode.gov.pk/pdffiles/administrator6598dabbad120033d4d42d717dcf9755.pdf"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": "No federal statute on forensic expert activity found. Sectoral: Prevention of Electronic Crimes Act 2016 s. 40 (forensic laboratory) and the Prevention of Electronic Crimes Investigation Rules 2018",
+    "source": "https://www.pakistancode.gov.pk/pdffiles/administrator6a061efe0ed5bd153fa8b79b8eb4cba7.pdf"
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Pakistan Penal Code 1860 ss. 191, 192, 193",
+      "summary_en": "Making a false statement while legally bound by oath or by law to state the truth, including a false statement of belief, is giving false evidence (s. 191). Intentionally giving or fabricating false evidence in any stage of a judicial proceeding: imprisonment of either description up to 7 years, and liability to a fine. In any other case: up to 3 years and a fine (s. 193). An investigation directed by a Court of Justice is a stage of a judicial proceeding (s. 193 Explanation 3).",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "https://pakistancode.gov.pk/pdffiles/administratord5622ea3f15bfa00b17d2cf7770a8434.pdf"
+    },
+    {
+      "route": "all",
+      "norm": "Pakistan Penal Code 1860 ss. 197 (issuing or signing false certificate), 199 (false statement in declaration receivable as evidence)",
+      "summary_en": "Issuing or signing a certificate required by law, or a certificate admissible in evidence, while knowing or believing it is false in a material point; or making a knowingly false material statement in a declaration that a court or public servant must or may receive as evidence: punished in the same manner as giving false evidence.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "https://pakistancode.gov.pk/pdffiles/administratord5622ea3f15bfa00b17d2cf7770a8434.pdf"
+    }
+  ],
+  "declaration": {
+    "basis": null,
+    "text_local": null,
+    "text_en": null,
+    "wording": null,
+    "source": null
+  },
+  "standards": [
+    {
+      "id": "PECA Investigation Rules 2018, Schedule VI",
+      "national_id": null,
+      "title_en": "Management and Working of Digital Forensic Laboratory (evidence assessment, acquisition, examination, documentation and reporting; examiner's report guidance)",
+      "status": "official guidance",
+      "issuer": "Federal Government of Pakistan (Prevention of Electronic Crimes Investigation Rules 2018 under PECA 2016)",
+      "source": "https://sja.gos.pk/assets/Updated_Laws/Prevention%20of%20Electronic%20Crimes%20Act,%20Rules%20(Amendments%20upto%20date).pdf"
+    }
+  ],
+  "esignature": {
+    "law_local": "Electronic Transactions Ordinance, 2002 (Ordinance No. LI of 2002), ss. 2(d), 7, 8, 9",
+    "law_en": "Electronic Transactions Ordinance 2002: a legal requirement for signatures is satisfied by electronic or advanced electronic signatures (s. 7). An electronic signature may be proved in any manner (s. 8). For an advanced electronic signature, it is presumed, unless evidence to the contrary is adduced, that a document so signed and identified in a valid accreditation certificate is authentic and has integrity; or that the signature belongs to the person to whom it correlates, was affixed by that person intending to sign or approve, and that the document has not been altered since (s. 9). QSO Art. 78A governs proof of electronic signatures and documents; QSO Art. 73 Explanations 3-4 give printouts of automated information systems the status of primary evidence.",
+    "qualified_term_local": "advanced electronic signature",
+    "source": "https://pakistancode.gov.pk/pdffiles/administratordbc98dd49f2df3b1d07bb986dcceb9a3.pdf"
+  },
+  "timestamp": {
+    "basis": null,
+    "qualified_recognition": null,
+    "source": null
+  },
+  "open_questions": [
+    "QSO Art. 164 no longer concerns evidence 'that has become available because of modern devices' in the sense of the original text. Pakistan Code (RGN 08-01-2026) shows it substituted by Act XXXVII of 2023, s. 12. It now lets the court allow evidence or witnesses recorded by the court through modern devices or techniques (video call, Skype, WhatsApp, video conference etc.). Confirm how this interacts with the admissibility of digital forensic material.",
+    "Form of oath for witnesses: Oaths Act 1873 s. 7 leaves the form to High Court rules. The current form prescribed by the Lahore, Sindh, Peshawar, Balochistan and Islamabad High Courts was not verified (pg.punjab.gov.pk was unreachable). warning_local is therefore null.",
+    "No statutory declaration or statement of truth required in an expert report was found in QSO, CrPC, CPC or PECA.",
+    "No electronic time-stamp provision was found in the Electronic Transactions Ordinance 2002. Not checked: Certification Service Providers' accreditation regulations and Electronic Certification Accreditation Council rules on time-stamping.",
+    "PECA Investigation Rules 2018 refer to the FIA Cybercrime Wing. Since Act II of 2025 established the National Cyber Crime Investigation Agency (PECA s. 29), not confirmed whether the 2018 Rules (including Schedule VI and rr. 11-13) continue in force or have been replaced. The Rules text was taken from the Sindh Judicial Academy compilation, not from the Gazette of Pakistan.",
+    "Whether a forensic laboratory has been formally established or designated under PECA s. 40 (independent of the investigation agency) was not verified.",
+    "Provincial forensic science agency statutes (e.g. Punjab Forensic Science Agency Act 2007), which reportedly deem agency experts to be experts under CrPC s. 510 and QSO Art. 59, were not checked on an official provincial portal.",
+    "The Code of Civil Procedure was taken from Pakistan Code (marked 'Under Review'); provincial High Court amendments to Order XXVI were not checked.",
+    "No national adoption of ISO/IEC 27037/27041/27042/27043 by the Pakistan Standards and Quality Control Authority was found. Absence not confirmed.",
+    "Urdu texts were not checked; items_local are given in English, which is also a court language."
+  ]
+}

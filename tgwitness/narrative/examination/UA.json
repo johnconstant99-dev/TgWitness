@@ -1,0 +1,184 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "UA",
+  "name_en": "Ukraine",
+  "name_local": "Україна",
+  "court_languages": [
+    "uk"
+  ],
+  "local_language": "uk",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "експерт (судовий експерт)",
+    "en": "forensic expert engaged by a party or appointed by the investigating judge or court"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "КПК України ст. 242 ч. 1, ст. 243 ч. 1, ст. 244",
+        "summary_en": "An examination is carried out by an expert institution or expert(s) engaged by a party to the criminal proceedings, or by the investigating judge on a motion of the defence under art. 244, where special knowledge is needed (art. 242(1)). The expert is engaged on the instruction of a party (art. 243(1)); the defence may engage experts independently on a contractual basis; the investigating judge may engage an expert at the defence's request under art. 244. Art. 242(2) lists mandatory examinations (cause of death, injuries, mental state, age, damage).",
+        "source": "https://zakon.rada.gov.ua/laws/show/4651-17"
+      },
+      "questions": {
+        "basis": "КПК України ст. 101 ч. 1 і 4; ст. 69 ч. 4; ст. 102 ч. 3",
+        "summary_en": "Questions are put by the person who engaged the expert or by the investigating judge or court that ordered the examination (art. 101(1)). Questions and the opinion may not go beyond the expert's special knowledge (art. 101(4)). The expert may decline to give an opinion if the materials provided are insufficient; the refusal must be reasoned (art. 69(4)). If information relevant to the proceedings is found on which no questions were asked, the expert may state it in the opinion (art. 102(3)).",
+        "source": "https://zakon.rada.gov.ua/laws/show/4651-17"
+      },
+      "report_contents": {
+        "basis": "КПК України ст. 102 ч. 1–3; Інструкція про призначення та проведення судових експертиз та експертних досліджень (наказ Мін'юсту від 08.10.1998 № 53/5), розд. IV п. 4.14",
+        "items_en": [
+          "when, where, by whom (name, education, specialty, forensic expert qualification certificate, length of expert work, academic degree, academic title, position) and on what grounds the examination was carried out",
+          "place and time of the examination",
+          "who was present during the examination",
+          "list of questions put to the expert",
+          "description of the materials received and which materials were used",
+          "detailed description of the research, including methods applied, results obtained and their expert assessment",
+          "reasoned answers to each question",
+          "mandatory statement that the expert was warned of liability for a knowingly false opinion and for refusing without good reason to perform his duties",
+          "the opinion is signed by the expert",
+          "per Instruction 53/5 p. 4.14: details (title, date and number, category and type of examination) and three parts: introduction (Вступ), research (Дослідження), conclusions (Висновки)"
+        ],
+        "items_local": [
+          "коли, де, ким (ім'я, освіта, спеціальність, свідоцтво про присвоєння кваліфікації судового експерта, стаж експертної роботи, науковий ступінь, вчене звання, посада експерта) та на якій підставі була проведена експертиза",
+          "місце і час проведення експертизи",
+          "хто був присутній при проведенні експертизи",
+          "перелік питань, що були поставлені експертові",
+          "опис отриманих експертом матеріалів та які матеріали були використані експертом",
+          "докладний опис проведених досліджень, у тому числі методи, застосовані у дослідженні, отримані результати та їх експертна оцінка",
+          "обґрунтовані відповіді на кожне поставлене питання",
+          "У висновку експерта обов'язково повинно бути зазначено, що його попереджено про відповідальність за завідомо неправдивий висновок та відмову без поважних причин від виконання покладених на нього обов'язків.",
+          "Висновок підписується експертом.",
+          "вступна частина (Вступ), дослідницька частина (Дослідження), заключна частина (Висновки)"
+        ],
+        "source": "https://zakon.rada.gov.ua/laws/show/4651-17"
+      },
+      "rights_duties": {
+        "basis": "КПК України ст. 69, ст. 70",
+        "summary_en": "An expert is a person with special knowledge entitled under the Law on Forensic Examination to perform examinations (art. 69(1)). Persons in service or other dependence on the parties or the victim cannot be experts (art. 69(2)). The expert may not collect materials on his own initiative and may refuse if materials are insufficient, with reasons (art. 69(4)); must conduct a complete study, give a reasoned opinion, appear in court, preserve the object and not disclose information (art. 69(5)); must notify the instructing person if the examination cannot be performed (art. 69). For a knowingly false opinion, refusal without good reason to perform duties in court and non-performance of other duties the expert bears liability established by law (art. 70).",
+        "source": "https://zakon.rada.gov.ua/laws/show/4651-17"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "ЦПК України ст. 102 ч. 3, ст. 103, ст. 106",
+        "summary_en": "An expert opinion may be prepared at the request of a party or on the basis of a court ruling appointing an examination (art. 102(3)). The court appoints an examination where special knowledge is needed (art. 103). A party may file an opinion prepared at its own request; it must state that it was prepared for submission to court and that the expert is aware of criminal liability for a knowingly false opinion; such an expert has the same rights and duties as a court-appointed expert (art. 106).",
+        "source": "https://zakon.rada.gov.ua/laws/show/1618-15"
+      },
+      "questions": {
+        "basis": "ЦПК України ст. 103; ст. 102 ч. 2 і 8; ст. 72",
+        "summary_en": "For a court-appointed examination the questions are determined by the court; parties may propose questions and the court must give reasons for rejecting or changing them (art. 103). The subject of an opinion may only be circumstances within the subject of proof requiring special knowledge; questions of law may not be the subject (art. 102(2)). A court-appointed expert may refuse if the materials provided are insufficient (art. 72). The expert may include his views on relevant circumstances on which no questions were asked (art. 102(8)).",
+        "source": "https://zakon.rada.gov.ua/laws/show/1618-15"
+      },
+      "report_contents": {
+        "basis": "ЦПК України ст. 102 ч. 1, 4, 6, 7; ст. 106 ч. 5",
+        "items_en": [
+          "detailed description of the research, the conclusions and reasoned answers to the questions put",
+          "in writing, attached to the case file",
+          "when, where, by whom (name, education, specialty and, if any, forensic expert qualification certificate, length of expert work, academic degree, academic title, position) and on what grounds the examination was carried out",
+          "who was present during the examination",
+          "questions put to the expert",
+          "materials used by the expert",
+          "statement that the expert was warned of (is aware of) liability for a knowingly false opinion and, where appointed by the court, for refusing without good reason to perform his duties",
+          "for a party-commissioned opinion: statement that it was prepared for submission to court and that the expert is aware of criminal liability for a knowingly false opinion"
+        ],
+        "items_local": [
+          "докладний опис проведених експертом досліджень, зроблені у результаті них висновки та обґрунтовані відповіді на питання, поставлені експертові",
+          "Висновок експерта викладається у письмовій формі і приєднується до справи.",
+          "коли, де, ким (ім'я, освіта, спеціальність, а також, за наявності, свідоцтво про присвоєння кваліфікації судового експерта, стаж експертної роботи, науковий ступінь, вчене звання, посада експерта), на якій підставі була проведена експертиза",
+          "хто був присутній при проведенні експертизи",
+          "питання, що були поставлені експертові",
+          "які матеріали експерт використав",
+          "У висновку експерта має бути зазначено, що він попереджений (обізнаний) про відповідальність за завідомо неправдивий висновок, а у випадку призначення експертизи судом - також про відповідальність за відмову без поважних причин від виконання покладених на нього обов'язків.",
+          "висновок підготовлено для подання до суду; експерт обізнаний про кримінальну відповідальність за завідомо неправдивий висновок"
+        ],
+        "source": "https://zakon.rada.gov.ua/laws/show/1618-15"
+      },
+      "rights_duties": {
+        "basis": "ЦПК України ст. 72",
+        "summary_en": "The expert must give a reasoned and objective written opinion, appear when summoned and explain the opinion; may not delegate the examination to another person; a court-appointed expert may refuse if the materials provided are insufficient.",
+        "source": "https://zakon.rada.gov.ua/laws/show/1618-15"
+      }
+    },
+    {
+      "route": "commercial",
+      "appointment": {
+        "basis": "Господарський процесуальний кодекс України ст. 69, ст. 98, ст. 101",
+        "summary_en": "An expert may be appointed by the commercial court or engaged by a party (art. 69). A party may file an opinion prepared at its own request under the forensic examination legislation; it must state that it was prepared for submission to court and that the expert is aware of criminal liability for a knowingly false opinion (art. 101).",
+        "source": "https://zakon.rada.gov.ua/laws/show/1798-12"
+      },
+      "questions": {
+        "basis": "ГПК України ст. 98, ст. 69",
+        "summary_en": "Questions of law may not be the subject of an opinion (art. 98). A court-appointed expert may refuse if the materials provided are insufficient, with a reasoned statement; the expert may include facts found on which no questions were asked (art. 69, art. 98).",
+        "source": "https://zakon.rada.gov.ua/laws/show/1798-12"
+      },
+      "report_contents": {
+        "basis": "ГПК України ст. 98, ст. 101",
+        "items_en": [
+          "same structure as ЦПК art. 102: research description, conclusions, reasoned answers; when, where, by whom and on what grounds; who was present; questions; materials used",
+          "statement that the expert was warned of (is aware of) liability for a knowingly false opinion and, where appointed by the court, for refusing without good reason",
+          "for a party-commissioned opinion: prepared for submission to court; expert aware of criminal liability for a knowingly false opinion"
+        ],
+        "items_local": [
+          "докладний опис проведених експертом досліджень, зроблені у результаті них висновки та обґрунтовані відповіді на питання, поставлені експертові",
+          "попереджений (обізнаний) про відповідальність за завідомо неправдивий висновок",
+          "висновок підготовлено для подання до суду; експерт обізнаний про кримінальну відповідальність за завідомо неправдивий висновок"
+        ],
+        "source": "https://zakon.rada.gov.ua/laws/show/1798-12"
+      },
+      "rights_duties": {
+        "basis": "ГПК України ст. 69",
+        "summary_en": "The expert must give a reasoned and objective written opinion, appear when summoned (videoconference possible if parties do not object), may not delegate; may study the case file, request additional materials, include facts not asked about, attend procedural actions, and exercise rights under the Law on Forensic Examination.",
+        "source": "https://zakon.rada.gov.ua/laws/show/1798-12"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": "Закон України «Про судову експертизу» від 25.02.1994 № 4038-XII",
+    "title_en": "Law of Ukraine on Forensic Examination No. 4038-XII of 25 February 1994",
+    "source": "https://zakon.rada.gov.ua/laws/show/4038-12"
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Кримінальний кодекс України ст. 384 «Введення в оману суду або іншого уповноваженого органу»; КПК ст. 70",
+      "summary_en": "Knowingly false expert opinion prepared for or submitted to a pre-trial investigation body, enforcement body, court, High Council of Justice or a parliamentary inquiry commission: correctional labour up to 2 years, probation supervision up to 2 years or restriction of liberty up to 2 years (part 1); combined with accusation of a grave or especially grave crime, artificial creation of evidence, or committed for gain: up to 2 years correctional labour, restriction of liberty up to 5 years, or imprisonment of 2 to 5 years (part 2). Refusal to perform duties is referred to art. 385 in Instruction 53/5.",
+      "warning_local": "Про кримінальну відповідальність за надання завідомо неправдивого висновку за статтею 384 Кримінального кодексу України та за відмову без поважних причин від виконання покладених на мене обов'язків за статтею 385 Кримінального кодексу України попереджений (обізнаний).",
+      "warning_en": "I have been warned of (am aware of) criminal liability under Article 384 of the Criminal Code of Ukraine for giving a knowingly false opinion and under Article 385 for refusing without good reason to perform my duties.",
+      "wording": "customary",
+      "source": "https://zakon.rada.gov.ua/laws/show/z0705-98"
+    }
+  ],
+  "declaration": {
+    "basis": "КПК ст. 102 ч. 2; ЦПК ст. 102 ч. 7 і ст. 106 ч. 5; ГПК ст. 98 і ст. 101; Інструкція № 53/5 п. 4.14 (introduction must state the warning or awareness under arts. 384, 385 КК)",
+    "text_local": "Висновок підготовлено для подання до суду. Про кримінальну відповідальність за надання завідомо неправдивого висновку за статтею 384 Кримінального кодексу України та за відмову без поважних причин від виконання покладених на мене обов'язків за статтею 385 Кримінального кодексу України попереджений (обізнаний).",
+    "text_en": "This opinion was prepared for submission to court. I have been warned of (am aware of) criminal liability under Article 384 of the Criminal Code of Ukraine for giving a knowingly false opinion and under Article 385 for refusing without good reason to perform my duties.",
+    "wording": "composed",
+    "source": "https://zakon.rada.gov.ua/laws/show/z0705-98"
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "Закон України «Про електронну ідентифікацію та електронні довірчі послуги» від 05.10.2017 № 2155-VIII",
+    "law_en": "Law of Ukraine on Electronic Identification and Electronic Trust Services No. 2155-VIII",
+    "qualified_term_local": "кваліфікований електронний підпис (удосконалений електронний підпис, що створюється з використанням засобу кваліфікованого електронного підпису і базується на кваліфікованому сертифікаті електронного підпису)",
+    "source": "https://zakon.rada.gov.ua/laws/show/2155-19"
+  },
+  "timestamp": {
+    "basis": "Закон № 2155-VIII ст. 1 (definitions 'електронна позначка часу' and 'кваліфікована електронна позначка часу')",
+    "qualified_recognition": null,
+    "source": "https://zakon.rada.gov.ua/laws/show/2155-19"
+  },
+  "open_questions": [
+    "zakon.rada.gov.ua refused connections from the research environment. Texts were checked against consolidated mirrors (pravosvit.com.ua ed. 14.10.2026 for КПК, 05.08.2026 for ЦПК, 28.10.2026 for КК; urst.com.ua; zakon.cc) and zakon.rada.gov.ua search-index excerpts; source URLs point to the official portal but were not opened.",
+    "No DSTU national adoption of ISO/IEC 27037, 27041, 27042 or 27043 could be verified; the national standards catalogue was not reachable or searchable.",
+    "The article of Law 2155-VIII on the legal effect of electronic time stamps (expected presumption of accuracy of date/time and data integrity for a qualified time stamp) and the article on equivalence of a qualified electronic signature to a handwritten signature were not found in the fetched text; qualified_recognition left null.",
+    "The warning text is customary practice drawn from Instruction 53/5 p. 4.14 requirements; the exact sentence used by state forensic institutions (КНДІСЕ, ДНДЕКЦ МВС) was not verified from an official sample.",
+    "ЦПК ст. 106 ч. 5: exact statutory wording ('висновок підготовлено для подання до суду та що експерт обізнаний про кримінальну відповідальність за завідомо неправдивий висновок') is reconstructed from court decisions and commentary; verify against the official text.",
+    "КК України ст. 385 (refusal of an expert to perform duties) text and penalties were not verified.",
+    "ГПК (commercial) article part numbers for the requirements in arts. 69, 98 and 101 were not verified; ГПК ст. 98 may still use 'прізвище, ім'я, по батькові' where ЦПК/КПК now use 'ім'я'.",
+    "Instruction 53/5 consolidated text on zakon.rada.gov.ua (z0705-98) was not opened; p. 4.14 content is taken from commentary and Supreme Court practice summaries."
+  ]
+}

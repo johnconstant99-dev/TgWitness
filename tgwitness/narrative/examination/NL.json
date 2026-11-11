@@ -1,0 +1,145 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "NL",
+  "name_en": "Netherlands",
+  "name_local": "Nederland",
+  "court_languages": [
+    "nl"
+  ],
+  "local_language": "nl",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "deskundige (gerechtelijk deskundige)",
+    "en": "expert appointed in criminal proceedings by the investigating judge, the court or the public prosecutor; NRGD-registered where available"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Wetboek van Strafvordering (Sv) art. 51i(1)-(2), 51k, 227",
+        "summary_en": "An expert is appointed in the manner provided by law with an assignment to give information on, or carry out an investigation in, a field in which the expert has specific or special knowledge (art. 51i(1)); the appointment states the assignment and the deadline for the written report (art. 51i(2)). There is a national public register of court experts (NRGD); when an unregistered expert is appointed, the reasons for treating that person as an expert must be stated (art. 51k). The investigating judge (rechter-commissaris) may appoint one or more experts ex officio, on the prosecutor's demand or at the suspect's request; the suspect may recommend experts and the judge chooses from them unless the investigation's interest opposes it (art. 227).",
+        "source": "https://wetten.overheid.nl/BWBR0001903/2026-07-01/0"
+      },
+      "questions": {
+        "basis": "Sv art. 51i(2), 228; NRGD Gedragscode",
+        "summary_en": "The appointing authority sets the assignment. The investigating judge notifies the prosecutor and the suspect of the appointment and the assignment (notice may be postponed in the interest of the investigation); further investigation may be ordered on demand or request; the suspect may designate an own expert who may attend the investigation, give directions and make remarks, notifying the judge and prosecutor within one week (art. 228). Under the NRGD code of conduct a registered expert must report immediately in writing if the assignment falls outside the limits of the expert's expertise. Reporting facts not asked about is not regulated in the provisions reviewed.",
+        "source": "https://zoek.officielebekendmakingen.nl/stb-2009-33.html"
+      },
+      "report_contents": {
+        "basis": "Sv art. 51l(1)-(3); NRGD Gedragscode",
+        "items_en": [
+          "Reasoned report addressed to the person who gave the assignment",
+          "Where possible: the method applied, the extent to which the method and its results can be considered reliable, and the expert's competence in applying the method",
+          "Written form, unless the court decides it may be oral",
+          "Declaration that the report was drawn up truthfully, completely and to the best of the expert's insight, and that it is based on what the expert's science and knowledge teach about the matter submitted",
+          "NRGD-registered experts: registration field, methods and their limitations, and a report that another expert can verify"
+        ],
+        "items_local": [
+          "De deskundige brengt aan zijn opdrachtgever een met redenen omkleed verslag uit.",
+          "Hij geeft daarbij zo mogelijk aan welke methode hij heeft toegepast, in welke mate deze methode en de resultaten daarvan betrouwbaar kunnen worden geacht en welke bekwaamheid hij heeft bij de toepassing van de methode.",
+          "Het verslag wordt schriftelijk uitgebracht, tenzij de rechter bepaalt dat dit mondeling kan geschieden.",
+          "De deskundige verklaart het verslag naar waarheid, volledig en naar beste inzicht te hebben opgesteld. Het verslag is gebaseerd op wat zijn wetenschap en kennis hem leren omtrent datgene wat aan zijn oordeel onderworpen is.",
+          "Vermeldt zo mogelijk de gebruikte methode(n) en de eventuele beperkingen ervan."
+        ],
+        "source": "https://wetten.overheid.nl/BWBR0001903/2026-07-01/0"
+      },
+      "rights_duties": {
+        "basis": "Sv art. 51i(3), 51j, 51m; NRGD Gedragscode",
+        "summary_en": "The expert is also instructed to report truthfully, completely and to the best of insight (art. 51i(3)). Anyone appointed as expert must perform the services ordered by the court; the court may impose secrecy; the expert may excuse himself in the cases of arts. 217 to 219a; the expert is paid from public funds (art. 51j). The court may hear the expert ex officio, on the prosecutor's demand or the suspect's request; the expert is sworn when heard at trial; no order of civil detention (gijzeling) may be made against an expert (art. 51m). The NRGD code requires integrity, independence and impartiality, prompt disclosure of possible conflicts of interest, and confidential handling of material.",
+        "source": "https://zoek.officielebekendmakingen.nl/stb-2009-33.html"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": null,
+        "items_en": [],
+        "items_local": [],
+        "source": null
+      },
+      "rights_duties": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      }
+    }
+  ],
+  "statute": {
+    "title_local": "Wet van 22 januari 2009 tot wijziging van het Wetboek van Strafvordering tot verbetering van de regeling van de positie van de deskundige in het strafproces (Wet deskundige in strafzaken), Stb. 2009, 33; Besluit register deskundige in strafzaken, Stb. 2009, 330",
+    "title_en": "Act on Experts in Criminal Cases (amending the Code of Criminal Procedure, arts. 51i-51m) and the Decree on the Register of Experts in Criminal Cases establishing the Netherlands Register of Court Experts (NRGD)",
+    "source": "https://zoek.officielebekendmakingen.nl/stb-2009-33.html"
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Wetboek van Strafrecht (Sr) art. 207 (meineed)",
+      "summary_en": "Perjury: intentionally making a false statement under oath where a statutory provision requires a sworn statement or attaches legal consequences to it. Applies to the expert's oath at trial (Sv art. 51m(2)). Maximum penalty not verified (see open_questions).",
+      "warning_local": "De deskundige wordt bij zijn verhoor op de terechtzitting beëdigd dat hij naar waarheid en zijn geweten zal verklaren.",
+      "warning_en": "When examined at trial, the expert is sworn to state the truth according to conscience (Sv art. 51m(2)).",
+      "wording": "official",
+      "source": "https://wetten.overheid.nl/BWBR0001854/2026-07-01/0"
+    }
+  ],
+  "declaration": {
+    "basis": "Sv art. 51l(3): 'De deskundige verklaart het verslag naar waarheid, volledig en naar beste inzicht te hebben opgesteld. Het verslag is gebaseerd op wat zijn wetenschap en kennis hem leren omtrent datgene wat aan zijn oordeel onderworpen is.'",
+    "text_local": "Ondergetekende verklaart dit verslag naar waarheid, volledig en naar beste inzicht te hebben opgesteld. Het verslag is gebaseerd op wat zijn wetenschap en kennis hem leren omtrent datgene wat aan zijn oordeel onderworpen is.",
+    "text_en": "The undersigned declares that this report was drawn up truthfully, completely and to the best of his or her insight. The report is based on what the expert's science and knowledge teach about the matter submitted for judgment.",
+    "wording": "composed",
+    "source": "https://wetten.overheid.nl/BWBR0001903/2026-07-01/0"
+  },
+  "standards": [
+    {
+      "id": "NRGD Beoordelingskader Digitaal Forensisch Onderzoek (2022-06-09)",
+      "national_id": null,
+      "title_en": "NRGD assessment framework for the field Digital Forensic Investigation (subfields 008.1-008.6: computer, software, database, multimedia, device, network forensics)",
+      "status": "official guidance",
+      "issuer": "Nederlands Register Gerechtelijk Deskundigen (NRGD)",
+      "source": "https://www.nrgd.nl/deskundigheidsgebieden/digitaal-forensisch-onderzoek"
+    },
+    {
+      "id": "Gedragscode NRGD (in force 1 January 2016)",
+      "national_id": null,
+      "title_en": "NRGD code of conduct for registered court experts, adopted under art. 4(c) of the Besluit register deskundige in strafzaken",
+      "status": "official guidance",
+      "issuer": "Nederlands Register Gerechtelijk Deskundigen (NRGD)",
+      "source": "https://www.nrgd.nl/registreren/gedragscode-nrgd"
+    }
+  ],
+  "esignature": {
+    "law_local": "Verordening (EU) nr. 910/2014 (eIDAS), zoals gewijzigd bij Verordening (EU) 2024/1183",
+    "law_en": "Regulation (EU) No 910/2014 (eIDAS) as amended by Regulation (EU) 2024/1183; the national implementing provisions were not verified",
+    "qualified_term_local": "gekwalificeerde elektronische handtekening",
+    "source": "https://eur-lex.europa.eu/legal-content/NL/TXT/?uri=CELEX:02014R0910-20241018"
+  },
+  "timestamp": {
+    "basis": "Regulation (EU) No 910/2014 Art. 41 as amended by Regulation (EU) 2024/1183 (Art. 41(3) deleted; cross-border recognition moved to Art. 24a)",
+    "qualified_recognition": "A qualified electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which they are bound (Art. 41(2)). An electronic time stamp may not be denied legal effect or admissibility solely because it is electronic or not qualified (Art. 41(1)). Qualified time stamps from other Member States are recognised (Art. 24a).",
+    "source": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02014R0910-20241018"
+  },
+  "open_questions": [
+    "wetten.overheid.nl and rechtspraak.nl refused automated access (HTTP 403). The current text of Sv art. 51l was checked through search-index excerpts of wetten.overheid.nl; Sv arts. 51i, 51j, 51k, 51m, 227 and 228 were checked only in their original 2009 wording (Stb. 2009, 33) and later amendments, renumbering of leden and the cross-reference in art. 51j(3) were not verified.",
+    "Civil route not verified: the expert provisions of the Wetboek van Burgerlijke Rechtsvordering (believed to be Rv arts. 194-200: appointment, duty to act impartially and to the best of knowledge, parties' comments recorded in the report) and the Leidraad deskundigen in civiele zaken could not be read from an official source.",
+    "Maximum penalties under Sr art. 207 (meineed), including any aggravation for perjury in a criminal case to the detriment of the suspect, were not verified.",
+    "Whether a knowingly false written report bearing the art. 51l(3) declaration, without an oath at trial, is punishable under Sr art. 207 or another provision was not verified.",
+    "Appointment of experts by the public prosecutor (e.g. Sv art. 150 and following) and by the trial court was not verified.",
+    "Disciplinary consequences under the Besluit register deskundige in strafzaken (removal from the NRGD register) were not verified; civil liability of court experts is not codified in the provisions reviewed.",
+    "The new Wetboek van Strafvordering (modernisation project) and its entry-into-force date, and whether it changes the expert provisions, were not verified.",
+    "Dutch national adoptions (NEN-EN-ISO/IEC 27037, 27041, 27042, 27043) were not confirmed, and the NRGD assessment framework was not checked for references to ISO/IEC standards or ISO/IEC 17025 accreditation requirements.",
+    "National implementing provisions for eIDAS (e.g. Burgerlijk Wetboek art. 3:15a, Telecommunicatiewet) were not verified; the Dutch term for qualified electronic signature is taken from the Dutch eIDAS text, which could not be loaded directly from EUR-Lex.",
+    "EUR-Lex could not be loaded directly; eIDAS Art. 25, 41 and 24a wording after Regulation (EU) 2024/1183 was checked only through search-index excerpts.",
+    "Use of Frisian before courts in Friesland was not verified; only Dutch is listed.",
+    "No court-documented model wording for the art. 51l(3) declaration was found; the first-person declaration text is composed from the statutory sentence."
+  ]
+}

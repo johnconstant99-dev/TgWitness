@@ -1,0 +1,157 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "RO",
+  "name_en": "Romania",
+  "name_local": "România",
+  "court_languages": [
+    "ro"
+  ],
+  "local_language": "ro",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "expert (expert tehnic judiciar; party adviser: expert consilier / expert recomandat)",
+    "en": "expert appointed by the criminal investigation body or the court; experts recommended by the parties may take part"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Codul de procedură penală (Legea nr. 135/2010), art. 172, 173 alin. (4), 177",
+        "summary_en": "An expert examination is ordered when an expert opinion is needed to establish, clarify or assess facts or circumstances important for finding the truth (art. 172(1)). It is ordered on request or of the authority's own motion by reasoned order of the criminal investigation body or, at trial, by reasoned court decision (art. 172(2)). Parties and main procedural subjects may ask that an expert recommended by them take part; where the court orders the examination, the prosecutor may do likewise (art. 173(4), 177(4)). The ordering body sets a hearing at which the object and questions are communicated (art. 177(1)-(2)).",
+        "source": "https://legislatie.just.ro/Public/DetaliiDocument/120611"
+      },
+      "questions": {
+        "basis": "CPP art. 172 alin. (6), 175 alin. (3)-(4), 177 alin. (2), 178 alin. (4) lit. c)",
+        "summary_en": "The ordering act states the facts or circumstances to be established, clarified and assessed, the objectives (questions) to be answered, the deadline and the designated institution or experts (art. 172(6)). The prosecutor, parties, main procedural subjects and the expert are told the object and questions and may comment on them and ask for their modification or completion (art. 177(2)). The expert may ask the ordering body, and with its approval the parties, for clarifications (art. 175(3)-(4)). The conclusions answer the objectives and may include any other clarifications and findings resulting from the examination that relate to its objectives (art. 178(4)(c)).",
+        "source": "https://legislatie.just.ro/Public/DetaliiDocumentAfis/284050"
+      },
+      "report_contents": {
+        "basis": "CPP art. 178",
+        "items_en": [
+          "Findings, clarifications, assessments and the expert's opinion recorded in a report",
+          "Several experts draw up a single report; separate opinions are reasoned in the same report",
+          "Introductory part: ordering judicial body, date of the order, expert's name, objectives to be answered, date of the examination, material on which it was based, proof that the parties were notified, whether they took part and gave explanations, date of the report",
+          "Descriptive part: the operations performed and the methods, programs and equipment used",
+          "Conclusions answering the objectives set by the judicial bodies, plus any other clarifications and findings related to the objectives",
+          "Report filed with the judicial body that ordered the examination"
+        ],
+        "items_local": [
+          "După efectuarea expertizei, constatările, clarificările, evaluările și opinia expertului sunt consemnate într-un raport.",
+          "Când sunt mai mulți experți se întocmește un singur raport de expertiză. Opiniile separate se motivează în același raport.",
+          "partea introductivă, în care se arată organul judiciar care a dispus efectuarea expertizei, data când s-a dispus efectuarea acesteia, numele și prenumele expertului, obiectivele la care expertul urmează să răspundă, data la care a fost efectuată, materialul pe baza căruia expertiza a fost efectuată, dovada încunoștințării părților, dacă au participat la aceasta și au dat explicații în cursul expertizei, data întocmirii raportului de expertiză;",
+          "partea expozitivă prin care sunt descrise operațiile de efectuare a expertizei, metodele, programele și echipamentele utilizate",
+          "concluziile, prin care se răspunde la obiectivele stabilite de organele judiciare, precum și orice alte precizări și constatări rezultate din efectuarea expertizei, în legătură cu obiectivele expertizei.",
+          "Raportul de expertiză se depune la organul judiciar care a dispus efectuarea expertizei."
+        ],
+        "source": "https://legislatie.just.ro/Public/DetaliiDocumentAfis/284050"
+      },
+      "rights_duties": {
+        "basis": "CPP art. 175, 177 alin. (3), 179",
+        "summary_en": "The expert is informed that he must analyse the object of the examination, state every observation or finding exactly and give an impartial opinion on the facts assessed, in accordance with the rules of science and professional expertise (art. 177(3)). He may refuse on the same grounds as a witness may refuse to testify, may consult the file material needed, may request clarifications, and is entitled to a fee and to protection measures (art. 175(1)-(6)). He must appear when summoned and file the report within the deadline, extendable on good grounds for no more than 6 months in total (art. 175(7)). Unjustified delay or refusal leads to a judicial fine and to civil liability of the expert or institution for damage caused (art. 175(8)). The expert may be heard to clarify findings; the hearing follows the rules on hearing witnesses (art. 179).",
+        "source": "https://legislatie.just.ro/Public/DetaliiDocument/120611"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Codul de procedură civilă (Legea nr. 134/2010, republicată), art. 330, 331, 332, 333",
+        "summary_en": "Where the court needs specialist opinion to clarify facts, it appoints one or three experts at a party's request or of its own motion; experts chosen by the parties and approved by the court may take part as party advisers (art. 330). If the parties do not agree on the experts, the court appoints them by lot from the list of the local expertise office; the appointing decision sets the objectives, deadline and provisional fee (art. 331). Experts may be challenged on the same grounds as judges (art. 332). The rules on summoning and sanctioning absent witnesses apply to experts; a non-appearing expert may be replaced (art. 333).",
+        "source": "https://legislatie.just.ro/Public/DetaliiDocument/140271"
+      },
+      "questions": {
+        "basis": "CPC art. 331 alin. (2); OG nr. 2/2000 art. 21 lit. c)",
+        "summary_en": "The court's appointing decision sets the objectives on which the expert must rule (CPC art. 331(2)). Under OG 2/2000 the conclusions contain the answers to the questions and the expert's opinion on the object of the examination (art. 21(c)). Whether the expert may report facts outside the objectives is not expressly regulated in the texts checked.",
+        "source": "https://legislatie.just.ro/Public/FormaPrintabila/00000G26KHPZ665XPE53LP7O5PU6R72C"
+      },
+      "report_contents": {
+        "basis": "CPC art. 336; OG nr. 2/2000 art. 21 (applies to judicial technical expertise generally; OG 2/2000 is supplemented by the CPC or CPP)",
+        "items_en": [
+          "Reasoned findings and conclusions recorded in a written report, filed at least 10 days before the hearing date (CPC art. 336(1))",
+          "Where several experts differ, the report contains the reasoned opinion of each (CPC art. 336(2))",
+          "Introductory part: ordering body, date, expert's name and specialty, dates of drafting and completion, object and questions, bibliography used, whether participating parties gave explanations (OG 2/2000 art. 21(a))",
+          "Description of the operations, the parties' objections or explanations and the expert's analysis of them (art. 21(b))",
+          "Conclusions with the answers to the questions and the expert's opinion on the object (art. 21(c))"
+        ],
+        "items_local": [
+          "Constatările şi concluziile motivate ale expertului [...] vor fi consemnate într-un raport scris, care va fi depus cu cel puţin 10 zile înainte de termenul fixat",
+          "Când sunt mai mulţi experţi cu păreri deosebite lucrarea trebuie să cuprindă părerea motivată a fiecăruia.",
+          "a) partea introductivă, în care se menționează organul care a dispus efectuarea expertizei, data la care s-a dispus depunerea acesteia, numele și prenumele expertului sau ale experților, specialitatea acestuia/acestora, data întocmirii și finalizării raportului de expertiză, obiectul acesteia și întrebările la care expertul sau experții urmează să răspundă, bibliografia pe baza căreia expertiza a fost efectuată și dacă părțile care au participat la aceasta au dat explicații în cursul lucrărilor la care au fost convocate;",
+          "b) descrierea operațiunilor de efectuare a expertizei, obiecțiile sau explicațiile părților, precum și analiza acestor obiecții ori explicații pe baza celor constatate de expert sau de specialist;",
+          "c) concluziile, care cuprind răspunsurile la întrebările puse și părerea expertului sau a specialistului asupra obiectului expertizei."
+        ],
+        "source": "https://legislatie.just.ro/Public/FormaPrintabila/00000G26KHPZ665XPE53LP7O5PU6R72C"
+      },
+      "rights_duties": {
+        "basis": "CPC art. 330, 332, 333, 187 alin. (1) pct. 2 lit. d); OG nr. 2/2000 art. 34-35",
+        "summary_en": "Experts may be challenged on the same grounds as judges (art. 332). The witness rules on summons, compulsory attendance and sanctions apply; a non-appearing expert may be replaced (art. 333). Refusal to accept the assignment, unjustified failure to file the work by the deadline, or refusal to give requested clarifications is sanctioned by a judicial fine (art. 187(1)(2)(d)). Failure to perform or unlawful performance of the expertise attracts disciplinary, administrative, civil or criminal liability under OG 2/2000 art. 34.",
+        "source": "https://legislatie.just.ro/Public/DetaliiDocument/140271"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": "Ordonanța Guvernului nr. 2/2000 privind organizarea activității de expertiză tehnică judiciară și extrajudiciară",
+    "title_en": "Government Ordinance no. 2/2000 on the organisation of judicial and extrajudicial technical expertise (last consolidated after Legea nr. 304/2023)",
+    "source": "https://legislatie.just.ro/Public/DetaliiDocument/20653"
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Codul penal (Legea nr. 286/2009), art. 273 alin. (2) lit. c) (Mărturia mincinoasă)",
+      "summary_en": "False testimony committed by a person who draws up an expert report or by an interpreter: imprisonment from 1 to 5 years (basic offence by a witness, art. 273(1): 6 months-3 years or a fine). No punishment if the false statement is withdrawn in time (art. 273(3)).",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": "official",
+      "source": "https://legislatie.just.ro/Public/DetaliiDocument/109855"
+    },
+    {
+      "route": "criminal",
+      "norm": "CPP art. 175 alin. (8)",
+      "summary_en": "Unjustified delay in or refusal to carry out the expertise: judicial fine and civil liability of the expert or of the designated institution for damage caused.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": "official",
+      "source": "https://legislatie.just.ro/Public/DetaliiDocument/120611"
+    },
+    {
+      "route": "all",
+      "norm": "OG nr. 2/2000, art. 34 alin. (1) and art. 35",
+      "summary_en": "Failure to carry out the technical expertise for imputable causes or carrying it out in breach of the law attracts disciplinary, administrative, civil or criminal liability; disciplinary sanctions: written warning, suspension of the right to perform judicial technical expertise for 3 months to 1 year, withdrawal of judicial technical expert status.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": "official",
+      "source": "https://legislatie.just.ro/Public/FormaPrintabila/00000G26KHPZ665XPE53LP7O5PU6R72C"
+    }
+  ],
+  "declaration": {
+    "basis": "No statutory oath or statement of truth for the written report was found. CPP art. 177 alin. (3) requires that the expert be informed of the duties of exact reporting and impartiality; the first-person text below restates that provision.",
+    "text_local": "Subsemnatul/Subsemnata [nume], expert [tehnic judiciar], declar că am analizat obiectul expertizei, am indicat cu exactitate orice observație sau constatare și am expus o opinie imparțială cu privire la faptele sau împrejurările evaluate, în conformitate cu regulile științei și expertizei profesionale.",
+    "text_en": "I, the undersigned [name], [judicial technical] expert, declare that I have analysed the object of the examination, stated every observation or finding exactly and given an impartial opinion on the facts or circumstances assessed, in accordance with the rules of science and professional expertise.",
+    "wording": "composed",
+    "source": "https://legislatie.just.ro/Public/DetaliiDocumentAfis/284050"
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "Regulamentul (UE) nr. 910/2014 modificat prin Regulamentul (UE) 2024/1183; Legea nr. 214/2024 privind utilizarea semnăturii electronice, a mărcii temporale și prestarea serviciilor de încredere bazate pe acestea (abrogă Legea nr. 455/2001)",
+    "law_en": "eIDAS Regulation (EU) No 910/2014 as amended by (EU) 2024/1183; Law no. 214/2024 on the use of electronic signatures, time stamps and trust services (repealed Law no. 455/2001). An electronic document with a qualified electronic signature is assimilated to a private signed document (art. 4(1)).",
+    "qualified_term_local": "semnătură electronică calificată (advanced: semnătură electronică avansată)",
+    "source": "https://legislatie.just.ro/Public/DetaliiDocument/285178"
+  },
+  "timestamp": {
+    "basis": "Regulation (EU) No 910/2014, art. 41 (as amended by (EU) 2024/1183); Legea nr. 214/2024, art. 7-8",
+    "qualified_recognition": "eIDAS art. 41(2): presumption of accuracy of date and time and integrity of the bound data. Law 214/2024 art. 7 provides that applying a qualified electronic time stamp gives the electronic document a certain date and time; qualified time-stamping is provided by qualified trust service providers on the national trusted lists (art. 8).",
+    "source": "https://legislatie.just.ro/Public/DetaliiDocument/285178"
+  },
+  "open_questions": [
+    "The consolidated codes on legislatie.just.ro (CPP doc 120611, CPC doc 140271, Codul penal doc 109855) are truncated by the fetch tool. CPP art. 173(4), 177 and 178 were read verbatim in Constitutional Court Decision no. 711/2023 published on legislatie.just.ro; CPP art. 172, 175, 179, CPC art. 330-336 and 187 and Codul penal art. 273(2) were checked only against secondary consolidations (lege5.ro, legeaz.net, coduri.juridice.ro) and must be re-read on the official consolidated text.",
+    "Codul penal art. 273(1) was confirmed verbatim in CCR Decision no. 480/2018 on legislatie.just.ro; the wording of art. 273(2)(c) was not read on an official page.",
+    "Whether CPP art. 177 or another provision requires the criminal expert to be warned of liability under Codul penal art. 273, and with what wording, was not verified.",
+    "No oath for experts in the written report was found in CPP, CPC or OG 2/2000; when heard, experts follow the witness hearing rules (CPP art. 179(3)), whose oath formula (CPP art. 121) was not verified on an official page.",
+    "The amount of the judicial fine under CPC art. 187(1)(2) and CPP art. 175(8) was not verified.",
+    "OG 2/2000 art. 21(a) reads 'data la care s-a dispus depunerea acesteia' on the printable form fetched; confirm on the current consolidated text.",
+    "ASRO national adoptions of EN ISO/IEC 27037/27041/27042/27043 (expected designation SR EN ISO/IEC ...) were not verified; the web search budget was exhausted.",
+    "Specific rules for forensic IT expertise in criminal cases (for example by police or prosecutorial forensic laboratories, or OG 75/2000 on forensic expertise) were not checked.",
+    "Legea nr. 214/2024 art. 4 and art. 7 wording was read through a summarising fetch and is not quoted verbatim."
+  ]
+}

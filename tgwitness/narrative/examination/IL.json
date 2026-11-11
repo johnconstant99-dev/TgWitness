@@ -1,0 +1,126 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "IL",
+  "name_en": "Israel",
+  "name_local": "ישראל",
+  "court_languages": [
+    "he",
+    "ar"
+  ],
+  "local_language": "he",
+  "legal_family": "mixed",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "מומחה",
+    "en": "expert witness whose written opinion (חוות דעת) is admitted in lieu of oral testimony"
+  },
+  "procedures": [
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "פקודת הראיות [נוסח חדש], התשל\"א-1971, סעיף 20; תקנות סדר הדין האזרחי, התשע\"ט-2018 (provisions on experts not verified)",
+        "summary_en": "The court may, if it sees no risk of a miscarriage of justice, admit as evidence an expert's written opinion on a question of science, research, art or professional knowledge (s. 20). Party-appointed and court-appointed expert procedure under the Civil Procedure Regulations 2018 was not verified.",
+        "source": "https://www.nevo.co.il/law_html/law00/98569.htm"
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": "פקודת הראיות סעיפים 24, 25 והתוספת הראשונה (טופס חוות דעת)",
+        "items_en": [
+          "opinion drawn up according to the form in the First Schedule or as similar to it as possible (s. 24)",
+          "the expert's declaration that the provisions of s. 25 are known to him (s. 25)",
+          "for an opinion made outside Israel: certification by an Israeli consular or diplomatic representative that the signature is trustworthy and that under local law the expert is punishable for false statements (s. 22)"
+        ],
+        "items_local": [
+          "חוות דעת, תעודת רופא ותעודת עובד הציבור ייערכו לפי הטפסים הקבועים בתוספת הראשונה או בדומה להם ככל האפשר.",
+          "כל חוות דעת וכל תעודת רופא יכילו הצהרת המומחה או הרופא כי הוראות סעיף זה ידועות לו.",
+          "אישור של נציג קונסולרי או דיפלומטי של ישראל – שהחתימה על חוות הדעת או תעודת הרופא ראויה לאמון; שלפי חוקי המקום שבו נעשתה חוות הדעת או תעודת הרופא צפוי למומחה או לרופא עונש על דברי שקר הכלולים בהן."
+        ],
+        "source": "https://www.nevo.co.il/law_html/law00/98569.htm"
+      },
+      "rights_duties": {
+        "basis": "פקודת הראיות סעיף 26",
+        "summary_en": "The court may order the expert to be cross-examined in court and must grant a party's request to do so; if the request was vexatious or frivolous the court may charge the costs of the examination to the requesting party (s. 26).",
+        "source": "https://www.nevo.co.il/law_html/law00/98569.htm"
+      }
+    },
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "פקודת הראיות [נוסח חדש], התשל\"א-1971, סעיף 20",
+        "summary_en": "Section 20 of the Evidence Ordinance is not limited to civil proceedings; criminal-procedure rules on expert disclosure and appointment were not verified.",
+        "source": "https://www.nevo.co.il/law_html/law00/98569.htm"
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": "פקודת הראיות סעיפים 24, 25",
+        "items_en": [
+          "same form and s. 25 declaration requirements as the civil route"
+        ],
+        "items_local": [
+          "כל חוות דעת וכל תעודת רופא יכילו הצהרת המומחה או הרופא כי הוראות סעיף זה ידועות לו."
+        ],
+        "source": "https://www.nevo.co.il/law_html/law00/98569.htm"
+      },
+      "rights_duties": {
+        "basis": "פקודת הראיות סעיף 26",
+        "summary_en": "Cross-examination in court on order of the court or on a party's request (s. 26).",
+        "source": "https://www.nevo.co.il/law_html/law00/98569.htm"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": "No dedicated statute on forensic expert activity identified; expert opinions are governed by the Evidence Ordinance [New Version] 1971, ss. 20–26",
+    "source": "https://www.nevo.co.il/law_html/law00/98569.htm"
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "פקודת הראיות סעיף 25 (opinion treated as sworn testimony for the purposes of s. 117 of the Criminal Code Ordinance 1936); חוק העונשין, התשל\"ז-1977 (perjury provision not verified)",
+      "summary_en": "An expert opinion submitted as evidence is treated as sworn testimony for the purposes of the perjury provision (s. 25 refers to s. 117 of the Criminal Code Ordinance 1936, which has been replaced by the Penal Law 1977). The successor Penal Law section and its maximum penalty were not verified.",
+      "warning_local": "כל חוות דעת וכל תעודת רופא יכילו הצהרת המומחה או הרופא כי הוראות סעיף זה ידועות לו.",
+      "warning_en": "Every opinion and every medical certificate shall contain the expert's or physician's declaration that the provisions of this section are known to him.",
+      "wording": "official",
+      "source": "https://www.nevo.co.il/law_html/law00/98569.htm"
+    }
+  ],
+  "declaration": {
+    "basis": "פקודת הראיות סעיף 25 (mandatory declaration) and סעיף 24 with the First Schedule form",
+    "text_local": "הוראות סעיף 25 לפקודת הראיות [נוסח חדש], התשל\"א-1971 ידועות לי, ואני יודע כי דין חוות דעתי זו, כשהיא חתומה על ידי ומוגשת כראיה לבית המשפט, כדין עדות בשבועה.",
+    "text_en": "The provisions of section 25 of the Evidence Ordinance [New Version] 1971 are known to me, and I know that this opinion, when signed by me and submitted as evidence to the court, has the status of sworn testimony.",
+    "wording": "composed",
+    "source": "https://www.nevo.co.il/law_html/law00/98569.htm"
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "חוק חתימה אלקטרונית, התשס\"א-2001",
+    "law_en": "Electronic Signature Law, 5761-2001",
+    "qualified_term_local": null,
+    "source": null
+  },
+  "timestamp": {
+    "basis": null,
+    "qualified_recognition": null,
+    "source": null
+  },
+  "open_questions": [
+    "The official First Schedule form for an expert opinion (טופס חוות דעת) is linked from nevo.co.il as a .doc file that could not be parsed; its exact declaration text (believed to begin 'אני נותן חוות דעתי זו במקום עדות בבית משפט') was not verified. The declaration in this file is therefore composed from s. 25.",
+    "Penal Law 1977 provision on perjury that replaced s. 117 of the Criminal Code Ordinance 1936 (believed to be s. 237 'עדות שקר') and its maximum penalty were not verified; the nevo and Wikisource pages were truncated before that section.",
+    "Civil Procedure Regulations 2018 (תקנות סדר הדין האזרחי, התשע\"ט-2018) rules on party experts, court-appointed experts, questions to experts and filing deadlines were not verified.",
+    "Criminal-procedure rules on expert opinions (Criminal Procedure Law [Consolidated Version] 1982 and related disclosure rules) were not verified.",
+    "Electronic Signature Law 2001: the Hebrew terms for the higher signature tiers (secure / certified electronic signature), the evidential presumption, and the nevo or Knesset URL were not verified.",
+    "No Israeli statute or regulation on electronic timestamps was identified.",
+    "No Standards Institution of Israel (SII) adoption of ISO/IEC 27037/27041/27042/27043 was verified; whether Israel Police use ISO/IEC 17025 accreditation for digital forensics was not checked.",
+    "Arabic-language (ar) versions of the quoted provisions were not retrieved.",
+    "Whether any statute on forensic expert activity exists in Israel remains unconfirmed after a search; the statute field reflects only the Evidence Ordinance."
+  ]
+}

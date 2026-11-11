@@ -1,0 +1,140 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "CH",
+  "name_en": "Switzerland (federal law)",
+  "name_local": "Schweiz / Suisse / Svizzera",
+  "court_languages": [
+    "de",
+    "fr",
+    "it"
+  ],
+  "local_language": "de",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "sachverständige Person (fr: expert; it: perito)",
+    "en": "expert appointed by the directing authority (criminal) or the court (civil)"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Schweizerische Strafprozessordnung (StPO, SR 312.0) Art. 184(1)-(3)",
+        "summary_en": "The directing authority (Verfahrensleitung) appoints the expert and issues a written mandate stating the expert, any permission to use further persons under the expert's responsibility, the precisely formulated questions, the deadline, the confidentiality duty of the expert and assistants, and the penal consequences of a false opinion under Art. 307 StGB (Art. 184(2)). The parties are first given the opportunity to comment on the expert and the questions and to make their own proposals; this may be omitted for certain laboratory analyses (Art. 184(3)).",
+        "source": "https://www.fedlex.admin.ch/eli/cc/2010/267/de#art_184"
+      },
+      "questions": {
+        "basis": "StPO Art. 184(2)(c), 184(3)",
+        "summary_en": "The directing authority formulates the questions precisely in the written mandate; the parties may comment on the questions and propose their own before the mandate is issued. The provisions reviewed do not expressly regulate declining questions outside the expertise or reporting facts not asked about.",
+        "source": "https://www.fedlex.admin.ch/eli/cc/2010/267/de#art_184"
+      },
+      "report_contents": {
+        "basis": "StPO Art. 185(1), 187(1)",
+        "items_en": [
+          "Written opinion (oral delivery or oral explanation only where the directing authority orders it)",
+          "Names and function of any other persons who took part in preparing the opinion",
+          "Opinion for which the expert is personally responsible"
+        ],
+        "items_local": [
+          "Die sachverständige Person erstattet das Gutachten schriftlich.",
+          "Namen und Funktion weiterer Personen, die an der Ausarbeitung des Gutachtens mitgewirkt haben",
+          "Die sachverständige Person ist für das Gutachten persönlich verantwortlich."
+        ],
+        "source": "https://www.fedlex.admin.ch/eli/cc/2010/267/de#art_187"
+      },
+      "rights_duties": {
+        "basis": "StPO Art. 73, 184(2)(e)-(f), 185(1)",
+        "summary_en": "The expert is personally responsible for the opinion and must in principle carry out the mandate personally; use of assistants requires a note in the mandate and disclosure in the report (Art. 184(2)(b), 185(1), 187(1); see BGE 144 IV 176). Experts appointed by criminal authorities must keep confidential facts learned in their official capacity (Art. 73). The mandate warns of confidentiality and of the penalties of Art. 307 StGB (Art. 184(2)(e), (f)).",
+        "source": "https://www.fedlex.admin.ch/eli/cc/2010/267/de#art_185"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Schweizerische Zivilprozessordnung (ZPO, SR 272) Art. 183",
+        "summary_en": "The court may obtain an opinion from one or more experts on a party's request or on its own motion, after hearing the parties. The same recusal grounds apply to experts as to court officers.",
+        "source": "https://www.fedlex.admin.ch/eli/cc/2010/262/de#art_183"
+      },
+      "questions": {
+        "basis": "ZPO Art. 185, 186",
+        "summary_en": "The court instructs the expert and puts the questions in writing or orally at the hearing; the parties may comment on the questions and request changes or additions; the court supplies the necessary files and sets a deadline (Art. 185). With the court's consent the expert may carry out own investigations and must disclose them in the opinion (Art. 186). The provisions reviewed do not expressly regulate declining questions or reporting facts not asked about.",
+        "source": "https://www.fedlex.admin.ch/eli/cc/2010/262/de#art_185"
+      },
+      "report_contents": {
+        "basis": "ZPO Art. 186, 187",
+        "items_en": [
+          "Written or oral opinion as ordered by the court; the court may order oral explanation of a written opinion (Art. 187(1))",
+          "Disclosure of any own investigations carried out with the court's consent (Art. 186)",
+          "Where several experts are appointed, each gives an opinion unless the court orders otherwise (Art. 187(3))"
+        ],
+        "items_local": [
+          "Das Gericht kann mündliche oder schriftliche Erstattung des Gutachtens anordnen.",
+          "Die sachverständige Person kann mit Zustimmung des Gerichts eigene Abklärungen vornehmen. Sie hat sie im Gutachten offenzulegen.",
+          "Sind mehrere sachverständige Personen beauftragt, so erstattet jede von ihnen ein Gutachten, sofern das Gericht nichts anderes anordnet."
+        ],
+        "source": "https://www.fedlex.admin.ch/eli/cc/2010/262/de#art_187"
+      },
+      "rights_duties": {
+        "basis": "ZPO Art. 184, 188",
+        "summary_en": "The expert is bound to tell the truth and must deliver the opinion on time; the court informs the expert of the criminal liability for a false opinion (Art. 307 StGB) and for breach of official secrecy (Art. 320 StGB) and of the consequences of default and defective performance; the expert is entitled to compensation (Art. 184). If the opinion is late the court may revoke the mandate; an incomplete, unclear or insufficiently reasoned opinion may be supplemented, explained or replaced by another expert (Art. 188).",
+        "source": "https://www.fedlex.admin.ch/eli/cc/2010/262/de#art_184"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": "No federal statute on forensic expert activity was identified; expert rules are in the StPO and ZPO, and any expert registers are cantonal.",
+    "source": null
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Schweizerisches Strafgesetzbuch (StGB, SR 311.0) Art. 307(1), (3)",
+      "summary_en": "An expert in judicial proceedings who gives false findings or a false opinion: custodial sentence up to five years or monetary penalty (para. 1). If the false statement concerns facts immaterial to the decision: monetary penalty (para. 3). The former aggravation for statements under oath or solemn promise (para. 2) was repealed with effect from 1 July 2023 (AS 2023 259).",
+      "warning_local": "Wer in einem gerichtlichen Verfahren als Zeuge, Sachverständiger, Übersetzer oder Dolmetscher zur Sache falsch aussagt, einen falschen Befund oder ein falsches Gutachten abgibt oder falsch übersetzt, wird mit Freiheitsstrafe bis zu fünf Jahren oder Geldstrafe bestraft.",
+      "warning_en": "Statutory text of Art. 307(1): anyone who, as an expert in judicial proceedings, gives false findings or a false opinion is liable to a custodial sentence of up to five years or a monetary penalty. The warning itself is given by the authority in the mandate (StPO Art. 184(2)(f)) or by the court (ZPO Art. 184(2)); no prescribed form for the expert to sign was found.",
+      "wording": "official",
+      "source": "https://www.fedlex.admin.ch/eli/cc/54/757_781_799/de#art_307"
+    }
+  ],
+  "declaration": {
+    "basis": "No federal rule requires a declaration or statement of truth in the report. The warning under Art. 307 StGB is part of the mandate (StPO Art. 184(2)(f)) or is given by the court (ZPO Art. 184(2)).",
+    "text_local": "Ich bestätige, dass ich auf die Straffolgen eines falschen Gutachtens nach Artikel 307 StGB hingewiesen worden bin, und erstatte dieses Gutachten wahrheitsgemäss.",
+    "text_en": "I confirm that I have been informed of the penal consequences of a false expert opinion under Article 307 of the Criminal Code, and I give this opinion truthfully.",
+    "wording": "composed",
+    "source": "https://www.fedlex.admin.ch/eli/cc/2010/262/de#art_184"
+  },
+  "standards": [
+    {
+      "id": "ISO/IEC 27037:2012",
+      "national_id": "SN EN ISO/IEC 27037:2016-11",
+      "title_en": "Guidelines for identification, collection, acquisition and preservation of digital evidence",
+      "status": "national adoption",
+      "issuer": "Schweizerische Normen-Vereinigung (SNV); listing via DIN Media",
+      "source": "https://www.dinmedia.de/en/standard/sn-en-iso-iec-27037/266618280"
+    }
+  ],
+  "esignature": {
+    "law_local": "Bundesgesetz vom 18. März 2016 über Zertifizierungsdienste im Bereich der elektronischen Signatur und anderer Anwendungen digitaler Zertifikate (Bundesgesetz über die elektronische Signatur, ZertES, SR 943.03); Obligationenrecht Art. 14 Abs. 2bis",
+    "law_en": "Federal Act on Electronic Signatures (ZertES), SR 943.03; Code of Obligations Art. 14(2bis): a qualified electronic signature combined with a qualified time stamp is equivalent to a handwritten signature. Switzerland is not bound by eIDAS.",
+    "qualified_term_local": "qualifizierte elektronische Signatur",
+    "source": "https://www.fedlex.admin.ch/eli/cc/2016/752/de"
+  },
+  "timestamp": {
+    "basis": "ZertES Art. 2 lit. i and j; Obligationenrecht Art. 14 Abs. 2bis",
+    "qualified_recognition": "ZertES defines an electronic time stamp as confirmation that certain digital data existed at a certain time, and a qualified electronic time stamp as one issued by a recognised certification service provider and bearing a regulated electronic seal. Equivalence with a handwritten signature (OR Art. 14(2bis)) requires a qualified electronic signature combined with a qualified time stamp. No statutory presumption of accuracy of the time stamp comparable to eIDAS Art. 41(2) was identified.",
+    "source": "https://www.fedlex.admin.ch/eli/cc/2016/752/de"
+  },
+  "open_questions": [
+    "Fedlex is a JavaScript application and its full-text files are too large for the research tool; StPO, ZPO, StGB, ZertES and OR wording was checked through search-index excerpts of the official Fedlex PDFs, Federal Supreme Court decision BGE 144 IV 176 and secondary reproductions, not by direct reading of the current consolidated text.",
+    "The full current wording of StPO Art. 184(2) letters (a)-(f) and Art. 187(2) was confirmed only through secondary sources and BGE 144 IV 176; StPO Art. 182, 183, 186, 188-191 were not verified.",
+    "The repeal of StGB Art. 307(2) with effect from 1 July 2023 (AS 2023 259) was confirmed only from secondary reproductions of the Fedlex footnote, not from AS 2023 259 itself.",
+    "French and Italian verbatim wording of StGB Art. 307, StPO Art. 184/187 and ZPO Art. 184-187 was not verified against the current Fedlex texts; only German is quoted.",
+    "Penalty under StGB Art. 320 (breach of official secrecy), referred to in the ZPO warning, was not verified.",
+    "Civil or state liability of a court-appointed expert for a defective opinion is not codified in the federal provisions reviewed; cantonal liability law and case law were not reviewed.",
+    "Cantonal expert registers, oaths and practice (e.g. cantonal forms for the Art. 307 warning) were not reviewed.",
+    "Swiss national adoptions (SN EN ISO/IEC) of ISO/IEC 27041, 27042 and 27043 were not confirmed.",
+    "ZPO Art. 187 in the version in force from 1 July 2026 adds a cross-reference to Art. 170a (applied by analogy); its exact placement and content were not verified."
+  ]
+}

@@ -1,0 +1,184 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "SE",
+  "name_en": "Sweden",
+  "name_local": "Sverige",
+  "court_languages": [
+    "sv"
+  ],
+  "local_language": "sv",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "sakkunnig",
+    "en": "expert appointed by the court (or engaged by the preliminary investigation leader or called by a party) to give an opinion on a question requiring special professional knowledge"
+  },
+  "procedures": [
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Rättegångsbalken (1942:740) 40 kap. 1, 3, 7 och 19 §§",
+        "summary_en": "Where assessment of a question requires special professional knowledge, the court may obtain an opinion from an authority, official or other person appointed to give opinions in the field, or commission one or more persons known for integrity and skill in the subject (40:1). The parties should be heard before an expert is chosen; if the parties agree on an expert, that person is to be used if suitable, but the court may appoint another as well (40:3). A party may call its own expert not named by the court; 40:7 and 40:8 then apply as relevant and oral hearing follows the rules for witnesses (40:19).",
+        "source": "https://data.riksdagen.se/dokument/sfs-1942-740.text"
+      },
+      "questions": {
+        "basis": "Rättegångsbalken 40 kap. 1, 4, 5, 7 och 10 §§",
+        "summary_en": "The court commissions the opinion and sets the time limit for the written opinion (40:1, 40:7). The court may order hearings or other evidence before the main hearing to inform the expert's task, order an on-site inspection by the expert, and order objects to be made available for examination (40:5). At an oral hearing the court examines the expert, may allow the parties to do so, and rejects questions that are clearly irrelevant, confusing or otherwise improper (40:10). The expert is not obliged to disclose trade secrets unless there is special reason (40:4). No express rule was found on the expert declining questions outside the expertise or reporting facts not asked about.",
+        "source": "https://data.riksdagen.se/dokument/sfs-1942-740.text"
+      },
+      "report_contents": {
+        "basis": "Rättegångsbalken 40 kap. 6 och 7 §§",
+        "items_en": [
+          "Written opinion, unless the court orders otherwise, delivered within the time set by the court (40:7 second paragraph)",
+          "The reasons and circumstances on which the opinion is based (40:7 third paragraph)",
+          "Where the expert carries out an inspection: a record stating who attended and what took place (40:6 second paragraph)"
+        ],
+        "items_local": [
+          "Annan sakkunnig skall, om ej rätten förordnar annat, avgiva skriftligt utlåtande. Rätten skall förelägga honom viss tid, inom vilken utlåtandet skall avgivas.",
+          "Utlåtande skall angiva de skäl och omständigheter, på vilka det däri givna omdömet är grundat.",
+          "Över förrättningen skall föras protokoll, vari antecknas, vilka vid förrättningen närvarit och vad därvid förekommit."
+        ],
+        "source": "https://data.riksdagen.se/dokument/sfs-1942-740.text"
+      },
+      "rights_duties": {
+        "basis": "Rättegångsbalken 40 kap. 2, 4, 8, 9, 11, 12, 14, 16, 17 och 18 §§",
+        "summary_en": "A person whose relationship to the case or a party could diminish their reliability may not be an expert (40:2). No one is obliged to act as expert without consent unless it is an official duty, but having accepted the assignment the expert may not withdraw without valid excuse (40:4). An expert who gave a written opinion must also be heard orally if a party requests it and it is not clearly irrelevant, or if the court finds it necessary (40:8). Before oral testimony the expert takes the statutory oath and the court reminds them of its importance (40:9). Certain witness provisions apply (40:11). Failure to deliver the opinion in time or refusal to take the oath or testify can be ordered under penalty of a fine (vite) (40:12, 40:14), and the expert can be ordered to compensate costs caused by such neglect (40:16). Right to reasonable remuneration and advance (40:17-18).",
+        "source": "https://data.riksdagen.se/dokument/sfs-1942-740.text"
+      }
+    },
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Rättegångsbalken 23 kap. 14 §; 40 kap.",
+        "summary_en": "During the preliminary investigation the investigation leader may obtain an opinion from an expert; before obtaining one from anyone other than an authority, the suspect or defence counsel is to be given an opportunity to comment on the choice of expert unless there are special reasons against it. If an expert should already be appointed by the court during the investigation, the investigation leader may request this (23:14, Lag 2022:316). At trial chapter 40 applies.",
+        "source": "https://data.riksdagen.se/dokument/sfs-1942-740.text"
+      },
+      "questions": {
+        "basis": "Rättegångsbalken 23 kap. 14 §; 40 kap. 5, 7 och 10 §§",
+        "summary_en": "The investigation leader (pre-trial) or the court defines the assignment. Court-stage rules are the same as in the civil route (40:5, 40:7, 40:10). No express rule was found on declining questions outside the expertise or volunteering facts.",
+        "source": "https://data.riksdagen.se/dokument/sfs-1942-740.text"
+      },
+      "report_contents": {
+        "basis": "Rättegångsbalken 40 kap. 7 §",
+        "items_en": [
+          "Written opinion, unless the court orders otherwise, within the time set",
+          "The reasons and circumstances on which the opinion is based"
+        ],
+        "items_local": [
+          "Annan sakkunnig skall, om ej rätten förordnar annat, avgiva skriftligt utlåtande. Rätten skall förelägga honom viss tid, inom vilken utlåtandet skall avgivas.",
+          "Utlåtande skall angiva de skäl och omständigheter, på vilka det däri givna omdömet är grundat."
+        ],
+        "source": "https://data.riksdagen.se/dokument/sfs-1942-740.text"
+      },
+      "rights_duties": {
+        "basis": "Rättegångsbalken 40 kap. 2, 4, 9 och 14 §§",
+        "summary_en": "Same impartiality, acceptance and oath rules as in the civil route; opinions of authorities or officials appointed to give opinions follow their own rules or established practice (40:7 first paragraph).",
+        "source": "https://data.riksdagen.se/dokument/sfs-1942-740.text"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": null,
+    "source": null
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Brottsbalken (1962:700) 15 kap. 1 § (mened), as amended by Lag (2026:1318)",
+      "summary_en": "A person who, after taking an oath prescribed by law, gives false information or withholds the truth is guilty of perjury: imprisonment of at least six months and at most four years; if less serious, at most one year; aggravated perjury two to eight years. Applies to an expert heard orally after the RB 40:9 oath. A statement of no importance to the case is not punishable (15:4).",
+      "warning_local": "Jag N.N. lovar och försäkrar på heder och samvete, att jag efter bästa förstånd skall fullgöra det sakkunniguppdrag, som lämnats mig.",
+      "warning_en": "I, N.N., promise and affirm on my honour and conscience that I will to the best of my understanding perform the expert assignment entrusted to me.",
+      "wording": "official",
+      "source": "https://data.riksdagen.se/dokument/sfs-1962-700.text"
+    },
+    {
+      "route": "all",
+      "norm": "Brottsbalken 15 kap. 3 § (ovarsam utsaga)",
+      "summary_en": "Committing an act under 15:1 or 15:2 through gross negligence: fine or imprisonment of at most six months.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "https://data.riksdagen.se/dokument/sfs-1962-700.text"
+    },
+    {
+      "route": "all",
+      "norm": "Brottsbalken 15 kap. 10 § (osann försäkran, vårdslös försäkran)",
+      "summary_en": "Giving false information otherwise than orally where the information is by law or other statute to be given on honour and conscience or under a similar assurance, if this creates a danger in matters of evidence: fine or imprisonment up to six months; aggravated up to two years; gross negligence: fine or up to six months. RB 40:7 does not require a written expert opinion to be given on honour and conscience, so applicability to written opinions is uncertain.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "https://data.riksdagen.se/dokument/sfs-1962-700.text"
+    },
+    {
+      "route": "civil",
+      "norm": "Rättegångsbalken 40 kap. 16 §",
+      "summary_en": "An expert who without valid excuse fails to deliver the written opinion in time or refuses to take the oath or testify (40:12, 40:14), or fails to appear when summoned, and thereby causes litigation costs, shall on a party's request be ordered to compensate those costs to a reasonable extent; the same applies to costs caused to the State.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "https://data.riksdagen.se/dokument/sfs-1942-740.text"
+    }
+  ],
+  "declaration": {
+    "basis": "Rättegångsbalken 40 kap. 9 § (oath before oral testimony; adjusted if the opinion has already been given; the court then reminds the expert of the importance of the oath). No statutory declaration is required in the written opinion (40:7).",
+    "text_local": "Jag N.N. lovar och försäkrar på heder och samvete, att jag efter bästa förstånd skall fullgöra det sakkunniguppdrag, som lämnats mig.",
+    "text_en": "I, N.N., promise and affirm on my honour and conscience that I will to the best of my understanding perform the expert assignment entrusted to me.",
+    "wording": "official",
+    "source": "https://data.riksdagen.se/dokument/sfs-1942-740.text"
+  },
+  "standards": [
+    {
+      "id": "ISO/IEC 27037:2012",
+      "national_id": "SS-EN ISO/IEC 27037:2016",
+      "title_en": "Information technology - Security techniques - Guidelines for identification, collection, acquisition and preservation of digital evidence (ISO/IEC 27037:2012, IDT); status valid; replaces SS-ISO/IEC 27037:2012",
+      "status": "national adoption",
+      "issuer": "SIS (Svenska institutet för standarder)",
+      "source": "https://www.sis.se/en/produkter/standardization/information-sciences-publishing/documents-in-administration-commerce-and-industry/ssenisoiec270372016/"
+    },
+    {
+      "id": "ISO/IEC 27041:2015",
+      "national_id": "SS-EN ISO/IEC 27041:2016",
+      "title_en": "Information technology - Security techniques - Guidance on assuring suitability and adequacy of incident investigative method (ISO/IEC 27041:2015, IDT); status valid",
+      "status": "national adoption",
+      "issuer": "SIS (Svenska institutet för standarder)",
+      "source": "https://www.sis.se/en/produkter/standardization/information-sciences-publishing/documents-in-administration-commerce-and-industry/ssenisoiec270412016/"
+    },
+    {
+      "id": "ISO/IEC 27042:2015",
+      "national_id": "SS-EN ISO/IEC 27042:2016",
+      "title_en": "Information technology - Security techniques - Guidelines for the analysis and interpretation of digital evidence (ISO/IEC 27042:2015, IDT); status valid",
+      "status": "national adoption",
+      "issuer": "SIS (Svenska institutet för standarder)",
+      "source": "https://www.sis.se/en/produkter/standardization/information-sciences-publishing/documents-in-administration-commerce-and-industry/ssenisoiec270422016/"
+    },
+    {
+      "id": "ISO/IEC 27043:2015",
+      "national_id": "SS-EN ISO/IEC 27043:2016",
+      "title_en": "Information technology - Security techniques - Incident investigation principles and processes (ISO/IEC 27043:2015, IDT); status valid",
+      "status": "national adoption",
+      "issuer": "SIS (Svenska institutet för standarder)",
+      "source": "https://www.sis.se/en/produkter/standardization/information-sciences-publishing/documents-in-administration-commerce-and-industry/ssenisoiec270432016/"
+    }
+  ],
+  "esignature": {
+    "law_local": "Europaparlamentets och rådets förordning (EU) nr 910/2014 (eIDAS), ändrad genom förordning (EU) 2024/1183; Lag (2016:561) med kompletterande bestämmelser till EU:s förordning om elektronisk identifiering",
+    "law_en": "eIDAS Regulation (EU) No 910/2014 as amended by Regulation (EU) 2024/1183; Act (2016:561) with supplementary provisions to the EU Regulation on electronic identification",
+    "qualified_term_local": "kvalificerad elektronisk underskrift (artikel 25.2: motsvarande rättsliga verkan som en handskriven underskrift); avancerad elektronisk underskrift (artikel 26)",
+    "source": "https://eur-lex.europa.eu/legal-content/SV/TXT/?uri=CELEX:02014R0910-20241018"
+  },
+  "timestamp": {
+    "basis": "eIDAS artikel 41.1-41.2 (konsoliderad version; artikel 41.3 utgår genom förordning (EU) 2024/1183); term: kvalificerad elektronisk tidsstämpling",
+    "qualified_recognition": "An electronic time stamp may not be denied legal effect or admissibility as evidence solely because it is electronic or not qualified; a qualified electronic time stamp enjoys a presumption of the accuracy of the date and time it indicates and of the integrity of the data to which the date and time are bound (Art. 41(1)-(2)). Swedish text: 'En kvalificerad elektronisk tidsstämpling ska omfattas av en presumtion om korrekthet hos det datum och den tid som den anger och integritet hos de uppgifter som datumet och tiden är kopplade till.'",
+    "source": "https://eur-lex.europa.eu/legal-content/SV/TXT/?uri=CELEX:02014R0910-20241018"
+  },
+  "open_questions": [
+    "No general Swedish statute on forensic expert activity was identified; statute fields left null. The status of opinions from the Police Authority's National Forensic Centre (as 'myndighet ... satt att tillhandagå med yttrande' under RB 40:1 and 40:7) was not verified from an official source.",
+    "Whether a knowingly false written expert opinion (not confirmed orally under the 40:9 oath) is punishable under BrB 15:10 or another provision was not verified; RB 40:7 does not require written opinions to be given on honour and conscience.",
+    "No express RB rule was found on an expert declining questions outside the expertise or reporting facts not asked about; practice or case law not researched.",
+    "Civil damages liability of experts (e.g. under skadeståndslagen) was not researched.",
+    "Whether ISO/IEC 17025 accreditation is legally required for forensic expert reports in Sweden was not verified; not listed.",
+    "Lag (2016:561) 1 § refers to the eIDAS Regulation 'i den ursprungliga lydelsen'; whether it has been aligned with Regulation (EU) 2024/1183 was not checked."
+  ]
+}

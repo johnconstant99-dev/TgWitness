@@ -1,0 +1,104 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "SG",
+  "name_en": "Singapore",
+  "name_local": "Singapore",
+  "court_languages": [
+    "en"
+  ],
+  "local_language": "en",
+  "legal_family": "common law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "expert",
+    "en": "expert witness (term used in the Supreme Court Practice Directions 2021, para. 56(8)-(9)); the statutory definition in Evidence Act 1893 s. 47 was not verified"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": null,
+        "items_en": [],
+        "items_local": [],
+        "source": null
+      },
+      "rights_duties": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "questions": {
+        "basis": "Supreme Court Practice Directions 2021 para. 56(8)-(9) (case conferences, Part 7; Expert Witness Template, Form B7 of Appendix B)",
+        "summary_en": "Before the case conference (RCC) at which expert evidence is discussed, the parties fill in an Expert Witness Template (Form B7) giving general information on the proposed expert(s), the list of issues to be referred to them, the proposed timelines for rendering their opinion and the proposed duration of their evidence at trial. The governing Rules of Court 2021 Order 12 were not verified.",
+        "source": "https://epd2021-supremecourt.judiciary.gov.sg/part-7-case-conferences.md"
+      },
+      "report_contents": {
+        "basis": null,
+        "items_en": [],
+        "items_local": [],
+        "source": null
+      },
+      "rights_duties": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": null,
+    "source": null
+  },
+  "liability": [],
+  "declaration": {
+    "basis": null,
+    "text_local": null,
+    "text_en": null,
+    "wording": null,
+    "source": null
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": null,
+    "law_en": null,
+    "qualified_term_local": null,
+    "source": null
+  },
+  "timestamp": {
+    "basis": null,
+    "qualified_recognition": null,
+    "source": null
+  },
+  "open_questions": [
+    "Singapore Statutes Online (sso.agc.gov.sg) returned HTTP 403 to the fetch tool, and further attempts to obtain its content (including a site-restricted web search) were refused by the session's permission classifier as bot-check circumvention. No statutory text was therefore verified for Singapore; the user must either grant access or supply the texts.",
+    "Evidence Act 1893 s. 47 (opinions of experts) wording and scope were not verified.",
+    "Evidence Act 1893 s. 116A (presumptions in relation to electronic records) and the other computer-output / electronic-record provisions were not verified.",
+    "Rules of Court 2021 Order 12 (experts): court appointment, party experts, single joint expert, contents of the expert's report and the required statement/declaration of duty to the Court were not verified; only the related Practice Direction para. 56(8)-(9) was read on judiciary.gov.sg.",
+    "Criminal Procedure Code 2010 s. 263 and s. 269 (expert reports in criminal proceedings, conditions for admission without calling the expert) were not verified.",
+    "Penal Code 1871 ss. 191-193 (giving and fabricating false evidence) and current maximum penalties were not verified.",
+    "Electronic Transactions Act 2010: provisions on electronic and secure electronic signatures, specified security procedures and any time-stamp provisions were not verified.",
+    "State Courts Practice Directions 2021 provisions on experts were not checked.",
+    "Singapore national adoptions of ISO/IEC 27037/27041/27042/27043 (SS ISO/IEC ...) and any official digital-forensics guidance (e.g., from the Singapore Police Force or CSA) were not verified.",
+    "Whether Singapore has a statute regulating forensic expert activity was not verified."
+  ]
+}

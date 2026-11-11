@@ -1,0 +1,101 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "GR",
+  "name_en": "Greece",
+  "name_local": "Ελλάδα",
+  "court_languages": [
+    "el"
+  ],
+  "local_language": "el",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": null,
+    "en": null
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": null,
+        "items_en": [],
+        "items_local": [],
+        "source": null
+      },
+      "rights_duties": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": null,
+        "items_en": [],
+        "items_local": [],
+        "source": null
+      },
+      "rights_duties": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": null,
+    "source": null
+  },
+  "liability": [],
+  "declaration": {
+    "basis": null,
+    "text_local": null,
+    "text_en": null,
+    "wording": null,
+    "source": null
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "Κανονισμός (ΕΕ) αριθ. 910/2014 όπως τροποποιήθηκε με τον Κανονισμό (ΕΕ) 2024/1183",
+    "law_en": "eIDAS Regulation (EU) No 910/2014 as amended by Regulation (EU) 2024/1183; national implementing act not verified",
+    "qualified_term_local": null,
+    "source": "https://eur-lex.europa.eu/eli/reg/2014/910/oj/eng"
+  },
+  "timestamp": {
+    "basis": "Regulation (EU) No 910/2014, art. 41 (as amended by Regulation (EU) 2024/1183)",
+    "qualified_recognition": "A qualified electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which they are bound; it is recognised as qualified in all Member States. National implementing rules not verified.",
+    "source": "https://eur-lex.europa.eu/eli/reg/2014/910/oj/eng"
+  },
+  "open_questions": [
+    "Research not completed for Greece: the session's web-search budget (200 calls) was exhausted before Greek sources could be located, and no per-article official text (et.gr gazette PDFs or the national codification portal) could be reached by direct fetch. Every national field below remains unverified.",
+    "Criminal route to verify: Κώδικας Ποινικής Δικονομίας (ν. 4620/2019, ΦΕΚ Α' 96/2019 as amended) chapter on πραγματογνωμοσύνη and τεχνικοί σύμβουλοι - appointment from court lists, oath, questions set by the investigating authority, contents and deadline of the έκθεση πραγματογνωμοσύνης, challenge grounds.",
+    "Civil route to verify: Κώδικας Πολιτικής Δικονομίας chapter on πραγματογνωμοσύνη (approximately art. 368-393) - appointment, oath, written report (γνωμοδότηση), party technical advisers (τεχνικοί σύμβουλοι).",
+    "Liability to verify: Ποινικός Κώδικας (ν. 4619/2019) provision punishing a false expert opinion (ψευδής πραγματογνωμοσύνη / perjury provisions applied to experts) with its penalty, and any disciplinary rules for listed experts.",
+    "Expert oath or declaration formula (όρκος / δήλωση πραγματογνώμονα) and whether it must appear in the written report: not verified.",
+    "Electronic signature: national implementing provisions (expected in ν. 4727/2020 on digital governance; terms εγκεκριμένη / προηγμένη ηλεκτρονική υπογραφή and ηλεκτρονική χρονοσφραγίδα) not verified on an official source.",
+    "Standards: ELOT national adoption of EN ISO/IEC 27037/27041/27042/27043 not verified."
+  ]
+}

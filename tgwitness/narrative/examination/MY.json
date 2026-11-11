@@ -1,0 +1,154 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "MY",
+  "name_en": "Malaysia",
+  "name_local": "Malaysia",
+  "court_languages": [
+    "ms",
+    "en"
+  ],
+  "local_language": "en",
+  "legal_family": "common law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "pakar",
+    "en": "expert: a person specially skilled in foreign law, science or art, or in questions as to identity or genuineness of handwriting or finger impressions, whose opinion is a relevant fact (Evidence Act 1950 s. 45)"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Evidence Act 1950 [Act 56] s. 45; Criminal Procedure Code [Act 593] s. 399",
+        "summary_en": "The Criminal Procedure Code contains no court-appointment scheme for experts in the provisions reviewed; expert opinion is admitted as a relevant fact under Evidence Act s. 45 when given by a person specially skilled in the field. Under CPC s. 399, a report under the hand of a listed person (officers of the Institute for Medical Research, Government Medical Officers, government chemists of Malaysia or Singapore, Document Examiners appointed by the Minister by Gazette notification, Inspectors of Weights and Measures, and any person or class declared by the Minister by Gazette notification) on any person, matter or thing examined or analysed by him may be given in evidence without calling the maker, unless the Court requires attendance or the accused requires it by notice to the Public Prosecutor not less than three clear days before trial. The Public Prosecutor must deliver a copy of the report to the accused not less than ten clear days before trial. CyberSecurity Malaysia states that its digital forensic analysts were gazetted under s. 399 on 23 February 2009 (not verified against the Gazette).",
+        "source": "https://lom.agc.gov.my/ilims/upload/portal/akta/outputaktap/1688322_BI/ACT%20593_CRIMINAL%20%20PROCEDURE%20CODE_18.10.2021.pdf"
+      },
+      "questions": {
+        "basis": "Criminal Procedure Code s. 399(1)",
+        "summary_en": "The report covers 'any person, matter or thing examined or analysed by him' as submitted by the investigating or prosecuting authority. The provisions reviewed do not regulate who formulates the questions, whether the expert may decline questions outside his expertise or the material, or whether he may report facts not asked about.",
+        "source": "https://lom.agc.gov.my/ilims/upload/portal/akta/outputaktap/1688322_BI/ACT%20593_CRIMINAL%20%20PROCEDURE%20CODE_18.10.2021.pdf"
+      },
+      "report_contents": {
+        "basis": "Criminal Procedure Code s. 399(1) (no prescribed form or contents)",
+        "items_en": [
+          "Report under the hand (signature) of the listed person",
+          "Identification of the person, matter or thing examined or analysed by him",
+          "The result of the examination or analysis (no further contents are prescribed by s. 399)"
+        ],
+        "items_local": [
+          "\"a report under the hand of any of the persons mentioned in subsection (2)\"",
+          "\"upon any person, matter or thing examined or analysed by him\"",
+          "No further contents are prescribed by s. 399 (English text is the authoritative text; no official Malay text of s. 399 was checked)"
+        ],
+        "source": "https://lom.agc.gov.my/ilims/upload/portal/akta/outputaktap/1688322_BI/ACT%20593_CRIMINAL%20%20PROCEDURE%20CODE_18.10.2021.pdf"
+      },
+      "rights_duties": {
+        "basis": "Criminal Procedure Code s. 399(3); Evidence Act 1950 ss. 45-46",
+        "summary_en": "The persons listed in s. 399(2) and the Registrar of Criminals are bound by the Code to state the truth in reports made under their hands, which brings a knowingly false report within Penal Code s. 191 (false evidence). The expert may be required to attend as a witness by the Court or the accused. Facts not otherwise relevant become relevant if they support or are inconsistent with the expert opinion (s. 46).",
+        "source": "https://lom.agc.gov.my/ilims/upload/portal/akta/outputaktap/1688322_BI/ACT%20593_CRIMINAL%20%20PROCEDURE%20CODE_18.10.2021.pdf"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Rules of Court 2012 [P.U. (A) 205/2012] O. 40 r. 1 (Court expert); O. 40A rr. 1-3 (experts of parties)",
+        "summary_en": "The Court may, on its own motion or on a party's application, appoint an independent 'Court expert' to inquire and report on any question of fact or opinion not involving questions of law or construction; the expert should if possible be agreed by the parties and failing agreement is nominated by the Court (O. 40 r. 1). Parties may also call their own experts, an 'expert' being one instructed to give or prepare evidence for court proceedings; the Court may limit the number of expert witnesses (O. 40A r. 1).",
+        "source": "https://lom.agc.gov.my/ilims/upload/portal/akta/outputp/pua_20120702_RULES%20OF%20COURT%202012%20(FINAL)%20-%201%20July%202012.pdf"
+      },
+      "questions": {
+        "basis": "Rules of Court 2012 O. 40 r. 1(4); O. 40A r. 3(2)(c); O. 40A r. 4; O. 40A r. 5",
+        "summary_en": "For a Court expert, the question submitted and any instructions are settled by the Court failing agreement between the parties. A party expert's report must state the issues he has been asked to consider and the basis upon which the evidence was given. With leave, another party may put written questions, for clarification of the report only; answers form part of the report, and failure to answer may lead to orders that the instructing party cannot rely on the expert or recover his costs, or that the expert answer. The Court may direct a discussion between experts and a joint statement of agreed and disagreed issues. The rules reviewed do not expressly address declining questions outside the expertise or reporting facts not asked about.",
+        "source": "https://lom.agc.gov.my/ilims/upload/portal/akta/outputp/pua_20120702_RULES%20OF%20COURT%202012%20(FINAL)%20-%201%20July%202012.pdf"
+      },
+      "report_contents": {
+        "basis": "Rules of Court 2012 O. 40A r. 3(1)-(2)",
+        "items_en": [
+          "Written report signed by the expert, exhibited in an affidavit sworn or affirmed by him testifying that the report is his and that he accepts full responsibility for it (unless the Court otherwise directs)",
+          "Details of the expert's qualifications",
+          "Details of any literature or other material relied on in making the report",
+          "Statement setting out the issues he has been asked to consider and the basis upon which the evidence was given",
+          "If applicable, the name and qualifications of the person who carried out any test or experiment used for the report and whether it was carried out under the expert's supervision",
+          "Where there is a range of opinion: a summary of the range of opinion and reasons for his own opinion",
+          "Summary of the conclusions reached",
+          "Statement of belief of correctness of the expert's opinion",
+          "Statement that the expert understands that in giving his report his overriding duty is to the Court and that he complies with that duty"
+        ],
+        "items_local": [
+          "\"expert evidence to be given at the trial of any action, is to be given in a written report signed by the expert and exhibited in an affidavit sworn to or affirmed by him testifying that the report exhibited is his and that he accepts full responsibility for the report\"",
+          "\"give details of the expert's qualifications\"",
+          "\"give details of any literature or other material which the expert witness has relied on in making the report\"",
+          "\"contain a statement setting out the issues which he has been asked to consider and the basis upon which the evidence was given\"",
+          "\"if applicable, state the name and qualifications of the person who carried out any test or experiment which the expert has used for the report and whether or not such test or experiment has been carried out under the expert's supervision\"",
+          "\"where there is a range of opinion on the matters dealt with in the report-- (i) summarise the range of opinion; and (ii) give reasons for his opinion\"",
+          "\"contain a summary of the conclusions reached\"",
+          "\"contain a statement of belief of correctness of the expert's opinion\"",
+          "\"contain a statement that the expert understands that in giving his report, his overriding duty is to the Court and that he complies with that duty\""
+        ],
+        "source": "https://lom.agc.gov.my/ilims/upload/portal/akta/outputp/pua_20120702_RULES%20OF%20COURT%202012%20(FINAL)%20-%201%20July%202012.pdf"
+      },
+      "rights_duties": {
+        "basis": "Rules of Court 2012 O. 40A r. 2; O. 40 rr. 2-4",
+        "summary_en": "An expert has a duty to assist the Court on matters within his expertise; this duty overrides any obligation to the person who instructed or pays him (O. 40A r. 2). A Court expert sends his report to the Court, may be directed to make a further or supplemental report, must inform the parties before any non-trifling experiment or test and arrange expenses and attendance, and may be cross-examined on his report on a party's application made within fourteen days of receiving it (O. 40 rr. 2-4). Parts of a Court expert's report not accepted by all parties are treated as information given such weight as the Court thinks fit.",
+        "source": "https://lom.agc.gov.my/ilims/upload/portal/akta/outputp/pua_20120702_RULES%20OF%20COURT%202012%20(FINAL)%20-%201%20July%202012.pdf"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": null,
+    "source": null
+  },
+  "liability": [
+    {
+      "route": "criminal",
+      "norm": "Penal Code [Act 574] ss. 191, 192, 193, read with Criminal Procedure Code s. 399(3)",
+      "summary_en": "A person bound by an oath or by an express provision of law to state the truth (CPC s. 399(3) binds listed experts to state the truth in their reports) who makes a statement he knows or believes to be false, or does not believe to be true, gives false evidence (s. 191); a false statement as to belief is included. Fabricating false evidence is defined in s. 192. Intentionally giving or fabricating false evidence in any stage of a judicial proceeding: imprisonment up to seven years and liability to fine; in any other case: up to three years and liability to fine (s. 193). An investigation directed by law preliminary to court proceedings is a stage of a judicial proceeding (s. 193 Explanation 2).",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "https://lom.agc.gov.my/ilims/upload/portal/akta/outputaktap/1823715_BI/Act%20574%20Project%202%20Final.pdf"
+    },
+    {
+      "route": "civil",
+      "norm": "Penal Code [Act 574] ss. 191, 193, read with Rules of Court 2012 O. 40A r. 3(1) (report exhibited in a sworn or affirmed affidavit)",
+      "summary_en": "A party expert's report is exhibited in an affidavit sworn or affirmed by the expert; a knowingly false statement made while legally bound by that oath or affirmation is false evidence under s. 191, punishable under s. 193 by up to seven years' imprisonment and fine when made in a judicial proceeding. The Rules also allow the Court to bar reliance on, or recovery of costs of, an expert who fails to answer permitted written questions (O. 40A r. 4(5)). No codified civil or disciplinary liability regime for forensic experts was identified.",
+      "warning_local": "Saya percaya bahawa pendapat yang dinyatakan dalam laporan ini adalah betul. Saya faham bahawa dalam memberikan laporan ini kewajipan utama saya adalah kepada Mahkamah, dan saya mematuhi kewajipan tersebut.",
+      "warning_en": "I believe that the opinions expressed in this report are correct. I understand that in giving this report my overriding duty is to the Court, and I comply with that duty.",
+      "wording": "composed",
+      "source": "https://lom.agc.gov.my/ilims/upload/portal/akta/outputp/pua_20120702_RULES%20OF%20COURT%202012%20(FINAL)%20-%201%20July%202012.pdf"
+    }
+  ],
+  "declaration": {
+    "basis": "Rules of Court 2012 O. 40A r. 3(2)(g) (statement of belief of correctness) and r. 3(2)(h) (statement of understanding of overriding duty to the Court); O. 40A r. 3(1) (report exhibited in affidavit). The Rules prescribe the content of the statements, not their wording.",
+    "text_local": "Saya percaya bahawa pendapat yang dinyatakan dalam laporan ini adalah betul. Saya faham bahawa dalam memberikan laporan ini kewajipan utama saya adalah kepada Mahkamah, dan saya mematuhi kewajipan tersebut.",
+    "text_en": "I believe that the opinions expressed in this report are correct. I understand that in giving this report my overriding duty is to the Court, and I comply with that duty.",
+    "wording": "composed",
+    "source": "https://lom.agc.gov.my/ilims/upload/portal/akta/outputp/pua_20120702_RULES%20OF%20COURT%202012%20(FINAL)%20-%201%20July%202012.pdf"
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "Digital Signature Act 1997 [Act 562]; Electronic Commerce Act 2006 [Act 658] (English is the authoritative text)",
+    "law_en": "Digital Signature Act 1997 [Act 562]; Electronic Commerce Act 2006 [Act 658]",
+    "qualified_term_local": "digital signature (verified by reference to the public key listed in a valid certificate issued by a licensed certification authority, DSA s. 62(1)(a))",
+    "source": "https://lom.agc.gov.my/ilims/upload/portal/akta/LOM/EN/Act%20562.pdf"
+  },
+  "timestamp": {
+    "basis": "Digital Signature Act 1997 s. 67(d) (presumption) and s. 70 (recognition of date/time stamp services by the Commission)",
+    "qualified_recognition": "In adjudicating a dispute involving a digital signature, a court shall presume that a digital signature was created before it was time-stamped by a recognized date/time stamp service utilizing a trustworthy system (s. 67(d)). The Commission may recognize date/time stamp services meeting requirements prescribed by regulations and publishes a list of them (s. 70). Under DSA s. 62, a digital signature verified by a valid certificate of a licensed certification authority satisfies legal signature requirements and is as legally binding as a handwritten signature; under ECA s. 9, other electronic signatures satisfy signature requirements if attached or logically associated, adequately identify the person and approval, and are as reliable as appropriate.",
+    "source": "https://lom.agc.gov.my/ilims/upload/portal/akta/LOM/EN/Act%20562.pdf"
+  },
+  "open_questions": [
+    "Rules of Court 2012 O. 40 and O. 40A were verified only in the original gazetted text P.U. (A) 205/2012 (official lom.agc.gov.my file returned HTTP 500; text read from the Wikimedia Commons copy of that same file). Later amendments to O. 40/O. 40A were not checked.",
+    "No official Malay text of Rules of Court 2012 O. 40A or of CPC s. 399 was checked; items_local therefore quote the authoritative English text.",
+    "The Malay term 'pakar' (Evidence Act s. 45(2): 'Orang sedemikian itu dipanggil pakar') was read from an AGC translation (2006 reprint) hosted on icj.org, not from lom.agc.gov.my; the translation states it is not authoritative.",
+    "Evidence Act 1950 text checked is the reprint as at 1 November 2017 (latest amendment Act A1527); amendments after that date were not checked.",
+    "Criminal Procedure Code text checked is the updated text as at 1 October 2021; later amendments to s. 399 were not checked.",
+    "Penal Code text checked is the updated text as at 31 May 2023 (stated by AGC to be not an authentic text until reprinted); later amendments to ss. 191-193 were not checked.",
+    "The Gazette notification (P.U. (B) number) extending CPC s. 399 to CyberSecurity Malaysia digital forensic analysts (stated by CyberSecurity Malaysia as 23 February 2009) was not located; the cybersecurity.my page returned HTTP 500 during this check.",
+    "No prescribed warning or oath text for expert reports in criminal proceedings was located; the witness oath form is left by Oaths and Affirmations Act 1949 s. 9 to rules and existing practice, which were not checked.",
+    "No national adoption of ISO/IEC 27037/27041/27042/27043 by Department of Standards Malaysia (MS ISO/IEC ...) and no official digital-evidence guidance used by courts or police could be verified.",
+    "Digital Signature Act 1997 text checked is the reprint incorporating amendments up to 1 January 2006; Electronic Commerce Act 2006 text checked is the reprint as at 1 November 2012; later amendments were not checked.",
+    "Digital Signature Regulations 1998 (P.U. (A) 359/98) requirements for recognized date/time stamp services were not checked on an official source.",
+    "No dedicated statute on forensic expert activity was identified; this was not confirmed by an exhaustive search."
+  ]
+}

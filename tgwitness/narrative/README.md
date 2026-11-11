@@ -21,6 +21,7 @@ archive and selected trust requirements before rendering into an empty directory
 | [`render.py`](render.py), [`diagrams.py`](diagrams.py) | Documents, timelines, data flow, assurance ladder and file diagrams |
 | [`text.py`](text.py), [texts/](texts/README.md) | Report catalogs and bounded plural-template rendering |
 | [jurisdictions/](jurisdictions/README.md) | Optional terminology and source references |
+| [`expert.py`](expert.py), [examination/](examination/README.md) | Expert examination protocol draft and per-jurisdiction rules for expert reports |
 | [`review-policy.json`](review-policy.json) | Translation review status and release requirements |
 
 Run `python -m tgwitness.narrative --help` from the repository root.

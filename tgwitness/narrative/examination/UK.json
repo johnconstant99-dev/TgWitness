@@ -1,0 +1,227 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "UK",
+  "name_en": "United Kingdom (England and Wales only)",
+  "name_local": "England and Wales",
+  "court_languages": [
+    "en"
+  ],
+  "local_language": "en",
+  "legal_family": "common law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "expert (expert witness)",
+    "en": "person instructed by a party, or jointly by parties, to give or prepare expert opinion evidence; owes an overriding duty to the court"
+  },
+  "procedures": [
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Civil Procedure Rules (CPR) Part 35: r. 35.1, 35.2, 35.4(1)-(4), 35.7",
+        "summary_en": "Parties instruct their own experts, but no party may call an expert or put in an expert's report without the court's permission (r. 35.4(1)). The application must give a cost estimate and identify the field and the issues and, where practicable, the expert's name; permission is limited to the named expert or identified field and may specify the issues (r. 35.4(2)-(3)). The court may direct that evidence on an issue be given by a single joint expert (r. 35.7). Expert evidence is restricted to what is reasonably required (r. 35.1).",
+        "source": "https://www.justice.gov.uk/courts/procedure-rules/civil/rules/part35"
+      },
+      "questions": {
+        "basis": "CPR r. 35.4(2)-(3), 35.6, 35.14; Practice Direction 35 paras 2.3-2.5",
+        "summary_en": "The issues are framed by the party seeking permission and may be specified in the permission order; the expert works from the instructing party's (or joint) instructions, whose substance must be stated in the report (r. 35.10(3)). Other parties may put proportionate written questions once, within 28 days of service, for clarification only unless the court permits or the parties agree; answers form part of the report (r. 35.6). The expert must make clear when a question or issue falls outside their expertise or when no definite opinion can be reached (PD 35 para 2.4), must consider all material facts including those detracting from the opinion (para 2.3), and must communicate a material change of view without delay (para 2.5). Experts may file written requests to the court for directions (r. 35.14). No express rule was found on volunteering facts outside the questions beyond paras 2.3 and 2.5.",
+        "source": "https://www.justice.gov.uk/courts/procedure-rules/civil/rules/part35/pd_part35"
+      },
+      "report_contents": {
+        "basis": "CPR r. 35.10; Practice Direction 35 paras 3.1-3.3",
+        "items_en": [
+          "Addressed to the court, not to the instructing party (PD 35 para 3.1)",
+          "Details of the expert's qualifications (para 3.2(1))",
+          "Details of any literature or other material relied on (para 3.2(2))",
+          "Statement of the substance of all facts and instructions material to the opinions or on which they are based (para 3.2(3); r. 35.10(3))",
+          "Which facts are within the expert's own knowledge (para 3.2(4))",
+          "Who carried out any examination, measurement, test or experiment used, that person's qualifications, and whether it was done under the expert's supervision (para 3.2(5))",
+          "Where there is a range of opinion: a summary of the range and reasons for the expert's own opinion (para 3.2(6))",
+          "Summary of conclusions (para 3.2(7))",
+          "Any qualification to the opinion (para 3.2(8))",
+          "Statement that the expert understands and has complied with their duty to the court and is aware of Part 35, PD 35 and the Guidance for the Instruction of Experts in Civil Claims 2014 (para 3.2(9); r. 35.10(2))",
+          "Statement of truth in the form set out in PD 35 para 3.3"
+        ],
+        "items_local": [
+          "An expert's report should be addressed to the court and not to the party from whom the expert has received instructions.",
+          "give details of the expert's qualifications;",
+          "give details of any literature or other material which has been relied on in making the report;",
+          "contain a statement setting out the substance of all facts and instructions which are material to the opinions expressed in the report or upon which those opinions are based;",
+          "make clear which of the facts stated in the report are within the expert's own knowledge;",
+          "say who carried out any examination, measurement, test or experiment which the expert has used for the report, give the qualifications of that person, and say whether or not the test or experiment has been carried out under the expert's supervision;",
+          "where there is a range of opinion on the matters dealt with in the report - (a) summarise the range of opinions; and (b) give reasons for the expert's own opinion;",
+          "contain a summary of the conclusions reached;",
+          "if the expert is not able to give an opinion without qualification, state the qualification; and",
+          "contain a statement that the expert - (a) understands their duty to the court, and has complied with that duty; and (b) is aware of the requirements of Part 35, this practice direction and the Guidance for the Instruction of Experts in Civil Claims 2014.",
+          "An expert's report must be verified by a statement of truth in the following form - [PD 35 para 3.3 text]"
+        ],
+        "source": "https://www.justice.gov.uk/courts/procedure-rules/civil/rules/part35/pd_part35"
+      },
+      "rights_duties": {
+        "basis": "CPR r. 35.3, 35.6(4), 35.14; Practice Direction 35 paras 2.1-2.5",
+        "summary_en": "Duty to help the court on matters within the expertise, overriding any obligation to the instructing or paying party (r. 35.3). Evidence must be the independent product of the expert uninfluenced by litigation pressures; objective, unbiased, not an advocate; consider all material facts; flag matters outside expertise or where information is insufficient; communicate changes of view (PD 35 paras 2.1-2.5). If an expert does not answer a proper written question, the instructing party may be barred from relying on the evidence or recovering the fees (r. 35.6(4)). The expert may seek directions from the court (r. 35.14).",
+        "source": "https://www.justice.gov.uk/courts/procedure-rules/civil/rules/part35"
+      }
+    },
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Criminal Procedure Rules 2025 (SI 2025/909), Part 19: r. 19.1, 19.3, 19.6, 19.7",
+        "summary_en": "Part 19 applies where a party wants to introduce expert opinion evidence (r. 19.1). Each party instructs its own expert; a party must serve the expert's report complying with r. 19.4 on the court officer and each other party as soon as practicable, with notice of anything that might undermine the reliability of the opinion or the expert's credibility or impartiality (r. 19.3(3)). Where more than one defendant wants expert evidence on an issue, the court may direct a single expert (r. 19.7). The court may direct a pre-hearing discussion and a joint statement of agreed and disagreed matters (r. 19.6; Criminal Practice Directions 2023 para 7.3).",
+        "source": "https://www.legislation.gov.uk/uksi/2025/909/part/19"
+      },
+      "questions": {
+        "basis": "CrimPR 2025 r. 19.2(3), 19.3(3)(c); Criminal Practice Directions 2023 paras 7.1.4, 7.2.1",
+        "summary_en": "There is no court-formulated list of questions; the instructing party defines the task. The expert must define their area(s) of expertise in the report and in oral evidence, draw the court's attention to any question whose answer would be outside that expertise, inform all parties and the court if the opinion changes, and disclose to the commissioning party anything that party would have to notify under r. 19.3(3)(c) (matters undermining reliability or credibility) (r. 19.2(3)). The CPD 7.2.1 declaration (point 8) requires the expert to include matters that might adversely affect the validity of the opinion.",
+        "source": "https://www.legislation.gov.uk/uksi/2025/909/rule/19.2"
+      },
+      "report_contents": {
+        "basis": "CrimPR 2025 r. 19.4(a)-(k); Criminal Practice Directions 2023 (as amended October 2026) para 7.2.1; Forensic Science Regulator Code of Practice v2 s. 31.3.2 where the Code applies",
+        "items_en": [
+          "Expert's qualifications, relevant experience and accreditation (r. 19.4(a))",
+          "Literature or other information relied on (r. 19.4(b))",
+          "Substance of all facts given to the expert that are material to, or the basis of, the opinions (r. 19.4(c))",
+          "Which facts are within the expert's own knowledge (r. 19.4(d))",
+          "Where an opinion relies on another person's representation (e.g. test results): identify that person, give their qualifications, experience and accreditation, and certify their personal knowledge (r. 19.4(e))",
+          "Where there is a range of opinion: summarise it and give reasons for the expert's own opinion (r. 19.4(f))",
+          "Any qualification to the opinion (r. 19.4(g))",
+          "Information the court may need to decide whether the opinion is sufficiently reliable to be admissible (r. 19.4(h))",
+          "Summary of conclusions (r. 19.4(i))",
+          "Statement that the expert understands the duty to the court and has complied and will continue to comply (r. 19.4(j))",
+          "The same declaration of truth as a witness statement (r. 19.4(k); Criminal Justice Act 1967 s. 9), in the CPD 7.2.1 terms or terms substantially the same",
+          "Where the FSR statutory Code applies to the forensic science activity: a compliance or non-compliance declaration in the terms of Code s. 31.3.2"
+        ],
+        "items_local": [
+          "give details of the expert's qualifications, relevant experience and accreditation;",
+          "give details of any literature or other information which the expert has relied on in making the report;",
+          "contain a statement setting out the substance of all facts given to the expert which are material to the opinions expressed in the report, or upon which those opinions are based;",
+          "make clear which of the facts stated in the report are within the expert's own knowledge;",
+          "where the expert has based an opinion or inference on a representation of fact or opinion made by another person for the purposes of criminal proceedings (for example, as to the outcome of an examination, measurement, test or experiment) - (i) identify the person who made that representation to the expert, (ii) give the qualifications, relevant experience and any accreditation of that person, and (iii) certify that that person had personal knowledge of the matters stated in that representation;",
+          "where there is a range of opinion on the matters dealt with in the report - (i) summarise the range of opinion, and (ii) give reasons for the expert's own opinion;",
+          "if the expert is not able to give an opinion without qualification, state the qualification;",
+          "include such information as the court may need to decide whether the expert's opinion is sufficiently reliable to be admissible as evidence;",
+          "contain a summary of the conclusions reached;",
+          "contain a statement that the expert understands an expert's duty to the court, and has complied and will continue to comply with that duty; and",
+          "contain the same declaration of truth as a witness statement.",
+          "I confirm that, to the best of my knowledge and belief, I have complied with the Code of Practice [insert version] published by the statutory Forensic Science Regulator"
+        ],
+        "source": "https://www.legislation.gov.uk/uksi/2025/909/rule/19.4"
+      },
+      "rights_duties": {
+        "basis": "CrimPR 2025 r. 19.2; Criminal Practice Directions 2023 paras 7.1.1-7.1.6",
+        "summary_en": "Duty to help the court achieve the overriding objective by giving objective, unbiased opinion within the expert's area(s) of expertise and by actively assisting case management, including at once informing the court of any significant failure to comply with directions; the duty overrides obligations to the instructing or paying person (r. 19.2(1)-(2)). CPD 7.1.2-7.1.3 list reliability factors (data quality, validity of method, treatment of uncertainty, peer review, completeness of information, adherence to established practice) and flaws the court must be astute to identify. CPD 7.1.4 requires disclosure of matters such as contingent fees, conflicts, adverse judicial comment, regulatory findings (including by the Forensic Science Regulator), lack of expected accreditation and poor proficiency history; undisclosed matters may lead to exclusion (CPD 7.1.6).",
+        "source": "https://assets.publishing.service.gov.uk/media/6a9fdbdc62ec7fe7bedf5115/criminal-practice-directions-2023-as-amended011026.pdf"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": "Forensic Science Regulator Act 2021",
+    "title_en": "Forensic Science Regulator Act 2021 (statutory regulator and statutory code of practice for forensic science activities in England and Wales; s. 2 duty to publish a code, s. 4 status of the code)",
+    "source": "https://www.legislation.gov.uk/ukpga/2021/14/contents"
+  },
+  "liability": [
+    {
+      "route": "civil",
+      "norm": "CPR r. 32.14 (false statements: contempt of court); CPR r. 81.3(5)(b) (permission required); Contempt of Court Act 1981 s. 14(1)",
+      "summary_en": "Proceedings for contempt of court may be brought against a person who makes or causes to be made a false statement in a document verified by a statement of truth without an honest belief in its truth (r. 32.14). Permission is required for a contempt application alleging a knowingly false statement in a document verified by a statement of truth (r. 81.3(5)(b)). Committal is for a fixed term not exceeding two years (superior court) or one month (inferior court) (Contempt of Court Act 1981 s. 14(1)).",
+      "warning_local": "I understand that proceedings for contempt of court may be brought against anyone who makes, or causes to be made, a false statement in a document verified by a statement of truth without an honest belief in its truth.",
+      "warning_en": "I understand that proceedings for contempt of court may be brought against anyone who makes, or causes to be made, a false statement in a document verified by a statement of truth without an honest belief in its truth.",
+      "wording": "official",
+      "source": "https://www.justice.gov.uk/courts/procedure-rules/civil/rules/part32"
+    },
+    {
+      "route": "criminal",
+      "norm": "Criminal Justice Act 1967 s. 89 (false written statements tendered in evidence), read with s. 9(2)(b) and CrimPR r. 19.4(k)",
+      "summary_en": "A person who, in a written statement tendered in evidence in criminal proceedings by virtue of s. 9, wilfully makes a statement material in those proceedings which he knows to be false or does not believe to be true is liable on conviction on indictment to imprisonment not exceeding two years or a fine or both; the Perjury Act 1911 applies as if s. 89 were contained in it.",
+      "warning_local": "I confirm that the contents of this report are true to the best of my knowledge and belief and that I make this report knowing that, if it is tendered in evidence, I would be liable to prosecution if I have wilfully stated anything which I know to be false or that I do not believe to be true.",
+      "warning_en": "I confirm that the contents of this report are true to the best of my knowledge and belief and that I make this report knowing that, if it is tendered in evidence, I would be liable to prosecution if I have wilfully stated anything which I know to be false or that I do not believe to be true.",
+      "wording": "official",
+      "source": "https://www.legislation.gov.uk/ukpga/1967/80/section/89"
+    },
+    {
+      "route": "all",
+      "norm": "Perjury Act 1911 s. 1(1) and (3); Criminal Justice Act 1948 s. 1(1)",
+      "summary_en": "A person lawfully sworn as a witness in a judicial proceeding who wilfully makes a material statement known to be false or not believed to be true commits perjury; maximum on indictment: 'penal servitude for a term not exceeding seven years' or imprisonment up to two years, or a fine, or both. Under the Criminal Justice Act 1948 s. 1(1) a power to pass penal servitude is construed as a power to pass imprisonment up to the same maximum term. Statements made on oath outside the tribunal for the purposes of the proceeding are treated as made in it (s. 1(3)).",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "https://www.legislation.gov.uk/ukpga/Geo5/1-2/6/section/1"
+    }
+  ],
+  "declaration": {
+    "basis": "Civil route: CPR r. 35.10(2) and Practice Direction 35 para 3.3 (statement of truth in prescribed form)",
+    "text_local": "I confirm that I have made clear which facts and matters referred to in this report are within my own knowledge and which are not. Those that are within my own knowledge I confirm to be true. The opinions I have expressed represent my true and complete professional opinions on the matters to which they refer. I understand that proceedings for contempt of court may be brought against anyone who makes, or causes to be made, a false statement in a document verified by a statement of truth without an honest belief in its truth.",
+    "text_en": "I confirm that I have made clear which facts and matters referred to in this report are within my own knowledge and which are not. Those that are within my own knowledge I confirm to be true. The opinions I have expressed represent my true and complete professional opinions on the matters to which they refer. I understand that proceedings for contempt of court may be brought against anyone who makes, or causes to be made, a false statement in a document verified by a statement of truth without an honest belief in its truth.",
+    "wording": "official",
+    "source": "https://www.justice.gov.uk/courts/procedure-rules/civil/rules/part35/pd_part35"
+  },
+  "standards": [
+    {
+      "id": "Forensic Science Regulator Code of Practice, version 2",
+      "national_id": null,
+      "title_en": "Forensic science activities: statutory code of practice, version 2 (in force 00:01 on 2 October 2025, replacing version 1). FSA DIG 100 (data capture, processing and analysis from digital storage devices) requires compliance with the Code and the digital forensics requirements in s. 97, demonstrated by ISO/IEC 17025:2017 accreditation with the Code on the schedule (s. 70.2.1). FSA DIG 101 (communications network data) and DIG 102 (digital network capture and analysis) have no compliance requirements in this version (ss. 85.2.1, 86.2.1). Reports declare compliance per s. 31.3.2. Status: failure to comply does not of itself create civil or criminal liability, but the code is admissible and courts may take non-compliance into account (FSR Act 2021 s. 4).",
+      "status": "binding",
+      "issuer": "Forensic Science Regulator (approved by Parliament under Forensic Science Regulator Act 2021 s. 3)",
+      "source": "https://www.gov.uk/government/publications/forensic-science-activities-statutory-code-of-practice-version-2/forensic-science-activities-statutory-code-of-practice-version-2-accessible"
+    },
+    {
+      "id": "ISO/IEC 17025:2017",
+      "national_id": null,
+      "title_en": "General requirements for the competence of testing and calibration laboratories; accreditation (assessed by UKAS) required by the FSR Code for FSA DIG 100 digital storage device work",
+      "status": "binding",
+      "issuer": "ISO/IEC; requirement imposed by the Forensic Science Regulator Code of Practice v2 s. 70.2.1",
+      "source": "https://www.gov.uk/government/publications/forensic-science-activities-statutory-code-of-practice-version-2/forensic-science-activities-statutory-code-of-practice-version-2-accessible"
+    },
+    {
+      "id": "ISO/IEC 27037:2012",
+      "national_id": "BS EN ISO/IEC 27037:2016",
+      "title_en": "Information technology. Security techniques. Guidelines for identification, collection, acquisition and preservation of digital evidence",
+      "status": "national adoption",
+      "issuer": "BSI (British Standards Institution)",
+      "source": "https://knowledge.bsigroup.com/products/information-technology-security-techniques-guidelines-for-identification-collection-acquisition-and-preservation-of-digital-evidence"
+    },
+    {
+      "id": "ACPO Good Practice Guide for Digital Evidence, version 5",
+      "national_id": null,
+      "title_en": "ACPO Good Practice Guide for Digital Evidence (March 2012; page footer 'Version 5 (October 2011)'); four principles for handling digital evidence; now hosted by the National Police Chiefs' Council",
+      "status": "official guidance",
+      "issuer": "Association of Chief Police Officers (ACPO), succeeded by the National Police Chiefs' Council (NPCC)",
+      "source": "https://npcc.police.uk/documents/crime/2014/Revised%20Good%20Practice%20Guide%20for%20Digital%20Evidence_Vers%205_Oct%202011_Website.pdf"
+    },
+    {
+      "id": "CPS Guidance for Experts on Disclosure, Unused Material and Case Management",
+      "national_id": null,
+      "title_en": "Crown Prosecution Service guidance that prosecution experts confirm having read and followed in the CPD 7.2.1 declaration (point 14)",
+      "status": "official guidance",
+      "issuer": "Crown Prosecution Service",
+      "source": "https://www.cps.gov.uk/prosecution-guidance/expert-guidance-disclosure-unused-material-and-case-management"
+    }
+  ],
+  "esignature": {
+    "law_local": "Electronic Communications Act 2000, s. 7 (electronic signatures) and ss. 7A-7D; Regulation (EU) No 910/2014 as retained in UK law ('UK eIDAS'), as amended by SI 2016/696, SI 2019/89 and the Data (Use and Access) Act 2025 Part 7 (ss. 129-134)",
+    "law_en": "Electronic Communications Act 2000; UK version of the eIDAS Regulation on electronic identification and trust services",
+    "qualified_term_local": "qualified electronic signature (UK eIDAS Art. 25(2): equivalent legal effect of a handwritten signature); advanced electronic signature (Art. 26)",
+    "source": "https://www.legislation.gov.uk/eur/2014/910/article/25"
+  },
+  "timestamp": {
+    "basis": "Electronic Communications Act 2000 s. 7B (electronic time stamps and related certificates, inserted by SI 2016/696); UK eIDAS Art. 41(1)-(2) (Art. 41(3) omitted by SI 2019/89 from 31 December 2020); UK eIDAS Art. 24A (recognition of EU-qualified trust services); Data (Use and Access) Act 2025 s. 132 inserting Arts. 45A-45C (power to treat specified overseas trust products as qualified)",
+    "qualified_recognition": "Electronic time stamps logically associated with a communication or data, and their certification, are admissible in evidence (ECA 2000 s. 7B(1)). An electronic time stamp may not be denied legal effect or admissibility solely because it is electronic or not qualified (Art. 41(1)). A qualified electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which the date and time are bound (Art. 41(2)). Time stamps qualified under the equivalent EU law are treated as qualified for Art. 41(2) (Art. 24A).",
+    "source": "https://www.legislation.gov.uk/eur/2014/910/article/41"
+  },
+  "open_questions": [
+    "Welsh as a court language in Wales (Welsh Language Act 1993) was not researched; court_languages lists only English.",
+    "Official copies of the ACPO Good Practice Guide could not be fetched (npcc.police.uk returned HTTP 403; the College of Policing copy at library.college.police.uk failed TLS certificate verification). Title, version and date are taken from search-result references to those official copies, not from a direct read.",
+    "The exact oath or affirmation wording used before oral expert evidence (Oaths Act 1978) was not verified, so no warning text is given for the Perjury Act 1911 entry.",
+    "Family proceedings (Family Procedure Rules Part 25 and PD 25B), which have their own expert rules and statement of truth, were not covered.",
+    "Whether any regulations under UK eIDAS Art. 45A (inserted by Data (Use and Access) Act 2025 s. 132) have yet specified overseas trust products as qualified was not checked.",
+    "The national designation of ISO/IEC 17025:2017 as a BS EN standard was not verified on the BSI site; national_id left null.",
+    "The FSR Code declaration quoted in criminal report_contents is option (a) of Code s. 31.3.2; options (b) (infrequently used or new methods) and (c) (non-compliance with annex) exist and were not reproduced in full here."
+  ],
+  "declaration_criminal": {
+    "basis": "Criminal route: CrimPR 2025 r. 19.4(j)-(k); Criminal Practice Directions 2023 (as amended, October 2026 edition) para 7.2.1 ('in the following terms, or in terms substantially the same as these'); point 13B applies only where the FSR Code does not apply; where it applies, the report carries the Code s. 31.3.2 declaration instead",
+    "text_local": "I (name) DECLARE THAT:\n1. I understand that my duty is to help the court to achieve the overriding objective by giving independent assistance by way of objective, unbiased opinion on matters within my expertise, both in preparing reports and giving oral evidence. I understand that this duty overrides any obligation to the party by whom I am engaged or the person who has paid or is liable to pay me. I confirm that I have complied with and will continue to comply with that duty.\n2. I confirm that I have not entered into any arrangement where the amount or payment of my fees is in any way dependent on the outcome of the case.\n3. I know of no conflict of interest of any kind, other than any which I have disclosed in my report.\n4. I do not consider that any interest which I have disclosed affects my suitability as an expert witness on any issues on which I have given evidence.\n5. I will advise the party by whom I am instructed if, between the date of my report and the trial, there is any change in circumstances which affect my answers to points 3 and 4 above.\n6. I have shown the sources of all information I have used.\n7. I have exercised reasonable care and skill in order to be accurate and complete in preparing this report.\n8. I have endeavoured to include in my report those matters, of which I have knowledge or of which I have been made aware, that might adversely affect the validity of my opinion. I have clearly stated any qualifications to my opinion.\n9. I have not, without forming an independent view, included or excluded anything which has been suggested to me by others including my instructing lawyers.\n10. I will notify those instructing me immediately and confirm in writing if for any reason my existing report requires any correction or qualification.\n11. I understand that:\n(a) my report will form the evidence to be given under oath or affirmation;\n(b) the court may at any stage direct a discussion to take place between experts;\n(c) the court may direct that, following a discussion between the experts, a statement should be prepared showing those issues which are agreed and those issues which are not agreed, together with the reasons;\n(d) I may be required to attend court to be cross-examined on my report by a cross-examiner assisted by an expert.\n(e) I am likely to be the subject of public adverse criticism by the judge if the Court concludes that I have not taken reasonable care in trying to meet the standards set out above.\n12. I have read Part 19 of the Criminal Procedure Rules and I have complied with its requirements.\n13. A I confirm that I have complied with the disclosure obligations listed in paragraph 7.1.4 of the Criminal Practice Directions.\nB [For experts to whose reports the code published under section 2 of the Forensic Science Regulator Act 2021 does not apply.] I confirm that I have complied with the code of practice or conduct for experts of my discipline, namely [identify the code], in all respects save as identified in [schedule][annexe][x] to this report. That [schedule][annexe] identifies any respect in which I have not complied with that code, explains why I have not done so, and either: (a) explains why I do not think that that non-compliance creates any material risk to the reliability of my opinion, or (b) gives details of the action taken to mitigate any such risk.\n[Reports to which the code published under section 2 of the Forensic Science Regulator Act 2021 applies will include a compliance declaration in the terms required by that code.]\n14. [For Experts instructed by the Prosecution only] I confirm that I have read the CPS Guidance for Experts on Disclosure, Unused Material and Case Management which details my role and documents my responsibilities, in relation to revelation as an expert witness. I have followed the guidance and recognise the continuing nature of my responsibilities of disclosure. In accordance with my duties of disclosure, as documented in the guidance booklet, I confirm that:\n(a) I have complied with my duties to record, retain and reveal material in accordance with the Criminal Procedure and Investigations Act 1996, as amended;\n(b) I have compiled an Index of all material. I will ensure that the Index is updated in the event I am provided with or generate additional material;\n(c) in the event my opinion changes on any material issue, I will inform the investigating officer, as soon as reasonably practicable and give reasons.\nI confirm that the contents of this report are true to the best of my knowledge and belief and that I make this report knowing that, if it is tendered in evidence, I would be liable to prosecution if I have wilfully stated anything which I know to be false or that I do not believe to be true.",
+    "text_en": "Same as text_local (English is the court language).",
+    "wording": "official",
+    "source": "https://assets.publishing.service.gov.uk/media/6a9fdbdc62ec7fe7bedf5115/criminal-practice-directions-2023-as-amended011026.pdf"
+  }
+}

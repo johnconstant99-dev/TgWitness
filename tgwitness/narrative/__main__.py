@@ -11,6 +11,8 @@ from ..store import canonical
 from .model import build, Limit
 from dataclasses import asdict
 from .render import write
+from . import expert as examination
+from .text import Texts
 from .text import LANGUAGES
 from .config import DIAGRAMS, OUTPUTS, resolve, validate, write_example
 
@@ -37,12 +39,13 @@ def digest_file(path):
 def generate(package, out, lang='en', jurisdiction=None, fingerprint=None, witness=None,
              witness_fingerprint=None, check_drand=False, check_bitcoin=False, tsa_ca=None,
              outputs=OUTPUTS, diagrams=DIAGRAMS, max_records=100000, scene_max_records=2000,
-             require_tier='self_attested', require_pinned_signer=False):
+             require_tier='self_attested', require_pinned_signer=False, expert=False, procedure='criminal'):
     settings = validate(dict(lang=lang, jurisdiction=jurisdiction, fingerprint=fingerprint,
                             witness=witness, witness_fingerprint=witness_fingerprint, tsa_ca=tsa_ca,
                             check_drand=check_drand, check_bitcoin=check_bitcoin, outputs=outputs,
                             diagrams=diagrams, max_records=max_records, scene_max_records=scene_max_records,
-                            require_tier=require_tier, require_pinned_signer=require_pinned_signer))
+                            require_tier=require_tier, require_pinned_signer=require_pinned_signer,
+                            expert=expert, procedure=procedure))
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
     if out.is_symlink() or any(out.iterdir()):
@@ -91,7 +94,11 @@ def generate(package, out, lang='en', jurisdiction=None, fingerprint=None, witne
                    'witness_package_sha256': model.get('witness_source', {}).get('package_sha256'),
                    'tsa_ca_sha256': digest_file(ca) if ca else None,
                    'signer_pinned': pinned, 'assurance_tier': actual_tier}
-        (rendered / 'narrative-run.json').write_text(json.dumps(receipt, ensure_ascii=False, indent=2), encoding='utf-8')
+        receipt_text = json.dumps(receipt, ensure_ascii=False, indent=2)
+        (rendered / 'narrative-run.json').write_text(receipt_text, encoding='utf-8')
+        if settings['expert']:
+            protocol = examination.build(result, model, settings, hashlib.sha256(receipt_text.encode('utf-8')).hexdigest())
+            examination.write(protocol, rendered, Texts(lang), settings['outputs'])
         for file in rendered.iterdir():
             file.rename(out / file.name)
     return model
@@ -120,6 +127,9 @@ def main():
     parser.add_argument('--scene-max-records', type=int, help='Maximum grouped records before restart cross-references')
     parser.add_argument('--require-tier', choices=ASSURANCE_TIERS)
     parser.add_argument('--require-pinned-signer', action=argparse.BooleanOptionalAction, default=None)
+    parser.add_argument('--expert', action=argparse.BooleanOptionalAction, default=None,
+                        help='Also write an expert examination protocol draft for the selected jurisdiction')
+    parser.add_argument('--procedure', choices=examination.PROCEDURES, help='Procedure for the expert protocol')
     args = parser.parse_args()
     overrides = {key: value for key, value in vars(args).items() if value is not None and key not in
                  ('package', 'out', 'config', 'profile', 'write_config', 'print_config')}

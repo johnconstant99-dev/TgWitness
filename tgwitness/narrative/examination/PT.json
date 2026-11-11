@@ -1,0 +1,148 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "PT",
+  "name_en": "Portugal",
+  "name_local": "Portugal",
+  "court_languages": [
+    "pt"
+  ],
+  "local_language": "pt",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "perito (party-appointed: consultor técnico)",
+    "en": "expert appointed by the judicial authority or court; party technical consultant"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Código de Processo Penal (Decreto-Lei n.º 78/87), art. 151, 152, 154",
+        "summary_en": "Expert evidence is used when perceiving or assessing facts requires special technical, scientific or artistic knowledge (art. 151). The examination is carried out by an appropriate official establishment, laboratory or service or, where not possible or convenient, by an expert appointed from the expert lists kept in each district (comarca) or, failing that, by a person of good repute and recognised competence; complex matters may be assigned to several experts acting collegially or on an interdisciplinary basis (art. 152). It is ordered by order (despacho) of the judicial authority, of its own motion or on application (art. 154).",
+        "source": "https://www.pgdlisboa.pt/leis/lei_mostra_articulado.php?artigo_id=199A0152&nid=199&tabela=leis&pagina=1&ficha=1"
+      },
+      "questions": {
+        "basis": "CPP art. 154.1, 155, 156.1-5",
+        "summary_en": "The order states the object of the examination and the questions (quesitos) the experts must answer and names the institution or experts (art. 154.1). The judicial authority may add questions of its own motion or at the request of experts or technical consultants (art. 156.1). Experts may request steps, clarifications and access to case documents; if the order lacks the art. 154.1 elements they must request them (art. 156.3-4). Information learned may be used only within the object and purposes of the examination (art. 156.5). Party technical consultants may propose steps and make observations and objections recorded in the file (art. 155). The CPP does not expressly address reporting facts outside the questions.",
+        "source": "https://www.pgdlisboa.pt/leis/lei_mostra_articulado.php?artigo_id=199A0156&nid=199&tabela=leis&pagina=1&ficha=1"
+      },
+      "report_contents": {
+        "basis": "CPP art. 157",
+        "items_en": [
+          "Report stating and describing the experts' answers and conclusions, with proper reasons",
+          "Report may be dictated into the record if written immediately after the examination",
+          "Time limit of up to 60 days if not written immediately, extendable by 30 days on reasoned request in complex cases",
+          "Where several experts disagree, each submits his own report (also in interdisciplinary examinations); in a collegial examination there may be a majority and a dissenting opinion"
+        ],
+        "items_local": [
+          "Finda a perícia, os peritos procedem à elaboração de um relatório, no qual mencionam e descrevem as suas respostas e conclusões devidamente fundamentadas.",
+          "O relatório, elaborado logo em seguida à realização da perícia, pode ser ditado para o auto.",
+          "Se o relatório não puder ser elaborado logo em seguida à realização da perícia, é marcado um prazo, não superior a 60 dias, para a sua apresentação. Em casos de especial complexidade, o prazo pode ser prorrogado, a requerimento fundamentado dos peritos, por mais 30 dias.",
+          "Se a perícia for realizada por mais de um perito e houver discordância entre eles, apresenta cada um o seu relatório, o mesmo sucedendo na perícia interdisciplinar. Tratando-se de perícia colegial, pode haver lugar a opinião vencedora e opinião vencida."
+        ],
+        "source": "https://www.pgdlisboa.pt/leis/lei_mostra_articulado.php?artigo_id=199A0157&nid=199&tabela=leis&pagina=1&ficha=1"
+      },
+      "rights_duties": {
+        "basis": "CPP art. 91, 153, 156.1, 157.1, 163",
+        "summary_en": "The appointed expert must perform the function, subject to the impediment rules of art. 47; he may ask to be excused for lack of conditions indispensable to the examination and may be challenged on the same grounds. He may be replaced if he misses the deadline or performs negligently; after replacement, gross breach of duty may lead to a payment of 1-6 UC (art. 153). Experts give the compromisso of art. 91.2 before the judicial or criminal police authority, which first warns them of the sanctions for refusal or breach; public-servant experts acting in their functions are exempt (art. 91.3, 91.6, 156.1). Clarifications may be requested by the judicial authority, defendant, assistant, civil parties and technical consultants (art. 157.1). The technical, scientific or artistic judgment is presumed to be outside the court's free assessment; a divergent court must give reasons (art. 163).",
+        "source": "https://www.pgdlisboa.pt/leis/lei_mostra_articulado.php?artigo_id=199A0153&nid=199&tabela=leis&pagina=1&ficha=1"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Código de Processo Civil (Lei n.º 41/2013), art. 467, 470",
+        "summary_en": "An examination requested by a party or ordered by the judge is requisitioned from an appropriate official establishment, laboratory or service or, where not possible or convenient, carried out by a single expert appointed by the judge from persons of recognised good repute and competence; the parties are heard and the judge appoints the expert they agree on unless there are reasoned doubts about integrity or competence (art. 467). The judges' rules on impediments and suspicion apply to experts with adaptations; certain office holders are exempt and anyone for whom the task is unreasonable may ask to be excused (art. 470).",
+        "source": "https://www.pgdlisboa.pt/leis/lei_mostra_articulado.php?artigo_id=1959A0467&nid=1959&tabela=leis&pagina=1&ficha=1"
+      },
+      "questions": {
+        "basis": "CPC art. 475, 476, 485",
+        "summary_en": "The requesting party must state the object of the examination, setting out the questions of fact to be clarified (art. 475). The opposing party may join, extend or restrict the object; the judge fixes the object, rejecting inadmissible or irrelevant questions or extending it to others needed to establish the truth (art. 476). Parties may complain of deficiency, obscurity, contradiction or lack of reasons and the judge may order the expert to complete, clarify or give reasons in writing, also of his own motion (art. 485). The CPC does not expressly address reporting facts outside the object.",
+        "source": "https://www.pgdlisboa.pt/leis/lei_mostra_articulado.php?artigo_id=1959A0476&nid=1959&tabela=leis&pagina=1&ficha=1"
+      },
+      "report_contents": {
+        "basis": "CPC art. 479.3, 484",
+        "items_en": [
+          "Report in which the expert(s) give a reasoned opinion on the object of the examination",
+          "In a collegial examination without unanimity, the dissenting expert states his reasons",
+          "Where the judge attends and the expert can answer at once, the report is dictated into the minutes",
+          "Where the judge does not attend, the expert's compromisso may be given as a written signed declaration, which may be included in the report"
+        ],
+        "items_local": [
+          "O resultado da perícia é expresso em relatório, no qual o perito ou peritos se pronunciam fundamentadamente sobre o respetivo objeto.",
+          "Tratando-se de perícia colegial, se não houver unanimidade, o discordante apresenta as suas razões.",
+          "Se o juiz assistir à inspeção e o perito puder de imediato pronunciar-se, o relatório é ditado para a ata.",
+          "Se o juiz não assistir à realização da diligência, o compromisso a que se refere o n.º 1 pode ser prestado mediante declaração escrita e assinada pelo perito, podendo constar do relatório pericial."
+        ],
+        "source": "https://www.pgdlisboa.pt/leis/lei_mostra_articulado.php?artigo_id=1959A0484&nid=1959&tabela=leis&ficha=1&pagina=1&so_miolo="
+      },
+      "rights_duties": {
+        "basis": "CPC art. 469, 470, 479, 485, 489",
+        "summary_en": "The expert must perform the function diligently; the judge may fine him for breaching duties of cooperation and remove him for negligent performance, in particular failure to file the report in time (art. 469). Impediment and suspicion rules for judges apply (art. 470). Non-public-servant experts give a compromisso of conscientious performance (art. 479). A second examination does not invalidate the first; both are freely assessed by the court (art. 489).",
+        "source": "https://www.pgdlisboa.pt/leis/lei_mostra_articulado.php?artigo_id=1959A0469&nid=1959&tabela=leis&pagina=1&ficha=1"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": null,
+    "source": null
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Código Penal, art. 360 (Falsidade de testemunho, perícia, interpretação ou tradução) and art. 361 (Agravação)",
+      "summary_en": "A witness, expert, technician, translator or interpreter who gives false testimony, report, information or translation before a court or competent official: 6 months-3 years' imprisonment or a fine of at least 60 days; the same for refusing without just cause to report. If committed after taking the oath and being warned of the criminal consequences: up to 5 years' imprisonment or a fine of up to 600 days. Limits increase by one third for profit motive, loss of job or relationships of another person, or conviction of another person; 1-8 years' imprisonment if a person is deprived of liberty as a result.",
+      "warning_local": "Comprometo-me, por minha honra, a desempenhar fielmente as funções que me são confiadas.",
+      "warning_en": "I undertake, on my honour, to perform faithfully the functions entrusted to me.",
+      "wording": "official",
+      "source": "https://www.pgdlisboa.pt/leis/lei_mostra_articulado.php?artigo_id=109A0360&nid=109&tabela=leis&pagina=1&ficha=1"
+    },
+    {
+      "route": "criminal",
+      "norm": "CPP art. 153.3-4 (procedural sanction)",
+      "summary_en": "An expert who misses the deadline or performs negligently may be replaced; for gross breach of duty the judge orders payment of 1 to 6 UC (procedural accounting units).",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": "official",
+      "source": "https://www.pgdlisboa.pt/leis/lei_mostra_articulado.php?artigo_id=199A0153&nid=199&tabela=leis&pagina=1&ficha=1"
+    },
+    {
+      "route": "civil",
+      "norm": "CPC art. 469 (procedural sanction)",
+      "summary_en": "Fine for breach of the duty to cooperate with the court; removal for negligent performance, including failure to file the report within the time limit.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": "official",
+      "source": "https://www.pgdlisboa.pt/leis/lei_mostra_articulado.php?artigo_id=1959A0469&nid=1959&tabela=leis&pagina=1&ficha=1"
+    }
+  ],
+  "declaration": {
+    "basis": "CPP art. 91.2 (criminal compromisso formula) and CPC art. 479.1 and 479.3 (civil compromisso of conscientious performance, which may be given as a written signed declaration included in the report). Experts who are public servants acting in their functions are exempt (CPP art. 91.6; CPC art. 479.1).",
+    "text_local": "Comprometo-me, por minha honra, a desempenhar fielmente as funções que me são confiadas.",
+    "text_en": "I undertake, on my honour, to perform faithfully the functions entrusted to me.",
+    "wording": "official",
+    "source": "https://www.pgdlisboa.pt/leis/lei_mostra_articulado.php?artigo_id=199A0091&nid=199&tabela=leis&pagina=1&ficha=1"
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "Regulamento (UE) n.º 910/2014 alterado pelo Regulamento (UE) 2024/1183; Decreto-Lei n.º 12/2021, de 9 de fevereiro (execução do Regulamento eIDAS; alterado pela Lei n.º 79/2021, DL n.º 66-A/2022 e DL n.º 94/2024)",
+    "law_en": "eIDAS Regulation (EU) No 910/2014 as amended by (EU) 2024/1183; Decree-Law no. 12/2021 of 9 February implementing eIDAS (qualified electronic signature is equivalent to a handwritten signature and creates presumptions of authorship, intent to sign and integrity; art. 3)",
+    "qualified_term_local": "assinatura eletrónica qualificada (advanced: assinatura eletrónica avançada)",
+    "source": "https://www.pgdlisboa.pt/leis/lei_mostra_articulado.php?nid=3404&tabela=leis&ficha=1&pagina=1&so_miolo=S"
+  },
+  "timestamp": {
+    "basis": "Regulation (EU) No 910/2014, art. 41 (as amended by (EU) 2024/1183); Decreto-Lei n.º 12/2021, art. 3.8 and art. 5.2",
+    "qualified_recognition": "A qualified time stamp (selo temporal qualificado) creates the presumption, under eIDAS art. 41(2), of the accuracy of the date and time indicated and of the integrity of the electronic document (DL 12/2021 art. 3.8). The date and time of creation, sending or receipt of an electronic document bearing a time validation (validação cronológica) issued by a qualified trust service provider are opposable between the parties and to third parties (art. 5.2).",
+    "source": "https://www.pgdlisboa.pt/leis/lei_mostra_articulado.php?nid=3404&tabela=leis&ficha=1&pagina=1&so_miolo=S"
+  },
+  "open_questions": [
+    "diariodarepublica.pt consolidated pages could not be rendered by the fetch tool; all verbatim text was read on the consolidated texts of the Procuradoria-Geral Regional de Lisboa (pgdlisboa.pt, CPP 52nd version by Lei n.º 37/2026; CPC version updated by Lei n.º 56/2025) and should be cross-checked on diariodarepublica.pt.",
+    "No general statute on court or forensic expert activity was identified; the EU e-Justice portal states there is no general register of experts for civil or commercial cases. The legal basis and keeper of the district (comarca) expert lists referred to in CPP art. 152 were not verified.",
+    "The exact wording of the warning of criminal sanctions given to experts under CPP art. 91.3 is not prescribed in the text checked; no official form was found.",
+    "No IPQ national designation for EN ISO/IEC 27037/27041/27042/27043 was verified; a university thesis cites an adoption term (Termo de Adoção n.º 1252/2016) for EN ISO/IEC 27037 that was not confirmed on an IPQ source.",
+    "Whether DL n.º 12/2021 has been amended to reflect Regulation (EU) 2024/1183 was not verified.",
+    "Whether the expert may decline questions outside his expertise (other than excuse under CPP art. 153 / CPC art. 470) or report facts outside the object is not expressly regulated in the articles checked."
+  ]
+}

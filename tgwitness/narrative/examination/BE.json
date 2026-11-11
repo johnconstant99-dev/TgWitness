@@ -1,0 +1,144 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "BE",
+  "name_en": "Belgium",
+  "name_local": "Belgique / België / Belgien",
+  "court_languages": [
+    "fr",
+    "nl",
+    "de"
+  ],
+  "local_language": "fr",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "expert judiciaire",
+    "en": "judicial expert entered in the national register of judicial experts (or, exceptionally, an unregistered expert appointed by reasoned decision)"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Code judiciaire art. 991ter, 991decies (inserted by the Loi du 10 avril 2014); Code d'instruction criminelle provisions not verified",
+        "summary_en": "Only persons entered in the national register of judicial experts may use the title of judicial expert and carry out missions in that capacity (art. 991ter). The judicial authority entrusting the mission may, by reasoned decision, appoint an unregistered expert in case of urgency, where no registered expert with the required expertise and specialisation is available, or where the register contains no such expert (art. 991decies). The criminal-procedure provisions on who orders an expert examination (public prosecutor, investigating judge, trial court) were not verified.",
+        "source": "https://www.ejustice.just.fgov.be/cgi_loi/article.pl?language=fr&lg_txt=F&numac_search=2014009214&caller=list&view_numac=2014009214f"
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": "Code judiciaire art. 991decies (oath of an unregistered expert); art. 991novies (registration oath)",
+        "items_en": [
+          "Registered experts: no per-report oath; the oath taken on registration covers all subsequent missions (art. 991novies)",
+          "Unregistered experts appointed under art. 991decies: oath in the prescribed form for the specific mission"
+        ],
+        "items_local": [
+          "Je jure que je remplirai ma mission en honneur et conscience, avec exactitude et probité",
+          "Je jure avoir rempli ma mission en honneur et conscience, avec exactitude et probité"
+        ],
+        "source": "https://www.ejustice.just.fgov.be/cgi_loi/article.pl?language=fr&lg_txt=F&numac_search=2014009214&caller=list&view_numac=2014009214f"
+      },
+      "rights_duties": {
+        "basis": "Code judiciaire art. 991quater, 991novies, 991septies, 991undecies",
+        "summary_en": "Registration requires among other things five years' relevant experience within the preceding eight years, professional aptitude, legal knowledge, written adherence to the deontological code and the oath (art. 991quater, 991novies). Judicial experts may decline a mission (art. 991undecies). The Minister of Justice may strike an expert from the register temporarily (up to one year) or permanently for inadequate performance, breach of deontology or of dignity, on proposal of the court president or the Crown prosecutor (art. 991septies).",
+        "source": "https://www.ejustice.just.fgov.be/cgi_loi/article.pl?language=fr&lg_txt=F&numac_search=2014009214&caller=list&view_numac=2014009214f"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Code judiciaire art. 972 (as replaced by the Loi du 15 mai 2007); art. 991ter, 991decies",
+        "summary_en": "The judge orders the expert examination. The decision ordering it contains at least the circumstances that make it necessary (and any appointment of several experts), the identity of the expert(s), a precise description of the mission, and the date of the installation meeting unless the judge waives it with the parties' consent (art. 972). The expert must be on the national register unless art. 991decies applies.",
+        "source": "https://www.ejustice.just.fgov.be/cgi_loi/article.pl?language=fr&lg_txt=F&numac_search=2007009537&caller=list&view_numac=2007009537f"
+      },
+      "questions": {
+        "basis": "Code judiciaire art. 972, 973, 976, 991undecies",
+        "summary_en": "The judge defines the mission precisely in the order (art. 972). The judge supervises the examination, its time limits and its adversarial character; experts work under the judge's control; all disputes during the examination, including replacement of experts and extension or prolongation of the mission, are settled by the judge (art. 973). At the end of the work the expert sends the findings with a provisional opinion to the judge, the parties and their counsel and receives their observations within the time limit (art. 976). Registered experts may decline a mission (art. 991undecies). Reporting facts outside the mission is not regulated in the provisions reviewed.",
+        "source": "https://www.ejustice.just.fgov.be/cgi_loi/article.pl?language=fr&lg_txt=F&numac_search=2007009537&caller=list&view_numac=2007009537f"
+      },
+      "report_contents": {
+        "basis": "Code judiciaire art. 978 (text of the Loi du 15 mai 2007; § 1, third paragraph repealed by art. 6 of the Loi du 10 avril 2014)",
+        "items_en": [
+          "Date of the final report",
+          "Presence of the parties during the work, their oral statements and their requests",
+          "List of documents and notes handed to the expert by the parties, reproduced only as far as necessary for the discussion",
+          "Signature of the expert, on pain of nullity",
+          "Filing of the original report, the parties' documents and notes and a detailed statement of costs and fees with the court registry; copy of the report and cost statement sent to the parties by registered letter and to their counsel by ordinary letter (§ 2)"
+        ],
+        "items_local": [
+          "Le rapport final est daté et relate la présence des parties lors des travaux, leurs déclarations verbales et leurs réquisitions.",
+          "Il contient en outre le relevé des documents et des notes remis par les parties aux experts; il ne peut les reproduire que dans la mesure où cela est nécessaire à la discussion.",
+          "Le rapport est, à peine de nullité, signé par l'expert.",
+          "La minute du rapport, les documents et notes des parties ainsi qu'un état de frais et honoraires détaillé de l'expert sont déposés au greffe."
+        ],
+        "source": "https://www.ejustice.just.fgov.be/cgi_loi/article.pl?language=fr&lg_txt=F&numac_search=2007009537&caller=list&view_numac=2007009537f"
+      },
+      "rights_duties": {
+        "basis": "Code judiciaire art. 973, 991ter-991undecies",
+        "summary_en": "Experts carry out the mission under the judge's control and must respect time limits and the adversarial character of the examination (art. 973). Registration, oath, deontological code, removal from the register and the right to decline a mission as in the criminal route (arts. 991quater, 991novies, 991septies, 991undecies). Recusal grounds were not verified.",
+        "source": "https://www.ejustice.just.fgov.be/cgi_loi/article.pl?language=fr&lg_txt=F&numac_search=2007009537&caller=list&view_numac=2007009537f"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": "Loi du 10 avril 2014 modifiant diverses dispositions en vue d'établir un registre national des experts judiciaires et établissant un registre national des traducteurs, interprètes et traducteurs-interprètes jurés (Code judiciaire art. 991ter à 991undecies)",
+    "title_en": "Act of 10 April 2014 establishing the national register of judicial experts (Judicial Code arts. 991ter-991undecies)",
+    "source": "https://www.ejustice.just.fgov.be/cgi_loi/article.pl?language=fr&lg_txt=F&numac_search=2014009214&caller=list&view_numac=2014009214f"
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Code pénal 2024 (Loi du 29 février 2024), Livre II, art. 647-652 (Le faux témoignage, la fausse déclaration et le faux serment), in force 1 September 2026",
+      "summary_en": "The new Criminal Code groups false testimony, false declaration and false oath in arts. 647-652 among offences against the administration of justice. The exact wording, whether and how experts are covered, and the penalty level were not verified. The former Code pénal of 1867 (including arts. 215-226 on false testimony and false oath) is shown on Justel as abrogated with effect from 1 September 2026.",
+      "warning_local": "Je jure que je remplirai ma mission en honneur et conscience, avec exactitude et probité",
+      "warning_en": "Registration oath of judicial experts (Code judiciaire art. 991novies): I swear that I will fulfil my mission in honour and conscience, with accuracy and integrity. Dutch: 'Ik zweer dat ik mijn opdracht in eer en geweten, nauwgezet en eerlijk zal vervullen'. German: 'Ich schwöre, dass ich den mir erteilten Auftrag auf Ehre und Gewissen genau und ehrlich erfüllen werde'.",
+      "wording": "official",
+      "source": "https://www.ejustice.just.fgov.be/cgi_loi/article.pl?language=fr&sum_date=&pd_search=2024-04-08&numac_search=2024A02052&page=1&lg_txt=F&caller=list&2024A02052=1&trier=promulgation&dt=CODE+PENAL&fr=f&choix1=ET&choix2=ET"
+    },
+    {
+      "route": "all",
+      "norm": "Code judiciaire art. 991septies",
+      "summary_en": "Disciplinary: temporary (up to one year) or permanent removal from the national register by the Minister of Justice for inadequate performance, breach of the deontological code or of dignity.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": "official",
+      "source": "https://www.ejustice.just.fgov.be/cgi_loi/article.pl?language=fr&lg_txt=F&numac_search=2014009214&caller=list&view_numac=2014009214f"
+    }
+  ],
+  "declaration": {
+    "basis": "Code judiciaire art. 991decies: an unregistered expert appointed by reasoned decision takes an oath for the specific mission. Registered experts rely on the registration oath (art. 991novies); the former per-report oath in art. 978 § 1, third paragraph, was repealed by art. 6 of the Loi du 10 avril 2014.",
+    "text_local": "FR: Je jure avoir rempli ma mission en honneur et conscience, avec exactitude et probité. NL: Ik zweer dat ik mijn opdracht in eer en geweten, nauwgezet en eerlijk vervuld heb. DE: Ich schwöre, dass ich den mir erteilten Auftrag auf Ehre und Gewissen, genau und ehrlich erfüllt habe.",
+    "text_en": "I swear that I have fulfilled my mission in honour and conscience, with accuracy and integrity.",
+    "wording": "official",
+    "source": "https://www.ejustice.just.fgov.be/cgi_loi/article.pl?language=fr&lg_txt=F&numac_search=2014009214&caller=list&view_numac=2014009214f"
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "Règlement (UE) n° 910/2014 (eIDAS), tel que modifié par le Règlement (UE) 2024/1183",
+    "law_en": "Regulation (EU) No 910/2014 (eIDAS) as amended by Regulation (EU) 2024/1183; the Belgian implementing provisions were not verified",
+    "qualified_term_local": "signature électronique qualifiée",
+    "source": "https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:02014R0910-20241018"
+  },
+  "timestamp": {
+    "basis": "Regulation (EU) No 910/2014 Art. 41 as amended by Regulation (EU) 2024/1183 (Art. 41(3) deleted; cross-border recognition moved to Art. 24a)",
+    "qualified_recognition": "A qualified electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which they are bound (Art. 41(2)). An electronic time stamp may not be denied legal effect or admissibility solely because it is electronic or not qualified (Art. 41(1)). Qualified time stamps from other Member States are recognised (Art. 24a).",
+    "source": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02014R0910-20241018"
+  },
+  "open_questions": [
+    "Justel consolidated texts of the Code judiciaire (Part IV), the Code d'instruction criminelle and the Code pénal are too long for the research tool and were truncated. Arts. 972, 973, 976 and 978 were checked in the amending Loi du 15 mai 2007 (numac 2007009537) and arts. 991ter-991undecies in the Loi du 10 avril 2014 (numac 2014009214); later amendments to these articles were not checked.",
+    "The entry-into-force date of the Loi du 10 avril 2014 (including the repeal of art. 978 § 1, third paragraph) was not confirmed from the royal decree; one tool summary indicated 1 December 2016.",
+    "Wording of new Code pénal 2024 arts. 647-652, their application to experts, and the penalty level were not retrieved. Whether the 1 September 2026 entry into force was set by a law of 3 March 2026 (shown on Justel as '2026-03-03/04, art. 129,4°') was not verified beyond the Justel note.",
+    "Criminal-procedure rules on ordering expert examinations (Code d'instruction criminelle, e.g. arts. 43-44bis as amended in 2014) and on the content of criminal expert reports were not verified; whether a new Code de procédure pénale is in force was not verified.",
+    "Who formulates the questions in criminal proceedings and whether the parties may request additional questions (contradictory expertise in criminal matters) were not verified.",
+    "Civil: art. 962 (power of the judge to order an expert opinion, non-binding nature) and recusal provisions (arts. 966-970) were not verified.",
+    "Dutch and German statutory wording of arts. 972, 973 and 978 was not verified; the Dutch and German oath formulas come from the French-language Justel page of the 2014 law. The tool output rendered the German art. 991decies formula as 'Ich schwore ...' and the 2007 art. 978 formula as '... erlich ...'; these were normalised to 'schwöre' and 'ehrlich' and should be checked against the Moniteur belge.",
+    "The royal decree establishing the deontological code for judicial experts was not reviewed.",
+    "Belgian national adoptions (NBN EN ISO/IEC 27037, 27041, 27042, 27043) and any official digital-forensics guidance were not verified.",
+    "Belgian eIDAS implementing provisions (Code de droit économique, Livre XII; Code civil, Livre 8) were not verified; the French term for qualified electronic signature is taken from the French eIDAS text, which could not be loaded directly from EUR-Lex.",
+    "EUR-Lex could not be loaded directly; eIDAS Art. 25, 41 and 24a wording after Regulation (EU) 2024/1183 was checked only through search-index excerpts.",
+    "Dutch and German terms for 'expert judiciaire' were not verified."
+  ]
+}

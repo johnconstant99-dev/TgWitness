@@ -1,0 +1,166 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "AT",
+  "name_en": "Austria",
+  "name_local": "Österreich",
+  "court_languages": [
+    "de"
+  ],
+  "local_language": "de",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "Sachverständiger (allgemein beeideter und gerichtlich zertifizierter Sachverständiger)",
+    "en": "expert appointed by the public prosecutor or court, preferably a certified court expert entered in the official list"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Strafprozeßordnung 1975 (StPO) § 126(1), (2), (3), (5)",
+        "summary_en": "Experts are appointed where special expertise is needed that the authorities do not have through their own staff or institutions (§ 126(1)). Persons entered in the list of court experts and interpreters (SDG § 2(1)) are to be appointed primarily; others must first be informed of their essential rights and duties (§ 126(2)). The public prosecutor appoints the expert; for judicial investigations or evidence-taking (§§ 104, 105) and for the main proceedings (§ 210(2)) the court appoints. The accused receives the appointment and information on the right under § 126(5) to seek removal of the expert within 14 days on grounds of bias or doubts about competence and to propose a better qualified expert.",
+        "source": "https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10002326&Paragraf=126"
+      },
+      "questions": {
+        "basis": "StPO §§ 126(3b), 127(1)-(3)",
+        "summary_en": "The appointing authority sets a reasonable deadline; the expert must report within 14 days if it cannot be met (§ 126(3b)). Unless special reasons prevent it, the expert may attend examinations and inspect the file as needed (§ 127(1)). The expert must answer questions at hearings, examinations and reconstructions (§ 127(2)). If the findings are indefinite, the opinion contradictory or otherwise deficient, or two experts differ substantially and questioning does not resolve it, a further expert is appointed (§ 127(3)). The texts reviewed do not expressly regulate who drafts the questions, declining questions outside the expertise, or reporting facts not asked about.",
+        "source": "https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10002326&Paragraf=127"
+      },
+      "report_contents": {
+        "basis": "StPO § 127(2); Sachverständigen- und Dolmetschergesetz (SDG) § 8(5), (6)",
+        "items_en": [
+          "Findings (Befund): what was examined and observed",
+          "Opinion (Gutachten) rendered to the best of knowledge and conscience and according to the rules of the expert's science, art or trade",
+          "Certified court experts: round seal showing name and status when signing a written opinion; for electronic opinions a qualified certificate for electronic signatures suffices; seal and signature rules do not apply to opinions sent through electronic legal communication (ERV)"
+        ],
+        "items_local": [
+          "Befund",
+          "Sachverständige haben den Befund und das Gutachten nach bestem Wissen und Gewissen und nach den Regeln ihrer Wissenschaft oder Kunst oder ihres Gewerbes abzugeben.",
+          "Der allgemein beeidete und gerichtlich zertifizierte Sachverständige hat bei der Unterfertigung schriftlicher Gutachten ein Rundsiegel zu verwenden, das seinen Namen und seine Eigenschaft bezeichnet."
+        ],
+        "source": "https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10002326&Paragraf=127"
+      },
+      "rights_duties": {
+        "basis": "StPO §§ 126(2c), (3a), (4), 127(1), (2), (5)",
+        "summary_en": "Selection follows economy, efficiency and appropriateness (§ 126(2c)). An expert who has exceeded deadlines in more than ten cases must disclose this (§ 126(3a)). Experts are subject to the disqualification grounds of § 47(1) and must be removed if biased or if their competence is in doubt (§ 126(4)). Entitlement to fees under the Gebührenanspruchsgesetz; confidentiality of facts learned solely through the proceedings, as far as necessary and proportionate for the reasons in § 6(1) IFG (§ 127(1)). Duty to follow summonses and answer questions (§ 127(2)). Substantial deadline overrun despite reminder: removal; culpable delay: fine up to EUR 10,000 (§ 127(5)).",
+        "source": "https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10002326&Paragraf=126"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Zivilprozessordnung (ZPO) § 351",
+        "summary_en": "When expert evidence is needed, the trial court appoints one or more experts after hearing the parties on the person; publicly appointed experts are to be preferred; the court may replace the expert (§ 351).",
+        "source": "https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10001699&Paragraf=351"
+      },
+      "questions": {
+        "basis": "ZPO §§ 357(1), 359",
+        "summary_en": "The court may order a written opinion and sets a reasonable deadline; the expert must report within 14 days if it cannot be met (§ 357(1)). The court provides the objects, files and aids needed to answer the questions put to the expert (§ 359(1)). If parties or third persons do not cooperate, the expert reports this to the court with a precise list; if they still fail, the expert reports without the missing information (§ 359(2)). The texts reviewed do not expressly regulate declining questions outside the expertise or reporting facts not asked about.",
+        "source": "https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10001699&Paragraf=359"
+      },
+      "report_contents": {
+        "basis": "ZPO §§ 362(1), 357(2); SDG § 8(5), (6)",
+        "items_en": [
+          "Reasons for the opinion (always required)",
+          "Where the opinion follows an inspection of persons, things or places and their condition matters, a description of what was inspected (Befund) before the opinion",
+          "Readiness to give oral explanations of a written opinion on request (§ 357(2))",
+          "Certified court experts: round seal, or qualified electronic signature for electronic opinions (SDG § 8(5))"
+        ],
+        "items_local": [
+          "Das Gutachten ist stets zu begründen.",
+          "Vor Darlegung seiner Ansicht hat der Sachverständige in denjenigen Fällen, in welchen der Abgabe seines Gutachtens die Besichtigung von Personen, Sachen, Örtlichkeiten u. dgl. vorausging und die Kenntnis ihrer Beschaffenheit für das Verständnis und die Würdigung des Gutachtens von Belang ist, eine Beschreibung der besichtigten Gegenstände zu geben (Befund).",
+          "Wird das Gutachten schriftlich erstattet, so sind die Sachverständigen verpflichtet, auf Verlangen über das schriftliche Gutachten mündliche Aufklärungen zu geben oder dieses bei der mündlichen Verhandlung zu erläutern.",
+          "Bei elektronischen Gutachten ist die Verwendung eines qualifizierten Zertifikats für elektronische Signaturen (Art. 3 Z 15 Verordnung (EU) Nr. 910/2014 ...) ausreichend."
+        ],
+        "source": "https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10001699&Paragraf=362"
+      },
+      "rights_duties": {
+        "basis": "ZPO §§ 353, 355, 357(1a), 358",
+        "summary_en": "Publicly appointed experts must accept the appointment; exemption on the grounds that allow a witness to refuse testimony (§ 353). Challenge on the same grounds as a judge, not because of earlier testimony as a witness, before the hearing or before the written opinion is submitted (§ 355). An expert with more than ten overdue written opinions must disclose this to the court (§ 357(1a)). The expert takes the expert's oath before evidence-taking unless the parties waive it; a generally sworn expert relies on the oath taken (§ 358).",
+        "source": "https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10001699&Paragraf=358"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": "Bundesgesetz über die allgemein beeideten und gerichtlich zertifizierten Sachverständigen und Dolmetscher (Sachverständigen- und Dolmetschergesetz – SDG), BGBl. Nr. 137/1975",
+    "title_en": "Federal Act on Generally Sworn and Court-Certified Experts and Interpreters (Experts and Interpreters Act)",
+    "source": "https://ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10002338"
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Strafgesetzbuch (StGB) § 288(1), (4) (Falsche Beweisaussage)",
+      "summary_en": "An expert who gives false findings or a false opinion before a court: imprisonment up to three years (§ 288(1)). The same applies to an expert in criminal investigation proceedings before the criminal police, the public prosecutor or the European Public Prosecutor's Office (§ 288(4)).",
+      "warning_local": "Wer vor Gericht als Zeuge oder, soweit er nicht zugleich Partei ist, als Auskunftsperson bei seiner förmlichen Vernehmung zur Sache falsch aussagt oder als Sachverständiger einen falschen Befund oder ein falsches Gutachten erstattet, ist mit Freiheitsstrafe bis zu drei Jahren zu bestrafen.",
+      "warning_en": "Statutory text of § 288(1): anyone who, as an expert, gives false findings or a false opinion before a court is liable to imprisonment of up to three years. (No prescribed warning form for the expert to sign was found; the statutory text is given.)",
+      "wording": "official",
+      "source": "https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10002296&Paragraf=288"
+    },
+    {
+      "route": "all",
+      "norm": "StGB § 288(2)",
+      "summary_en": "False evidence under oath or confirmed by oath before a court: imprisonment from six months to five years. Reliance on an oath taken earlier counts as an oath, which covers certified experts relying on their SDG § 5 oath.",
+      "warning_local": "Ich schwöre bei Gott dem Allmächtigen und Allwissenden einen reinen Eid, daß ich die Gegenstände eines Augenscheins sorgfältig untersuchen, die gemachten Wahrnehmungen treu und vollständig angeben und den Befund und mein Gutachten nach bestem Wissen und Gewissen und nach den Regeln der Wissenschaft (der Kunst, des Gewerbes) angeben werde; so wahr mir Gott helfe!",
+      "warning_en": "Oath taken on entry into the list of court experts (SDG § 5(1)): I swear that I will examine the objects of an inspection carefully, report my observations faithfully and completely, and give my findings and opinion to the best of my knowledge and conscience and according to the rules of science (art, trade). The invocation of God is omitted on request.",
+      "wording": "official",
+      "source": "https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10002338&Paragraf=5"
+    },
+    {
+      "route": "civil",
+      "norm": "Allgemeines bürgerliches Gesetzbuch (ABGB) § 1299; SDG § 2a",
+      "summary_en": "A person who publicly professes an art, trade or profession, or voluntarily takes on a task requiring special expertise, is answerable for lacking the necessary diligence and knowledge (ABGB § 1299). Certified court experts must hold liability insurance covering damage claims arising from their court expert work, with a minimum sum of EUR 400,000 per insured event (SDG § 2a).",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": "official",
+      "source": "https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10001622&Paragraf=1299"
+    }
+  ],
+  "declaration": {
+    "basis": "ZPO § 358(2): a generally sworn expert relies on the oath already taken; StGB § 288(2) treats such reliance as an oath; SDG § 5(2): a listed expert need not be sworn again before the courts. No statute prescribes wording for a declaration in the report.",
+    "text_local": "Ich erstatte Befund und Gutachten unter Berufung auf den von mir als allgemein beeideter und gerichtlich zertifizierter Sachverständiger geleisteten Eid.",
+    "text_en": "I give these findings and this opinion relying on the oath I took as a generally sworn and court-certified expert.",
+    "wording": "composed",
+    "source": "https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=10001699&Paragraf=358"
+  },
+  "standards": [
+    {
+      "id": "EN ISO/IEC 27037:2016 (ISO/IEC 27037:2012)",
+      "national_id": null,
+      "title_en": "Guidelines for identification, collection, acquisition and preservation of digital evidence",
+      "status": "national adoption",
+      "issuer": "CEN; Austrian Standards International (national designation not confirmed)",
+      "source": "https://www.austrian-standards.at/en/shop/din-en-iso-iec-27037-2016-12~p2272901"
+    },
+    {
+      "id": "EN ISO/IEC 27042:2016 (ISO/IEC 27042:2015)",
+      "national_id": null,
+      "title_en": "Guidelines for the analysis and interpretation of digital evidence",
+      "status": "national adoption",
+      "issuer": "CEN; Austrian Standards International (national designation not confirmed)",
+      "source": "https://www.austrian-standards.at/en/shop/din-en-iso-iec-27042-2016-12~p2272881"
+    }
+  ],
+  "esignature": {
+    "law_local": "Verordnung (EU) Nr. 910/2014 (eIDAS) in der Fassung der Verordnung (EU) 2024/1183; Signatur- und Vertrauensdienstegesetz (SVG), BGBl. I Nr. 50/2016",
+    "law_en": "Regulation (EU) No 910/2014 (eIDAS) as amended by Regulation (EU) 2024/1183; Signature and Trust Services Act (SVG). Under SVG § 4(1) a qualified electronic signature satisfies the written-form requirement of ABGB § 886, subject to other statutory form requirements.",
+    "qualified_term_local": "qualifizierte elektronische Signatur",
+    "source": "https://www.ris.bka.gv.at/NormDokument.wxe?Abfrage=Bundesnormen&Gesetzesnummer=20009585&Paragraf=4"
+  },
+  "timestamp": {
+    "basis": "Regulation (EU) No 910/2014 Art. 41 as amended by Regulation (EU) 2024/1183 (Art. 41(3) deleted; cross-border recognition moved to Art. 24a)",
+    "qualified_recognition": "A qualified electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which they are bound (Art. 41(2)). An electronic time stamp may not be denied legal effect or admissibility solely because it is electronic or not qualified (Art. 41(1)). Qualified time stamps from other Member States are recognised (Art. 24a). No separate Austrian statutory presumption for time stamps was identified.",
+    "source": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02014R0910-20241018"
+  },
+  "open_questions": [
+    "EUR-Lex could not be loaded directly by the research tool; eIDAS Art. 25, 41 and 24a wording after Regulation (EU) 2024/1183 was checked only through search-index excerpts. The paragraph of Art. 24a covering time stamps was not confirmed.",
+    "StPO texts reviewed (§§ 126, 127) do not state who formulates the expert's questions or whether parties may propose questions; other StPO provisions were not checked.",
+    "Whether an expert may decline questions outside the expertise or report facts not asked about is not expressly regulated in the provisions reviewed; case law was not verified.",
+    "The exact basis and scope of a court expert's civil liability towards the parties (direct liability under ABGB § 1299 versus state liability) is settled by case law that was not verified.",
+    "The Austrian national designations (ÖVE/ÖNORM EN ISO/IEC ...) for EN ISO/IEC 27037, 27041, 27042 and 27043 were not confirmed on the Austrian Standards website; the shop pages found list the DIN editions.",
+    "The oath wording for an ad hoc (non-listed) expert sworn under ZPO § 358(1) or in criminal proceedings was not verified.",
+    "No official or court-documented wording for a declaration in a written report was found; the declaration text is composed.",
+    "Additional official court languages in certain districts (Slovene, Croatian, Hungarian under minority-language rules) were not verified; only German is listed.",
+    "Grounds and procedure for withdrawal of certification (SDG § 10) as a disciplinary consequence of a false opinion were not reviewed."
+  ]
+}

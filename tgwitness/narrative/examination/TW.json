@@ -1,0 +1,147 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "TW",
+  "name_en": "Taiwan",
+  "name_local": "臺灣（中華民國）",
+  "court_languages": [
+    "zh-Hant"
+  ],
+  "local_language": "zh-Hant",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "鑑定人",
+    "en": "expert witness selected by the presiding judge, commissioned judge or prosecutor (criminal) or by the trial court (civil); institutional expertise is commissioned from an agency, institution or body (機關鑑定)"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "刑事訴訟法 第197條、第198條、第198條之1、第198條之2、第208條（2023年12月15日修正公布，鑑定新制自2024年5月15日施行）",
+        "summary_en": "Rules on witnesses apply to experts unless otherwise provided (art. 197). The presiding judge, commissioned judge or prosecutor selects one or more experts from persons with professional competence in the subject through knowledge, skill, experience, training or education, or persons appointed by a government agency to expert duties (art. 198(1)). The defence may request an expertise during investigation and parties may apply at trial (art. 198-1); parties may comment before the expert is selected (art. 198-2). The court or prosecutor may commission hospitals, schools or other agencies, institutions or bodies to conduct or review an expertise; parties may also apply for or themselves commission such an institutional expertise at trial (art. 208).",
+        "source": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=C0010001&flno=198"
+      },
+      "questions": {
+        "basis": "刑事訴訟法 第198條、第205條、第206條",
+        "summary_en": "The selecting judge or prosecutor defines the matters for expertise; no verified article sets out the drafting of questions in the criminal route. The expert may, with permission, inspect the file and exhibits, request their collection, request the questioning of the defendant, private prosecutor or witnesses, attend and put questions directly (art. 205). The report must address the four reliability elements in art. 206(3). No verified provision addresses declining questions or reporting facts not asked about.",
+        "source": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=C0010001&flno=205"
+      },
+      "report_contents": {
+        "basis": "刑事訴訟法 第206條、第208條第2項、第3項",
+        "items_en": [
+          "the process and results of the expertise, reported orally or in writing; several experts may report jointly, but differing opinions must be reported separately",
+          "that the expert's professional competence assists the finding of fact",
+          "that the expertise is based on sufficient facts or data",
+          "that the expertise was made using reliable principles and methods",
+          "that those principles and methods were applied reliably to the matter examined",
+          "disclosure: any division of work or cooperation with the defendant, private prosecutor, agents, defence counsel, assistants or other participants; any money or support received from them and its amount or value; identity of other funders and amounts (art. 198(2))",
+          "for institutional expertise, the persons who conducted the expertise sign the written report by name (art. 208(2))",
+          "a written report is admissible only if the expert explains it orally at trial and states that it was genuinely prepared, unless the parties expressly consent; institutional reports are admissible with party consent, from an agency legally charged with expertise, forensics or testing, or from an institution or body accredited by the competent authority (art. 206(4)–(5), art. 208(3))"
+        ],
+        "items_local": [
+          "鑑定之經過及其結果；鑑定人有數人時，得使其共同報告之。但意見不同者，應使其各別報告",
+          "鑑定人之專業能力有助於事實認定",
+          "鑑定係以足夠之事實或資料為基礎",
+          "鑑定係以可靠之原理及方法作成",
+          "前款之原理及方法係以可靠方式適用於鑑定事項",
+          "與被告、自訴人、代理人、辯護人、輔佐人或其他訴訟關係人有無分工或合作關係；有無受前款之人金錢報酬或資助及其金額或價值；前項以外其他提供金錢報酬或資助者之身分及其金額或價值",
+          "實施鑑定或審查之人應於書面報告具名",
+          "以書面報告者，於審判中應使實施鑑定之人到庭以言詞說明。但經當事人明示同意書面報告得為證據者，不在此限"
+        ],
+        "source": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=C0010001&flno=206"
+      },
+      "rights_duties": {
+        "basis": "刑事訴訟法 第198條第2項、第202條、第205條、第206條之1、第208條",
+        "summary_en": "Before the expertise the expert takes an oath in writing (具結) stating that the expertise will be impartial and honest (art. 202); persons conducting institutional expertise also take the oath and sign the report (art. 208(2)). The expert must disclose cooperation relationships and funding (art. 198(2)). The expert may access the file and exhibits with permission and question persons (art. 205). The court or prosecutor may notify parties to attend the expertise (art. 206-1).",
+        "source": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=C0010001&flno=202"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "民事訴訟法 第324條、第325條、第326條、第340條",
+        "summary_en": "Rules on witness evidence apply to expert evidence unless otherwise provided (art. 324). A party applying for an expertise must state the matters to be examined (art. 325). The trial court selects the expert and fixes the number; it may hear the parties first and must follow an agreed choice unless clearly inappropriate; it may replace an expert (art. 326). The court may commission agencies or bodies, including foreign ones, to conduct or review an expertise (art. 340).",
+        "source": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=B0010001&flno=326"
+      },
+      "questions": {
+        "basis": "民事訴訟法 第325條、第330條、第337條",
+        "summary_en": "The applying party states the matters for expertise (art. 325). The court may excuse an expert who refuses for reasons it considers justified even if they do not meet the testimonial-privilege grounds (art. 330(2)). The court informs the expert of available material; the expert may apply to obtain exhibits or to question witnesses or parties and, with permission, ask questions directly (art. 337). No verified provision addresses reporting facts not asked about.",
+        "source": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=B0010001&flno=337"
+      },
+      "report_contents": {
+        "basis": "民事訴訟法 第335條",
+        "items_en": [
+          "opinion stated in a written expert report (鑑定書) when ordered by the court",
+          "the oath (結文) under art. 334 may be attached to the report",
+          "the expert may be ordered to appear to explain the report"
+        ],
+        "items_local": [
+          "受訴法院、受命法官或受託法官得命鑑定人具鑑定書陳述意見",
+          "依前條規定具結之結文，得附於鑑定書提出",
+          "鑑定書須說明者，得命鑑定人到場說明"
+        ],
+        "source": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=B0010001&flno=335"
+      },
+      "rights_duties": {
+        "basis": "民事訴訟法 第330條、第331條、第334條、第337條",
+        "summary_en": "Persons in the situations of art. 32 items 1–5 (judge-recusal grounds) may not be experts unless no other suitable person is available or the parties agree (art. 330(1)). Parties may challenge an expert on judge-recusal grounds (art. 331). The expert takes an oath before the expertise, stating that it will be impartial and honest and that the expert accepts the penalty for perjury for any false expertise (art. 334). Art. 334 does not apply to institutional expertise under art. 340.",
+        "source": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=B0010001&flno=334"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": null,
+    "source": null
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "中華民國刑法 第168條（偽證罪）",
+      "summary_en": "A witness, expert or interpreter who, having taken the oath before or after testifying, makes a false statement on a matter material to the case at a trial before a judicial authority or during a prosecutor's investigation: imprisonment of up to 7 years.",
+      "warning_local": "必為公正、誠實之鑑定，如有虛偽鑑定，願受偽證之處罰",
+      "warning_en": "I will make an impartial and honest expertise; if I make a false expertise I am willing to accept the penalty for perjury",
+      "wording": "official",
+      "source": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=C0000001&flno=168"
+    }
+  ],
+  "declaration": {
+    "basis": "刑事訴訟法 第202條（結文應記載必為公正誠實之鑑定等語）；民事訴訟法 第334條、第335條第2項；刑事訴訟法 第208條第2項（機關鑑定實施人準用第202條）",
+    "text_local": "必為公正、誠實之鑑定，如有虛偽鑑定，願受偽證之處罰",
+    "text_en": "I will make an impartial and honest expertise; if I make a false expertise I am willing to accept the penalty for perjury",
+    "wording": "official",
+    "source": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=B0010001&flno=334"
+  },
+  "standards": [
+    {
+      "id": "Executive Yuan SOP 院臺護字第1040036611號 (2015), based on ISO/IEC 27037:2012",
+      "national_id": null,
+      "title_en": "Government agencies' standard operating procedure for preservation of digital evidence in information security incidents (政府機關（構）資安事件數位證據保全標準作業程序), issued by the Executive Yuan by letter 院臺護字第1040036611號 of 4 August 2015 with reference to ISO/IEC 27037",
+      "status": "official guidance",
+      "issuer": "Executive Yuan",
+      "source": "http://www.laws.taipei.gov.tw/pda1/LawContent.aspx?LawID=A040020001003400-20150804&type=2"
+    }
+  ],
+  "esignature": {
+    "law_local": "電子簽章法（2024年5月15日修正公布）",
+    "law_en": "Electronic Signatures Act (as amended 15 May 2024)",
+    "qualified_term_local": "數位簽章（使用經主管機關依第十二條或第十五條許可之憑證機構簽發之憑證，且憑證未逾有效期間及其使用範圍者，推定為本人親自簽名或蓋章）",
+    "source": "https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=J0080037&flno=6"
+  },
+  "timestamp": {
+    "basis": null,
+    "qualified_recognition": null,
+    "source": null
+  },
+  "open_questions": [
+    "The text of the official 鑑定人結文 form could not be extracted (judicial.gov.tw PDF not machine-readable). The declaration and warning use the statutory formula of 民事訴訟法 第334條; 刑事訴訟法 第202條 only requires 「必為公正誠實之鑑定等語」 without the perjury clause.",
+    "No CNS national adoption of ISO/IEC 27037, 27041, 27042 or 27043 was found; not confirmed either way.",
+    "The 2015 Executive Yuan digital-evidence SOP was issued for a one-year trial; its current status was not verified, and the source is a Taipei City government reproduction, not a central-government portal.",
+    "Whether TAF ISO/IEC 17025 accreditation of a digital forensics laboratory counts as accreditation by the competent authority under 刑事訴訟法 第208條第3項第3款 is unresolved; the Judicial Yuan Q&A on the new expert rules (2024) does not settle it for digital forensics.",
+    "No provision of the Electronic Signatures Act on timestamps was found, and no other statute on electronic timestamps was identified.",
+    "Not verified which provisions on refusal, privilege and compulsory appearance apply to criminal experts through 刑事訴訟法 第197條 and 第199–201條, and who drafts the questions in the criminal route.",
+    "刑事訴訟法 was amended again on 2025-11-11 (arts. 116-2, 205-2; new arts. 205-3, 205-4) and 2026-05-13 (art. 101-1) according to law.moj.gov.tw history; these amendments were not reviewed for effects on expert evidence.",
+    "No statute specific to forensic expert activity was identified; statute is null."
+  ]
+}

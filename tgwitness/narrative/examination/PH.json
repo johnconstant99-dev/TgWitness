@@ -1,0 +1,152 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "PH",
+  "name_en": "Philippines",
+  "name_local": "Pilipinas",
+  "court_languages": [
+    "en",
+    "fil"
+  ],
+  "local_language": "en",
+  "legal_family": "mixed",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "expert witness",
+    "en": "expert witness: a witness shown to possess special knowledge, skill, experience, training or education on a matter requiring it, whose opinion may be received in evidence (Rule 130, Sec. 52, Revised Rules on Evidence as amended 2019)"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Revised Rules on Evidence (as amended by A.M. No. 19-08-15-SC, effective 1 May 2020) Rule 130, Secs. 51-53; Judicial Affidavit Rule (A.M. No. 12-8-8-SC) Secs. 1, 9",
+        "summary_en": "The opinion of a witness is inadmissible except as provided; the opinion of a witness on a matter requiring special knowledge, skill, experience, training or education which he or she is shown to possess may be received in evidence (Rule 130, Secs. 51-52). Experts are presented as witnesses by the parties; no general rule on court-appointed experts in criminal cases was verified. The Judicial Affidavit Rule applies to criminal actions where the maximum imposable penalty does not exceed six years, where the accused agrees, or as to the civil aspect; the prosecution submits judicial affidavits five days before pre-trial and the accused has ten days to respond (Sec. 9).",
+        "source": "https://lawphil.net/courts/rules/am_19-08-15-sc_2019.html"
+      },
+      "questions": {
+        "basis": "Judicial Affidavit Rule Sec. 3(d); Revised Rules on Evidence Rule 130, Sec. 52",
+        "summary_en": "Direct testimony is given in question-and-answer form prepared by the presenting lawyer (judicial affidavit with consecutively numbered questions and answers showing how the witness acquired the facts and their relevance), followed by cross-examination. The rules reviewed do not address whether an expert may decline questions outside the expertise or report facts not asked about.",
+        "source": "https://lawphil.net/courts/supreme/am/am_12-8-8-sc_2012.html"
+      },
+      "report_contents": {
+        "basis": "Judicial Affidavit Rule (A.M. No. 12-8-8-SC) Secs. 3-4 (where the Rule applies); no separate statutory form for expert reports was found",
+        "items_en": [
+          "Name, age, residence or business address and occupation of the witness",
+          "Name and address of the lawyer who conducts or supervises the examination and the place where it is held",
+          "Statement that the witness is answering the questions fully conscious that he does so under oath and that he may face criminal liability for false testimony or perjury",
+          "Questions and answers, consecutively numbered, showing how the witness acquired the facts and their relevance",
+          "Signature of the witness over his printed name",
+          "Sworn attestation by the lawyer that he faithfully recorded the questions and answers and that neither he nor any other person coached the witness"
+        ],
+        "items_local": [
+          "\"The name, age, residence or business address, and occupation of the witness\"",
+          "\"The name and address of the lawyer who conducts or supervises the examination of the witness and the place where the examination is being held\"",
+          "\"A statement that the witness is answering the questions asked of him, fully conscious that he does so under oath, and that he may face criminal liability for false testimony or perjury\"",
+          "Questions and answers consecutively numbered (Sec. 3(d))",
+          "\"The signature of the witness over his printed name\"",
+          "Lawyer's sworn attestation (Sec. 4)"
+        ],
+        "source": "https://lawphil.net/courts/supreme/am/am_12-8-8-sc_2012.html"
+      },
+      "rights_duties": {
+        "basis": "Revised Rules on Evidence Rule 130, Sec. 52; Judicial Affidavit Rule Sec. 10",
+        "summary_en": "The expert must be shown to possess the special knowledge, skill, experience, training or education. Under the Judicial Affidavit Rule, late affidavits require a valid reason and absence of prejudice, with a fine of P1,000 to P5,000; the affidavit of a witness who does not appear for cross-examination is not considered. No codified independence or refusal rules for experts were found in the rules reviewed.",
+        "source": "https://lawphil.net/courts/rules/am_19-08-15-sc_2019.html"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Revised Rules on Evidence Rule 130, Sec. 52; 2019 Amendments to the 1997 Rules of Civil Procedure (A.M. No. 19-10-20-SC, effective 1 May 2020) Rule 7, Sec. 6; Judicial Affidavit Rule Secs. 1-2",
+        "summary_en": "Parties present expert witnesses. Every pleading stating claims or defences must name the witnesses and summarise their intended testimonies, with their judicial affidavits attached as an integral part of the pleading (Rule 7, Sec. 6). Judicial affidavits replace direct testimony and are filed not later than five days before pre-trial, preliminary conference or the scheduled hearing (Judicial Affidavit Rule Sec. 2). No general rule on court-appointed experts was verified.",
+        "source": "https://lawphil.net/courts/rules/am_19-10-20-sc_2019.html"
+      },
+      "questions": {
+        "basis": "Judicial Affidavit Rule Sec. 3(d)",
+        "summary_en": "The presenting lawyer frames the questions in the judicial affidavit; the adverse party cross-examines. Declining questions outside the expertise and reporting unasked facts are not addressed.",
+        "source": "https://lawphil.net/courts/supreme/am/am_12-8-8-sc_2012.html"
+      },
+      "report_contents": {
+        "basis": "Judicial Affidavit Rule Secs. 3-4; Rules on Electronic Evidence (A.M. No. 01-7-01-SC) Rule 9, Secs. 1-2 for matters of admissibility and weight of electronic documents",
+        "items_en": [
+          "Same judicial-affidavit contents as in the criminal route (identity, lawyer, oath-awareness statement, numbered questions and answers, signature, lawyer's attestation)",
+          "For electronic documents: an affidavit stating facts of direct personal knowledge of the affiant or based on authentic records, which the affiant must affirm in open court and on which he may be cross-examined"
+        ],
+        "items_local": [
+          "See criminal route (Judicial Affidavit Rule Sec. 3)",
+          "\"All matters relating to the admissibility and evidentiary weight of an electronic document may be established by an affidavit stating facts of direct personal knowledge of the affiant or based on authentic records.\""
+        ],
+        "source": "https://lawphil.net/courts/supreme/am/am_01-7-01_sc_2001.html"
+      },
+      "rights_duties": {
+        "basis": "Rules on Electronic Evidence Rule 5, Sec. 2; Rule 9, Sec. 2",
+        "summary_en": "A private electronic document offered as authentic must be authenticated by evidence of digital signature, by other security procedures authorised by the Supreme Court or by law, or by other evidence showing its integrity and reliability to the satisfaction of the judge (Rule 5, Sec. 2). The affiant must affirm the affidavit in open court and may be cross-examined as of right (Rule 9, Sec. 2).",
+        "source": "https://lawphil.net/courts/supreme/am/am_01-7-01_sc_2001.html"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": null,
+    "source": null
+  },
+  "liability": [
+    {
+      "route": "criminal",
+      "norm": "Revised Penal Code (Act No. 3815) Arts. 180-181, as amended by Republic Act No. 10951 Secs. 30-31",
+      "summary_en": "False testimony against a defendant in a criminal case: from arresto mayor (defendant acquitted or sentenced to a correctional penalty or fine) up to reclusion temporal (defendant sentenced to death), with a fine not exceeding P200,000 in the lower categories (Art. 180). False testimony favourable to the defendant: arresto mayor maximum to prision correccional minimum and fine not exceeding P200,000 (Art. 181).",
+      "warning_local": "A statement that the witness is answering the questions asked of him, fully conscious that he does so under oath, and that he may face criminal liability for false testimony or perjury",
+      "warning_en": "Statement required in every judicial affidavit (Judicial Affidavit Rule Sec. 3(c)); the rule prescribes the content, the witness's affidavit states it in the first person.",
+      "wording": "official",
+      "source": "https://lawphil.net/statutes/repacts/ra2017/ra_10951_2017.html"
+    },
+    {
+      "route": "civil",
+      "norm": "Revised Penal Code Art. 182, as amended by Republic Act No. 10951 Sec. 32",
+      "summary_en": "False testimony in a civil case: prision correccional minimum and fine not exceeding P1,200,000 if the amount in controversy exceeds P1,000,000; otherwise arresto mayor maximum to prision correccional minimum and fine not exceeding P200,000.",
+      "warning_local": "A statement that the witness is answering the questions asked of him, fully conscious that he does so under oath, and that he may face criminal liability for false testimony or perjury",
+      "warning_en": "Statement required in every judicial affidavit (Judicial Affidavit Rule Sec. 3(c)).",
+      "wording": "official",
+      "source": "https://lawphil.net/statutes/repacts/ra2017/ra_10951_2017.html"
+    },
+    {
+      "route": "all",
+      "norm": "Revised Penal Code Art. 183 (false testimony in other cases and perjury in solemn affirmation)",
+      "summary_en": "Perjury in affidavits and sworn statements; RA 10951 does not amend Art. 183. Text and penalty not verified in this check.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": null
+    }
+  ],
+  "declaration": {
+    "basis": "Judicial Affidavit Rule (A.M. No. 12-8-8-SC) Sec. 3(c) and (e); Sec. 4 (lawyer's sworn attestation)",
+    "text_local": "A statement that the witness is answering the questions asked of him, fully conscious that he does so under oath, and that he may face criminal liability for false testimony or perjury",
+    "text_en": "A statement that the witness is answering the questions asked of him, fully conscious that he does so under oath, and that he may face criminal liability for false testimony or perjury",
+    "wording": "official",
+    "source": "https://lawphil.net/courts/supreme/am/am_12-8-8-sc_2012.html"
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "Electronic Commerce Act of 2000 (Republic Act No. 8792); Rules on Electronic Evidence (A.M. No. 01-7-01-SC)",
+    "law_en": "Electronic Commerce Act of 2000 (Republic Act No. 8792); Rules on Electronic Evidence (A.M. No. 01-7-01-SC, effective 1 August 2001)",
+    "qualified_term_local": "digital signature",
+    "source": "https://lawphil.net/statutes/repacts/ra2000/ra_8792_2000.html"
+  },
+  "timestamp": {
+    "basis": null,
+    "qualified_recognition": "Republic Act No. 8792 contains no provision on time stamps. An electronic signature is equivalent to a handwritten signature if proved under a prescribed procedure not alterable by the parties that identifies the party, is reliable and appropriate, is necessary to proceed, and allows the other party to verify it (RA 8792 Sec. 8); it is presumed to be the signature of the person to whom it correlates and to have been affixed with intent to sign, unless the relying party knows of defects or reliance is unreasonable (Sec. 9). Authenticated electronic signatures are admissible as the functional equivalent of handwritten signatures under the Rules on Electronic Evidence, Rule 6.",
+    "source": "https://lawphil.net/statutes/repacts/ra2000/ra_8792_2000.html"
+  },
+  "open_questions": [
+    "Sources were read on lawphil.net (Arellano Law Foundation), named in the task as an accepted portal; the Supreme Court's own texts (sc.judiciary.gov.ph) and the Official Gazette (HTTP 403) were not checked.",
+    "Revised Penal Code Art. 183 (perjury) text and penalty were not verified: the lawphil page for Act No. 3815 was truncated before Book Two in the fetch tool.",
+    "Rules on Electronic Evidence Rule 1, Sec. 2 as displayed covers civil, quasi-judicial and administrative cases; a later Supreme Court resolution extending the Rules to criminal cases was not verified.",
+    "No general rule on court-appointed experts (civil or criminal) was verified; Rule 32 (trial by commissioner) was not checked.",
+    "No Filipino-language official text of the rules was found; items_local quote the official English text.",
+    "Any amendment of the Judicial Affidavit Rule after 2012 (including by the 2019 civil procedure amendments) was not fully checked.",
+    "The Rule on Cybercrime Warrants (A.M. No. 17-11-03-SC) and any PNP, NBI or DOJ digital forensic standards or adoption of ISO/IEC 27037 were not verified.",
+    "No national time-stamp or qualified electronic signature regime (e.g., PNPKI rules issued by DICT) was verified.",
+    "No dedicated statute on forensic expert activity was identified; not confirmed by an exhaustive search."
+  ]
+}

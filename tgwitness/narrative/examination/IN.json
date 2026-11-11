@@ -1,0 +1,168 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "IN",
+  "name_en": "India",
+  "name_local": "भारत (Bharat)",
+  "court_languages": [
+    "en",
+    "hi"
+  ],
+  "local_language": "en",
+  "legal_family": "common law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "expert; Examiner of Electronic Evidence",
+    "en": "person specially skilled in a field whose opinion is a relevant fact (BSA s. 39(1)); for electronic records, the Examiner of Electronic Evidence notified under IT Act s. 79A is deemed an expert (BSA s. 39(2))"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Bharatiya Sakshya Adhiniyam 2023 (Act 47 of 2023) s. 39(1)-(2); Bharatiya Nagarik Suraksha Sanhita 2023 (Act 46 of 2023) ss. 176(3), 329, 330(1) second proviso, 336; Information Technology Act 2000 s. 79A",
+        "summary_en": "No court appointment procedure is codified for criminal cases. Material is 'duly submitted' for examination in the course of a BNSS proceeding to a Government scientific expert listed in BNSS s. 329(4) (including Directors, Deputy Directors or Assistant Directors of a Central or State Forensic Science Laboratory, and any other scientific expert specified or certified by notification of the State or Central Government). That expert's report 'under his hand' may be used as evidence without calling the expert (s. 329(1)). The court may summon and examine the expert (s. 329(2)); the expert may depute a responsible officer conversant with the facts unless personal appearance is ordered (s. 329(3)). No expert is called unless a party disputes the report (s. 330(1) second proviso). For offences punishable with 7 years or more, the officer in charge of the police station must have a forensic expert visit the crime scene, from a date the State notifies (s. 176(3)). For electronic or digital information, the opinion of the Examiner of Electronic Evidence notified by the Central Government under IT Act s. 79A is a relevant fact (BSA s. 39(2)).",
+        "source": "https://egazette.gov.in/WriteReadData/2023/250882.pdf"
+      },
+      "questions": {
+        "basis": "BNSS 2023 s. 329(1)",
+        "summary_en": "BNSS does not say who formulates the questions. The report covers 'any matter or thing duly submitted to him for examination or analysis and report'. No provision was found on whether the expert may decline questions outside the field or the material, or may report facts not asked about.",
+        "source": "https://archive.org/details/in.gazette.central.e.2023-12-25.250884"
+      },
+      "report_contents": {
+        "basis": "BNSS 2023 s. 329(1) (report 'under the hand of' the expert); BSA 2023 s. 63(4) and the Schedule, Part B (to be filled by the Expert) for the certificate that accompanies an electronic record",
+        "items_en": [
+          "Report signed ('under the hand of') the Government scientific expert (BNSS s. 329(1))",
+          "Schedule Part B: identity of the expert: name, son/daughter/spouse of, residing/employed at, followed by 'do hereby solemnly affirm and sincerely state and submit as follows'",
+          "Device or digital record source the electronic record/output was obtained from (tick: Computer/Storage Media, DVR, Mobile, Flash Drive, CD/DVD, Server, Cloud, Other)",
+          "Make and model, colour, serial number",
+          "IMEI/UIN/UID/MAC/Cloud ID (as applicable) and any other relevant information about the device or digital record",
+          "Hash value(s) of the electronic/digital record(s) and the algorithm used (SHA1, SHA256, MD5, or other legally acceptable standard)",
+          "Hash report enclosed with the certificate",
+          "Name, designation and signature of the expert",
+          "Date (DD/MM/YYYY), time (IST, 24-hour format) and place"
+        ],
+        "items_local": [
+          "Report under the hand of the Government scientific expert",
+          "I, (Name), Son/daughter/spouse of ____ residing/employed at ____ do hereby solemnly affirm and sincerely state and submit as follows:—",
+          "The produced electronic record/output of the digital record are obtained from the following device/digital record source (tick mark): Computer / Storage Media, DVR, Mobile, Flash Drive, CD/DVD, Server, Cloud, Other",
+          "Make & Model: Color: Serial Number:",
+          "IMEI/UIN/UID/MAC/Cloud ID (as applicable) and any other relevant information, if any, about the device/digital record (specify).",
+          "I state that the HASH value/s of the electronic/digital record/s is ____ obtained through the following algorithm: SHA1: SHA256: MD5: Other (Legally acceptable standard)",
+          "(Hash report to be enclosed with the certificate)",
+          "(Name, designation and signature)",
+          "Date (DD/MM/YYYY): Time (IST): hours (In 24 hours format) Place:"
+        ],
+        "source": "https://egazette.gov.in/WriteReadData/2023/250882.pdf"
+      },
+      "rights_duties": {
+        "basis": "BNSS 2023 ss. 329(2)-(3), 336; BSA 2023 s. 63(4)",
+        "summary_en": "No codified list of expert duties (independence, completeness, refusal grounds) was found for criminal proceedings. Codified points: the court may summon the expert; a responsible officer may be deputed unless personal appearance is ordered; if the expert has been transferred, retired or died, cannot be found, or would cause delay, the court secures the successor officer (s. 336). A matter in the s. 63(4) certificate may be stated 'to the best of the knowledge and belief' of the person stating it.",
+        "source": "https://archive.org/details/in.gazette.central.e.2023-12-25.250884"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Code of Civil Procedure 1908, s. 75 and First Schedule Order XXVI rr. 9, 10A; BSA 2023 s. 39",
+        "summary_en": "Where a question in a suit involves a scientific investigation that the court thinks cannot conveniently be conducted before it, the court may issue a commission 'to such person as it thinks fit, directing him to inquire into such question and report thereon to the Court' (O. XXVI r. 10A(1)). Commissions for local investigation are issued under r. 9. Parties may also call experts as witnesses; their opinions are relevant facts under BSA s. 39.",
+        "source": "https://aphc.gov.in/docs/6_20241130055515.pdf"
+      },
+      "questions": {
+        "basis": "CPC O. XXVI rr. 10A(1), 16",
+        "summary_en": "The court frames the question in the commission ('directing him to inquire into such question'). The commissioner's powers apply 'unless otherwise directed by the order of appointment' (r. 16): examining parties and witnesses, calling for documents and things, entering land or buildings. No provision was found on declining questions outside the expertise or on reporting facts not asked about.",
+        "source": "https://aphc.gov.in/docs/6_20241130055515.pdf"
+      },
+      "report_contents": {
+        "basis": "CPC O. XXVI r. 10(1), applied to r. 10A by r. 10A(2)",
+        "items_en": [
+          "Report in writing signed by the Commissioner",
+          "Evidence taken by the Commissioner, reduced to writing and returned with the report"
+        ],
+        "items_local": [
+          "his report in writing signed by him",
+          "after reducing to writing the evidence taken by him, shall return such evidence, together with his report"
+        ],
+        "source": "https://aphc.gov.in/docs/6_20241130055515.pdf"
+      },
+      "rights_duties": {
+        "basis": "CPC O. XXVI rr. 10(2)-(3), 16, 16A, 17",
+        "summary_en": "The report and the evidence taken (but not the evidence without the report) form part of the record. The court, or a party with the court's permission, may examine the Commissioner personally in open court about the report and the manner of investigation. If dissatisfied, the court may direct further inquiry. The Commissioner records objected questions (r. 16A). For summoning and examining witnesses the Commissioner is deemed a Civil Court, but a Commissioner who is not a judge cannot impose penalties (r. 17).",
+        "source": "https://aphc.gov.in/docs/6_20241130055515.pdf"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": "No general statute on forensic expert activity found. Sectoral rules: IT Act 2000 s. 79A (Examiner of Electronic Evidence) and the MeitY 'Scheme for Notifying Examiner of Electronic Evidence'",
+    "source": "https://www.indiacode.nic.in/bitstream/123456789/1999/1/A2000-21%20(1).pdf"
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Bharatiya Nyaya Sanhita 2023 (Act 45 of 2023) ss. 227 (giving false evidence) and 229(1)",
+      "summary_en": "A person legally bound by an oath or by law to state the truth who makes a statement they know or believe to be false, or do not believe to be true, gives false evidence (s. 227); a false statement of belief also counts. Intentionally giving or fabricating false evidence in a judicial proceeding: imprisonment of either description up to 7 years and a fine up to 10,000 rupees (s. 229(1)). In other cases: up to 3 years and a fine up to 5,000 rupees (s. 229(2)). An investigation directed by law before a court proceeding is a stage of a judicial proceeding.",
+      "warning_local": "I do swear in the name of God / solemnly affirm that what I shall state shall be the truth, the whole truth and nothing but the truth.",
+      "warning_en": "Oath or affirmation of a witness (Oaths Act 1969, Schedule, Form No. 1), taken before testifying",
+      "wording": "official",
+      "source": "https://archive.org/details/in.gazette.central.e.2023-12-25.250883"
+    },
+    {
+      "route": "all",
+      "norm": "Bharatiya Nyaya Sanhita 2023 ss. 234 (false certificate) and 236 (false statement in a declaration receivable as evidence)",
+      "summary_en": "Issuing or signing a certificate required by law, or a certificate admissible in evidence, while knowing or believing it is false in a material point is punished as if giving false evidence (s. 234). This covers the BSA s. 63(4) certificate. A false statement in a declaration that a court or public servant must or may receive as evidence is punished the same way (s. 236).",
+      "warning_local": "I, (Name), Son/daughter/spouse of ____ residing/employed at ____ do hereby solemnly affirm and sincerely state and submit as follows:—",
+      "warning_en": "Affirmation at the head of BSA Schedule Part B (certificate filled by the Expert)",
+      "wording": "official",
+      "source": "https://egazette.gov.in/WriteReadData/2023/250882.pdf"
+    }
+  ],
+  "declaration": {
+    "basis": "BSA 2023 s. 63(4)(c) and the Schedule, Part B (To be filled by the Expert); for testimony, Oaths Act 1969 ss. 4, 6 and Schedule Form No. 1",
+    "text_local": "I, (Name), Son/daughter/spouse of ____ residing/employed at ____ do hereby solemnly affirm and sincerely state and submit as follows:—",
+    "text_en": "Opening affirmation of the electronic-record certificate signed by the expert",
+    "wording": "official",
+    "source": "https://egazette.gov.in/WriteReadData/2023/250882.pdf"
+  },
+  "standards": [
+    {
+      "id": "ISO/IEC 27037:2012",
+      "national_id": "IS/ISO/IEC 27037 : 2012 (reaffirmed 2021)",
+      "title_en": "Information Technology - Security Techniques - Guidelines for Identification, Collection, Acquisition and Preservation of Digital Evidence",
+      "status": "national adoption",
+      "issuer": "Bureau of Indian Standards, technical committee LTD 17",
+      "source": "https://standardsbis.bsbedge.com/search_redirect.aspx?id=23138"
+    },
+    {
+      "id": "ISO/IEC 17025",
+      "national_id": null,
+      "title_en": "General requirements for the competence of testing and calibration laboratories (required compliance for laboratories seeking notification as Examiner of Electronic Evidence)",
+      "status": "official guidance",
+      "issuer": "Ministry of Electronics and Information Technology (MeitY), Scheme for Notifying Examiner of Electronic Evidence under IT Act s. 79A; assessment by STQC",
+      "source": "https://www.meity.gov.in/static/uploads/2025/11/67f1ee29ffea0e76a3e5b5fee9883711.pdf"
+    }
+  ],
+  "esignature": {
+    "law_local": "Information Technology Act, 2000 (21 of 2000), ss. 2(1)(ta), 3A, 15; Bharatiya Sakshya Adhiniyam 2023 ss. 41(2), 85-87",
+    "law_en": "Information Technology Act 2000: 'electronic signature' means authentication of an electronic record by a subscriber by means of a technique in the Second Schedule, and includes digital signature (s. 2(1)(ta)). An electronic signature is a 'secure electronic signature' if the signature creation data was under the signatory's exclusive control when the signature was affixed and was stored and affixed in the prescribed exclusive manner (s. 15). BSA s. 86(2): for a secure electronic signature, the court presumes, unless the contrary is proved, that the subscriber affixed it intending to sign or approve the record. BSA s. 87: information in an accepted Electronic Signature Certificate is presumed correct.",
+    "qualified_term_local": "secure electronic signature",
+    "source": "https://www.indiacode.nic.in/bitstream/123456789/1999/1/A2000-21%20(1).pdf"
+  },
+  "timestamp": {
+    "basis": "No IT Act or BSA provision specific to electronic time-stamps found. Controller of Certifying Authorities, Time Stamping Services Guidelines for CAs (CCA-TSG, Version 2.0, 2016), issued within the framework of the Information Technology (Certifying Authorities) Rules 2000 and the Information Technology (Certifying Authority) Regulations 2001; tokens 'shall be in compliance with RFC 3161'",
+    "qualified_recognition": "No statutory presumption specific to time-stamp tokens identified. BSA s. 86(1) presumes that a secure electronic record has not been altered since the point of time to which its secure status relates.",
+    "source": "https://cca.gov.in/sites/files/pdf/services/TIMESTAMPINGGUIDELINES.pdf"
+  },
+  "open_questions": [
+    "indiacode.nic.in returned HTTP 403 and egazette.gov.in failed TLS verification. BSA, BNSS and BNS texts were verified on the Internet Archive copies of the Gazette of India Extraordinary (items in.gazette.central.e.2023-12-25.250882, .250884, .250883: OCR text of the official Gazette). Recheck wording against the official PDF, especially OCR-affected tokens such as 'SHA1' and 'MD5' in the Schedule.",
+    "The BNS source URL points to the Internet Archive mirror of Gazette CG-DL-E-25122023-250883 because no egazette.gov.in URL for that Gazette was confirmed.",
+    "The IT Act text was verified on the gac.gov.in (Grievance Appellate Committee, MeitY) copy because India Code returned 403. Recheck s. 79A, s. 3A and s. 15 against India Code.",
+    "Oaths Act 1969 Schedule Form No. 1 wording is taken from a search-engine extract of the India Code PDF and matching secondary copies; the India Code PDF itself could not be fetched (403).",
+    "MeitY 'Scheme for Notifying Examiner of Electronic Evidence' could not be fetched (403). The ISO/IEC 17025 compliance requirement and the ISO/IEC 27037/27041 references rest on search extracts of that PDF. Not confirmed: whether prior NABL accreditation is a precondition.",
+    "Not verified on an official source: whether an Examiner of Electronic Evidence under IT Act s. 79A must sign Part B of the BSA s. 63 certificate, or whether any other expert may sign it. Secondary sources report conflicting High Court and Supreme Court positions.",
+    "No official text found prescribing the contents of a forensic laboratory report in criminal cases beyond BNSS s. 329 ('under the hand of'). No rule found on who formulates the questions to a forensic laboratory, or on declining or adding questions; check State FSL manuals and Directorate of Forensic Science Services (DFSS) guidance.",
+    "The dates from which States notified the BNSS s. 176(3) forensic crime-scene visit requirement were not checked.",
+    "Hindi authoritative texts (भारतीय साक्ष्य अधिनियम, 2023 etc.) were not checked. items_local are given in English, which is also a court language. The Hindi equivalents of 'expert' and of the Schedule wording are unverified.",
+    "BIS adoption of ISO/IEC 27041, 27042 and 27043 was not found. Absence not confirmed.",
+    "No codified duties of independence or completeness, or refusal grounds, for experts in criminal or civil proceedings were found in BNSS, BSA or CPC. Check High Court rules and the Supreme Court's practice directions."
+  ]
+}

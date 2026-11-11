@@ -1,0 +1,144 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "IE",
+  "name_en": "Ireland",
+  "name_local": "Éire / Ireland",
+  "court_languages": [
+    "en",
+    "ga"
+  ],
+  "local_language": "en",
+  "legal_family": "common law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "expert witness",
+    "en": "expert witness retained by a party, or a single joint expert directed by the court"
+  },
+  "procedures": [
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Rules of the Superior Courts (RSC) Order 39 rules 45, 57, 58 (rules 54-61 inserted by S.I. No. 254 of 2016, from 1 October 2016)",
+        "summary_en": "Experts are retained by the parties. The judge may, of its own motion or on motion, require each party to identify the field of expertise and, where practicable, the proposed expert; determine the fields or experts who may give evidence; fix times for delivery or exchange of reports; direct a single joint expert where two or more parties wish to call expert evidence on an issue, and select that expert if the parties cannot agree; and give directions on instructions and fees (r. 58(2)). Save for special reason, each party may call one expert per field per issue (r. 58(3)).",
+        "source": "https://courts.ie/court-rules/full-court-rule?url=Order-39-Superior-Evidence"
+      },
+      "questions": {
+        "basis": "RSC Order 39 rule 59",
+        "summary_en": "A party may put concise written questions on the content of a report to another party's expert or to a single joint expert, once only, within 28 days of service of the report, for clarification only unless the court permits or the instructing party agrees. The expert is not obliged to answer questions that are disproportionate, unnecessary for determining any issue, or not within the expert's field of expertise; a ruling may be sought by motion. Answers are treated as part of the report. If the expert does not answer, the court may bar reliance on the expert's evidence or recovery of the expert's fees. Reporting facts not asked about is not regulated.",
+        "source": "https://courts.ie/court-rules/full-court-rule?url=Order-39-Superior-Evidence"
+      },
+      "report_contents": {
+        "basis": "RSC Order 39 rules 45(2), 57(2), 58(2)(iii), 61(2)",
+        "items_en": [
+          "Statement acknowledging the expert's duty to assist the court within the expert's field of expertise, which overrides any obligation to the party paying the fee (r. 57(2)(a))",
+          "Disclosure of any financial or economic interest of the expert, or of any person connected with the expert, in any business or economic activity of the retaining party, including sponsorship of or contributions to research, other than the fee for the report and participation (r. 57(2)(b))",
+          "The substance of the evidence to be adduced, including any maps, drawings, photographs, graphs, charts, calculations or similar matter referred to (definition of 'report', r. 45(2))",
+          "Where the court so directs, the key elements of the expert's evidence (r. 58(2)(iii))",
+          "Where ordered under r. 60, a joint report identifying agreed and non-agreed evidence after a private meeting of experts (r. 61(2))"
+        ],
+        "items_local": [
+          "contain a statement acknowledging the duty mentioned in sub-rule (1)",
+          "disclose any financial or economic interest of the expert, or of any person connected with the expert, in any business or economic activity of the party retaining that expert",
+          "containing the substance of the evidence to be adduced and shall also include any maps, drawings, photographs, graphs, charts, calculations or other like matter referred to in any such report",
+          "a report setting out the key elements of the of the evidence of each expert",
+          "a written statement (in this rule, the 'joint report') identifying such evidence as is agreed between or among them and such evidence as is not agreed"
+        ],
+        "source": "https://courts.ie/court-rules/full-court-rule?url=Order-39-Superior-Evidence"
+      },
+      "rights_duties": {
+        "basis": "RSC Order 39 rules 57(1), 58(1), 60, 61",
+        "summary_en": "The expert's duty is to assist the court on matters within the expert's field of expertise; this duty overrides any obligation to the party paying the fee (r. 57(1)). Expert evidence is restricted to what is reasonably required to determine the proceedings (r. 58(1)). Where experts may contradict each other, the court may order them to meet privately without parties or lawyers and prepare a joint report, and may apply consecutive examination or the 'debate among experts' procedure at trial (rr. 60, 61).",
+        "source": "https://courts.ie/court-rules/full-court-rule?url=Order-39-Superior-Evidence"
+      }
+    },
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Criminal Procedure Act 2010 s. 34",
+        "summary_en": "Experts are called by the prosecution or the defence. The accused may call an expert witness or adduce expert evidence only with leave; written notice must be given to the prosecution at least 28 days before the trial date, a preliminary trial hearing, or an earlier date set by the court (s. 34(1)-(2)). 'Expert witness' means a person who appears to the court to possess the appropriate qualifications or experience about the matter to which the evidence relates (s. 34(9)).",
+        "source": "https://revisedacts.lawreform.ie/eli/2010/act/27/revised/en/html"
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": "Criminal Procedure Act 2010 s. 34(3)-(4) (defence expert evidence)",
+        "items_en": [
+          "Name and address of the expert witness",
+          "Any report prepared by the expert concerning a matter relevant to the case, including details of any analysis carried out by or on behalf of, or relied upon by, the expert, or a summary of the expert's findings"
+        ],
+        "items_local": [
+          "the name and address of the expert witness",
+          "any report prepared by the expert witness concerning a matter relevant to the case, including details of any analysis carried out by or on behalf of, or relied upon by, the expert witness, or a summary of the findings of the expert witness"
+        ],
+        "source": "https://revisedacts.lawreform.ie/eli/2010/act/27/revised/en/html"
+      },
+      "rights_duties": {
+        "basis": "Criminal Procedure Act 2010 s. 34(5)-(8)",
+        "summary_en": "Leave is granted if the evidence satisfies the rules of evidence and the notice requirements were met, or late notice was not reasonably possible or is necessary in the interests of justice, or a matter arose from prosecution expert testimony that the defence could not reasonably anticipate; the prosecution is heard and must be given a reasonable opportunity to consider the report or summary before the evidence is given.",
+        "source": "https://revisedacts.lawreform.ie/eli/2010/act/27/revised/en/html"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": "No statute on forensic expert activity was identified; expert evidence is governed by court rules (RSC Order 39) and specific provisions such as Criminal Procedure Act 2010 s. 34.",
+    "source": null
+  },
+  "liability": [
+    {
+      "route": "civil",
+      "norm": "Civil Liability and Courts Act 2004 s. 25 (penalties in s. 29)",
+      "summary_en": "In a personal injuries action, giving or adducing (or dishonestly causing to be given or adduced) evidence that is false or misleading in any material respect, knowing it to be so, is an offence; s. 25 defines 'expert' for the related offence of giving false information to an expert. On indictment: fine up to EUR 100,000 and/or imprisonment up to 10 years (s. 29). Applies to personal injuries actions only.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": "official",
+      "source": "https://revisedacts.lawreform.ie/eli/2004/act/31/revised/en/html"
+    },
+    {
+      "route": "all",
+      "norm": "Perjury (false evidence on oath or affirmation); governing statute not verified",
+      "summary_en": null,
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": null
+    }
+  ],
+  "declaration": {
+    "basis": "RSC Order 39 rule 57(2)(a): every expert report delivered under the Rules or a court order or direction must contain a statement acknowledging the duty in rule 57(1). The rule does not prescribe the wording.",
+    "text_local": "I acknowledge that it is my duty to assist the Court as to matters within my field of expertise and that this duty overrides any obligation to any party paying my fee.",
+    "text_en": "I acknowledge that it is my duty to assist the Court as to matters within my field of expertise and that this duty overrides any obligation to any party paying my fee.",
+    "wording": "composed",
+    "source": "https://courts.ie/court-rules/full-court-rule?url=Order-39-Superior-Evidence"
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "Regulation (EU) No 910/2014 (eIDAS) as amended by Regulation (EU) 2024/1183; Electronic Commerce Act 2000",
+    "law_en": "Regulation (EU) No 910/2014 (eIDAS) as amended by Regulation (EU) 2024/1183; Electronic Commerce Act 2000 (s. 22: electronic communications and documents may not be denied admissibility solely because they are electronic). The national eIDAS implementing instrument was not verified.",
+    "qualified_term_local": "qualified electronic signature",
+    "source": "https://revisedacts.lawreform.ie/eli/2000/act/27/revised/en/html"
+  },
+  "timestamp": {
+    "basis": "Regulation (EU) No 910/2014 Art. 41 as amended by Regulation (EU) 2024/1183 (Art. 41(3) deleted; cross-border recognition moved to Art. 24a)",
+    "qualified_recognition": "A qualified electronic time stamp enjoys the presumption of the accuracy of the date and time it indicates and of the integrity of the data to which they are bound (Art. 41(2)). An electronic time stamp may not be denied legal effect or admissibility solely because it is electronic or not qualified (Art. 41(1)). Qualified time stamps from other Member States are recognised (Art. 24a).",
+    "source": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02014R0910-20241018"
+  },
+  "open_questions": [
+    "irishstatutebook.ie and oireachtas.ie refused automated access (HTTP 403); statutes were read from the Law Reform Commission revised Acts and court rules from courts.ie.",
+    "The perjury statute (believed to be the Criminal Justice (Perjury and Related Offences) Act 2021), its section numbers, its application to expert witnesses and false statements in reports, and the maximum penalty were not verified.",
+    "Contempt of court as a sanction for a knowingly false expert report, and any civil or disciplinary liability (including witness immunity) of experts, were not verified.",
+    "Prosecution expert evidence in criminal trials (book of evidence under Criminal Procedure Act 1967 s. 4B, statements of evidence, certificates under the Criminal Evidence Act 1992) and the content requirements for prosecution expert reports were not verified.",
+    "Whether RSC Order 39 rules 57-61 apply in criminal trials, and the corresponding Circuit Court and District Court rules on expert evidence, were not verified.",
+    "Who formulates the questions to experts in criminal proceedings and whether experts may decline questions outside their expertise in criminal trials were not verified.",
+    "Penalties on summary conviction under Civil Liability and Courts Act 2004 s. 29 were not recorded because the revised text was not read in full.",
+    "No practice direction or official model wording for the rule 57(2)(a) statement was found; the declaration text is composed from rule 57(1).",
+    "The Irish statutory instrument giving effect to eIDAS and any national rules on electronic signatures in court filings were not verified; the Electronic Commerce Act 2000 (revised to 1 June 2025) still refers to Directive 1999/93/EC.",
+    "No Irish national adoption (I.S. EN ISO/IEC 27037 etc. by NSAI) or official digital-forensics guidance used by An Garda Síochána or Forensic Science Ireland was verified.",
+    "EUR-Lex could not be loaded directly; eIDAS Art. 25, 41 and 24a wording after Regulation (EU) 2024/1183 was checked only through search-index excerpts.",
+    "Local-language fields are given in English only; Irish-language versions of the rules were not checked."
+  ]
+}

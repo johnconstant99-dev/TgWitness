@@ -1,0 +1,173 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "ID",
+  "name_en": "Indonesia",
+  "name_local": "Indonesia",
+  "court_languages": [
+    "id"
+  ],
+  "local_language": "id",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "Ahli",
+    "en": "expert: a person with knowledge in a particular field evidenced by an academic diploma or certain certificate, and/or special experience and skills related to the criminal event (UU 20/2025 Pasal 1 angka 51); expert testimony (Keterangan Ahli) is a means of evidence"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "UU 20/2025 tentang Kitab Undang-Undang Hukum Acara Pidana (KUHAP, in force 2 January 2026) Pasal 1 angka 51-52, Pasal 38, Pasal 49, Pasal 210, Pasal 230",
+        "summary_en": "During investigation the investigator (Penyidik) may request expert testimony when deemed necessary (Pasal 38(1)); for victims with injuries, poisoning or death, the investigator may request testimony from a forensic medicine expert, doctor and/or other expert by written request specifying the examination (Pasal 49). At trial the prosecutor presents witnesses and experts first; the advocate may present evidence, experts and witnesses, and experts requested by the advocate and approved by the judge are summoned by the prosecutor (Pasal 210(4),(5),(8)). The presiding judge may request expert testimony to clarify issues arising at trial (Pasal 230(1)). Keterangan Ahli is evidence at the investigation, prosecution and/or trial stage (Pasal 1 angka 52).",
+        "source": "https://jdih.bp2mi.go.id/uploads//20260310//20260310124213_889000745_uu-nomor-20-tahun-2025_compressed.pdf"
+      },
+      "questions": {
+        "basis": "UU 20/2025 Pasal 38(3), Pasal 49(2), Pasal 230(2)-(3), Pasal 238",
+        "summary_en": "The requesting authority (investigator, or the presiding judge at trial) frames the request; a forensic-medicine request must state expressly the examination of wounds, poisoning, corpse and/or autopsy. An expert bound by secrecy by reason of dignity, work or office may refuse to give the testimony requested (Pasal 38(3)). Testimony in court concerns what the expert knows according to his expertise (Pasal 238(1)). On a well-founded objection by the defendant or advocate, the judge orders re-examination, carried out by the original institution with different personnel and another competent institution (Pasal 230(2)-(3)). The Code does not expressly address declining questions outside the expertise or reporting facts not asked about.",
+        "source": "https://jdih.bp2mi.go.id/uploads//20260310//20260310124213_889000745_uu-nomor-20-tahun-2025_compressed.pdf"
+      },
+      "report_contents": {
+        "basis": "UU 20/2025 Pasal 239 huruf c (surat Keterangan Ahli) and chapeau of Pasal 239; Pasal 39 (investigator's record); no statutory template for the expert report",
+        "items_en": [
+          "Written expert statement (surat Keterangan Ahli) requested officially from the expert",
+          "The matter or condition on which the opinion is given",
+          "The opinion, based on the expert's expertise",
+          "Made under oath of office or confirmed by oath",
+          "Where taken during investigation: the investigator's dated record (berita acara) containing the expert's testimony"
+        ],
+        "items_local": [
+          "\"surat Keterangan Ahli ... yang diminta secara resmi darinya\"",
+          "\"mengenai suatu hal atau suatu keadaan\"",
+          "\"yang memuat pendapat berdasarkan keahliannya\"",
+          "\"dibuat berdasarkan sumpah jabatan atau dikuatkan dengan sumpah\"",
+          "\"Penyidik atas kekuatan sumpah jabatannya ... membuat berita acara yang diberi tanggal dan memuat: ... c. keterangan Tersangka, Saksi, dan/atau Ahli\""
+        ],
+        "source": "https://jdih.bp2mi.go.id/uploads//20260310//20260310124213_889000745_uu-nomor-20-tahun-2025_compressed.pdf"
+      },
+      "rights_duties": {
+        "basis": "UU 20/2025 Pasal 38(2), Pasal 210(12), Pasal 211, Pasal 229, Pasal 238(2)-(3)",
+        "summary_en": "Every person asked for an opinion as a forensic medicine expert, doctor or other expert must give expert testimony for the sake of justice; all provisions on witnesses apply to experts, the expert swearing or promising to give testimony truthfully and honestly according to knowledge in his field (Pasal 229). Before testifying during investigation the expert takes an oath or promise before the investigator (Pasal 38(2)); at trial the judge administers the oath or promise according to religion or belief (Pasal 210(12)). Testimony of an expert who without valid reason refuses the oath is not evidence but may strengthen the judge's conviction (Pasal 211). In court the expert need not present a letter of assignment or permission from his institution, except where he must first carry out an examination, research or observation for the case (Pasal 238(2)-(3)).",
+        "source": "https://jdih.bp2mi.go.id/uploads//20260310//20260310124213_889000745_uu-nomor-20-tahun-2025_compressed.pdf"
+      }
+    },
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "UU 8/1981 tentang Hukum Acara Pidana (old KUHAP) Pasal 1 butir 28, Pasal 120, Pasal 133, Pasal 179, Pasal 180, Pasal 184, Pasal 186, Pasal 187; still applied under UU 20/2025 Pasal 361 huruf a and c to cases in investigation or prosecution, or already under trial, on 2 January 2026",
+        "summary_en": "Old KUHAP (repealed by UU 20/2025 Pasal 362, but applied transitionally): the investigator may request the opinion of an expert or person with special expertise (Pasal 120(1)); written requests to a forensic medicine expert, doctor or other expert for victims of injury, poisoning or death (Pasal 133); the presiding judge may request expert testimony at trial (Pasal 180). Expert testimony is testimony by a person with special expertise on matters needed to clarify a criminal case (Pasal 1 butir 28) and is legal evidence (Pasal 184(1)(b)); it is what an expert states in court (Pasal 186).",
+        "source": "https://jdih.mahkamahagung.go.id/storage/uploads/produk_hukum/file/KUHAP.pdf"
+      },
+      "questions": {
+        "basis": "UU 8/1981 Pasal 120(2), Pasal 133(2)",
+        "summary_en": "The investigator frames the request; requests to forensic experts must expressly state examination of wounds, corpse and/or autopsy. An expert whose dignity, work or office requires secrecy may refuse to give the requested testimony (Pasal 120(2)). Declining questions outside the expertise and reporting unasked facts are not addressed.",
+        "source": "https://jdih.mahkamahagung.go.id/storage/uploads/produk_hukum/file/KUHAP.pdf"
+      },
+      "report_contents": {
+        "basis": "UU 8/1981 Pasal 187 huruf c",
+        "items_en": [
+          "Written statement of an expert, officially requested from him",
+          "Opinion based on his expertise on a matter or condition",
+          "Made under oath of office or confirmed by oath"
+        ],
+        "items_local": [
+          "\"surat keterangan dari seorang ahli ... yang diminta secara resmi dari padanya\"",
+          "\"yang memuat pendapat berdasarkan keahliannya mengenai sesuatu hal atau sesuatu keadaan\"",
+          "\"dibuat atas sumpah jabatan atau dikuatkan dengan sumpah\""
+        ],
+        "source": "https://jdih.mahkamahagung.go.id/storage/uploads/produk_hukum/file/KUHAP.pdf"
+      },
+      "rights_duties": {
+        "basis": "UU 8/1981 Pasal 120(2), Pasal 179",
+        "summary_en": "The expert swears or promises before the investigator to give testimony according to his knowledge as best he can (Pasal 120(2)); every person asked for an opinion as forensic medicine expert, doctor or other expert must give expert testimony for justice, and provisions for witnesses apply, with an oath to give the best and true testimony according to knowledge in his field (Pasal 179).",
+        "source": "https://jdih.mahkamahagung.go.id/storage/uploads/produk_hukum/file/KUHAP.pdf"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Herzien Inlandsch Reglement (HIR, Stb. 1941 No. 44) Pasal 154 (Java and Madura); Rechtsreglement Buitengewesten (RBg) Pasal 181 for other regions (not verified)",
+        "summary_en": "If the chair of the district court considers that the case can be clarified by examination or determination by experts, he may appoint experts ex officio or at the parties' request (HIR Pasal 154(1)).",
+        "source": "https://jdihpn.pn-bengkalis.go.id/kolonial/data_kolonial/KOLONIAL_HERZIEN_INLANDSCH_REGLEMENT.pdf"
+      },
+      "questions": {
+        "basis": "HIR Pasal 154",
+        "summary_en": "The court determines the question by appointing the expert; HIR does not regulate declining questions or reporting unasked facts.",
+        "source": "https://jdihpn.pn-bengkalis.go.id/kolonial/data_kolonial/KOLONIAL_HERZIEN_INLANDSCH_REGLEMENT.pdf"
+      },
+      "report_contents": {
+        "basis": "HIR Pasal 154(2)",
+        "items_en": [
+          "Report given in writing or orally at a hearing fixed by the court",
+          "Testimony confirmed by oath"
+        ],
+        "items_local": [
+          "\"memberi laporannya baik dengan surat, maupun dengan lisan\"",
+          "\"menguatkan keterangan itu dengan sumpah\""
+        ],
+        "source": "https://jdihpn.pn-bengkalis.go.id/kolonial/data_kolonial/KOLONIAL_HERZIEN_INLANDSCH_REGLEMENT.pdf"
+      },
+      "rights_duties": {
+        "basis": "HIR Pasal 154(3)-(4)",
+        "summary_en": "A person who cannot be heard as a witness cannot be appointed as expert; the court is not obliged to follow the expert's opinion if it contradicts its conviction.",
+        "source": "https://jdihpn.pn-bengkalis.go.id/kolonial/data_kolonial/KOLONIAL_HERZIEN_INLANDSCH_REGLEMENT.pdf"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": null,
+    "source": null
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "UU 1/2023 tentang Kitab Undang-Undang Hukum Pidana (KUHP, in force 2 January 2026) Pasal 291 (false sworn statement in judicial proceedings) and Pasal 373 (false sworn statement generally)",
+      "summary_en": "Any person required by law to give a statement under oath, or whose statement has legal consequences, who gives a false sworn statement, orally or in writing, personally or through a specially appointed representative, in the examination of a case in judicial proceedings: imprisonment up to 7 years, increased by one third if it harms the suspect, defendant or opposing party (Pasal 291). Outside judicial proceedings the same conduct is punishable by up to 7 years (Pasal 373(1)); a required promise or affirmation is equated with an oath (Pasal 373(2)); additional penalty of deprivation of rights (Pasal 373(3)); the falsity must be known to the maker (Penjelasan Pasal 373(1)).",
+      "warning_local": "Saya bersumpah/berjanji bahwa saya akan memberikan keterangan yang sebenar-benarnya dan sejujur-jujurnya menurut pengetahuan dalam bidang keahlian saya.",
+      "warning_en": "I swear/promise that I will give testimony truthfully and honestly according to my knowledge in my field of expertise.",
+      "wording": "composed",
+      "source": "https://jdih.bpip.go.id/common/dokumen/uu1-2023.pdf"
+    },
+    {
+      "route": "all",
+      "norm": "UU 1/2023 (KUHP) Pasal 285 (failure to appear or perform a legal duty as witness, expert or interpreter)",
+      "summary_en": "Unlawfully failing to appear when summoned as a witness, expert or interpreter, or failing to fulfil an obligation required by law: imprisonment up to 9 months or fine up to category II in criminal cases; up to 6 months or fine up to category II in other cases.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": "https://jdih.bpip.go.id/common/dokumen/uu1-2023.pdf"
+    }
+  ],
+  "declaration": {
+    "basis": "UU 20/2025 Pasal 239 (written expert statement made under oath of office or confirmed by oath), Pasal 229(2) (content of the expert's oath), Pasal 38(2) (oath before the investigator). No prescribed wording for a written declaration was found.",
+    "text_local": "Keterangan Ahli ini saya berikan di bawah sumpah/janji bahwa saya memberikan keterangan yang sebenar-benarnya dan sejujur-jujurnya menurut pengetahuan dalam bidang keahlian saya.",
+    "text_en": "I give this expert statement under oath/promise that I give testimony truthfully and honestly according to my knowledge in my field of expertise.",
+    "wording": "composed",
+    "source": "https://jdih.bp2mi.go.id/uploads//20260310//20260310124213_889000745_uu-nomor-20-tahun-2025_compressed.pdf"
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "Undang-Undang Nomor 11 Tahun 2008 tentang Informasi dan Transaksi Elektronik sebagaimana telah diubah dengan Undang-Undang Nomor 19 Tahun 2016 dan Undang-Undang Nomor 1 Tahun 2024; Peraturan Pemerintah Nomor 71 Tahun 2019 tentang Penyelenggaraan Sistem dan Transaksi Elektronik",
+    "law_en": "Law No. 11 of 2008 on Electronic Information and Transactions, as amended by Law No. 19 of 2016 and Law No. 1 of 2024; Government Regulation No. 71 of 2019 on the Operation of Electronic Systems and Transactions",
+    "qualified_term_local": "Tanda Tangan Elektronik tersertifikasi",
+    "source": "https://jdih.komdigi.go.id/produk_hukum/view/id/695/t/peraturan+pemerintah+nomor+71+tahun+2019"
+  },
+  "timestamp": {
+    "basis": "UU 11/2008 Pasal 13A ayat (1) huruf c (inserted by UU 1/2024) and its Penjelasan; PP 71/2019 Pasal 66-67",
+    "qualified_recognition": "Electronic certification providers may offer electronic time-stamp services (penanda waktu elektronik), defined as a marker binding time and date to electronic information and/or documents using a reliable method. Services are certified or uncertified; a certified time stamp must bind date and time to prevent undetected alteration, refer to an accurate time source related to Coordinated Universal Time, use an electronic certificate issued by an Indonesian electronic certification provider, and be signed or sealed by such a provider or an equivalent method, and must provide accurate date and time and integrity of the related information. No statutory presumption for time stamps was found. Electronic information and documents and their printouts are legal evidence (UU 11/2008 Pasal 5(1)); electronic evidence is a separate means of proof in criminal cases (UU 20/2025 Pasal 235(1)(f), Pasal 242). Electronic signatures have legal force if they meet UU 11/2008 Pasal 11(1)(a)-(f); a certified electronic signature must use a certificate from an Indonesian certification provider and a certified signature-creation device (PP 71/2019 Pasal 60(3)).",
+    "source": "https://jdih.komdigi.go.id/produk_hukum/view/id/884/t/undangundang+nomor+1+tahun+2024"
+  },
+  "open_questions": [
+    "UU 20/2025 (new KUHAP) text was read from an OCR text layer of the official salinan hosted by JDIH BP2MI; the word after 'menurut' in Pasal 38(2) was lost in OCR, so the exact oath wording before the investigator is not quoted. JDIH BPK and peraturan.go.id were not reachable (HTTP 403 / connection refused).",
+    "Old KUHAP (UU 8/1981) was read from a compiled text on JDIH Mahkamah Agung that omits the official Penjelasan; the Penjelasan of old Pasal 186 (expert report made during investigation) was not verified.",
+    "HIR Pasal 154 was read from an Indonesian translation with commentary hosted on JDIH PN Bengkalis; there is no official Indonesian text of HIR. RBg Pasal 181 was not verified on an official source.",
+    "Whether UU 1/2026 tentang Penyesuaian Pidana amended KUHP Pasal 285, 291 or 373 was checked only against a secondary source (pasal.id), which lists no such amendment; the official UU 1/2026 text was not reachable.",
+    "Old KUHP (Wetboek van Strafrecht) Pasal 242 (sumpah palsu), relevant to conduct before 2 January 2026, was not verified on an official source.",
+    "No prescribed oath formula for experts (including religious formulas) or written declaration wording was found in an official or court-issued document; the warning and declaration texts are composed from UU 20/2025 Pasal 229(2).",
+    "No statute on forensic expert activity and no national adoption of ISO/IEC 27037/27041/27042/27043 (e.g., as SNI ISO/IEC 27037) could be verified; BSN catalogue and Polri/BSSN digital forensic regulations were not checked.",
+    "The Peraturan Menteri implementing PP 71/2019 Pasal 67(4) on certified electronic time stamps was not identified.",
+    "Evidentiary weight differences between certified and uncertified electronic signatures were not verified in the PP 71/2019 text.",
+    "Civil procedure reform (any new Hukum Acara Perdata law replacing HIR/RBg) was not checked."
+  ]
+}

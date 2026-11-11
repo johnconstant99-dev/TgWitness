@@ -1,0 +1,114 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "IR",
+  "name_en": "Iran",
+  "name_local": "ایران",
+  "court_languages": [
+    "fa"
+  ],
+  "local_language": "fa",
+  "legal_family": "Islamic law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "کارشناس (کارشناس رسمی دادگستری)",
+    "en": "expert appointed by the court or prosecutor, normally an official judicial expert"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "قانون آیین دادرسی کیفری 1392 (article numbers not verified)",
+        "summary_en": null,
+        "source": null
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": null,
+        "items_en": null,
+        "items_local": null,
+        "source": null
+      },
+      "rights_duties": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "قانون آیین دادرسی دادگاه‌های عمومی و انقلاب در امور مدنی 1379, section on کارشناسی (article numbers not verified)",
+        "summary_en": null,
+        "source": "https://www.wipo.int/wipolex/en/legislation/details/14336"
+      },
+      "questions": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      },
+      "report_contents": {
+        "basis": null,
+        "items_en": null,
+        "items_local": null,
+        "source": null
+      },
+      "rights_duties": {
+        "basis": null,
+        "summary_en": null,
+        "source": null
+      }
+    }
+  ],
+  "statute": {
+    "title_local": "قانون کانون کارشناسان رسمی دادگستری 1381",
+    "title_en": "Law on the Centre of Official Judicial Experts (1381 / 2002)",
+    "source": null
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": null,
+      "summary_en": null,
+      "warning_local": null,
+      "warning_en": null,
+      "wording": null,
+      "source": null
+    }
+  ],
+  "declaration": {
+    "basis": null,
+    "text_local": null,
+    "text_en": null,
+    "wording": null,
+    "source": null
+  },
+  "standards": [],
+  "esignature": {
+    "law_local": "قانون تجارت الکترونیکی",
+    "law_en": "Electronic Commerce Law 1382 (WIPO Lex: Electronic Commerce Act 2003). Art. 2 defines a secure (enhanced/advanced) electronic signature as one complying with art. 10 (unique to the signatory, identifies the signatory, made by or under the sole intention of the signatory, affixed so that any change to the data message can be detected). Art. 14: data messages generated and stored by a secure method are deemed valid and reliable documents by judicial and legal authorities. Art. 15: the validity of a secure data message, record or signature may not be denied; only a claim of forgery or of invalidity on legal grounds may be raised (per WIPO Lex English translation).",
+    "qualified_term_local": null,
+    "source": "https://www.wipo.int/wipolex/en/legislation/details/7711"
+  },
+  "timestamp": {
+    "basis": null,
+    "qualified_recognition": null,
+    "source": null
+  },
+  "open_questions": [
+    "rc.majlis.ir closed the connection, qavanin.ir and ekhtebar.com served only an interstitial or error page, and dotic.ir returned 403. No official Iranian legislation text could be opened. The WIPO Lex Persian PDF of the Civil Procedure Law (ir024fa.pdf) could not be parsed.",
+    "Criminal Procedure Code 1392 (قانون آیین دادرسی کیفری): articles on appointment of experts, questions, report contents, expert duties and fees not verified.",
+    "Civil Procedure Law 1379: articles in the کارشناسی section (believed to be approximately arts. 257–269) on appointment, subject of expertise, reasoned opinion, deadline and court's evaluation not verified.",
+    "Law on the Centre of Official Judicial Experts 1381 (قانون کانون کارشناسان رسمی دادگستری): text, oath of official experts, disciplinary sanctions and liability provisions not verified; title and year taken from the task description.",
+    "Islamic Penal Code (قانون مجازات اسلامی), including Book 5 (Ta'zirat): article punishing a knowingly false expert report and its penalty not verified.",
+    "Any required oath, declaration or warning in an expert report (and its exact Persian wording) not identified.",
+    "Persian statutory term for the secure electronic signature in the Electronic Commerce Law (expected 'امضای الکترونیکی مطمئن') not verified from the Persian original; the English translation on WIPO Lex was used.",
+    "Adoption date of the Electronic Commerce Law: WIPO Lex metadata gives October 2003 while the Persian date 1382/10/17 corresponds to 7 January 2004; not resolved against an official source.",
+    "No Iranian statute or regulation on electronic timestamps identified.",
+    "No ISIRI (INSO) national adoption of ISO/IEC 27037/27041/27042/27043 verified."
+  ]
+}

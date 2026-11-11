@@ -1,0 +1,160 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "AU",
+  "name_en": "Australia (Commonwealth level)",
+  "name_local": "Australia",
+  "court_languages": [
+    "en"
+  ],
+  "local_language": "en",
+  "legal_family": "common law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "expert witness",
+    "en": "person with specialised knowledge based on training, study or experience (Evidence Act 1995 (Cth) s 79); party expert or Court expert (Federal Court Rules 2011 Pt 23)"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Judiciary Act 1903 (Cth) s 68(1)-(2); Evidence Act 1995 (Cth) ss 4(1), 79, 177",
+        "summary_en": "Most Commonwealth offences are tried in State and Territory courts, which apply State or Territory criminal procedure to persons charged with Commonwealth offences (Judiciary Act s 68(1)-(2)); expert appointment and disclosure in those trials therefore follow the law of the State or Territory. The Evidence Act 1995 (Cth) applies to all proceedings in a federal court (s 4(1)). Experts are called by the prosecution or the defence; opinion evidence is admissible where the person has specialised knowledge based on training, study or experience and the opinion is wholly or substantially based on that knowledge (s 79(1)).",
+        "source": "https://www.legislation.gov.au/C1903A00006/latest/text"
+      },
+      "questions": {
+        "basis": "Evidence Act 1995 (Cth) ss 79, 80",
+        "summary_en": "No statutory list of questions; the calling party defines the issues. The opinion must be wholly or substantially based on the expert's specialised knowledge (s 79(1)); opinion evidence is not inadmissible only because it is about a fact in issue or an ultimate issue, or a matter of common knowledge (s 80). Whether the expert may decline questions or volunteer findings is not regulated by the Act.",
+        "source": "https://www.legislation.gov.au/C2004A04858/latest/text"
+      },
+      "report_contents": {
+        "basis": "Evidence Act 1995 (Cth) s 177 (expert certificate, federal courts)",
+        "items_en": [
+          "Certificate signed by the expert",
+          "Expert's name and address",
+          "Statement that the expert has specialised knowledge based on training, study or experience, as specified in the certificate",
+          "The opinion held, expressed to be wholly or substantially based on that knowledge",
+          "Copy of the certificate and written notice of intention to tender served on each other party at least 21 days before the hearing (or other period set by the court)"
+        ],
+        "items_local": [
+          "\"a certificate (expert certificate) signed by the person\"",
+          "\"states the person's name and address\"",
+          "\"states that the person has specialised knowledge based on his or her training, study or experience, as specified in the certificate\"",
+          "\"sets out an opinion that the person holds and that is expressed to be wholly or substantially based on that knowledge\"",
+          "\"a copy of the certificate\" and \"a written notice stating that the party proposes to tender the certificate as evidence of the opinion\", served \"not later than: (a) 21 days before the hearing\""
+        ],
+        "source": "https://www.legislation.gov.au/C2004A04858/latest/text"
+      },
+      "rights_duties": {
+        "basis": "Evidence Act 1995 (Cth) ss 146, 147, 177(5)-(7)",
+        "summary_en": "A party served with an expert certificate may require the expert to be called to give evidence, in which case the certificate is inadmissible; costs may be ordered against a party who did so without reasonable cause (s 177(5)-(7)). For machine-produced documents or things, if the device or process is one that, if properly used, ordinarily produces the asserted outcome, it is presumed (unless evidence sufficient to raise doubt is adduced) that it produced that outcome on the occasion in question (s 146); a similar presumption applies to business records produced by devices or processes (s 147).",
+        "source": "https://www.legislation.gov.au/C2004A04858/latest/text"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Federal Court Rules 2011 rr 23.01-23.04 (Court expert), rr 23.11-23.15 (parties' experts)",
+        "summary_en": "A party may apply (and the Court may act of its own motion, r 1.40) for appointment of a Court expert to inquire into and report on any question, with remuneration fixed by the Court and payable jointly and severally by the parties (r 23.01). A party may call an expert at trial only if it has delivered a report complying with r 23.13 to all other parties (r 23.11). Before retaining an expert, the party must give the expert the Court's practice note on guidelines for expert witnesses (r 23.12). The Court may order experts to confer, produce a joint document identifying agreement and disagreement, give concurrent evidence or swear affidavits after the factual evidence (r 23.15).",
+        "source": "https://www.legislation.gov.au/F2011L01551/latest/text"
+      },
+      "questions": {
+        "basis": "Federal Court Rules 2011 rr 23.02(2)(c), 23.13(1)(d)",
+        "summary_en": "The report must identify the questions the expert was asked to address. For a Court expert the questions are set by the Court's order. The rules do not regulate refusal of questions; the opinions must be based wholly or substantially on the expert's specialised knowledge (r 23.13(1)(ga)).",
+        "source": "https://www.legislation.gov.au/F2011L01551/latest/text"
+      },
+      "report_contents": {
+        "basis": "Federal Court Rules 2011 r 23.13(1) (party experts); r 23.02(2) (Court expert); Expert Evidence Practice Note (GPN-EXPT) and Harmonised Expert Witness Code of Conduct (content not verified, see open_questions)",
+        "items_en": [
+          "Signed by the expert who prepared the report",
+          "Acknowledgement at the beginning of the report that the expert has read, understood and complied with the Practice Note",
+          "Particulars of the training, study or experience by which the expert acquired specialised knowledge",
+          "The questions the expert was asked to address",
+          "Each factual finding or assumption on which the opinion is based, set out separately",
+          "Each opinion, set out separately from the findings or assumptions",
+          "Reasons for each opinion",
+          "Acknowledgement that the opinions are based wholly or substantially on the specialised knowledge",
+          "Compliance with the Practice Note"
+        ],
+        "items_local": [
+          "(a) be signed by the expert who prepared the report; and",
+          "(b) contain an acknowledgement at the beginning of the report that the expert has read, understood and complied with the Practice Note; and",
+          "(c) contain particulars of the training, study or experience by which the expert has acquired specialised knowledge; and",
+          "(d) identify the questions that the expert was asked to address; and",
+          "(e) set out separately each of the factual findings or assumptions on which the expert's opinion is based; and",
+          "(f) set out separately from the factual findings or assumptions each of the expert's opinions; and",
+          "(g) set out the reasons for each of the expert's opinions; and",
+          "(ga) contain an acknowledgement that the expert's opinions are based wholly or substantially on the specialised knowledge mentioned in paragraph (c); and",
+          "(h) comply with the Practice Note."
+        ],
+        "source": "https://www.legislation.gov.au/F2011L01551/latest/text"
+      },
+      "rights_duties": {
+        "basis": "Federal Court Rules 2011 rr 23.03, 23.12, 23.15; Evidence Act 1995 (Cth) s 79; GPN-EXPT (not verified)",
+        "summary_en": "A Court expert's report complying with r 23.02 is admissible at trial and the expert may be cross-examined by order (r 23.03). Party experts must be given the Practice Note before engagement (r 23.12) and may be ordered to confer and identify agreement and disagreement (r 23.15). The expert's overriding duty to assist the Court impartially is set out in the Practice Note and Harmonised Code of Conduct, whose text could not be retrieved from fedcourt.gov.au.",
+        "source": "https://www.legislation.gov.au/F2011L01551/latest/text"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": "No Commonwealth statute on forensic expert activity; expert evidence is governed by the Evidence Act 1995 (Cth) (ss 76-80, 177), the Federal Court Rules 2011 Pt 23 and the Federal Court Expert Evidence Practice Note (GPN-EXPT)",
+    "source": "https://www.legislation.gov.au/C2004A04858/latest/text"
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Crimes Act 1914 (Cth) s 35 (giving false testimony)",
+      "summary_en": "Giving false testimony touching a matter material in a federal judicial proceeding (or with the intention of instituting one): imprisonment for 5 years. It is immaterial whether the testimony is on oath or not, oral or in writing, or admissible. Fabricating evidence is a separate offence (s 36). Intentionally making a false statement in a statutory declaration: imprisonment for 4 years (Statutory Declarations Act 1959 s 11).",
+      "warning_local": "I understand that giving false testimony, orally or in writing, touching a matter material in a federal judicial proceeding is an offence under section 35 of the Crimes Act 1914 (Cth), punishable by imprisonment for 5 years.",
+      "warning_en": "I understand that giving false testimony, orally or in writing, touching a matter material in a federal judicial proceeding is an offence under section 35 of the Crimes Act 1914 (Cth), punishable by imprisonment for 5 years.",
+      "wording": "composed",
+      "source": "https://www.legislation.gov.au/C1914A00012/latest/text"
+    },
+    {
+      "route": "civil",
+      "norm": "Federal Court Rules 2011 r 23.11",
+      "summary_en": "Procedural consequence: a party may call an expert at trial only if a report complying with r 23.13 has been delivered and Division 23.2 has otherwise been complied with. No codified civil or disciplinary liability of the expert was identified in the Commonwealth instruments reviewed.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": "official",
+      "source": "https://www.legislation.gov.au/F2011L01551/latest/text"
+    }
+  ],
+  "declaration": {
+    "basis": "Federal Court Rules 2011 r 23.13(1)(b) and (ga) require two acknowledgements; the exact wording prescribed by GPN-EXPT and the Harmonised Expert Witness Code of Conduct could not be verified, so the text below is composed from the rule.",
+    "text_local": "I acknowledge that I have read, understood and complied with the Expert Evidence Practice Note (GPN-EXPT), including the Harmonised Expert Witness Code of Conduct, and I agree to be bound by it. My opinions in this report are based wholly or substantially on the specialised knowledge arising from my training, study or experience set out in this report.",
+    "text_en": "I acknowledge that I have read, understood and complied with the Expert Evidence Practice Note (GPN-EXPT), including the Harmonised Expert Witness Code of Conduct, and I agree to be bound by it. My opinions in this report are based wholly or substantially on the specialised knowledge arising from my training, study or experience set out in this report.",
+    "wording": "composed",
+    "source": "https://www.legislation.gov.au/F2011L01551/latest/text"
+  },
+  "standards": [
+    {
+      "id": "HB 171-2003",
+      "national_id": "HB 171-2003",
+      "title_en": "Guidelines for the management of IT evidence (Standards Australia handbook; status: Withdrawn)",
+      "status": "professional guidance",
+      "issuer": "Standards Australia",
+      "source": "https://store.standards.org.au/product/hb-171-2003"
+    }
+  ],
+  "esignature": {
+    "law_local": "Electronic Transactions Act 1999 (Cth) s 10",
+    "law_en": "Where a Commonwealth law requires a signature, the requirement is met for an electronic communication if a method is used to identify the person and indicate the person's intention, the method is as reliable as appropriate for the purpose or proven in fact to have fulfilled those functions, and (where applicable) Commonwealth entity IT requirements or the recipient's consent are met (s 10(1)). Part 2A and Division 2 of Part 2 do not apply to the practice and procedure of a court or tribunal and do not affect the operation of the Evidence Act 1995 (s 7B). No qualified or advanced signature tier exists in Commonwealth law.",
+    "qualified_term_local": null,
+    "source": "https://www.legislation.gov.au/C2004A00553/latest/text"
+  },
+  "timestamp": {
+    "basis": null,
+    "qualified_recognition": "No Commonwealth provision on electronic timestamps was identified. Output of devices and processes, including system timestamps, benefits from the rebuttable presumptions in Evidence Act 1995 (Cth) ss 146-147 where the device or process ordinarily produces the asserted outcome when properly used.",
+    "source": "https://www.legislation.gov.au/C2004A04858/latest/text"
+  },
+  "open_questions": [
+    "The Federal Court Expert Evidence Practice Note (GPN-EXPT) and the Harmonised Expert Witness Code of Conduct could not be retrieved: fedcourt.gov.au returned HTTP 403. Their required report contents, the exact acknowledgement and the declaration on inquiries and matters withheld are therefore not quoted; the declaration text is composed from FCR r 23.13.",
+    "Federal Court (Criminal Proceedings) Rules 2016 provisions on expert evidence in indictable proceedings in the Federal Court were not researched.",
+    "Expert disclosure in Commonwealth prosecutions tried in State and Territory courts follows State or Territory law (Judiciary Act s 68) and was not researched.",
+    "No Australian adoption of ISO/IEC 27037 (AS ISO/IEC 27037) could be found on the Standards Australia store; HB 171-2003 is listed as withdrawn and no successor was verified.",
+    "Statutory declaration form wording under the Statutory Declarations Regulations 2023 was not retrieved.",
+    "Compilations used: Evidence Act 1995 Compilation No. 35 (10 June 2025); Federal Court Rules 2011 Compilation No. 11 (11 June 2026); Crimes Act 1914 Compilation No. 167 (27 August 2026); Electronic Transactions Act 1999 compilation of 5 December 2025; Judiciary Act 1903 compilation of 11 December 2024. Later amendments were not checked."
+  ]
+}

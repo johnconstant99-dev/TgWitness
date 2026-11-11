@@ -1,0 +1,188 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "ES",
+  "name_en": "Spain",
+  "name_local": "España",
+  "court_languages": [
+    "es",
+    "ca",
+    "eu",
+    "gl"
+  ],
+  "local_language": "es",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "perito",
+    "en": "expert appointed by the court or investigating judge, or designated by a party"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Ley de Enjuiciamiento Criminal (LECrim), art. 456-462, 466, 467, 471; art. 788.3 for the abbreviated procedure",
+        "summary_en": "The investigating judge orders an expert report when scientific or artistic knowledge is necessary or useful to know or assess an important fact (art. 456). Experts may be titled (official qualification) or untitled; titled experts are preferred (art. 457-458). Every examination is made by two experts unless only one is available and waiting would seriously harm the investigation (art. 459); in the abbreviated procedure one expert may suffice (art. 788.3). Nobody may refuse a judicial call to act as expert unless legitimately impeded (art. 462). Where the examination cannot be repeated at trial, the parties may challenge the experts and appoint their own expert at their cost (art. 467, 471).",
+        "source": "https://www.boe.es/buscar/act.php?id=BOE-A-1882-6036"
+      },
+      "questions": {
+        "basis": "LECrim art. 475, 480, 483",
+        "summary_en": "The judge states clearly and specifically the object of the report (art. 475). Parties attending may put observations to the experts, which are recorded (art. 480). The judge, of his own motion or at the request of the parties, may ask questions and request clarifications when the experts deliver their conclusions; the answers form part of the report (art. 483). LECrim does not expressly regulate whether the expert may decline questions or report facts not asked about.",
+        "source": "https://www.boe.es/buscar/act.php?id=BOE-A-1882-6036"
+      },
+      "report_contents": {
+        "basis": "LECrim art. 478 (also art. 479, 483, 484)",
+        "items_en": [
+          "Description of the person or thing examined, in the state or manner in which it is found",
+          "Detailed account of all operations performed by the experts and of their result",
+          "Conclusions drawn by the experts from those data according to the principles and rules of their science or art",
+          "Where analysis destroys or alters the objects, a part is kept, if possible, at the judge's disposal for a new analysis",
+          "Answers to the judge's questions form part of the report",
+          "Where experts disagree, the additional expert states reasoned conclusions jointly with whichever expert he agrees with, or separately"
+        ],
+        "items_local": [
+          "1.º Descripción de la persona o cosa que sea objeto del mismo en el estado o del modo en que se halle.",
+          "2.º Relación detallada de todas las operaciones practicadas por los peritos y de su resultado, extendida y autorizada en la misma forma que la anterior.",
+          "3.º Las conclusiones que en vista de tales datos formulen los peritos conforme a los principios y reglas de su ciencia o arte.",
+          "Si los peritos tuvieren necesidad de destruir o alterar los objetos que analicen, deberá conservarse, a ser posible, parte de ellos a disposición del Juez, para que, en caso necesario, pueda hacerse nuevo análisis.",
+          "Las contestaciones de los peritos se considerarán como parte de su informe.",
+          "a formular luego con quien estuviere conforme, o separadamente si no lo estuviese con ninguno, sus conclusiones motivadas."
+        ],
+        "source": "https://www.boe.es/buscar/act.php?id=BOE-A-1882-6036"
+      },
+      "rights_duties": {
+        "basis": "LECrim art. 462-465, 468, 474, 723-725",
+        "summary_en": "Duty to accept the appointment unless legitimately impeded (art. 462); failure to appear or refusal to report without good excuse attracts the witness sanctions of art. 420 (art. 463). Persons exempt from testifying under art. 416 may not report; an expert who reports without disclosing such a relationship incurs a fine of EUR 200-5,000 (art. 464). Challenge grounds: kinship to the fourth degree with complainant or accused, direct or indirect interest in the case, close friendship or manifest enmity (art. 468). Before the expert act all experts swear to proceed well and faithfully and to have no aim other than discovering and declaring the truth (art. 474). Fees may be claimed unless the expert is salaried by the State (art. 465). At trial experts are examined together and answer the parties' questions (art. 724-725).",
+        "source": "https://www.boe.es/buscar/act.php?id=BOE-A-1882-6036"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Ley 1/2000 de Enjuiciamiento Civil (LEC), art. 335.1, 336, 339, 340, 341, 342",
+        "summary_en": "Parties may submit opinions of experts they designate, normally with the claim or defence (art. 336), or ask the court to appoint an expert (art. 339). Court experts are designated from annual lists supplied by professional associations, the first by lot and the rest in order (art. 341). Experts must hold the official qualification for the subject or, where none exists, be knowledgeable persons; academies and institutions may also be asked (art. 340). On acceptance the court expert makes the sworn or promised statement of art. 335.2 (art. 342).",
+        "source": "https://www.boe.es/buscar/act.php?id=BOE-A-2000-323"
+      },
+      "questions": {
+        "basis": "LEC art. 339, 342.3, 347",
+        "summary_en": "The requesting parties define the subject of a court-appointed opinion; art. 342.3 refers to the party indicating the points on which the opinion must rule. At trial the parties may ask for explanation, answers on method, premises and conclusions, extension to connected points and criticism by the opposing expert; the court may ask questions but may not order an extension of its own motion except in the cases of art. 339.5 (art. 347). The LEC does not expressly regulate whether the expert may decline questions or report facts not asked about.",
+        "source": "https://www.boe.es/buscar/act.php?id=BOE-A-2000-323"
+      },
+      "report_contents": {
+        "basis": "LEC art. 335.2, 336.2, 346",
+        "items_en": [
+          "Statement under oath or promise to tell the truth that the expert has acted and will act with the greatest possible objectivity, considering what may favour or harm any party, and that the expert knows the criminal penalties for breach of duty",
+          "Written opinion, accompanied where appropriate by the documents, instruments or materials needed to explain the expert's view; if they cannot be provided, sufficient indications about them",
+          "Court expert: opinion issued in writing and sent to the court by electronic means within the time limit set"
+        ],
+        "items_local": [
+          "Al emitir el dictamen, todo perito deberá manifestar, bajo juramento o promesa de decir verdad, que ha actuado y, en su caso, actuará con la mayor objetividad posible, tomando en consideración tanto lo que pueda favorecer como lo que sea susceptible de causar perjuicio a cualquiera de las partes, y que conoce las sanciones penales en las que podría incurrir si incumpliere su deber como perito.",
+          "Los dictámenes se formularán por escrito, acompañados, en su caso, de los demás documentos, instrumentos o materiales adecuados para exponer el parecer del perito sobre lo que haya sido objeto de la pericia. Si no fuese posible o conveniente aportar estos materiales e instrumentos, el escrito de dictamen contendrá sobre ellos las indicaciones suficientes.",
+          "El perito que el tribunal designe emitirá por escrito su dictamen, que hará llegar por medios electrónicos al tribunal en el plazo que se le haya señalado."
+        ],
+        "source": "https://www.boe.es/buscar/act.php?id=BOE-A-2000-323"
+      },
+      "rights_duties": {
+        "basis": "LEC art. 124, 335.2-3, 340, 342, 343, 347, 348",
+        "summary_en": "Duty of objectivity under oath or promise (art. 335.2). An expert who took part in a mediation or arbitration on the same matter may not be asked for an opinion unless the parties agree (art. 335.3). A court expert may decline for just cause (art. 342.2) and may request an advance on fees (art. 342.3). Only court experts designated by lot can be challenged (recusación), on the LOPJ grounds plus prior contrary opinion, prior services to the opposing party or participation in a party (art. 124); party experts may be objected to (tacha) for kinship, interest, dependence, close friendship or enmity, or other circumstances (art. 343). The court assesses opinions under the rules of sound judgment (sana crítica) (art. 348).",
+        "source": "https://www.boe.es/buscar/act.php?id=BOE-A-2000-323"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": null,
+    "source": null
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Código Penal, art. 459 (by reference to art. 458)",
+      "summary_en": "Experts or interpreters who maliciously misstate the truth in their opinion receive the false-testimony penalties of art. 458 in their upper half, plus special disqualification from profession, trade, employment or public office for 6 to 12 years. Art. 458 base: 6 months-2 years' imprisonment and 3-6 months' fine; against the accused in criminal proceedings: 1-3 years' imprisonment and 6-12 months' fine, one degree higher if a conviction resulted.",
+      "warning_local": "y que conoce las sanciones penales en las que podría incurrir si incumpliere su deber como perito",
+      "warning_en": "and that [the expert] knows the criminal penalties that may be incurred for failing in the duty as expert",
+      "wording": "official",
+      "source": "https://www.boe.es/buscar/act.php?id=BOE-A-1995-25444"
+    },
+    {
+      "route": "all",
+      "norm": "Código Penal, art. 460",
+      "summary_en": "A witness, expert or interpreter who, without substantially misstating the truth, alters it through reticence, inaccuracies or by withholding relevant known facts or data: fine of 6-12 months and, where applicable, suspension from employment, public office, profession or trade for 6 months to 3 years.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": "official",
+      "source": "https://www.boe.es/buscar/act.php?id=BOE-A-1995-25444"
+    },
+    {
+      "route": "criminal",
+      "norm": "LECrim art. 474 (oath) and art. 463-464 (procedural sanctions)",
+      "summary_en": "Oath before the expert act; refusal to report without good excuse attracts the witness sanctions of art. 420; reporting despite an undisclosed art. 416 relationship: fine of EUR 200-5,000 unless criminal liability arises.",
+      "warning_local": "prestarán juramento, conforme al artículo 434, de proceder bien y fielmente en sus operaciones y de no proponerse otro fin más que el de descubrir y declarar la verdad",
+      "warning_en": "shall swear, in accordance with article 434, to proceed well and faithfully in their operations and to have no aim other than discovering and declaring the truth",
+      "wording": "official",
+      "source": "https://www.boe.es/buscar/act.php?id=BOE-A-1882-6036"
+    }
+  ],
+  "declaration": {
+    "basis": "LEC art. 335.2 (civil, mandatory in every expert opinion; art. 342.1 for court experts). Criminal route: oath before the expert act under LECrim art. 474. The first-person text below transposes art. 335.2 without changing its content.",
+    "text_local": "Juro (o prometo) decir verdad, que he actuado y, en su caso, actuaré con la mayor objetividad posible, tomando en consideración tanto lo que pueda favorecer como lo que sea susceptible de causar perjuicio a cualquiera de las partes, y que conozco las sanciones penales en las que podría incurrir si incumpliere mi deber como perito.",
+    "text_en": "I swear (or promise) to tell the truth, that I have acted and, where applicable, will act with the greatest possible objectivity, taking into account both what may favour and what may harm any of the parties, and that I know the criminal penalties I may incur if I fail in my duty as an expert.",
+    "wording": "composed",
+    "source": "https://www.boe.es/buscar/act.php?id=BOE-A-2000-323"
+  },
+  "standards": [
+    {
+      "id": "ISO/IEC 27037:2012",
+      "national_id": "UNE-EN ISO/IEC 27037:2016 (ratified December 2016)",
+      "title_en": "Guidelines for identification, collection, acquisition and preservation of digital evidence",
+      "status": "national adoption",
+      "issuer": "UNE (Asociación Española de Normalización)",
+      "source": "https://www.une.org/encuentra-tu-norma/busca-tu-norma/norma?c=N0057481"
+    },
+    {
+      "id": "ISO/IEC 27042:2015",
+      "national_id": "UNE-EN ISO/IEC 27042:2016 (ratified December 2016, English text)",
+      "title_en": "Guidelines for the analysis and interpretation of digital evidence",
+      "status": "national adoption",
+      "issuer": "UNE (Asociación Española de Normalización)",
+      "source": "https://tienda.aenor.com/norma-une-en-iso-iec-27042-2016-n0057471"
+    },
+    {
+      "id": "UNE 197010:2015",
+      "national_id": "UNE 197010:2015",
+      "title_en": "General criteria for the preparation of expert reports and opinions on information and communication technologies (ICT)",
+      "status": "national adoption",
+      "issuer": "UNE, committee CTN 197",
+      "source": "https://www.une.org/encuentra-tu-norma/busca-tu-norma/norma?c=N0055393"
+    },
+    {
+      "id": "UNE 197001:2019",
+      "national_id": "UNE 197001:2019",
+      "title_en": "General criteria for the preparation of expert reports",
+      "status": "national adoption",
+      "issuer": "UNE, committee CTN 197",
+      "source": "https://www.une.org/encuentra-tu-norma/comites-tecnicos-de-normalizacion/comite?c=CTN+197"
+    }
+  ],
+  "esignature": {
+    "law_local": "Reglamento (UE) n.º 910/2014 modificado por el Reglamento (UE) 2024/1183; Ley 6/2020, de 11 de noviembre, reguladora de determinados aspectos de los servicios electrónicos de confianza; Ley de Enjuiciamiento Civil, art. 326.3-4",
+    "law_en": "eIDAS Regulation (EU) No 910/2014 as amended by (EU) 2024/1183; Law 6/2020 of 11 November regulating certain aspects of electronic trust services (complements eIDAS); Civil Procedure Act art. 326.3-4 on evidential value of electronic documents using trust services",
+    "qualified_term_local": "firma electrónica cualificada (advanced: firma electrónica avanzada)",
+    "source": "https://www.boe.es/buscar/act.php?id=BOE-A-2020-14046"
+  },
+  "timestamp": {
+    "basis": "Regulation (EU) No 910/2014, art. 41-42 (as amended by (EU) 2024/1183); LEC art. 326.3-4 (via Ley 6/2020, art. 3.2)",
+    "qualified_recognition": "Under eIDAS art. 41(2) a qualified electronic time stamp is presumed accurate as to date and time and as to the integrity of the bound data. Under LEC art. 326.4, where a qualified trust service was used and the provider was on the trusted list at the relevant time, the document is presumed to have the challenged characteristic (including date and time accuracy) and the challenger bears the burden and cost of verification; a reckless challenge may be fined EUR 300-1,200. Non-qualified services are assessed under art. 326.2-3.",
+    "source": "https://www.boe.es/buscar/act.php?id=BOE-A-2000-323"
+  },
+  "open_questions": [
+    "No general Spanish statute on forensic or court expert activity was identified; confirm that none exists beyond the LEC/LECrim provisions and professional-association lists (LEC art. 341).",
+    "LECrim art. 434 provides that the oath is taken in the name of God; the use of a secular promise for expert oaths in criminal proceedings was not verified on an official source.",
+    "No official or court-documented customary wording for the criminal-route expert declaration in the written report was verified; practitioners often reuse LEC art. 335.2, which applies to civil proceedings.",
+    "LECrim art. 420 (sanctions applied by art. 463 to non-appearing experts) was not retrieved; the exact amount is not stated here.",
+    "Whether the expert may decline questions outside his expertise or report facts not asked about is not expressly regulated in the LEC or LECrim articles checked.",
+    "UNE-EN ISO/IEC 27041 and 27043 ratifications are reported in BOE of 14 January 2017 (resolution of 9 January 2017) but their une.org catalogue entries were not opened.",
+    "UNE 71506:2013 (methodology for forensic analysis of electronic evidence) was reported as annulled on 2026-02-19 (BOE-A-2026-5981); it is therefore not listed, but the annulment should be confirmed on une.org before citing it in any report.",
+    "Co-official court languages (Catalan/Valencian, Basque, Galician) apply only in the respective autonomous communities under LOPJ art. 231; per-region scope not detailed here."
+  ]
+}

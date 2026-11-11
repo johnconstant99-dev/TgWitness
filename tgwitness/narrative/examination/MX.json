@@ -1,0 +1,184 @@
+{
+  "format": "tgwitness-examination-v1",
+  "code": "MX",
+  "name_en": "Mexico",
+  "name_local": "México",
+  "court_languages": [
+    "es"
+  ],
+  "local_language": "es",
+  "legal_family": "civil law",
+  "checked_at": "2026-11-11",
+  "review": "machine-assisted research, not reviewed by local counsel",
+  "expert_term": {
+    "local": "perito",
+    "en": "expert (perito) offered by a party or designated by the prosecutor (Ministerio Público) or the court"
+  },
+  "procedures": [
+    {
+      "route": "criminal",
+      "appointment": {
+        "basis": "Código Nacional de Procedimientos Penales (CNPP) arts. 272, 103, 368, 369, 43",
+        "summary_en": "During the investigation the Ministerio Público, or the police with its knowledge, may order the expert examinations (peritajes) necessary to investigate the facts; the written opinion does not exempt the expert from testifying at trial (art. 272). Expert evidence may be offered when special knowledge in a science, art, technique or trade is necessary or convenient (art. 368). Experts must hold an official title in the subject where the field is regulated and have no impediment to practise; otherwise a person of manifest suitability, preferably a member of a relevant professional body, is designated (art. 369). On a party's request the court orders designation of experts from public institutions, which are obliged to perform the examination (art. 103). Experts must recuse themselves or may be challenged on the same grounds as judges (art. 43).",
+        "source": "https://www.diputados.gob.mx/LeyesBiblio/pdf/CNPP.pdf"
+      },
+      "questions": {
+        "basis": "CNPP arts. 335 (last paragraph), 372, 373",
+        "summary_en": "The parties frame the matter: when offering experts the prosecution (or victim) must list them and state the points on which the examination will bear (art. 335). At trial the expert answers the questions of the party that offered them and is then cross-examined; the court may only ask clarifying questions; on re-examination hypotheses on the subject matter of the opinion may be put to the expert, who must answer according to the science, the profession and the hypothetical facts proposed (art. 372). The CNPP does not regulate whether the expert may decline questions outside the expertise or report facts not asked about.",
+        "source": "https://www.diputados.gob.mx/LeyesBiblio/pdf/CNPP.pdf"
+      },
+      "report_contents": {
+        "basis": "CNPP arts. 272, 337, 369, 376; no statutory list of report contents in the CNPP",
+        "items_en": [
+          "Written expert opinion (dictamen / informe pericial); it does not replace oral testimony at trial",
+          "Report delivered to the other parties at discovery of evidence (descubrimiento probatorio), or at the latest three days before the intermediate hearing if justified",
+          "Proof of the expert's official title in the subject (where the field is regulated) or of manifest suitability",
+          "At trial the expert may read part of the report to refresh memory"
+        ],
+        "items_local": [
+          "\"El dictamen escrito no exime al perito del deber de concurrir a declarar en la audiencia de juicio.\" (art. 272)",
+          "\"Tratándose de la prueba pericial, se deberá entregar el informe respectivo al momento de descubrir los medios de prueba a cargo de cada una de las partes, salvo que se justifique que aún no cuenta con ellos, caso en el cual, deberá descubrirlos a más tardar tres días antes del inicio de la audiencia intermedia\" (art. 337)",
+          "\"Los peritos deberán poseer título oficial en la materia relativa al punto sobre el cual dictaminarán y no tener impedimentos para el ejercicio profesional\" (art. 369)",
+          "\"Con el mismo propósito se podrá leer durante la declaración de un perito parte del informe que él hubiere elaborado.\" (art. 376)"
+        ],
+        "source": "https://www.diputados.gob.mx/LeyesBiblio/pdf/CNPP.pdf"
+      },
+      "rights_duties": {
+        "basis": "CNPP arts. 43, 49, 227, 228, 273, 274, 370, 371",
+        "summary_en": "Duty to recuse on the same grounds as judges (art. 43). Experts have access at all times to the evidence (indicios) on which the opinion bears (art. 273). Where analysis consumes the sample or prevents an independent re-examination, the defence must be notified so that experts of both parties examine jointly or the defence expert attends (art. 274). Chain of custody records identity, original state, collection, preservation, packaging, transfer, places and dates and every person in contact with the evidence (arts. 227-228). Experts may request witness protection measures (art. 370). Before testifying the court identifies the expert, takes the protest to tell the truth and warns of the penalties for false statements (arts. 49, 371).",
+        "source": "https://www.diputados.gob.mx/LeyesBiblio/pdf/CNPP.pdf"
+      }
+    },
+    {
+      "route": "civil",
+      "appointment": {
+        "basis": "Código Nacional de Procedimientos Civiles y Familiares (CNPCF, DOF 07-06-2023, last reform DOF 15-01-2026) arts. 300-307; transitory art. Segundo (gradual entry into force, no later than 1 April 2027). Until the CNPCF is in force in a given forum, the Código Federal de Procedimientos Civiles (federal) or the state procedural code applies.",
+        "summary_en": "Each party designates its own expert: if expert evidence is offered in the claim, the opposing party must designate its expert when answering and may propose additional points (art. 301-I). The court admits the evidence at the preliminary hearing and sets 5-10 days for written opinions (art. 301-II). Experts must hold a title in the field and a professional licence (cédula) where required; otherwise any knowledgeable person may be appointed (art. 300-IV, V). If the opinions are substantially contradictory the court may designate a third expert (perito tercero en discordia), chosen from court-authorised auxiliaries or candidates proposed by professional bodies, universities or chambers (arts. 303-304). In family matters an official expert is always appointed and paid by the State (art. 306).",
+        "source": "https://www.diputados.gob.mx/LeyesBiblio/pdf/CNPCF.pdf"
+      },
+      "questions": {
+        "basis": "CNPCF art. 300-III, VI; art. 301-I",
+        "summary_en": "The offering party must state the points and questions the experts are to resolve, otherwise the evidence is not admitted; the opposing party may propose to expand them. Expert evidence is rejected for general knowledge, facts already proven in the record or simple arithmetic. The code does not regulate whether the expert may decline questions or report facts not asked about.",
+        "source": "https://www.diputados.gob.mx/LeyesBiblio/pdf/CNPCF.pdf"
+      },
+      "report_contents": {
+        "basis": "CNPCF arts. 300, 301, 303; no statutory list of report sections",
+        "items_en": [
+          "Written opinion (dictamen) answering the points and questions admitted by the court",
+          "Proof, at the trial hearing, of the expert's scientific, technical, artistic or industrial qualification by original or certified copy of the professional licence (cédula) or equivalent documents",
+          "Brief oral presentation of the conclusions at the trial hearing and answers to questions of the court and the parties",
+          "Third (tie-breaking) expert: written acceptance of the appointment with protest of faithful and lawful performance and statement of fees"
+        ],
+        "items_local": [
+          "\"Se ofrecerá expresando los puntos y cuestionamientos sobre los que versará y que deban resolver los peritos\" (art. 300-III)",
+          "\"deberán acreditar, bajo su responsabilidad, su calidad científica, técnica, artística o industrial para el que fueron propuestos, con el original o copia certificada de su cédula profesional o los documentos respectivos\" (art. 301-V)",
+          "\"deberán exponer verbal y brevemente las conclusiones de sus dictámenes\" (art. 301-V)",
+          "\"presente escrito en el que acepte el cargo conferido y proteste su fiel y legal desempeño. Asimismo, señalará el monto de sus honorarios\" (art. 303)"
+        ],
+        "source": "https://www.diputados.gob.mx/LeyesBiblio/pdf/CNPCF.pdf"
+      },
+      "rights_duties": {
+        "basis": "CNPCF arts. 301-III, IV, 302, 303, 307",
+        "summary_en": "The court ensures that experts, in strict equality, receive the elements requested by the parties (art. 301-III). An expert who fails to file on time loses the right and the evidence proceeds with the opinion filed (art. 301-IV). A defaulting third expert is fined an amount equal to the quoted fee and reported to the Judicial Council and the proposing professional body, without prejudice to administrative and legal sanctions (art. 303). The third expert may be challenged on the same grounds as the judge (art. 307).",
+        "source": "https://www.diputados.gob.mx/LeyesBiblio/pdf/CNPCF.pdf"
+      }
+    },
+    {
+      "route": "commercial",
+      "appointment": {
+        "basis": "Código de Comercio arts. 1252, 1253, 1255, 1257",
+        "summary_en": "In commercial trials each party proposes its expert within the evidence period, stating the field, the points and questions, and the expert's licence and details; once admitted, the expert must within three days file a written acceptance and protest of the appointment, attaching proof of qualification, and declare under protest to tell the truth that he or she knows the points in question and is competent to give the opinion; the opinion is due within ten days (five in executive or special proceedings). The judge designates a third expert if the opinions are substantially contradictory.",
+        "source": "https://docs.mexico.justia.com/federales/codigo-de-comercio.pdf"
+      },
+      "questions": {
+        "basis": "Código de Comercio arts. 1252, 1253-I",
+        "summary_en": "The offering party states precisely the points and questions to be resolved and their relation to the disputed facts; expert evidence on general knowledge, matters already proven or simple arithmetic is rejected ex officio.",
+        "source": "https://docs.mexico.justia.com/federales/codigo-de-comercio.pdf"
+      },
+      "report_contents": {
+        "basis": "Código de Comercio art. 1253-III",
+        "items_en": [
+          "Written acceptance of the appointment and protest of faithful and lawful performance",
+          "Original or certified copy of the professional licence or documents proving the expert's qualification",
+          "Statement under protest to tell the truth that the expert knows the points in question and has sufficient capacity to give the opinion",
+          "Expert opinion (dictamen) within the statutory period"
+        ],
+        "items_local": [
+          "\"presenten escrito en el que acepten el cargo conferido y protesten su fiel y legal desempeño\"",
+          "\"debiendo anexar el original o copia certificada de su cédula profesional o documentos que acrediten su calidad de perito en el arte, técnica, oficio o industria para el que se les designa\"",
+          "\"manifestando, bajo protesta de decir verdad, que conocen los puntos cuestionados y pormenores relativos a la pericial, así como que tienen la capacidad suficiente para emitir dictamen sobre el particular\"",
+          "\"quedando obligados a rendir su dictamen dentro de los diez días siguientes a la fecha en que hayan presentado los escritos de aceptación y protesta del cargo de peritos\""
+        ],
+        "source": "https://docs.mexico.justia.com/federales/codigo-de-comercio.pdf"
+      },
+      "rights_duties": {
+        "basis": "Código de Comercio art. 1253-VI; art. 1298-A",
+        "summary_en": "Experts who fail to file the opinion are fined (amount updated annually by the Secretaría de Economía). Data messages are recognised as evidence; their probative force is assessed primarily by the reliability of the method by which they were generated, archived, communicated or preserved (art. 1298-A).",
+        "source": "https://docs.mexico.justia.com/federales/codigo-de-comercio.pdf"
+      }
+    }
+  ],
+  "statute": {
+    "title_local": null,
+    "title_en": "No federal statute specifically on forensic expert activity was identified; expert evidence is regulated in the CNPP, CNPCF, Código Federal de Procedimientos Civiles and Código de Comercio",
+    "source": null
+  },
+  "liability": [
+    {
+      "route": "all",
+      "norm": "Código Penal Federal art. 247 Bis (added DOF 23-01-2009)",
+      "summary_en": "Anyone examined by a judicial authority as a witness or expert who fails to tell the truth about the facts under investigation or about aspects, quantities, qualities or other circumstances relevant to the meaning of an opinion, affirming, denying or maliciously concealing data that could prove the truth or falsity of the main fact, its gravity, or technical or scientific particulars relevant to the decision: 5 to 12 years' imprisonment and 300 to 500 day-fines; 8 to 15 years and 500 to 800 day-fines where the convicted person received more than 20 years' imprisonment because of the false testimony or opinion. Spontaneous retraction before judgment in that instance reduces the penalty to 30-180 day-fines (art. 248). Art. 247-III punishes bribing an expert (4-8 years).",
+      "warning_local": "Acepto el cargo conferido y protesto su fiel y legal desempeño. Manifiesto bajo protesta de decir verdad que conozco los puntos cuestionados y que tengo la capacidad suficiente para emitir el presente dictamen, y que se me ha hecho saber que el artículo 247 Bis del Código Penal Federal sanciona al perito que, examinado por la autoridad judicial, faltare a la verdad.",
+      "warning_en": "I accept the appointment and protest its faithful and lawful performance. I declare under protest to tell the truth that I know the points in question and have sufficient capacity to give this opinion, and that I have been informed that article 247 Bis of the Federal Criminal Code punishes an expert who, examined by the judicial authority, fails to tell the truth.",
+      "wording": "composed",
+      "source": "https://www.diputados.gob.mx/LeyesBiblio/doc/CPF.doc"
+    },
+    {
+      "route": "civil",
+      "norm": "CNPCF art. 303; Código de Comercio art. 1253-VI",
+      "summary_en": "Procedural sanctions: a defaulting third expert pays a sanction equal to the quoted fee and is reported to the Judicial Council and the proposing body, without prejudice to administrative and legal sanctions; in commercial trials defaulting experts are fined.",
+      "warning_local": null,
+      "warning_en": null,
+      "wording": "official",
+      "source": "https://www.diputados.gob.mx/LeyesBiblio/pdf/CNPCF.pdf"
+    }
+  ],
+  "declaration": {
+    "basis": "CNPP arts. 49 and 371 (protest to tell the truth taken orally by the court after warning of the penalties); CNPCF art. 303 and Código de Comercio art. 1253-III (written acceptance and protest of faithful and lawful performance; in commercial trials a statement 'bajo protesta de decir verdad'). No statutory written formula for the end of the report was found; the text below is composed from the statutory phrases.",
+    "text_local": "Bajo protesta de decir verdad, manifiesto que el presente dictamen es producto de mi análisis personal e independiente, que conozco los puntos sometidos a peritaje y que tengo la capacidad suficiente para emitirlo, y que he sido informado de las penas que se imponen a quien se conduce con falsedad.",
+    "text_en": "Under protest to tell the truth, I declare that this opinion is the product of my own independent analysis, that I know the points submitted for expert examination and have sufficient capacity to give it, and that I have been informed of the penalties imposed on anyone who makes false statements.",
+    "wording": "composed",
+    "source": "https://docs.mexico.justia.com/federales/codigo-de-comercio.pdf"
+  },
+  "standards": [
+    {
+      "id": "NOM-151-SCFI-2016",
+      "national_id": "NOM-151-SCFI-2016",
+      "title_en": "Mexican Official Standard issued by the Secretaría de Economía on conservation of data messages and digitisation of documents, referred to in Código de Comercio arts. 49 and 89 (exact title and DOF publication date not verified)",
+      "status": "binding",
+      "issuer": "Secretaría de Economía",
+      "source": "https://docs.mexico.justia.com/federales/codigo-de-comercio.pdf"
+    }
+  ],
+  "esignature": {
+    "law_local": "Código de Comercio, Título Segundo 'Del Comercio Electrónico' (arts. 89-114), en particular arts. 89, 89 bis, 97",
+    "law_en": "Commercial Code, Title Two on electronic commerce: legal effect of data messages (art. 89 bis); definitions of electronic signature, advanced or reliable electronic signature, certificate and digital timestamp (art. 89); requirements for an advanced or reliable electronic signature (art. 97: creation data exclusively the signer's and under the signer's sole control; any alteration of the signature or of the data after signing is detectable).",
+    "qualified_term_local": "Firma Electrónica Avanzada o Fiable",
+    "source": "https://docs.mexico.justia.com/federales/codigo-de-comercio.pdf"
+  },
+  "timestamp": {
+    "basis": "Código de Comercio art. 89 (definition of 'Sello Digital de Tiempo'), arts. 100 and 102 (accredited certification service providers for conservation of data messages and digital timestamping), art. 49 (conservation of data messages under the NOM issued by the Secretaría de Economía)",
+    "qualified_recognition": "A digital timestamp is defined as 'the record that proves that a datum existed before the date and time of issue of the timestamp, in the terms established in the official Mexican standard on digitisation and conservation of data messages'. Timestamping is provided by certification service providers accredited by the Secretaría de Economía; accreditation does not by itself confer notarial public faith (art. 100). No separate statutory presumption beyond the definition was located.",
+    "source": "https://docs.mexico.justia.com/federales/codigo-de-comercio.pdf"
+  },
+  "open_questions": [
+    "diputados.gob.mx, dof.gob.mx and ordenjuridico.gob.mx were unreachable from this network. CNPP text was checked against a government-hosted reproduction of the Chamber of Deputies consolidation with last reform DOF 28-11-2025 (imuvii.gob.mx) and an earlier 2021 consolidation (congresojal.gob.mx); CNPCF against isstech.gob.mx (last reform DOF 15-01-2026); Código Penal Federal against transparencia.septlaxcala.gob.mx (last reform DOF 28-11-2025). The source URLs point to the official Chamber of Deputies files, which should be rechecked.",
+    "A search snippet reported a later Código Penal Federal reform (DOF 13-03-2026); whether it touched arts. 247-248 was not verified.",
+    "Código de Comercio text was taken from a reproduction of the Chamber of Deputies PDF (docs.mexico.justia.com, used as source URL because no official copy was reachable) whose page header shows 'Última Reforma DOF 28-03-2018' but which contains later notes up to 2023; the current consolidated text was not verified.",
+    "Whether the federal Declaratoria bringing the CNPCF into force in federal civil matters has been issued (deadline 1 April 2027), and therefore whether federal civil proceedings are still governed by the Código Federal de Procedimientos Civiles (arts. 143-160 on expert evidence, art. 210-A on electronic information), was not verified; the CFPC text could not be retrieved.",
+    "Exact title and DOF publication date of NOM-151-SCFI-2016 could not be verified on dof.gob.mx.",
+    "Ley de Firma Electrónica Avanzada (federal public sector) and the Poder Judicial de la Federación electronic signature (FIREL) were not researched.",
+    "No Mexican national adoption of ISO/IEC 27037/27041/27042/27043 (NMX) and no official digital forensics guide (e.g. FGR or CNPJ chain-of-custody guides) could be verified.",
+    "The exact oral protest formula used by courts under CNPP art. 49 and any customary closing formula of written dictámenes were not verified; the declaration and warning texts are composed."
+  ]
+}
