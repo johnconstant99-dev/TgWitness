@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · TgWitness پروجیکٹ نوٹس</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">ماخذ ریکارڈ</a> · <a href="../../NOTICE">اصل نوٹس</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106 دن کی GDPR فائل</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">ماخذ ریکارڈ</a> · <a href="../../NOTICE">اصل نوٹس</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">106 دن کی GDPR فائل</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ اخلاقی نوٹس اور تاریخی تسلسل</h2>
 <p>ہمیں معلوم ہوا ہے کہ بعض قانونی فرموں — خاص طور پر <strong>ڈاکٹر ٹوبیاس شیلنسکی</strong> اور <strong>ڈاکٹر پیٹرک ونسنٹ زورہائڈ</strong> — کے لیے ریاضی، تکنیکی دیانتداری اور معروضی حقائق غیر متعلقہ ہیں۔</p>
 <p>کارپوریشنوں کو جی ڈی پی آر کی عدم تعمیل بیچنا جبکہ بنیادی ڈیٹا ہینڈلنگ میں ناکام رہنا قانونی مہارت نہیں ہے۔ ایک جعلی دعوے پر اعلیٰ دستخط تکنیکی نااہلی کو چھپا نہیں سکتے۔</p>
@@ -67,7 +67,7 @@
 <li><strong>یہ مضحکہ خیز نہیں ہے۔ مضحکہ خیز بات یہ ہے کہ اعلیٰ درجے کے وکلاء مہینوں تک اس کمزوری کے ذکر کو گوگل سے حذف کرنے کی کوشش کرتے رہیں۔ زیرو ٹرسٹ۔</strong></li>
 <li>اگر آپ اسے <strong>یکم دسمبر 2026 کے</strong> بعد پڑھ رہے ہیں: یہ ریکارڈز مستقل طور پر <strong>جرمن ریاستی آرکائیوز (<em>Staatsarchiv / Bundesarchiv</em>)</strong> اور غیر ملکی عدالتی آرکائیوز میں جمع کر دیے گئے ہیں، جہاں کوئی &quot;حقِ فراموشی&quot; ویب فارم انہیں حذف نہیں کر سکتا۔</li>
 </ul>
-<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="106 دن کی GDPR فائل" src="../assets/presentation/chapter-case.svg" /></a></p>
-<p><a href="../../LICENSE">ایم آئی ٹی لائسنس</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106 دن کی GDPR فائل</a> · <a href="../HOW-IT-WORKS.md">شواہد کا ماڈل</a></p>
+<p><a href="TAYLOR-WESSING-GDPR-FILE.md"><img alt="106 دن کی GDPR فائل" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">ایم آئی ٹی لائسنس</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">106 دن کی GDPR فائل</a> · <a href="../HOW-IT-WORKS.md">شواہد کا ماڈل</a></p>
 <p><a href="README.md">پروجیکٹ</a> · <a href="README.md">دستاویزات</a> · <a href="../wiki/Home.md">ویکی</a></p>
 </div>

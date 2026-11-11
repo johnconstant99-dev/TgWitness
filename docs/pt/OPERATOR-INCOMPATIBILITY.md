@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · Aviso do projeto TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Registro de origem</a> · <a href="../../NOTICE">AVISO original</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">O processo GDPR de 106 dias</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Registro de origem</a> · <a href="../../NOTICE">AVISO original</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">O processo GDPR de 106 dias</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Aviso Ético e Continuidade Histórica</h2>
 <p>Ficamos sabendo que, para certos escritórios de advocacia — especificamente <strong>o Dr. Tobias Schelinski</strong> e <strong>o Dr. Patrick Vincent Zurheide</strong> —, a matemática, a integridade técnica e os fatos objetivos são irrelevantes.</p>
 <p>Vender a não conformidade com o GDPR a empresas enquanto se falha no tratamento básico de dados não constitui especialização jurídica. A assinatura de uma personalidade de destaque em uma alegação falsificada não encobre a incompetência técnica.</p>
@@ -67,7 +67,7 @@
 <li><strong>Isso não tem graça. O que é engraçado é ver advogados de elite passarem meses tentando excluir menções a essa vulnerabilidade do Google. Zero Trust.</strong></li>
 <li>Caso leia isto após <strong>1º de dezembro de 2026</strong>: esses registros estão permanentemente arquivados nos <strong>Arquivos Estaduais da Alemanha (<em>Staatsarchiv / Bundesarchiv</em>)</strong> e em arquivos judiciais estrangeiros, onde nenhum formulário online de “Direito ao Esquecimento” poderá excluí-los.</li>
 </ul>
-<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="O processo GDPR de 106 dias" src="../assets/presentation/chapter-case.svg" /></a></p>
-<p><a href="../../LICENSE">Licença MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">O processo GDPR de 106 dias</a> · <a href="../HOW-IT-WORKS.md">Modelo de evidências</a></p>
+<p><a href="TAYLOR-WESSING-GDPR-FILE.md"><img alt="O processo GDPR de 106 dias" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">Licença MIT</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">O processo GDPR de 106 dias</a> · <a href="../HOW-IT-WORKS.md">Modelo de evidências</a></p>
 <p><a href="README.md">Projeto</a> · <a href="README.md">Documentação</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

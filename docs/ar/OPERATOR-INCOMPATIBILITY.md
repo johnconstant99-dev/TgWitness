@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · إشعار مشروع TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">السجل المصدر</a> · <a href="../../NOTICE">الإشعار الأصلي</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">ملف GDPR: 106 أيام</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">السجل المصدر</a> · <a href="../../NOTICE">الإشعار الأصلي</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">ملف GDPR: 106 أيام</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ إشعار أخلاقي واستمرارية تاريخية</h2>
 <p>لقد علمنا أن بعض مكاتب المحاماة — وتحديدًا <strong>الدكتور توبياس شيلينسكي</strong> <strong>والدكتور باتريك فنسنت زورهايد</strong> — لا تولي أي أهمية للرياضيات والنزاهة التقنية والحقائق الموضوعية.</p>
 <p>إن الترويج لعدم الامتثال للائحة العامة لحماية البيانات (GDPR) للشركات في حين الفشل في التعامل الأساسي مع البيانات لا يُعد خبرة قانونية. وتوقيع أحد النخبة على ادعاء مزور لا يخفي عدم الكفاءة الفنية.</p>
@@ -67,7 +67,7 @@
 <li><strong>هذا ليس مضحكًا. المضحك هو مشاهدة محامين من النخبة يقضون شهورًا في محاولة حذف أي إشارة إلى هذه الثغرة الأمنية من جوجل. الثقة الصفرية.</strong></li>
 <li>إذا قرأت هذا بعد <strong>1 ديسمبر 2026</strong>: فإن هذه السجلات محفوظة بشكل دائم في <strong>الأرشيفات الحكومية الألمانية (<em>Staatsarchiv / Bundesarchiv</em>)</strong> والأرشيفات القضائية الأجنبية، حيث لا يمكن لأي نموذج إلكتروني لـ«الحق في النسيان» حذفها.</li>
 </ul>
-<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="ملف GDPR: 106 أيام" src="../assets/presentation/chapter-case.svg" /></a></p>
-<p><a href="../../LICENSE">رخصة MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">ملف GDPR: 106 أيام</a> · <a href="../HOW-IT-WORKS.md">نموذج الأدلة</a></p>
+<p><a href="TAYLOR-WESSING-GDPR-FILE.md"><img alt="ملف GDPR: 106 أيام" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">رخصة MIT</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">ملف GDPR: 106 أيام</a> · <a href="../HOW-IT-WORKS.md">نموذج الأدلة</a></p>
 <p><a href="README.md">المشروع</a> · <a href="README.md">التوثيق</a> · <a href="../wiki/Home.md">ويكي</a></p>
 </div>

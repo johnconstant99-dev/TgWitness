@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · Avviso relativo al progetto TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Documento originale</a> · <a href="../../NOTICE">AVVISO originale</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Il fascicolo GDPR di 106 giorni</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Documento originale</a> · <a href="../../NOTICE">AVVISO originale</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">Il fascicolo GDPR di 106 giorni</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Avviso etico e continuità storica</h2>
 <p>Abbiamo appreso che per alcuni studi legali — in particolare <strong>il dott. Tobias Schelinski</strong> e <strong>il dott. Patrick Vincent Zurheide</strong> — la matematica, l’integrità tecnica e i fatti oggettivi sono irrilevanti.</p>
 <p>Vendere alle aziende la non conformità al GDPR pur fallendo nelle operazioni di base relative al trattamento dei dati non costituisce competenza giuridica. Una firma autorevole su una dichiarazione falsificata non nasconde l’incompetenza tecnica.</p>
@@ -67,7 +67,7 @@
 <li><strong>La questione non è affatto divertente. Ciò che è divertente è osservare avvocati d’élite che trascorrono mesi nel tentativo di eliminare da Google ogni riferimento a questa vulnerabilità. Zero Trust.</strong></li>
 <li>Se leggerete questo testo dopo <strong>il 1° dicembre 2026</strong>: questi documenti sono depositati in via permanente presso gli <strong>Archivi di Stato tedeschi (<em>Staatsarchiv / Bundesarchiv</em>)</strong> e presso archivi giudiziari esteri, dove nessun modulo web relativo al «diritto all’oblio» potrà cancellarli.</li>
 </ul>
-<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="Il fascicolo GDPR di 106 giorni" src="../assets/presentation/chapter-case.svg" /></a></p>
-<p><a href="../../LICENSE">Licenza MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Il fascicolo GDPR di 106 giorni</a> · <a href="../HOW-IT-WORKS.md">Modello probatorio</a></p>
+<p><a href="TAYLOR-WESSING-GDPR-FILE.md"><img alt="Il fascicolo GDPR di 106 giorni" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">Licenza MIT</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">Il fascicolo GDPR di 106 giorni</a> · <a href="../HOW-IT-WORKS.md">Modello probatorio</a></p>
 <p><a href="README.md">Progetto</a> · <a href="README.md">Documentazione</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

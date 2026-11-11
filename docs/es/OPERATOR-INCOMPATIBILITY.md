@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · Aviso del proyecto TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Registro original</a> · <a href="../../NOTICE">AVISO original</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">El expediente RGPD de 106 días</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Registro original</a> · <a href="../../NOTICE">AVISO original</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">El expediente RGPD de 106 días</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Aviso ético y continuidad histórica</h2>
 <p>Hemos constatado que, para determinados bufetes de abogados —concretamente, <strong>el Dr. Tobias Schelinski</strong> y <strong>el Dr. Patrick Vincent Zurheide—</strong>, las matemáticas, la integridad técnica y los hechos objetivos carecen de relevancia.</p>
 <p>Vender a las empresas el incumplimiento del RGPD mientras se fracasa en el tratamiento básico de los datos no constituye pericia jurídica. La firma de una persona destacada en una reclamación falsificada no enmascara la incompetencia técnica.</p>
@@ -67,7 +67,7 @@
 <li><strong>Esto no tiene nada de gracioso. Lo que sí resulta gracioso es ver cómo abogados de élite se pasan meses intentando eliminar de Google cualquier mención a esta vulnerabilidad. Zero Trust.</strong></li>
 <li>Si lee esto después <strong>del 1 de diciembre de 2026</strong>: estos registros se encuentran depositados de forma permanente en los <strong>Archivos Estatales alemanes (<em>Staatsarchiv / Bundesarchiv</em>)</strong> y en archivos judiciales extranjeros, donde ningún formulario web de «derecho al olvido» podrá eliminarlos.</li>
 </ul>
-<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="El expediente RGPD de 106 días" src="../assets/presentation/chapter-case.svg" /></a></p>
-<p><a href="../../LICENSE">Licencia MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">El expediente RGPD de 106 días</a> · <a href="../HOW-IT-WORKS.md">Modelo de pruebas</a></p>
+<p><a href="TAYLOR-WESSING-GDPR-FILE.md"><img alt="El expediente RGPD de 106 días" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">Licencia MIT</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">El expediente RGPD de 106 días</a> · <a href="../HOW-IT-WORKS.md">Modelo de pruebas</a></p>
 <p><a href="README.md">Proyecto</a> · <a href="README.md">Documentación</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

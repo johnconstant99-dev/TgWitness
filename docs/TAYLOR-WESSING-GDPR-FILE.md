@@ -4,7 +4,9 @@
 
 # Valve, Taylor Wessing and 106 days of waiting under the GDPR: a breakdown of the file and its 70,717 words
 
-[Source record](https://phishdestroy.io/steam_dossier/taylor_wessing) · [Operator notice](OPERATOR-INCOMPATIBILITY.md) · [Deutsch](de/TAYLOR-WESSING-GDPR-FILE.md)
+[Source record](https://phishdestroy.io/steam_dossier/taylor_wessing) · [Operator notice](OPERATOR-INCOMPATIBILITY.md)
+
+**English** · [Русский](ru/TAYLOR-WESSING-GDPR-FILE.md) · [Українська](uk/TAYLOR-WESSING-GDPR-FILE.md) · [Español](es/TAYLOR-WESSING-GDPR-FILE.md) · [Português (Brasil)](pt/TAYLOR-WESSING-GDPR-FILE.md) · [Türkçe](tr/TAYLOR-WESSING-GDPR-FILE.md) · [العربية](ar/TAYLOR-WESSING-GDPR-FILE.md) · [فارسی](fa/TAYLOR-WESSING-GDPR-FILE.md) · [اردو](ur/TAYLOR-WESSING-GDPR-FILE.md) · [हिन्दी](hi/TAYLOR-WESSING-GDPR-FILE.md) · [Bahasa Indonesia](id/TAYLOR-WESSING-GDPR-FILE.md) · [Tiếng Việt](vi/TAYLOR-WESSING-GDPR-FILE.md) · [简体中文](zh/TAYLOR-WESSING-GDPR-FILE.md) · [繁體中文](zh-Hant/TAYLOR-WESSING-GDPR-FILE.md) · [Français](fr/TAYLOR-WESSING-GDPR-FILE.md) · [Deutsch](de/TAYLOR-WESSING-GDPR-FILE.md) · [Italiano](it/TAYLOR-WESSING-GDPR-FILE.md) · [Polski](pl/TAYLOR-WESSING-GDPR-FILE.md) · [O‘zbekcha](uz/TAYLOR-WESSING-GDPR-FILE.md) · [한국어](ko/TAYLOR-WESSING-GDPR-FILE.md) · [日本語](ja/TAYLOR-WESSING-GDPR-FILE.md) · [Bahasa Melayu](ms/TAYLOR-WESSING-GDPR-FILE.md) · [ไทย](th/TAYLOR-WESSING-GDPR-FILE.md) · [עברית](he/TAYLOR-WESSING-GDPR-FILE.md) · [বাংলা](bn/TAYLOR-WESSING-GDPR-FILE.md) · [አማርኛ](am/TAYLOR-WESSING-GDPR-FILE.md)
 
 We are left with questions that will never be answered, because we are not a party to the dispute. No ordinary
 person can hold out waiting a hundred days at a time and taking on elite lawyers, bankrolled by corporations through

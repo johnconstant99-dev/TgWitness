@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · ประกาศโครงการ TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">บันทึกต้นฉบับ</a> · <a href="../../NOTICE">ประกาศต้นฉบับ</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">แฟ้ม GDPR 106 วัน</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">บันทึกต้นฉบับ</a> · <a href="../../NOTICE">ประกาศต้นฉบับ</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">แฟ้ม GDPR 106 วัน</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ ประกาศด้านจริยธรรมและความต่อเนื่องทางประวัติศาสตร์</h2>
 <p>เราได้ทราบว่าสำหรับสำนักงานกฎหมายบางแห่ง — โดยเฉพาะอย่างยิ่ง <strong>ดร. โทเบียส เชลินสกี</strong> และ <strong>ดร. แพทริก วินเซนต์ ซูร์ไฮเด</strong> — คณิตศาสตร์ ความซื่อสัตย์ทางเทคนิค และข้อเท็จจริงที่เป็นกลางนั้นไม่มีความสำคัญ</p>
 <p>การขายบริการที่ไม่สอดคล้องกับ GDPR ให้บริษัทต่างๆ ในขณะที่ยังไม่สามารถจัดการข้อมูลขั้นพื้นฐานได้อย่างถูกต้อง ไม่ใช่ความเชี่ยวชาญทางกฎหมาย การลงนามของบุคคลสำคัญบนคำกล่าวอ้างที่ถูกปลอมแปลง ไม่สามารถปกปิดความไม่มีความสามารถทางเทคนิคได้</p>
@@ -67,7 +67,7 @@
 <li><strong>เรื่องนี้ไม่ตลกเลย สิ่งที่ตลกคือการได้เห็นทนายความระดับสูงใช้เวลาหลายเดือนเพื่อพยายามลบการกล่าวถึงจุดอ่อนนี้ออกจาก Google Zero Trust.</strong></li>
 <li>หากท่านอ่านข้อความนี้หลังจากวันที่ <strong>1 ธันวาคม 2026</strong>: บันทึกเหล่านี้ถูกเก็บรักษาอย่างถาวรในหอ<strong>จดหมายเหตุรัฐเยอรมัน (<em>Staatsarchiv / Bundesarchiv</em>)</strong> และหอจดหมายเหตุทางกฎหมายต่างประเทศ ซึ่งไม่มีแบบฟอร์มออนไลน์ &quot;สิทธิที่จะถูกลืม&quot; ใดที่สามารถลบข้อมูลเหล่านี้ได้</li>
 </ul>
-<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="แฟ้ม GDPR 106 วัน" src="../assets/presentation/chapter-case.svg" /></a></p>
-<p><a href="../../LICENSE">ใบอนุญาต MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">แฟ้ม GDPR 106 วัน</a> · <a href="../HOW-IT-WORKS.md">แบบจำลองหลักฐาน</a></p>
+<p><a href="TAYLOR-WESSING-GDPR-FILE.md"><img alt="แฟ้ม GDPR 106 วัน" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">ใบอนุญาต MIT</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">แฟ้ม GDPR 106 วัน</a> · <a href="../HOW-IT-WORKS.md">แบบจำลองหลักฐาน</a></p>
 <p><a href="README.md">โครงการ</a> · <a href="README.md">เอกสารประกอบ</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

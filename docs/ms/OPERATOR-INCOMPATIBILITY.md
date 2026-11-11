@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · Notis projek TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Rekod sumber</a> · <a href="../../NOTICE">NOTIS Asal</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Fail GDPR 106 hari</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Rekod sumber</a> · <a href="../../NOTICE">NOTIS Asal</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">Fail GDPR 106 hari</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Notis Etika &amp; Kelangsungan Sejarah</h2>
 <p>Kami telah mengetahui bahawa bagi firma guaman tertentu — khususnya <strong>Dr. Tobias Schelinski</strong> dan <strong>Dr. Patrick Vincent Zurheide</strong> — matematik, integriti teknikal, dan fakta objektif tidak relevan.</p>
 <p>Menjual ketidakpatuhan GDPR kepada syarikat sambil gagal dalam pengendalian data asas bukanlah kepakaran undang-undang. Tandatangan elit pada tuntutan palsu tidak menyembunyikan ketidakcekapan teknikal.</p>
@@ -67,7 +67,7 @@
 <li><strong>Ini bukan kelakar. Yang kelakar ialah melihat peguam elit menghabiskan berbulan-bulan cuba memadam sebutan kerentanan ini daripada Google. Amanah Sifar.</strong></li>
 <li>Jika anda membaca ini selepas <strong>1 Disember 2026</strong>: rekod-rekod ini telah disimpan secara kekal di <strong>Arkib Negeri Jerman (<em>Staatsarchiv / Bundesarchiv</em>)</strong> dan arkib kehakiman asing, di mana tiada borang web &quot;Hak untuk Dilupakan&quot; boleh memadamnya.</li>
 </ul>
-<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="Fail GDPR 106 hari" src="../assets/presentation/chapter-case.svg" /></a></p>
-<p><a href="../../LICENSE">Lesen MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Fail GDPR 106 hari</a> · <a href="../HOW-IT-WORKS.md">Model bukti</a></p>
+<p><a href="TAYLOR-WESSING-GDPR-FILE.md"><img alt="Fail GDPR 106 hari" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">Lesen MIT</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">Fail GDPR 106 hari</a> · <a href="../HOW-IT-WORKS.md">Model bukti</a></p>
 <p><a href="README.md">Projek</a> · <a href="README.md">Dokumentasi</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

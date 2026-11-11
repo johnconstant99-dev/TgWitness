@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · TgWitness परियोजना सूचना</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">स्रोत रिकॉर्ड</a> · <a href="../../NOTICE">मूल सूचना</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106 दिनों की GDPR फ़ाइल</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">स्रोत रिकॉर्ड</a> · <a href="../../NOTICE">मूल सूचना</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">106 दिनों की GDPR फ़ाइल</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ नैतिक सूचना और ऐतिहासिक निरंतरता</h2>
 <p>हमें पता चला है कि कुछ कानूनी फर्मों — विशेष रूप से <strong>डॉ. टोबियास शेलिंस्की</strong> और <strong>डॉ. पैट्रिक विंसेंट ज़ुरहाइड</strong> — के लिए गणित, तकनीकी अखंडता और वस्तुनिष्ठ तथ्य अप्रासंगिक हैं।</p>
 <p>बुनियादी डेटा हैंडलिंग में असफल होते हुए निगमों को जीडीपीआर अनुपालनहीनता बेचने को कानूनी विशेषज्ञता नहीं कहा जा सकता। एक फर्जी दावे पर विशिष्ट हस्ताक्षर तकनीकी अक्षमता को छिपा नहीं सकते।</p>
@@ -67,7 +67,7 @@
 <li><strong>यह मज़ेदार नहीं है। मज़ेदार बात यह है कि शीर्ष वकील महीनों तक इस भेद्यता के उल्लेख को Google से हटाने की कोशिश करते रहते हैं। जीरो ट्रस्ट।</strong></li>
 <li>यदि आप इसे <strong>1 दिसंबर, 2026</strong> के बाद पढ़ रहे हैं: ये अभिलेख स्थायी रूप से <strong>जर्मन राज्य अभिलेखागार (<em>Staatsarchiv / Bundesarchiv</em>)</strong> और विदेशी न्यायिक अभिलेखागारों में जमा किए गए हैं, जहाँ कोई &quot;भुलाए जाने का अधिकार&quot; वेब फॉर्म उन्हें मिटा नहीं सकता।</li>
 </ul>
-<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="106 दिनों की GDPR फ़ाइल" src="../assets/presentation/chapter-case.svg" /></a></p>
-<p><a href="../../LICENSE">एमआईटी लाइसेंस</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106 दिनों की GDPR फ़ाइल</a> · <a href="../HOW-IT-WORKS.md">साक्ष्य मॉडल</a></p>
+<p><a href="TAYLOR-WESSING-GDPR-FILE.md"><img alt="106 दिनों की GDPR फ़ाइल" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">एमआईटी लाइसेंस</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">106 दिनों की GDPR फ़ाइल</a> · <a href="../HOW-IT-WORKS.md">साक्ष्य मॉडल</a></p>
 <p><a href="README.md">परियोजना</a> · <a href="README.md">दस्तावेज़ीकरण</a> · <a href="../wiki/Home.md">विकी</a></p>
 </div>

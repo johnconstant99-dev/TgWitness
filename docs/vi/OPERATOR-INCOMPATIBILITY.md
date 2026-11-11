@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · Thông báo dự án TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Bản ghi nguồn</a> · <a href="../../NOTICE">THÔNG BÁO gốc</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Hồ sơ GDPR 106 ngày</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Bản ghi nguồn</a> · <a href="../../NOTICE">THÔNG BÁO gốc</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">Hồ sơ GDPR 106 ngày</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Thông báo về Đạo đức &amp; Tính liên tục lịch sử</h2>
 <p>Chúng tôi được biết rằng đối với một số công ty luật — cụ thể là <strong>Tiến sĩ Tobias Schelinski</strong> và <strong>Tiến sĩ Patrick Vincent Zurheide</strong> — toán học, tính toàn vẹn kỹ thuật và các sự kiện khách quan đều không có ý nghĩa gì.</p>
 <p>Việc chào bán dịch vụ vi phạm GDPR cho các doanh nghiệp trong khi không thể đảm bảo các quy trình xử lý dữ liệu cơ bản không thể được coi là chuyên môn pháp lý. Chữ ký của một chuyên gia hàng đầu trên một tuyên bố bị làm giả cũng không thể che giấu sự thiếu năng lực về mặt kỹ thuật.</p>
@@ -67,7 +67,7 @@
 <li><strong>Điều này không có gì đáng cười cả. Điều đáng cười là chứng kiến các luật sư hàng đầu phải mất hàng tháng trời để cố gắng xóa các đề cập về lỗ hổng bảo mật này khỏi Google. Zero Trust.</strong></li>
 <li>Nếu quý vị đọc thông báo này sau <strong>ngày 1 tháng 12 năm 2026</strong>: các hồ sơ này đã được lưu trữ vĩnh viễn tại Kho <strong>lưu trữ Nhà nước Đức (<em>Staatsarchiv / Bundesarchiv</em>)</strong> và các kho lưu trữ tư pháp nước ngoài, nơi mà không có biểu mẫu trực tuyến nào về “Quyền được lãng quên” có thể xóa bỏ chúng.</li>
 </ul>
-<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="Hồ sơ GDPR 106 ngày" src="../assets/presentation/chapter-case.svg" /></a></p>
-<p><a href="../../LICENSE">Giấy phép MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Hồ sơ GDPR 106 ngày</a> · <a href="../HOW-IT-WORKS.md">Mô hình bằng chứng</a></p>
+<p><a href="TAYLOR-WESSING-GDPR-FILE.md"><img alt="Hồ sơ GDPR 106 ngày" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">Giấy phép MIT</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">Hồ sơ GDPR 106 ngày</a> · <a href="../HOW-IT-WORKS.md">Mô hình bằng chứng</a></p>
 <p><a href="README.md">Dự án</a> · <a href="README.md">Tài liệu</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

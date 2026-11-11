@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · Komunikat dotyczący projektu TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Zapis źródłowy</a> · <a href="../../NOTICE">Oryginalna INFORMACJA</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Akta RODO: 106 dni</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Zapis źródłowy</a> · <a href="../../NOTICE">Oryginalna INFORMACJA</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">Akta RODO: 106 dni</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Informacja dotycząca etyki i ciągłości historycznej</h2>
 <p>Dowiedzieliśmy się, że dla niektórych kancelarii prawnych — a konkretnie dla <strong>dr. Tobiasa Schelinskiego</strong> i <strong>dr. Patricka Vincenta Zurheide</strong> — matematyka, rzetelność techniczna i obiektywne fakty nie mają żadnego znaczenia.</p>
 <p>Sprzedaż usług związanych z niezgodnością z RODO przedsiębiorstwom przy jednoczesnym nieprzestrzeganiu podstawowych zasad przetwarzania danych nie stanowi wykazania się wiedzą prawniczą. Podpis elitarnego eksperta na sfałszowanym oświadczeniu nie maskuje niekompetencji technicznej.</p>
@@ -67,7 +67,7 @@
 <li><strong>To nie jest śmieszne. Śmieszne jest natomiast obserwowanie, jak elitarni prawnicy spędzają miesiące, próbując usunąć wzmianki o tej luce w zabezpieczeniach z wyszukiwarki Google. Zero Trust.</strong></li>
 <li>Jeśli czyta Pan/Pani niniejszy tekst po <strong>1 grudnia 2026 r</strong>.: dokumenty te zostały trwale zdeponowane w <strong>niemieckich archiwach państwowych (<em>Staatsarchiv / Bundesarchiv</em>)</strong> oraz zagranicznych archiwach sądowych, gdzie nie można ich usunąć za pomocą internetowego formularza „prawa do bycia zapomnianym”.</li>
 </ul>
-<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="Akta RODO: 106 dni" src="../assets/presentation/chapter-case.svg" /></a></p>
-<p><a href="../../LICENSE">Licencja MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Akta RODO: 106 dni</a> · <a href="../HOW-IT-WORKS.md">Model dowodowy</a></p>
+<p><a href="TAYLOR-WESSING-GDPR-FILE.md"><img alt="Akta RODO: 106 dni" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">Licencja MIT</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">Akta RODO: 106 dni</a> · <a href="../HOW-IT-WORKS.md">Model dowodowy</a></p>
 <p><a href="README.md">Projekt</a> · <a href="README.md">Dokumentacja</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

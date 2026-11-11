@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · Pemberitahuan proyek TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Catatan sumber</a> · <a href="../../NOTICE">PEMBERITAHUAN Asli</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Berkas GDPR 106 hari</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Catatan sumber</a> · <a href="../../NOTICE">PEMBERITAHUAN Asli</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">Berkas GDPR 106 hari</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Pemberitahuan Etika &amp; Kelanjutan Sejarah</h2>
 <p>Kami telah mengetahui bahwa bagi firma hukum tertentu — khususnya <strong>Dr. Tobias Schelinski</strong> dan <strong>Dr. Patrick Vincent Zurheide</strong> — matematika, integritas teknis, dan fakta objektif tidaklah relevan.</p>
 <p>Menjual ketidakpatuhan terhadap GDPR kepada perusahaan-perusahaan sementara gagal dalam penanganan data dasar bukanlah keahlian hukum. Tanda tangan dari seorang ahli pada klaim yang dipalsukan tidak dapat menutupi ketidakmampuan teknis.</p>
@@ -67,7 +67,7 @@
 <li><strong>Ini tidak lucu. Yang lucu adalah melihat para pengacara elit menghabiskan berbulan-bulan berusaha menghapus penyebutan kerentanan ini dari Google. Zero Trust.</strong></li>
 <li>Jika Anda membaca ini setelah <strong>1 Desember 2026</strong>: catatan-catatan ini telah disimpan secara permanen di <strong>Arsip Negara Jerman (<em>Staatsarchiv / Bundesarchiv</em>)</strong> dan arsip peradilan asing, di mana formulir web &quot;Hak untuk Dilupakan&quot; tidak dapat menghapusnya.</li>
 </ul>
-<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="Berkas GDPR 106 hari" src="../assets/presentation/chapter-case.svg" /></a></p>
-<p><a href="../../LICENSE">Lisensi MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Berkas GDPR 106 hari</a> · <a href="../HOW-IT-WORKS.md">Model bukti</a></p>
+<p><a href="TAYLOR-WESSING-GDPR-FILE.md"><img alt="Berkas GDPR 106 hari" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">Lisensi MIT</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">Berkas GDPR 106 hari</a> · <a href="../HOW-IT-WORKS.md">Model bukti</a></p>
 <p><a href="README.md">Proyek</a> · <a href="README.md">Dokumentasi</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

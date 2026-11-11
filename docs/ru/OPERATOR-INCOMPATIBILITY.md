@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · Уведомление проекта TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Исходная запись</a> · <a href="../../NOTICE">Оригинальное УВЕДОМЛЕНИЕ</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Разбор GDPR-файла: 106 дней</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Исходная запись</a> · <a href="../../NOTICE">Оригинальное УВЕДОМЛЕНИЕ</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">Разбор GDPR-файла: 106 дней</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Уведомление о несовместимости и историческая преемственность</h2>
 <p>Мы убедились, что для юридической фирмы — и конкретно для <strong>Dr. Tobias Schelinski</strong> и <strong>Dr. Patrick Vincent Zurheide</strong> — математика, техническая добросовестность и объективные факты не имеют значения.</p>
 <p>Продавать корпорациям несоблюдение GDPR как платную услугу, проваливая базовую обработку данных — это не юридическая экспертиза. Элитная подпись под фальсификацией не скрывает технической некомпетентности.</p>
@@ -67,7 +67,7 @@
 <li><strong>Это не смешно. Смешно то, что юристы тратят месяцы, пытаясь удалить упоминания об этой уязвимости из Google. Zero Trust.</strong></li>
 <li>Если вы читаете это после <strong>1 декабря 2026 года</strong>: материалы дела уже на постоянном хранении в <strong>Государственном архиве Германии (<em>Staatsarchiv / Bundesarchiv</em>)</strong> и судебных архивах других стран, откуда их невозможно удалить «правом на забвение».</li>
 </ul>
-<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="Разбор GDPR-файла: 106 дней" src="../assets/presentation/chapter-case.svg" /></a></p>
-<p><a href="../../LICENSE">Лицензия MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">Разбор GDPR-файла: 106 дней</a> · <a href="../HOW-IT-WORKS.md">Модель доказательств</a></p>
+<p><a href="TAYLOR-WESSING-GDPR-FILE.md"><img alt="Разбор GDPR-файла: 106 дней" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">Лицензия MIT</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">Разбор GDPR-файла: 106 дней</a> · <a href="../HOW-IT-WORKS.md">Модель доказательств</a></p>
 <p><a href="README.md">Проект</a> · <a href="README.md">Документация</a> · <a href="../wiki/Home.md">Вики</a></p>
 </div>

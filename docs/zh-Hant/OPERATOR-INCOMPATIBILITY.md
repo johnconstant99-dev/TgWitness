@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · TgWitness 專案公告</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">原始記錄</a> · <a href="../../NOTICE">原始「聲明」</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106 天的 GDPR 檔案</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">原始記錄</a> · <a href="../../NOTICE">原始「聲明」</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">106 天的 GDPR 檔案</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ 道德聲明與歷史延續性</h2>
 <p>我們獲悉，對於某些律師事務所——具體而言是<strong>托拜厄斯·謝林斯基博士</strong>（Dr. Tobias Schelinski）與<strong>派翠克·文森特·祖爾海德博士</strong>（Dr. Patrick Vincent Zurheide）——而言，數學、技術完整性及客觀事實皆無關緊要。</p>
 <p>向企業兜售不符合《一般資料保護規範》（GDPR）的服務，卻連基本的資料處理都做不好，這並非法律專業能力。在偽造的主張上加上精英級的簽名，也無法掩蓋技術上的無能。</p>
@@ -67,7 +67,7 @@
 <li><strong>這一點也不好笑。真正好笑的是，看著頂尖律師們耗費數月，試圖從 Google 上刪除這項漏洞的相關提及。零信任。</strong></li>
 <li>若您於 <strong>2026 年 12 月 1 日</strong>之後閱讀此聲明：這些紀錄已永久存檔於<strong>德國國家檔案館（<em>Staatsarchiv / Bundesarchiv</em>）</strong>及海外司法檔案館，任何「被遺忘權」的網路表單均無法刪除這些紀錄。</li>
 </ul>
-<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="106 天的 GDPR 檔案" src="../assets/presentation/chapter-case.svg" /></a></p>
-<p><a href="../../LICENSE">MIT 授權條款</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106 天的 GDPR 檔案</a> · <a href="../HOW-IT-WORKS.md">證據模型</a></p>
+<p><a href="TAYLOR-WESSING-GDPR-FILE.md"><img alt="106 天的 GDPR 檔案" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">MIT 授權條款</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">106 天的 GDPR 檔案</a> · <a href="../HOW-IT-WORKS.md">證據模型</a></p>
 <p><a href="README.md">專案</a> · <a href="README.md">文件說明</a> · <a href="../wiki/Home.md">維基</a></p>
 </div>

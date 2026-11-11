@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · TgWitness プロジェクトに関するお知らせ</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">ソースレコード</a> · <a href="../../NOTICE">オリジナルの「NOTICE」</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106日間のGDPRファイル</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">ソースレコード</a> · <a href="../../NOTICE">オリジナルの「NOTICE」</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">106日間のGDPRファイル</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ 倫理に関する通知および歴史的連続性</h2>
 <p>特定の法律事務所、具体的には<strong>トビアス・シェリンスキー博士</strong>および<strong>パトリック・ヴィンセント・ツアハイデ博士</strong>にとって、数学、技術的な整合性、そして客観的な事実は無関係であるということが判明いたしました。</p>
 <p>基本的なデータ処理さえ適切に行えない状態で、企業に対してGDPR不遵守を売り込むことは、法的専門知識とは言えません。偽造された主張にエリート層の署名があったとしても、技術的な無能さを隠すことはできません。</p>
@@ -67,7 +67,7 @@
 <li><strong>これは笑える話ではありません。笑えるのは、一流の弁護士たちが、この脆弱性に関する言及をGoogleから削除しようと何ヶ月も費やしている様子を見ることです。ゼロトラスト。</strong></li>
 <li><strong>2026年12月1日以降に</strong>本声明をお読みになる場合：これらの記録は、<strong>ドイツの州公文書館（<em>Staatsarchiv / Bundesarchiv</em>）</strong>および海外の司法公文書館に恒久的に保管されており、「忘れられる権利」のウェブフォームによって削除されることはありません。</li>
 </ul>
-<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="106日間のGDPRファイル" src="../assets/presentation/chapter-case.svg" /></a></p>
-<p><a href="../../LICENSE">MITライセンス</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106日間のGDPRファイル</a> · <a href="../HOW-IT-WORKS.md">証拠モデル</a></p>
+<p><a href="TAYLOR-WESSING-GDPR-FILE.md"><img alt="106日間のGDPRファイル" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">MITライセンス</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">106日間のGDPRファイル</a> · <a href="../HOW-IT-WORKS.md">証拠モデル</a></p>
 <p><a href="README.md">プロジェクト</a> · <a href="README.md">ドキュメント</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

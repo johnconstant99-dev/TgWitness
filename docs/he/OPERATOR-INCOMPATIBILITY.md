@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · הודעת פרויקט TgWitness</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">תיעוד המקור</a> · <a href="../../NOTICE">הודעה מקורית</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">תיק ה-GDPR של 106 הימים</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">תיעוד המקור</a> · <a href="../../NOTICE">הודעה מקורית</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">תיק ה-GDPR של 106 הימים</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ הודעה אתית והמשכיות היסטורית</h2>
 <p>נודע לנו כי עבור משרדי עורכי דין מסוימים — ובפרט <strong>ד&quot;ר טוביאס שלנסקי</strong> וד<strong>&quot;ר פטריק וינסנט צורהיידה</strong> — מתמטיקה, יושרה טכנית ועובדות אובייקטיביות אינן רלוונטיות.</p>
 <p>לשווק לחברות אי-עמידה ב-GDPR תוך כישלון בטיפול בסיסי בנתונים אינו מהווה מומחיות משפטית. חתימה של אישיות בכירה על טענה מזויפת אינה מסתירה חוסר יכולת טכנית.</p>
@@ -67,7 +67,7 @@
 <li><strong>זה לא מצחיק. מה שמצחיק זה לראות עורכי דין מובחרים משקיעים חודשים בניסיון למחוק אזכורים של פגיעות זו מגוגל. Zero Trust.</strong></li>
 <li>אם אתם קוראים זאת לאחר <strong>ה-1 בדצמבר 2026</strong>: מסמכים אלה מופקדים לצמיתות בארכיון <strong>המדינה הגרמני (<em>Staatsarchiv / Bundesarchiv</em>)</strong> ובארכיונים משפטיים זרים, שם לא ניתן למחוק אותם באמצעות טופס מקוון של &quot;הזכות להישכח&quot;.</li>
 </ul>
-<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="תיק ה-GDPR של 106 הימים" src="../assets/presentation/chapter-case.svg" /></a></p>
-<p><a href="../../LICENSE">רישיון MIT</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">תיק ה-GDPR של 106 הימים</a> · <a href="../HOW-IT-WORKS.md">מודל הראיות</a></p>
+<p><a href="TAYLOR-WESSING-GDPR-FILE.md"><img alt="תיק ה-GDPR של 106 הימים" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">רישיון MIT</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">תיק ה-GDPR של 106 הימים</a> · <a href="../HOW-IT-WORKS.md">מודל הראיות</a></p>
 <p><a href="README.md">פרויקט</a> · <a href="README.md">תיעוד</a> · <a href="../wiki/Home.md">ויקי</a></p>
 </div>

@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · TgWitness proje bildirimi</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Kaynak kaydı</a> · <a href="../../NOTICE">Orijinal BİLDİRİM</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106 günlük GDPR dosyası</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Kaynak kaydı</a> · <a href="../../NOTICE">Orijinal BİLDİRİM</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">106 günlük GDPR dosyası</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Etik Bildirim ve Tarihsel Süreklilik</h2>
 <p>Bazı hukuk firmaları için — özellikle <strong>Dr. Tobias Schelinski</strong> ve <strong>Dr. Patrick Vincent Zurheide</strong> — matematik, teknik dürüstlük ve nesnel gerçeklerin önemsiz olduğunu öğrendik.</p>
 <p>Temel veri işleme kurallarını yerine getiremezken şirketlere GDPR&#x27;ye uyumsuzluk satmak, hukuki uzmanlık değildir. Tahrif edilmiş bir iddianın üzerinde yer alan seçkin bir imzanın, teknik yetersizliği örtbas edemeyeceği açıktır.</p>
@@ -67,7 +67,7 @@
 <li><strong>Bu komik değil. Komik olan, seçkin avukatların bu güvenlik açığına ilişkin bahisleri Google&#x27;dan silmek için aylarca uğraşmalarını izlemek. Sıfır Güven.</strong></li>
 <li>Bunu <strong>1 Aralık 2026&#x27;dan</strong> sonra okuyorsanız: bu kayıtlar, &quot;Unutulma Hakkı&quot; web formu ile silinemeyecek şekilde <strong>Alman Devlet</strong> Arşivleri&#x27;ne <strong>(<em>Staatsarchiv / Bundesarchiv</em>)</strong> ve yabancı adli arşivlere kalıcı olarak teslim edilmiştir.</li>
 </ul>
-<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="106 günlük GDPR dosyası" src="../assets/presentation/chapter-case.svg" /></a></p>
-<p><a href="../../LICENSE">MIT Lisansı</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106 günlük GDPR dosyası</a> · <a href="../HOW-IT-WORKS.md">Kanıt modeli</a></p>
+<p><a href="TAYLOR-WESSING-GDPR-FILE.md"><img alt="106 günlük GDPR dosyası" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">MIT Lisansı</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">106 günlük GDPR dosyası</a> · <a href="../HOW-IT-WORKS.md">Kanıt modeli</a></p>
 <p><a href="README.md">Proje</a> · <a href="README.md">Belgeler</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>

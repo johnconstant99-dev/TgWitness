@@ -6,7 +6,7 @@
 <p><a href="../OPERATOR-INCOMPATIBILITY.md" lang="en">English</a></p>
 
 <p><strong>PhishDestroy · TgWitness loyihasi bildirishnomas</strong></p>
-<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Manba yozuvi</a> · <a href="../../NOTICE">Asl E&#x27;LON</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106 kunlik GDPR fayli</a></p>
+<p><a href="https://phishdestroy.io/steam_dossier/taylor_wessing">Manba yozuvi</a> · <a href="../../NOTICE">Asl E&#x27;LON</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">106 kunlik GDPR fayli</a></p>
 <h2 id="-ethical-notice--historical-continuity">⚖️ Axloqiy ogohlantirish va tarixiy uzluksizlik</h2>
 <p>Biz bilib oldikki, ayrim yuridik firmalar — xususan <strong>Dr Tobias Schelinski</strong> va <strong>Dr Patrick Vincent Zurheide</strong> — uchun matematika, texnik yaxlitlik va ob&#x27;ektiv faktlar ahamiyatsizdir.</p>
 <p>GDPR talablariga rioya qilmaslikni korporatsiyalarga sotish va asosiy ma&#x27;lumotlarni boshqarishda muvaffaqiyatsiz bo&#x27;lish huquqiy ekspertiza hisoblanmaydi. Soxtalashtirilgan da&#x27;voga elita imzo texnik malakatsizlikni yashira olmaydi.</p>
@@ -67,7 +67,7 @@
 <li><strong>Bu kulgili emas. Kulgili tomoni shundaki, elit yuristlar oylar davomida Google&#x27;dan ushbu zaiflikka oid eslatmalarni o&#x27;chirishga urinishlarini tomosha qilish. Zero Trust.</strong></li>
 <li>Agar siz buni <strong>2026-yil 1-dekabrdan</strong> keyin o&#x27;qisangiz: bu yozuvlar doimiy ravishda <strong>Germaniya Davlat</strong> arxivlariga <strong>(<em>Staatsarchiv / Bundesarchiv</em>)</strong> va xorijiy sud arxivlariga topshirilgan bo&#x27;lib, ularni hech qanday &quot;Unutilish huquqi&quot; veb-formasi o&#x27;chira olmaydi.</li>
 </ul>
-<p><a href="../TAYLOR-WESSING-GDPR-FILE.md"><img alt="106 kunlik GDPR fayli" src="../assets/presentation/chapter-case.svg" /></a></p>
-<p><a href="../../LICENSE">MIT litsenziyasi</a> · <a href="../TAYLOR-WESSING-GDPR-FILE.md">106 kunlik GDPR fayli</a> · <a href="../HOW-IT-WORKS.md">Dalil modeli</a></p>
+<p><a href="TAYLOR-WESSING-GDPR-FILE.md"><img alt="106 kunlik GDPR fayli" src="../assets/presentation/chapter-case.svg" /></a></p>
+<p><a href="../../LICENSE">MIT litsenziyasi</a> · <a href="TAYLOR-WESSING-GDPR-FILE.md">106 kunlik GDPR fayli</a> · <a href="../HOW-IT-WORKS.md">Dalil modeli</a></p>
 <p><a href="README.md">Loyiha</a> · <a href="README.md">Hujjatlash</a> · <a href="../wiki/Home.md">Wiki</a></p>
 </div>
