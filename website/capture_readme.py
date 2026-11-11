@@ -32,7 +32,6 @@ def capture(page, mobile):
 
 
 def choose_filter(page, name):
-    # The message filters sit in a collapsed "Filters" menu; choose one without opening it.
     page.locator(f'#chat-status [data-chat-filter="{name}"]').evaluate("button => button.click()")
     page.wait_for_timeout(600)
 

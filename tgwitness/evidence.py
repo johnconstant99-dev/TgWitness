@@ -88,7 +88,6 @@ def checkpoint(store, vault):
         annotations = board.head(snapshot.connection)
         if annotations["seq"]:
             statement["annotations_head"] = annotations
-    # The latest drand round fetched through the workspace route; a checkpoint never connects out itself.
     drand = store.get_setting("drand_latest", None)
     if drand:
         statement["drand_anchor"] = drand

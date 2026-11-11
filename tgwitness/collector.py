@@ -1182,8 +1182,6 @@ class Collector:
         return saved_route(self.vault.read("network"))
 
     async def refresh_drand(self):
-        # Checkpoints carry the latest drand round as a lower time bound; fetch it through the outside route
-        # so Hide IP, proxies and a turned-off outside route apply.
         from .verify import DRAND_CHAIN
         from .witness import drand_latest
         with suppress(Exception):
