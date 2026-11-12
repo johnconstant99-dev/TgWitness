@@ -732,8 +732,8 @@ The panel prepares a request archive containing canonical checkpoint.json bytes,
 a SHA-256 message imprint and random nonce in timestamp.tsq, checksums, and instructions.
 No network request is made; the token the authority returns for this request is the timestamp.
 
-`python -m tgwitness.anchor verify` calls OpenSSL ts twice: once against checkpoint
-bytes and once against the original request. A trusted CA file is required explicitly;
+`python -m tgwitness.anchor verify` checks the reply against the checkpoint
+bytes and the original request without OpenSSL. A trusted CA file is required explicitly;
 included certificates are not automatically trusted. Request checking is optional at
 the CLI, so retain and supply --request to check the nonce. The result states whether
 it was checked. The collector checkpoint signature and journal must still be verified

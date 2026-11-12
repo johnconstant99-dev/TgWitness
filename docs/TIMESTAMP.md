@@ -62,10 +62,10 @@ compared rounds supply the authenticated lower time bound.
 python -m tgwitness.anchor verify --checkpoint checkpoint.json --request timestamp.tsq --response timestamp.tsr --ca trusted-tsa-root.pem
 ```
 
-Add `--intermediates tsa-intermediates.pem` or `--openssl /path/to/openssl` if needed.
-OpenSSL must support `ts`. On Windows the verifier also searches the standard Git
-installation. OpenSSL 3.5.9 was used for the synthetic CA/TSA tests and for the live
-service check below.
+Add `--intermediates tsa-intermediates.pem` if needed. OpenSSL is not needed: the
+signature, the signing certificate reference and the chain are checked in Python with the
+`cryptography` library, the same code `verify.py --tsa-ca` uses. `openssl ts -verify`
+remains an independent second check for an expert who wants one.
 
 6. Export a signed journal ZIP after the checkpoint so it includes that prefix.
    Verify using the independently known fingerprint:
@@ -97,14 +97,15 @@ input file had different whitespace.
 | --- | --- |
 | Data | SHA-256 of the exact checkpoint bytes must match the response |
 | Request | With `--request`, the original query and nonce are verified |
-| TSA signature | OpenSSL verifies the signature and chain to the explicit CA |
+| TSA signature | The signature, the signing certificate and its chain to the explicit CA are checked at the stamped time |
 | Collector signature | Separately verified by the journal verifier with a pinned key |
 | Revocation | Evidence mode stores OCSP/CRL evidence that `verify.py` checks |
 | Scheduled submission | Evidence mode, off by default |
 
 `--request` is technically optional, but omitting it prevents verification of the
 original nonce. For this full procedure, the result's `request_checked` must be true.
-Certificate verification follows the installed OpenSSL's rules and verification time.
+Each certificate in the chain must be valid at the stamped time, and the signing
+certificate must be for time stamping only.
 
 The TSA response anchors the submitted checkpoint bytes to its stated time.
 Review that result with the acquisition records and environment verification for

@@ -1,11 +1,9 @@
-"""Prepare an offline RFC 3161 request and verify a TSA response with a trusted CA."""
+"""Prepare an offline RFC 3161 request and verify a TSA response against a trusted CA, without OpenSSL."""
 import argparse
 import hashlib
 import io
 import json
 import os
-import shutil
-import subprocess
 import zipfile
 from pathlib import Path
 
@@ -45,7 +43,7 @@ Verify from a trusted TgWitness installation:
 python -m tgwitness.anchor verify --checkpoint checkpoint.json --request timestamp.tsq \
 --response timestamp.tsr --ca trusted-tsa-root.pem
 
-If needed add --intermediates tsa-intermediates.pem and --openssl /path/to/openssl.
+If needed add --intermediates tsa-intermediates.pem. OpenSSL is not needed.
 The verifier checks both checkpoint bytes and the original request (including nonce).
 Then verify the evidence ZIP against checkpoint.json and a separately trusted
 collector fingerprint using tgwitness/verify.py.
@@ -68,40 +66,26 @@ def request_archive(checkpoint):
     return output.getvalue()
 
 
-def find_openssl(explicit=None):
-    path = explicit or shutil.which("openssl")
-    if not path and os.name == "nt":
-        candidate = Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / "Git/usr/bin/openssl.exe"
-        if candidate.is_file():
-            path = str(candidate)
-    if not path:
-        raise ValueError("OpenSSL is required to verify RFC 3161 responses.")
-    return str(path)
-
-
-def verify_timestamp(checkpoint_path, response_path, ca_path, request_path=None,
-                     intermediates=None, openssl=None):
+def verify_timestamp(checkpoint_path, response_path, ca_path, request_path=None, intermediates=None):
+    from cryptography import x509
+    from .verifier.timestamps import timestamp_reply_summary, timestamp_signature, tsa_roots
     paths = [checkpoint_path, response_path, ca_path] + ([request_path] if request_path else [])
     if intermediates:
         paths.append(intermediates)
     if any(not Path(p).is_file() for p in paths):
         raise ValueError("Every timestamp/CA input must be an existing file.")
-    binary = find_openssl(openssl)
-
-
-    common = [binary, "ts", "-verify", "-in", str(response_path), "-CAfile", str(ca_path)]
-    if intermediates:
-        common += ["-untrusted", str(intermediates)]
-    for selector in ([["-data", str(checkpoint_path)], ["-queryfile", str(request_path)]]
-                     if request_path else [["-data", str(checkpoint_path)]]):
-        result = subprocess.run(common + selector, capture_output=True, timeout=30, check=False)
-        if result.returncode:
-            raise ValueError("TSA verification failed: " + result.stderr.decode(errors="replace")[-3000:])
-    detail = subprocess.run([binary, "ts", "-reply", "-in", str(response_path), "-text"],
-                            capture_output=True, timeout=30, check=True)
-    return {"verified": True, "checkpoint_sha256": hashlib.sha256(Path(checkpoint_path).read_bytes()).hexdigest(),
+    data, reply = Path(checkpoint_path).read_bytes(), Path(response_path).read_bytes()
+    query = Path(request_path).read_bytes() if request_path else None
+    extra = x509.load_pem_x509_certificates(Path(intermediates).read_bytes()) if intermediates else []
+    try:
+        summary = timestamp_reply_summary(reply, hashlib.sha256(data).digest(), query)
+        signed = timestamp_signature(reply, tsa_roots(ca_path), intermediates=extra)
+    except (ValueError, TypeError, IndexError) as exc:
+        raise ValueError("TSA verification failed: " + str(exc)) from None
+    return {"verified": True, "checkpoint_sha256": hashlib.sha256(data).hexdigest(),
             "request_checked": request_path is not None, "trust_store": "explicit CA file",
-            "tsa_statement": detail.stdout.decode(errors="replace"),
+            "time": summary["time"], "signer": signed["signer"], "root": signed["root"],
+            "root_sha256": signed["root_sha256"],
             "limitation": "The timestamp shows that the checkpoint existed by its time; the response was checked "
                           "against the explicit CA file."}
 
@@ -117,7 +101,6 @@ def main():
         verify.add_argument("--" + name, type=Path, required=True)
     for name in ("request", "intermediates"):
         verify.add_argument("--" + name, type=Path)
-    verify.add_argument("--openssl")
     args = parser.parse_args()
     try:
         if args.command == "prepare":
@@ -127,7 +110,7 @@ def main():
             print("Prepared timestamp request. No TSA was contacted:", args.out)
         else:
             print(json.dumps(verify_timestamp(args.checkpoint, args.response, args.ca, args.request,
-                                             args.intermediates, args.openssl), indent=2))
+                                             args.intermediates), indent=2))
     except Exception as exc:
         parser.exit(1, str(exc) + "\n")
 

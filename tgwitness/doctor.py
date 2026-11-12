@@ -95,12 +95,6 @@ def inspect_environment(root, host="127.0.0.1", port=8787):
         add("vault_mode", "warning", "Default local key mode; use encrypted storage for journal and attachments")
     if os.environ.get("TGWITNESS_TOKEN") and len(os.environ["TGWITNESS_TOKEN"]) < 24:
         add("panel_token", "fail", "TGWITNESS_TOKEN must contain at least 24 characters")
-    from .anchor import find_openssl
-    try:
-        find_openssl()
-        add("timestamp_verifier", "pass", "OpenSSL executable found; optional TSA interoperability is a separate check")
-    except ValueError:
-        add("timestamp_verifier", "warning", "OpenSSL not found; only external timestamp verification needs it")
     return {"ready": not any(c["status"] == "fail" for c in checks), "platform": platform.platform(),
             "interpreter": sys.executable, "data_directory": str(root), "checks": checks,
             "scope": "Local startup prerequisites"}

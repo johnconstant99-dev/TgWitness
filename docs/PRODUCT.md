@@ -227,7 +227,7 @@ A retained local checkpoint can detect rollback to an earlier journal prefix.
 | Program-file measurement | Collector self-report about measured files |
 | Valid independent TSA response | Existence of particular bytes by the TSA time under explicit trust assumptions |
 
-RFC 3161 request preparation and OpenSSL response verification are implemented.
+RFC 3161 request preparation and response verification are implemented without OpenSSL.
 Evidence mode also submits checkpoint hashes to configured timestamp services.
 Retain and verify the authority's response to establish an independent time anchor.
 See [TIMESTAMP.md](TIMESTAMP.md).
