@@ -16,16 +16,12 @@ from .common import (
     hashlib,
     json,
     ocsp,
-    os,
     padding,
     re,
     read_member,
     rsa,
-    shutil,
     strict_json,
     struct,
-    subprocess,
-    tempfile,
     timezone,
     x509,
 )
@@ -210,7 +206,7 @@ def timestamp_certificate_reference(reply):
     return certificate_reference_details(algorithm)
 
 
-def timestamp_signature(reply, roots, *, include_reference=False):
+def timestamp_signature(reply, roots, *, include_reference=False, intermediates=()):
     token = timestamp_token(reply)
     when = tst_info(token["tst"])["time"]
     _, _, start, end = token["signer"]
@@ -265,7 +261,7 @@ def timestamp_signature(reply, roots, *, include_reference=False):
     while not (len(chain) > 1 and chain[-1].fingerprint(hashes.SHA256()) in trusted):
         if len(chain) > 8:
             raise ValueError("The timestamp certificate chain is too long")
-        candidates = list(trusted.values()) + [c for c in raw.values() if c not in chain]
+        candidates = list(trusted.values()) + [c for c in [*raw.values(), *intermediates] if c not in chain]
         issuer = None
         for candidate in candidates:
             if candidate.subject != current.issuer:
@@ -519,33 +515,15 @@ def confirm_ots(proof, digest, fetch=None):
     return summary
 
 
-def find_openssl():
-    found = shutil.which("openssl")
-    if not found and os.name == "nt":
-        for base in (os.environ.get("ProgramFiles", r"C:\Program Files"),):
-            for sub in ("Git/usr/bin/openssl.exe", "Git/ucrt64/bin/openssl.exe", "Git/mingw64/bin/openssl.exe"):
-                if os.path.isfile(os.path.join(base, sub)):
-                    return os.path.join(base, sub)
-    if not found:
-        raise ValueError("OpenSSL is required to check timestamp signatures (--tsa-ca)")
-    return found
-
-
-def openssl_verify_timestamp(data, reply, query, ca_path):
-    binary = find_openssl()
-    with tempfile.TemporaryDirectory() as tmp:
-        paths = {}
-        for name, content in (("data", data), ("reply.tsr", reply), ("query.tsq", query)):
-            if content is not None:
-                paths[name] = os.path.join(tmp, name)
-                with open(paths[name], "wb") as handle:
-                    handle.write(content)
-        common = [binary, "ts", "-verify", "-in", paths["reply.tsr"], "-CAfile", str(ca_path)]
-        selectors = [["-data", paths["data"]]] + ([["-queryfile", paths["query.tsq"]]] if query is not None else [])
-        for selector in selectors:
-            done = subprocess.run(common + selector, capture_output=True, timeout=30, check=False)
-            if done.returncode:
-                raise ValueError("Timestamp signature check failed: " + done.stderr.decode(errors="replace")[-500:])
+def tsa_roots(path):
+    data = Path(path).read_bytes()
+    try:
+        roots = x509.load_pem_x509_certificates(data)
+    except ValueError:
+        roots = [x509.load_der_x509_certificate(data)]
+    if not roots:
+        raise ValueError("The --tsa-ca file holds no certificate")
+    return roots
 
 
 def qualified_timestamp(reply):
@@ -711,7 +689,7 @@ def verify_anchors(archive, names, public_key, event_count, hash_at, tsa_ca=None
                 query = read_member(archive, query_name) if query_name in names else None
                 entry.update(kind="rfc3161", **timestamp_reply_summary(reply, digest, query))
                 if tsa_ca:
-                    openssl_verify_timestamp(data, reply, query, tsa_ca)
+                    timestamp_signature(reply, tsa_roots(tsa_ca))
                 entry["signature"] = "checked against the given root" if tsa_ca else "not checked (use --tsa-ca)"
                 if tsa_ca:
                     entry.update(qualified_timestamp(reply))

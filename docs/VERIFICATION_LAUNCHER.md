@@ -117,8 +117,8 @@ python -I verify.py archive.zip --pretty --explain --witness witness.zip --witne
 ```
 
 Use `python/python.exe` in place of `python` for the embedded Windows runtime.
-RFC 3161 verification also requires OpenSSL and a trusted root; OpenSSL is not
-bundled here. OpenTimestamps Bitcoin authentication remains a separate check.
+RFC 3161 verification needs the authority's trusted root (`--tsa-ca`); it does not
+need OpenSSL. OpenTimestamps Bitcoin authentication remains a separate check.
 The default maximum expanded ZIP size is 4 GiB; `--max-gib` explicitly changes
 it. `--json` keeps its machine-readable format, including when `--explain` is
 supplied. `--plain --explain` gives readable explanations without colour.
