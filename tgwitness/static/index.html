@@ -39,7 +39,7 @@
 <script defer src="/dialogs.js?v=2"></script>
 <script defer src="/privacy.js?v=1"></script>
 <script defer src="/chat-safety.js?v=1"></script>
-<script defer src="/app.js?v=0.9.1-evidence1-topology2-layout1-activity3"></script>
+<script defer src="/app.js?v=0.9.1-evidence1-topology2-layout1-activity4"></script>
 <script defer src="/services.js?v=1"></script>
 <script defer src="/independent-capture.js?v=2"></script>
 <script defer src="/investigate.js?v=9"></script>
@@ -58,7 +58,7 @@
 <link href="/views/disclosure-preview.css?v=1" rel="stylesheet">
 <link href="/components/forms.css?v=35" rel="stylesheet">
 <link href="/components/feedback.css?v=36" rel="stylesheet">
-<link href="/components/layout.css?v=4" rel="stylesheet">
+<link href="/components/layout.css?v=8" rel="stylesheet">
 </head>
 <body>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
@@ -258,7 +258,7 @@
   <section class="card workflow-status" hidden aria-label="Current workspace"><div><strong id="workflow-status-title"></strong><p id="workflow-status-copy"></p></div><button class="secondary" data-open="chats" type="button">Open saved chats</button><button class="quiet" data-open="accounts" type="button">Manage accounts</button><div class="workflow-accounts" hidden id="workflow-accounts"></div></section>
   <div class="workflow-choices">
     <article class="card workflow-card workflow-link" hidden id="workflow-link-card"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg><h2>Export a chat by link</h2><p>Choose a Telegram chat and review the export plan before starting.</p><form class="link-export-form" id="link-export-form"><label for="link-export-input">Chat link or @username</label><input autocomplete="off" id="link-export-input" maxlength="300" placeholder="@channel or https://t.me/…" spellcheck="false"><button class="primary" type="submit">Plan the export</button></form><div class="link-export-plan" hidden id="link-export-plan" role="status"></div><p class="hint">Checking briefly uses one permitted account. Starting an export requires a separate click.</p></article>
-    <article class="card workflow-card" id="workflow-account-card"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg><h2>Export my account</h2><p>Download the chats and history your account can read now. Choose dates, messages and files before starting.</p><div class="workflow-buttons"><button class="primary" data-workflow="account-all" type="button">Export everything</button><button class="secondary" data-workflow="account" type="button">Choose what to export</button></div><p class="hint" id="workflow-account-hint">No continuous observation needed.</p></article>
+    <article class="card workflow-card" id="workflow-account-card"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg><h2>Export my account</h2><p>Download the chats and history your account can read now. Choose dates, messages and files before starting.</p><div class="workflow-buttons"><button class="primary" data-workflow="account-all" type="button">Export everything</button><button class="secondary" data-workflow="account" type="button">Choose what to export</button></div><p class="hint" id="workflow-account-hint"></p></article>
     <article class="card workflow-card" id="workflow-investigation-card"><svg aria-hidden="true" class="icon"><use href="#i-journal"/></svg><h2>Follow an investigation</h2><p>Keep new messages, observed edits and deletion notices from the chats you choose.</p><button class="secondary" data-workflow="investigation" type="button">Set up observation</button><p class="hint">Previously saved records stay available when observation is paused.</p></article>
   </div>
   <section class="setup-start" hidden id="setup-start" aria-labelledby="setup-start-title">
@@ -271,7 +271,6 @@
     </div>
     <button class="text-link" id="setup-start-skip" type="button">Skip, I will set it up myself</button>
   </section>
-  <p class="hint">TgWitness signs the saved files. Export details explain what was collected and what is missing.</p>
 </section>
 
 <section class="view" id="view-observations">

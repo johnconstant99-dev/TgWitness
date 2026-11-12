@@ -327,9 +327,10 @@
 .event-row[data-category="system"] .event-excerpt { color: var(--muted); font-size: 12px; }
 .event-row[data-category="system"] .event-icon { opacity: .6; }
 .journal .card-heading #journal-to-slice { font-size: 12px; border-color: var(--border); color: var(--text-2); }
-.workflow-status .workflow-gap { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-top: 8px; padding: 6px 10px; border-radius: 6px; background: var(--warning-soft); color: var(--text); font-size: 13px; }
-.workflow-status .workflow-gap[hidden] { display: none; }
-.workflow-status .workflow-gap .text-link { font-size: 13px; }
+#view-start .workflow-gap { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 0 0 16px; padding: 10px 14px; border: 1px solid var(--warning-border); border-radius: 10px; background: var(--warning-soft); color: var(--text); font-size: 13px; }
+#view-start .workflow-gap::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--status-warn); flex: none; }
+#view-start .workflow-gap[hidden] { display: none; }
+#view-start .workflow-gap .text-link { font-size: 13px; font-weight: 600; }
 #view-accounts .route-exit { display: block; margin-top: 2px; color: var(--muted); font-size: 11px; font-weight: 400; }
 @media (max-width: 1199px) {
   #view-accounts .account-meta { grid-template-columns: minmax(0, 1fr); gap: 0; margin: 10px 0 12px; }
@@ -338,4 +339,30 @@
   #view-accounts .account-meta > .account-value:not(.account-task) dt { font-size: 12px; }
   #view-accounts .account-meta > .account-value:not(.account-task) dd { margin: 0; text-align: start; font-size: 13px; font-weight: 550; overflow-wrap: break-word; }
   #view-accounts .account-meta > .account-value:is([data-field="updated"], [data-field="attention"]) { display: none; }
+}
+[data-tip="closed"] { display: none !important; }
+[data-tip="open"] { margin: 6px 0 10px; padding: 9px 12px; border-inline-start: 3px solid var(--accent-border); border-radius: 0 8px 8px 0; background: var(--accent-soft); color: var(--text-2); font-size: 13px; line-height: 1.55; animation: unfold .2s ease-out; }
+.tip-toggle { display: inline-grid; place-items: center; flex: none; align-self: center; width: 20px; height: 20px; min-width: 20px; min-height: 20px; max-height: 20px; margin-inline-start: 8px; padding: 0; border: 1px solid var(--border); border-radius: 50%; background: var(--surface); color: var(--muted); vertical-align: middle; cursor: pointer; transition: color .15s, border-color .15s, background .15s, transform .15s; }
+.tip-toggle .icon { width: 14px; height: 14px; margin: 0; }
+button.tip-toggle { width: 20px !important; height: 20px !important; min-height: 20px !important; margin-top: 0 !important; padding: 0 !important; }
+.tip-toggle:hover { color: var(--accent-text); border-color: var(--accent-border); transform: scale(1.08); }
+.tip-toggle[aria-expanded="true"] { color: var(--accent-text); border-color: var(--accent-border); background: var(--accent-soft); }
+:is(p, div, span) > .tip-toggle:first-child:last-child { margin-inline-start: 0; }
+.page-heading .eyebrow, .workflow-intro .eyebrow { display: none; }
+.workflow-intro { margin-bottom: 18px; }
+#workflow-account-hint:empty { display: none; }
+@keyframes live-ping { 0% { box-shadow: 0 0 0 0 rgb(18 183 106 / .5); } 75%, 100% { box-shadow: 0 0 0 7px rgb(18 183 106 / 0); } }
+@keyframes count-bump { 0% { transform: scale(1); } 35% { transform: scale(1.35); background: var(--accent); color: #fff; } 100% { transform: scale(1); } }
+.status-chip.live::before,
+#view-accounts .account-task[data-task="monitoring"] dt::before,
+.workflow-status[data-state="monitoring"] #workflow-status-title::before,
+.workflow-account[data-task="monitoring"] small::before { animation: live-ping 1.8s ease-out infinite; }
+.sidebar .nav b.count-bump { animation: count-bump .6s cubic-bezier(.3, 1.5, .5, 1); }
+.workspace-status > summary { position: relative; }
+.workspace-status[data-state="live"] .status-chip { color: var(--success); }
+@media (max-width: 767px) {
+  .workspace-status > summary::after { content: ""; position: absolute; top: 5px; inset-inline-end: 5px; width: 8px; height: 8px; border-radius: 50%; background: var(--status-off); box-shadow: 0 0 0 2px var(--surface); }
+  .workspace-status[data-state="live"] > summary::after { background: var(--status-ok); animation: live-ping 1.8s ease-out infinite; }
+  .workspace-status[data-state="warn"] > summary::after { background: var(--status-warn); }
+  .workspace-status[data-state="demo"] > summary::after { background: var(--accent); }
 }

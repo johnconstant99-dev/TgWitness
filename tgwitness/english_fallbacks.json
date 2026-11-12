@@ -3493,7 +3493,6 @@
   "Telegram only",
   "Telegram pipes",
   "Telegram range",
-  "TgWitness signs the saved files. Export details explain what was collected and what is missing.",
   "TgWitness signs these files with the collector key; any change to a file breaks the signature.",
   "TgWitness signs this archive with the collector key; a change to any file breaks the signature.",
   "The archive is unchanged since the collector signed it.",

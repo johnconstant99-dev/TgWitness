@@ -1,5 +1,6 @@
 "use strict";
 const panelRoots=new Map([...document.querySelectorAll('.view')].map(root=>[root.id.slice(5),root]));
+for(const text of document.querySelectorAll('#workspace p, #workspace small, dialog p, dialog small'))text.dataset.static='1';
 const $ = id => {
   const attached=document.getElementById(id);if(attached)return attached;
   for(const root of panelRoots.values()){
@@ -882,7 +883,7 @@ function renderWorkflowControls(){
   exporter.textContent=tr(!demo&&activity.observing?'Pause observation and export':'Export everything');
   $('workflow-account-hint').textContent=!demo&&activity.observing?
     tr('Observation pauses for the export. Start it again in Accounts when the export finishes.'):
-    !demo&&activity.busy?tr('{task}. The export can start when it finishes.',{task:activity.title}):tr('No continuous observation needed.');
+    !demo&&activity.busy?tr('{task}. The export can start when it finishes.',{task:activity.title}):'';
   renderWorkflowAccounts();
   const investigate=viewQuery('start','[data-workflow="investigation"]');
   investigate.textContent=tr(state.status.collector.running?'Open investigation':'Set up observation');
@@ -1051,6 +1052,7 @@ function syncHiddenNav(){
   if(hidden)hint.textContent=trn("Show {n} hidden section","Show {n} hidden sections",hidden);
 }
 new MutationObserver(syncHiddenNav).observe(document.documentElement,{attributes:true,attributeFilter:["data-ui-level"]});
+import("./components/tips.js?v=3").then(({createTips})=>createTips({tr,icon,roots:[...panelRoots.values()]})).catch(error=>toast(error.message,true));
 $("nav-hidden-hint").addEventListener("click",()=>{
   const select=document.querySelector(".sidebar [data-ui-level]");if(!select)return;
   select.value="expert";select.dispatchEvent(new Event("change"));
@@ -1293,11 +1295,14 @@ function renderStatus() {
     c.has_session ? "Observation off" : ({code_required:"Waiting for code",password_required:"Waiting for 2FA",qr_pending:"Waiting for QR"}[c.phase]||"Account not connected"));
   $("status-chip").classList.toggle("live",!s.demo && c.running && c.connected);
   $("status-chip").classList.toggle("warn",!s.demo && (!c.running || !c.connected));
+  $("workspace-status").dataset.state=s.demo?"demo":c.running&&c.connected?"live":c.running||accountState(s).needsSignIn?"warn":"off";
   $("collector-toggle").textContent=tr(c.running ? "Pause observation" : "Start observation");
   $("collector-toggle").disabled=s.demo||(!c.running&&!accountState(s).canStart);
   $("collector-toggle").title=tr(s.demo?"Demo uses fictional observations":accountState(s).needsSignIn?'Sign in again':!c.has_session?"Connect an account first":
     !hasSources(s)?"Select at least one source first":"");
-  $("nav-count").textContent=s.stats.total.toLocaleString();
+  const navCount=$("nav-count"),total=s.stats.total.toLocaleString();
+  if(navCount.textContent!==total){if(navCount.dataset.profile===state.profile&&/\d/.test(navCount.textContent))replay(navCount,"count-bump",700);navCount.textContent=total;}
+  navCount.dataset.profile=state.profile;
   renderCollectorHealth(s.health);collectionUI?.update();
   const signIn=accountState(s).needsSignIn;
   show("collector-error",!!c.last_error||signIn);
