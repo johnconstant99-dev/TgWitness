@@ -1,4 +1,4 @@
-# TgWitness verifier sources SHA-256: 867cc108ef4f08b080ef6ac43431ba391cce23f8a7c3703cd5ac9d7af59143f8
+# TgWitness verifier sources SHA-256: fb5ae93c742e37b64020560891345d0ffad9f188a02e365314041c1653845b1c
 """Standalone verifier"""
 import argparse
 import base64
@@ -1931,7 +1931,8 @@ class Coverage:
         elif kind == "session.security_baseline" and payload.get("trigger") == "observation_start" \
                 and payload.get("other_sessions") == 0 and type(payload.get("other_sessions")) is int:
             s.setdefault("sessions_at_start", []).append({"at": at, "others": 0})
-        elif kind == "coverage.gap" and payload.get("reason") == "concurrent_sessions_at_start":
+        elif (kind == "session.concurrent_at_start"
+              or kind == "coverage.gap" and payload.get("reason") == "concurrent_sessions_at_start"):
             count = payload.get("concurrent_sessions")
             if type(count) is not int:
                 count = len(payload["sessions"]) if isinstance(payload.get("sessions"), list) else None

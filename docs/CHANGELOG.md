@@ -7,6 +7,7 @@
 <details>
 <summary>On this page</summary>
 
+- [Unreleased](#unreleased)
 - [0.9.3 preview · 11 November 2026](#093-preview--11-november-2026)
 - [0.9.2 preview · 10 November 2026](#092-preview--10-november-2026)
 - [0.9.1 preview · 5 November 2026](#091-preview--5-november-2026)
@@ -21,6 +22,12 @@
 - [0.5.0 · 26 October 2026](#050--26-october-2026)
 
 </details>
+
+## Unreleased
+
+- The saved Telegram update position no longer runs ahead of the journal. Telegram's client library advanced it as soon as a batch of updates arrived, so a reconnect or stop while a handler was still waiting, for example during a FloodWait, skipped the rest of that batch; edits and deletions in it were lost. The position now covers only updates whose handling has finished, and the rest are requested again.
+- Other sessions signed in when observation starts are recorded as `session.concurrent_at_start` instead of a coverage gap. Telegram delivers updates to each signed-in session separately, so these sessions do not take updates from TgWitness; a shared session key is still detected as `updates_diverted`. The verifier reads both forms.
+- **Make this the only session when Telegram allows it** kept the two-step password it set only in memory until the operator opened **Sessions of this account**, so a restart in between left the account with a password nobody knew. The password is now saved in the workspace vault before Telegram sets it and removed once it has been shown.
 
 ## 0.9.3 preview · 11 November 2026
 

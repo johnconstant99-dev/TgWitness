@@ -683,7 +683,9 @@ when the checkpoint survives. Independent retention keeps that reference availab
 the workspace; a verified external timestamp additionally anchors it in time.
 
 After a restart the saved Telegram update position is resumed (`catch_up_from` in
-`observation.started`) and missed updates are requested. A periodic recheck records
+`observation.started`) and missed updates are requested. The saved position covers only
+updates whose handling has finished, so updates still waiting when the connection closed or
+the process stopped are requested again. A periodic recheck records
 `message.recovered` for missed messages and `message.missing_on_recheck` when Telegram no
 longer returns a saved message; the latter is not a deletion notice and names no deleter or time.
 

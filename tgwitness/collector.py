@@ -531,7 +531,7 @@ class Collector:
         self.sessions_checked_at = -SESSIONS_EVERY
         self.sessions_checking = 0
         self.session_revoked = None
-        self.only_session_password = None
+        self.only_session_password = vault.read("only_session_password").get("password")
         self.auto_only_checked_at = -AUTO_ONLY_SESSION_EVERY
         self.auto_only_retry_at = 0
         self.auto_only_failures = 0
@@ -678,6 +678,7 @@ class Collector:
         self.authorization_generation += 1
         first = not self.authorization_required
         self.authorization_required, self.running, self.buffering = True, False, False
+        self.paused_drops += len(self.buffered)
         self.buffered = []
         self.phase, self.last_error = "authorization_required", type(exc).__name__
         cause = exc.cause if isinstance(exc, AccountLost) else account_loss_cause(exc) or "not_authorized"
@@ -1056,7 +1057,7 @@ class Collector:
     def save_update_state(self):
         session = getattr(self.client, "session", None)
         account = (self.store.get_setting("account", {}) or {}).get("id")
-        if account is None or not hasattr(session, "get_update_states"):
+        if account is None or self.paused_drops or not hasattr(session, "get_update_states"):
             return
         record = {"account_id": account, "saved_at": utcnow(), "account": None, "channels": []}
         for entity_id, state in list(session.get_update_states()):
@@ -2297,14 +2298,12 @@ class Collector:
             if snapshot and trigger == "observation_start":
                 others = snapshot.get("others", [])
                 if others:
-                    self.store.append("coverage.gap", {
-                        "reason": "concurrent_sessions_at_start",
+                    self.store.append("session.concurrent_at_start", {
                         "concurrent_sessions": len(others),
                         "sessions": others,
-                        "meaning": ("%d other session(s) were active in this account when observation began. "
-                                    "These sessions had access to the same account and may have received "
-                                    "push updates (GetDifference) instead of this TgWitness session." % len(others)),
-                        "completeness": "unknown; other sessions may have received updates not visible here"})
+                        "meaning": ("%d other session(s) were signed in to this account when observation began. "
+                                    "Telegram delivers updates to each signed-in session separately; these sessions "
+                                    "could also send, edit or delete this account's messages." % len(others))})
         except asyncio.CancelledError:
             raise
         except Exception:
@@ -2386,7 +2385,7 @@ class Collector:
             "initiated_by": "this workspace"})
         return {"terminated": others_before, "remaining_others": others_after}
 
-    async def make_only_session(self):
+    async def make_only_session(self, take=True):
         await self.restore()
         if (self.store.get_setting("account", None) or {}).get("key_origin") != "created":
             raise ValueError("This session key was imported, so copies of it can exist outside Telegram's session "
@@ -2398,13 +2397,24 @@ class Collector:
         state = await asyncio.wait_for(self.client(functions.account.GetPasswordRequest()), 30)
         password = None if state.has_password else secrets.token_urlsafe(18)
         if password:
-            await self.change_password(None, password)
+            self.keep_only_session_password(password)
+            try:
+                await self.change_password(None, password)
+            except (RPCError, ValueError):
+                self.keep_only_session_password(None)
+                raise
         record = {"other_sessions_ended": ended["terminated"],
                   "two_step": "set_now" if password else "already_on", "meaning": ONLY_SESSION_MEANING}
         with self.store.transaction():
             self.store.set_setting("only_session", {"since": utcnow()})
             self.store.append("session.exclusive_from", record)
+        if password and take:
+            self.keep_only_session_password(None)
         return {"other_sessions_ended": ended["terminated"], "two_step": record["two_step"], "password": password}
+
+    def keep_only_session_password(self, password):
+        self.vault.save("only_session_password", {"password": password} if password else {})
+        self.only_session_password = password
 
     def set_auto_only_session(self, enabled):
         enabled = bool(enabled)
@@ -2420,7 +2430,9 @@ class Collector:
         return {"auto_only_session": enabled}
 
     def take_only_session_password(self):
-        password, self.only_session_password = self.only_session_password, None
+        password = self.only_session_password
+        if password:
+            self.keep_only_session_password(None)
         return {"password": password}
 
     def authorized_age(self):
@@ -2441,7 +2453,7 @@ class Collector:
         if waited is None or waited < AUTO_ONLY_SESSION_AFTER:
             return
         try:
-            result = await self.make_only_session()
+            await self.make_only_session(take=False)
         except asyncio.CancelledError:
             raise
         except Exception as exc:
@@ -2456,8 +2468,6 @@ class Collector:
                     "meaning": AUTO_ONLY_SESSION_POSTPONED_MEANING})
             return
         self.auto_only_failures, self.auto_only_reason, self.auto_only_retry_at = 0, None, 0
-        if result.get("password"):
-            self.only_session_password = result["password"]
 
     async def change_password(self, current_password, new_password, hint=""):
         await self.restore()
@@ -2526,6 +2536,7 @@ class Collector:
         try:
             await self.start_observation()
         except BaseException as exc:
+            self.paused_drops += len(self.buffered)
             self.buffered, self.buffering = [], False
             if self.running:
                 with suppress(Exception):

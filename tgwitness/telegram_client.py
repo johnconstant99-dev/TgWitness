@@ -26,12 +26,32 @@ if MessageBox is not None:
     class GapAwareMessageBox(MessageBox):
         __slots__ = ("gap_owner",)
 
+        def session_state(self):
+            held = getattr(getattr(self, "gap_owner", None), "accepted_state", None)
+            return held or super().session_state()
+
+        def hold(self):
+            owner = getattr(self, "gap_owner", None)
+            if owner is not None and owner.accepted_state is None:
+                owner.accepted_state = MessageBox.session_state(self)
+
+        def load(self, session_state, channel_states):
+            super().load(session_state, channel_states)
+            if (owner := getattr(self, "gap_owner", None)) is not None:
+                owner.accepted_state, owner.undispatched = None, 0
+
+        def process_updates(self, updates, chat_hashes, result):
+            self.hold()
+            return super().process_updates(updates, chat_hashes, result)
+
         def apply_difference(self, diff, chat_hashes):
+            self.hold()
             if isinstance(diff, types.updates.DifferenceTooLong):
                 self.report_gap(None, ENTRY_ACCOUNT, diff.pts)
             return super().apply_difference(diff, chat_hashes)
 
         def apply_channel_difference(self, request, diff, chat_hashes):
+            self.hold()
             if isinstance(diff, types.updates.ChannelDifferenceTooLong):
                 entry = request.channel.channel_id
                 self.report_gap(entry, entry, getattr(diff.dialog, "pts", None))
@@ -113,11 +133,25 @@ def request_method(request):
 class WitnessClient(TelegramClient):
 
     def __init__(self, *args, **kwargs):
+        self.accepted_state, self.undispatched = None, 0
         super().__init__(*args, **kwargs)
         if GapAwareMessageBox is not None:
             box = GapAwareMessageBox(self._log["messagebox"])
             box.gap_owner = self
             self._message_box = box
+
+    async def _preprocess_updates(self, updates, users, chats):
+        result = await super()._preprocess_updates(updates, users, chats)
+        self.undispatched += len(result)
+        if not self.undispatched:
+            self.accepted_state = None
+        return result
+
+    async def _dispatch_update(self, update):
+        await super()._dispatch_update(update)
+        self.undispatched = max(0, self.undispatched - 1)
+        if not self.undispatched:
+            self.accepted_state = None
 
     def difference_gap(self, channel_id, before, after):
         if listener := getattr(self, "difference_gap_listener", None):

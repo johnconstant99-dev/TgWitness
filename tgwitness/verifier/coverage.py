@@ -213,7 +213,8 @@ class Coverage:
         elif kind == "session.security_baseline" and payload.get("trigger") == "observation_start" \
                 and payload.get("other_sessions") == 0 and type(payload.get("other_sessions")) is int:
             s.setdefault("sessions_at_start", []).append({"at": at, "others": 0})
-        elif kind == "coverage.gap" and payload.get("reason") == "concurrent_sessions_at_start":
+        elif (kind == "session.concurrent_at_start"
+              or kind == "coverage.gap" and payload.get("reason") == "concurrent_sessions_at_start"):
             count = payload.get("concurrent_sessions")
             if type(count) is not int:
                 count = len(payload["sessions"]) if isinstance(payload.get("sessions"), list) else None
