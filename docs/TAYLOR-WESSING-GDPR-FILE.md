@@ -1,6 +1,6 @@
 [TgWitness](../README.md) / [Documentation](README.md) · [Operator notice](OPERATOR-INCOMPATIBILITY.md)
 
-![The 106-day GDPR file](assets/presentation/chapter-case.svg)
+![The 106-day GDPR file](assets/presentation/chapter-gdpr-file.svg)
 
 # Valve, Taylor Wessing and 106 days of waiting under the GDPR: a breakdown of the file and its 70,717 words
 
@@ -135,10 +135,91 @@ to act this way (we are not lawyers and do not know the law).
   carried out in their own name. We do not draft legal texts and we accuse no one. We simply write what we saw, and
   what they are trying so hard to delete.
 
+---
+
+## 6. What Valve bought was not GDPR processing
+
+We are not a party to the dispute and we do not defend the account or the ban. One question is left. Valve hired top lawyers: two renowned doctors from a renowned "freelance company", **Dr. Tobias Schelinski** (`Doc. No. 42282474`, 15 August 2025) and **Dr. Patrick Vincent Zurheide** (`Doc. No. 42603633`, 1 October 2025). What did it pay for? Not GDPR processing: the request was not fulfilled then and is not fulfilled now.
+
+### What was delivered instead, in their own words
+
+* **A deadline "if at all":** *„wenn überhaupt“* — Doctor Tobias.
+* **Ask for your data, lose your account:** terminated *„mit sofortiger Wirkung“*, in reply to a data access request — Doctor Tobias.
+* **Proof by quantity:** *„Unabhängig von den Einzelheiten der Beschwerden…“* Content irrelevant, count everything — Doctor Tobias.
+* **A diagnosis of the requester:** *„…Ihr Mandant bzw. dessen Komplizen…“* — Doctor Patrick.
+* **A verdict for every court:** *„Aus unserer Erfahrung wird jedes Gericht…“* — Doctor Patrick. No court has ruled; we thought that is what courts are for.
+* **Four sections of the Criminal Code:** `§§ 263, 263a, 202a, 303a StGB`, for asking for one's own data.
+* **Instead of the data:** five pages of Steam's public Privacy Policy, a copy of the Dashboard the user already sees, and a translated Steam Support reply. Two doctors of law delivered what a support agent had already written.
+* **A written IOU:** *„Gerne beauskunften wir die restlichen … Daten, sobald …“* The rest, some day.
+* **Third parties protected by leaking them:** the ban data withheld "to protect third parties", third parties' data shipped in a PDF whose black boxes come off.
+* **Two versions of the facts:** one doctor dates the user from May 2025, the other from 2019. Both signed. A doctor would not sign something untrue, so we accept both.
+* **Premium spelling:** *„Die Antwortet lautet ja“*, twice, and the partner's own e-mail misspelled in his own signature.
+
+### Not a mistake
+
+> [!IMPORTANT]
+> Mistakes are usually hidden. Here nobody even tried. **What is on sale is GDPR non-compliance, and it is sold openly.** That is not a mistake; that is arrogance.
+
+### For themselves, for the user, and for everyone else
+
+* **For themselves:** `Art. 17` delisting. Doctor Patrick filed first; we published Part 3 on Medium; right after it, the results about Doctor Tobias were delisted too.
+* **For the data subject:** seventeen months and counting.
+* **Without lawyers:** Steam Support closed another account holder's request in **3 days**, with a link to Account Data: *"there's no further information Steam Support can offer, this request will be closed"* (ticket `HT-2YBP-F7JP-D4VB`; the requester's screenshots, [Section 18 of the Steam dossier](https://phishdestroy.io/steam_dossier/#gdpr-live-case)).
+* **With lawyers:** the same closed ticket in **106 days**, on letterhead. Who allowed Valve not to process GDPR requests at all? Doctor Tobias?
+
+### Titles
+
+We call them "Doctor" throughout, and we mean it respectfully: the title is a historical fact. Doctor Tobias's rests on [a 2005 study of how German authorities supervise foreign online services](https://www.verlagdrkovac.de/978-3-8300-1791-2.htm); Doctor Patrick's on [a 2020 study of software development contracts in Scrum](https://books.google.pl/books/about/Herausforderungen_bei_einer_Softwareentw.html?id=uh4PzgEACAAJ&redir_esc=y). Each is one narrow piece of research, on one narrow topic, done once. It is not expertise in data protection, in PDF files, or in what every court will decide. Under the titles, in this file: no supervision, and a PDF made with `Aspose.PDF for .NET 20.8`, from 2020.
+
+We have not read either dissertation, Doctor Tobias's or Doctor Patrick's. We have read the publisher's description of Doctor Tobias's. In 2005 there was no GDPR, of course. But it sounds as if the solution was already there.
+
+<details>
+<summary><b>The publisher's description of Doctor Tobias's thesis (German original and translation)</b></summary>
+
+> „Darüber hinaus geht der Autor auf Probleme ein, die sich aus der Durchführung der behördlichen Aufsicht über die Online-Dienste ergeben. Hier sind insbesondere die Ausführungen über die örtliche Zuständigkeit von Behörden hervorzuheben. Dem Autor gelingt es insoweit, anhand einzelner Gesetze Lösungsmöglichkeiten aufzuzeigen wie der Gegensatz einer beschränkten örtlichen Zuständigkeit im Verhältnis zu der weltweiten Präsenz von Online-Diensten zu lösen ist.“
+>
+> *(The author also addresses problems arising from carrying out official supervision of online services. His remarks on the local jurisdiction of authorities deserve particular mention. Using individual laws, the author succeeds in showing possible solutions to the contrast between limited local jurisdiction and the worldwide presence of online services.)*
+
+Source: [Verlag Dr. Kovač](https://www.verlagdrkovac.de/978-3-8300-1791-2.htm).
+
+</details>
+
+Judging by this file, the author did find a solution, for the GDPR too: one lawyer decides who is entitled to their own data and who is not. Which laws had to be used to narrow a European regulation in the interest of a single American company, we do not know. One possible solution would have been to process the GDPR request lawfully. But the author is already a doctor.
+
+### Three ways to get an access request wrong
+
+As far as we, not lawyers, can read the Regulation, there are three, and all three were taken:
+
+* **Not handing the data over:** unlawful.
+* **Handing it over incomplete:** unlawful.
+* **"Cleaning it manually" and leaking third parties' data:** unlawful twice over (`Art. 5(1)(f)`, `Art. 32`).
+
+> [!TIP]
+> **The fourth way:** simply fulfilling the request. It is the only one two doctors of law did not take. That is not bad luck; that is a choice.
+
+### Who is accountable?
+
+As far as we can see, nobody, not financially and not personally. You cannot leave them a review. You cannot write an opinion. The company is "decentralised", so there is no other company to address. And the moment you name the people who signed the letters on the company's behalf, the company's representatives suddenly become private individuals, with a right to be forgotten written for private individuals, applied at once. Yet everything that was delisted was about their professional work. Does a report on a violation, or on professional competence, really fall under the right to be forgotten? How are people supposed to tell a good lawyer from a bad one: from the profile on Taylor Wessing's own website? And can that be trusted, when the firm edits its own Wikipedia history?
+
+We simply do not understand why the historical fact of a doctorate on a narrow topic gives anyone the right to switch off GDPR rights. Perhaps we understand it wrongly. Perhaps Doctor Tobias teaches his students something not quite right. Or perhaps it is right, and Germany has quietly given up on the GDPR. Or is that for Doctor Tobias to decide?
+
+And why, just to publish our audit, our opinion and our experience (about competence, and about the leak risk in Doctor Patrick's vulnerable software), do we have to build the text into our own software so that it survives? That is exactly why all of this looks to us like corporatocracy. And if the person who asks gets nothing, what is the GDPR for? Revenue for lawyers who cannot use a PDF?
+
+### Our conclusion
+
+We are not a party to this dispute, and frankly we are tired of it. In the time it took, we have looked at everything: the Wikipedia history erased twice, the children in the reports, a GDPR request that was never processed, the right to be forgotten used for themselves, a founder who helped write the Nazi version of §175, and a "decentralised" structure in which responsibility belongs to no one. From our small experience, the conclusion is a sad one: titles are titles. Responsibility on the lawyers' side: zero. What remains is arrogance, and a GDPR that was not complied with. We only ask what Valve bought, since it clearly was not GDPR processing.
+
+---
+
 Since the lawyers think they are the law, and that people's lives, children's lives, do not matter, that is their
 choice. It is not our conflict. But we can say with confidence that the firm's impunity is historically confirmed,
 going back to its founder Goltz, one of the eight who drafted the amendments to §175, and to his only famous case,
-which is sometimes read as a defence of LGBT people: the case of General von Fritsch. We will skip the history; we
+which is sometimes read as a defence of LGBT people: the case of General von Fritsch.
+
+<details>
+<summary><b>History: Goltz, §175 and the Fritsch case</b></summary>
+
+We will skip the history; we
 studied it straight from a reliable source and the original record. But this is how the case ended: there was one
 defendant, and we have three dead. Achim von Frisch, crushed by the millstones of repression. Otto Schmidt, shot in
 1943. And General Fritsch himself: it does not matter that he was acquitted, the price was high. In 1939, seeking
@@ -159,6 +240,8 @@ a mortality rate of 60%. Saving one general does not cancel out the architecture
 denazification panels. The architect of repressive laws used his defence of one general as proof of his
 "independence", escaped Nuremberg, kept his status and his licence, and in 1957 founded the outfit that today trades
 on its progressiveness under the Taylor Wessing sign.
+
+</details>
 
 So yes, all in all: we are sure it makes no difference whether it is this German Taylor Wessing or any other; this is
 not about the law at all. What we say here is a statement, not an assertion of fact but an assumption, because in
@@ -189,6 +272,9 @@ into any conflict with you in all this time. But if you decide to break our work
 without an active repository regulators and others will not be able to compare the signature of a version (though who
 am I telling), and then we will enter into direct conflict. On that note, we hope to take our leave of mega-expertise
 and elite lawyers. It was not fun, and I am not glad. All the best.
+
+> [!CAUTION]
+> **Taking this repository down will not delete anything.** Investigators and researchers use TgWitness, and this repository is what their copies are verified against. We keep backups. But a takedown would turn us from the auditor of one case into a party to a conflict. Enough deleting the truth.
 
 [Source record](https://phishdestroy.io/steam_dossier/taylor_wessing) · [Operator notice](OPERATOR-INCOMPATIBILITY.md) · [MIT License](../LICENSE)
 

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="200" viewBox="0 0 960 200" role="img" aria-labelledby="title desc">
+<title id="title">TgWitness · The 106-day GDPR file</title>
+<desc id="desc">Review of a GDPR disclosure file: what Valve bought was not GDPR processing. Section illustration, not a test result.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#122536"/><stop offset="1" stop-color="#0b1722"/></linearGradient></defs>
+<rect x="1" y="1" width="958" height="198" rx="16" fill="url(#bg)" stroke="#294253"/>
+<path d="M36 46h44" stroke="#e8a598" stroke-width="4" stroke-linecap="round"/>
+<text x="94" y="52" fill="#b7c8d4" font-family="Arial,Helvetica,sans-serif" font-size="17" letter-spacing="2">TGWITNESS / CASE FILE</text>
+<text x="36" y="108" fill="#edf5f9" font-family="Arial,Helvetica,sans-serif" font-size="40" font-weight="600">The 106-day GDPR file</text>
+<text x="36" y="142" fill="#b7c8d4" font-family="Arial,Helvetica,sans-serif" font-size="20">What Valve bought was not GDPR processing</text>
+<path d="M36 166h580" stroke="#294253"/>
+<g fill="none" stroke="#e8a598" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M680 42h58l18 18v96h-76zM738 42v18h18M694 132h46"/><circle cx="842" cy="88" r="34"/><path d="M842 64v24l15 10M842 54v4M842 118v4M808 88h4M872 88h4"/></g>
+<g fill="#e8a598" opacity=".85"><rect x="694" y="74" width="46" height="9" rx="2"/><rect x="694" y="91" width="30" height="9" rx="2"/><rect x="694" y="108" width="40" height="9" rx="2"/></g>
+<g transform="rotate(-14 718 100)"><rect x="642" y="84" width="152" height="32" rx="4" fill="#0b1722" fill-opacity=".72" stroke="#e8a598" stroke-width="2.5"/><text x="718" y="105.5" fill="#e8a598" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="700" letter-spacing="1.6" text-anchor="middle">NOT FULFILLED</text></g>
+<text x="842" y="150" fill="#9db3c3" font-family="Arial,Helvetica,sans-serif" font-size="12" letter-spacing="1.2" text-anchor="middle">106 DAYS</text>
+</svg>

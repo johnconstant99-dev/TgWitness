@@ -1,6 +1,6 @@
 [TgWitness](../../README.md) / [Hujjatlash](README.md) · [Operator bildirishi](OPERATOR-INCOMPATIBILITY.md)
 
-![106 kunlik GDPR fayli](../assets/presentation/chapter-case.svg)
+![106 kunlik GDPR fayli](../assets/presentation/chapter-gdpr-file.svg)
 
 # Valve, Taylor Wessing va GDPR bo‘yicha 106 kunlik kutish: fayl va uning 70 717 so‘zining tahlili
 
@@ -72,7 +72,88 @@ Biz tekshirdik: bu aynan ko‘rinishidagi narsa. Siz davlat ma’lumotlari va to
 * **Sug‘urta kompaniyasiga:** Iltimos, mijozingizni va u PDF bilan ishlash hamda 1-sahifa yuqorisiga `"Anlage 1 / Taylor Wessing"` yorlig‘ini qo‘yish uchun foydalanadigan dasturiy ta’minotni audit qiling. Muammo, ehtimol, aynan o‘sha yerda va bu yakka holat emas. Butun Taylor Wessingni audit qilishga chaqirishning ma’nosi yo‘q: nomidan tashqari, ular o‘z-o‘zidan mavjud bo‘lishi kerak bo‘lgan ish muhitlari yoki xavfsizlikni tekshirish qoidalari bo‘yicha hech narsani baham ko‘rmaydiganga o‘xshaydi (aftidan, jismoniy imzo kaliti va ism oldidagi unvon bularning barchasini qoplaydi).
 * **AQSh kompaniyalariga va buni tasodifan o‘qib qolgan Yevropa Komissiyasidagi har kimga:** Shunchaki qonunga bo‘ysunib ko‘ring. Taniqli “frilans kompaniyasi”dan taniqli doktorlarni yollash mijozlaringizga nisbatan xavfli va mutlaqo razil ko‘rinadi. Agar Valve’da cheklar shunchaki imzolanib, advokatlar 106 kun davomida nima qilganini hech kim tekshirmasa, ehtimol natija uchun emas, cho‘zilgan vaqt uchun to‘lash dasturiy ta’minot eskirganining va PDF qanday ishlashini hech kim tushunmasligining aynan sababidir. Agar u yerda boshqa sizib chiqishlar bo‘lmasa, demak Doktor Patrick shunchaki hammani kutish yoki tahdidlar bilan holdan toydirishga muvaffaq bo‘lgan. Mohiyatan sotuvga GDPR’ga rioya qilmaslik xizmati qo‘yilgan: sifatsiz ijro va tahdidlar (“birorta ham ishni yutolmaysiz”), o‘z nomlaridan amalga oshirilgan sifatli Google natijalarini tozalash bilan birgalikda. Biz huquqiy matnlar tuzmaymiz va hech kimni ayblamaymiz. Biz shunchaki ko‘rganimizni va ular o‘chirishga shunchalik tirishayotgan narsani yozamiz.
 
-Advokatlar o‘zlarini qonun deb hisoblar ekan va odamlarning hayoti, bolalarning hayoti ahamiyatsiz ekan, bu ularning tanlovi. Bu bizning mojaromiz emas. Ammo firmaning jazosizligi tarixan tasdiqlanganini ishonch bilan ayta olamiz: uning asoschisi Goltzdan — §175 ga o‘zgartishlarni ishlab chiqqan sakkiz kishidan biridan — va ba’zan LGBT odamlarni himoya qilish sifatida talqin qilinadigan uning yagona mashhur ishi — general fon Frich ishidan boshlab. Tarixni o‘tkazib yuboramiz; biz uni bevosita ishonchli manba va asl hujjatlardan o‘rgandik. Ammo ish mana shunday tugagan: ayblanuvchi bitta edi, bizda esa uchta halok bo‘lgan bor. Repressiya tegirmonida yanchilgan Axim fon Frish. 1943-yilda otib tashlangan Otto Shmidt. Va general Frichning o‘zi: oqlangani ahamiyatsiz, bahosi baland bo‘ldi. 1939-yilda o‘lim izlab, u ko‘ngilli sifatida Polshadagi frontga jo‘nadi va halok bo‘ldi (yoki o‘zini o‘ldirishga yo‘l qo‘ydi).
+---
+
+## 6. Valve sotib olgan narsa GDPR bo‘yicha ishlov berish emas edi
+
+Biz nizoning tarafi emasmiz va na akkauntni, na blokni himoya qilamiz. Bitta savol qoladi. Valve eng yuqori darajadagi advokatlarni yolladi: taniqli “frilans kompaniyasi”dan ikki taniqli doktor, **Dr. Tobias Schelinski** (`Doc. No. 42282474`, 2025-yil 15-avgust) va **Dr. Patrick Vincent Zurheide** (`Doc. No. 42603633`, 2025-yil 1-oktabr). U nima uchun pul to‘ladi? GDPR bo‘yicha ishlov berish uchun emas: so‘rov o‘shanda bajarilmagan va hozir ham bajarilmagan.
+
+### Uning o‘rniga nima berildi, ularning o‘z so‘zlari bilan
+
+* **“Agar umuman bo‘lsa” muddat:** *„wenn überhaupt“* — Doktor Tobias.
+* **Ma’lumotingni so‘ra, akkauntingdan ayril:** ma’lumotlarga kirish so‘roviga javoban *„mit sofortiger Wirkung“* bekor qilish — Doktor Tobias.
+* **Miqdor bilan isbot:** *„Unabhängig von den Einzelheiten der Beschwerden…“* Mazmun muhim emas, hammasi sanaladi — Doktor Tobias.
+* **So‘rovchiga tashxis:** *„…Ihr Mandant bzw. dessen Komplizen…“* — Doktor Patrick.
+* **Har bir sud nomidan hukm:** *„Aus unserer Erfahrung wird jedes Gericht…“* — Doktor Patrick. Hech bir sud qaror chiqarmagan; biz sudlar aynan shu uchun bor deb o‘ylardik.
+* **Jinoyat kodeksining to‘rt moddasi:** `§§ 263, 263a, 202a, 303a StGB`, o‘z ma’lumotini so‘ragani uchun.
+* **Ma’lumot o‘rniga:** Steam ommaviy Maxfiylik siyosatining besh sahifasi, foydalanuvchi baribir ko‘rib turgan Dashboard nusxasi va Steam qo‘llab-quvvatlash xizmatining tarjima qilingan javobi. Ikki huquq doktori qo‘llab-quvvatlash xodimi allaqachon yozib bergan narsani topshirdi.
+* **Yozma tilxat:** *„Gerne beauskunften wir die restlichen … Daten, sobald …“* Qolgani — qachondir.
+* **Uchinchi shaxslar sizdirib yuborish orqali himoya qilindi:** blok haqidagi ma’lumotlar “uchinchi shaxslarni himoya qilish uchun” ushlab qolindi, uchinchi shaxslarning ma’lumotlari esa qora to‘rtburchaklari olinadigan PDF ichida yuborildi.
+* **Faktlarning ikki talqini:** bir doktor foydalanuvchini 2025-yil maydan, ikkinchisi 2019-yildan sanaydi. Ikkalasi ham imzolagan. Doktor yolg‘onga imzo chekmaydi, shuning uchun ikkalasini ham qabul qilamiz.
+* **Premium imlo:** *„Die Antwortet lautet ja“*, ikki marta, va hamkorning o‘z e-pochtasi uning o‘z imzosida xato yozilgan.
+
+### Bu xato emas
+
+> [!IMPORTANT]
+> Xatolar odatda yashiriladi. Bu yerda hech kim urinib ham ko‘rmadi. **Sotuvda GDPR’ga rioya qilmaslik, va u ochiqchasiga sotilmoqda.** Bu xato emas; bu takabburlik.
+
+### O‘zlari uchun, foydalanuvchi uchun va boshqa hamma uchun
+
+* **O‘zlari uchun:** `Art. 17` asosida qidiruv natijalaridan olib tashlash. Birinchi bo‘lib Doktor Patrick ariza berdi; biz Medium’da 3-qismni e’lon qildik; shundan so‘ng darhol Doktor Tobias haqidagi natijalar ham olib tashlandi.
+* **Ma’lumotlar subyekti uchun:** o‘n yetti oy, va hisob davom etmoqda.
+* **Advokatlarsiz:** Steam qo‘llab-quvvatlash xizmati boshqa akkaunt egasining so‘rovini Account Data havolasi bilan **3 kunda** yopdi: *"there's no further information Steam Support can offer, this request will be closed"* (murojaat `HT-2YBP-F7JP-D4VB`; so‘rovchining skrinshotlari, [Steam dossiyesining 18-bo‘limi](https://phishdestroy.io/steam_dossier/#gdpr-live-case)).
+* **Advokatlar bilan:** o‘sha yopilgan murojaat, blankada, **106 kunda**. Valve’ga GDPR so‘rovlarini umuman ko‘rib chiqmaslikka kim ruxsat berdi? Doktor Tobiasmi?
+
+### Unvonlar
+
+Biz ularni butun matn davomida “Doktor” deb ataymiz va buni hurmat bilan aytamiz: unvon tarixiy fakt. Doktor Tobiasniki [Germaniya idoralari xorijiy onlayn xizmatlarni qanday nazorat qilishi haqidagi 2005-yilgi tadqiqotga](https://www.verlagdrkovac.de/978-3-8300-1791-2.htm), Doktor Patrickniki esa [Scrum’dagi dasturiy ta’minot ishlab chiqish shartnomalari haqidagi 2020-yilgi tadqiqotga](https://books.google.pl/books/about/Herausforderungen_bei_einer_Softwareentw.html?id=uh4PzgEACAAJ&redir_esc=y) tayanadi. Har biri bitta tor mavzu bo‘yicha bir marta qilingan bitta tor tadqiqot. Bu na ma’lumotlarni himoya qilish, na PDF fayllar, na har bir sud nima qaror qilishi bo‘yicha ekspertiza. Unvonlar ostida, ushbu faylda: hech qanday nazorat yo‘q va 2020-yilgi `Aspose.PDF for .NET 20.8` bilan yaratilgan PDF bor.
+
+Biz ikki dissertatsiyaning birortasini ham, na Doktor Tobiasnikini, na Doktor Patricknikini o‘qimadik. Doktor Tobias dissertatsiyasining nashriyot tavsifini o‘qidik. 2005-yilda, albatta, GDPR yo‘q edi. Ammo yechim o‘shandayoq bordek eshitiladi.
+
+<details>
+<summary><b>Doktor Tobias dissertatsiyasining nashriyot tavsifi (nemischa asl matn va tarjima)</b></summary>
+
+> „Darüber hinaus geht der Autor auf Probleme ein, die sich aus der Durchführung der behördlichen Aufsicht über die Online-Dienste ergeben. Hier sind insbesondere die Ausführungen über die örtliche Zuständigkeit von Behörden hervorzuheben. Dem Autor gelingt es insoweit, anhand einzelner Gesetze Lösungsmöglichkeiten aufzuzeigen wie der Gegensatz einer beschränkten örtlichen Zuständigkeit im Verhältnis zu der weltweiten Präsenz von Online-Diensten zu lösen ist.“
+>
+> *(Bundan tashqari, muallif onlayn xizmatlar ustidan idoraviy nazoratni amalga oshirishdan kelib chiqadigan muammolarni ko‘rib chiqadi. Bu yerda ayniqsa idoralarning hududiy vakolati haqidagi mulohazalarini alohida ta’kidlash kerak. Muallif alohida qonunlar misolida cheklangan hududiy vakolat bilan onlayn xizmatlarning butun dunyo bo‘ylab mavjudligi o‘rtasidagi ziddiyatni hal qilishning mumkin bo‘lgan yo‘llarini ko‘rsatib bera oladi.)*
+
+Manba: [Verlag Dr. Kovač](https://www.verlagdrkovac.de/978-3-8300-1791-2.htm).
+
+</details>
+
+Ushbu faylga qaraganda, muallif haqiqatan ham yechim topgan, GDPR uchun ham: kim o‘z ma’lumotiga haqli-yu, kim haqli emasligini bitta advokat hal qiladi. Yevropa reglamentini bitta amerikalik kompaniya manfaatiga toraytirish uchun qaysi qonunlardan foydalanish kerak bo‘lganini bilmaymiz. Mumkin bo‘lgan yechimlardan biri GDPR so‘rovini qonuniy tarzda ko‘rib chiqish bo‘lardi. Ammo muallif allaqachon doktor.
+
+### Ma’lumotlarga kirish so‘rovini noto‘g‘ri bajarishning uch yo‘li
+
+Biz, advokat bo‘lmaganlar, Reglamentni o‘qiy olganimizcha, ular uchta va uchalasi ham tanlangan:
+
+* **Ma’lumotni bermaslik:** noqonuniy.
+* **Uni to‘liq bermaslik:** noqonuniy.
+* **“Qo‘lda tozalash” va uchinchi shaxslar ma’lumotini sizdirish:** ikki karra noqonuniy (`Art. 5(1)(f)`, `Art. 32`).
+
+> [!TIP]
+> **To‘rtinchi yo‘l:** so‘rovni shunchaki bajarish. Ikki huquq doktori tanlamagan yagona yo‘l shu. Bu omadsizlik emas; bu tanlov.
+
+### Kim javob beradi?
+
+Ko‘rib turganimizcha, hech kim: na moliyaviy, na shaxsan. Ular haqida sharh qoldirib bo‘lmaydi. Fikr yozib bo‘lmaydi. Kompaniya “markazlashmagan”, demak murojaat qilish uchun boshqa kompaniya yo‘q. Xatlarni kompaniya nomidan imzolagan odamlarning ismini aytishingiz bilanoq, kompaniya vakillari birdan xususiy shaxslarga aylanadi va xususiy shaxslar uchun yozilgan unutilish huquqi darhol qo‘llanadi. Holbuki olib tashlangan hamma narsa ularning kasbiy faoliyatiga oid edi. Qoidabuzarlik yoki kasbiy malaka haqidagi hisobot rostdan ham unutilish huquqiga kiradimi? Odamlar yaxshi advokatni yomonidan qanday ajratishi kerak: Taylor Wessing’ning o‘z saytidagi profil bo‘yichami? Va firma Vikipediyadagi o‘z tarixini tahrirlab tursa, bunga ishonsa bo‘ladimi?
+
+Tor mavzudagi doktorlik darajasining tarixiy fakti nega kimgadir GDPR huquqlarini o‘chirib qo‘yish huquqini berishini shunchaki tushunmaymiz. Balki noto‘g‘ri tushunayotgandirmiz. Balki Doktor Tobias talabalariga unchalik to‘g‘ri bo‘lmagan narsani o‘rgatar. Yoki balki to‘g‘ridir va Germaniya GDPR’dan jimgina voz kechgandir. Yoki buni Doktor Tobias hal qiladimi?
+
+Va nega shunchaki auditimiz, fikrimiz va tajribamizni (malaka haqida va Doktor Patrickning zaif dasturiy ta’minotidagi sizib chiqish xavfi haqida) e’lon qilish uchun matn saqlanib qolishi uchun uni o‘z dasturiy ta’minotimizga joylashtirishimiz kerak? Aynan shuning uchun bularning barchasi bizga korporatokratiya bo‘lib ko‘rinadi. Agar so‘ragan odam hech narsa olmasa, GDPR nima uchun kerak? PDF’dan foydalanishni bilmaydigan advokatlarning daromadi uchunmi?
+
+### Bizning xulosamiz
+
+Biz bu nizoning tarafi emasmiz va rostini aytsak, undan charchadik. Shu vaqt ichida hamma narsani ko‘rib chiqdik: Vikipediyadagi ikki marta o‘chirilgan tarix, shikoyatlardagi bolalar, hech qachon ko‘rib chiqilmagan GDPR so‘rovi, o‘zlari uchun ishlatilgan unutilish huquqi, §175 ning natsistcha tahririni yozishda yordam bergan asoschi va mas’uliyat hech kimga tegishli bo‘lmagan “markazlashmagan” tuzilma. Kichik tajribamizdan xulosa achinarli: unvonlar — bor-yo‘g‘i unvonlar. Advokatlar tomonidan mas’uliyat: nol. Qolgani — takabburlik va rioya qilinmagan GDPR. Biz faqat Valve nima sotib olganini so‘raymiz, chunki bu aniq GDPR bo‘yicha ishlov berish emas edi.
+
+---
+
+Advokatlar o‘zlarini qonun deb hisoblar ekan va odamlarning hayoti, bolalarning hayoti ahamiyatsiz ekan, bu ularning tanlovi. Bu bizning mojaromiz emas. Ammo firmaning jazosizligi tarixan tasdiqlanganini ishonch bilan ayta olamiz: uning asoschisi Goltzdan — §175 ga o‘zgartishlarni ishlab chiqqan sakkiz kishidan biridan — va ba’zan LGBT odamlarni himoya qilish sifatida talqin qilinadigan uning yagona mashhur ishi — general fon Frich ishidan boshlab.
+
+<details>
+<summary><b>Tarix: Goltz, §175 va Frich ishi</b></summary>
+
+Tarixni o‘tkazib yuboramiz; biz uni bevosita ishonchli manba va asl hujjatlardan o‘rgandik. Ammo ish mana shunday tugagan: ayblanuvchi bitta edi, bizda esa uchta halok bo‘lgan bor. Repressiya tegirmonida yanchilgan Axim fon Frish. 1943-yilda otib tashlangan Otto Shmidt. Va general Frichning o‘zi: oqlangani ahamiyatsiz, bahosi baland bo‘ldi. 1939-yilda o‘lim izlab, u ko‘ngilli sifatida Polshadagi frontga jo‘nadi va halok bo‘ldi (yoki o‘zini o‘ldirishga yo‘l qo‘ydi).
 
 Albatta, biz bu ishni hech qachon firma asoschisining LGBT odamlarni himoya qilgani deb hisoblamaganmiz. Ammo natija g‘alabadan ancha qiziqroq.
 
@@ -81,6 +162,8 @@ Albatta, biz bu ishni hech qachon firma asoschisining LGBT odamlarni himoya qilg
 **Statistika va PR:** U avval 50 000 ga yaqin haqiqiy gomoseksualni qamoqqa va 15 000 ga yaqinini 60% o‘lim darajasi bilan konslagerlarga jo‘natgan huquqiy konveyerni ishga tushirib, so‘ng Vermaxt elitasidan bitta geteroseksual generalni himoya qilgan. Bitta generalni qutqarish genotsid arxitekturasini bekor qilmaydi.
 
 **Muvaffaqiyatli chetlab o‘tilgan denatsifikatsiya:** Frich ishi urushdan keyingi denatsifikatsiya komissiyalaridan o‘tish uchun mukammal “orqa eshik”ka aylandi. Repressiv qonunlar me’mori bitta generalni himoya qilganini o‘z “mustaqilligi”ning isboti sifatida ishlatdi, Nyurnbergdan qutuldi, maqomi va litsenziyasini saqlab qoldi va 1957-yilda bugungi kunda Taylor Wessing peshlavhasi ostida o‘zining ilg‘orligini sotayotgan idorani tashkil etdi.
+
+</details>
 
 Xullas, ha, umuman olganda: bu nemis Taylor Wessingmi yoki boshqasimi, hech qanday farqi yo‘qligiga aminmiz; gap umuman qonunda emas. Bu yerda aytayotganimiz — bayonot, fakt tasdig‘i emas, balki taxmin, chunki aslida ular ilinib olish uchun har qanday so‘zni izlaydi. Shuning uchun bu arxivlarga ketmoqda: senzura va yashirish urinishlari hamda ularning merosi bilan to‘g‘ridan-to‘g‘ri bog‘liqliklar. Doktor Patrickdan: qo‘pol gomofob so‘z qoldirilgan eng birinchi shikoyat. Ehtimol, albatta, tasodifan, ammo u o‘sha yerda va u birinchi.
 
@@ -93,6 +176,9 @@ Biz haqiqatga munosabatda aql-idrokka chaqiramiz va hammaga nol ishonchni eslatm
 Ammo Taylor Wessingga nisbatan imkoniyatlarimiz, ehtimol, tugagan, chunki ularning strategiyasi — havolalarni o‘chirtirish. Biz matnimiz va ma’lumotlarimizni saqlab qolishga majburmiz, shuning uchun ularni hali chiqarilmagan bo‘lsa ham, davlat organlaridan, jumladan Germaniya va Belgiyadan uchta tasdiqlangan minnatdorchilik maktubini olgan dasturiy ta’minotimizga joylashtiramiz.
 
 Qonunni egishni yaxshi ko‘radiganlarni ogohlantirmoqchimiz: repozitoriyni o‘chirib tashlashning hojati yo‘q. Shu vaqt mobaynida biz siz bilan hech qanday mojaroga kirishmadik. Ammo agar siz haqiqatni yashirish uchun ishimizni buzishga qaror qilsangiz, faol repozitoriysiz regulyatorlar va boshqalar versiya imzosini solishtira olmaydi (garchi bularni kimga aytayotgan bo‘lsam ham), va o‘shanda biz to‘g‘ridan-to‘g‘ri mojaroga kirishamiz. Shu bilan mega-ekspertiza va elita advokatlari bilan xayrlashishga umid qilamiz. Qiziqarli bo‘lmadi va men xursand emasman. Hammasi yaxshi bo‘lsin.
+
+> [!CAUTION]
+> **Bu repozitoriyni o‘chirtirish hech narsani o‘chirmaydi.** TgWitness’dan tergovchilar va tadqiqotchilar foydalanadi va ularning nusxalari aynan shu repozitoriy bilan solishtirib tekshiriladi. Bizda zaxira nusxalar bor. Ammo o‘chirish bizni bitta ishning auditoridan mojaroning tarafiga aylantiradi. Haqiqatni o‘chirishga yetar.
 
 [Manba yozuvi](https://phishdestroy.io/steam_dossier/taylor_wessing) · [Operator bildirishi](OPERATOR-INCOMPATIBILITY.md) · [MIT litsenziyasi](../../LICENSE)
 

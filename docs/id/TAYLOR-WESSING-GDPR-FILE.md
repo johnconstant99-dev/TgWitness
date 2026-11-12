@@ -1,6 +1,6 @@
 [TgWitness](../../README.md) / [Dokumentasi](README.md) · [Pemberitahuan operator](OPERATOR-INCOMPATIBILITY.md)
 
-![Berkas GDPR 106 hari](../assets/presentation/chapter-case.svg)
+![Berkas GDPR 106 hari](../assets/presentation/chapter-gdpr-file.svg)
 
 # Valve, Taylor Wessing, dan 106 hari menunggu berdasarkan GDPR: uraian berkas dan 70.717 katanya
 
@@ -72,7 +72,88 @@ Kami memeriksanya: memang persis seperti yang terlihat. Anda secara terbuka mene
 * **Kepada perusahaan asuransi:** Mohon audit klien Anda dan perangkat lunak yang ia gunakan untuk mengolah PDF dan menempatkan label `"Anlage 1 / Taylor Wessing"` di bagian atas halaman 1. Kemungkinan besar di sanalah tepatnya masalahnya, dan ini bukan kasus tunggal. Tidak ada gunanya menyerukan audit atas seluruh Taylor Wessing: selain nama, mereka tampaknya tidak berbagi apa pun dalam hal lingkungan kerja atau aturan tinjauan keamanan, yang seharusnya ada dengan sendirinya (rupanya kunci tanda tangan fisik dan gelar di depan nama sudah menutupi semua itu).
 * **Kepada perusahaan AS, dan siapa pun di Komisi Eropa yang kebetulan membaca ini:** Cobalah sekadar menaati hukum. Mempekerjakan doktor ternama dari "perusahaan pekerja lepas" ternama tampak berbahaya dan sungguh keji terhadap pelanggan Anda. Jika di Valve cek begitu saja ditandatangani dan tidak ada yang memeriksa apa yang dikerjakan para pengacara selama 106 hari, mungkin membayar waktu yang diulur alih-alih hasil itulah alasan perangkat lunaknya usang dan tidak ada yang memahami cara kerja PDF. Dan jika tidak ada kebocoran lain di sana, berarti Doktor Patrick hanya berhasil membuat semua orang lelah dengan penantian atau ancaman. Pada dasarnya, yang dijual adalah layanan ketidakpatuhan GDPR: pelaksanaan berkualitas buruk dan ancaman ("Anda tidak akan memenangkan satu perkara pun"), dipadukan dengan pembersihan hasil Google berkualitas tinggi yang dilakukan atas nama mereka sendiri. Kami tidak menyusun teks hukum dan tidak menuduh siapa pun. Kami hanya menuliskan apa yang kami lihat, dan apa yang mereka berusaha keras hapus.
 
-Karena para pengacara menganggap merekalah hukum, dan bahwa nyawa manusia, nyawa anak-anak, tidak penting, itu pilihan mereka. Ini bukan konflik kami. Tetapi kami dapat mengatakan dengan yakin bahwa impunitas firma ini terkonfirmasi secara historis, sejak pendirinya Goltz, salah satu dari delapan orang yang menyusun amandemen §175, dan sejak satu-satunya perkaranya yang terkenal, yang kadang dibaca sebagai pembelaan terhadap orang LGBT: perkara Jenderal von Fritsch. Kami lewati sejarahnya; kami mempelajarinya langsung dari sumber tepercaya dan catatan aslinya. Tetapi beginilah perkara itu berakhir: ada satu terdakwa, dan kita punya tiga orang tewas. Achim von Frisch, digilas roda penindasan. Otto Schmidt, ditembak mati pada 1943. Dan Jenderal Fritsch sendiri: tidak penting bahwa ia dibebaskan, harganya mahal. Pada 1939, mencari kematian, ia menjadi sukarelawan untuk front di Polandia dan tewas (atau membiarkan dirinya terbunuh).
+---
+
+## 6. Yang dibeli Valve bukan pemrosesan GDPR
+
+Kami bukan pihak dalam sengketa ini dan kami tidak membela akun maupun pemblokirannya. Tinggal satu pertanyaan. Valve menyewa pengacara papan atas: dua doktor ternama dari "perusahaan pekerja lepas" ternama, **Dr. Tobias Schelinski** (`Doc. No. 42282474`, 15 Agustus 2025) dan **Dr. Patrick Vincent Zurheide** (`Doc. No. 42603633`, 1 Oktober 2025). Untuk apa Valve membayar? Bukan untuk pemrosesan GDPR: permintaannya tidak dipenuhi saat itu dan tidak dipenuhi sampai sekarang.
+
+### Yang diserahkan sebagai gantinya, dengan kata-kata mereka sendiri
+
+* **Tenggat "kalaupun ada":** *„wenn überhaupt“* — Doktor Tobias.
+* **Minta datamu, kehilangan akunmu:** pemutusan *„mit sofortiger Wirkung“*, sebagai jawaban atas permintaan akses data — Doktor Tobias.
+* **Bukti dengan jumlah:** *„Unabhängig von den Einzelheiten der Beschwerden…“* Isi tidak penting, semuanya dihitung — Doktor Tobias.
+* **Diagnosis bagi pemohon:** *„…Ihr Mandant bzw. dessen Komplizen…“* — Doktor Patrick.
+* **Vonis atas nama setiap pengadilan:** *„Aus unserer Erfahrung wird jedes Gericht…“* — Doktor Patrick. Belum ada pengadilan yang memutus; kami kira justru untuk itulah pengadilan ada.
+* **Empat pasal Kitab Undang-Undang Hukum Pidana:** `§§ 263, 263a, 202a, 303a StGB`, karena meminta data milik sendiri.
+* **Sebagai ganti data:** lima halaman Kebijakan Privasi publik Steam, salinan Dashboard yang sudah bisa dilihat pengguna, dan balasan Dukungan Steam yang diterjemahkan. Dua doktor hukum menyerahkan apa yang sudah ditulis seorang agen dukungan.
+* **Surat utang tertulis:** *„Gerne beauskunften wir die restlichen … Daten, sobald …“* Sisanya, suatu hari nanti.
+* **Pihak ketiga dilindungi dengan membocorkannya:** data pemblokiran ditahan "untuk melindungi pihak ketiga", data pihak ketiga dikirim dalam PDF yang kotak hitamnya bisa dilepas.
+* **Dua versi fakta:** satu doktor menanggali pengguna sejak Mei 2025, yang lain sejak 2019. Keduanya menandatangani. Seorang doktor tidak akan menandatangani hal yang tidak benar, jadi kami menerima keduanya.
+* **Ejaan premium:** *„Die Antwortet lautet ja“*, dua kali, dan e-mail milik sang partner sendiri salah eja di tanda tangannya sendiri.
+
+### Bukan kekeliruan
+
+> [!IMPORTANT]
+> Kekeliruan biasanya disembunyikan. Di sini tidak ada yang mencoba sama sekali. **Yang dijual adalah ketidakpatuhan GDPR, dan dijual secara terbuka.** Itu bukan kekeliruan; itu arogansi.
+
+### Untuk diri sendiri, untuk pengguna, dan untuk semua orang lain
+
+* **Untuk diri sendiri:** penghapusan dari hasil pencarian berdasarkan `Art. 17`. Doktor Patrick mengajukan lebih dulu; kami menerbitkan Bagian 3 di Medium; tepat setelahnya, hasil tentang Doktor Tobias juga dihapus.
+* **Untuk subjek data:** tujuh belas bulan dan terus bertambah.
+* **Tanpa pengacara:** Dukungan Steam menutup permintaan pemegang akun lain dalam **3 hari**, dengan tautan ke Account Data: *"there's no further information Steam Support can offer, this request will be closed"* (tiket `HT-2YBP-F7JP-D4VB`; tangkapan layar pemohon, [Bagian 18 dosir Steam](https://phishdestroy.io/steam_dossier/#gdpr-live-case)).
+* **Dengan pengacara:** tiket tertutup yang sama dalam **106 hari**, di atas kop surat. Siapa yang mengizinkan Valve sama sekali tidak memproses permintaan GDPR? Doktor Tobias?
+
+### Gelar
+
+Kami menyebut mereka "Doktor" di sepanjang tulisan, dan kami mengatakannya dengan hormat: gelar adalah fakta sejarah. Gelar Doktor Tobias bertumpu pada [studi tahun 2005 tentang cara otoritas Jerman mengawasi layanan daring asing](https://www.verlagdrkovac.de/978-3-8300-1791-2.htm); gelar Doktor Patrick pada [studi tahun 2020 tentang kontrak pengembangan perangkat lunak dalam Scrum](https://books.google.pl/books/about/Herausforderungen_bei_einer_Softwareentw.html?id=uh4PzgEACAAJ&redir_esc=y). Masing-masing adalah satu penelitian sempit, tentang satu topik sempit, yang dikerjakan sekali. Itu bukan keahlian dalam perlindungan data, dalam berkas PDF, atau dalam apa yang akan diputuskan setiap pengadilan. Di bawah gelar-gelar itu, dalam berkas ini: tidak ada pengawasan, dan sebuah PDF yang dibuat dengan `Aspose.PDF for .NET 20.8` dari tahun 2020.
+
+Kami belum membaca kedua disertasi itu, baik milik Doktor Tobias maupun Doktor Patrick. Kami membaca deskripsi penerbit untuk disertasi Doktor Tobias. Pada 2005 tentu saja belum ada GDPR. Tetapi kedengarannya solusinya sudah ada sejak itu.
+
+<details>
+<summary><b>Deskripsi penerbit untuk disertasi Doktor Tobias (asli berbahasa Jerman dan terjemahan)</b></summary>
+
+> „Darüber hinaus geht der Autor auf Probleme ein, die sich aus der Durchführung der behördlichen Aufsicht über die Online-Dienste ergeben. Hier sind insbesondere die Ausführungen über die örtliche Zuständigkeit von Behörden hervorzuheben. Dem Autor gelingt es insoweit, anhand einzelner Gesetze Lösungsmöglichkeiten aufzuzeigen wie der Gegensatz einer beschränkten örtlichen Zuständigkeit im Verhältnis zu der weltweiten Präsenz von Online-Diensten zu lösen ist.“
+>
+> *(Selain itu, penulis membahas masalah yang timbul dari pelaksanaan pengawasan oleh otoritas terhadap layanan daring. Yang patut disorot khususnya adalah uraiannya tentang kewenangan wilayah otoritas. Berdasarkan undang-undang tertentu, penulis berhasil menunjukkan kemungkinan solusi atas pertentangan antara kewenangan wilayah yang terbatas dan kehadiran layanan daring di seluruh dunia.)*
+
+Sumber: [Verlag Dr. Kovač](https://www.verlagdrkovac.de/978-3-8300-1791-2.htm).
+
+</details>
+
+Menilik berkas ini, sang penulis memang menemukan solusi, juga untuk GDPR: satu pengacara memutuskan siapa yang berhak atas datanya sendiri dan siapa yang tidak. Undang-undang mana yang harus dipakai untuk mempersempit sebuah regulasi Eropa demi kepentingan satu perusahaan Amerika, kami tidak tahu. Salah satu solusi yang mungkin adalah memproses permintaan GDPR itu secara sah. Tetapi penulisnya sudah doktor.
+
+### Tiga cara menangani permintaan akses dengan salah
+
+Sejauh kami, yang bukan pengacara, bisa membaca Regulasi itu, ada tiga, dan ketiganya diambil:
+
+* **Tidak menyerahkan data:** melanggar hukum.
+* **Menyerahkannya tidak lengkap:** melanggar hukum.
+* **"Membersihkan secara manual" dan membocorkan data pihak ketiga:** dua kali melanggar hukum (`Art. 5(1)(f)`, `Art. 32`).
+
+> [!TIP]
+> **Cara keempat:** cukup penuhi permintaannya. Itulah satu-satunya cara yang tidak diambil dua doktor hukum. Itu bukan sial; itu pilihan.
+
+### Siapa yang bertanggung jawab?
+
+Sejauh yang kami lihat, tidak ada: baik secara finansial maupun pribadi. Anda tidak bisa memberi mereka ulasan. Anda tidak bisa menulis opini. Perusahaannya "terdesentralisasi", jadi tidak ada perusahaan lain untuk dituju. Dan begitu Anda menyebut nama orang-orang yang menandatangani surat atas nama perusahaan, para perwakilan perusahaan tiba-tiba menjadi individu pribadi, dengan hak untuk dilupakan yang ditulis untuk individu pribadi, diterapkan seketika. Padahal semua yang dihapus menyangkut pekerjaan profesional mereka. Apakah laporan tentang pelanggaran, atau tentang kompetensi profesional, benar-benar termasuk hak untuk dilupakan? Bagaimana orang seharusnya membedakan pengacara yang baik dari yang buruk: dari profil di situs web Taylor Wessing sendiri? Dan bisakah itu dipercaya, ketika firma itu menyunting sejarahnya sendiri di Wikipedia?
+
+Kami sungguh tidak mengerti mengapa fakta sejarah sebuah gelar doktor dalam topik sempit memberi seseorang hak untuk mematikan hak-hak GDPR. Mungkin kami salah memahaminya. Mungkin Doktor Tobias mengajarkan sesuatu yang kurang tepat kepada mahasiswanya. Atau mungkin itu benar, dan Jerman diam-diam telah menyerah pada GDPR. Atau itu Doktor Tobias yang memutuskan?
+
+Dan mengapa, hanya untuk menerbitkan audit kami, opini kami, dan pengalaman kami (tentang kompetensi, dan tentang risiko kebocoran pada perangkat lunak rentan milik Doktor Patrick), kami harus menanamkan teksnya ke dalam perangkat lunak kami sendiri agar teks itu bertahan? Justru karena itulah semua ini tampak bagi kami sebagai korporatokrasi. Dan jika orang yang bertanya tidak mendapat apa-apa, untuk apa ada GDPR? Pendapatan bagi pengacara yang tidak bisa memakai PDF?
+
+### Kesimpulan kami
+
+Kami bukan pihak dalam sengketa ini, dan terus terang kami sudah lelah dengannya. Selama ini kami sudah melihat semuanya: riwayat Wikipedia yang dihapus dua kali, anak-anak dalam laporan, permintaan GDPR yang tidak pernah diproses, hak untuk dilupakan yang dipakai untuk diri sendiri, pendiri yang ikut menulis versi Nazi §175, dan struktur "terdesentralisasi" di mana tanggung jawab bukan milik siapa pun. Dari pengalaman kecil kami, kesimpulannya menyedihkan: gelar hanyalah gelar. Tanggung jawab di pihak pengacara: nol. Yang tersisa adalah arogansi, dan GDPR yang tidak dipatuhi. Kami hanya bertanya apa yang dibeli Valve, karena jelas itu bukan pemrosesan GDPR.
+
+---
+
+Karena para pengacara menganggap merekalah hukum, dan bahwa nyawa manusia, nyawa anak-anak, tidak penting, itu pilihan mereka. Ini bukan konflik kami. Tetapi kami dapat mengatakan dengan yakin bahwa impunitas firma ini terkonfirmasi secara historis, sejak pendirinya Goltz, salah satu dari delapan orang yang menyusun amandemen §175, dan sejak satu-satunya perkaranya yang terkenal, yang kadang dibaca sebagai pembelaan terhadap orang LGBT: perkara Jenderal von Fritsch.
+
+<details>
+<summary><b>Sejarah: Goltz, §175, dan perkara Fritsch</b></summary>
+
+Kami lewati sejarahnya; kami mempelajarinya langsung dari sumber tepercaya dan catatan aslinya. Tetapi beginilah perkara itu berakhir: ada satu terdakwa, dan kita punya tiga orang tewas. Achim von Frisch, digilas roda penindasan. Otto Schmidt, ditembak mati pada 1943. Dan Jenderal Fritsch sendiri: tidak penting bahwa ia dibebaskan, harganya mahal. Pada 1939, mencari kematian, ia menjadi sukarelawan untuk front di Polandia dan tewas (atau membiarkan dirinya terbunuh).
 
 Tentu saja, kami tidak pernah menganggap perkara ini sebagai pembelaan pendiri firma terhadap orang LGBT. Tetapi hasil akhirnya jauh lebih menarik daripada sebuah kemenangan.
 
@@ -81,6 +162,8 @@ Tentu saja, kami tidak pernah menganggap perkara ini sebagai pembelaan pendiri f
 **Statistik versus PR:** Ia membela seorang jenderal heteroseksual dari kalangan elite Wehrmacht setelah lebih dulu menggerakkan ban berjalan hukum yang mengirim sekitar 50.000 homoseksual sungguhan ke penjara dan sekitar 15.000 ke kamp konsentrasi, dengan tingkat kematian 60%. Menyelamatkan satu jenderal tidak menghapus arsitektur genosida.
 
 **Denazifikasi, berhasil dihindari:** Perkara Fritsch menjadi "pintu belakang" sempurna melewati panel denazifikasi pascaperang. Arsitek undang-undang represif itu memakai pembelaannya atas satu jenderal sebagai bukti "independensinya", lolos dari Nuremberg, mempertahankan status dan izinnya, dan pada 1957 mendirikan kantor yang kini memperdagangkan progresivitasnya di bawah papan nama Taylor Wessing.
+
+</details>
 
 Jadi ya, secara keseluruhan: kami yakin tidak ada bedanya apakah ini Taylor Wessing Jerman ini atau yang lain; ini sama sekali bukan soal hukum. Apa yang kami katakan di sini adalah sebuah pernyataan, bukan penegasan fakta melainkan asumsi, karena kenyataannya mereka akan mencari kata apa pun untuk dijadikan pegangan. Itulah sebabnya ini masuk ke arsip: upaya sensor dan penyembunyian, serta kaitan langsung dengan warisan mereka. Dari Doktor Patrick: laporan paling pertama, dengan kata homofobik kasar yang dibiarkan. Mungkin tidak sengaja, tentu saja, tetapi kata itu ada di sana, dan itu yang pertama.
 
@@ -93,6 +176,9 @@ Kami menyerukan kewarasan dalam memperlakukan kebenaran, dan ingin mengingatkan 
 Tetapi pilihan kami terkait Taylor Wessing kemungkinan besar sudah habis, karena strategi mereka adalah membuat tautan dihapus. Kami terpaksa melestarikan teks dan data kami, sehingga kami menanamkannya ke dalam perangkat lunak kami, yang sudah memiliki tiga surat terima kasih terkonfirmasi dari lembaga pemerintah, termasuk di Jerman dan Belgia, padahal belum dirilis.
 
 Kami ingin memperingatkan mereka yang gemar membengkokkan hukum: tidak perlu menurunkan repositori. Selama ini kami tidak pernah berkonflik dengan Anda. Tetapi jika Anda memutuskan merusak pekerjaan kami demi menyembunyikan kebenaran, maka tanpa repositori yang aktif, regulator dan pihak lain tidak akan bisa membandingkan tanda tangan sebuah versi (walau kepada siapa saya menceritakan ini), dan saat itulah kami akan masuk ke konflik langsung. Dengan ini kami berharap dapat berpamitan dengan keahlian mega dan para pengacara elite. Ini tidak menyenangkan, dan saya tidak senang. Semoga sukses.
+
+> [!CAUTION]
+> **Menurunkan repositori ini tidak akan menghapus apa pun.** Penyidik dan peneliti menggunakan TgWitness, dan salinan mereka diverifikasi terhadap repositori ini. Kami punya cadangan. Tetapi penurunan akan mengubah kami dari auditor satu kasus menjadi pihak dalam konflik. Cukup sudah menghapus kebenaran.
 
 [Catatan sumber](https://phishdestroy.io/steam_dossier/taylor_wessing) · [Pemberitahuan operator](OPERATOR-INCOMPATIBILITY.md) · [Lisensi MIT](../../LICENSE)
 

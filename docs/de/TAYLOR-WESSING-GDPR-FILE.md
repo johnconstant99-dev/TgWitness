@@ -1,6 +1,6 @@
 [TgWitness](../../README.md) / [Dokumentation](README.md) · [Hinweis zum Betreiber](OPERATOR-INCOMPATIBILITY.md)
 
-![Die DSGVO-Akte: 106 Tage](../assets/presentation/chapter-case.svg)
+![Die DSGVO-Akte: 106 Tage](../assets/presentation/chapter-gdpr-file.svg)
 
 # Valve, Taylor Wessing und 106 Tage Warten nach der DSGVO: Analyse der Datei und ihrer 70.717 Wörter
 
@@ -137,11 +137,90 @@ gibt ihm das Recht, so zu handeln (wir sind keine Juristen und kennen die Gesetz
   Bereinigung der Google-Ergebnisse im eigenen Namen. Wir verfassen keine juristischen Texte und beschuldigen
   niemanden. Wir schreiben einfach, was wir gesehen haben und was sie so eifrig zu löschen versuchen.
 
+---
+
+## 6. Was Valve gekauft hat, war keine DSGVO-Bearbeitung
+
+Wir sind nicht Partei des Streits und verteidigen weder das Konto noch die Sperre. Es bleibt eine Frage. Valve hat Spitzenjuristen engagiert: zwei namhafte Doktoren aus einem namhaften „Freelance-Unternehmen“, **Dr. Tobias Schelinski** (`Dok.-Nr. 42282474`, 15. August 2025) und **Dr. Patrick Vincent Zurheide** (`Dok.-Nr. 42603633`, 1. Oktober 2025). Wofür hat Valve bezahlt? Nicht für eine DSGVO-Bearbeitung: Der Antrag wurde damals nicht erfüllt und ist es bis heute nicht.
+
+### Was stattdessen geliefert wurde, in ihren eigenen Worten
+
+* **Eine Frist mit Vorbehalt:** *„wenn überhaupt“* — Doktor Tobias.
+* **Daten verlangt, Konto verloren:** gekündigt *„mit sofortiger Wirkung“*, als Antwort auf einen Auskunftsantrag — Doktor Tobias.
+* **Beweis durch Menge:** *„Unabhängig von den Einzelheiten der Beschwerden…“* Inhalt egal, gezählt wird alles — Doktor Tobias.
+* **Eine Diagnose des Antragstellers:** *„…Ihr Mandant bzw. dessen Komplizen…“* — Doktor Patrick.
+* **Ein Urteil für jedes Gericht:** *„Aus unserer Erfahrung wird jedes Gericht…“* — Doktor Patrick. Kein Gericht hat entschieden; wir dachten, dafür seien Gerichte da.
+* **Vier Paragrafen des Strafgesetzbuchs:** `§§ 263, 263a, 202a, 303a StGB`, für die Bitte um die eigenen Daten.
+* **Statt der Daten:** fünf Seiten der öffentlichen Datenschutzerklärung von Steam, eine Kopie des Dashboards, das der Nutzer ohnehin sieht, und eine übersetzte Antwort des Steam-Supports. Zwei Doktoren der Rechte haben geliefert, was ein Support-Mitarbeiter bereits geschrieben hatte.
+* **Ein Schuldschein:** *„Gerne beauskunften wir die restlichen … Daten, sobald …“* Der Rest, irgendwann.
+* **Dritte geschützt, indem man sie leakt:** die Sperrdaten „zum Schutz Dritter“ zurückgehalten, die Daten Dritter in einem PDF verschickt, dessen schwarze Balken sich entfernen lassen.
+* **Zwei Versionen der Fakten:** Der eine Doktor datiert den Nutzer auf Mai 2025, der andere auf 2019. Beide haben unterschrieben. Ein Doktor würde nichts Unwahres unterschreiben, also akzeptieren wir beide.
+* **Premium-Rechtschreibung:** *„Die Antwortet lautet ja“*, gleich zweimal, und die eigene E-Mail-Adresse des Partners falsch geschrieben, in seiner eigenen Signatur.
+
+### Kein Versehen
+
+> [!IMPORTANT]
+> Fehler werden normalerweise versteckt. Hier hat es niemand auch nur versucht. **Verkauft wird die Nichteinhaltung der DSGVO, und zwar offen.** Das ist kein Versehen, das ist Arroganz.
+
+### Für sich selbst, für den Nutzer und für alle anderen
+
+* **Für sich selbst:** Auslistung nach `Art. 17`. Doktor Patrick hat zuerst beantragt; wir haben Teil 3 auf Medium veröffentlicht; gleich danach wurden auch die Ergebnisse zu Doktor Tobias ausgelistet.
+* **Für die betroffene Person:** siebzehn Monate, und es werden mehr.
+* **Ohne Juristen:** Der Steam-Support hat den Antrag eines anderen Kontoinhabers in **3 Tagen** geschlossen, mit einem Link auf Account Data: *"there's no further information Steam Support can offer, this request will be closed"* (Ticket `HT-2YBP-F7JP-D4VB`; Screenshots des Antragstellers, [Abschnitt 18 des Steam-Dossiers](https://phishdestroy.io/steam_dossier/#gdpr-live-case)).
+* **Mit Juristen:** dasselbe geschlossene Ticket in **106 Tagen**, auf Briefpapier. Wer hat Valve erlaubt, DSGVO-Anträge überhaupt nicht zu bearbeiten? Doktor Tobias?
+
+### Titel
+
+Wir nennen sie durchgehend „Doktor“, und das meinen wir respektvoll: Der Titel ist eine historische Tatsache. Der von Doktor Tobias beruht auf [einer Studie von 2005 darüber, wie deutsche Behörden ausländische Online-Dienste beaufsichtigen](https://www.verlagdrkovac.de/978-3-8300-1791-2.htm), der von Doktor Patrick auf [einer Studie von 2020 über Softwareentwicklungsverträge in Scrum](https://books.google.pl/books/about/Herausforderungen_bei_einer_Softwareentw.html?id=uh4PzgEACAAJ&redir_esc=y). Jede davon ist eine schmale Forschungsarbeit zu einem schmalen Thema, einmal angefertigt. Das ist keine Expertise im Datenschutz, in PDF-Dateien oder darin, was jedes Gericht entscheiden wird. Unter den Titeln, in dieser Akte: keine Aufsicht, und ein PDF, erstellt mit `Aspose.PDF for .NET 20.8` aus dem Jahr 2020.
+
+Wir haben keine der beiden Dissertationen gelesen, weder die von Doktor Tobias noch die von Doktor Patrick. Gelesen haben wir die Verlagsbeschreibung der Dissertation von Doktor Tobias. 2005 gab es die DSGVO natürlich noch nicht. Aber es klingt, als wäre die Lösung schon damals da gewesen.
+
+<details>
+<summary><b>Die Verlagsbeschreibung der Dissertation von Doktor Tobias (Originaltext)</b></summary>
+
+> „Darüber hinaus geht der Autor auf Probleme ein, die sich aus der Durchführung der behördlichen Aufsicht über die Online-Dienste ergeben. Hier sind insbesondere die Ausführungen über die örtliche Zuständigkeit von Behörden hervorzuheben. Dem Autor gelingt es insoweit, anhand einzelner Gesetze Lösungsmöglichkeiten aufzuzeigen wie der Gegensatz einer beschränkten örtlichen Zuständigkeit im Verhältnis zu der weltweiten Präsenz von Online-Diensten zu lösen ist.“
+
+Quelle: [Verlag Dr. Kovač](https://www.verlagdrkovac.de/978-3-8300-1791-2.htm).
+
+</details>
+
+Nach dieser Akte zu urteilen, hat der Autor tatsächlich eine Lösung gefunden, auch für die DSGVO: Ein Jurist entscheidet, wer Anspruch auf seine eigenen Daten hat und wer nicht. Welche Gesetze nötig waren, um eine europäische Verordnung im Interesse eines einzigen amerikanischen Unternehmens einzuengen, wissen wir nicht. Eine mögliche Lösung wäre gewesen, den DSGVO-Antrag rechtmäßig zu bearbeiten. Aber der Autor ist ja schon Doktor.
+
+### Drei Wege, einen Auskunftsantrag falsch zu behandeln
+
+Soweit wir, keine Juristen, die Verordnung lesen können, gibt es drei, und alle drei wurden gegangen:
+
+* **Die Daten nicht herausgeben:** rechtswidrig.
+* **Sie unvollständig herausgeben:** rechtswidrig.
+* **„Manuell bereinigen“ und Daten Dritter leaken:** doppelt rechtswidrig (`Art. 5(1)(f)`, `Art. 32`).
+
+> [!TIP]
+> **Der vierte Weg:** den Antrag einfach erfüllen. Es ist der einzige, den zwei Doktoren der Rechte nicht gegangen sind. Das ist kein Pech, das ist eine Entscheidung.
+
+### Wer trägt die Verantwortung?
+
+Soweit wir sehen: niemand, weder finanziell noch persönlich. Eine Bewertung kann man ihnen nicht hinterlassen. Eine Meinung kann man nicht schreiben. Die Kanzlei ist „dezentral“, also gibt es keine andere Gesellschaft, an die man sich wenden könnte. Und sobald man die Menschen nennt, die die Schreiben im Namen der Kanzlei unterschrieben haben, werden die Vertreter der Kanzlei plötzlich zu Privatpersonen, und das Recht auf Vergessenwerden, geschrieben für Privatpersonen, greift sofort. Dabei betraf alles, was ausgelistet wurde, ihre berufliche Arbeit. Fällt ein Bericht über einen Verstoß oder über berufliche Kompetenz wirklich unter das Recht auf Vergessenwerden? Wie sollen Menschen einen guten Anwalt von einem schlechten unterscheiden: am Profil auf der Website von Taylor Wessing selbst? Und kann man dem trauen, wenn die Kanzlei ihre eigene Wikipedia-Geschichte bearbeitet?
+
+Wir verstehen einfach nicht, warum die historische Tatsache einer Promotion zu einem schmalen Thema jemandem das Recht gibt, DSGVO-Rechte abzuschalten. Vielleicht verstehen wir es falsch. Vielleicht bringt Doktor Tobias seinen Studierenden etwas nicht ganz Richtiges bei. Oder vielleicht ist es richtig, und Deutschland hat die DSGVO still und leise aufgegeben. Oder entscheidet das Doktor Tobias?
+
+Und warum müssen wir, nur um unser Audit, unsere Meinung und unsere Erfahrung zu veröffentlichen (über Kompetenz und über das Leak-Risiko in der verwundbaren Software von Doktor Patrick), den Text in unsere eigene Software einbauen, damit er überlebt? Genau deshalb sieht das alles für uns nach Korporatokratie aus. Und wenn derjenige, der fragt, nichts bekommt, wozu dann die DSGVO? Als Umsatz für Juristen, die kein PDF bedienen können?
+
+### Unser Fazit
+
+Wir sind nicht Partei dieses Streits, und ehrlich gesagt sind wir ihn leid. In dieser Zeit haben wir uns alles angesehen: die zweimal gelöschte Wikipedia-Geschichte, die Kinder in den Meldungen, einen DSGVO-Antrag, der nie bearbeitet wurde, das Recht auf Vergessenwerden, für sich selbst genutzt, einen Gründer, der an der nationalsozialistischen Fassung des §175 mitgeschrieben hat, und eine „dezentrale“ Struktur, in der die Verantwortung niemandem gehört. Aus unserer kleinen Erfahrung ist das Fazit traurig: Titel sind Titel. Verantwortung auf Seiten der Juristen: null. Was bleibt, ist Arroganz und eine DSGVO, die nicht eingehalten wurde. Wir fragen nur, was Valve gekauft hat, denn eine DSGVO-Bearbeitung war es offensichtlich nicht.
+
+---
+
 Da die Juristen glauben, sie seien das Gesetz, und das Leben von Menschen, von Kindern, sei egal, ist das ihre
 Entscheidung. Es ist nicht unser Konflikt. Aber wir können mit Gewissheit sagen, dass die Straflosigkeit der Kanzlei
 historisch belegt ist, angefangen bei ihrem Gründer Goltz, einem der acht, die die Änderungen des §175 ausarbeiteten,
 und bei seinem einzigen aufsehenerregenden Fall, der mitunter als Verteidigung von LGBT-Menschen gedeutet wird: dem
-Fall des Generals von Fritsch. Die Geschichte überspringen wir; wir haben sie direkt aus einer verlässlichen Quelle
+Fall des Generals von Fritsch.
+
+<details>
+<summary><b>Geschichte: Goltz, §175 und der Fall Fritsch</b></summary>
+
+Die Geschichte überspringen wir; wir haben sie direkt aus einer verlässlichen Quelle
 und dem Original studiert. Das Ende dieses Falls aber lautet: Es gab einen Angeklagten, und wir haben drei Tote.
 Achim von Frisch, zermalmt von den Mühlsteinen der Repression. Otto Schmidt, 1943 erschossen. Und General Fritsch
 selbst: Dass er freigesprochen wurde, spielt keine Rolle, der Preis war hoch. 1939 ging er, den Tod suchend,
@@ -164,6 +243,8 @@ Völkermords nicht auf.
 Spruchkammern der Nachkriegszeit. Der Architekt repressiver Gesetze nutzte die Verteidigung eines Generals als Beleg
 seiner „Unabhängigkeit“, entging Nürnberg, behielt Status und Zulassung und gründete 1957 den Laden, der heute unter
 dem Schild Taylor Wessing seine Fortschrittlichkeit verkauft.
+
+</details>
 
 Also ja, alles in allem: Wir sind sicher, dass es keine Rolle spielt, ob es dieses deutsche Taylor Wessing ist oder
 irgendein anderes; mit dem Recht hat das überhaupt nichts zu tun. Was wir hier sagen, ist eine Erklärung, keine
@@ -196,6 +277,9 @@ Wahrheit zu verbergen, dann können Aufsichtsbehörden und andere ohne ein aktiv
 nicht vergleichen (obwohl, wem sage ich das), und dann treten wir in einen direkten Konflikt. In diesem Sinne
 verabschieden wir uns hoffentlich von Mega-Expertise und Elite-Juristen. Es war nicht lustig, und gefreut hat es mich
 auch nicht. Alles Gute.
+
+> [!CAUTION]
+> **Eine Löschung dieses Repositorys löscht nichts.** Ermittler und Forschende nutzen TgWitness, und mit diesem Repository werden ihre Kopien abgeglichen. Wir haben Backups. Aber eine Löschung würde uns vom Prüfer eines einzelnen Falls zur Konfliktpartei machen. Genug davon, die Wahrheit zu löschen.
 
 [Quelldatensatz](https://phishdestroy.io/steam_dossier/taylor_wessing) · [Hinweis zum Betreiber](OPERATOR-INCOMPATIBILITY.md) · [MIT-Lizenz](../../LICENSE)
 

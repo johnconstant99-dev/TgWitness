@@ -1,6 +1,6 @@
 [TgWitness](../../README.md) / [Belgeler](README.md) · [Operatör bildirimi](OPERATOR-INCOMPATIBILITY.md)
 
-![106 günlük GDPR dosyası](../assets/presentation/chapter-case.svg)
+![106 günlük GDPR dosyası](../assets/presentation/chapter-gdpr-file.svg)
 
 # Valve, Taylor Wessing ve GDPR kapsamında 106 günlük bekleyiş: dosyanın ve 70.717 kelimesinin çözümlemesi
 
@@ -72,7 +72,88 @@ Kontrol ettik: tam olarak göründüğü gibi. Devlet verilerini ve eksiksiz ki�
 * **Sigorta şirketine:** Lütfen müvekkilinizi ve PDF'lerle çalışmak ve `"Anlage 1 / Taylor Wessing"` etiketini 1. sayfanın üstüne yerleştirmek için kullandığı yazılımı denetleyin. Sorun büyük olasılıkla tam olarak oradadır ve münferit bir vaka değildir. Tüm Taylor Wessing'in denetlenmesini istemenin anlamı yok: isim dışında, kendiliğinden var olması gereken çalışma ortamları ya da güvenlik inceleme kuralları bakımından ortak hiçbir şeyleri yok gibi görünüyor (anlaşılan fiziksel bir imza anahtarı ve bir ismin önündeki unvan bunların hepsini karşılıyor).
 * **ABD şirketlerine ve bunu tesadüfen okuyan Avrupa Komisyonu'ndaki herkese:** Sadece yasaya uymayı deneyin. Ünlü bir "serbest çalışan şirketinden" ünlü doktorlar tutmak, müşterilerinize karşı tehlikeli ve son derece aşağılık görünüyor. Eğer Valve'da çekler öylece imzalanıyor ve avukatların 106 gün boyunca ne yaptığını kimse kontrol etmiyorsa, belki de sonuç yerine uzatılmış zamana para ödemek, yazılımın eski olmasının ve kimsenin bir PDF'in nasıl çalıştığını anlamamasının tam nedenidir. Ve orada başka sızıntı yoksa, Doktor Patrick herkesi beklemeyle ya da tehditlerle yıpratmayı başarmış demektir. Özünde satışa sunulan şey bir GDPR'a uymama hizmeti: düşük kaliteli uygulama ve tehditler ("tek bir davayı bile kazanamayacaksınız"), kendi adlarına yürütülen yüksek kaliteli bir Google sonuçları temizliğiyle birleşiyor. Hukuki metin kaleme almıyor ve kimseyi suçlamıyoruz. Yalnızca gördüğümüzü ve silmek için bu kadar uğraştıkları şeyi yazıyoruz.
 
-Avukatlar yasanın kendileri olduğunu ve insanların hayatlarının, çocukların hayatlarının önemli olmadığını düşündüğüne göre, bu onların tercihi. Bu bizim çatışmamız değil. Ama firmanın cezasızlığının tarihsel olarak doğrulandığını güvenle söyleyebiliriz; kurucusu Goltz'a, §175 değişikliklerini hazırlayan sekiz kişiden birine ve bazen LGBT bireylerin savunması olarak okunan tek ünlü davasına, General von Fritsch davasına kadar uzanıyor. Tarihi geçeceğiz; onu doğrudan güvenilir bir kaynaktan ve özgün kayıttan inceledik. Ama dava şöyle bitti: bir sanık vardı ve bizde üç ölü var. Baskının değirmen taşlarında ezilen Achim von Frisch. 1943'te kurşuna dizilen Otto Schmidt. Ve General Fritsch'in kendisi: beraat etmiş olması önemli değil, bedeli ağırdı. 1939'da ölümü arayarak Polonya cephesine gönüllü gitti ve öldürüldü (ya da öldürülmesine izin verdi).
+---
+
+## 6. Valve'ın satın aldığı şey GDPR işleme değildi
+
+Uyuşmazlığın tarafı değiliz; ne hesabı ne de yasağı savunuyoruz. Geriye tek bir soru kalıyor. Valve en üst düzey avukatlar tuttu: ünlü bir "serbest çalışan şirketinden" iki ünlü doktor, **Dr. Tobias Schelinski** (`Doc. No. 42282474`, 15 Ağustos 2025) ve **Dr. Patrick Vincent Zurheide** (`Doc. No. 42603633`, 1 Ekim 2025). Neye para ödedi? GDPR işlemeye değil: talep o zaman yerine getirilmedi, bugün de yerine getirilmiş değil.
+
+### Bunun yerine teslim edilenler, kendi sözleriyle
+
+* **"Eğer olursa" bir süre:** *„wenn überhaupt“* — Doktor Tobias.
+* **Verini iste, hesabını kaybet:** bir veri erişim talebine yanıt olarak *„mit sofortiger Wirkung“* fesih — Doktor Tobias.
+* **Miktarla ispat:** *„Unabhängig von den Einzelheiten der Beschwerden…“* İçerik önemsiz, her şey sayılır — Doktor Tobias.
+* **Talep sahibine bir teşhis:** *„…Ihr Mandant bzw. dessen Komplizen…“* — Doktor Patrick.
+* **Her mahkeme adına bir hüküm:** *„Aus unserer Erfahrung wird jedes Gericht…“* — Doktor Patrick. Hiçbir mahkeme karar vermedi; mahkemelerin bunun için olduğunu sanıyorduk.
+* **Ceza Kanunu'ndan dört madde:** `§§ 263, 263a, 202a, 303a StGB`, insanın kendi verisini istemesine karşılık.
+* **Veri yerine:** Steam'in herkese açık Gizlilik Politikası'ndan beş sayfa, kullanıcının zaten gördüğü Dashboard'un bir kopyası ve çevrilmiş bir Steam Destek yanıtı. İki hukuk doktoru, bir destek temsilcisinin zaten yazmış olduğu şeyi teslim etti.
+* **Yazılı bir senet:** *„Gerne beauskunften wir die restlichen … Daten, sobald …“* Gerisi, bir gün.
+* **Üçüncü kişiler sızdırılarak korundu:** yasak verileri "üçüncü kişileri korumak için" alıkonuldu, üçüncü kişilerin verileri siyah kutuları kalkan bir PDF içinde gönderildi.
+* **Olayların iki versiyonu:** bir doktor kullanıcıyı Mayıs 2025'ten, diğeri 2019'dan tarihliyor. İkisi de imzaladı. Bir doktor gerçek dışı bir şeyi imzalamaz, o yüzden ikisini de kabul ediyoruz.
+* **Premium imla:** *„Die Antwortet lautet ja“*, iki kez, ve ortağın kendi e-posta adresi kendi imzasında yanlış yazılmış.
+
+### Hata değil
+
+> [!IMPORTANT]
+> Hatalar genellikle gizlenir. Burada kimse denemedi bile. **Satışta olan GDPR'a uymamaktır ve açıkça satılıyor.** Bu bir hata değil; bu kibir.
+
+### Kendileri için, kullanıcı için ve herkes için
+
+* **Kendileri için:** `Art. 17` kapsamında arama sonuçlarından kaldırma. İlk başvuran Doktor Patrick oldu; Medium'da 3. Bölümü yayımladık; hemen ardından Doktor Tobias hakkındaki sonuçlar da kaldırıldı.
+* **İlgili kişi için:** on yedi ay ve sayılmaya devam ediyor.
+* **Avukatsız:** Steam Destek, başka bir hesap sahibinin talebini Account Data bağlantısıyla **3 günde** kapattı: *"there's no further information Steam Support can offer, this request will be closed"* (talep `HT-2YBP-F7JP-D4VB`; talep sahibinin ekran görüntüleri, [Steam dosyasının 18. Bölümü](https://phishdestroy.io/steam_dossier/#gdpr-live-case)).
+* **Avukatlı:** aynı kapatılmış talep, antetli kâğıt üzerinde, **106 günde**. Valve'a GDPR taleplerini hiç işlememe iznini kim verdi? Doktor Tobias mı?
+
+### Unvanlar
+
+Onlara baştan sona "Doktor" diyoruz ve bunu saygıyla söylüyoruz: unvan tarihsel bir olgudur. Doktor Tobias'ınki [Alman makamlarının yabancı çevrim içi hizmetleri nasıl denetlediğine dair 2005 tarihli bir çalışmaya](https://www.verlagdrkovac.de/978-3-8300-1791-2.htm), Doktor Patrick'inki [Scrum'da yazılım geliştirme sözleşmelerine dair 2020 tarihli bir çalışmaya](https://books.google.pl/books/about/Herausforderungen_bei_einer_Softwareentw.html?id=uh4PzgEACAAJ&redir_esc=y) dayanıyor. Her biri, dar bir konuda, bir kez yapılmış dar bir araştırmadır. Bu; ne veri korumada, ne PDF dosyalarında, ne de her mahkemenin neye karar vereceğinde uzmanlıktır. Unvanların altında, bu dosyada: hiçbir denetim yok ve 2020 tarihli `Aspose.PDF for .NET 20.8` ile yapılmış bir PDF var.
+
+İki tezden hiçbirini, ne Doktor Tobias'ınkini ne de Doktor Patrick'inkini okumadık. Doktor Tobias'ınkinin yayınevi tanıtımını okuduk. 2005'te elbette GDPR yoktu. Ama çözüm sanki o zaman bile oradaymış gibi geliyor.
+
+<details>
+<summary><b>Doktor Tobias'ın tezinin yayınevi tanıtımı (Almanca orijinal ve çeviri)</b></summary>
+
+> „Darüber hinaus geht der Autor auf Probleme ein, die sich aus der Durchführung der behördlichen Aufsicht über die Online-Dienste ergeben. Hier sind insbesondere die Ausführungen über die örtliche Zuständigkeit von Behörden hervorzuheben. Dem Autor gelingt es insoweit, anhand einzelner Gesetze Lösungsmöglichkeiten aufzuzeigen wie der Gegensatz einer beschränkten örtlichen Zuständigkeit im Verhältnis zu der weltweiten Präsenz von Online-Diensten zu lösen ist.“
+>
+> *(Yazar ayrıca çevrim içi hizmetler üzerindeki resmî denetimin yürütülmesinden doğan sorunları ele alıyor. Burada özellikle makamların yer bakımından yetkisine ilişkin açıklamaları öne çıkarılmalıdır. Yazar, tek tek yasalar üzerinden, sınırlı yer bakımından yetki ile çevrim içi hizmetlerin dünya çapındaki varlığı arasındaki karşıtlığın nasıl çözülebileceğine dair olası çözümler göstermeyi başarıyor.)*
+
+Kaynak: [Verlag Dr. Kovač](https://www.verlagdrkovac.de/978-3-8300-1791-2.htm).
+
+</details>
+
+Bu dosyaya bakılırsa yazar gerçekten bir çözüm bulmuş, GDPR için de: kimin kendi verisine hakkı olduğuna ve kimin olmadığına tek bir avukat karar veriyor. Bir Avrupa tüzüğünü tek bir Amerikan şirketinin çıkarına daraltmak için hangi yasaların kullanılması gerektiğini bilmiyoruz. Olası çözümlerden biri, GDPR talebini hukuka uygun biçimde işlemek olurdu. Ama yazar zaten doktor.
+
+### Bir erişim talebini yanlış yürütmenin üç yolu
+
+Biz avukat olmayanların Tüzüğü okuyabildiği kadarıyla üç yol var ve üçü de seçildi:
+
+* **Veriyi teslim etmemek:** hukuka aykırı.
+* **Eksik teslim etmek:** hukuka aykırı.
+* **"Elle temizlemek" ve üçüncü kişilerin verisini sızdırmak:** iki kat hukuka aykırı (`Art. 5(1)(f)`, `Art. 32`).
+
+> [!TIP]
+> **Dördüncü yol:** talebi basitçe yerine getirmek. İki hukuk doktorunun seçmediği tek yol bu. Bu şanssızlık değil; bir tercih.
+
+### Kim sorumlu?
+
+Görebildiğimiz kadarıyla hiç kimse: ne maddi ne de kişisel olarak. Onlar hakkında yorum bırakamazsınız. Görüş yazamazsınız. Şirket "merkeziyetsiz", yani başvurulacak başka bir şirket yok. Ve mektupları şirket adına imzalayan kişilerin adını verdiğiniz anda, şirketin temsilcileri birden özel kişilere dönüşüyor; özel kişiler için yazılmış unutulma hakkı da derhâl uygulanıyor. Oysa kaldırılan her şey onların mesleki çalışmalarıyla ilgiliydi. Bir ihlale ya da mesleki yetkinliğe dair bir rapor gerçekten unutulma hakkına mı girer? İnsanlar iyi bir avukatı kötüsünden nasıl ayırt edecek: Taylor Wessing'in kendi sitesindeki profilden mi? Ve firma kendi Wikipedia geçmişini düzenliyorken buna güvenilebilir mi?
+
+Dar bir konudaki doktoranın tarihsel olgusunun neden birine GDPR haklarını kapatma hakkı verdiğini anlamıyoruz. Belki yanlış anlıyoruz. Belki Doktor Tobias öğrencilerine pek doğru olmayan bir şey öğretiyor. Ya da belki doğrudur ve Almanya GDPR'dan sessizce vazgeçmiştir. Yoksa buna Doktor Tobias mı karar verir?
+
+Ve neden sırf denetimimizi, görüşümüzü ve deneyimimizi (yetkinlik hakkında ve Doktor Patrick'in güvenlik açığı bulunan yazılımındaki sızıntı riski hakkında) yayımlamak için, metnin ayakta kalması adına onu kendi yazılımımıza gömmek zorundayız? İşte tam da bu yüzden bütün bunlar bize korporatokrasi gibi görünüyor. Ve soran kişi hiçbir şey alamıyorsa GDPR ne işe yarar? PDF kullanmayı bilmeyen avukatlara ciro mu?
+
+### Vardığımız sonuç
+
+Bu uyuşmazlığın tarafı değiliz ve açıkçası bundan yorulduk. Bu süre içinde her şeye baktık: iki kez silinen Wikipedia geçmişi, şikâyetlerdeki çocuklar, hiç işlenmeyen bir GDPR talebi, kendileri için kullanılan unutulma hakkı, §175'in Nazi versiyonunun yazılmasına yardım eden bir kurucu ve sorumluluğun kimseye ait olmadığı "merkeziyetsiz" bir yapı. Küçük deneyimimizden çıkan sonuç üzücü: unvanlar unvandır. Avukatlar tarafındaki sorumluluk: sıfır. Geriye kalan kibir ve uyulmamış bir GDPR. Valve'ın ne satın aldığını soruyoruz yalnızca, çünkü açıkça GDPR işleme değildi.
+
+---
+
+Avukatlar yasanın kendileri olduğunu ve insanların hayatlarının, çocukların hayatlarının önemli olmadığını düşündüğüne göre, bu onların tercihi. Bu bizim çatışmamız değil. Ama firmanın cezasızlığının tarihsel olarak doğrulandığını güvenle söyleyebiliriz; kurucusu Goltz'a, §175 değişikliklerini hazırlayan sekiz kişiden birine ve bazen LGBT bireylerin savunması olarak okunan tek ünlü davasına, General von Fritsch davasına kadar uzanıyor.
+
+<details>
+<summary><b>Tarih: Goltz, §175 ve Fritsch davası</b></summary>
+
+Tarihi geçeceğiz; onu doğrudan güvenilir bir kaynaktan ve özgün kayıttan inceledik. Ama dava şöyle bitti: bir sanık vardı ve bizde üç ölü var. Baskının değirmen taşlarında ezilen Achim von Frisch. 1943'te kurşuna dizilen Otto Schmidt. Ve General Fritsch'in kendisi: beraat etmiş olması önemli değil, bedeli ağırdı. 1939'da ölümü arayarak Polonya cephesine gönüllü gitti ve öldürüldü (ya da öldürülmesine izin verdi).
 
 Elbette bu davayı hiçbir zaman firmanın kurucusunun LGBT bireyleri savunması olarak saymadık. Ama sonuç bir zaferden çok daha ilginç.
 
@@ -81,6 +162,8 @@ Elbette bu davayı hiçbir zaman firmanın kurucusunun LGBT bireyleri savunması
 **İstatistik ve halkla ilişkiler:** Önce yaklaşık 50.000 gerçek eşcinseli hapishaneye, yaklaşık 15.000'ini de %60 ölüm oranıyla toplama kamplarına gönderen hukuki bir yürüyen bandı harekete geçirdikten sonra, Wehrmacht elitinden heteroseksüel bir generali savundu. Bir generali kurtarmak soykırımın mimarisini ortadan kaldırmaz.
 
 **Başarıyla atlatılan Nazilerden arındırma:** Fritsch davası, savaş sonrası Nazilerden arındırma kurullarından geçmek için kusursuz bir "arka kapı" oldu. Baskıcı yasaların mimarı, bir generali savunmasını "bağımsızlığının" kanıtı olarak kullandı, Nürnberg'den kurtuldu, statüsünü ve ruhsatını korudu ve 1957'de bugün Taylor Wessing tabelası altında ilericiliğini satan büroyu kurdu.
+
+</details>
 
 Yani evet, sonuç olarak: bunun bu Alman Taylor Wessing mi yoksa başka biri mi olduğunun hiçbir fark yaratmadığından eminiz; mesele hiç de yasa değil. Burada söylediğimiz bir beyandır; bir olgu iddiası değil, bir varsayımdır, çünkü gerçekte tutunacakları herhangi bir kelime arayacaklar. Bu yüzden bu, arşivlere gidiyor: sansür ve gizleme girişimleri ve onların mirasıyla doğrudan bağlantılar. Doktor Patrick'ten: kaba homofobik kelimenin bırakıldığı ilk şikâyet. Belki de kazara, elbette, ama orada ve ilk sırada.
 
@@ -93,6 +176,9 @@ Gerçekle ilişkide sağduyu çağrısında bulunuyor ve herkese sıfır güveni
 Ama Taylor Wessing konusundaki seçeneklerimiz büyük olasılıkla tükendi, çünkü onların stratejisi bağlantıları kaldırtmak. Metnimizi ve verilerimizi korumak zorundayız, bu yüzden onları, henüz yayımlanmamışken bile Almanya ve Belçika dahil devlet kurumlarından üç onaylı teşekkür mektubu almış olan yazılımımıza yerleştiriyoruz.
 
 Yasayı eğip bükmeyi sevenleri uyarmak istiyoruz: depoyu kaldırmaya gerek yok. Bunca zaman boyunca sizinle hiçbir çatışmaya girmedik. Ama gerçeği gizlemek için çalışmamızı bozmaya karar verirseniz, etkin bir depo olmadan düzenleyiciler ve diğerleri bir sürümün imzasını karşılaştıramaz (gerçi kime anlatıyorum) ve o zaman doğrudan çatışmaya gireriz. Bununla birlikte mega uzmanlığa ve seçkin avukatlara veda etmeyi umuyoruz. Eğlenceli değildi ve memnun değilim. Her şey gönlünüzce olsun.
+
+> [!CAUTION]
+> **Bu depoyu kaldırtmak hiçbir şeyi silmez.** Soruşturmacılar ve araştırmacılar TgWitness kullanıyor ve kopyaları bu depoyla karşılaştırılarak doğrulanıyor. Yedeklerimiz var. Ama bir kaldırma, bizi tek bir vakanın denetçisinden bir çatışmanın tarafına dönüştürür. Gerçeği silmek yeter.
 
 [Kaynak kaydı](https://phishdestroy.io/steam_dossier/taylor_wessing) · [Operatör bildirimi](OPERATOR-INCOMPATIBILITY.md) · [MIT Lisansı](../../LICENSE)
 
