@@ -62,8 +62,6 @@
 .modes-page dl { margin:0; }
 .modes-page dt { font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-weight:650; margin-top:14px; }
 .modes-page dd { margin:5px 0 0; font-size:13px; color:var(--ink); }
-.modes-page .m-limit { margin-top:20px; padding-top:14px; border-top:1px solid var(--line); font-size:12px; }
-.m-limit strong { color:var(--ink); font-weight:650; margin-inline-end:5px; }
 .m-note { font-size:12px; margin:16px 0; }
 .modes-page > .m-note { width:min(1120px,calc(100% - 40px)); margin:20px auto 0; }
 .m-more { display:inline-flex; gap:12px; align-items:center; font-size:12px; margin-top:16px; text-decoration:underline; }
@@ -144,8 +142,6 @@
 .m-compare { min-width:720px; }
 .m-compare [data-answer="yes"] { color:var(--m-good); font-weight:600; }
 .m-compare [data-answer="partial"] { color:var(--m-warn); }
-.m-limits { padding-inline-start:22px; font-size:14px; line-height:1.8; color:var(--muted); }
-.m-limits li { padding-inline-start:7px; margin-bottom:10px; }
 .m-final-links { display:flex; flex-wrap:wrap; gap:16px 24px; margin-top:25px; align-items:center; font-size:12px; }
 .m-final-links .m-more { margin:0; }
 .m-footer { width:min(1240px,calc(100% - 64px)); margin:0 auto; padding:28px 0 44px; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; justify-content:space-between; gap:15px; font-size:11px; color:var(--muted); }
