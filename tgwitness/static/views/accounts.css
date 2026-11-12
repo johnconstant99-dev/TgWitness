@@ -37,3 +37,17 @@
  #view-accounts .account-card>.access-warning{grid-column:2 / 8;grid-row:4;margin:3px 0;font-size:12px}
 }
 @media(max-width:700px){.accounts-overview{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.accounts-total{padding:10px}.accounts-total strong{font-size:21px}.accounts-tools{grid-template-columns:1fr 1fr}.accounts-tools label:first-child{grid-column:1 / -1}.accounts-bulk{gap:8px}.accounts-bulk #accounts-selected{margin-left:auto}#view-accounts .account-actions{flex-wrap:wrap;gap:7px}#view-accounts .account-actions button{min-height:36px}.accounts-pagination{justify-content:space-between;gap:8px}.accounts-groups{padding:12px}.accounts-total span{overflow-wrap:anywhere}}
+#view-accounts .account-value.account-task{display:grid;gap:3px;align-content:start;min-width:0}
+#view-accounts .account-value.account-task dt{display:flex;align-items:center;gap:7px;margin:0;font-size:13px;font-weight:600;color:var(--text)}
+#view-accounts .account-value.account-task dt::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--status-off)}
+#view-accounts .account-value.account-task dd{margin:0;padding-left:15px;font-size:12px;font-weight:400;line-height:1.45;color:var(--muted)}
+#view-accounts .account-task[data-task=monitoring] dt::before{background:var(--status-ok);box-shadow:0 0 0 3px var(--success-soft)}
+#view-accounts .account-task[data-task=free] dt::before{background:transparent;box-shadow:inset 0 0 0 2px var(--accent)}
+#view-accounts .account-task:is([data-task=history],[data-task=export],[data-task=profile_image],[data-task=reconnecting]) dt::before{background:var(--status-info);animation:account-task-pulse 1.6s ease-in-out infinite}
+#view-accounts .account-task:is([data-task=sign_in],[data-task=failed]) dt::before{background:var(--status-warn)}
+#view-accounts .account-task[data-task=unavailable] dt::before{background:var(--status-error)}
+#view-accounts .account-task[data-task=demo] dt::before{background:var(--accent)}
+#view-accounts .account-actions [data-action=export]{font-weight:600}
+@keyframes account-task-pulse{50%{opacity:.35}}
+@media(prefers-reduced-motion:reduce){#view-accounts .account-task dt::before{animation:none}}
+@media(min-width:1200px){#view-accounts .account-value.account-task dt{font-size:12px}#view-accounts .account-value.account-task dd{font-size:11px}}

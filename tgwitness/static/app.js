@@ -33,7 +33,7 @@ const workspaceSafetyReady=import('./core/workspace-safety.js?v=1').then(({creat
   workspaceSafety=createWorkspaceSafety({state,find:$,tr,avatar:avatarNode,switchProfile,refreshStatus,confirm:askConfirm});
   window.TgWitnessWorkspace=workspaceSafety;
 });
-let accountState;
+let accountState,accountActivity;
 let boardView;
 const boardReady=import('./views/board.js?v=2').then(({createCaseBoard})=>{
   boardView=createCaseBoard({root:$('view-board'),state,json,tr,trn,node,toast,may,download,media:mediaNode,
@@ -103,7 +103,8 @@ let connectionView;
 const connectionViewReady=import('./views/connection.js?v=2').then(({createConnectionView})=>{
   connectionView=createConnectionView({root:$('connect-guide'),tr,json,state,refreshStatus,askConfirm});
 });
-const accountStateReady=import('./components/account-state.js?v=1').then(module=>{accountState=module.accountState;});
+const accountStateReady=import('./components/account-state.js?v=2').then(module=>{
+  accountState=module.accountState;accountActivity=module.accountActivity;});
 let disclosurePreview;
 const disclosurePreviewReady=import('./views/disclosure-preview.js?v=2').then(({createDisclosurePreview})=>{
   disclosurePreview=createDisclosurePreview({root:$('view-evidence'),tr,formatTime:accountExportTime});
@@ -852,10 +853,18 @@ function renderWorkflowControls(){
   show('workflow-link-card',!state.status.demo&&may('export'));
   show('workflow-account-card',canExport);
   show('workflow-investigation-card',viewAllowed('sources')&&viewAllowed('connection')&&may('collect'));
-  $('workflow-status-title').textContent=state.status.demo?tr('Demo workspace'):tr(info.label);
-  $('workflow-status-title').closest('.workflow-status').dataset.state=info.kind;
-  $('workflow-status-copy').textContent=tr('{records} saved records · {sources} selected sources',
-    {records:state.status.stats.total.toLocaleString(),sources:state.status.targets.filter(target=>target.enabled).length});
+  const sources=state.status.targets.filter(target=>target.enabled).length,current=profileEntry()||{};
+  const activity=accountActivityText({...current,collector:state.status.collector,sources_enabled:sources}),demo=state.status.demo;
+  $('workflow-status-title').textContent=demo?tr('Demo workspace'):activity.title;
+  $('workflow-status-title').closest('.workflow-status').dataset.state=demo?'demo':activity.kind;
+  $('workflow-status-copy').textContent=[demo?'':current.label,tr('{records} saved records · {sources} selected sources',
+    {records:state.status.stats.total.toLocaleString(),sources})].filter(Boolean).join(' · ');
+  const exporter=viewQuery('start','[data-workflow="account"]');
+  exporter.textContent=tr(!demo&&activity.observing?'Pause observation and export':'Export my account');
+  $('workflow-account-hint').textContent=!demo&&activity.observing?
+    tr('Observation pauses for the export. Start it again in Accounts when the export finishes.'):
+    !demo&&activity.busy?tr('{task}. The export can start when it finishes.',{task:activity.title}):tr('No continuous observation needed.');
+  renderWorkflowAccounts();
   const investigate=viewQuery('start','[data-workflow="investigation"]');
   investigate.textContent=tr(state.status.collector.running?'Open investigation':'Set up observation');
   }
@@ -877,6 +886,34 @@ function renderWorkflowControls(){
   $('account-export-configure').textContent=tr(!state.status.demo&&!accountSignedIn()?
     info.needsSignIn?'Sign in again':'Connect account →':'Configure account export');
   }
+}
+function renderWorkflowAccounts(){
+  const box=$('workflow-accounts'),list=(state.profiles||[]).filter(p=>!p.error_type&&p.collector);
+  const exporting=!!state.me?.admin&&viewAllowed('evidence'),shown=list.slice(0,6);
+  const rows=shown.map(p=>({p,activity:accountActivityText(p.id===state.profile?{...p,collector:state.status.collector}:p)}));
+  const signature=JSON.stringify([state.profile,exporting,list.length,rows.map(({p,activity})=>[p.id,p.label,activity.kind,activity.title])]);
+  box.hidden=state.status.demo||list.length<2;
+  if(box.hidden||box.dataset.signature===signature)return;
+  box.dataset.signature=signature;
+  const items=rows.map(({p,activity})=>{
+    const item=node('div','workflow-account'+(p.id===state.profile?' current':''));item.dataset.task=activity.kind;
+    const text=node('span','workflow-account-text'),account=p.collector.account;
+    text.append(node('strong','',p.label),node('small','',activity.title));
+    item.append(avatarNode(account?account.id:null,account?.username||p.label,'',p.id),text);
+    if(exporting&&activity.kind==='free'){
+      const exporter=node('button','secondary',tr('Export account'));exporter.type='button';
+      exporter.addEventListener('click',()=>busy(exporter,()=>exportAccountFrom(p.id)));item.append(exporter);
+    }else if(p.id!==state.profile){
+      const open=node('button','quiet',tr('Open'));open.type='button';
+      open.addEventListener('click',()=>busy(open,()=>switchProfile(p.id)));item.append(open);
+    }
+    return item;
+  });
+  if(list.length>shown.length){
+    const more=node('button','text-link',tr('All accounts: {n}',{n:list.length}));more.type='button';
+    more.addEventListener('click',()=>navigate('accounts'));items.push(more);
+  }
+  box.replaceChildren(...items);
 }
 function openWorkflowSignIn(){
   const entered=navigate('connection');
@@ -905,6 +942,7 @@ function importedKeyNotice(id){
 }
 async function openAccountWorkflow(){
   if(!state.me?.admin||!viewAllowed('evidence'))return;
+  if(!state.status.demo&&state.status.collector?.running&&!(await pauseForExport(state.profile)))return;
   const workflow=state.workflow={profile:state.profile,kind:'account'},revision=state.workspaceRevision;
   const current=()=>state.workflow===workflow&&revision===state.workspaceRevision&&state.me?.admin&&viewAllowed('evidence');
   if(!state.status.demo&&!accountSignedIn()){
@@ -1345,11 +1383,50 @@ async function loadProfiles(){
   if(request!==profilesRequest)return;
   renderAccounts();window.TgWitnessAccountImport?.renderAccount();
   if(state.view==='group')groupView?.status();
+  if(state.view==='start')renderWorkflowControls();
 }
 function accountPhaseLabel(p){
   if(p.error_type==="DeletionPending")return tr("Deletion incomplete");
   if(p.error_type)return tr("Unavailable")+" · "+(errorName(p.error_type)||p.error_type);
   return tr(accountState(p).label);
+}
+const activityTitles=()=>({reconnecting:tr("Reconnecting to Telegram"),history:tr("Downloading history"),
+  export:tr("Export in progress"),profile_image:tr("Updating profile photos"),sign_in:tr("Sign-in required"),
+  empty:tr("No Telegram account"),failed:tr("Needs attention"),unavailable:tr("Unavailable"),free:tr("Free")});
+const activityHints=()=>({monitoring:tr("To export this account, pause observation."),
+  reconnecting:tr("Observation resumes when the connection returns."),history:tr("Exports and observation wait until it finishes."),
+  export:tr("Observation waits until the export finishes."),profile_image:tr("Takes a moment."),
+  sign_in:tr("Sign in again to observe or export."),empty:tr("Connect an account to observe or export."),
+  failed:tr("Check the problems listed for this account."),free:tr("Ready to export or observe.")});
+const activityOf=p=>accountActivity?accountActivity(p):{kind:"unavailable",observing:false,busy:false,canExport:false};
+function accountActivityText(p){
+  const activity=activityOf(p),chats=p.sources_enabled;
+  const title=activity.kind==="monitoring"?(chats>0?trn("Observing {n} chat","Observing {n} chats",chats):tr("Observing")):
+    activityTitles()[activity.kind];
+  return {...activity,title,hint:activityHints()[activity.kind]||""};
+}
+function busyAccountText(p){
+  const activity=accountActivityText(p);
+  return (activity.busy?activity.title:tr("Busy"))+" · "+
+    tr(activity.observing?"Pause observation to use this account.":"Available when it finishes.");
+}
+function profileEntry(id=state.profile){
+  const entry=(state.profiles||[]).find(p=>p.id===id);
+  return id===state.profile&&state.status?{...(entry||{}),collector:state.status.collector}:entry;
+}
+async function pauseForExport(id){
+  const p=profileEntry(id);
+  if(!p?.collector?.running)return true;
+  if(!(await (await collectionReady).confirmPause(p.label)))return false;
+  await json("collector/stop",{},{profile:id});
+  toast(tr("Paused collection for {name}.",{name:p.label}));
+  await loadProfiles();if(id===state.profile)await refreshStatus();
+  return true;
+}
+async function exportAccountFrom(id){
+  if(!(await pauseForExport(id)))return;
+  if(state.profile!==id)await switchProfile(id);
+  if(state.profile===id)await openAccountWorkflow();
 }
 function accountIdentity(p){
   const a=p.collector&&p.collector.account;
@@ -1413,7 +1490,11 @@ function renderAccounts(){
     if(!down){
       const meta=node("dl","account-meta");
       const pair=(k,v,field)=>{const item=node("div","account-value");item.dataset.field=field;item.append(node("dt","",k),node("dd","",v));meta.append(item);};
-      pair(tr("Observation"),s.demo?tr("Sample data"):accountPhaseLabel(p),"observation");
+      const activity=accountActivityText(p),task=node("div","account-value account-task");
+      task.dataset.field="observation";task.dataset.task=s.demo?"demo":activity.kind;
+      task.append(node("dt","",s.demo?tr("Sample data"):activity.title));
+      if(!s.demo&&activity.hint)task.append(node("dd","",activity.hint));
+      meta.append(task);
       const attention=!s.demo&&p.health?Object.keys(healthPartNames).filter(name=>needsLook(p.health[name]?.state)):[];
       if(attention.length)pair(tr("Needs attention"),attention.map(name=>healthPartNames[name]+" — "+healthStates[healthKnown(p.health[name].state)][0]).join(" · "),"attention");
       const restricted=c.account_restriction&&(!c.account_restriction.until||c.account_restriction.until*1000>Date.now())?c.account_restriction:null;
@@ -1451,6 +1532,13 @@ function renderAccounts(){
         await loadProfiles();if(p.id===state.profile)await refreshStatus();
       }));
       actions.append(toggle);
+      const activity=activityOf(p);
+      if(activity.canExport&&!s.demo&&state.me?.admin&&viewAllowed('evidence')){
+        const exporter=node("button","secondary",tr(activity.observing?"Pause and export":"Export account"));
+        exporter.type="button";exporter.dataset.action="export";
+        exporter.addEventListener("click",()=>busy(exporter,()=>exportAccountFrom(p.id)));
+        actions.prepend(exporter);
+      }
     }
     const rename=node("button","quiet",tr("Rename"));rename.dataset.action='rename';rename.disabled=state.status.demo;
     rename.addEventListener("click",()=>busy(rename,async()=>{
@@ -2533,11 +2621,26 @@ async function loadAccountExport(silent=false){
       state.accountExportJobs.some(job=>["preparing","running","waiting","packaging"].includes(job.phase));
     $("account-export-status").textContent=state.status?.demo?
       tr("Demo account export uses fictional data only."):"";
+    renderAccountExportBusy();
     renderAccountExportJobs();
   })();
   accountExportRead={revision,profile,promise:pending};
   try{await pending;}finally{if(accountExportRead?.promise===pending)accountExportRead=null;}
 }
+function renderAccountExportBusy(){
+  const collector=state.status?.collector,busy=!state.status?.demo&&!!collector?.has_session&&collector.available_for_export===false;
+  show("account-export-busy",busy);if(!busy)return;
+  const activity=accountActivityText({...(profileEntry()||{}),collector,
+    sources_enabled:state.status.targets.filter(target=>target.enabled).length});
+  $("account-export-busy-copy").textContent=activity.observing?
+    tr("{task}. Pause observation to start the export; start it again in Accounts afterwards.",{task:activity.title}):
+    tr("{task}. The export can start when it finishes.",{task:activity.title});
+  show("account-export-pause",activity.observing);
+}
+$("account-export-pause").addEventListener("click",e=>busy(e.currentTarget,async()=>{
+  if(!(await pauseForExport(state.profile)))return;
+  await loadAccountExport();
+}));
 async function accountExportAction(job,verb){
   await json("account-export/"+encodeURIComponent(job.id)+"/"+verb,{});
   await loadAccountExport();
@@ -5600,7 +5703,7 @@ async function openExportDialog(){
     box.type="checkbox";box.value=p.id;box.disabled=!connected||!!occupied||basic&&!lead;box.addEventListener("change",estimate);
     box.checked=!box.disabled&&(lead||!!exportPreselect?.has(p.id));
     text.append(node("b","",p.label),node("small","",limited?tr("Telegram rate limit: wait until {time}.",{
-      time:formatTime(new Date(c.rpc_backoff_until*1000).toISOString())}):occupied?tr("Busy: pause the current task explicitly"):!connected?tr("no Telegram account connected"):
+      time:formatTime(new Date(c.rpc_backoff_until*1000).toISOString())}):occupied?busyAccountText(p):!connected?tr("no Telegram account connected"):
       basic?tr("not possible for ordinary groups"):account?(account.username?"@"+account.username+" · ":"")+"ID "+account.id:""));
     who.append(avatarNode(account?account.id:null,account&&account.username?account.username:p.label,"",p.id),text);
     row.append(box,who);list.append(row);
@@ -6126,7 +6229,7 @@ async function pollWorkspace(){
     if(!window.TgWitnessLive?.active()&&state.view==="observations" && state.drawerSeq===null && state.eventBefore===null && state.events.length<=200&&window.TgWitnessJournal?.canRefresh()!==false
         && state.status.stats.head?.seq!==head) await refreshEvents();
     if(!window.TgWitnessLive?.active()&&state.view==="chats" && state.status.stats.head?.seq!==head) await refreshChats(true);
-    if(state.view==="accounts"||state.view==="group") await loadProfiles();
+    if(state.view==="accounts"||state.view==="group"||state.view==="start") await loadProfiles();
     if(state.view==="witness") await loadExtras();
     if(state.view==="access") await loadAccess(true);
     if(state.view==="system-log") await loadConsole();

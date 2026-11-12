@@ -174,8 +174,8 @@
 .workflow-card .link-export-form { max-width: none; margin: 6px 0; }
 .workflow-card button { font-size: 13px; min-height: 40px; }
 .workflow-card .link-export-form label { font-size: 12px; }
-.accounts-overview { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 10px; padding: 8px; background: var(--surface); margin-bottom: 22px; }
-.accounts-overview .accounts-total { display: flex; align-items: baseline; gap: 10px; padding: 10px 16px; border: 0; border-radius: 6px; background: transparent; }
+.accounts-overview { display: flex; flex-wrap: wrap; gap: 4px; border: 1px solid var(--border); border-radius: 10px; padding: 8px; background: var(--surface); margin-bottom: 22px; }
+.accounts-overview .accounts-total { display: flex; align-items: baseline; gap: 10px; padding: 10px 16px; border: 0; border-radius: 6px; background: transparent; white-space: nowrap; }
 .accounts-overview .accounts-total[aria-pressed="true"] { background: var(--accent-soft); }
 .accounts-total strong { font-size: 22px; }
 .accounts-total span { font-size: 12px; }
@@ -265,7 +265,7 @@
   .workflow-card { padding: 20px; }
   .workflow-status { padding: 18px; }
   .accounts-overview { flex-wrap: wrap; gap: 4px; }
-  .accounts-overview .accounts-total { padding: 8px 10px; flex: 1; }
+  .accounts-overview .accounts-total { padding: 8px 10px; flex: 1 1 calc(33.333% - 4px); flex-wrap: wrap; gap: 2px 8px; white-space: normal; }
   .accounts-total strong { font-size: 20px; }
   .accounts-total span { font-size: 11px; text-align: start; }
 }

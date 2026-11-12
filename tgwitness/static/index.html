@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="/components/modes.css?v=1">
 <link rel="stylesheet" href="/views/sources.css?v=18">
 <link rel="stylesheet" href="/views/parameters.css?v=21">
-<link rel="stylesheet" href="/views/accounts.css?v=30">
+<link rel="stylesheet" href="/views/accounts.css?v=31">
 <link rel="stylesheet" href="/views/group.css?v=1">
 <link rel="stylesheet" href="/views/setup.css?v=4">
 <link rel="stylesheet" href="/views/settings-hub.css?v=4">
@@ -39,7 +39,7 @@
 <script defer src="/dialogs.js?v=2"></script>
 <script defer src="/privacy.js?v=1"></script>
 <script defer src="/chat-safety.js?v=1"></script>
-<script defer src="/app.js?v=0.9.1-evidence1-topology2-layout1"></script>
+<script defer src="/app.js?v=0.9.1-evidence1-topology2-layout1-activity1"></script>
 <script defer src="/services.js?v=1"></script>
 <script defer src="/independent-capture.js?v=2"></script>
 <script defer src="/investigate.js?v=9"></script>
@@ -54,11 +54,11 @@
 <script defer src="/live.js?v=3"></script>
 <script defer src="/cloud-capture-locales.js?v=1"></script><script defer src="/cloud-capture-story.js?v=4"></script><script defer src="/cloud-capture.js?v=6"></script>
 <link href="/views/exports.css?v=32" rel="stylesheet">
-<link href="/views/workflows.css?v=2" rel="stylesheet">
+<link href="/views/workflows.css?v=3" rel="stylesheet">
 <link href="/views/disclosure-preview.css?v=1" rel="stylesheet">
 <link href="/components/forms.css?v=35" rel="stylesheet">
 <link href="/components/feedback.css?v=36" rel="stylesheet">
-<link href="/components/layout.css?v=1" rel="stylesheet">
+<link href="/components/layout.css?v=2" rel="stylesheet">
 </head>
 <body>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
@@ -253,10 +253,10 @@
 <section class="view" hidden id="view-system-map" aria-label="System map"></section>
 <section class="view" hidden id="view-start">
   <div class="workflow-intro"><span class="eyebrow">YOUR WORKSPACE</span><h1>What would you like to do?</h1><p>Save a copy of your Telegram account, or keep a record of conversations as they change.</p></div>
-  <section class="card workflow-status" aria-label="Current workspace"><div><strong id="workflow-status-title"></strong><p id="workflow-status-copy"></p></div><button class="secondary" data-open="chats" type="button">Open saved chats</button><button class="quiet" data-open="accounts" type="button">Manage accounts</button></section>
+  <section class="card workflow-status" aria-label="Current workspace"><div><strong id="workflow-status-title"></strong><p id="workflow-status-copy"></p></div><button class="secondary" data-open="chats" type="button">Open saved chats</button><button class="quiet" data-open="accounts" type="button">Manage accounts</button><div class="workflow-accounts" hidden id="workflow-accounts"></div></section>
   <div class="workflow-choices">
     <article class="card workflow-card workflow-link" hidden id="workflow-link-card"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg><h2>Export a chat by link</h2><p>Choose a Telegram chat and review the export plan before starting.</p><form class="link-export-form" id="link-export-form"><label for="link-export-input">Chat link or @username</label><input autocomplete="off" id="link-export-input" maxlength="300" placeholder="@channel or https://t.me/…" spellcheck="false"><button class="primary" type="submit">Plan the export</button></form><div class="link-export-plan" hidden id="link-export-plan" role="status"></div><p class="hint">Checking briefly uses one permitted account. Starting an export requires a separate click.</p></article>
-    <article class="card workflow-card" id="workflow-account-card"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg><h2>Export my account</h2><p>Download the chats and history your account can read now. Choose dates, messages and files before starting.</p><button class="primary" data-workflow="account" type="button">Export my account</button><p class="hint">No continuous observation needed. Earlier deletions and edits cannot be recovered.</p></article>
+    <article class="card workflow-card" id="workflow-account-card"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg><h2>Export my account</h2><p>Download the chats and history your account can read now. Choose dates, messages and files before starting.</p><button class="primary" data-workflow="account" type="button">Export my account</button><p class="hint" id="workflow-account-hint">No continuous observation needed.</p></article>
     <article class="card workflow-card" id="workflow-investigation-card"><svg aria-hidden="true" class="icon"><use href="#i-journal"/></svg><h2>Follow an investigation</h2><p>Keep new messages, observed edits and deletion notices from the chats you choose.</p><button class="secondary" data-workflow="investigation" type="button">Set up observation</button><p class="hint">Previously saved records stay available when observation is paused.</p></article>
   </div>
   <section class="setup-start" hidden id="setup-start" aria-labelledby="setup-start-title">
@@ -505,6 +505,7 @@
   <dialog class="account-export-dialog" id="account-export-dialog" aria-labelledby="account-export-dialog-title">
     <form id="account-export-form" method="dialog">
       <div class="account-export-dialog-head"><div><span class="eyebrow">NEW ACCOUNT EXPORT</span><h2 id="account-export-dialog-title" tabindex="-1">Choose what to save</h2></div><button class="quiet" id="account-export-close" type="button" aria-label="Close export settings">×</button></div>
+      <div class="account-export-busy" hidden id="account-export-busy" role="status"><p id="account-export-busy-copy"></p><button class="secondary" hidden id="account-export-pause" type="button">Pause observation</button></div>
       <p class="muted">Every accessible chat and its full visible history are selected by default. Observation sources are separate from this export.</p>
       <p class="hint">For a personal backup, describe that purpose. You can prepare a separate sharing copy after the export finishes.</p>
       <p class="hint" hidden id="account-export-imported-key"></p>

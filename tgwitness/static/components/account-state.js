@@ -14,5 +14,16 @@ export function accountState(profile = {}) {
     collecting: "Collecting", reconnecting: "Reconnecting", failed: "Needs attention", paused: "Paused"}[kind];
   return {kind, label, hasSession, needsSignIn, sourcesReady,
     canStart: !unavailable && hasSession && !needsSignIn && !collector.running &&
-      collector.phase !== "storage_error" && sourcesReady};
+      collector.phase !== "storage_error" && sourcesReady && !["history", "export", "profile_image"].includes(collector.account_task)};
+}
+
+export function accountActivity(profile = {}) {
+  const account = accountState(profile), collector = profile.collector || {};
+  const task = collector.account_task || (collector.running ? "monitoring" : null);
+  const kind = account.kind === "unavailable" ? "unavailable" : account.needsSignIn ? "sign_in" : !account.hasSession ? "empty"
+    : task === "monitoring" ? (account.kind === "reconnecting" ? "reconnecting" : "monitoring")
+    : task || (account.kind === "failed" ? "failed" : "free");
+  const observing = kind === "monitoring" || kind === "reconnecting";
+  return {kind, observing, busy: observing || ["history", "export", "profile_image"].includes(kind),
+    canExport: kind === "free" || observing};
 }
