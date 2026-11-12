@@ -59,6 +59,19 @@ button.chat-setting-chip:hover { border-color: var(--accent); color: var(--accen
 .chat-compose:not(:focus-within) #chat-compose-hint { display:block; visibility:hidden; }
 .chat-newer { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 12px; flex-shrink: 0; }
 .chat-media-notice { flex-shrink: 0; }
+.chat-sub-danger { color: var(--danger); }
+.chat-sub-warning { color: var(--warning); }
+.chat-sub-accent { color: var(--accent-text); }
+.bubble-head .sender { color: inherit; }
+.sender-details > summary::after { opacity: 0; transition: opacity .15s; }
+.sender-details > summary:hover::after, .sender-details > summary:focus-visible::after, .sender-details[open] > summary::after { opacity: 1; }
+.msg.post .bubble { max-width: min(72ch, 100%); }
+.bubble-meta { gap: 10px; min-height: 18px; margin-top: 2px; padding-top: 0; }
+.bubble-meta .pill { gap: 4px; padding: 0; border: 0; background: transparent; font-size: 12px; font-weight: 550; line-height: 1.4; }
+.bubble-meta .pill .icon { width: 13px; height: 13px; flex: none; }
+.bubble-meta button.pill:hover span, .bubble-meta button.pill[aria-expanded="true"] span { text-decoration: underline; text-underline-offset: 3px; }
+.bubble-meta .time { font-size: 12px; }
+.chat-service time { font-variant-numeric: tabular-nums; }
 
 @media (min-width: 768px) {
   .workspace[data-current-view="chats"] .chats-sidebar,

@@ -18,3 +18,23 @@
 .chat-auto { display: inline-flex; align-items: center; color: var(--muted); }
 .chat-auto .icon, .chat-item-badges .pill .icon { width: 12px; height: 12px; }
 .chat-item-badges .pill { gap: 4px; font-variant-numeric: tabular-nums; }
+.chats-sidebar .chat-item-top { align-items: baseline; }
+.chats-sidebar .chat-item-time { font-size: 12px; }
+.chats-sidebar .chat-item-time:empty { display: none; }
+.chats-sidebar .chat-item-bottom { align-items: center; }
+.chats-sidebar .chat-item-preview { flex: 1; min-width: 0; }
+.chats-sidebar .chat-item-badges { flex: none; flex-wrap: nowrap; gap: 2px; }
+.chat-item-badges .pill-deleted { color: var(--danger); }
+.chat-item-badges .pill-edited { color: var(--accent-text); }
+.chat-item-badges .pill-missing { color: var(--warning); }
+.chat-item-badges .pill.pill-state { padding: 0 6px; border: 1px solid var(--border-strong); font-size: 11px; }
+.chat-item-priority { flex: none; width: 12px; height: 12px; margin-inline-end: auto; color: var(--accent-text); fill: currentColor; align-self: center; }
+.chats-sidebar .chat-priority { position: absolute; inset-inline-end: 6px; top: 6px; min-height: 28px; height: 28px; margin: 0; border-radius: 8px; background: var(--surface-2); box-shadow: var(--shadow-sm); opacity: 0; transition: opacity .15s; }
+.chats-sidebar .chat-item:hover .chat-priority, .chats-sidebar .chat-priority:focus-visible { opacity: 1; }
+.workspace .chats-sidebar .chat-item.active, .workspace .chats-sidebar .chat-item.active:hover { background: var(--accent); border-color: var(--accent); }
+.chats-sidebar .chat-item.active :is(.chat-item-title, .chat-item-preview, .chat-item-time, .chat-item-badges .pill, .chat-item-priority) { color: #fff; }
+.chats-sidebar .chat-item.active :is(.chat-item-preview, .chat-item-time) { opacity: .85; }
+.chats-sidebar .chat-item.active .chat-item-badges .pill.pill-state { border-color: rgba(255, 255, 255, .6); }
+@media (hover: none) {
+  .chats-sidebar .chat-priority { position: static; height: auto; min-height: 36px; background: none; box-shadow: none; opacity: 1; margin-inline-end: 4px; }
+}

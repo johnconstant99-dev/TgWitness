@@ -25,7 +25,7 @@ export function createWorkspaceSafety({state,find,tr,avatar,switchProfile,refres
     if(key!==avatarKey){
       avatarKey=key;const label=document.createElement('span');label.textContent=text;
       label.title=account?.id?'ID '+account.id:tr('No account connected');
-      identity.replaceChildren(avatar(account?.id,account?.username||name(state.profile),'sm',state.profile),label);
+      identity.replaceChildren(avatar(account?.id,account?.username||state.profiles.find(p=>p.id===state.profile)?.label||name(state.profile),'sm',state.profile),label);
     }
     return true;
   }

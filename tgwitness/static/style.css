@@ -980,13 +980,13 @@ button.pill { cursor: pointer; font-family: inherit; }
 .msg.grouped { margin-top: 0; }
 .bubble { position: relative; max-width: min(64ch, 100% - 50px); min-width: 0; padding: 8px 12px; border-radius: var(--radius-panel);
   background: var(--bubble); border: 1px solid var(--bubble-border); box-shadow: none; }
-.msg:not(.grouped) .bubble { border-end-start-radius: 5px; }
-.msg:not(.grouped) .bubble::before {
+.msg:not(.continued) .bubble { border-end-start-radius: 5px; }
+.msg:not(.continued) .bubble::before {
   content: ""; position: absolute; bottom: -1px; inset-inline-start: -10px; width: 12px; height: 17px; background: inherit;
   -webkit-mask-image: radial-gradient(11px 17px at 0 0, transparent 97%, #000 100%);
   mask-image: radial-gradient(11px 17px at 0 0, transparent 97%, #000 100%);
 }
-[dir="rtl"] .msg:not(.grouped) .bubble::before { transform: scaleX(-1); }
+[dir="rtl"] .msg:not(.continued) .bubble::before { transform: scaleX(-1); }
 .msg.deleted .bubble { background: var(--danger-soft); border-color: var(--danger-border); }
 .msg.missing .bubble { background: var(--warning-soft); border-color: var(--warning-border); }
 .msg.flash .bubble { outline: 2px solid var(--accent); }

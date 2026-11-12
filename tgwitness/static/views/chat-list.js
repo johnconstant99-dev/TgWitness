@@ -59,21 +59,18 @@ export function createChatList({root, tr, node, icon, avatarNode, timeNode, getS
     const title = chat.title || tr('Chat {id}', {id: chat.chat_id}), body = node('span', 'chat-item-body');
     const top = node('span', 'chat-item-top'), bottom = node('span', 'chat-item-bottom'), badges = node('span', 'chat-item-badges');
     top.append(node('span', 'chat-item-title', title));
+    if (chat.priority) {const mark = icon('star'); mark.classList.add('chat-item-priority'); top.append(mark);}
+    top.append(timeNode(chat.last_observed_at, 'chat-item-time', 'list'));
     bottom.append(node('span', 'chat-item-preview', chat.last_text ? (chat.last_sender ? chat.last_sender + ': ' : '') + window.TgWitnessPrivacy.preview(chat.last_text)
-      : tr(chat.messages ? 'Media or service message' : 'No messages saved yet')));
+      : tr(chat.messages ? 'Media or service message' : 'No messages saved yet')), badges);
     const deleted = typeof chat.deleted_saved === 'number' ? [chat.deleted_saved ? tr('{n} deleted, text kept', {n: chat.deleted_saved}) : '',
       chat.deleted_unsaved ? tr('{n} deleted before saving', {n: chat.deleted_unsaved}) : ''].filter(Boolean).join(', ') : tr('{n} deleted', {n: chat.deleted});
     if (chat.deleted) badges.append(badge('pill-deleted', deleted, chat.deleted, 'trash'));
     if (chat.missing) badges.append(badge('pill-missing', tr('{n} not found on recheck', {n: chat.missing}), chat.missing, 'question'));
     if (chat.edited) badges.append(badge('pill-edited', tr('{n} edited', {n: chat.edited}), chat.edited, 'edit'));
     const state = sourceState(chat), label = {excluded: 'Excluded', unconfirmed: 'Access unconfirmed', paused: 'Paused'}[state];
-    if (label) badges.append(node('span', 'pill', tr(label)));
-    if (chat.origin === 'scope') {
-      const automatic = node('span', 'chat-auto'); automatic.title = tr('Auto-discovered'); automatic.setAttribute('aria-label', tr('Auto-discovered'));
-      automatic.append(icon('refresh')); badges.append(automatic);
-    }
-    badges.append(timeNode(chat.last_observed_at, 'chat-item-time'));
-    body.append(top, bottom, badges); return [avatarNode(chat.chat_id, title), body];
+    if (label) badges.append(node('span', 'pill pill-state', tr(label)));
+    body.append(top, bottom); return [avatarNode(chat.chat_id, title), body];
   }
   async function priority(id) {
     const state = getState(), chat = currentChats().find(item => item.chat_id === id), current = getSession();
@@ -104,7 +101,7 @@ export function createChatList({root, tr, node, icon, avatarNode, timeNode, getS
       const signature = JSON.stringify([chat, sourceState(chat)]);
       if (row.renderKey !== signature) {open.replaceChildren(...presentation(chat)); row.renderKey = signature;}
       row.classList.toggle('active', chat.chat_id === state.chat); open.setAttribute('aria-pressed', String(chat.chat_id === state.chat));
-      open.title = chat.title || tr('Chat {id}', {id: chat.chat_id});
+      open.title = [chat.title || tr('Chat {id}', {id: chat.chat_id}), chat.origin === 'scope' ? tr('Auto-discovered') : ''].filter(Boolean).join(' · ');
       star.hidden = !chat.known; star.disabled = !may('sources') || state.status.demo || state.status.chats_limited || pending.has(chat.chat_id);
       star.classList.toggle('on', !!chat.priority); star.setAttribute('aria-pressed', String(!!chat.priority));
       const label = priorityHint(tr, !!chat.priority, state.status?.collector) + ' — ' + (chat.title || chat.chat_id);
