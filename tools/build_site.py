@@ -90,10 +90,11 @@ DEMO_STATIC.update({"demo/core/" + name: "tgwitness/static/core/" + name
 DEMO_STATIC.update({"demo/components/" + name: "tgwitness/static/components/" + name
                     for name in ("shell.js", "shell.css", "layout.css", "polish.css", "glow.js", "health.js", "health.css", "health-actions.js", "collection.js", "collection.css", "workspaces.js", "forms.js", "forms.css", "connection-notice.js", "feedback.css", "account-state.js", "modes.js", "modes.css")})
 DEMO_STATIC.update({"demo/views/" + name: "tgwitness/static/views/" + name
-                    for name in ("sources.js", "sources.css", "parameters.js", "parameters.css", "exports.js", "exports.css", "accounts.js", "accounts.css", "access.js", "access.css", "system-log.js", "chats.css", "chat-list.js", "chat-list.css", "workflows.css", "setup.js", "setup.css", "disclosure-preview.js", "disclosure-preview.css", "connection.js", "connection.css", "settings-hub.js", "settings-hub.css", "group-settings.js", "group.js", "group.css", "board.js", "board.css", "report-selection.js", "report-profiles.js", "report-wizard.js", "report-wizard.css", "pulse.js", "pulse.css", "chat-gaps.js", "people-timeline.js", "secret-chats.js", "home.js")})
+                    for name in ("sources.js", "sources.css", "parameters.js", "parameters.css", "exports.js", "exports.css", "accounts.js", "accounts.css", "access.js", "access.css", "system-log.js", "chats.css", "chat-list.js", "chat-list.css", "workflows.css", "setup.js", "setup.css", "disclosure-preview.js", "disclosure-preview.css", "connection.js", "connection.css", "settings-hub.js", "settings-hub.css", "group-settings.js", "group.js", "group.css", "board.js", "board.css", "report-selection.js", "report-editor.js", "report-profiles.js", "pulse.js", "pulse.css", "chat-gaps.js", "people-timeline.js", "secret-chats.js", "home.js")})
 DEMO_STATIC.update({"demo/mock.js": "website/demo/mock.js", "demo/fixtures.json": "website/demo/fixtures.json"})
 DEMO_STATIC["demo/system-map-data.js"] = "website/demo/system-map-data.js"
 DEMO_STATIC["demo/views/secret-chats.js"] = "tgwitness/static/views/secret-chats.js"
+DEMO_STATIC["demo/views/profile-collection.js"] = "tgwitness/static/views/profile-collection.js"
 DEMO_STATIC.update({"demo/views/" + name: "tgwitness/static/views/" + name
                     for name in ("system-map.js", "system-map-scene.js", "system-map.css")})
 DEMO_STATIC.update({"demo/views/topology.js": "tgwitness/static/views/topology.js",

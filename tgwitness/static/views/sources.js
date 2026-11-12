@@ -33,7 +33,7 @@ export function createSources(context) {
   const allowed = group => !getState().status?.demo && may(group === "recheck" ? "sources" : "settings");
   const permission = group => may(group === "recheck" ? "sources" : "settings");
 
-  function showTab(name, focus = false) {
+  function showTab(name, focus = false, {history = true} = {}) {
     if (!tabs.some(button => button.dataset.sourceTab === name)) name = "scope";
     tab = name;
     for (const button of tabs) {
@@ -45,7 +45,7 @@ export function createSources(context) {
     }
     if (name === "recording") updateStatus(getState().status);
     if (name === "chats") {renderTargets(); renderDialogs();}
-    context.onTab?.(name);
+    context.onTab?.(name, {history});
   }
   for (const button of tabs) {
     on(button, "click", () => showTab(button.dataset.sourceTab));
@@ -653,10 +653,11 @@ export function createSources(context) {
     for (const id of ["sources-scope-summary", "sources-count-summary", "sources-recording-summary"])
       find(id).textContent = "";
     find("sources-tab-count").textContent = "0";
-    showTab("scope");
+    showTab("scope", false, {history: false});
   }
   return {
-    enter({params} = {}) {showTab(params?.tab || tab); updateStatus(getState().status);},
+    get tab() {return tab;},
+    enter({params} = {}) {showTab(params?.tab || tab, false, {history: false}); updateStatus(getState().status);},
     updateStatus, showTab, renderTargets, loadDialogs, runSourceAction,
     filterTargets(value) {
       showTab("chats"); find("target-search").value=""; find("target-kind").value="";

@@ -7,18 +7,18 @@
 <meta name="color-scheme" content="light dark">
 <title>TgWitness · Observation workspace</title>
 <link rel="icon" type="image/svg+xml" href="/mark.svg">
-<link rel="stylesheet" href="/style.css?v=0.8.0-evidence2-chat2">
+<link rel="stylesheet" href="/style.css?v=0.9.3-workflows2">
 <link rel="stylesheet" href="/components/shell.css?v=1">
 <link rel="stylesheet" href="/components/health.css?v=1">
 <link rel="stylesheet" href="/components/collection.css?v=1">
 <link rel="stylesheet" href="/components/notifications.css?v=1">
 <link rel="stylesheet" href="/components/modes.css?v=1">
-<link rel="stylesheet" href="/views/sources.css?v=18">
+<link rel="stylesheet" href="/views/sources.css?v=19">
 <link rel="stylesheet" href="/views/parameters.css?v=21">
 <link rel="stylesheet" href="/views/accounts.css?v=31">
 <link rel="stylesheet" href="/views/group.css?v=1">
 <link rel="stylesheet" href="/views/setup.css?v=4">
-<link rel="stylesheet" href="/views/settings-hub.css?v=7">
+<link rel="stylesheet" href="/views/settings-hub.css?v=8">
 <link rel="stylesheet" href="/views/connection.css?v=1">
 <link rel="stylesheet" href="/views/system-map.css?v=2">
 <link rel="stylesheet" href="/services.css?v=1">
@@ -28,7 +28,7 @@
 <link rel="stylesheet" href="/account-import.css?v=1">
 <link rel="stylesheet" href="/views/access.css?v=30">
 <link rel="stylesheet" href="/components/journal.css?v=6">
-<link rel="stylesheet" href="/views/chats.css?v=14">
+<link rel="stylesheet" href="/views/chats.css?v=15">
 <link rel="stylesheet" href="/views/chat-list.css?v=13">
 <link rel="stylesheet" href="/views/board.css?v=2">
 <link rel="stylesheet" href="/views/topology.css?v=2">
@@ -39,7 +39,7 @@
 <script defer src="/dialogs.js?v=2"></script>
 <script defer src="/privacy.js?v=1"></script>
 <script defer src="/chat-safety.js?v=1"></script>
-<script defer src="/app.js?v=0.9.1-evidence1-topology2-layout1-activity5-chat2-wow4"></script>
+<script defer src="/app.js?v=0.9.3-profiles4"></script>
 <script defer src="/services.js?v=1"></script>
 <script defer src="/independent-capture.js?v=2"></script>
 <script defer src="/investigate.js?v=11"></script>
@@ -61,7 +61,6 @@
 <link href="/components/layout.css?v=9" rel="stylesheet">
 <link href="/components/polish.css?v=5" rel="stylesheet">
 <link href="/views/pulse.css?v=2" rel="stylesheet">
-<link href="/views/report-wizard.css?v=2" rel="stylesheet">
 </head>
 <body>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
@@ -156,6 +155,7 @@
   <nav aria-label="Main navigation">
     <button class="nav" data-view="start"><svg aria-hidden="true" class="nav-icon"><use href="#i-home"/></svg> Start here</button>
     <button class="nav" data-view="chats"><svg aria-hidden="true" class="nav-icon"><use href="#i-message"/></svg> Chats</button>
+    <button class="nav" data-view="secret-chats"><svg aria-hidden="true" class="nav-icon"><use href="#i-lock"/></svg> Pseudo-secret</button>
     <button class="nav active" data-view="observations"><svg aria-hidden="true" class="nav-icon"><use href="#i-journal"/></svg> Journal <b id="nav-count">0</b></button>
     <button class="nav" data-view="evidence"><svg aria-hidden="true" class="nav-icon"><use href="#i-export"/></svg> Exports</button>
     <div class="nav-section">Workspace</div>
@@ -328,7 +328,7 @@
     <button type="button" id="sources-tab-scope" role="tab" aria-controls="sources-panel-scope" aria-selected="true" data-source-tab="scope">Scope</button>
     <button type="button" id="sources-tab-chats" role="tab" aria-controls="sources-panel-chats" aria-selected="false" tabindex="-1" data-source-tab="chats">Chats in scope <span id="sources-tab-count" class="tab-count">0</span></button>
     <button type="button" id="sources-tab-recording" role="tab" aria-controls="sources-panel-recording" aria-selected="false" tabindex="-1" data-source-tab="recording">Recording <span id="recording-tab-dirty" class="tab-count" hidden></span></button>
-    <button type="button" id="sources-tab-secret" role="tab" aria-controls="sources-panel-secret" aria-selected="false" tabindex="-1" data-source-tab="secret">Pseudo-secret</button>
+    <button type="button" id="sources-tab-secret" data-open="secret-chats">Pseudo-secret ↗</button>
   </div>
   <div id="sources-panel-scope" role="tabpanel" aria-labelledby="sources-tab-scope">
   <form class="card padded scope-card" id="scope-form"><div class="eyebrow">Observation scope</div><h2>What this account records</h2>
@@ -453,19 +453,25 @@
     </div>
   </form>
   </div>
-  <div id="sources-panel-secret" role="tabpanel" aria-labelledby="sources-tab-secret" hidden>
-  <section class="card padded secret-chats" id="secret-chats"><div class="eyebrow">Pseudo-secret</div><h2>Telegram end-to-end chats of this account, kept in the journal</h2>
-    <p class="hint">Telegram keeps these chats on one device only. TgWitness takes part with this account's own authorization and records every message, timer, file and deletion notice in the signed journal, also after the other side deletes them. It never sends read receipts, typing or screenshot notices.</p>
+</section>
+
+<section class="view" hidden id="view-secret-chats">
+  <div class="page-heading"><div><h1>Pseudo-secret</h1><p class="page-description">Telegram end-to-end chats of this account, kept in the journal</p></div><div class="route-actions"><button type="button" class="quiet" data-open="observations">Journal</button><button type="button" class="secondary" id="secret-report">Build report</button><button type="button" class="quiet" id="secret-refresh">Refresh</button></div></div>
+  <section class="card padded secret-chats" id="secret-chats">
+    <details class="secret-explanation"><summary>Details</summary><p class="hint">Telegram keeps these chats on one device only. TgWitness takes part with this account's own authorization and records every message, timer, file and deletion notice in the signed journal, also after the other side deletes them. It never sends read receipts, typing or screenshot notices.</p>
+    <p class="hint">An accepted chat moves to TgWitness: this account's other devices, such as the phone, do not get it. Without this option a request waits here for your decision. While pseudo-secret is on, the account stays connected so messages arrive.</p></details>
     <p class="notice warning" id="secret-unavailable" hidden></p>
-    <div class="secret-settings"><label class="check-label"><input id="secret-enabled" type="checkbox"> Turn on pseudo-secret for this account</label>
-    <label class="check-label"><input id="secret-accept" type="checkbox"> Accept incoming requests automatically</label>
-    <p class="hint">An accepted chat moves to TgWitness: this account's other devices, such as the phone, do not get it. Without this option a request waits here for your decision. While pseudo-secret is on, the account stays connected so messages arrive.</p></div>
+    <div id="secret-install" class="secret-install" hidden><code id="secret-install-command"></code><button class="secondary small" type="button" id="secret-install-copy">Copy install command</button></div>
+    <div class="secret-settings"><label class="check-label"><input id="secret-enabled" type="checkbox" role="switch" disabled> Turn on pseudo-secret for this account</label>
+    <label class="check-label"><input id="secret-accept" type="checkbox" role="switch" disabled> Accept incoming requests automatically</label></div>
     <p class="hint" id="secret-status" role="status"></p>
+    <div class="route-actions" id="secret-recovery" hidden><button class="secondary" id="secret-connect" type="button" data-open="connection">Connect account</button><button class="secondary" id="secret-reconnect" type="button">Retry</button></div>
+    <p class="notice warning" id="secret-sync" hidden role="status"></p>
+    <p class="notice" id="secret-interaction" hidden></p>
     <form class="secret-start" id="secret-start"><label for="secret-user">Start a chat with</label><input autocomplete="off" id="secret-user" maxlength="64" placeholder="@username or user ID" spellcheck="false"><button class="primary" type="submit">Start chat</button></form>
-    <p class="hint">The other side sees the request and must accept it on their device. Starting a chat and sending are actions of this account and are recorded.</p>
+    <div class="secret-list-tools"><input id="secret-search" type="search" placeholder="Search chats" aria-label="Search chats"><span id="secret-count" class="hint"></span></div>
     <div class="secret-layout"><div class="secret-list" id="secret-list"></div><div class="secret-thread" id="secret-thread"></div></div>
   </section>
-  </div>
 </section>
 
 <section class="view" hidden id="view-evidence">
@@ -663,7 +669,7 @@
     <div class="studio-heading"><div><div class="eyebrow">FROM RECORDS TO A READABLE STORY</div><h2>Report studio</h2><p class="muted">Choose a design. Select the information. Review the result.</p></div><span class="studio-badge">HTML · PDF · JSON</span></div>
     <p class="hint">Design and charts apply to new journal, chat, account and sharing exports. Case details apply to journal and single-chat reports; record and change-history switches apply to the journal. Account and sharing exports keep their own language and privacy settings.</p>
     <fieldset class="report-fields" id="report-fields" disabled>
-    <details id="report-profiles" class="report-manual" data-form-ignore>
+    <details id="report-profiles" class="report-manual" data-form-ignore data-form-draft-container>
       <summary>Reusable report configurations</summary>
       <p class="hint">Save language, design, sections and chart settings. Case details, findings and data filters stay in the current report and are never included in a configuration.</p>
       <div class="report-grid"><label>Saved configuration<select id="report-profile-list"></select></label><label>Configuration name<input id="report-profile-name" maxlength="80" autocomplete="off"></label></div>
@@ -697,12 +703,16 @@
           <label class="check-label"><input id="report-kind-edited" data-report-kind="message.edited" type="checkbox" checked> Edits</label>
           <label class="check-label"><input id="report-kind-deleted" data-report-kind="message.deleted" type="checkbox" checked> Deletion notices</label>
           <label class="check-label"><input id="report-kind-missing" data-report-kind="message.missing_on_recheck" type="checkbox" checked> Missing on recheck</label>
+          <label class="check-label"><input id="report-kind-secret-message" data-report-kind="secret_chat.message" type="checkbox" checked> Pseudo-secret message</label>
+          <label class="check-label"><input id="report-kind-secret-action" data-report-kind="secret_chat.action" type="checkbox" checked> Pseudo-secret notice</label>
+          <label class="check-label"><input id="report-kind-secret-file" data-report-kind="secret_chat.file" type="checkbox" checked> Pseudo-secret file preserved</label>
         </div></fieldset>
       </fieldset>
       <label class="check-label"><input id="report-selection-gaps" type="checkbox" checked> Include missing message IDs and neighboring records</label>
       <p class="hint">Missing numbers are gaps in the observed IDs; deletions are recorded as separate notices.</p>
       <p class="report-scope-notice">Scope applies to the report. The evidence ZIP keeps the complete original journal; use a minimized handover to share only selected data.</p>
     </section>
+    <section id="report-content-step" hidden>
     <div class="report-section-heading" id="report-content"><span aria-hidden="true">02</span><div><h3 tabindex="-1">Design and contents</h3><p class="hint">Choose how the report looks and what it includes.</p></div></div>
     <fieldset class="report-designs" aria-describedby="report-design-help"><legend>Report design</legend>
       <p class="hint" id="report-design-help">Page layouts for HTML and PDF. Changing the design keeps your data, included sections and written notes.</p>
@@ -891,13 +901,15 @@
     </fieldset>
     <p class="studio-fixed">Trust assessment, coverage and verification instructions stay in every report. Display choices do not remove signed source records.</p>
     </div><aside class="studio-stage" aria-label="Report preview"><div class="studio-stage-bar"><div><strong>Preview</strong><span>Cover & charts · current journal</span></div><button class="secondary" id="report-preview-refresh" type="button">Update preview</button></div><div class="studio-preview-tabs" role="group" aria-label="Preview section"><button type="button" data-preview-section="cover" aria-pressed="true">Cover</button><button type="button" data-preview-section="analytics" aria-pressed="false">Charts</button><button type="button" data-preview-section="guidance" aria-pressed="false" hidden>Guidance</button></div><p class="hint" id="report-design-preview-status" role="status">Preview uses your draft. Save settings before exporting.</p><iframe id="report-preview-frame" title="Draft report preview" sandbox="allow-same-origin" referrerpolicy="no-referrer" hidden></iframe><div id="report-preview-empty" class="studio-preview-empty"><span aria-hidden="true">Aa</span><strong>Your report, before you export</strong><p>Review the cover and real chart data here. The preview is unsigned and does not save your edits.</p></div><p class="hint">Design preview uses up to 50,000 source records. Build the data preview below for the complete selection. PDF has a separate print layout.</p></aside></div>
-    <section class="report-preview" id="report-preview" aria-labelledby="report-preview-title">
+    </section>
+    <section class="report-preview" id="report-preview" aria-labelledby="report-preview-title" hidden>
       <div class="report-section-heading"><span aria-hidden="true">03</span><div><h3 id="report-preview-title" tabindex="-1">Inspect the actual data</h3><p class="hint">This preview uses your current choices. It does not save them or create a signed export.</p></div></div>
       <div class="report-preview-toolbar"><button class="primary" type="button" id="report-preview-run">Build preview</button><button class="secondary" type="button" id="report-preview-retry" hidden>Retry preview</button><span id="report-preview-stale" class="report-preview-stale" hidden>Choices changed. Rebuild the preview.</span></div>
       <p id="report-preview-status" class="hint" role="status" data-no-translate></p>
       <div id="report-preview-result" data-no-translate></div>
     </section>
-    <div class="report-actions studio-save"><div><strong>Ready for the next export</strong><p class="hint">Saved settings apply to newly prepared files.</p></div><button class="primary" type="submit">Save report settings</button><button class="secondary" type="button" id="report-open-downloads">Go to downloads</button></div>
+    <div class="report-flow-actions"><button class="secondary" type="button" id="report-step-back" hidden>Back</button><span id="report-step-position" aria-live="polite"></span><button class="primary" type="button" id="report-step-next">Next</button><div class="report-formats" id="report-draft-downloads" hidden><button class="primary" data-export="pdf" data-report-download data-no-translate type="button">PDF</button><button class="secondary" data-export="html" data-report-download data-no-translate type="button">HTML</button><button class="secondary" data-export="json" data-report-download data-no-translate type="button">JSON</button></div></div>
+    <div class="report-actions studio-save"><div><strong>Ready for the next export</strong><p class="hint">Saved settings apply to newly prepared files.</p></div><button class="secondary" type="submit">Save report settings</button><button class="secondary" type="button" id="report-open-downloads">Go to downloads</button></div>
     <p class="hint">Save your choices, then download HTML, PDF or the signed ZIP. A preview can become outdated as new records arrive.</p>
     </fieldset>
     <p class="hint" id="report-status" role="status"></p>

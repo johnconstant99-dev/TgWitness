@@ -167,8 +167,12 @@ class BundleSizeLimit(ValueError):
     pass
 
 
+class EmptyReport(ValueError):
+    pass
+
+
 def export_file(store, vault, fmt, options=None, *, include_board=True, compact=False, output_stream=None,
-                max_uncompressed_bytes=None):
+                max_uncompressed_bytes=None, require_records=False):
     if fmt not in ("jsonl", "csv", "html", "json", "pdf", "zip"):
         raise ValueError("Unsupported export format")
     if compact and fmt != "zip":
@@ -245,6 +249,11 @@ def export_file(store, vault, fmt, options=None, *, include_board=True, compact=
             if not compact and (selection.enabled or selection.id_gaps) and fmt in ("html", "json", "pdf", "zip"):
                 selected = report.report_selection.analyze(snapshot, selection, preview_limit=0, scratch_root=directory)
                 context["selection"] = {key: selected[key] for key in ("selection", "source", "counts", "id_gaps")}
+
+            if require_records and fmt in ("html", "json", "pdf"):
+                count = context["selection"]["counts"]["selected_records"] if "selection" in context else result["events"]
+                if not count:
+                    raise EmptyReport("No records match these choices. Change the filters and build the preview again.")
 
             def chunks(format):
                 events = snapshot.events()

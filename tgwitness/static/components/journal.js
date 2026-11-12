@@ -1,5 +1,5 @@
 const TYPES=[["messages","Messages"],["message.edited","Edits"],["message.deleted","Deletions"],
-  ["reaction.snapshot","Reactions"],["membership","Membership"],["media","Attachments"],["actions","Actions"],["coverage","Collection"]];
+  ["reaction.snapshot","Reactions"],["membership","Membership"],["media","Attachments"],["actions","Actions"],["coverage","Collection"],["secret_chat.","Pseudo-secret"]];
 
 export function groupEvents(events){
   const groups=[];
@@ -69,7 +69,7 @@ export function createJournal(context){
       const b=button(label,"quiet small"),next=index>=0?state.events[index+offset]:null;b.id=id;b.disabled=!next;
       b.addEventListener("click",()=>context.openDetail(next));bar.append(b);
     }
-    if(event.chat_id!==null&&event.chat_id!==undefined){
+    if(event.chat_id!==null&&event.chat_id!==undefined||event.kind.startsWith('secret_chat.')&&event.payload?.secret_chat_id!=null){
       const open=button("Open in chat","secondary small");open.id="journal-open-chat";
       open.addEventListener("click",async()=>{
         if(open.disabled)return;open.disabled=true;

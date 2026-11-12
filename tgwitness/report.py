@@ -189,7 +189,7 @@ def size_text(value):
 CATEGORY_ORDER = ("message", "edited", "deleted", "missing", "media", "reaction", "member", "system")
 CATEGORIES = {"message.new": "message", "message.snapshot": "message", "message.recovered": "message",
               "message.edited": "edited", "message.deleted": "deleted", "message.missing_on_recheck": "missing",
-              "media.saved": "media", "media.hashed": "media"}
+              "media.saved": "media", "media.hashed": "media", "secret_chat.message": "message", "secret_chat.file": "media"}
 TITLE_KINDS = ("target.changed", "source.discovered", "target.removed")
 VERSION_KINDS = ("message.new", "message.snapshot", "message.recovered", "message.edited")
 CHANGE_KINDS = ("message.edited", "message.deleted", "message.missing_on_recheck")
@@ -214,7 +214,9 @@ def kind_label(say, kind):
     return {"message.new": say("New message"), "message.snapshot": say("History snapshot"),
             "message.recovered": say("Recovered message"), "message.edited": say("Edited message"),
             "message.deleted": say("Deletion notice"), "message.missing_on_recheck": say("Missing on recheck"),
-            "media.saved": say("Saved file"), "media.hashed": say("File hashes; content not downloaded")}.get(kind, kind)
+            "media.saved": say("Saved file"), "media.hashed": say("File hashes; content not downloaded"),
+            "secret_chat.message": say("Pseudo-secret message"), "secret_chat.file": say("Pseudo-secret file preserved"),
+            "secret_chat.action": say("Pseudo-secret notice")}.get(kind, kind)
 
 
 class Digest:
@@ -241,7 +243,7 @@ class Digest:
     def add(self, event):
         self.analytics.add(event)
         self.metrics.add(event)
-        kind, payload, chat = event["kind"], event["payload"], event["chat_id"]
+        kind, payload, chat = event["kind"], event["payload"], report_analytics.chat_key(event)
         if kind == "beacon.drand":
             self.trust_signals["drand"] += 1
         if kind == "process.started":
@@ -264,14 +266,16 @@ class Digest:
             self.changed.add((chat, event["message_id"]))
         if chat is not None:
             self.chats[chat] = self.chats.get(chat, 0) + 1
+            if report_analytics.secret_chat_id(event) is not None:
+                self.titles[chat] = "Secret Chat " + str(payload["secret_chat_id"])
             if kind in TITLE_KINDS and isinstance(payload.get("title"), str):
                 self.titles[chat] = payload["title"]
         if kind == "scope.applied":
             for added in payload.get("added") or []:
                 if isinstance(added, dict) and isinstance(added.get("title"), str):
                     self.titles[added.get("chat_id")] = added["title"]
-        if CATEGORIES.get(kind) == "message" and payload.get("sender_id") is not None:
-            self.senders.add(payload["sender_id"])
+        if CATEGORIES.get(kind) == "message" and report_analytics.sender_id(event) is not None:
+            self.senders.add(report_analytics.sender_id(event))
         if CATEGORIES.get(kind) in ("message", "edited"):
             self.indicators.message(payload.get("text"), shown_details(payload),
                                     {"chat": chat, "message": event["message_id"], "seq": event["seq"]},
@@ -281,7 +285,7 @@ class Digest:
             note_indicators(self.indicators, payload["addresses"], "mini app",
                             {"chat": chat, "message": event["message_id"], "seq": event["seq"]},
                             event["observed_at"])
-        digest = payload.get("media_sha256") if kind == "media.saved" else None
+        digest = payload.get("media_sha256") if kind in ("media.saved", "secret_chat.file") else None
         if isinstance(digest, str):
             self.media[digest] = {"mime_type": payload.get("mime_type"), "size": payload.get("size"),
                                   "ref": {"chat": chat, "message": event["message_id"], "seq": event["seq"]},
@@ -1539,8 +1543,25 @@ def media_text(say, info):
                                   info.get("url"), ephemeral.label(say, info.get("ephemeral_media"))) if x)
 
 
+def secret_record_lines(say, payload):
+    lines = []
+    if payload.get("direction") in ("in", "out"):
+        lines.append(say("Sent") if payload["direction"] == "out" else say("Received"))
+    if payload.get("ttl"):
+        lines.append(say("timer {n} s", n=payload["ttl"]))
+    action = payload.get("action")
+    if action == "DeleteMessages":
+        details = payload.get("details") or {}
+        lines.append(say("The other side deleted {n} messages; TgWitness keeps them.", n=len(details.get("random_ids") or [])))
+    elif action == "FlushHistory":
+        lines.append(say("The other side cleared the history; TgWitness keeps it."))
+    elif action:
+        lines.append(str(action))
+    return lines
+
+
 def record_html(event, say, titles, options, archive, base=""):
-    kind, payload, chat, seq = event["kind"], event["payload"], event["chat_id"], event["seq"]
+    kind, payload, chat, seq = event["kind"], event["payload"], report_analytics.chat_key(event), event["seq"]
     cat = category(kind)
     parts = ['<article class="rec cat-' + cat + '" id="r' + str(seq) + '" data-cat="' + cat + '" data-chat="'
              + e("" if chat is None else chat) + '"><header><a class="seq" href="#r' + str(seq) + '">#' + str(seq) + "</a>"
@@ -1551,13 +1572,16 @@ def record_html(event, say, titles, options, archive, base=""):
                      + "</span>")
     parts.append('<span class="at">' + e(say("Observed")) + " " + when(event["observed_at"]) + "</span></header>")
     sender = payload.get("sender_observation") if isinstance(payload.get("sender_observation"), dict) else {}
-    sender_id = payload.get("sender_id", sender.get("id"))
+    sender_id = report_analytics.sender_id(event)
     if sender.get("display_name") or sender_id is not None:
         parts.append('<div class="who">' + e(sender.get("display_name") or say("User {id}", id=sender_id))
                      + (' <span class="uname">@' + e(sender["username"]) + "</span>" if sender.get("username") else "")
                      + (' <span class="sub">· id ' + e(sender_id) + "</span>" if sender_id is not None else "") + "</div>")
     if isinstance(payload.get("text"), str) and payload["text"]:
         parts.append('<div class="text">' + e(payload["text"]) + "</div>")
+    if report_analytics.secret_chat_id(event) is not None:
+        for line in secret_record_lines(say, payload):
+            parts.append('<div class="file">' + e(line) + '</div>')
     if payload.get("text_withheld"):
         parts.append('<div class="withheld">' + e(say("Text withheld in this extract")) + "</div>")
     if event.get("minimised"):
@@ -1579,7 +1603,7 @@ def record_html(event, say, titles, options, archive, base=""):
     if kind.startswith("media.") and payload.get("ephemeral_media"):
         from . import ephemeral
         parts.append('<div class="file ephemeral-media">' + e(ephemeral.label(say, payload["ephemeral_media"])) + "</div>")
-    if kind == "media.saved" and isinstance(payload.get("media_sha256"), str):
+    if kind in ("media.saved", "secret_chat.file") and isinstance(payload.get("media_sha256"), str):
         digest, mime = payload["media_sha256"], payload.get("mime_type")
         parts.append('<div class="file">' + e(payload.get("original_name") or say("Saved file")) + " · " + e(mime or "—")
                      + " · " + e(size_text(payload.get("size"))) + "<br><code>" + e(digest) + "</code></div>")

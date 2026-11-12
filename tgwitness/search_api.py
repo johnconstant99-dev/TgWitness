@@ -6,6 +6,7 @@ from fastapi import Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict
 
 from .fulltext import SOURCES, Query
+from .store import JOURNAL_KIND_GROUPS
 from .workers import limited_in_thread
 
 MATCH_FIELDS = ("source", "score", "focus", "job_id", "machine_recognition", "excerpt", "excerpt_truncated",
@@ -47,7 +48,7 @@ def register(app, authenticate, workspace_id):
     @app.get("/api/search", dependencies=[Depends(authenticate)])
     async def search(request: Request, q: str = "", chat_id: int | None = None, source: str = "messages",
                      since: str | None = None, until: str | None = None, order: str = "relevance",
-                     match: str = "all", limit: int = 100, offset: int = 0):
+                     match: str = "all", limit: int = 100, offset: int = 0, kind: str = ""):
         allowed = request.state.principal.chats(workspace_id)
         if chat_id is not None and allowed is not None and chat_id not in allowed:
             raise HTTPException(403, "This chat is not open to this access.")
@@ -57,12 +58,14 @@ def register(app, authenticate, workspace_id):
         if start and end and start > end:
             raise HTTPException(422, "The start must precede the end of the selected period.")
         chats = {chat_id} if chat_id is not None else allowed
+        kinds = list(dict.fromkeys(match for value in kind.split(",") if value.strip()
+                                   for match in JOURNAL_KIND_GROUPS.get(value.strip(), (value.strip(),))))
 
         def find():
             result = app.state.store.fulltext.search(
                 Query(q, match), chat_ids=chats, since=start, until=end,
                 sources=SOURCES if source == "all" else (source,), order=order, limit=limit, offset=offset,
-                public=allowed is not None)
+                public=allowed is not None, kinds=kinds)
             events = []
             for hit in result["hits"]:
                 events.append({**hit["event"], "match": {key: hit[key] for key in MATCH_FIELDS if key in hit}})

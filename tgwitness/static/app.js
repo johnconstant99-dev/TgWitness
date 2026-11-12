@@ -37,7 +37,7 @@ const workspaceSafetyReady=import('./core/workspace-safety.js?v=3').then(({creat
 });
 let accountState,accountActivity;
 let boardView;
-const boardReady=import('./views/board.js?v=3').then(({createCaseBoard})=>{
+const boardReady=import('./views/board.js?v=4').then(({createCaseBoard})=>{
   boardView=createCaseBoard({root:$('view-board'),state,json,tr,trn,node,toast,may,download,media:mediaNode,
     openEvidence:async(event,range)=>{
       const revision=state.workspaceRevision;
@@ -73,7 +73,7 @@ const boardReady=import('./views/board.js?v=3').then(({createCaseBoard})=>{
   const slice=node('button','quiet small',tr('Slice by time'));slice.type='button';slice.id='chat-to-slice';slice.addEventListener('click',()=>boardView.sliceDialog({chat_id:state.chat}));viewQuery('chats','.chat-toolbar').append(slice);
 });
 let settingsHub;
-const settingsHubReady=import('./views/settings-hub.js?v=layout2-undo1').then(({createSettingsHub})=>{
+const settingsHubReady=import('./views/settings-hub.js?v=layout2-undo2').then(({createSettingsHub})=>{
   const authCard=$('credentials-form').closest('.auth-card');
   const catalog=()=>panelQueries('input[id],select[id],textarea[id]').filter(el=>!el.closest('#gate,#view-settings,#view-first-run')).map(el=>{
     const root=[...panelRoots].find(([,r])=>r.contains(el));
@@ -131,16 +131,17 @@ let viewHost=null;
 const viewContexts=new Map();
 const viewOptions=view=>({signal:viewContexts.get(view)?.signal});
 const viewReady=Promise.all([
-  import('./core/view-host.js?v=1'),
+  import('./core/view-host.js?v=2'),
   new Promise(resolve=>document.readyState==='complete'?resolve():document.addEventListener('DOMContentLoaded',resolve,{once:true})),
 ]).then(([{createViewHost}])=>{
-  viewHost=createViewHost({getSession:()=>({workspace:state.profile,revision:state.workspaceRevision}),onError:error=>toast(error.message,true)});
+  viewHost=createViewHost({tr,getSession:()=>({workspace:state.profile,revision:state.workspaceRevision}),onError:error=>toast(error.message,true)});
   for(const [name,root] of panelRoots){
     let top=0,scrolls=[];
     viewHost.register(name,root,{
       async enter(context){
         viewContexts.set(name,context);
-        if(context.params.load!==false)await loadPanelView(name);
+        if(typeof context.params.load==='function')await context.params.load();
+        else if(context.params.load!==false)await loadPanelView(name);
         if(!context.current())return;
         for(const [element,scroll] of scrolls)if(root.contains(element))element.scrollTop=scroll;
         if(context.params.restore!==false)window.scrollTo({top,behavior:'instant'});
@@ -153,6 +154,7 @@ const viewReady=Promise.all([
         if(name==='integrations'){window.TgWitnessIntegrations?.clear();window.TgWitnessWebhooks?.clear();}
         if(name==='sealed')window.TgWitnessCaptureStory?.pause?.();
         if(name==='parameters')parametersView?.leave();
+        if(name==='secret-chats')secretChatsView?.leave();
         if(name==='evidence'){exportsView?.leave();reportSelection?.leave();}
         if(name==='system-log')systemLogView?.leave();
         if(name==='system-map')systemMapView?.leave();
@@ -177,6 +179,7 @@ function resetViewContent(view){
   if(view==='group')groupView?.reset();
   if(view==='witness'){setupView?.resetSession();state.evidenceDirty=false;state.replicaDirty=false;state.alertsDirty=false;state.githubDirty=false;}
   if(view==='chats')chatListView?.resetSession();
+  if(view==='secret-chats')secretChatsView?.reset();
   if(view==='sealed')window.TgWitnessCapture?.reset();
   if(view==='system-log')systemLogView?.resetSession();
   if(view==='system-map')systemMapView?.resetSession();
@@ -201,6 +204,7 @@ async function loadPanelView(view){
   else if(view==='accounts'){renderAccounts();await loadProfiles();}
   else if(view==='group'){await groupViewReady;await loadProfiles();await groupView.load(state.groupId);}
   else if(view==='chats')await refreshChats(true);
+  else if(view==='secret-chats')await showSecretChats(true);
   else if(view==='observations')await refreshEvents();
   else if(view==='access')await loadAccess();
   else if(view==='system-log')await loadConsole();
@@ -214,6 +218,7 @@ async function loadPanelView(view){
 }
 let routerTask=null;
 function routeSnapshot(){return {view:state.drawerSeq!==null?"observations":state.view,workspace:state.profile,
+  tab:state.view==='sources'?sourcesView?.tab:state.view==='evidence'?exportsView?.tab:null,
   slice:state.boardSlice||null,added:!!state.boardAdded,
   chatId:state.view==="chats"?state.chat:null,seq:state.drawerSeq,kind:state.filter,source:state.source,q:state.search,
   since:state.eventSince,until:state.eventUntil,system:state.eventSystem,before:state.eventBefore,extra:state.extra||null,section:state.parameterSection||null,
@@ -242,7 +247,7 @@ async function applyRouteToPanel(route,current){
   viewQueries("observations","[data-filter]").forEach(button=>button.classList.toggle("active",button.dataset.filter===state.filter));
   if(route.view==="chats"&&route.chatId!==null&&route.chatId!==state.chat)beginChat(route.chatId);
   if(route.view==="group")state.groupId=route.group;
-  navigate(route.view,{history:false,load:false});
+  await navigate(route.view,{history:false,load:async()=>{
   const view=state.view;
   if(view==='topology'){await topologyReady;if(current())await topologyView.enter();return;}
   if(view==='system-map'){await systemMapReady;if(current())await systemMapView.enter();return;}
@@ -256,7 +261,8 @@ async function applyRouteToPanel(route,current){
     }
   }
   else if(view==="observations"){await refreshEvents();if(current()&&route.seq)await openRecord(route.seq,{history:false});}
-  else if(view==="sources"){await sourcesReady;sourcesView.enter();renderTargets();await loadScope();}
+  else if(view==="sources"){await sourcesReady;sourcesView.enter({params:{tab:route.tab||'scope'}});renderTargets();await loadScope();}
+  else if(view==='secret-chats')await showSecretChats(true);
   else if(view==="parameters"){
     await loadParameters();if(current()){state.parameterSection=route.section;if(route.section)parametersView?.selectSection(route.section,{record:false});}
   }else if(view==="accounts")await loadProfiles();
@@ -269,8 +275,11 @@ async function applyRouteToPanel(route,current){
   else if(view==="evidence"){
     renderChatExportTools();
     await Promise.all([loadReportSettings(),loadExports(),loadAccountExport().catch(accountExportError)]);
+    if(current())exportsView.select(route.tab||'downloads',false,{history:false});
   }
   else if(view==="witness"){await loadExtras();if(current())selectExtra(route.extra,{history:false});}
+  else await loadPanelView(view);
+  }});
 }
 
 const permissionLabels={
@@ -564,6 +573,7 @@ let networkLoadedFor=null;
 let qrPending=null,importExpectedId=null,importClientProfile=null,importFormats=[],importTwoFactor="",accountImportRevision=0,authMethod="phone";
 let accessStarted=false;
 class StaleView extends Error {constructor(){super("");this.name="StaleView";}}
+class Cancelled extends Error {constructor(){super("");this.name="Cancelled";}}
 function toast(message, error=false) {
   if(!message)return;const n = $("toast"),mark=node("span","toast-mark"),close=node("button","toast-close");
   mark.append(icon(error?"alert":"check"));close.type="button";close.setAttribute("aria-label",tr("Close"));close.append(icon("x"));
@@ -582,7 +592,7 @@ async function api(path, body, options={}) {
   if(body?.enabled&&['evidence','replica','alerts'].includes(path)&&state.me?.admin){
     const current=await json('settings',undefined,{profile,token});
     if(!current.values.outside){
-      if(!await askConfirm(tr('This feature needs external requests. Allow them?')))throw new Error(tr('Cancelled'));
+      if(!await askConfirm(tr('This feature needs external requests. Allow them?')))throw new Cancelled();
       if(revision!==state.workspaceRevision||token!==state.token)throw new StaleView();
       await json('settings/edit',{key:'outside',value:true,revision:current.revision},{profile,token});
     }
@@ -601,7 +611,7 @@ async function api(path, body, options={}) {
   if(fetchOptions.signal?.aborted){await response.body?.cancel();throw new StaleView();}
   if(!allowStale&&revision!==state.workspaceRevision){await response.body?.cancel();throw new StaleView();}
   if(revision===state.workspaceRevision&&token===state.token){
-    if(response.ok&&path==='status')connectionNotice?.clear();else if(response.status>=500)connectionNotice?.fail();
+    if(path==='status'){if(response.ok)connectionNotice?.clear();else if(response.status>=500)connectionNotice?.fail();}
   }
   if (!response.ok) {
     const result = await response.json().catch(() => ({detail: tr("Request failed")}));
@@ -629,7 +639,7 @@ async function busy(button, work) {
   if (button) {button.disabled = true;button.setAttribute("aria-busy","true");}
   const form=button?.closest("form");form?.querySelector(".form-error")?.remove();
   try { return await work(); } catch (e) {
-    if(e instanceof StaleView)return;
+    if(e instanceof StaleView||e instanceof Cancelled)return;
     toast(e.message, true);
     if(form){const message=node("p","form-error",e.message);message.setAttribute("role","alert");form.append(message);}
     if(e.field&&form?.contains($(e.field))){showFieldError($(e.field),e.message);$(e.field).focus();}
@@ -732,7 +742,7 @@ function viewAllowed(view){
   if(view==='system-map')return !!state.me?.admin;
   if(view==='board')return may('board.read');
   const limited=!!state.status?.chats_limited;
-  return {settings:!!state.me?.admin,'first-run':!!state.me?.admin,start:!!state.me&&!limited,sources:may("sources")&&!limited,evidence:may("export")&&!limited,sealed:may("export")&&!limited,witness:may("settings")&&!limited,
+  return {'secret-chats':may('view')&&!limited,settings:!!state.me?.admin,'first-run':!!state.me?.admin,start:!!state.me&&!limited,sources:may("sources")&&!limited,evidence:may("export")&&!limited,sealed:may("export")&&!limited,witness:may("settings")&&!limited,
     parameters:may("settings")&&!limited,connection:may("account")&&!limited,accounts:!!state.me?.admin,group:!!state.me?.admin,
     access:!!state.me?.admin,"system-log":!!state.me?.admin,integrations:!!state.me?.admin,
     analysis:!!(state.status?.analysis?.enabled||state.status?.analysis?.media_available)}[view]??true;
@@ -831,7 +841,8 @@ function navigate(view,options={}) {
     n.classList.toggle("active",selected);
     if(selected)n.setAttribute("aria-current","page");else n.removeAttribute("aria-current");
   });
-  $("view-label").textContent=tr({'system-map':'System map',topology:'Network topology',settings:'Settings','first-run':'First setup',start:"Start here",chats:"Chats",observations:"Journal",sources:"Sources",evidence:"Exports",sealed:"Exports",witness:"Extras",parameters:"Parameters",connection:"Account",accounts:"Accounts",group:"Group",access:"Access","system-log":"System log",integrations:"Integrations",analysis:state.status?.analysis?.enabled?"Ask the archive":"Machine recognition"}[view]);
+  const viewLabel={'system-map':'System map',topology:'Network topology',settings:'Settings','first-run':'First setup',start:"Start here",chats:"Chats","secret-chats":"Pseudo-secret",observations:"Journal",sources:"Sources",evidence:"Exports",sealed:"Exports",witness:"Extras",parameters:"Parameters",connection:"Account",accounts:"Accounts",group:"Group",access:"Access","system-log":"System log",integrations:"Integrations",analysis:state.status?.analysis?.enabled?"Ask the archive":"Machine recognition"}[view];
+  $("view-label").textContent=tr(viewLabel);
   show("entry-header",view==="connection");
   if(view==="connection")connectionSettings(false);
   if(state.status){renderSetup();renderWorkflowControls();}
@@ -1961,6 +1972,7 @@ async function refreshEvents(direction=false) {
 }
 async function refreshRanked(request) {
   const params=new URLSearchParams({q:state.search,limit:"200",source:state.searchSource||"messages"});
+  if(state.filter)params.set('kind',state.filter);
   if(state.source)params.set("chat_id",state.source);
   if(state.eventSince)params.set("since",state.eventSince);
   if(state.eventUntil)params.set("until",state.eventUntil);
@@ -1978,7 +1990,13 @@ const journalReady=import('./components/journal.js?v=layout3').then(({createJour
     changed:async()=>{state.boardSlice=null;state.boardAdded=false;$('board-slice-context')?.remove();state.cursor=state.eventBefore=state.eventAfter=state.eventMatched=null;closeDetail({history:false});window.TgWitnessRouter?.record({seq:null});await refreshEvents();},
     page:direction=>{closeDetail({history:false});return refreshEvents(direction);},openDetail,showBackdrop:visible=>show("drawer-backdrop",visible),
     openChat:async event=>{
-      const revision=state.workspaceRevision;closeDetail({history:false});await navigate("chats",{load:false});
+      const revision=state.workspaceRevision;closeDetail({history:false});
+      if(event.kind.startsWith('secret_chat.')&&event.payload?.secret_chat_id!=null){
+        await navigate('secret-chats');
+        if(revision===state.workspaceRevision&&state.view==='secret-chats')await secretChatsView?.selectChat(event.payload.secret_chat_id);
+        return;
+      }
+      await navigate("chats",{load:false});
       if(revision!==state.workspaceRevision||state.view!=="chats")return;
       await refreshChats();if(revision!==state.workspaceRevision||state.view!=="chats")return;
       if(await openChat(event.chat_id)){
@@ -2120,7 +2138,7 @@ document.addEventListener("keydown",e=>{
   }
 });
 let sourcesView=null;
-const sourcesReady=import("./views/sources.js?v=2").then(({createSources})=>{
+const sourcesReady=import("./views/sources.js?v=3").then(({createSources})=>{
   sourcesView=createSources({root:$("view-sources"),tr,getState:()=>state,
     getSession:()=>state.workspaceRevision+":"+state.profile,may,json,refreshStatus,toast,termText,scopeName,icon,loadScope,formatTime,
     setDialogs:result=>{state.dialogs=result.dialogs;if(state.scope)state.scope.folders=result.folders||[];},
@@ -2130,7 +2148,7 @@ const sourcesReady=import("./views/sources.js?v=2").then(({createSources})=>{
       [...new Set([...state.scopeExclude,...ids])]:state.scopeExclude.filter(id=>!ids.includes(id));},
     setDirty:dirty=>{state.monitoringDirty=dirty.monitoring;state.captureDirty=dirty.capture;state.recheckDirty=dirty.recheck;},
     saved:result=>{for(const name of ["monitoring","capture","recheck"])state.status[name]=result[name];},
-    onTab:name=>{void showSecretChats(name==="secret");}});
+    onTab:(tab,options)=>{if(options.history&&state.view==='sources')window.TgWitnessRouter?.record({tab});}});
   if(state.view==="sources"&&!$("workspace").hidden)sourcesView.enter();
   return sourcesView;
 }).catch(error=>{toast(error.message,true);throw error;});
@@ -2138,11 +2156,19 @@ let secretChatsView=null,secretChatsLoading=null;
 window.addEventListener("tgwitness:lock",()=>secretChatsView?.reset());
 async function showSecretChats(visible){
   if(!visible){secretChatsView?.leave();return;}
-  if(state.status?.demo)return;
-  secretChatsLoading??=import("./views/secret-chats.js?v=2").then(({createSecretChats})=>secretChatsView=createSecretChats({
-    root:$("view-sources"),tr,trn,json,toast,busy,node,formatTime,download,confirm:(message,options)=>askConfirm(message,options),
-    getSession:()=>state.workspaceRevision+":"+state.profile,may,humanSize,actionText:secretActionText}));
-  try{await (await secretChatsLoading).enter();}catch(error){if(!(error instanceof StaleView))toast(error.message,true);}
+  if(window.TGW_ONLINE_DEMO){
+    const source=document.querySelector('[data-secret-demo-open]');
+    for(const control of $('view-secret-chats').querySelectorAll('input,form button'))control.disabled=true;
+    $('secret-status').textContent=tr('Demo with fictional messages. Deleted messages are red; edited ones keep every saved version.');
+    if(source&&!$('view-secret-chats').querySelector('[data-secret-demo-open]'))$('secret-thread').append(source.cloneNode(true));
+    $('secret-refresh').hidden=$('secret-report').hidden=true;return;
+  }
+  secretChatsLoading??=import("./views/secret-chats.js?v=3").then(({createSecretChats})=>secretChatsView=createSecretChats({
+    root:$("view-secret-chats"),tr,trn,json,toast,busy,node,formatTime,download,confirm:(message,options)=>askConfirm(message,options),
+    getSession:()=>state.workspaceRevision+":"+state.profile,may:permission=>may(permission)&&!state.status?.demo,humanSize,actionText:secretActionText,
+    openReport:async id=>{const owner=actionOwner();await navigate('evidence');if(!owner.current())return;
+      (await exportsReady).select('settings');reportSelection?.selectSecrets(id===null?[]:[id]);}}));
+  await (await secretChatsLoading).enter();
 }
 function renderTargets() { sourcesView?.renderTargets(); }
 const MEDIA_ORDER=["photo","video","document","voice","audio","video_note","animation","sticker"];
@@ -2937,8 +2963,9 @@ $("account-disclosure-form").addEventListener("submit",event=>{
   event.preventDefault();busy(event.submitter,createAccountDisclosure);
 });
 let exportsView=null;
-const exportsReady=import('./views/exports.js?v=2').then(({createExports})=>{
+const exportsReady=import('./views/exports.js?v=3').then(({createExports})=>{
   exportsView=createExports({root:$("view-evidence"),tr,json,getSession:()=>state.workspaceRevision+":"+state.profile,fmtTime,toast,
+    onTab:tab=>{if(state.view==='evidence')window.TgWitnessRouter?.record({tab});},
     downloadAgain:entry=>download('exports/'+entry.id+'/download','tgwitness-'+entry.id.slice(0,8)+'.'+(entry.encrypted?(entry.encryption||'zip'):entry.format),true)});
   return exportsView;
 });
@@ -2961,6 +2988,7 @@ async function download(path,filename,stream=false,root=false,body=undefined,pro
   }
   current();
   if(handle){try{writer=await handle.createWritable();}catch{handle=null;}}
+  progress({phase:'preparing'});
   let response;
   try{current();response=await api(path,body,root?{root:true,token}:{profile,token});}
   catch(error){await writer?.abort().catch(()=>{});throw error;}
@@ -2999,16 +3027,18 @@ async function download(path,filename,stream=false,root=false,body=undefined,pro
       progress({phase:"saving",total,expected});
       if(stream){const size=(total/1024**2).toFixed(1)+" MiB"+(expected?" / "+(expected/1024**2).toFixed(1)+" MiB":"");toast(tr("Saving export: {size}",{size}));}
     }
-    if(expected&&total!==expected)throw new Error(tr("Download was interrupted. Retry the export."));
+    if(!total||expected&&total!==expected){
+      const error=new Error(tr("Download was interrupted. Retry the export."));error.downloadHint=true;throw error;
+    }
     current();if(writer){await writer.close();writer=null;}
     else saveBlob(new Blob(chunks,{type:response.headers.get("Content-Type")||"application/octet-stream"}),filename);
-    progress({phase:"done",total,expected});
+    progress({phase:handle?'done':'browser',total,expected});
     if(stream)toast(tr(handle?'File saved.':'Download started. Check your browser’s downloads.'));
     return true;
   }catch(error){
-    if(reader)await reader.cancel().catch(()=>{});else await response.body.cancel().catch(()=>{});
+    if(reader)await reader.cancel().catch(()=>{});else await response.body?.cancel().catch(()=>{});
     if(writer)await writer.abort().catch(()=>{});
-    if(!(error instanceof StaleView)&&ticketPath&&!nativeAttempted){current();return await nativeDownload();}
+    if(!(error instanceof StaleView)&&!error.downloadHint&&ticketPath&&!nativeAttempted){current();return await nativeDownload();}
     if(error instanceof StaleView)throw error;
     if(nativeAttempted)throw error;
     if(error.downloadHint)throw error;
@@ -3020,13 +3050,25 @@ function saveBlob(blob,filename){
 }
 panelQueries("[data-export]").forEach(b=>b.addEventListener("click",()=>busy(b,async()=>{
   const fmt=b.dataset.export,password=$("export-password").value;
+  const owner=reportKey();
+  let options;
+  if(['html','pdf','json','zip'].includes(fmt)&&state.view==='evidence'){
+    await loadReportSettings();
+    if(owner!==reportKey())throw new StaleView();
+    if(!reportReady||reportOwner!==owner)return;
+    options=reportDraft();
+    if(!$("report-form").checkValidity()){
+      (await exportsReady).select('settings');$("report-form").reportValidity();return;
+    }
+  }
   const encrypt=!!b.closest("#view-evidence")&&$("export-encrypt-on").checked;
   if(encrypt&&password.length<12){$("export-password").focus();throw new Error(tr("Enter a password of at least 12 characters, or untick encryption."));}
   const encryption=$("export-encryption").value;
   const progress=(await exportsReady).begin({format:fmt,encrypted:encrypt,encryption,retry:()=>b.click()}),language=exportLanguage();
   const query=language?"?language="+encodeURIComponent(language):"",name=fmt==="json"||fmt==="pdf"?"tgwitness-report."+fmt:"tgwitness-evidence."+fmt;
   try{
-    const saved=await download("export/"+fmt+query,encrypt?"tgwitness-evidence-"+fmt+"-encrypted."+encryption:name,true,false,encrypt?{password,encryption}:undefined,progress);
+    const body=encrypt||options?{...(encrypt?{password,encryption}:{}),...(options?{options}:{})}:undefined;
+    const saved=await download("export/"+fmt+query,encrypt?"tgwitness-evidence-"+fmt+"-encrypted."+encryption:name,true,false,body,progress);
     if(saved)toast(tr(encrypt?"Encrypted export sent to your browser. Keep its password separately.":"Export sent to your browser. Check Downloads for the saved file."));
   }catch(error){progress({phase:"failed",error:error.message});throw error;}
 })));
@@ -3053,7 +3095,7 @@ const reportGuidanceReady=import('./views/report-guidance.js?v=1').then(({create
   reportGuidance=createReportGuidance({root:$("report-guidance"),tr});
   return reportGuidance;
 });
-const reportSelectionReady=import('./views/report-selection.js?v=3').then(({createReportSelection})=>{
+const reportSelectionReady=import('./views/report-selection.js?v=5').then(({createReportSelection})=>{
   reportSelection=createReportSelection({root:$("report-form"),tr,json,titles:()=>new Map([...(state.status?.targets||[]),...(state.chats||[])].map(chat=>[chat.chat_id,chat.title])),
     getOwner:()=>state.workspaceRevision+":"+state.profile,
     ready:()=>reportReady&&reportOwner===reportKey()&&!reportSaving&&state.view==='evidence',
@@ -3087,10 +3129,16 @@ function setReportTemplate(value){
 let reportOwner=null,reportReady=false,reportDirty=false,reportRequest=0,reportLoading=null,reportSaving=false;
 let reportPreviewRequest=0,reportPreviewTimer=null,reportPreviewBusy=false;
 let reportPreviewSection="cover";
+let reportPreviewTarget=null;
+function reportPreviewState(value){
+  const stage=$("report-form").querySelector('.studio-stage');stage.dataset.previewState=value;
+  stage.setAttribute('aria-busy',String(value==='loading'||value==='waiting'));
+}
 const reportKey=()=>state.workspaceRevision+":"+state.profile;
 function resetReportSettings(){
   clearTimeout(reportPreviewTimer);reportPreviewRequest++;reportPreviewBusy=false;
   reportPreviewSection="cover";
+  reportPreviewTarget=null;reportPreviewState('empty');
   $("report-preview-frame").removeAttribute("srcdoc");show("report-preview-frame",false);show("report-preview-empty",true);
   delete $("report-preview-frame").dataset.reportDesign;
   $("report-design-preview-status").textContent=tr("Preview uses your draft. Save settings before exporting.");
@@ -3112,7 +3160,6 @@ async function reportFor(chat,sender){
   if(revision!==state.workspaceRevision||profile!==state.profile||state.view!=='evidence'||!reportReady)return;
   reportSelection.load({...reportSelection.read(),enabled:true,chats:[chat],senders:sender===null||sender===undefined?[]:[sender]});
   $("exports-tab-settings").click();
-  window.TgWitnessReportWizard?.go('data');
   $("report-selection-chosen").dispatchEvent(new Event('input',{bubbles:true}));
 }
 $("chat-build-report").addEventListener("click",event=>{$("chat-tools-menu").open=false;busy(event.currentTarget,()=>reportFor(state.chat,null));});
@@ -3126,7 +3173,8 @@ async function loadReportSettings(){
   await Promise.all([reportSelectionReady,reportConfigurationsReady,reportGuidanceReady]);
   const owner=reportKey();
   if(reportOwner!==owner){resetReportSettings();reportOwner=owner;}
-  if(reportSaving||reportReady&&reportDirty)return;
+  if(reportSaving)return;
+  if(reportReady&&reportDirty){if(!$("report-form").hidden)scheduleReportPreview();return;}
   if(reportLoading)return reportLoading;
   const request=++reportRequest,current=()=>reportOwner===owner&&reportKey()===owner&&request===reportRequest;
   reportReady=false;reportControls();$("report-status").textContent=tr("Loading…");
@@ -3170,6 +3218,9 @@ function syncReportParts(){
   const guidanceTab=$("report-form").querySelector('[data-preview-section="guidance"]');
   guidanceTab.hidden=!guidanceActive;
   if(!guidanceActive&&reportPreviewSection==='guidance')showReportPreviewSection('cover');
+  const hasCharts=["activity","hourly","participant","chat","composition"].some(key=>$("report-"+key+"-chart").checked);
+  $("report-form").querySelector('[data-preview-section="analytics"]').disabled=!hasCharts;
+  if(!hasCharts&&reportPreviewSection==='analytics'){reportPreviewTarget=null;showReportPreviewSection('cover');}
   if(["question","method","findings","conclusion"].some(key=>$("report-review-"+key).value.trim()))parts.push(tr("Examination notes"));
   if($("report-activity-chart").checked)parts.push(tr("Activity over time"));
   if($("report-hourly-chart").checked)parts.push(tr("Activity by weekday and hour"));
@@ -3200,6 +3251,7 @@ function reportDraft(){
 }
 function scheduleReportPreview(){
   clearTimeout(reportPreviewTimer);
+  reportPreviewState('waiting');
   reportPreviewTimer=setTimeout(()=>refreshReportPreview(),900);
 }
 function discardReportDraft(){
@@ -3213,46 +3265,53 @@ function showReportPreviewSection(section){
   $("report-form").querySelectorAll('[data-preview-section]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.previewSection===section)));
   const frame=$("report-preview-frame");
   if(frame.hidden)return;
-  if(section==='analytics')frame.contentDocument?.getElementById('report-analytics')?.scrollIntoView({block:'start'});
+  if(section==='analytics'){
+    const target=reportPreviewTarget&&frame.contentDocument?.querySelector(reportPreviewTarget);
+    (target||frame.contentDocument?.getElementById('report-analytics'))?.scrollIntoView({block:'start'});
+  }
   else if(section==='guidance')frame.contentDocument?.getElementById('jurisdiction-guidance')?.scrollIntoView({block:'start'});
   else frame.contentWindow?.scrollTo(0,0);
 }
 $("report-preview-frame").addEventListener('load',()=>showReportPreviewSection(reportPreviewSection));
-$("report-form").querySelectorAll('[data-preview-section]').forEach(button=>button.addEventListener('click',()=>showReportPreviewSection(button.dataset.previewSection)));
+$("report-form").querySelectorAll('[data-preview-section]').forEach(button=>button.addEventListener('click',()=>{reportPreviewTarget=null;showReportPreviewSection(button.dataset.previewSection);}));
+$("report-form").addEventListener('report:chart',event=>{
+  const classes={'report-activity-chart':'activity','report-hourly-chart':'heatmap','report-participant-chart':'participants','report-chat-chart':'chats','report-composition-chart':'composition'};
+  reportPreviewTarget=event.detail.enabled?'.chart-'+classes[event.detail.id]:null;
+});
 async function refreshReportPreview(){
   clearTimeout(reportPreviewTimer);
   if(!reportReady||reportOwner!==reportKey()||$("report-form").hidden||window.TGW_ONLINE_DEMO)return;
   if(!$("report-form").checkValidity()){
-    $("report-design-preview-status").textContent=tr("Complete the required fields to update the preview.");return;
+    reportPreviewState('invalid');$("report-design-preview-status").textContent=tr("Complete the required fields to update the preview.");return;
   }
   const body=reportDraft();
   if(!$("report-form").checkValidity()){
-    $("report-design-preview-status").textContent=tr("Complete the required fields to update the preview.");return;
+    reportPreviewState('invalid');$("report-design-preview-status").textContent=tr("Complete the required fields to update the preview.");return;
   }
   const owner=reportOwner,snapshot=JSON.stringify(body),request=++reportPreviewRequest;
   const current=()=>owner===reportOwner&&owner===reportKey()&&request===reportPreviewRequest;
-  reportPreviewBusy=true;reportControls();$("report-design-preview-status").textContent=tr("Preparing preview…");
+  reportPreviewBusy=true;reportControls();reportPreviewState('loading');$("report-design-preview-status").textContent=tr("Preparing preview…");
   try{
     const result=await json("report-design-preview",body,viewOptions('evidence'));
     if(!current()||snapshot!==JSON.stringify(reportDraft())||state.view!=='evidence')return;
     $("report-preview-frame").dataset.reportDesign=body.design;
     $("report-preview-frame").srcdoc=result.html;show("report-preview-frame",true);show("report-preview-empty",false);
+    reportPreviewState('ready');
     $("report-design-preview-status").textContent=tr(result.sampled?"Draft preview · first 50,000 records · not signed":"Draft preview · {n} records · not signed",{n:result.records.toLocaleString()});
   }catch(error){
     if(!current()||error instanceof StaleView||error.name==='AbortError')return;
-    $("report-design-preview-status").textContent=tr("Preview failed. Update to retry.")+" "+error.message;
+    reportPreviewState('error');$("report-design-preview-status").textContent=tr("Preview failed. Update to retry.")+" "+error.message;
   }finally{if(current()){reportPreviewBusy=false;reportControls();}}
 }
 $("report-preview-refresh").addEventListener("click",refreshReportPreview);
-import("./views/report-wizard.js?v=3").then(({createReportWizard})=>{window.TgWitnessReportWizard=createReportWizard({form:$("report-form"),node,tr,icon});}).catch(error=>toast(error.message,true));
-$("exports-tab-settings").addEventListener("click",()=>{if(reportReady&&!$("report-preview-frame").hasAttribute("srcdoc"))scheduleReportPreview();});
+$("exports-tab-settings").addEventListener("click",()=>{if(reportReady)scheduleReportPreview();});
 $("report-form").addEventListener("input",event=>{if(reportReady&&!event.target.closest('#report-profiles')&&!event.target.matches("[data-report-search]")){
   reportSelection?.changed(event);
   if(event.target.name==="report-template")applyReportPreset();
   else if(Object.hasOwn(REPORT_CHECKS,event.target.id)||["report-participant-labels","report-chart-limit"].includes(event.target.id))setReportTemplate("custom");
-  syncReportParts();reportDirty=true;$("report-status").textContent=tr("Draft changed. Save before exporting.");
-  if(event.target.id.endsWith('-chart')||event.target.id==='report-chart-limit')reportPreviewSection='analytics';
-  if(event.target.name==='report-design')reportPreviewSection='cover';
+  syncReportParts();reportDirty=true;$("report-status").textContent="";
+  if((event.target.id.endsWith('-chart')||event.target.id==='report-chart-limit')&&!$("report-form").querySelector('[data-preview-section="analytics"]').disabled)reportPreviewSection='analytics';
+  if(event.target.name==='report-design'||event.target.id==='report-case-title'){reportPreviewSection='cover';reportPreviewTarget=null;}
   $("report-design-preview-status").textContent=tr("Preview is updating to your draft…");scheduleReportPreview();
 }});
 $("report-form").addEventListener("change",event=>{syncReportParts();reportSelection?.changed(event);});
@@ -3260,7 +3319,6 @@ $("report-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitt
   if(!reportReady||reportOwner!==reportKey()||reportSaving||window.TGW_ONLINE_DEMO)return;
   const owner=reportOwner,draft=formControls?.capture("report-form");
   const body=reportDraft();
-  window.TgWitnessReportWizard?.revealInvalid();
   if(!$("report-form").reportValidity())return;
   reportSaving=true;reportControls();
   try{
@@ -3269,13 +3327,12 @@ $("report-form").addEventListener("submit",e=>{e.preventDefault();busy(e.submitt
   }finally{if(reportOwner===owner&&reportKey()===owner){reportSaving=false;reportControls();}}
 });});
 $("report-open-downloads").addEventListener("click",async()=>{
-  if(reportDirty){$("report-status").textContent=tr("Save your changes before downloading a report with these choices.");$("report-status").scrollIntoView({block:"center"});return;}
   (await exportsReady).select('downloads');$("exports-downloads").scrollIntoView({block:"start"});
 });
 panelQueries("[data-go-reports]").forEach(link=>link.addEventListener("click",event=>{
   event.preventDefault();
   Promise.resolve(navigate("evidence")).then(()=>exportsReady).then(view=>{view.select("settings");
-    const field=$(link.dataset.goReports==='data'?"report-data-title":"report-language");window.TgWitnessReportWizard?.reveal(field);field.scrollIntoView({block:"center"});field.focus({preventScroll:true});});
+    const field=$(link.dataset.goReports==='data'?"report-data-title":"report-language");reportSelection?.reveal(field);});
 }));
 $("export-encrypt-on").addEventListener("change",()=>{
   const on=$("export-encrypt-on").checked;show("export-password-field",on);if(on)$("export-password").focus();else $("export-password").value="";
@@ -3669,7 +3726,7 @@ function parameterValue(value){
   return typeof value==="boolean"?tr(value?"On":"Off"):Number(value).toLocaleString();
 }
 let parametersView=null;
-const parametersReady=import("./views/parameters.js").then(({createParameters})=>{
+const parametersReady=import("./views/parameters.js?v=2").then(({createParameters})=>{
   parametersView=createParameters({root:$("view-parameters"),tr,getState:()=>state,
     getSession:()=>state.workspaceRevision+":"+state.profile,may,json,refreshStatus,toast,
     headerOffset:()=>{const header=document.querySelector(".topbar");return header&&["sticky","fixed"].includes(getComputedStyle(header).position)?header.getBoundingClientRect().height:0;},
@@ -5238,7 +5295,7 @@ function renderChatStatus(){
     f.addEventListener("click",()=>{state.chatFilter=key;renderChatStatus();renderChatFeed();});filters.append(f);
   }
   const tabs=node('div','chat-view-tabs');tabs.setAttribute('role','group');tabs.setAttribute('aria-label',tr('Chat views'));
-  const views=[['messages',tr('Messages')],['people',tr('People')],['activity',tr('Activity timeline')],['profile',tr('Profile')]];
+  const views=[['messages',tr('Messages')],['activity',tr('People')],['people',tr('Authors')],['profile',tr('Profile')]];
   if(s.analysis?.enabled&&!s.demo&&viewAllowed('analysis'))views.push(['ai',tr('AI context')]);
   for(const [name,label] of views){const tab=node('button','filter'+(state.chatView===name?' active':''),label);tab.type='button';tab.dataset.chatView=name;
     tab.setAttribute('aria-pressed',String(state.chatView===name));tab.addEventListener('click',()=>{
@@ -5259,6 +5316,22 @@ function renderChatStatus(){
     box.append(hint);
   }
   const viewBar=node('div','chat-view-bar');viewBar.append(tabs,toolbar);box.append(viewBar);
+  if(!s.demo&&may('sources')&&!s.chats_limited&&s.targets.some(target=>target.chat_id===state.chat)){
+    const chat=state.chat,enabled=!!s.targets.find(target=>target.chat_id===chat)?.enabled&&!s.scope?.exclude?.includes(chat);
+    const toggle=node('button','chat-record-toggle',tr('Recording'));toggle.type='button';toggle.setAttribute('role','switch');
+    toggle.setAttribute('aria-checked',String(enabled));toggle.title=tr(enabled?'Pause':'Resume');
+    toggle.append(node('span','',tr(enabled?'On':'Off')));
+    toggle.addEventListener('click',()=>busy(toggle,async()=>{const owner=actionOwner();await sourcesReady;if(!owner.current())return;
+      await sourcesView.runSourceAction([chat],enabled?(s.scope?.mode==='selected'?'pause':'exclude'):'enable',{confirmed:true});
+      if(owner.current())await refreshChats(true);
+    }));viewBar.append(toggle);
+  }
+  if(viewAllowed('evidence')){
+    const report=node('button','quiet small',tr('Build report'));report.type='button';report.dataset.chatReport='';
+    report.addEventListener('click',()=>busy(report,async()=>{const owner=actionOwner(),chat=state.chat;await navigate('evidence');if(!owner.current())return;
+      (await exportsReady).select('settings');reportSelection?.selectChats([chat]);
+    }));viewBar.append(report);
+  }
   if(state.chatAuthor!==null&&state.chatView==='messages'){
     const who=state.chatMessages.find(m=>m.sender?.id===state.chatAuthor),chip=node("div","chat-author-chip");
     const author=who?senderName(who):"ID "+state.chatAuthor;chip.append(node("span","",tr("Showing only messages from {name}",{name:author})));
@@ -5272,11 +5345,11 @@ function renderChatStatus(){
   if(focusedView)box.querySelector('[data-chat-view="'+focusedView+'"]')?.focus({preventScroll:true});
 }
 let peopleTimeline;
-const peopleTimelineReady=import('./views/people-timeline.js?v=1').then(({createPeopleTimeline})=>{
+const peopleTimelineReady=import('./views/people-timeline.js?v=2').then(({createPeopleTimeline})=>{
   peopleTimeline=createPeopleTimeline({root:$("chat-feed"),json,tr,
     owner:()=>state.workspaceRevision+':'+state.profile+':'+state.chat,
     active:()=>state.view==='chats'&&state.chatView==='activity'&&state.chat!==null,
-    record:openRecord,formatTime:fmtFull});return peopleTimeline;
+    record:openRecord,formatTime:fmtFull,canCollect:()=>!!state.me?.admin&&!state.status?.demo,attachment:mediaNode});return peopleTimeline;
 });
 window.addEventListener('tgwitness:lock',()=>peopleTimeline?.reset());
 function renderChatFeed(){

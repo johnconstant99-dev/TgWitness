@@ -6,7 +6,10 @@ export function createCaseBoard(ctx){
   const key=()=>state.workspaceRevision+':'+state.profile;
   const valid=(stamp,rev)=>stamp===key()&&rev===revision&&!!state.me;
   const btn=(text,fn,cls='quiet small')=>{const b=n('button',cls,t(text));b.type='button';b.addEventListener('click',async event=>{
-    event.stopPropagation();if(b.disabled)return;b.disabled=true;try{await fn(event);}catch(error){if(!['AbortError','StaleView'].includes(error.name))toast(error.message,true);}finally{b.disabled=false;}});return b;};
+    event.stopPropagation();if(b.disabled)return;const owner=b.closest('dialog');owner?.querySelector('.form-error')?.remove();b.disabled=true;b.setAttribute('aria-busy','true');
+    try{await fn(event);}catch(error){if(!['AbortError','StaleView'].includes(error.name)){
+      if(owner?.isConnected){const message=n('p','form-error',error.message);message.setAttribute('role','alert');owner.append(message);}else toast(error.message,true);
+    }}finally{b.disabled=false;b.removeAttribute('aria-busy');}});return b;};
   const field=(form,label,type='text',value='')=>{const wrap=n('label','board-field',t(label)),input=n(type==='textarea'?'textarea':'input');
     if(type!=='textarea')input.type=type;input.value=value;wrap.append(input);form.append(wrap);return input;};
   const select=(form,label,options)=>{const wrap=n('label','board-field',t(label)),input=n('select');for(const [value,text] of options)input.add(new Option(t(text),value));wrap.append(input);form.append(wrap);return input;};
@@ -143,24 +146,25 @@ export function createCaseBoard(ctx){
       if(may('export'))right.append(btn('JSON excerpt',()=>download('board/slice/'+id+'/export','board-slice.json')),btn('CSV excerpt',()=>download('board/slice/'+id+'/export?format=csv','board-slice.csv')));
     }
   }
-  function closeDialog(){if(dialog){dialog.close();dialog.remove();dialog=null;}}
-  function modal(title){closeDialog();dialog=n('dialog','board-dialog');const own=dialog,head=n('div','board-dialog-heading');head.append(n('h2','',t(title)),btn('Close',closeDialog));
+  function closeDialog(expected=dialog){if(dialog&&expected===dialog){dialog.close();dialog.remove();dialog=null;}}
+  function modal(title){closeDialog();dialog=n('dialog','board-dialog');const own=dialog,head=n('div','board-dialog-heading');head.append(n('h2','',t(title)),btn('Close',()=>closeDialog(own)));
     const body=n('div');dialog.append(head,body);dialog.setAttribute('aria-label',t(title));dialog.addEventListener('close',()=>{own.remove();if(dialog===own)dialog=null;},{once:true});document.body.append(dialog);dialog.showModal();return body;}
   async function post(action,payload){const stamp=key(),rev=revision;const saved=await json('board/'+action,payload);if(!valid(stamp,rev))return null;
+    if(action==='remove'&&selected?.card.id===payload.card_id){selected=null;right.hidden=true;threadTicket++;}
     liveCursor=Math.max(liveCursor,saved.seq);toast(t('Added to Case Board. Nothing was sent to Telegram.'));if(state.view==='board')await load();return saved;}
   async function bookmark(event){if(!may('board.write'))return;await post('bookmark',{target:{event_hash:event.hash,seq:event.seq}});}
   async function bookmarkOptions(event){const stamp=key(),rev=revision,result=await json('board?limit=1');if(!valid(stamp,rev))return;
     const body=modal('Bookmark options'),title=field(body,'Title'),note=field(body,'Note','textarea'),labels=field(body,'Labels, separated by commas'),collection=select(body,'Collection',[['','Inbox'],...result.collections.map(item=>[item.id,item.title])]);
     body.append(btn('Add to board',async()=>{const saved=await post('bookmark',{target:{event_hash:event.hash,seq:event.seq},title:title.value,note:note.value,labels:labels.value.split(',').map(value=>value.trim()).filter(Boolean)});
-      if(saved&&collection.value)await post('move',{card_id:saved.payload.id,collection_id:collection.value});if(saved)closeDialog();},'primary'));}
+      if(saved&&collection.value)await post('move',{card_id:saved.payload.id,collection_id:collection.value});if(saved)closeDialog(body.closest('dialog'));},'primary'));}
   async function editDialog(card){const body=modal('Edit card'),title=field(body,'Title','text',card.title||''),note=field(body,'Note','textarea',card.note||''),labels=field(body,'Labels, separated by commas','text',(card.labels||[]).join(', '));
     body.append(n('p','hint',t('Saving appends a signed revision. The previous version remains in the annotations history.')),
       btn('Save revision',async()=>{const payload={id:card.id,supersedes:card.annotation_hash,title:title.value,note:note.value,labels:labels.value.split(',').map(x=>x.trim()).filter(Boolean)};
         if(card.target)payload.target=card.target;if(card.range){payload.range=card.range;payload.color=card.color;}if(card.query)payload.query=card.query;
-        await post(card.kind.split('.')[1],payload);closeDialog();},'primary'));}
+        await post(card.kind.split('.')[1],payload);closeDialog(body.closest('dialog'));},'primary'));}
   async function highlight(event,range){const body=modal('Highlight → board');body.append(preview(range.quote));
     const color=select(body,'Highlight color',[['amber','Amber'],['blue','Blue'],['green','Green'],['rose','Rose']]),note=field(body,'Note','textarea'),labels=field(body,'Labels, separated by commas');
-    body.append(btn('Add to board',async()=>{const saved=await post('highlight',{target:{event_hash:event.hash,seq:event.seq},range:{...range,version:event.hash},color:color.value,note:note.value,labels:labels.value.split(',').map(x=>x.trim()).filter(Boolean)});if(saved)closeDialog();},'primary'));
+    body.append(btn('Add to board',async()=>{const saved=await post('highlight',{target:{event_hash:event.hash,seq:event.seq},range:{...range,version:event.hash},color:color.value,note:note.value,labels:labels.value.split(',').map(x=>x.trim()).filter(Boolean)});if(saved)closeDialog(body.closest('dialog'));},'primary'));
   }
   async function sliceDialog(initial={}){
     const body=modal('Save a range slice');body.append(n('p','hint',t('Includes every observed action by default. Times below are observation times in UTC.')));
@@ -184,19 +188,19 @@ export function createCaseBoard(ctx){
       ...(start.value?{from_message_id:Number(start.value)}:{}),...(end.value?{to_message_id:Number(end.value)}:{}),
       actors:actors.value?actors.value.split(',').map(x=>Number(x.trim())):[],kinds:kinds.value.trim()==='all'?'all':kinds.value.split(',').map(x=>x.trim()),include_unscoped:unscoped.checked,search:search.value,hide_system:hideSystem.checked});
     let checked='';const add=btn('Add to board',async()=>{const q=query();if(JSON.stringify(q)!==checked)throw new Error(t('Preview the current slice before adding it.'));
-      const saved=await post('slice',{title:title.value,note:note.value,query:q});if(saved)closeDialog();},'primary');add.disabled=true;
+      const saved=await post('slice',{title:title.value,note:note.value,query:q});if(saved)closeDialog(body.closest('dialog'));},'primary');add.disabled=true;
     body.append(btn('Preview all actions',async()=>{const q=query(),stamp=key(),rev=revision,container=dialog,result=await json('board/slice-preview',q);if(!valid(stamp,rev)||container!==dialog)return;
       summary.replaceChildren(n('strong','',trn('{n} records','{n} records',result.record_count)));for(const [kind,count] of Object.entries(result.counts))summary.append(n('span','board-tag',kind+' · '+count));checked=JSON.stringify(q);add.disabled=false;},'secondary'),add);
     body.addEventListener('input',()=>{add.disabled=true;});
   }
   async function collectionDialog(item=null){const body=modal(item?'Edit collection':'New collection'),title=field(body,'Title','text',item?.title||''),description=field(body,'Description','textarea',item?.description||''),chats=field(body,'Chat IDs (empty means whole workspace)','text',(item?.chat_ids||[]).join(',')),order=field(body,'Order','number',item?.order||0);
-    body.append(btn('Save collection',async()=>{await post('collection',{...(item?{id:item.id,supersedes:item.annotation_hash}:{}),title:title.value,description:description.value,chat_ids:chats.value?chats.value.split(',').map(Number):[],card_ids:[],order:Number(order.value)});closeDialog();},'primary'));}
+    body.append(btn('Save collection',async()=>{await post('collection',{...(item?{id:item.id,supersedes:item.annotation_hash}:{}),title:title.value,description:description.value,chat_ids:chats.value?chats.value.split(',').map(Number):[],card_ids:[],order:Number(order.value)});closeDialog(body.closest('dialog'));},'primary'));}
   async function moveDialog(card){if(!data)data=await json('board');const body=modal('Move card'),choice=select(body,'Collection',[['','Inbox'],...data.collections.map(item=>[item.id,item.title])]);choice.value=card.collection_id||'';
-    body.append(btn('Move',async()=>{await post('move',{card_id:card.id,collection_id:choice.value||null});closeDialog();},'primary'));}
+    body.append(btn('Move',async()=>{await post('move',{card_id:card.id,collection_id:choice.value||null});closeDialog(body.closest('dialog'));},'primary'));}
   async function statusDialog(card){const body=modal('Change status'),options=[['open','Open'],['review','Under review']];if(may('board.manage'))options.push(['confirmed','Confirmed'],['dismissed','Dismissed']);
     const value=select(body,'Status',options),reason=field(body,'Reason','textarea');value.value=card.state;body.append(n('p','hint',t('A team status is an opinion, not a verification result.')),
-      btn('Save status',async()=>{await post('status',{card_id:card.id,state:value.value,reason:reason.value});closeDialog();},'primary'));}
-  async function removeCard(card){const body=modal('Remove card');body.append(n('p','',t('The card will be hidden from the feed. Its signed history remains.')),btn('Remove',async()=>{await post('remove',{card_id:card.id});selected=null;right.hidden=true;closeDialog();},'danger'));}
+      btn('Save status',async()=>{await post('status',{card_id:card.id,state:value.value,reason:reason.value});closeDialog(body.closest('dialog'));},'primary'));}
+  async function removeCard(card){const body=modal('Remove card');body.append(n('p','',t('The card will be hidden from the feed. Its signed history remains.')),btn('Remove',async()=>{await post('remove',{card_id:card.id});closeDialog(body.closest('dialog'));},'danger'));}
   async function sliceRecords(id){const body=modal('Slice records'),stamp=key(),rev=revision,container=dialog;let next=0;const table=n('table','board-record-table'),head=n('tr');
     for(const title of ['Observed / Telegram time','Kind','Actor','Target','Summary','Record'])head.append(n('th','',t(title)));const thead=n('thead'),tbody=n('tbody');thead.append(head);table.append(thead,tbody);
     const summary=n('p','hint'),wrap=n('div','board-record-scroll');wrap.append(table);body.append(summary,wrap);

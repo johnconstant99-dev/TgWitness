@@ -685,7 +685,7 @@ def records(lay, say, events, titles, options):
         if run:
             flush()
             run = None
-        payload, chat = event["payload"], event["chat_id"]
+        payload, chat = event["payload"], report.report_analytics.chat_key(event)
         head = ("#" + str(event["seq"]) + "  " + report.kind_label(say, event["kind"]) + " · "
                 + say("Observed") + ": " + report.utc_text(event["observed_at"]))
         if chat is not None:
@@ -696,13 +696,16 @@ def records(lay, say, events, titles, options):
         if times:
             lay.text(times, size=7.8, color=MUTED)
         sender = payload.get("sender_observation") if isinstance(payload.get("sender_observation"), dict) else {}
-        sender_id = payload.get("sender_id", sender.get("id"))
+        sender_id = report.report_analytics.sender_id(event)
         if sender.get("display_name") or sender_id is not None:
             lay.text((sender.get("display_name") or say("User {id}", id=sender_id))
                      + (" @" + sender["username"] if sender.get("username") else "")
                      + (" · id " + str(sender_id) if sender_id is not None else ""), size=8)
         if isinstance(payload.get("text"), str) and payload["text"]:
             report_composition_pdf.message_text(lay, payload["text"])
+        if report.report_analytics.secret_chat_id(event) is not None:
+            for line in report.secret_record_lines(say, payload):
+                lay.text(line, size=8, color=MUTED)
         if payload.get("text_withheld"):
             lay.text(say("Text withheld in this extract"), size=8, color=MUTED)
         if report.CATEGORIES.get(event["kind"]) in ("message", "edited"):
@@ -711,7 +714,7 @@ def records(lay, say, events, titles, options):
         if event.get("minimised"):
             lay.text(say("Minimised") + ": " + ", ".join(say(report.WITHHELD.get(x, x)) for x in event["minimised"]),
                      size=8, color=WARN)
-        if event["kind"] == "media.saved" and isinstance(payload.get("media_sha256"), str):
+        if event["kind"] in ("media.saved", "secret_chat.file") and isinstance(payload.get("media_sha256"), str):
             lay.text((payload.get("original_name") or say("Saved file")) + " · " + str(payload.get("mime_type") or "—")
                      + " · " + report.size_text(payload.get("size")), size=8)
             lay.text(say("File SHA-256") + ": " + payload["media_sha256"], size=6.8, color=MUTED, family="Mono")
@@ -916,7 +919,7 @@ class EvidencePDF:
                 "directory": self.render_directory,
                 "relations": self.render_relations,
             }
-            default_order = ['brief', 'selection', 'examination', 'analytics', 'assessment', 'case', 'minimisation', 'case_board', 'histories', 'indicators', 'actions', 'integrity', 'timestamps', 'coverage', 'custody', 'verify', 'files', 'standards', 'limitations', 'journal']
+            default_order = ['brief', 'selection', 'examination', 'analytics', 'histories', 'journal', 'assessment', 'case', 'minimisation', 'case_board', 'indicators', 'actions', 'integrity', 'timestamps', 'coverage', 'custody', 'verify', 'files', 'standards', 'limitations']
             if self.options.get("template") == "activity":
                 default_order[2:4] = ["analytics", "examination"]
             visible = {

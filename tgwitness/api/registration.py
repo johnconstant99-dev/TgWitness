@@ -7,6 +7,7 @@ from . import evidence as routes_evidence
 from . import export as routes_export
 from . import network as routes_network
 from . import secret_chats as routes_secret_chats
+from . import profiling as routes_profiling
 from . import system as routes_system
 from .topology import topology
 from .system_map import system_map
@@ -555,6 +556,9 @@ def register(app, ctx):
     router.get(
         "/api/chats/{chat_id}/people/{user_id}", dependencies=[Depends(authenticate)]
     )(routes_chats.person_timeline)
+    router.get("/api/chats/{chat_id}/people/{user_id}/assets", dependencies=[Depends(authenticate)])(routes_profiling.assets)
+    router.get("/api/profiling", dependencies=[Depends(authenticate)])(routes_profiling.status)
+    router.post("/api/profiling/{action}", dependencies=[Depends(authenticate)])(routes_profiling.action)
     router.post("/api/chats/{chat_id}/dossier", dependencies=[Depends(authenticate)])(
         routes_chats.dossier_switch
     )

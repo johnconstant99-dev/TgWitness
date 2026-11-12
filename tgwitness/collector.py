@@ -611,6 +611,8 @@ class Collector:
         self.export_files_lock = asyncio.Lock()
         self._forensics_clients = weakref.WeakSet()
         self.history = History(self)
+        from .profiling import Profiling
+        self.profiling = Profiling(self)
 
     def status(self):
         credentials = self.vault.read("credentials")
@@ -2678,6 +2680,8 @@ class Collector:
 
     async def stop(self, shutdown=False):
         await self.wait_authorization_cleanup()
+        if shutdown:
+            await self.profiling.suspend()
         await self.history.pause("process_shutdown" if shutdown else "observation_stopped")
         if shutdown and self.export_task:
             self.export_task.cancel()
@@ -2705,7 +2709,9 @@ class Collector:
 
         if shutdown:
             await secret_chats.of(self).detach()
-        if self.client and (shutdown or not (self.export_busy() or self.export_claim)):
+        if self.client and (shutdown or not (self.export_busy() or self.export_claim
+                                             or self.profiling.busy
+                                             or secret_chats.of(self).manager is not None)):
             await self.client.disconnect()
         if shutdown and self.proxy_pool:
             self.proxy_pool.release(self.route_owner)
@@ -3740,6 +3746,7 @@ class Collector:
 
     def idle(self):
         return not (self.running or self.observation_starting or self.history.busy or self.export_busy()
+                    or self.profiling.busy
                     or self.export_claim or self.connection_change_task is not None or self.foreground
                     or self.login_client is not None or self.qr_task is not None)
 

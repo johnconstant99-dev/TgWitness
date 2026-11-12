@@ -289,7 +289,7 @@ def message_text(lay, text):
     if active(lay):
         lay.text(text, size=10, height=5.1, family="Serif")
     else:
-        lay.text(text, size=8.6)
+        lay.text(text, size=10.5, height=5.1)
 
 
 def comparison(lay, old, new):

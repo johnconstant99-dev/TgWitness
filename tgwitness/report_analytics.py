@@ -47,6 +47,32 @@ def _identifier(value):
     return value if type(value) is int and 0 < abs(value) < 2**63 else None
 
 
+def secret_chat_id(event):
+    payload = event.get("payload")
+    if str(event.get("kind", "")).startswith("secret_chat.") and isinstance(payload, dict):
+        return _identifier(payload.get("secret_chat_id"))
+    return None
+
+
+def chat_key(event):
+    secret = secret_chat_id(event)
+    return "secret:" + str(secret) if secret is not None else _identifier(event.get("chat_id"))
+
+
+def sender_id(event):
+    payload = event.get("payload")
+    payload = payload if isinstance(payload, dict) else {}
+    if secret_chat_id(event) is not None:
+        return _identifier(payload.get("peer_user_id")) if payload.get("direction") == "in" else None
+    observed = payload.get("sender_observation")
+    observed = observed if isinstance(observed, dict) else {}
+    return _identifier(payload.get("sender_id", observed.get("id", event.get("sender_id"))))
+
+
+def _identity_key(value):
+    return isinstance(value, str), value
+
+
 def _sequence(value):
     return value if type(value) is int and 0 < value < 2**63 else None
 
@@ -115,7 +141,7 @@ class _Groups:
         return {"status": "too_many_groups" if self.overflow else "available",
                 "total": self.total, "counted_events": self.total,
                 "unknown_count": self.unknown["total"], "unknown": _copy(self.unknown),
-                "rows": [{"id": identity, **_copy(row)} for identity, row in sorted(self.rows.items())]}
+                "rows": [{"id": identity, **_copy(row)} for identity, row in sorted(self.rows.items(), key=lambda item: _identity_key(item[0]))]}
 
 
 class Analytics:
@@ -153,20 +179,15 @@ class Analytics:
         if not isinstance(event, dict):
             return
         event_kind = event.get("kind")
-        kind = KINDS.get(event_kind) if isinstance(event_kind, str) else None
+        kind = "new" if event_kind == "secret_chat.message" else KINDS.get(event_kind) if isinstance(event_kind, str) else None
         if kind is None:
             return
         seq = _sequence(event.get("seq"))
         _add(self.totals, kind, seq)
-        self.chats.add(_identifier(event.get("chat_id")), kind, seq)
+        self.chats.add(chat_key(event), kind, seq)
         if kind in MESSAGE_KINDS:
             self.message_observations += 1
-            payload = event.get("payload")
-            payload = payload if isinstance(payload, dict) else {}
-            sender = payload.get("sender_observation")
-            sender = sender if isinstance(sender, dict) else {}
-            identity = payload.get("sender_id", sender.get("id", event.get("sender_id")))
-            self.participants.add(_identifier(identity), kind, seq)
+            self.participants.add(sender_id(event), kind, seq)
         moment = _time(event.get("observed_at"))
         if moment is None:
             self.invalid_time_events += 1
@@ -196,8 +217,8 @@ class Analytics:
 
 def _ranking(data, limit, *, participants=False, labels="aliases"):
     rows = data["rows"]
-    aliases = {row["id"]: index for index, row in enumerate(sorted(rows, key=lambda row: row["id"]), 1)}
-    ranked = sorted(rows, key=lambda row: (-row["total"], row["id"]))
+    aliases = {row["id"]: index for index, row in enumerate(sorted(rows, key=lambda row: _identity_key(row["id"])), 1)}
+    ranked = sorted(rows, key=lambda row: (-row["total"], _identity_key(row["id"])))
     visible, remaining = ranked[:limit], ranked[limit:]
     output = []
     for row in visible:

@@ -5,6 +5,7 @@ const groupNames = {collection: "Collection", recheck: "Recheck", attachments: "
 export function createParameters(context) {
   const {root, tr, getState, getSession, json, may, toast, refreshStatus} = context;
   const find = id => root.querySelector("#" + id), form = find("parameters-form");
+  form.noValidate = true;
   const listeners = new AbortController(), fields = new Map(), groups = new Map();
   let session = getSession(), catalog = null, request = 0, saving = false, schema = "", selected = "collection";
   let pending = null, resetPlan = null;
@@ -66,7 +67,8 @@ export function createParameters(context) {
         entry.row.hidden = !!(query && !entry.search.includes(query) || changed && !entry.row.classList.contains("changed"));
         if (!entry.row.hidden) count++;
       }
-      total += count; group.card.hidden = group.link.hidden = !count;
+      total += count; group.link.hidden = !count;
+      group.card.hidden = !count || !query && !changed && id !== selected;
       group.link.setAttribute("aria-current", id === selected ? "location" : "false");
     }
     find("parameters-count").textContent = tr("{shown} of {total} parameters", {shown: total, total: fields.size});
@@ -238,7 +240,7 @@ export function createParameters(context) {
   on(form, "submit", async event => {
     event.preventDefault(); if (!catalog || !allowed() || saving) return;
     const invalid = [...fields.values()].find(entry => problem(entry));
-    if (invalid) {renderDraft(); invalid.field.focus(); return;}
+    if (invalid) {renderDraft(); focusParameter(invalid.item.key); return;}
     const values = draft(); if (!Object.keys(values).length) return;
     const submitted = Object.fromEntries([...fields].map(([key, entry]) => [key, raw(entry)]));
     const now = getSession(), profile = getState().profile; request++; saving = true; renderDraft();
@@ -256,7 +258,7 @@ export function createParameters(context) {
       const entry = fields.get(error.parameter);
       if (entry && equal(raw(entry), submitted[error.parameter])) {
         entry.serverError = error.message;
-        if (active()) {find("parameters-search").value = ""; find("parameters-changed").checked = false; filter(); entry.field.focus();}
+        if (active()) focusParameter(entry.item.key);
       }
       if (active()) find("parameters-result").textContent = error.message;
       toast(error.message, true);
@@ -270,7 +272,7 @@ export function createParameters(context) {
   });
   on(find("parameters-review-invalid"), "click", () => {
     const entry = [...fields.values()].find(item => problem(item)); if (!entry) return;
-    find("parameters-search").value = ""; find("parameters-changed").checked = false; filter(); entry.field.focus();
+    focusParameter(entry.item.key);
   });
   const plannedDefaults = () => [...fields].filter(([, entry]) => !equal(value(entry), entry.item.default))
     .map(([key, entry]) => ({key, before: raw(entry), after: entry.item.default}));

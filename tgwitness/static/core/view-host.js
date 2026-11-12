@@ -7,10 +7,11 @@ export function viewReferences(root){
   };
 }
 
-export function createViewHost({getSession=()=>({}),onError=error=>console.error(error)}={}){
+export function createViewHost({getSession=()=>({}),onError=error=>console.error(error),tr=value=>value}={}){
   const entries=new Map();
   let active=null,generation=0,status=null,disposed=false;
   function leave(entry){
+    clearTimeout(entry.loadingTimer);entry.notice?.remove();entry.notice=null;
     entry.request?.abort();entry.request=null;entry.unlink?.();entry.unlink=null;
     if(active===entry){
       try{entry.controller.leave?.();}catch(error){onError(error);}
@@ -31,7 +32,7 @@ export function createViewHost({getSession=()=>({}),onError=error=>console.error
     const ticket=++generation;
     if(active&&active!==entry)leave(active);
     for(const other of entries.values())if(other!==entry&&other.root.isConnected)leave(other);
-    entry.request?.abort();entry.unlink?.();
+    entry.request?.abort();entry.unlink?.();clearTimeout(entry.loadingTimer);entry.notice?.remove();entry.notice=null;
     const request=new AbortController();entry.request=request;
     if(signal){
       const abort=()=>request.abort();signal.addEventListener("abort",abort,{once:true});
@@ -42,16 +43,30 @@ export function createViewHost({getSession=()=>({}),onError=error=>console.error
     const current=()=>!disposed&&!request.signal.aborted&&ticket===generation&&active===entry;
     entry.context={signal:request.signal,session,params,current};
     entry.root.dataset.loading="true";entry.root.setAttribute("aria-busy","true");
+    function notice(error){
+      entry.notice?.remove();
+      const box=document.createElement('div'),text=document.createElement('span');
+      box.className='view-load-state'+(error?' failed':'');box.setAttribute('role',error?'alert':'status');
+      text.textContent=error?error.message:tr('Loading…');box.append(text);
+      if(error){
+        const retry=document.createElement('button');retry.type='button';retry.className='secondary small';retry.textContent=tr('Retry');
+        retry.addEventListener('click',()=>{if(current())void activate(name,{params}).catch(onError);});box.append(retry);
+      }
+      entry.root.prepend(box);entry.notice=box;
+    }
+    const loadingTimer=setTimeout(()=>{if(current())notice();},350);entry.loadingTimer=loadingTimer;
     try{
       if(!entry.mounted){entry.controller.mount?.(entry.root);entry.mounted=true;}
       if(status)updateStatus(status);
       await entry.controller.enter?.(entry.context);
+      if(current()){entry.notice?.remove();entry.notice=null;}
       return current();
     }catch(error){
       if(!current()||error?.name==="AbortError")return false;
+      notice(error);
       if(!entry.mounted)leave(entry);
       throw error;
-    }finally{if(current()){delete entry.root.dataset.loading;entry.root.removeAttribute("aria-busy");}}
+    }finally{clearTimeout(loadingTimer);if(current()){delete entry.root.dataset.loading;entry.root.removeAttribute("aria-busy");}}
   }
   function updateStatus(next){
     status=next;if(disposed||!active||active.request?.signal.aborted)return;

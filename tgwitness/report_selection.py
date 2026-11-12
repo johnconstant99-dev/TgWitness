@@ -24,20 +24,22 @@ ID_GAP_BASIS = (
 )
 Identifier = Annotated[int, Field(strict=True, gt=-(2**63), lt=2**63)]
 EventKind = Literal["message.new", "message.snapshot", "message.recovered", "message.edited",
-                    "message.deleted", "message.missing_on_recheck"]
+                    "message.deleted", "message.missing_on_recheck", "secret_chat.message", "secret_chat.action", "secret_chat.file"]
+SECRET_KINDS = ("secret_chat.message", "secret_chat.action", "secret_chat.file")
 
 
 class Selection(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
     enabled: StrictBool = False
     chats: list[Identifier] = Field(default_factory=list, max_length=MAX_SELECTION_IDS)
+    secret_chats: list[Identifier] = Field(default_factory=list, max_length=MAX_SELECTION_IDS)
     senders: list[Identifier] = Field(default_factory=list, max_length=MAX_SELECTION_IDS)
     date_from: str = Field(default="", strict=True, max_length=10, pattern=r"^(?:\d{4}-\d{2}-\d{2})?$")
     date_to: str = Field(default="", strict=True, max_length=10, pattern=r"^(?:\d{4}-\d{2}-\d{2})?$")
-    kinds: list[EventKind] = Field(default_factory=lambda: list(report_analytics.KINDS), max_length=6)
+    kinds: list[EventKind] = Field(default_factory=lambda: [*report_analytics.KINDS, *SECRET_KINDS], max_length=9)
     id_gaps: StrictBool = True
 
-    @field_validator("chats", "senders", "kinds")
+    @field_validator("chats", "secret_chats", "senders", "kinds")
     @classmethod
     def distinct(cls, value):
         if len(set(value)) != len(value):
@@ -69,24 +71,24 @@ def _text(value, limit=PREVIEW_CHARS):
 
 
 def sender_id(event):
-    payload = event.get("payload")
-    payload = payload if isinstance(payload, dict) else {}
-    observed = payload.get("sender_observation")
-    observed = observed if isinstance(observed, dict) else {}
-    return report_analytics._identifier(payload.get("sender_id", observed.get("id")))
+    return report_analytics.sender_id(event)
 
 
 class _Matcher:
     def __init__(self, selection):
         self.enabled = selection.enabled
         self.chats = frozenset(selection.chats)
+        self.secret_chats = frozenset(selection.secret_chats)
         self.senders = frozenset(selection.senders)
         self.kinds = frozenset(selection.kinds)
         self.start = date.fromisoformat(selection.date_from) if selection.date_from else None
         self.end = date.fromisoformat(selection.date_to) if selection.date_to else None
 
     def chat(self, event):
-        return not self.enabled or not self.chats or event.get("chat_id") in self.chats
+        if not self.enabled or not self.chats and not self.secret_chats:
+            return True
+        secret = report_analytics.secret_chat_id(event)
+        return secret in self.secret_chats if secret is not None else event.get("chat_id") in self.chats
 
     def time(self, event):
         if not self.enabled or not (self.start or self.end):
@@ -116,6 +118,7 @@ def _preview(event):
     payload = payload if isinstance(payload, dict) else {}
     return {"seq": report_analytics._sequence(event.get("seq")),
             "chat_id": report_analytics._identifier(event.get("chat_id")),
+            "secret_chat_id": report_analytics.secret_chat_id(event),
             "message_id": _message_id(event.get("message_id")),
             "kind": _text(event.get("kind"), 80), "observed_at": _text(event.get("observed_at"), 64),
             "sender_id": sender_id(event), "text": _text(payload.get("text"))}
@@ -133,8 +136,10 @@ def _prepare(connection):
         PRAGMA cache_size=-2048;
         CREATE TABLE titles (id INTEGER PRIMARY KEY, title TEXT NOT NULL);
         CREATE TABLE catalog_chats (id INTEGER PRIMARY KEY, count INTEGER NOT NULL);
+        CREATE TABLE catalog_secret_chats (id INTEGER PRIMARY KEY, count INTEGER NOT NULL, title TEXT NOT NULL);
         CREATE TABLE catalog_senders (id INTEGER PRIMARY KEY, count INTEGER NOT NULL);
         CREATE TABLE selected_chats (id INTEGER PRIMARY KEY);
+        CREATE TABLE selected_secret_chats (id INTEGER PRIMARY KEY);
         CREATE TABLE selected_senders (id INTEGER PRIMARY KEY);
         CREATE TABLE selected_changed (chat INTEGER, message INTEGER, PRIMARY KEY(chat,message));
         CREATE TABLE bounds (chat INTEGER PRIMARY KEY, low INTEGER NOT NULL, high INTEGER NOT NULL);
@@ -148,13 +153,15 @@ def _prepare(connection):
 
 
 def _catalog(connection, table, *, titles=False):
-    assert table in ("catalog_chats", "catalog_senders")
+    assert table in ("catalog_chats", "catalog_senders", "catalog_secret_chats")
     total = connection.execute("SELECT count(*) FROM " + table).fetchone()[0]
     if total > MAX_CATALOG_ROWS:
         return [], total, "too_many_groups"
     if titles:
         rows = connection.execute("SELECT c.id, c.count, COALESCE(t.title, '') AS title FROM catalog_chats c "
                                   "LEFT JOIN titles t ON t.id=c.id ORDER BY c.count DESC, c.id")
+    elif table == "catalog_secret_chats":
+        rows = connection.execute("SELECT id, count, title FROM catalog_secret_chats ORDER BY count DESC, id")
     else:
         rows = connection.execute("SELECT id, count FROM catalog_senders ORDER BY count DESC, id")
     return [dict(row) for row in rows], total, "available"
@@ -255,10 +262,15 @@ def analyze(snapshot, selection=None, preview_limit=40, *, scratch_root=None):
                 if selection.id_gaps:
                     _known(connection, event, predicate)
                 kind = event.get("kind")
-                message_kind = isinstance(kind, str) and kind in report_analytics.KINDS
+                secret = report_analytics.secret_chat_id(event)
+                message_kind = isinstance(kind, str) and (kind in report_analytics.KINDS or kind == "secret_chat.message")
                 chat = report_analytics._identifier(event.get("chat_id"))
                 sender = sender_id(event)
                 if message_kind:
+                    if secret is not None:
+                        peer = event.get("payload", {}).get("peer_user_id")
+                        title = "Secret Chat " + str(secret) + (" · " + str(peer) if type(peer) is int else "")
+                        connection.execute("INSERT INTO catalog_secret_chats VALUES (?,1,?) ON CONFLICT(id) DO UPDATE SET count=count+1", (secret, title))
                     if chat is not None:
                         connection.execute("INSERT INTO catalog_chats VALUES (?,1) ON CONFLICT(id) DO UPDATE SET count=count+1", (chat,))
                     if predicate.chat(event):
@@ -273,6 +285,10 @@ def analyze(snapshot, selection=None, preview_limit=40, *, scratch_root=None):
                     continue
                 selected_records += 1
                 aggregate.add(event)
+                if chat is not None:
+                    connection.execute("INSERT OR IGNORE INTO selected_chats VALUES (?)", (chat,))
+                if secret is not None:
+                    connection.execute("INSERT OR IGNORE INTO selected_secret_chats VALUES (?)", (secret,))
                 if kind in ("message.edited", "message.deleted", "message.missing_on_recheck") and chat is not None \
                         and type(event.get("message_id")) is int:
                     connection.execute("INSERT OR IGNORE INTO selected_changed VALUES (?,?)", (chat, event["message_id"]))
@@ -281,17 +297,16 @@ def analyze(snapshot, selection=None, preview_limit=40, *, scratch_root=None):
                 messages["total"] += 1
                 if len(messages["rows"]) < preview_limit:
                     messages["rows"].append(_preview(event))
-                if chat is not None:
-                    connection.execute("INSERT OR IGNORE INTO selected_chats VALUES (?)", (chat,))
                 if sender is not None:
                     connection.execute("INSERT OR IGNORE INTO selected_senders VALUES (?)", (sender,))
             raw = aggregate.result()
             chats, chats_total, chats_status = _catalog(connection, "catalog_chats", titles=True)
+            secret_chats, secret_total, secret_status = _catalog(connection, "catalog_secret_chats")
             senders, senders_total, senders_status = _catalog(connection, "catalog_senders")
             counts = {"selected_records": selected_records, "selected_message_records": messages["total"],
                       "message_observations": raw["message_observations"],
                       "participants": connection.execute("SELECT count(*) FROM selected_senders").fetchone()[0],
-                      "chats": connection.execute("SELECT count(*) FROM selected_chats").fetchone()[0],
+                      "chats": connection.execute("SELECT (SELECT count(*) FROM selected_chats) + (SELECT count(*) FROM selected_secret_chats)").fetchone()[0],
                       "invalid_time_excluded": invalid_time_excluded}
             gaps = _gaps(connection, predicate, selection.id_gaps)
             changed_total = connection.execute("SELECT count(*) FROM selected_changed").fetchone()[0]
@@ -307,6 +322,7 @@ def analyze(snapshot, selection=None, preview_limit=40, *, scratch_root=None):
             "source": {"records": records, "last_seq": last_seq, "journal_head": journal_head},
             "counts": counts, "analytics": raw,
             "catalog": {"chats": chats, "chats_total": chats_total, "chats_status": chats_status,
+                        "secret_chats": secret_chats, "secret_chats_total": secret_total, "secret_chats_status": secret_status,
                         "senders": senders, "senders_total": senders_total, "senders_status": senders_status,
                         "unknown_sender_records": unknown_catalog_senders,
                         "sender_basis": "Message records in selected chats and UTC dates, before sender and event-kind filters"},

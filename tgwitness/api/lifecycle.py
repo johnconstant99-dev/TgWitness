@@ -259,6 +259,8 @@ class LifecycleOperations:
                 not store.get_setting("demo", False)
             ):
                 resume_task = asyncio.create_task(resume())
+            if not store.get_setting("demo", False):
+                collector.profiling.restore()
             if self.allow_profiles:
 
                 def child_factory(path, **options):

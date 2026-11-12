@@ -1,6 +1,9 @@
-export function createPeopleTimeline({root, json, tr, owner, active, record, formatTime}) {
+import {createProfileCollection} from './profile-collection.js?v=1';
+
+export function createPeopleTimeline({root, json, tr, owner, active, record, formatTime,canCollect,attachment}) {
   const node=(tag,text='',cls='')=>{const el=document.createElement(tag);el.textContent=text;el.className=cls;return el;};
   let bound=null, request=0, offset=0, person=null, days=7, mode='all', pending=false, lastLoad=0;
+  const collection=createProfileCollection({json,tr,owner,active,record,formatTime,canCollect,attachment,onComplete:()=>load(true)});
   const current=(key,ticket)=>active()&&owner()===key&&bound===key&&ticket===request;
   const labels={online:'Online observed',offline:'Offline observed',unknown:'Unknown',recently:'Recently',last_week:'Within a week',last_month:'Within a month',
     joined:'Joined',left:'Left',removed:'Removed',banned:'Banned',restricted:'Restricted',admin:'Administrator',member:'Member',absent:'No longer present',
@@ -11,8 +14,8 @@ export function createPeopleTimeline({root, json, tr, owner, active, record, for
   function guard(work){return async()=>{const key=owner();try{await work();}catch(error){const status=root.querySelector('.people-timeline-status');if(active()&&key===owner()&&status)status.textContent=error.message;}};}
   function mount(){
     root.replaceChildren();const box=node('section','','people-timeline padded'),heading=node('div','','people-timeline-toolbar');
-    box.append(node('h3',tr('Participant timeline')),
-      node('p',tr('Observed profiles, membership and activity. Online status is account-wide, across all chats.'),'hint'));
+    box.append(node('h3',tr('People')));
+    collection.mount(box);
     const filter=node('select');filter.setAttribute('aria-label',tr('Filter participants'));filter.id='people-timeline-filter';
     for(const [key,text] of [['all','All observed users'],['quiet','No recent messages observed'],['departed','Left, removed or banned'],['deleted','Account marked deleted'],['never_posted','No saved messages']])filter.append(new Option(tr(text),key));
     filter.value=mode;filter.addEventListener('change',()=>{mode=filter.value;offset=0;person=null;load(true);});
@@ -26,13 +29,14 @@ export function createPeopleTimeline({root, json, tr, owner, active, record, for
   async function load(force=false){
     if(!active())return;
     const key=owner();if(bound!==key||!root.querySelector('.people-timeline')){bound=key;request++;offset=0;person=null;pending=false;lastLoad=0;mount();}
+    if(force)void collection.refresh();
     if(!force&&(pending||person!==null||Date.now()-lastLoad<15000))return;
     const ticket=++request,chat=key.split(':').at(-1);pending=true;
     lastLoad=Date.now();
     try{
       const query=person?`people/${person}?quiet_days=${days}`:`people?offset=${offset}&limit=100&quiet_days=${days}&mode=${mode}`;
       const data=await json(`chats/${encodeURIComponent(chat)}/${query}`);if(!current(key,ticket))return;
-      summary(data);const content=root.querySelector('.people-timeline-content');content.replaceChildren();
+      summary(data);root.querySelector('.people-timeline').classList.toggle('person-open',person!==null);const content=root.querySelector('.people-timeline-content');content.replaceChildren();
       if(person)detail(content,data,key,ticket);else list(content,data);
     }catch(error){if(current(key,ticket))root.querySelector('.people-timeline-status').textContent=error.message;}
     finally{if(current(key,ticket))pending=false;}
@@ -56,12 +60,13 @@ export function createPeopleTimeline({root, json, tr, owner, active, record, for
     if(offset+data.people.length<data.total)pages.append(button('Next',()=>{offset+=100;load(true);}));content.append(pages);
   }
   function detail(content,data,key,ticket){
-    const p=data.person;content.append(button('Back to participants',()=>{person=null;load(true);}),node('h4',p.profile.display_name||`ID ${p.user_id}`),
-      node('p',`ID ${p.user_id} · ${label(p.status.state)} · ${label(p.membership.state)}`));
+    const p=data.person;content.append(button('Back to participants',()=>{person=null;load(true);}));
+    collection.profile(content,p,()=>current(key,ticket));
     if(p.profile.flags?.deleted)content.append(node('p',tr('Telegram marked this account deleted. The cause and exact deletion time are unknown.'),'hint'));
     content.append(node('p',`${label(p.activity)} · ${tr('Last message')}: ${p.last_message_at?formatTime(p.last_message_at):'—'}`,'hint'));
     if(data.last_message_gap_days!=null)content.append(node('p',tr('Gap between the two latest saved message times: {days} days. Historical imports do not mean a return today.').replace('{days}',data.last_message_gap_days.toFixed(1)),'hint'));
-    const events=node('ol','','people-timeline-events');content.append(events);
+    const history=node('details','','profile-history');history.append(node('summary',tr('Activity timeline')));content.append(history);
+    const events=node('ol','','people-timeline-events');history.append(events);
     function append(items){for(const item of items){const li=node('li'),title={message:item.data.edited?'Message edited':'Message observed',profile:'Profile observed',status:'Status observed',membership:'Membership observed',refresh_requested:'Profile refresh requested',profile_unavailable:'Profile unavailable'}[item.category]||item.category;
       li.append(node('strong',tr(title)),node('small',`${tr('Observed')}: ${formatTime(item.observed_at)}`));
       if(item.source_at)li.append(node('small',`${tr('Source time')}: ${formatTime(item.source_at)}`));
@@ -76,7 +81,7 @@ export function createPeopleTimeline({root, json, tr, owner, active, record, for
       more.disabled=true;try{const chat=key.split(':').at(-1),value=await json(`chats/${encodeURIComponent(chat)}/people/${p.user_id}?before=${before}&quiet_days=${days}`);
         if(!current(key,ticket))return;append(value.events);before=value.next_before;if(!before)more.remove();
       }finally{if(more.isConnected)more.disabled=false;}
-    }));content.append(more);}
+    }));history.append(more);}
   }
-  return {load,reset(){bound=null;request++;pending=false;lastLoad=0;}};
+  return {load,reset(){collection.reset();bound=null;request++;pending=false;lastLoad=0;}};
 }

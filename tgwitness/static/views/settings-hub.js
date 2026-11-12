@@ -8,7 +8,7 @@ export function createSettingsHub(ctx) {
   const goalLevels = {copy:'simple',watch:'standard',evidence:'standard'};
   const routes = [['auto','✨','Automatic','Try WARP, then public proxies.'],['warp','🛡','Cloudflare WARP','Connect through a local tunnel.'],['proxy','🔌','My proxy','Paste one proxy address.'],['direct','🌐','Direct','Telegram will see this server’s address.']];
   const levels = [['simple','🙂','Simple','Only the essentials.'],['standard','⚙','Standard','Common settings and explanations.'],['expert','🛠','Expert','All fields, limits and technical details.']];
-  const navLevels = {'system-map':'expert',topology:'expert',start:'simple',chats:'simple',observations:'simple',evidence:'simple',settings:'simple',
+  const navLevels = {'system-map':'expert',topology:'expert',start:'simple',chats:'simple','secret-chats':'simple',observations:'simple',evidence:'simple',settings:'simple',
     board:'standard',accounts:'simple',access:'standard',sources:'standard',connection:'expert',witness:'expert',analysis:'expert',
     parameters:'expert','system-log':'expert',integrations:'expert',sealed:'expert'};
   let data=null, prefs=null, draft=null, section=null, generation=0, connectionBusy=false, checkTimer=null, statusTimer=null;
@@ -281,7 +281,7 @@ export function createSettingsHub(ctx) {
   }
   function summaryRows(){
     const inheritance=data.inheritance,connected=fresh(data.connection);
-    const rows=[['telegram','Telegram account',signedIn()?tr('Connected'):tr('Not connected'),signedIn()?'ok':'warn','👤'],
+    const rows=[['telegram','Telegram account',tr(accountState(state.status||{}).needsSignIn?'Sign in again':state.status?.collector?.connected?'Connected':signedIn()?'Session found':'Not connected'),state.status?.collector?.connected?'ok':'warn','👤'],
       ['chats','Which chats?',label(data.wizard.scope||'account')+(data.wizard.scope==='selected'?' · '+(data.wizard.chat_ids?.length||0):''),'ok','💬'],
       ['connection','Connection',label(data.connection.mode)+(connected?' · '+tr('Working · {n} ms',{n:data.connection.check.latency_ms}):''),connected?'ok':'warn','🛡'],
       ['appearance','Language, time and appearance',ctx.languages[prefs.language]+' · '+prefs.timezone+' · '+label(prefs.level),'none','🌐'],
@@ -387,7 +387,7 @@ export function createSettingsHub(ctx) {
       if(section==='telegram'&&signedIn()&&window.TgWitnessDocumentation)detail.append(button('Profile',async()=>{await closeSection();await window.TgWitnessDocumentation.openAccount();}));
       if(section==='telegram')move(ctx.authCard(),detail);
       if(section==='chats'){detail.append(message('Choose all chats, individual chats or a Telegram folder.'));
-        const box=node('div','hub-chats');detail.append(box);void chatsForm(box,owner(),true).catch(e=>{if(e.name!=='StaleView')box.append(message(e.message,'notice warning'));});}
+        const box=node('div','hub-chats');detail.append(box);void chatsForm(box,owner(),true).catch(e=>{if(e.name!=='StaleView')box.append(message(e.message,'notice warning'));});detail.append(button('Pseudo-secret',()=>navigate('secret-chats')));}
       const fields=section==='connection'?[]:data.fields.filter(f=>f.section===section);
       const hidden=fields.filter(f=>rank[f.level]>rank[prefs.level]&&!reveal.has(section));
       for(const f of fields.filter(f=>!hidden.includes(f)))detail.append(fieldRow(f));
@@ -704,7 +704,7 @@ export function createSettingsHub(ctx) {
   }
   function liveParts(){const h=state.status?.health||{};return ['connection','intake','sources','media'].map(name=>({name,...(h[name]||{state:'unknown'})}));}
   function renderLive(page){
-    const heading=node('h1','',tr(live.done?'Setup is applied.':'Checking that recording works…'));heading.tabIndex=-1;page.append(heading);
+    const heading=node('h1','',tr(live.done?'Setup is applied.':live.timedOut?'Check connection':'Checking that recording works…'));heading.tabIndex=-1;page.append(heading);
     const list=node('div','first-run-live'+(live.shown?'':' wizard-appear'));list.setAttribute('aria-live','polite');
     liveParts().forEach((part,i)=>{
       const row=node('div','first-run-check');row.dataset.state=part.state;row.style.setProperty('--i',String(i));
@@ -712,6 +712,9 @@ export function createSettingsHub(ctx) {
       list.append(row);
     });
     live.shown=true;page.append(list);
+    if(live.timedOut)page.append(button('Check again',async()=>{
+      live.started=Date.now();live.timedOut=false;await renderWizard();watchLive();
+    },'primary'));
     if(live.done){
       page.append(node('h2','wizard-done'+(live.celebrated?'':' wizard-appear'),tr('Done! What next:')));live.celebrated=true;
       const actions=node('div','first-run-next-actions');
@@ -726,12 +729,14 @@ export function createSettingsHub(ctx) {
     const active=()=>current(who)&&session&&live===session&&state.view==='first-run';
     const tick=async()=>{
       if(!active())return;
-      try{await refresh(who);}catch{}
+      let refreshed=false;
+      try{await refresh(who);refreshed=true;}catch{}
       if(!active())return;
-      const ready=liveParts().every(part=>['working','off'].includes(part.state));
-      if(ready&&Date.now()-live.started>4000||Date.now()-live.started>120000)live.done=true;
+      const ready=refreshed&&liveParts().every(part=>['working','off'].includes(part.state));
+      if(ready&&Date.now()-live.started>4000)live.done=true;
+      else if(Date.now()-live.started>120000)live.timedOut=true;
       await renderWizard(who);
-      if(active()&&!live.done)liveTimer=setTimeout(tick,2000);
+      if(active()&&!live.done&&!live.timedOut)liveTimer=setTimeout(tick,2000);
     };
     liveTimer=setTimeout(tick,1500);
   }

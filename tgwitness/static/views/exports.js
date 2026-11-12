@@ -1,4 +1,4 @@
-export function createExports({root, tr, json, getSession, fmtTime, toast,downloadAgain}) {
+export function createExports({root, tr, json, getSession, fmtTime, toast,downloadAgain,onTab}) {
   const find = id => root.querySelector('#'+id), tabs = [...root.querySelectorAll('[data-export-tab]')];
   let session = getSession(), request = 0, transfer = 0, selected = 'downloads', entries = [];
   const bytes = size => size < 1024 ? tr('{n} B',{n:size}) : size < 1048576
@@ -26,7 +26,7 @@ export function createExports({root, tr, json, getSession, fmtTime, toast,downlo
       size:bytes(entries[0].bytes),time:fmtTime(entries[0].created_at)}):'';
   }
   window.addEventListener('tgwitness:time-zone',renderTimes);
-  function select(name, focus=false) {
+  function select(name, focus=false, {history=true}={}) {
     selected = name === 'settings' ? 'settings' : 'downloads';
     for (const button of tabs) {
       const active = button.dataset.exportTab === selected;
@@ -34,6 +34,7 @@ export function createExports({root, tr, json, getSession, fmtTime, toast,downlo
       if(active&&focus)button.focus();
     }
     find('exports-downloads').hidden=selected!=='downloads';find('report-form').hidden=selected!=='settings';
+    if(history)onTab?.(selected);
   }
   for(const button of tabs) {
     button.addEventListener('click',()=>select(button.dataset.exportTab));
@@ -81,11 +82,11 @@ export function createExports({root, tr, json, getSession, fmtTime, toast,downlo
     select('downloads');find('exports-progress').hidden=false;
     find('exports-next').hidden=true;
     find('exports-progress-bar').hidden=false;
-    find('exports-progress-label').textContent=tr('Checking journal integrity and preparing the export…');
+    find('exports-progress-label').textContent=tr('Confirm');
     find('exports-progress-bar').removeAttribute('value');find('exports-progress-bytes').textContent='';
     return update=>{
       if(owner!==getSession()||mine!==transfer)return;
-      const labels={saving:tr('Saving export…'),done:tr('Export saved.'),browser:tr('Download started. Check your browser’s downloads.'),cancelled:tr('Download cancelled.'),failed:tr('Download failed. Retry the export.')};
+      const labels={preparing:tr('Checking journal integrity and preparing the export…'),saving:tr('Saving export…'),done:tr('Export saved.'),browser:tr('Download started. Check your browser’s downloads.'),cancelled:tr('Download cancelled.'),failed:tr('Download failed. Retry the export.')};
       if(labels[update.phase])find('exports-progress-label').textContent=labels[update.phase];
       if(update.total!==undefined)find('exports-progress-bytes').textContent=update.expected
         ? tr('{saved} of {total}',{saved:bytes(update.total),total:bytes(update.expected)}):bytes(update.total);
@@ -108,8 +109,8 @@ export function createExports({root, tr, json, getSession, fmtTime, toast,downlo
       retryButton.hidden=update.phase!=='failed'||!retry;
     };
   }
-  return {load,select,begin,leave(){request++;find('exports-history-refresh').disabled=false;},resetSession(){
-    session=getSession();request++;transfer++;entries=[];select('downloads');find('exports-progress').hidden=true;find('exports-next').hidden=true;
+  return {load,select,begin,get tab(){return selected;},leave(){request++;find('exports-history-refresh').disabled=false;},resetSession(){
+    session=getSession();request++;transfer++;entries=[];select('downloads',false,{history:false});find('exports-progress').hidden=true;find('exports-next').hidden=true;
     retryButton.hidden=true;retryButton.onclick=null;
     find('exports-history-list').replaceChildren();delete find('exports-history-list').dataset.stamp;
     find('exports-last').textContent=find('exports-history-status').textContent='';

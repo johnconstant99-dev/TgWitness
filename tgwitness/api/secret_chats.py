@@ -4,6 +4,7 @@ from fastapi import Depends
 from fastapi import HTTPException
 from fastapi import Query
 from pydantic import BaseModel
+from pydantic import ConfigDict
 from pydantic import Field
 
 
@@ -17,6 +18,7 @@ class SecretChatCreate(BaseModel):
 
 
 class SecretChatText(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
     text: str = Field(min_length=1, max_length=4096)
 
 
@@ -48,8 +50,13 @@ async def update_settings(body: SecretChatSettings, *, ctx=Depends(current_conte
     with store.transaction():
         store.set_setting(secret.SETTING, body.model_dump())
         store.append("secret_chat.settings", body.model_dump())
-    if body.enabled:
-        await ctx.operation(collector.restore)
+    if body.enabled and (collector.vault.read("credentials") or {}).get("session"):
+        try:
+            await ctx.operation(collector.restore)
+        except HTTPException as exc:
+            chats_of(ctx).error = str(exc.detail)
+    elif body.enabled:
+        chats_of(ctx).error = None
     else:
         await chats_of(ctx).detach()
         collector.close_when_idle()

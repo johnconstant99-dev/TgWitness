@@ -2,11 +2,16 @@ import asyncio
 import hashlib
 import json
 import logging
+import os
+from pathlib import Path
 import secrets
+import shlex
 import shutil
+import sys
 import time
 
 from telethon import utils
+from telethon.errors import FloodWaitError
 from telethon.tl import types
 from telethon.tl.tlobject import TLObject
 
@@ -36,6 +41,13 @@ SAME = ("direction", "seq_no", "text", "ttl", "reply_to_random_id", "entities", 
 
 def available():
     return library is not None
+
+
+def install_command():
+    root = Path(__file__).resolve().parent.parent
+    parts = [sys.executable, "-m", "pip", "install"]
+    parts += ["-e", str(root) + "[secret-chats]"] if (root / "pyproject.toml").is_file() else ["tgwitness[secret-chats]"]
+    return "& " + " ".join("'" + part.replace("'", "''") + "'" for part in parts) if os.name == "nt" else shlex.join(parts)
 
 
 def of(collector):
@@ -246,7 +258,7 @@ class SecretChats:
             raise ValueError(UNAVAILABLE)
         if not settings(self.store)["enabled"]:
             raise ValueError("Turn on pseudo-secret for this account first.")
-        if self.manager is None:
+        if self.manager is None or self.client is None or not self.client.is_connected():
             raise ValueError("Connect this account to Telegram first.")
         return self.manager
 
@@ -413,10 +425,13 @@ class SecretChats:
         return True
 
     def unaffordable(self, reference, media_root):
+        capture = capture_settings(self.store)
+        if not capture["download_media"]:
+            return "attachment downloads are off"
         size = getattr(reference, "size", None)
         if not isinstance(size, int):
             size = None
-        limit = capture_settings(self.store)["max_media_mb"] * 1024**2
+        limit = capture["max_media_mb"] * 1024**2
         if size is not None and size > limit:
             return "larger than the media size limit"
         free = shutil.disk_usage(media_root).free
@@ -443,7 +458,10 @@ class SecretChats:
                                             "reason": refused,
                                             "meaning": "The encrypted file stays queued; nothing was downloaded."})
                 return
-            await self.manager.save_file(reference, temporary)
+            size = getattr(reference, "size", 0)
+            size = max(0, size) if isinstance(size, int) else 0
+            timeout = self.collector.param("media_timeout_seconds") + size // (self.collector.param("media_min_speed_kbps") * 1024)
+            await asyncio.wait_for(self.manager.save_file(reference, temporary), timeout)
             digest, size, repaired = await complete_in_thread(retain_file, temporary, media_root)
             self.note("file", {"secret_chat_id": item["secret_chat_id"], "random_id": item["random_id"],
                                **({"message_event": message} if message else {}),
@@ -532,8 +550,14 @@ class SecretChats:
                 "created_at": chat.created_at, "closed_reason": chat.closed_reason}
 
     def view(self, *, before=None, after=None):
-        connected = self.manager is not None
-        chats = [self.snapshot(chat) for chat in self.manager.list()] if connected else []
+        from . import interactions
+        interaction_problem = None
+        try:
+            interactions.permitted(self.collector)
+        except (ValueError, FloodWaitError) as exc:
+            interaction_problem = str(exc)
+        connected = self.manager is not None and self.client is not None and self.client.is_connected()
+        chats = [self.snapshot(chat) for chat in self.manager.list()] if self.manager is not None else []
         if before is not None and after is not None:
             raise ValueError("Choose an older or newer history page, not both.")
         records = self.store.events(kind="secret_chat.", limit=2001, before=before, after=after)
@@ -544,6 +568,9 @@ class SecretChats:
         if after is None:
             records.reverse()
         return {"available": available(), "settings": settings(self.store), "connected": connected, "error": self.error,
+                "has_session": bool((self.collector.vault.read("credentials") or {}).get("session")),
+                "interaction_problem": interaction_problem,
+                "install_command": None if available() else install_command(),
                 "chats": display(sorted(chats, key=lambda chat: chat["created_at"] or 0, reverse=True)),
                 "records": display(records),
                 "next_before": records[0]["seq"] if more and after is None else None,

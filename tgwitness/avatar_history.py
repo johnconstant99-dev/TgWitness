@@ -60,6 +60,7 @@ def history_index(store, chat_id=None, events=None):
             "photo_id": photo, "sha256": digest, "phash": perceptual,
             "size": payload.get("size"), "mime_type": payload.get("mime_type"), "name": payload.get("name"),
             "first_at": event["observed_at"], "last_at": event["observed_at"], "records": [],
+            "uploaded_at": payload.get("uploaded_at"), "historical": bool(payload.get("historical")),
             "source": "signed actor.avatar_saved records"})
         item["last_at"] = event["observed_at"]
         item["records"].append(event["seq"])
@@ -100,6 +101,8 @@ class AvatarHistory:
         if not self.loaded:
             for event in history_events(self.store):
                 p = event["payload"]
+                if p.get("historical"):
+                    continue
                 key = (event["chat_id"], p.get("peer_id"), p.get("photo_id"))
                 self.current[key[:2]] = key[2]
                 if event["kind"] == "actor.avatar_saved":

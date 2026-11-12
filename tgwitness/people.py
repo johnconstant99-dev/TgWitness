@@ -118,7 +118,7 @@ class PeopleIndex:
             values = dict(profile)
             if values.pop("partial", False):
                 values = {k: v for k, v in values.items() if v not in (None, "", [], {})}
-            if values.get("source") == "message_profile_cache" and old.get("source") in {"telegram_update", "requested_profile_refresh"}:
+            if values.get("source") == "message_profile_cache" and old.get("source") in {"telegram_update", "requested_profile_refresh", "full_profile_collection"}:
                 for key in ("display_name", "username", "usernames"):
                     if key in old:
                         values[key] = old[key]
@@ -180,7 +180,13 @@ class PeopleIndex:
             self.db.execute("INSERT INTO people_refresh_jobs(user_id,requested_seq) VALUES(?,?) "
                             "ON CONFLICT(user_id) DO UPDATE SET requested_seq=excluded.requested_seq", (uid, event["seq"]))
         elif kind == "actor.profile_unavailable" and user_id(payload.get("user_id")):
-            self.record(event, payload["user_id"], "profile_unavailable", {"error_type": payload.get("error_type")})
+            self.record(event, payload["user_id"], "profile_unavailable", {"error_type": payload.get("error_type"), "area": payload.get("area")})
+        elif kind in {"actor.avatar_saved", "actor.avatar_observed", "actor.gift_observed", "actor.profile_link", "actor.profile_collected"}:
+            uid = user_id(payload.get("user_id", payload.get("peer_id")))
+            if uid:
+                category = {"actor.avatar_saved": "avatar", "actor.avatar_observed": "avatar", "actor.gift_observed": "gift",
+                    "actor.profile_link": "link", "actor.profile_collected": "collection"}[kind]
+                self.record(event, uid, category, dict(payload))
         elif kind.startswith("membership."):
             for uid, member in membership(event):
                 self.record(event, uid, "membership", member, member=member)

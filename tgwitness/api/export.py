@@ -17,6 +17,7 @@ from ..downloads import RetainedDownload
 from ..downloads import TemporaryDownload
 from ..downloads import build_file
 from ..evidence import encrypt_export
+from ..evidence import EmptyReport
 from ..workers import complete_in_thread
 from .dependencies import current_context
 from fastapi import Depends
@@ -27,6 +28,7 @@ from fastapi.responses import Response
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from pydantic import Field
+from pydantic import model_validator
 from typing import Literal
 import asyncio
 import json
@@ -36,6 +38,18 @@ import secrets
 class DisclosureConfirmation(BaseModel):
     model_config = {"extra": "forbid"}
     preview_id: str = Field(min_length=16, max_length=100)
+
+
+class ReportExportRequest(ExportPassword):
+    model_config = {"extra": "forbid"}
+    password: str | None = Field(default=None, min_length=12, max_length=256)
+    options: report.ReportOptions | None = None
+
+    @model_validator(mode="after")
+    def encrypted_password(self):
+        if "encryption" in self.model_fields_set and self.password is None:
+            raise ValueError("Enter a password of at least 12 characters, or untick encryption.")
+        return self
 
 
 async def account_export_jobs(*, ctx=Depends(current_context)):
@@ -414,16 +428,23 @@ async def export(
 async def export_encrypted(
     request: Request,
     fmt: Literal["zip", "jsonl", "csv", "html", "json", "pdf"],
-    body: ExportPassword,
+    body: ReportExportRequest,
     language: str | None = None,
     *,
     ctx=Depends(current_context),
 ):
-    path, headers = await ctx.build_export(fmt, request, body.password, language, body.encryption)
+    path, headers = await ctx.build_export(
+        fmt, request, body.password, language, body.encryption, body.options
+    )
+    encrypted = body.password is not None
+    media_types = {"zip": "application/zip", "jsonl": "application/x-ndjson",
+                   "csv": "text/csv", "html": "text/html", "json": "application/json", "pdf": "application/pdf"}
+    name = "tgwitness-report." + fmt if fmt in ("json", "pdf") else "tgwitness-evidence." + fmt
     return TemporaryDownload(
         path,
-        filename="tgwitness-evidence-" + fmt + "-encrypted." + body.encryption,
-        media_type="application/zip" if body.encryption == "zip" else "application/octet-stream",
+        filename="tgwitness-evidence-" + fmt + "-encrypted." + body.encryption if encrypted else name,
+        media_type=("application/zip" if body.encryption == "zip" else "application/octet-stream")
+        if encrypted else media_types[fmt],
         headers=headers,
     )
 
@@ -694,11 +715,15 @@ class ExportOperations:
             principal.admin or self.chat_export_owners.get(export_id) == principal.owner
         )
 
-    async def build_export(self, fmt, request, password=None, language=None, encryption="zip"):
+    async def build_export(self, fmt, request, password=None, language=None, encryption="zip", draft=None):
         from .. import export_history
 
         receipt = {}
         options = report_options(self.app.state.store, request, language)
+        if draft is not None:
+            options = draft.model_dump()
+            if language or options["language"] == "auto":
+                options["language"] = language or panel_language(request)
         principal = request.state.principal
         include_board = principal.may("board.read")
         permissions = ["view", "export"] + (["board.read"] if include_board else [])
@@ -710,6 +735,7 @@ class ExportOperations:
                 fmt,
                 options,
                 include_board=include_board,
+                require_records=fmt in ("html", "json", "pdf"),
             )
             try:
                 if password is not None:
@@ -740,7 +766,7 @@ class ExportOperations:
                     raise HTTPException(409, str(exc)) from None
             try:
                 path = await build_file(build)
-            except pdf_report.MissingFont as exc:
+            except (pdf_report.MissingFont, EmptyReport) as exc:
                 raise HTTPException(409, str(exc)) from None
             except Exception as exc:
                 self.app.state.store.append(

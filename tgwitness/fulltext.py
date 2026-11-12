@@ -14,7 +14,8 @@ from . import indicators, keyboard
 from .journal_index import TEXT_KINDS, search_text
 
 LOG = logging.getLogger("tgwitness.fulltext")
-VERSION = "fulltext-v1"
+VERSION = "fulltext-v2"
+SEARCH_KINDS = (*TEXT_KINDS, "secret_chat.message")
 MODES = ("disk", "memory", "off")
 SOURCES = ("messages", "ocr", "transcription")
 TOKENIZE = "unicode61 remove_diacritics 0 categories 'L* N* Co M* Pc' tokenchars '.@:#-'"
@@ -24,7 +25,7 @@ CATCH_UP = 5000
 MAX_CLAUSES = 24
 MAX_FORMS = 8
 KIND_TAGS = {"message.new": "new", "message.snapshot": "snapshot", "message.edited": "edited",
-             "message.recovered": "recovered"}
+             "message.recovered": "recovered", "secret_chat.message": "secret"}
 
 SEGMENTED = ("\u0e00-\u0eff\u1000-\u109f\u1100-\u11ff\u1780-\u17ff\u3040-\u30ff\u3130-\u318f\u31f0-\u31ff"
              "\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7af\uf900-\ufaff\uff66-\uff9f\U00020000-\U0003134f")
@@ -305,6 +306,8 @@ def message_document(chat_id, kind, payload):
     if chat_id is not None:
         meta.append("c:" + str(chat_id))
     sender = payload.get("sender_id")
+    if kind == "secret_chat.message" and payload.get("direction") == "in":
+        sender = payload.get("peer_user_id")
     if type(sender) is int:
         meta.append("s:" + str(sender))
     observed = payload.get("sender_observation") if isinstance(payload.get("sender_observation"), dict) else {}
@@ -580,7 +583,7 @@ class FullText:
         return self.store.root / "search" / "fulltext.sqlite3"
 
     def notify(self, event):
-        if event["kind"] in TEXT_KINDS:
+        if event["kind"] in SEARCH_KINDS:
             self.wake.set()
 
     def remove_files(self):
@@ -678,8 +681,8 @@ class FullText:
                     return False
                 rows = db.execute(
                     "SELECT seq,hash,kind,chat_id,payload FROM j.events WHERE seq>? AND seq<=? AND kind IN ("
-                    + ",".join("?" * len(TEXT_KINDS)) + ") ORDER BY seq LIMIT ?",
-                    (state["seq"], head["seq"], *TEXT_KINDS, batch)).fetchall()
+                    + ",".join("?" * len(SEARCH_KINDS)) + ") ORDER BY seq LIMIT ?",
+                    (state["seq"], head["seq"], *SEARCH_KINDS, batch)).fetchall()
                 for row in rows:
                     db.execute("INSERT INTO fulltext(rowid,body,ref,meta) VALUES (?,?,?,?)",
                                (row["seq"], *message_document(row["chat_id"], row["kind"], json.loads(row["payload"]))))
@@ -760,7 +763,7 @@ class FullText:
         return self.catch_up(progress)
 
     def search(self, query, *, chat_ids=None, since=None, until=None, sources=None, order="relevance",
-               limit=50, offset=0, timeout_s=3, public=False):
+               limit=50, offset=0, timeout_s=3, public=False, kinds=None):
         query = query if isinstance(query, Query) else Query(query)
         if order not in ("relevance", "newest"):
             raise ValueError("Order results by relevance or newest.")
@@ -776,11 +779,11 @@ class FullText:
         end = min(offset + limit, 1000)
         wanted_hits = end + 1
         if "messages" in wanted:
-            hits, matched["messages"] = self.messages(query, chats, since, until, order, wanted_hits, timeout_s)
+            hits, matched["messages"] = self.messages(query, chats, since, until, order, wanted_hits, timeout_s, kinds)
             found.append(hits)
         derived = wanted & {"ocr", "transcription"}
         if derived:
-            hits = self.derived.search(query, chats, since, until, derived, wanted_hits, order=order)
+            hits = self.derived.search(query, chats, since, until, derived, wanted_hits, order=order, kinds=kinds)
             matched.update({name: sum(hit["source"] == name for hit in hits) for name in sorted(derived)})
             found.append(hits)
         merged = found[0] if len(found) == 1 else fused(found, order)
@@ -795,12 +798,15 @@ class FullText:
                              else self.error or "Full-text search is unavailable.")
         return db
 
-    def messages(self, query, chats, since, until, order, limit, timeout_s):
+    def messages(self, query, chats, since, until, order, limit, timeout_s, kinds=None):
         if chats is not None and not chats:
             return [], 0
         meta_chats = chats if chats is not None and len(chats) <= 500 else None
         expression = query.expression(meta_chats, query.senders, query.usernames, query.kinds)
         where, params = [], []
+        if kinds:
+            where.append("(" + " OR ".join("e.kind LIKE ?" if kind.endswith(".") else "e.kind=?" for kind in kinds) + ")")
+            params += [kind + "%" if kind.endswith(".") else kind for kind in kinds]
         if since is not None or until is not None:
             low, high = iso(since) if since else "", iso(until) if until else "9999"
             with self.lock:
@@ -840,7 +846,7 @@ class FullText:
                         "SELECT * FROM j.events WHERE seq IN (" + ",".join("?" * len(batch)) + ")", [b[0] for b in batch])}
                     for seq, score in batch:
                         row = rows.get(seq)
-                        if row is None or row["kind"] not in TEXT_KINDS or chats is not None and row["chat_id"] not in chats:
+                        if row is None or row["kind"] not in SEARCH_KINDS or chats is not None and row["chat_id"] not in chats:
                             continue
                         if query.phrases and not all(p in payload_text(row["payload"]) for p in query.phrases):
                             continue
@@ -927,7 +933,7 @@ class DerivedIndex:
             self.db.close()
         self.db, self.signature, self.items = db, signature, items
 
-    def search(self, query, chats, since, until, engines, limit, *, order="relevance"):
+    def search(self, query, chats, since, until, engines, limit, *, order="relevance", kinds=None):
         if chats is not None and not chats or query.senders or query.usernames or query.message_ids or query.kinds:
             return []
         expression = query.expression(chats if chats is not None and len(chats) <= 500 else None, None, None, engines)
@@ -957,6 +963,8 @@ class DerivedIndex:
                 continue
             events = self.store.events(before=item["event_seq"] + 1, limit=1, chat_ids={item["chat_id"]})
             if not events or events[0]["seq"] != item["event_seq"]:
+                continue
+            if kinds and not any(events[0]["kind"].startswith(kind) if kind.endswith(".") else events[0]["kind"] == kind for kind in kinds):
                 continue
             when = datetime.fromisoformat(events[0]["observed_at"])
             if since is not None and when < since or until is not None and when > until:

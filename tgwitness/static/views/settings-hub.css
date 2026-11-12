@@ -4,6 +4,16 @@
 .hub-summary:hover{border-color:var(--accent);transform:translateY(-2px)}
 .hub-summary strong{font-size:17px}
 .hub-arrow{position:absolute;inset-inline-end:20px;bottom:18px}
+.hub-summary{transition:transform .16s,border-color .16s}
+@media(max-width:640px){
+  .hub-grid{gap:8px}
+  .hub-summary{min-height:0;display:grid;grid-template-columns:36px minmax(0,1fr) 16px;gap:4px 12px;padding:16px;align-items:center}
+  .hub-summary .hub-summary-mark{grid-column:1;grid-row:1/3}
+  .hub-summary strong{font-size:14px;line-height:1.4;grid-column:2}
+  .hub-summary .hint{grid-column:2;font-size:12px}
+  .hub-summary .hub-arrow{position:static;grid-column:3;grid-row:1/3;justify-self:end}
+}
+@media(prefers-reduced-motion:reduce){.hub-summary{transition:none}}
 [dir=rtl] .hub-arrow{transform:scaleX(-1)}
 .hub-search{width:100%;max-width:720px}
 .hub-detail{padding:28px;border:1px solid var(--border);border-radius:18px;background:var(--surface);margin:24px 0}

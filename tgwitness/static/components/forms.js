@@ -17,7 +17,7 @@ export function createFormControls({forms, roots, tr, getSession, toast}) {
     bar.className='form-draft-bar';bar.hidden=true;label.setAttribute('role','status');
     button.type='button';button.className='quiet';button.textContent=tr('Discard changes');
     const save=form.querySelector('button[type=submit]')||document.createElement('button');
-    const owner=save.closest('fieldset')||form;
+    const owner=form.querySelector('[data-form-draft-container]')||save.closest('fieldset')||form;
     if(!save.textContent){save.type='submit';save.className='primary';save.textContent=tr('Save changes');}
     bar.append(label,save,button);owner.append(bar);
     const entry={form,bar,label,button,setDirty,baseline:null};records.set(form.id,entry);

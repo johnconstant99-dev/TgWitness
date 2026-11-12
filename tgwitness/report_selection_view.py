@@ -10,7 +10,8 @@ CONTEXT_NOTE = ("Gaps use the chosen chats and the message-number span observed 
                 "Author and event filters do not create gaps. Neighboring saved messages are context and may be outside the selection.")
 KINDS = {"message.new": "New message", "message.snapshot": "History snapshot",
          "message.recovered": "Recovered message", "message.edited": "Edits",
-         "message.deleted": "Deletions", "message.missing_on_recheck": "Missing on recheck"}
+         "message.deleted": "Deletions", "message.missing_on_recheck": "Missing on recheck",
+         "secret_chat.message": "Pseudo-secret message", "secret_chat.action": "Pseudo-secret notice", "secret_chat.file": "Pseudo-secret file preserved"}
 
 
 def text_keys():
@@ -29,7 +30,7 @@ def scope_rows(material, say):
     selection, counts, source = material["selection"], material["counts"], material["source"]
     return [(say("Selected records"), str(counts["selected_records"])),
             (say("Source journal records"), str(source["records"])),
-            (say("Chats"), ", ".join(map(str, selection["chats"])) or say("All chats")),
+            (say("Chats"), ", ".join([*map(str, selection["chats"]), *("Secret Chat " + str(chat) for chat in selection.get("secret_chats", []))]) or say("All chats")),
             (say("Selected authors"), ", ".join(map(str, selection["senders"])) or say("All authors")),
             (say("Observation dates (UTC)"), " — ".join((selection["date_from"] or "…", selection["date_to"] or "…"))
              if selection["date_from"] or selection["date_to"] else say("All dates")),
