@@ -9,6 +9,8 @@ DOCUMENTS = (
     "/access", "/system-log", "/integrations", "/exports", "/extras", "/analysis", "/sealed",
     *("/extras/" + card for card in ("alerts", "evidence", "cloud", "bot", "github", "setup", "storage")),
     *("/first-run/" + str(step) for step in range(1, 8)),
+    *("/settings/" + section for section in ("appearance", "level", "goal", "connection", "telegram", "chats", "collection",
+                                             "protection", "notifications", "group")),
 )
 
 

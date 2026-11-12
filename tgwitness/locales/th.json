@@ -8775,5 +8775,10 @@
   "Export everything": "ส่งออกทั้งหมด",
   "Export everything this account can read: all chats and files, profile photos, stories, contacts and other account data, in every format. The automatic method uses Takeout, or the regular session if Takeout must wait.": "ส่งออกทุกข้อมูลที่บัญชีนี้สามารถอ่านได้: ทุกการสนทนาและไฟล์, รูปภาพโปรไฟล์, สตอรี, รายชื่อผู้ติดต่อ และข้อมูลบัญชีอื่น ๆ ในทุกรูปแบบ วิธีอัตโนมัติใช้ Takeout หรือเซสชันปกติหาก Takeout ต้องรอ",
   "Observation pauses while the export runs.": "การสังเกตการณ์จะหยุดชั่วคราวระหว่างการส่งออกข้อมูล",
-  "message-gaps.json lists all runs, {n} more than shown here.": "message-gaps.json ระบุรายการการรันทั้งหมด ซึ่งมีจำนวน {n} รายการมากกว่าที่แสดงไว้ที่นี่"
+  "message-gaps.json lists all runs, {n} more than shown here.": "message-gaps.json ระบุรายการการรันทั้งหมด ซึ่งมีจำนวน {n} รายการมากกว่าที่แสดงไว้ที่นี่",
+  "Nothing recorded in this chat yet": "ยังไม่มีข้อมูลใดที่ถูกบันทึกในบทสนทนานี้",
+  "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Insights อ่านบันทึก: ข้อความที่สังเกตแบบเรียลไทม์และประวัติที่โหลดเข้าTgWitness การส่งออกที่มีลายเซ็นเป็นไฟล์แยกต่างหากและไม่ถูกอ่านที่นี่ ให้โหลดประวัติการสนทนาหรือรักษาการสังเกตให้ทำงานต่อไป แล้วเปิดการสนทนานี้อีกครั้ง",
+  "No chats selected": "ไม่มีการเลือกการสนทนาใด",
+  "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "เลือกการสนทนาในส่วน Sources (แหล่งข้อมูล) ส่วน Insights (ข้อมูลเชิงลึก) แสดงเวลาตอบกลับ ชั่วโมงกิจกรรม ข้อความที่ถูกลบ และสถานะการออนไลน์ สำหรับการสนทนาหนึ่งครั้ง",
+  "Leave without saving the chat selection?": "จะออกจากหน้าโดยไม่บันทึกการเลือกการสนทนาหรือไม่?"
 }

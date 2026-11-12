@@ -16,7 +16,8 @@ export function createSettingsHub(ctx) {
   let autoTried=false, routeDirty=false, checkFailure=null;
   let live=null, liveTimer=null, visited=0, recordedStep=null, shownSession=null, methodShown=false;
   let shownStep=null, shownStage=null, levelChosen=false, moreOpen=false;
-  let groupScope=null;
+  let groupScope=null, scopeDirty=false;
+  const sections=['appearance','level','goal','connection','telegram','chats','collection','protection','notifications','group'];
   let preferencesQueue=Promise.resolve(), draftQueue=Promise.resolve(), preferencesSequence=0, draftSequence=0, checkSequence=0;
   const owner=()=>({generation,profile:state.profile,token:state.token,revision:state.workspaceRevision});
   const signedIn=()=>{const account=accountState(state.status||{});return account.hasSession&&!account.needsSignIn;};
@@ -102,8 +103,9 @@ export function createSettingsHub(ctx) {
     requireOwner(who);
     scheduleStatus();
   }
-  async function load(wanted=null){
+  async function load(wanted=null,hub){
     const who=owner();
+    if(hub!==undefined&&state.view==='settings'){section=sections.includes(hub)?hub:null;query='';}
     if(state.status?.demo){root.replaceChildren(message('Demo workspace. Connect accounts in your live installation.'));return;}
     if(!state.me?.admin){root.replaceChildren(message('Only the workspace administrator can change collection settings.'));return;}
     if(!prefs){const result=await request(who,'preferences');prefs=result.saved||{language:ctx.language,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC',theme:'system',level:lastLevel(),...(prefs||{})};applyPresentation();}
@@ -200,7 +202,12 @@ export function createSettingsHub(ctx) {
   }
   function sharedName(key){return key.startsWith('parameter:')?data.parameters.find(p=>p.key===key)?.label||key:sharedNames[key]||key;}
   async function openGroup(id){await groupView.load(id);groupScope=id;section=null;query='';render();}
-  function openSection(name){section=name;query='';render();root.querySelector('h2')?.focus();}
+  function openSection(name){section=name;query='';scopeDirty=false;render();ctx.record?.();root.querySelector('.hub-detail h2')?.focus();}
+  async function closeSection(){
+    if(section==='chats'&&scopeDirty&&!await confirm(owner(),tr('Leave without saving the chat selection?')))return;
+    const who=owner();data=await request(who,'settings');draft={...data.wizard};editing=false;scopeDirty=false;section=null;render();ctx.record?.();
+    root.querySelector('.hub-summary[data-section]')?.focus({preventScroll:true});
+  }
   function render(){
     restoreMoved();if(!data||!prefs)return;
     if(groupScope&&groupView.data){groupView.render(root);return;}
@@ -231,7 +238,10 @@ export function createSettingsHub(ctx) {
       b.append(node('strong','',tr(name)),node('span','hint',summary),node('span','hub-arrow','→'));overview.append(b);}
     const detail=node('section','hub-detail');detail.hidden=!section;root.append(detail);
     if(section){
-      detail.append(button('Back to settings',async()=>{data=await request(owner(),'settings');section=null;render();},'text-link'));
+      const bar=node('div','hub-detail-bar'), close=button('✕',closeSection,'icon-btn hub-close');
+      close.setAttribute('aria-label',tr('Close'));close.title=tr('Close');
+      const back=button('Back to settings',closeSection,'secondary hub-back');back.textContent='← '+tr('Back to settings');
+      bar.append(back,close);detail.append(bar);
       title(detail,summaries.find(s=>s[0]===section)?.[1]||'Settings');
       if(section==='appearance')preferencesForm(detail);
       if(section==='level')cards(detail,levels,prefs.level,async level=>{await savePreferences({level});render();});
@@ -252,7 +262,7 @@ export function createSettingsHub(ctx) {
       if(section==='connection')connectionForm(detail,false);
       if(section==='telegram')move(ctx.authCard(),detail);
       if(section==='chats'){detail.append(message('Choose all chats, individual chats or a Telegram folder.'));
-        detail.append(button('Choose chats',async()=>{await saveDraft({step:6,unchecked:true});await navigate('first-run');}));}
+        const box=node('div','hub-chats');detail.append(box);void chatsForm(box,owner(),true).catch(e=>{if(e.name!=='StaleView')box.append(message(e.message,'notice warning'));});}
       const fields=data.fields.filter(f=>f.section===section&&f.key!=='ip');
       const hidden=fields.filter(f=>rank[f.level]>rank[prefs.level]&&!reveal.has(section));
       for(const f of fields.filter(f=>!hidden.includes(f)))detail.append(fieldRow(f));
@@ -416,7 +426,9 @@ export function createSettingsHub(ctx) {
     for(const [key,name] of Object.entries(ctx.languages))language.append(new Option(name,key));
     language.value=prefs.language;language.setAttribute('aria-label',tr('Language'));
     language.onchange=()=>run(async()=>{const who=owner();await savePreferences({language:language.value},who);requireOwner(who);await ctx.changeLanguage(language.value);},language);
-    top.append(brand,language);page.append(top);
+    top.append(brand,language);
+    if(draft?.completed){const close=button('✕',async()=>{await navigate('settings');},'icon-btn wizard-close');close.setAttribute('aria-label',tr('Close'));close.title=tr('Close');top.append(close);}
+    page.append(top);
   }
   function wizardStages(page){
     const names=[tr('Goal'),tr('Connection'),tr('Telegram'),tr('Chats'),tr('Start')], targets=[1,4,5,6,7];
@@ -473,35 +485,7 @@ export function createSettingsHub(ctx) {
       move(ctx.authCard(),body);
       if(!shownSession&&!methodShown){methodShown=true;ctx.authMethod(draft.account_kind==='main'?'qr':'files');}
     }
-    if(draft.step===6){
-      const main=draft.goal!=='copy'&&draft.account_kind==='main';
-      if(main&&draft.scope!=='selected')draft.scope='selected';
-      cards(body,[['account','✦','All chats','Includes new chats in continuous collection.'],['selected','☑','Choose chats','Only the chats you select.'],['folder','▤','Telegram folder','Use a folder from Telegram.']],draft.scope,async scope=>{
-        draft.scope=scope;await saveDraft();await renderWizard();});
-      if(main){
-        for(const key of ['account','folder']){const card=body.querySelector('[data-answer="'+key+'"]');card.disabled=true;card.title=tr('Only on a separate account.');}
-        body.append(message('Only chosen chats can be recorded on a main account.','notice warning'));
-      }
-      if(!dialogs){const loading=message('Loading chats…');body.append(loading);try{dialogs=await request(who,'dialogs');loading.remove();}catch(e){loading.remove();if(e.name==='StaleView')throw e;body.append(message(e.message,'notice warning'));}}
-      requireOwner(who);
-      if(dialogs){
-        if(draft.scope==='folder')body.append(select('Telegram folder',[['','Choose a folder'],...dialogs.folders.map(f=>[String(f.id),f.title])],String(draft.folder_id??''),async id=>{draft.folder_id=id===''?null:Number(id);await saveDraft();updateNext();}));
-        if(draft.scope==='selected'){
-          const filter=node('input');filter.type='search';filter.placeholder=tr('Search chats');body.append(filter);
-          const list=node('div','wizard-chats');body.append(list);
-          for(const chat of dialogs.dialogs){const row=node('label','check-label'), check=node('input');check.type='checkbox';check.checked=draft.chat_ids.includes(chat.chat_id);
-            check.onchange=()=>run(async()=>{draft.chat_ids=check.checked?[...new Set([...draft.chat_ids,chat.chat_id])]:draft.chat_ids.filter(id=>id!==chat.chat_id);await saveDraft();updateNext();});
-            row.dataset.title=chat.title.toLocaleLowerCase();row.append(check,document.createTextNode(chat.title));list.append(row);}
-          filter.oninput=()=>{for(const row of list.children)row.hidden=!row.dataset.title.includes(filter.value.toLocaleLowerCase());};
-        }
-        body.append(message(tr('{n} chats loaded. File size and duration are estimates.',{n:dialogs.dialogs.length})));
-        if(dialogs.may_be_truncated)body.append(message('The chat list is limited. Increase the chat list limit in Settings.','notice warning'));
-        if(draft.completed)body.append(button('Save chat selection',async()=>{const action=owner();data=await request(action,'settings/scope',draftBody());await navigate('settings');requireOwner(action);toast(tr('Settings saved.'));},'primary'));
-        body.append(button('Estimate size and time',async()=>{const estimate=await request(owner(),'first-run/estimate',draftBody());
-          estimateBox.textContent=estimate.available?tr('About {size} MB · {min}–{max} minutes. Based on a sample; actual results may differ.',estimate):tr('An estimate is not available yet.');}));
-        const estimateBox=message('The estimate uses a small sample of the selected chats.');body.append(estimateBox);
-      }
-    }
+    if(draft.step===6)await chatsForm(body,who,false);
     if(draft.step===7){
       const summary=node('dl','setup-summary');for(const [key,value,go,more] of [['Goal',label(draft.goal),1,false],['Which chats?',label(draft.scope),6,false],['Telegram account',tr('Connected'),5,false],['Connection',label(draft.route),4,false],['Interface level',label(prefs.level),1,true],['Language',ctx.languages[prefs.language]||prefs.language,1,false],['Time zone',prefs.timezone,1,true]]){
         summary.append(node('dt','',tr(key)));const dd=node('dd','',value);dd.append(button('Edit',async()=>{draft.step=go;if(more)moreOpen=true;await saveDraft();await renderWizard();},'text-link'));summary.append(dd);
@@ -526,7 +510,7 @@ export function createSettingsHub(ctx) {
       }
       await saveDraft({step:draft.step+1},action);await renderWizard(action);
     },'primary');next.id='first-run-next';footer.append(next);
-    page.append(button('Skip, I’ll set it up myself',async()=>{data=await request(owner(),'first-run/skip',{});await navigate('settings');},'text-link setup-skip'));
+    if(!draft.completed)page.append(button('Skip, I’ll set it up myself',async()=>{data=await request(owner(),'first-run/skip',{});await navigate('settings');},'text-link setup-skip'));
     updateNext();
     const restore=direction==='none'&&focused?page.querySelector('[data-answer="'+focused+'"]'):null;
     if(restore)restore.focus({preventScroll:true});else heading.focus({preventScroll:true});
@@ -534,6 +518,48 @@ export function createSettingsHub(ctx) {
     if(draft.step===4&&draft.route==='auto'&&!autoTried&&!fresh(data.connection)){
       autoTried=true;void checkConnection(false,who);
     }
+  }
+  async function chatsForm(body,who,inSettings){
+    const main=draft.goal!=='copy'&&draft.account_kind==='main';
+    if(main&&draft.scope!=='selected')draft.scope='selected';
+    const changed=async()=>{if(inSettings){scopeDirty=true;updateScopeSave();}else{await saveDraft();updateNext();}};
+    const rerender=async()=>{if(inSettings)render();else await renderWizard();};
+    cards(body,[['account','✦','All chats','Includes new chats in continuous collection.'],['selected','☑','Choose chats','Only the chats you select.'],['folder','▤','Telegram folder','Use a folder from Telegram.']],draft.scope,async scope=>{
+      draft.scope=scope;await changed();await rerender();});
+    if(main){
+      for(const key of ['account','folder']){const card=body.querySelector('[data-answer="'+key+'"]');card.disabled=true;card.title=tr('Only on a separate account.');}
+      body.append(message('Only chosen chats can be recorded on a main account.','notice warning'));
+    }
+    if(!dialogs){const loading=message('Loading chats…');body.append(loading);try{dialogs=await request(who,'dialogs');loading.remove();}catch(e){loading.remove();if(e.name==='StaleView')throw e;body.append(message(e.message,'notice warning'));}}
+    requireOwner(who);
+    if(!body.isConnected)return;
+    if(dialogs){
+      if(draft.scope==='folder')body.append(select('Telegram folder',[['','Choose a folder'],...dialogs.folders.map(f=>[String(f.id),f.title])],String(draft.folder_id??''),async id=>{draft.folder_id=id===''?null:Number(id);await changed();}));
+      if(draft.scope==='selected'){
+        const filter=node('input');filter.type='search';filter.placeholder=tr('Search chats');body.append(filter);
+        const list=node('div','wizard-chats');body.append(list);
+        for(const chat of dialogs.dialogs){const row=node('label','check-label'), check=node('input');check.type='checkbox';check.checked=draft.chat_ids.includes(chat.chat_id);
+          check.onchange=()=>run(async()=>{draft.chat_ids=check.checked?[...new Set([...draft.chat_ids,chat.chat_id])]:draft.chat_ids.filter(id=>id!==chat.chat_id);await changed();});
+          row.dataset.title=chat.title.toLocaleLowerCase();row.append(check,document.createTextNode(chat.title));list.append(row);}
+        filter.oninput=()=>{for(const row of list.children)row.hidden=!row.dataset.title.includes(filter.value.toLocaleLowerCase());};
+      }
+      body.append(message(tr('{n} chats loaded. File size and duration are estimates.',{n:dialogs.dialogs.length})));
+      if(dialogs.may_be_truncated)body.append(message('The chat list is limited. Increase the chat list limit in Settings.','notice warning'));
+      const actions=node('div','hub-actions');body.append(actions);
+      if(inSettings||draft.completed){
+        const save=button('Save chat selection',async()=>{const action=owner();data=await request(action,'settings/scope',draftBody());draft={...data.wizard};scopeDirty=false;
+          toast(tr('Settings saved.'));if(inSettings){render();return;}await navigate('settings');requireOwner(action);},'primary');
+        save.dataset.scopeSave='';actions.append(save);
+      }
+      actions.append(button('Estimate size and time',async()=>{const estimate=await request(owner(),'first-run/estimate',draftBody());
+        estimateBox.textContent=estimate.available?tr('About {size} MB · {min}–{max} minutes. Based on a sample; actual results may differ.',estimate):tr('An estimate is not available yet.');}));
+      const estimateBox=message('The estimate uses a small sample of the selected chats.');body.append(estimateBox);
+      if(inSettings)updateScopeSave();
+    }
+  }
+  function updateScopeSave(){
+    const save=root.querySelector('[data-scope-save]');if(!save||!draft)return;
+    save.disabled=!scopeDirty||draft.scope==='selected'&&!draft.chat_ids.length||draft.scope==='folder'&&draft.folder_id===null;
   }
   function accountQuestion(box){
     box.append(node('h2','',tr('Is this a separate account or your main one?')));
@@ -589,10 +615,12 @@ export function createSettingsHub(ctx) {
       draft.step===5&&(!signedIn()||draft.goal!=='copy'&&!draft.account_kind)||
       draft.step===6&&(draft.scope==='selected'&&!draft.chat_ids.length||draft.scope==='folder'&&draft.folder_id===null);
   }
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&section&&state.view==='settings'&&!groupScope&&!event.defaultPrevented&&!event.target.closest?.('dialog,input,textarea,select')&&!document.querySelector('dialog[open]')){event.preventDefault();void run(closeSection);}});
   for(const select of document.querySelectorAll('[data-ui-level]'))select.onchange=()=>run(async()=>{await savePreferences({level:select.value});if(state.view==='settings')render();});
   return {bootstrap,load,render,savePreferences,
     async openGroup(id){if(!data)data=await request(owner(),'settings');await openGroup(id);},
     get step(){return draft&&!live?draft.step:null;},
+    get section(){return state.view==='settings'&&!groupScope?section:null;},
     leave(){restoreMoved();clearTimeout(liveTimer);live=null;recordedStep=null;groupScope=null;shownStep=shownStage=null;},
     status(){
       updateNext();if(data)updateIndicator(data.connection);

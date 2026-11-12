@@ -8880,5 +8880,10 @@
   "Export everything": "Экспортировать всё",
   "Export everything this account can read: all chats and files, profile photos, stories, contacts and other account data, in every format. The automatic method uses Takeout, or the regular session if Takeout must wait.": "Экспортировать всё, что может прочитать этот аккаунт: все чаты и файлы, фотографии профиля, истории, контакты и другие данные аккаунта в любом формате. Автоматический метод использует Takeout, либо обычный сеанс, если Takeout приходится ждать.",
   "Observation pauses while the export runs.": "На время экспорта наблюдение приостанавливается.",
-  "message-gaps.json lists all runs, {n} more than shown here.": "Файл message-gaps.json содержит список всех запусков, которых {n} больше, чем показано здесь."
+  "message-gaps.json lists all runs, {n} more than shown here.": "Файл message-gaps.json содержит список всех запусков, которых {n} больше, чем показано здесь.",
+  "Nothing recorded in this chat yet": "В этом чате пока ничего не записано",
+  "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Инсайтс считывает журнал: сообщения, наблюдаемые в режиме реального времени, и историю, загруженную в TgWitness. Подписанные экспорты представляют собой отдельные файлы и здесь не считываются. Загрузите историю чата или оставьте наблюдение в работе, а затем снова откройте этот чат.",
+  "No chats selected": "Чаты не выбраны",
+  "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "Выберите чаты в разделе «Источники». В разделе «Аналитика» отображаются время ответа, часы активности, удалённые сообщения и статус присутствия для одного чата.",
+  "Leave without saving the chat selection?": "Уйти, не сохранив выбранный чат?"
 }

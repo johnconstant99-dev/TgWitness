@@ -8820,5 +8820,10 @@
   "Export everything": "صادرات همه چیز",
   "Export everything this account can read: all chats and files, profile photos, stories, contacts and other account data, in every format. The automatic method uses Takeout, or the regular session if Takeout must wait.": "همه‌چیز را که این حساب می‌تواند بخواند صادر کنید: تمام چت‌ها و فایل‌ها، عکس‌های پروفایل، استوری‌ها، مخاطبین و سایر داده‌های حساب، در هر فرمت. روش خودکار از Takeout استفاده می‌کند، یا در صورتی که Takeout باید منتظر بماند از جلسهٔ عادی استفاده می‌کند.",
   "Observation pauses while the export runs.": "مشاهده در حین اجرای خروجی‌گیری متوقف می‌شود.",
-  "message-gaps.json lists all runs, {n} more than shown here.": "فایل message-gaps.json تمام اجراها را فهرست می‌کند، {n} که تعداد بیشتری نسبت به آنچه در اینجا نشان داده شده است را شامل می‌شود."
+  "message-gaps.json lists all runs, {n} more than shown here.": "فایل message-gaps.json تمام اجراها را فهرست می‌کند، {n} که تعداد بیشتری نسبت به آنچه در اینجا نشان داده شده است را شامل می‌شود.",
+  "Nothing recorded in this chat yet": "هنوز چیزی در این گفتگو ضبط نشده است",
+  "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Insights مجله را می‌خواند: پیام‌های مشاهده‌شده به‌صورت زنده و تاریخچه بارگذاری‌شده در TgWitness. خروجی‌های امضا‌شده فایل‌های جداگانه‌ای هستند و در اینجا خوانده نمی‌شوند. تاریخچه چت را بارگذاری کنید یا مشاهده را ادامه دهید، سپس این چت را دوباره باز کنید.",
+  "No chats selected": "هیچ چتی انتخاب نشده است",
+  "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "در بخش منابع، گفتگوها را انتخاب کنید. Insights زمان‌های پاسخ، ساعات فعالیت، پیام‌های حذف‌شده و وضعیت حضور را برای یک گفتگو نشان می‌دهد.",
+  "Leave without saving the chat selection?": "خروج بدون ذخیرهٔ انتخاب چت؟"
 }

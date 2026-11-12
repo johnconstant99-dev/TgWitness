@@ -8910,5 +8910,10 @@
   "Export everything": "Експортувати все",
   "Export everything this account can read: all chats and files, profile photos, stories, contacts and other account data, in every format. The automatic method uses Takeout, or the regular session if Takeout must wait.": "Експортувати все, що може читати цей обліковий запис: усі чати та файли, фотографії профілю, історії, контакти та інші дані облікового запису у будь-якому форматі. Автоматичний метод використовує Takeout або звичайну сесію, якщо Takeout доводиться чекати.",
   "Observation pauses while the export runs.": "Спостереження призупиняється на час виконання експорту.",
-  "message-gaps.json lists all runs, {n} more than shown here.": "У файлі message-gaps.json перелічено всі запуски — їх на {n} більше, ніж показано тут."
+  "message-gaps.json lists all runs, {n} more than shown here.": "У файлі message-gaps.json перелічено всі запуски — їх на {n} більше, ніж показано тут.",
+  "Nothing recorded in this chat yet": "У цьому чаті ще нічого не записано",
+  "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Функція «Аналітика» зчитує журнал: повідомлення, що спостерігаються в режимі реального часу, та історію, завантажену в TgWitness. Підписані експортовані файли є окремими файлами і тут не зчитуються. Завантажте історію чату або продовжуйте спостереження, а потім знову відкрийте цей чат.",
+  "No chats selected": "Чатів не вибрано",
+  "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "Виберіть чати в розділі «Джерела». У розділі «Аналітика» відображаються час відповідей, години активності, видалені повідомлення та присутність у одному чаті.",
+  "Leave without saving the chat selection?": "Вийти, не збереживши вибрані чати?"
 }

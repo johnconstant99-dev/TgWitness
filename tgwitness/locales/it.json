@@ -8826,5 +8826,10 @@
   "Export everything": "Esporta tutto",
   "Export everything this account can read: all chats and files, profile photos, stories, contacts and other account data, in every format. The automatic method uses Takeout, or the regular session if Takeout must wait.": "Esporta tutto ciò che questo account può leggere: tutte le chat e i file, le foto del profilo, le storie, i contatti e altri dati dell’account, in ogni formato. Il metodo automatico utilizza Takeout, oppure la sessione normale se Takeout deve attendere.",
   "Observation pauses while the export runs.": "L’osservazione viene messa in pausa durante l’esecuzione dell’esportazione.",
-  "message-gaps.json lists all runs, {n} more than shown here.": "Il file message-gaps.json elenca tutte le esecuzioni, {n} in più rispetto a quelle mostrate qui."
+  "message-gaps.json lists all runs, {n} more than shown here.": "Il file message-gaps.json elenca tutte le esecuzioni, {n} in più rispetto a quelle mostrate qui.",
+  "Nothing recorded in this chat yet": "Non è stato ancora registrato nulla in questa chat",
+  "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "La sezione \"Insights\" legge il registro: i messaggi osservati in tempo reale e la cronologia caricata in TgWitness. Le esportazioni firmate sono file separati e non vengono letti in questa sezione. Carica la cronologia della chat o mantieni attiva l’osservazione, quindi riapri questa chat.",
+  "No chats selected": "Nessuna chat selezionata",
+  "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "Seleziona le chat in \"Fonti\". La sezione \"Approfondimenti\" mostra i tempi di risposta, gli orari di attività, i messaggi eliminati e la presenza per una singola chat.",
+  "Leave without saving the chat selection?": "Uscire senza salvare la selezione delle chat?"
 }

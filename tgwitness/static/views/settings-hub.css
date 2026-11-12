@@ -8,6 +8,11 @@
 .hub-search{width:100%;max-width:720px}
 .hub-detail{padding:28px;border:1px solid var(--border);border-radius:18px;background:var(--surface);margin:24px 0}
 .hub-detail h2{margin:22px 0}
+.hub-detail-bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:-28px -28px 0;padding:14px 28px;border-bottom:1px solid var(--border);border-radius:18px 18px 0 0;background:var(--surface)}
+.hub-detail-bar .hub-back{min-height:36px}
+.hub-close,.wizard-close{width:36px;height:36px;border-radius:10px;font-size:16px;line-height:1}
+.hub-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.hub-chats .wizard-chats{max-height:420px;overflow:auto}
 .hub-label{display:flex;flex-direction:column;gap:8px;margin:16px 0;max-width:560px}
 .hub-label select{max-width:100%;width:100%}
 .hub-field{display:flex;align-items:center;gap:18px;justify-content:space-between;padding:18px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
@@ -68,6 +73,7 @@ html[data-ui-level=simple] #setup-start,html[data-ui-level=simple] #mode-onboard
 .answer-card[aria-pressed=true]{padding:17px}
 .answer-icon{font-size:21px}
 .hub-detail{padding:18px 14px}
+.hub-detail-bar{margin:-18px -14px 0;padding:10px 14px}
 .setup-summary{grid-template-columns:1fr;gap:8px}
 .setup-summary dd{margin-bottom:12px}
 .top-actions .level-pick{max-width:80px}

@@ -8820,5 +8820,10 @@
   "Export everything": "سب کچھ برآمد کریں",
   "Export everything this account can read: all chats and files, profile photos, stories, contacts and other account data, in every format. The automatic method uses Takeout, or the regular session if Takeout must wait.": "اس اکاؤنٹ کی پڑھنے کی صلاحیت رکھنے والی ہر چیز کو برآمد کریں: تمام چیٹس اور فائلیں، پروفائل تصاویر، سٹوریز، رابطے اور دیگر اکاؤنٹ ڈیٹا، ہر فارمیٹ میں۔ خودکار طریقہ Takeout استعمال کرتا ہے، یا اگر Takeout کو انتظار کرنا پڑے تو معمول کے سیشن کا استعمال کرتا ہے۔",
   "Observation pauses while the export runs.": "جب ایکسپورٹ چل رہا ہوتا ہے تو مشاہدہ معطل رہتا ہے۔",
-  "message-gaps.json lists all runs, {n} more than shown here.": "message-gaps.json تمام رنز کی فہرست دیتا ہے، {n} یہاں دکھائے گئے سے زیادہ۔"
+  "message-gaps.json lists all runs, {n} more than shown here.": "message-gaps.json تمام رنز کی فہرست دیتا ہے، {n} یہاں دکھائے گئے سے زیادہ۔",
+  "Nothing recorded in this chat yet": "اس چیٹ میں ابھی تک کچھ بھی ریکارڈ نہیں ہوا",
+  "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Insights جرنل پڑھتا ہے: براہِ راست دیکھے گئے پیغامات اور تاریخ جو TgWitness میں لوڈ کی گئی ہوتی ہے۔ دستخط شدہ برآمدات الگ فائلیں ہیں اور یہاں نہیں پڑھی جاتیں۔ چیٹ کی تاریخ لوڈ کریں یا مشاہدہ جاری رکھیں، پھر اس چیٹ کو دوبارہ کھولیں۔",
+  "No chats selected": "کوئی چیٹس منتخب نہیں",
+  "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "ماخذوں میں چیٹس منتخب کریں۔ انسایتس ایک چیٹ کے لیے جواب کے اوقات، سرگرمی کے اوقات، حذف شدہ پیغامات اور موجودگی دکھاتا ہے۔",
+  "Leave without saving the chat selection?": "چاٹ کے انتخاب کو محفوظ کیے بغیر چھوڑنا؟"
 }

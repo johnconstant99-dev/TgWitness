@@ -34,6 +34,7 @@
 - **Load messages** and **Load full history** offer to pause a running observation; loaded messages restart it right away, and history can start observation when it finishes (**Start observation when the history is loaded**). Profile photos load while the account observes or exports.
 - Account export: **Export everything** on the Overview starts it with every chat, file and account category in all formats. The default **Automatic** method uses Takeout and continues with the regular session when Telegram asks to wait for Takeout approval; the signed inventory records the method used.
 - Account archives add `message-gaps.json` and `map.html`: absent message numbers per channel and supergroup, and, for the account-wide sequence of private chats and groups, each absent run attributed to a chat by a reply or pin or estimated from the chats active at that time. The map shows a calendar, chats over time and weekday-by-hour grids for messages and absent numbers; chat pages mark where messages are absent. `verify.py` recomputes the file.
+- Settings: each section opens at its own address and closes with **Back to settings**, the close button, Escape or the browser's Back button. **Which chats?** is edited in place instead of reopening first setup. First setup opened after setup is complete has a close button. Analysis → Insights loads the selected chat at once and explains an empty journal instead of showing zeros.
 
 ## 0.9.3 preview · 11 November 2026
 

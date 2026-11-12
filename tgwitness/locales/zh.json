@@ -8775,5 +8775,10 @@
   "Export everything": "导出全部内容",
   "Export everything this account can read: all chats and files, profile photos, stories, contacts and other account data, in every format. The automatic method uses Takeout, or the regular session if Takeout must wait.": "导出该账户可读取的所有内容：所有聊天记录和文件、个人头像、动态、联系人及其他账户数据，支持各种格式。自动导出方式使用 Takeout；若 Takeout 需等待，则采用常规会话方式。",
   "Observation pauses while the export runs.": "导出运行期间，观察操作将暂停。",
-  "message-gaps.json lists all runs, {n} more than shown here.": "message-gaps.json 列出了所有运行记录，{n} 比此处显示的更多。"
+  "message-gaps.json lists all runs, {n} more than shown here.": "message-gaps.json 列出了所有运行记录，{n} 比此处显示的更多。",
+  "Nothing recorded in this chat yet": "此聊天记录中尚无任何内容",
+  "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "“Insights”功能用于读取日志：包括实时观察到的消息以及已导入TgWitness的历史记录。带签名的导出文件是独立文件，此处不予读取。请先加载聊天记录或保持观察状态，然后再次打开该聊天。",
+  "No chats selected": "未选择任何聊天记录",
+  "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "在“来源”中选择聊天记录。“洞察”功能会显示单个聊天记录的回复时间、活跃时段、已删除消息以及在线状态。",
+  "Leave without saving the chat selection?": "不保存聊天选择就退出吗？"
 }

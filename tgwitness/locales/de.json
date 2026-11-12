@@ -8820,5 +8820,10 @@
   "Export everything": "Alles exportieren",
   "Export everything this account can read: all chats and files, profile photos, stories, contacts and other account data, in every format. The automatic method uses Takeout, or the regular session if Takeout must wait.": "Exportiere alles, was dieses Konto lesen kann: alle Chats und Dateien, Profilfotos, Stories, Kontakte und andere Kontodaten in jedem Format. Die automatische Methode nutzt Takeout oder die reguläre Sitzung, falls Takeout warten muss.",
   "Observation pauses while the export runs.": "Die Beobachtung wird während des Exports unterbrochen.",
-  "message-gaps.json lists all runs, {n} more than shown here.": "message-gaps.json listet alle Durchläufe auf, {n} mehr als hier angezeigt."
+  "message-gaps.json lists all runs, {n} more than shown here.": "message-gaps.json listet alle Durchläufe auf, {n} mehr als hier angezeigt.",
+  "Nothing recorded in this chat yet": "In diesem Chat wurde noch nichts aufgezeichnet",
+  "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "„Insights“ lesen das Protokoll aus: live beobachtete Nachrichten und in TgWitness geladene Verlaufsdaten. Signierte Exporte sind separate Dateien und werden hier nicht gelesen. Laden Sie den Chat-Verlauf oder lassen Sie die Beobachtung weiterlaufen, und öffnen Sie diesen Chat anschließend erneut.",
+  "No chats selected": "Es wurden keine Chats ausgewählt",
+  "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "Wählen Sie Chats unter „Quellen“ aus. Die Einblicke zeigen Antwortzeiten, Aktivitätszeiten, gelöschte Nachrichten und die Anwesenheit für einen Chat an.",
+  "Leave without saving the chat selection?": "Möchten Sie die Chat-Auswahl verlassen, ohne sie zu speichern?"
 }

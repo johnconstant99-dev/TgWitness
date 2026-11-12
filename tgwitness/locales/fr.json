@@ -8826,5 +8826,10 @@
   "Export everything": "Tout exporter",
   "Export everything this account can read: all chats and files, profile photos, stories, contacts and other account data, in every format. The automatic method uses Takeout, or the regular session if Takeout must wait.": "Exporter tout ce que ce compte peut lire : toutes les discussions et tous les fichiers, les photos de profil, les stories, les contacts et autres données du compte, dans tous les formats. La méthode automatique utilise Takeout, ou la session standard si Takeout doit patienter.",
   "Observation pauses while the export runs.": "L'observation est mise en pause pendant l'exportation.",
-  "message-gaps.json lists all runs, {n} more than shown here.": "Le fichier message-gaps.json répertorie toutes les exécutions, {n} de plus que celles affichées ici."
+  "message-gaps.json lists all runs, {n} more than shown here.": "Le fichier message-gaps.json répertorie toutes les exécutions, {n} de plus que celles affichées ici.",
+  "Nothing recorded in this chat yet": "Rien n'a encore été enregistré dans cette conversation",
+  "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "La rubrique « Insights » permet de consulter le journal : les messages observés en direct et l'historique chargé dans TgWitness. Les exportations signées constituent des fichiers distincts et ne sont pas consultables ici. Chargez l'historique de la conversation ou poursuivez l'observation, puis rouvrez cette conversation.",
+  "No chats selected": "Aucune conversation sélectionnée",
+  "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "Sélectionnez des discussions dans « Sources ». Les statistiques indiquent les temps de réponse, les heures d’activité, les messages supprimés et la présence pour une discussion donnée.",
+  "Leave without saving the chat selection?": "Quitter sans enregistrer la sélection de discussions ?"
 }

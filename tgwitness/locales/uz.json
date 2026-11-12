@@ -8820,5 +8820,10 @@
   "Export everything": "Hammasini eksport qiling",
   "Export everything this account can read: all chats and files, profile photos, stories, contacts and other account data, in every format. The automatic method uses Takeout, or the regular session if Takeout must wait.": "Ushbu hisob o'qiy oladigan barcha narsalarni eksport qiling: barcha suhbatlar va fayllar, profil rasmlari, hikoyalar, kontaktlar va boshqa hisob ma'lumotlari, har qanday formatda. Avtomatik usul Takeout-dan foydalanadi, agar Takeout kutishi kerak bo'lsa, oddiy sessiyadan foydalanadi.",
   "Observation pauses while the export runs.": "Eksport jarayoni davomida kuzatuv to'xtaydi.",
-  "message-gaps.json lists all runs, {n} more than shown here.": "message-gaps.json barcha ish jarayonlarini ro'yxatlaydi, {n} bu yerda ko'rsatilganidan ko'proq."
+  "message-gaps.json lists all runs, {n} more than shown here.": "message-gaps.json barcha ish jarayonlarini ro'yxatlaydi, {n} bu yerda ko'rsatilganidan ko'proq.",
+  "Nothing recorded in this chat yet": "Bu suhbatda hali hech narsa yozilmagan",
+  "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Insights jurnalni o'qiydi: jonli kuzatilgan xabarlar va TgWitnessga yuklangan tarix. Imzolangan eksportlar alohida fayllar bo'lib, bu yerda o'qilmaydi. Suhbat tarixini yuklang yoki kuzatuvni davom ettiring, so'ng bu suhbatni yana oching.",
+  "No chats selected": "Suhbatlar tanlanmagan",
+  "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "Manbalar bo'limida suhbatlarni tanlang. Insights javob berish vaqtlari, faoliyat soatlari, o'chirilgan xabarlar va mavjudlikni bir suhbat bo'yicha ko'rsatadi.",
+  "Leave without saving the chat selection?": "Suhbat tanlovini saqlamasdan chiqib ketish?"
 }

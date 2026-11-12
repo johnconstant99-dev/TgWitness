@@ -8775,5 +8775,10 @@
   "Export everything": "すべてをエクスポート",
   "Export everything this account can read: all chats and files, profile photos, stories, contacts and other account data, in every format. The automatic method uses Takeout, or the regular session if Takeout must wait.": "このアカウントが読み取れるすべてのデータ（すべてのチャットとファイル、プロフィール写真、ストーリー、連絡先、その他のアカウントデータ）を、あらゆる形式でエクスポートします。自動エクスポートでは Takeout を使用しますが、Takeout が待機状態になる場合は通常のセッションが使用されます。",
   "Observation pauses while the export runs.": "エクスポートの実行中は、監視が一時停止します。",
-  "message-gaps.json lists all runs, {n} more than shown here.": "message-gaps.jsonにはすべての実行がリストされており、ここに表示されているものより{n}多くあります。"
+  "message-gaps.json lists all runs, {n} more than shown here.": "message-gaps.jsonにはすべての実行がリストされており、ここに表示されているものより{n}多くあります。",
+  "Nothing recorded in this chat yet": "このチャットにはまだ何も記録されていません",
+  "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Insightsはジャーナルを読み取ります。これには、リアルタイムで監視されたメッセージや、TgWitnessに読み込まれた履歴が含まれます。署名付きエクスポートは別のファイルであり、ここでは読み込まれません。チャット履歴を読み込むか、監視を継続してから、このチャットを再度開いてください。",
+  "No chats selected": "選択されたチャットはありません",
+  "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "「ソース」でチャットを選択します。「インサイト」では、1つのチャットについて、返信時間、アクティブ時間、削除されたメッセージ、オンライン状態が表示されます。",
+  "Leave without saving the chat selection?": "チャットの選択内容を保存せずに終了しますか？"
 }

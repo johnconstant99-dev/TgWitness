@@ -8820,5 +8820,10 @@
   "Export everything": "Her şeyi dışa aktar",
   "Export everything this account can read: all chats and files, profile photos, stories, contacts and other account data, in every format. The automatic method uses Takeout, or the regular session if Takeout must wait.": "Bu hesabın okuyabildiği her şeyi dışa aktarın: tüm sohbetler ve dosyalar, profil fotoğrafları, hikayeler, kişiler ve diğer hesap verileri, her formatta. Otomatik yöntem Takeout'u kullanır; Takeout'un beklemesi gerekiyorsa normal oturum kullanılır.",
   "Observation pauses while the export runs.": "Dışa aktarma işlemi devam ederken gözlem duraklatılır.",
-  "message-gaps.json lists all runs, {n} more than shown here.": "message-gaps.json dosyası tüm çalıştırmaları listeler; burada gösterilenden {n} tane daha fazlası vardır."
+  "message-gaps.json lists all runs, {n} more than shown here.": "message-gaps.json dosyası tüm çalıştırmaları listeler; burada gösterilenden {n} tane daha fazlası vardır.",
+  "Nothing recorded in this chat yet": "Bu sohbette henüz kaydedilen bir şey yok",
+  "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "\"Insights\", günlüğü okur: canlı olarak gözlemlenen mesajlar ve TgWitness'a yüklenen geçmiş. İmzalı dışa aktarımlar ayrı dosyalardır ve burada okunmaz. Sohbet geçmişini yükleyin veya gözlemi devam ettirin, ardından bu sohbeti tekrar açın.",
+  "No chats selected": "Seçili sohbet yok",
+  "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "Kaynaklar bölümünden sohbetleri seçin. İstatistikler, bir sohbet için yanıt sürelerini, etkinlik saatlerini, silinen mesajları ve çevrimiçi olma durumunu gösterir.",
+  "Leave without saving the chat selection?": "Sohbet seçimini kaydetmeden çıkmak mı istiyorsunuz?"
 }

@@ -217,9 +217,10 @@ function routeSnapshot(){return {view:state.drawerSeq!==null?"observations":stat
   slice:state.boardSlice||null,added:!!state.boardAdded,
   chatId:state.view==="chats"?state.chat:null,seq:state.drawerSeq,kind:state.filter,source:state.source,q:state.search,
   since:state.eventSince,until:state.eventUntil,system:state.eventSystem,before:state.eventBefore,extra:state.extra||null,section:state.parameterSection||null,
-  step:state.view==="first-run"?settingsHub?.step||null:null,group:state.view==="group"?state.groupId:null};}
+  step:state.view==="first-run"?settingsHub?.step||null:null,group:state.view==="group"?state.groupId:null,
+  hub:state.view==="settings"?settingsHub?.section||null:null};}
 function ensureRouter(){
-  if(!routerTask)routerTask=import("./router.js?v=9").then(({createRouter})=>{
+  if(!routerTask)routerTask=import("./router.js?v=10").then(({createRouter})=>{
     window.TgWitnessRouter=createRouter({snapshot:routeSnapshot,ready:()=>!!state.me&&!$("workspace").hidden,
       error:message=>toast(tr(message),true),apply:applyRouteToPanel});return window.TgWitnessRouter;
   });
@@ -246,7 +247,7 @@ async function applyRouteToPanel(route,current){
   if(view==='topology'){await topologyReady;if(current())await topologyView.enter();return;}
   if(view==='system-map'){await systemMapReady;if(current())await systemMapView.enter();return;}
   if(view==='board'){await boardReady;await boardView.load();return;}
-  if(view==='settings'||view==='first-run'){await settingsHubReady;await settingsHub.load(route.step);}
+  if(view==='settings'||view==='first-run'){await settingsHubReady;await settingsHub.load(route.step,view==='settings'?route.hub:undefined);}
   else if(view==="chats"){
     await refreshChats(false,route.chatId);
     if(current()&&route.chatId!==null){

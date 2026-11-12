@@ -8775,5 +8775,10 @@
   "Export everything": "匯出所有內容",
   "Export everything this account can read: all chats and files, profile photos, stories, contacts and other account data, in every format. The automatic method uses Takeout, or the regular session if Takeout must wait.": "匯出此帳號可讀取的所有內容：所有聊天紀錄與檔案、個人頭像、限時動態、聯絡人及其他帳號資料，並以各種格式輸出。自動匯出方式會使用 Takeout；若 Takeout 需等待，則改用一般會話進行匯出。",
   "Observation pauses while the export runs.": "在執行匯出作業期間，觀察功能將暫停。",
-  "message-gaps.json lists all runs, {n} more than shown here.": "message-gaps.json 列出了所有執行紀錄，實際數量 {n} 比此處顯示的更多。"
+  "message-gaps.json lists all runs, {n} more than shown here.": "message-gaps.json 列出了所有執行紀錄，實際數量 {n} 比此處顯示的更多。",
+  "Nothing recorded in this chat yet": "此聊天室目前尚未有任何記錄",
+  "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "「Insights」功能用於讀取日誌：包含即時監測的訊息以及載入至 TgWitness 的聊天紀錄。簽名匯出檔為獨立檔案，此處不會讀取。請先載入聊天紀錄或保持監測狀態，然後再次開啟此聊天室。",
+  "No chats selected": "未選取任何聊天記錄",
+  "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "在「來源」中選取聊天室。洞察功能會顯示單一聊天室的回覆時間、活躍時段、已刪除訊息及在線狀態。",
+  "Leave without saving the chat selection?": "要離開而不儲存當前的聊天選取範圍嗎？"
 }

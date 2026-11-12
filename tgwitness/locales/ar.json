@@ -9000,5 +9000,10 @@
   "Export everything": "تصدير كل شيء",
   "Export everything this account can read: all chats and files, profile photos, stories, contacts and other account data, in every format. The automatic method uses Takeout, or the regular session if Takeout must wait.": "تصدير كل ما يمكن لهذا الحساب قراءته: جميع المحادثات والملفات، وصور الملف الشخصي، والقصص، وجهات الاتصال، وبيانات الحساب الأخرى، بجميع التنسيقات. تستخدم الطريقة التلقائية أداة Takeout، أو الجلسة العادية إذا كان لا بد من انتظار Takeout.",
   "Observation pauses while the export runs.": "تتوقف عملية المراقبة مؤقتًا أثناء إجراء التصدير.",
-  "message-gaps.json lists all runs, {n} more than shown here.": "يُدرج ملف message-gaps.json جميع عمليات التشغيل، {n} أكثر مما هو موضح هنا."
+  "message-gaps.json lists all runs, {n} more than shown here.": "يُدرج ملف message-gaps.json جميع عمليات التشغيل، {n} أكثر مما هو موضح هنا.",
+  "Nothing recorded in this chat yet": "لم يتم تسجيل أي شيء في هذه المحادثة حتى الآن",
+  "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "تقوم «الرؤى» بقراءة السجل: الرسائل التي تمت مراقبة بثها المباشر وسجل المحادثات الذي تم تحميله إلى TgWitness. أما الصادرات الموقعة فهي ملفات منفصلة ولا تُقرأ هنا. قم بتحميل سجل المحادثة أو استمر في المراقبة، ثم افتح هذه المحادثة مرة أخرى.",
+  "No chats selected": "لم يتم تحديد أي محادثات",
+  "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "حدد المحادثات في قسم «المصادر». تُظهر «الإحصائيات» أوقات الرد وساعات النشاط والرسائل المحذوفة وحالة التواجد لمحادثة واحدة.",
+  "Leave without saving the chat selection?": "هل تريد الخروج دون حفظ اختيار المحادثة؟"
 }

@@ -8910,5 +8910,10 @@
   "Export everything": "Eksportuj wszystko",
   "Export everything this account can read: all chats and files, profile photos, stories, contacts and other account data, in every format. The automatic method uses Takeout, or the regular session if Takeout must wait.": "Wyeksportuj wszystko, do czego to konto ma dostęp: wszystkie czaty i pliki, zdjęcia profilowe, relacje, kontakty i inne dane konta, w każdym formacie. Metoda automatyczna wykorzystuje Takeout lub zwykłą sesję, jeśli Takeout musi czekać.",
   "Observation pauses while the export runs.": "Obserwacja zostaje wstrzymana na czas trwania eksportu.",
-  "message-gaps.json lists all runs, {n} more than shown here.": "Plik message-gaps.json zawiera listę wszystkich przebiegów, {n} więcej niż pokazano tutaj."
+  "message-gaps.json lists all runs, {n} more than shown here.": "Plik message-gaps.json zawiera listę wszystkich przebiegów, {n} więcej niż pokazano tutaj.",
+  "Nothing recorded in this chat yet": "W tej rozmowie nie ma jeszcze żadnych zapisów",
+  "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Funkcja „Insights” odczytuje dziennik: wiadomości obserwowane na żywo oraz historię załadowaną do TgWitness. Podpisane eksporty są oddzielnymi plikami i nie są tutaj odczytywane. Załaduj historię czatu lub kontynuuj obserwację, a następnie otwórz ten czat ponownie.",
+  "No chats selected": "Nie wybrano żadnych czatów",
+  "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "Wybierz czaty w sekcji „Źródła”. W sekcji „Statystyki” wyświetlane są czasy odpowiedzi, godziny aktywności, usunięte wiadomości oraz obecność użytkowników w danym czacie.",
+  "Leave without saving the chat selection?": "Czy chcesz wyjść bez zapisania wybranego czatu?"
 }

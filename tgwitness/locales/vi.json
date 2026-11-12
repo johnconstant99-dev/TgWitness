@@ -8775,5 +8775,10 @@
   "Export everything": "Xuất tất cả",
   "Export everything this account can read: all chats and files, profile photos, stories, contacts and other account data, in every format. The automatic method uses Takeout, or the regular session if Takeout must wait.": "Xuất tất cả những gì tài khoản này có thể truy cập: tất cả các cuộc trò chuyện và tệp tin, ảnh đại diện, câu chuyện, danh bạ và các dữ liệu tài khoản khác, dưới mọi định dạng. Phương pháp tự động sử dụng Takeout, hoặc phiên làm việc thông thường nếu Takeout phải chờ.",
   "Observation pauses while the export runs.": "Quá trình quan sát sẽ tạm dừng trong khi quá trình xuất dữ liệu đang diễn ra.",
-  "message-gaps.json lists all runs, {n} more than shown here.": "Tệp message-gaps.json liệt kê tất cả các lần chạy, {n} lần nhiều hơn so với số lượng hiển thị ở đây."
+  "message-gaps.json lists all runs, {n} more than shown here.": "Tệp message-gaps.json liệt kê tất cả các lần chạy, {n} lần nhiều hơn so với số lượng hiển thị ở đây.",
+  "Nothing recorded in this chat yet": "Chưa có nội dung nào được ghi lại trong cuộc trò chuyện này",
+  "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Chức năng \"Insights\" đọc nhật ký: các tin nhắn được theo dõi trực tiếp và lịch sử cuộc trò chuyện đã được tải vào TgWitness. Các tệp xuất có chữ ký là các tệp riêng biệt và không được đọc tại đây. Hãy tải lịch sử cuộc trò chuyện hoặc tiếp tục quá trình theo dõi, sau đó mở lại cuộc trò chuyện này.",
+  "No chats selected": "Chưa chọn cuộc trò chuyện nào",
+  "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "Chọn các cuộc trò chuyện trong phần \"Nguồn\". Phần \"Thông tin chi tiết\" hiển thị thời gian trả lời, giờ hoạt động, tin nhắn đã xóa và trạng thái trực tuyến của một cuộc trò chuyện.",
+  "Leave without saving the chat selection?": "Bạn có muốn thoát mà không lưu lựa chọn cuộc trò chuyện không?"
 }

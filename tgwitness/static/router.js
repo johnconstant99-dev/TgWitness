@@ -5,6 +5,7 @@ const legacy={start:"start",account:"connection",connection:"connection",journal
   exports:"evidence",evidence:"evidence",extras:"witness",witness:"witness",sealed:"sealed",chats:"chats",
   sources:"sources",parameters:"parameters",accounts:"accounts",access:"access","system-log":"system-log",integrations:"integrations",analysis:"analysis"};
 const cards=new Set(["setup","alerts","evidence","cloud","bot","github","storage","capture"]);
+const hubSections=new Set(["appearance","level","goal","connection","telegram","chats","collection","protection","notifications","group"]);
 const firstRunStep=value=>/^[1-7]$/.test(value||"")?Number(value):null;
 const workspacePattern=/^(?:default|[a-f0-9]{32})$/;
 const groupPattern=/^[a-f0-9]{32}$/;
@@ -22,7 +23,7 @@ export function parseRoute(value,{workspace="default",staticDemo=false}={}){
   const route={view:views[parts[0]]||null,workspace:query.get("ws")||query.get("workspace")||workspace,
     chatId:null,seq:null,kind:query.get("kind")||"",source:query.get("source")||"",q:query.get("q")||"",
     since:query.get("since")||"",until:query.get("until")||"",system:query.get("system")==="1",slice:query.get('slice')||null,added:query.get('added')==='1',
-    before:query.has("before")?integer(query.get("before")):null,extra:null,section:null,step:null,group:null,explicit};
+    before:query.has("before")?integer(query.get("before")):null,extra:null,section:null,step:null,group:null,hub:null,explicit};
   if(!workspacePattern.test(route.workspace))route.error="Unknown workspace.";
   if(parts[0]==="chats"&&parts.length>1){route.chatId=integer(parts[1]);if(route.chatId===null||parts.length>2)route.error="Record is unavailable to this access.";}
   if(parts[0]==="journal"&&parts.length>1){
@@ -31,8 +32,9 @@ export function parseRoute(value,{workspace="default",staticDemo=false}={}){
   }
   if(parts[0]==="extras"&&parts.length>1){route.extra=parts[1];if(!cards.has(route.extra)||parts.length>2)route.error="Record is unavailable to this access.";}
   if(parts[0]==="first-run"&&parts.length>1){route.step=firstRunStep(parts[1]);if(route.step===null||parts.length>2)route.error="Record is unavailable to this access.";}
+  if(parts[0]==="settings"&&parts.length>1){route.hub=hubSections.has(parts[1])&&parts.length===2?parts[1]:null;if(!route.hub)route.error="Record is unavailable to this access.";}
   if(parts[0]==="groups"){route.group=groupPattern.test(parts[1]||"")&&parts.length===2?parts[1]:null;if(!route.group)route.error="Record is unavailable to this access.";}
-  if(parts.length>1&&!["chats","journal","extras","first-run","groups"].includes(parts[0]))route.error="Record is unavailable to this access.";
+  if(parts.length>1&&!["chats","journal","extras","first-run","groups","settings"].includes(parts[0]))route.error="Record is unavailable to this access.";
   if(query.has("event")){
     route.seq=integer(query.get("event"));route.view="observations";
     if(route.seq===null||route.seq<=0)route.error="Record is unavailable to this access.";
@@ -52,6 +54,7 @@ export function routeURL(route,{base=location.href,staticDemo=false}={}){
   if(route.view==="witness"&&route.extra)path+="/"+encodeURIComponent(route.extra);
   if(route.view==="first-run"&&route.step)path+="/"+route.step;
   if(route.view==="group"&&route.group)path+="/"+route.group;
+  if(route.view==="settings"&&route.hub&&hubSections.has(route.hub))path+="/"+route.hub;
   if(staticDemo)query.set("route",path);else url.pathname=path;
   query.set("ws",route.workspace||"default");
   if(current.searchParams.has("lang"))query.set("lang",current.searchParams.get("lang"));

@@ -8865,5 +8865,10 @@
   "Export everything": "ייצא הכל",
   "Export everything this account can read: all chats and files, profile photos, stories, contacts and other account data, in every format. The automatic method uses Takeout, or the regular session if Takeout must wait.": "ייצא את כל מה שהחשבון הזה יכול לקרוא: כל הצ'אטים והקבצים, תמונות הפרופיל, הסיפורים, אנשי הקשר ונתוני חשבון אחרים, בכל פורמט. השיטה האוטומטית משתמשת ב-Takeout, או במושב הרגיל אם Takeout נאלץ להמתין.",
   "Observation pauses while the export runs.": "המעקב נעצר בזמן שהייצוא פועל.",
-  "message-gaps.json lists all runs, {n} more than shown here.": "הקובץ message-gaps.json מפרט את כל הריצות, {n} יותר ממה שמוצג כאן."
+  "message-gaps.json lists all runs, {n} more than shown here.": "הקובץ message-gaps.json מפרט את כל הריצות, {n} יותר ממה שמוצג כאן.",
+  "Nothing recorded in this chat yet": "עדיין לא הוקלט דבר בצ'אט זה",
+  "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "תובנות קוראות את היומן: הודעות שנצפו בזמן אמת והיסטוריית צ'אטים שהוטענה ל-TgWitness. ייצואים חתומים הם קבצים נפרדים ואינם נקראים כאן. טען את היסטוריית הצ'אט או המשך את התצפית, ואז פתח את הצ'אט הזה שוב.",
+  "No chats selected": "לא נבחרו צ'אטים",
+  "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "בחר צ'אטים תחת \"מקורות\". תובנות מציגות זמני תגובה, שעות פעילות, הודעות שנמחקו ונוכחות עבור צ'אט אחד.",
+  "Leave without saving the chat selection?": "לעזוב מבלי לשמור את בחירת הצ'אטים?"
 }

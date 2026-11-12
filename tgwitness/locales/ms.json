@@ -8775,5 +8775,10 @@
   "Export everything": "Eksport semuanya",
   "Export everything this account can read: all chats and files, profile photos, stories, contacts and other account data, in every format. The automatic method uses Takeout, or the regular session if Takeout must wait.": "Eksport semua yang akaun ini boleh baca: semua sembang dan fail, foto profil, cerita, kenalan dan data akaun lain, dalam setiap format. Kaedah automatik menggunakan Takeout, atau sesi biasa jika Takeout perlu menunggu.",
   "Observation pauses while the export runs.": "Pengamatan terhenti sementara eksport dijalankan.",
-  "message-gaps.json lists all runs, {n} more than shown here.": "message-gaps.json menyenaraikan semua larian, {n} lebih daripada yang ditunjukkan di sini."
+  "message-gaps.json lists all runs, {n} more than shown here.": "message-gaps.json menyenaraikan semua larian, {n} lebih daripada yang ditunjukkan di sini.",
+  "Nothing recorded in this chat yet": "Tiada yang dirakam dalam sembang ini setakat ini",
+  "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Insights membaca jurnal: mesej yang diperhatikan secara langsung dan sejarah yang dimuatkan ke dalam TgWitness. Eksport bermassa tandatangan adalah fail berasingan dan tidak dibaca di sini. Muatkan sejarah sembang atau teruskan pemantauan, kemudian buka semula sembang ini.",
+  "No chats selected": "Tiada sembang dipilih",
+  "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "Pilih sembang dalam Sumber. Wawasan memaparkan masa balasan, jam aktiviti, mesej yang dipadam dan kehadiran untuk satu sembang.",
+  "Leave without saving the chat selection?": "Meninggalkan tanpa menyimpan pilihan sembang?"
 }

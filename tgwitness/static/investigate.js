@@ -2171,6 +2171,9 @@
   function insightsView(result) {
     const hours = [...Array(24).keys()].map(String), parts = [];
     const c = result.counts, r = result.replies, d = result.deletions;
+    if (!c.messages && !c.deletions && !result.presence.some(person => person.online.some(Boolean))) return [empty('chart',
+      tr('Nothing recorded in this chat yet'),
+      tr('Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.'))];
     const stats = [[c.messages, 'messages'], [c.incoming, 'received'], [c.outgoing, 'sent'], [c.deletions, 'deletion notices'],
       [c.own_deletions, 'own messages deleted']];
     parts.push(el('div', 'doc-stats', ...stats.map(([value, label]) => el('div', 'doc-stat', node('b', '', String(value ?? 0)), node('span', '', tr(label))))));
@@ -2220,8 +2223,12 @@
       Object.assign(analysisState, {chat: chat.value, zone: zone.value, data: result});
       out.replaceChildren(...insightsView(result));
     }, 'chart');
+    chat.addEventListener('change', () => go.click());
+    zone.addEventListener('change', () => go.click());
     out.replaceChildren(...(analysisState.data ? insightsView(analysisState.data)
-      : [empty('chart', tr('Choose a chat'), tr('Reply times, activity hours, deleted messages and presence for one chat.'))]));
+      : [empty('chart', targets.length ? tr('Loading…') : tr('No chats selected'), targets.length ? ''
+        : tr('Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.'))]));
+    if (!analysisState.data && targets.length) queueMicrotask(() => go.click());
     return [el('div', 'doc-toolbar', chat, zone, go), out];
   }
 

@@ -26,6 +26,11 @@ parameters and the extended forms; a hidden field can be opened without changing
 level. Levels only change what is shown: the server checks permissions on its own.
 Collection settings and the first connection belong to the workspace administrator.
 
+Each section has its own address, such as `/settings/connection`. **Back to
+settings**, the close button, Escape and the browser's Back button return to the list
+of sections. **Which chats?** is edited in place and kept with **Save chat
+selection**; leaving with unsaved changes asks first.
+
 | Level | Fields | Sidebar |
 | --- | --- | --- |
 | Simple | Only the essentials | Home, Chats, Journal, Exports, Accounts and Settings |

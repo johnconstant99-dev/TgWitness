@@ -8820,5 +8820,10 @@
   "Export everything": "সবকিছু রপ্তানি করুন",
   "Export everything this account can read: all chats and files, profile photos, stories, contacts and other account data, in every format. The automatic method uses Takeout, or the regular session if Takeout must wait.": "এই অ্যাকাউন্ট যা কিছু পড়তে পারে সবকিছু রপ্তানি করুন: সব চ্যাট এবং ফাইল, প্রোফাইল ছবি, স্টোরি, যোগাযোগ এবং অন্যান্য অ্যাকাউন্ট ডেটা, প্রতিটি ফরম্যাটে। স্বয়ংক্রিয় পদ্ধতি Takeout ব্যবহার করে, অথবা যদি Takeout-কে অপেক্ষা করতে হয় তবে নিয়মিত সেশন ব্যবহার করে।",
   "Observation pauses while the export runs.": "এক্সপোর্ট চলার সময় পর্যবেক্ষণ বিরতিতে থাকে।",
-  "message-gaps.json lists all runs, {n} more than shown here.": "message-gaps.json সব রান তালিকাভুক্ত করে, {n} এখানে দেখানো সংখ্যার চেয়ে বেশি।"
+  "message-gaps.json lists all runs, {n} more than shown here.": "message-gaps.json সব রান তালিকাভুক্ত করে, {n} এখানে দেখানো সংখ্যার চেয়ে বেশি।",
+  "Nothing recorded in this chat yet": "এই চ্যাটে এখনও কিছুই রেকর্ড করা হয়নি",
+  "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Insights জার্নাল পড়ে: সরাসরি পর্যবেক্ষিত বার্তা এবং TgWitness-এ লোড করা ইতিহাস। স্বাক্ষরিত রপ্তানি আলাদা ফাইল এবং এখানে পড়া হয় না। চ্যাট ইতিহাস লোড করুন অথবা পর্যবেক্ষণ চালিয়ে রাখুন, তারপর এই চ্যাটটি আবার খুলুন।",
+  "No chats selected": "কোনও চ্যাট নির্বাচিত নয়",
+  "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "সোর্সেস-এ চ্যাটগুলো নির্বাচন করুন। ইনসাইটস একটি চ্যাটের জন্য উত্তর দেওয়ার সময়, কার্যকলাপের সময়, মুছে ফেলা বার্তা এবং উপস্থিতি দেখায়।",
+  "Leave without saving the chat selection?": "চ্যাট নির্বাচন সংরক্ষণ না করেই ছেড়ে যাব?"
 }
