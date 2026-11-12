@@ -207,7 +207,7 @@ Before relying on this preview, try a small chat you control: create a message
 and attachment, collect them, decrypt the result, run the verifier, check the
 coverage/media outcomes and confirm Telegram session revocation. Automated
 checks use a synthetic Telegram client plus a separate real GitHub certificate
-test; live account acceptance is recorded separately.
+test; no live-account run on the current revision has been recorded.
 
 ## Local decryption and verification
 

@@ -6306,7 +6306,6 @@
   "Message number {n} exists in Telegram but uses a data type this TgWitness version cannot decode (constructor {c}); its content is not in this export.": "الرسالة رقم {n} موجودة في Telegram لكنها تستخدم نوع بيانات لا يستطيع هذا الإصدار من TgWitness فكّه (المُنشئ {c})؛ محتواها غير موجود في هذا التصدير.",
   "Numbers {a}–{b}, just below the oldest message the history listing returned, were also requested; messages found there: {n}.": "طُلبت أيضًا الأرقام {a}–{b} الواقعة مباشرة تحت أقدم رسالة أعادتها قائمة السجل؛ الرسائل التي وُجدت هناك: {n}.",
   "{n} absent numbers were not requested; they cannot be told apart from deleted ones.": "لم يُطلب {n} من الأرقام الغائبة؛ ولا يمكن تمييزها عن المحذوفة.",
-  "This snapshot holds only what Telegram returned at export. The journal of this workspace also holds deletions or earlier versions observed in this chat; export the evidence journal to include them.": "تحتوي هذه اللقطة فقط على ما أرجعته Telegram عند التصدير. كما يحتوي سجل هذه المساحة العملية على عمليات الحذف أو الإصدارات السابقة التي تمت ملاحظتها في هذه المحادثة؛ قم بتصدير سجل الأدلة لتضمينها.",
   "access lost: removed or no longer readable": "فقدان الوصول: تمت إزالته أو لم يعد قابلاً للقراءة",
   "The account was removed from every source or can no longer read them.": "تمت إزالة الحساب من جميع المصادر أو لم يعد بإمكانه قراءتها.",
   "The account was removed from some sources or can no longer read them; nothing arrives from those. The others continue.": "تمت إزالة الحساب من بعض المصادر أو لم يعد بإمكانه قراءتها؛ ولا يصل أي شيء منها. أما المصادر الأخرى فتستمر.",
@@ -8723,5 +8722,16 @@
   "Resume export": "استئناف التصدير",
   "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}: حُفظت {messages} رسالة قبل التوقف، المعرّفات {low}–{high}.",
   "resumed": "مُستأنَف",
-  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "هل تريد حذف الرسائل المحفوظة من التصدير المتوقف وقراءة هذه المحادثة مجددًا بدءًا من أحدث رسالة؟"
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "هل تريد حذف الرسائل المحفوظة من التصدير المتوقف وقراءة هذه المحادثة مجددًا بدءًا من أحدث رسالة؟",
+  "Deletions and earlier versions": "الحذف والإصدارات السابقة",
+  "Messages of this chat that the observing account saw deleted, missing on recheck or edited. Every saved version comes from the workspace journal with its own hash and signature; Telegram's current history no longer shows these versions.": "الرسائل في هذه المحادثة التي لاحظ الحساب المراقب حذفها، أو فقدانها عند إعادة التحقق، أو تعديلها. كل نسخة محفوظة تأتي من سجل مساحة العمل مع التجزئة والتوقيع الخاصين بها؛ ولم يعد سجل Telegram الحالي يعرض هذه النسخ.",
+  "Saved text": "النص المحفوظ",
+  "Edits: {n}": "التعديلات: {n}",
+  "… and {n} more messages in journal-changes.jsonl.": "… و{n} رسالة أخرى في ملف journal-changes.jsonl.",
+  "This snapshot holds only what Telegram returned at export. Deletions and earlier versions observed in this chat are in journal-changes.jsonl, each record signed; the evidence journal export holds the complete hash chain.": "تحتوي هذه اللقطة فقط على ما أعاده Telegram عند التصدير. توجد عمليات الحذف والإصدارات السابقة التي لوحظت في هذه المحادثة في ملف journal-changes.jsonl، وكل سجل موقّع؛ ويحتوي تصدير سجل الأدلة على سلسلة التجزئة الكاملة.",
+  "rechecking absent message numbers": "إعادة التحقق من أرقام الرسائل المفقودة",
+  "packaging and signing the archive": "تعبئة الأرشيف وتوقيعه",
+  "Download the account loss report": "تنزيل تقرير فقدان الحساب",
+  "Signed account loss report downloaded. Check it with verify.py.": "تم تنزيل تقرير فقدان الحساب الموقع. تحقق منه باستخدام verify.py.",
+  "Another client lost its authorization": "فقد عميل آخر صلاحية الدخول"
 }

@@ -20,7 +20,7 @@
 <p align="center"><strong>CONFIANCE ZÉRO.</strong> TgWitness ne prend parti pour personne : les mêmes vérifications s'appliquent à l'opérateur, à PhishDestroy et à tous les autres.<br>Seul compte ce qu'un tiers ou les mathématiques confirment. <a href="../QUESTIONS-AND-CHECKS.md">Questions et vérifications</a></p>
 
 <p align="center">
-  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · préversion"></a>
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.3 · préversion"></a>
   <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
   <sub><a href="../VERIFICATION.md">Environnements testés</a> · 25 langues d'interface · 26 langues de guides</sub>
 </p>

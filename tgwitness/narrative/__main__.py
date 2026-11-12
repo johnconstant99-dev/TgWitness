@@ -86,7 +86,8 @@ def generate(package, out, lang='en', jurisdiction=None, fingerprint=None, witne
         model['model_sha256'] = hashlib.sha256(canonical(model['scenes'])).hexdigest()
         model['package_sha256'] = digest_file(source)
         rendered = scratch / 'rendered'
-        write(model, rendered, lang, jurisdiction, outputs=settings['outputs'], diagram_names=settings['diagrams'])
+        write(model, rendered, lang, jurisdiction, outputs=settings['outputs'], diagram_names=settings['diagrams'],
+              procedure=settings['procedure'])
         public_settings = {key: value for key, value in settings.items() if key not in ('witness', 'tsa_ca')}
         receipt = {'format': 'tgwitness-narrative-run-v1', 'settings': public_settings,
                    'settings_sha256': hashlib.sha256(canonical(public_settings)).hexdigest(),

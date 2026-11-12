@@ -36,7 +36,7 @@ from . import chat_export
 from . import keyboard
 from . import message_content
 from . import message_details
-from .message_numbers import MissingNumbers
+from .message_numbers import RECHECK_EDGE, MissingNumbers
 from . import replica
 from . import tuning
 from .history import History
@@ -373,7 +373,8 @@ def absent_numbers(scratch):
                 number = json.loads(line).get("id")
                 if type(number) is int:
                     numbers.add(number)
-    return MissingNumbers(sorted(numbers))
+    ordered = sorted(numbers)
+    return MissingNumbers(ordered), ordered[0] if ordered else None
 
 
 def merge_history(scratch, entries):
@@ -668,6 +669,11 @@ class Collector:
         if not isinstance(exc, AUTHORIZATION_ERRORS):
             return False
         if client is not None and client is not self.client:
+            self.note("account.authorization_error", {
+                "operation": operation, "error_type": type(exc).__name__, "telegram_error": telegram_error(exc),
+                "client": type(client).__name__, "dc_id": getattr(getattr(client, "session", None), "dc_id", None),
+                "meaning": "A Telegram client other than the observing session lost its authorization; "
+                           "observation with the current session continues."})
             return True
         self.authorization_generation += 1
         first = not self.authorization_required
@@ -676,14 +682,24 @@ class Collector:
         self.phase, self.last_error = "authorization_required", type(exc).__name__
         cause = exc.cause if isinstance(exc, AccountLost) else account_loss_cause(exc) or "not_authorized"
         error = exc.error if isinstance(exc, AccountLost) else telegram_error(exc)
-        self.store.set_setting("account_loss", {"cause": cause, "at": utcnow(), "telegram_error": error})
+        place = self.loss_place()
+        self.store.set_setting("account_loss", {"cause": cause, "at": utcnow(), "telegram_error": error, **place})
         if first:
             self.note("coverage.gap", {"reason": "authorization_required", "operation": operation,
                                       "error_type": type(exc).__name__, "saved_records_retained": True,
-                                      "cause": cause, "telegram_error": error, "meaning": LOSS_MEANING[cause]})
+                                      "cause": cause, "telegram_error": error, "meaning": LOSS_MEANING[cause],
+                                      **place})
         if self.authorization_cleanup is None or self.authorization_cleanup.done():
             self.authorization_cleanup = asyncio.create_task(self.cleanup_rejected_authorization(self.client))
         return True
+
+    def loss_place(self):
+        place = {"dc_id": getattr(getattr(self.client, "session", None), "dc_id", None)}
+        try:
+            place["route"] = self.route_receipt()
+        except Exception:
+            place["route"] = None
+        return place
 
     async def wait_authorization_cleanup(self):
         task = self.authorization_cleanup
@@ -1384,8 +1400,11 @@ class Collector:
         return ({k: v for k, v in profile.items() if v not in (None, "", [])},
                 {k: v for k, v in observer.items() if v not in (None, "", [])}, errors)
 
-    async def recheck_absent(self, entity, absent):
-        asked, returned, started = list(islice(absent, RECHECK_LIMIT)), [], utcnow()
+    async def recheck_absent(self, entity, absent, first=None):
+        edge = list(range(max(1, first - RECHECK_EDGE), first)) if first else []
+        budget = RECHECK_LIMIT - len(edge)
+        step = max(1, -(-len(absent) // budget))
+        asked, returned, started = edge + list(islice(absent.sample(step), budget)), [], utcnow()
         for low in range(0, len(asked), 100):
             batch = asked[low:low + 100]
             for attempt in range(3):
@@ -1398,9 +1417,14 @@ class Collector:
                     await asyncio.sleep(exc.seconds + 1)
             returned += [m for m in answer or [] if m is not None and getattr(m, "id", None) is not None
                          and type(m).__name__ != "MessageEmpty"]
+        found = sorted(m.id for m in returned)
         return {"asked_at": started, "asked": len(asked), "absent_total": len(absent),
-                "empty": len(asked) - len(returned), "returned": sorted(m.id for m in returned),
-                "limit_reached": len(absent) > len(asked), "method": "channels.getMessages by number",
+                "empty": len(asked) - len(returned), "returned": found,
+                "unchecked": len(absent) + len(edge) - len(asked), "limit_reached": len(absent) + len(edge) > len(asked),
+                "edge": [edge[0], edge[-1]] if edge else None,
+                "edge_found": sum(1 for number in found if first and number < first),
+                "sampling": "every number" if step == 1 else "every " + str(step) + "th absent number",
+                "method": "channels.getMessages by number",
                 "meaning": "An empty answer means Telegram has no message under that number for this account: it "
                            "was deleted, or was never visible to it. Telegram reports only the absence."}, returned
 
@@ -2200,6 +2224,24 @@ class Collector:
                 "completeness": "records after this point were captured on a ghost session"})
         return snapshot
 
+    async def check_frozen(self):
+        try:
+            answer = await asyncio.wait_for(self.client(functions.help.GetAppConfigRequest(hash=0)), 30)
+        except Exception:
+            return None
+        values = getattr(getattr(answer, "config", None), "value", None) or []
+        frozen = any(isinstance(item, types.JsonObjectValue) and item.key == "freeze_since_date" for item in values)
+        current = self.store.get_setting("account_restriction", None) or {}
+        if frozen and current.get("kind") != "frozen":
+            value = {"kind": "frozen", "since": time.time(), "until": None, "telegram_error": None}
+            self.store.set_setting("account_restriction", value)
+            self.store.append("account.restricted", {**value, "source": "help.getAppConfig",
+                                                    "meaning": "Telegram has frozen this account."})
+        elif not frozen and current.get("kind") == "frozen":
+            self.store.set_setting("account_restriction", None)
+            self.store.append("account.restriction_expired", {"kind": "frozen", "source": "help.getAppConfig"})
+        return frozen
+
     async def poll_security_log(self, trigger="periodic"):
         client = self.client
         if not client or not client.is_connected():
@@ -2710,6 +2752,7 @@ class Collector:
                         and time.time() >= self.store.get_setting("rpc_backoff_until", 0)):
                     self.sessions_checked_at = time.monotonic()
                     await self.check_sessions()
+                    await self.check_frozen()
                 if now - self.security_log_checked_at >= SECURITY_LOG_EVERY:
                     self.security_log_checked_at = now
                     await self.poll_security_log()
@@ -3774,10 +3817,11 @@ class Collector:
             count = await self.stream_history(entity, scratch, record, media_dir, files, partial=partial)
             recheck = None
             if chat_id < -1000000000000:
-                absent = absent_numbers(scratch)
-                if absent:
+                absent, first = absent_numbers(scratch)
+                if absent or first and first > 1:
+                    record.update(stage="recheck", eta_seconds=None)
                     try:
-                        recheck, missed = await self.recheck_absent(entity, absent)
+                        recheck, missed = await self.recheck_absent(entity, absent, first)
                     except asyncio.CancelledError:
                         raise
                     except Exception as exc:
@@ -3787,12 +3831,14 @@ class Collector:
                         merge_history(scratch, [{**message_record(m), "found_on_recheck": True,
                                                  **(await self.export_attachment(m, media_dir, files))} for m in missed])
                     count += len(missed)
+            record.update(stage="packaging", eta_seconds=None)
             log = await self.admin_log(entity) if observer.get("role") in ("creator", "admin") else None
             meta = {"chat": {"id": chat_id, "title": info.get("title"), "kind": info.get("kind"),
                              "visibility": info.get("visibility"), "profile": profile,
                              **({"profile_errors": problems} if problems else {})},
                     "observer": observer, "recheck": recheck, "admin_log": log,
-                    "journal": chat_export.journal_changes(self.store, chat_id),
+                    "journal": await complete_in_thread(chat_export.journal_changes, self.store, chat_id,
+                                                        Path(scratch).parent),
                     "account": self.store.get_setting("account", None), "message_count": count,
                     "client": self.client_identity(), "route": self.route_receipt(),
                     "acquisition": {"started_at": record.get("started_at"), "finished_at": utcnow(),
@@ -3836,11 +3882,13 @@ class Collector:
                 out_path.unlink(missing_ok=True)
             if loss and (record.get("partial") or {}).get("retained"):
                 try:
+                    journal = await complete_in_thread(chat_export.journal_changes, self.store, chat_id,
+                                                       partial.directory)
                     await complete_in_thread(partial.bundle, out_path, {
                         "chat": {"id": chat_id, "title": info.get("title"), "kind": info.get("kind"),
                                  "visibility": info.get("visibility"), "profile": profile,
                                  **({"profile_errors": problems} if problems else {})},
-                        "observer": observer, "journal": chat_export.journal_changes(self.store, chat_id),
+                        "observer": observer, "journal": journal,
                         "account": self.store.get_setting("account", None), "client": self.client_identity(),
                         "route": self.route_receipt(),
                         "acquisition": {"started_at": record.get("started_at"), "finished_at": utcnow(),
@@ -3999,10 +4047,10 @@ class Collector:
                 with suppress(Exception):
                     await pages.aclose()
 
-    async def export_attachment(self, message, directory, files=None):
+    async def export_attachment(self, message, directory, files=None, settings=None):
         if not getattr(message, "media", None) or not getattr(message, "file", None):
             return {}
-        settings = capture_settings(self.store)
+        settings = settings or capture_settings(self.store)
         kind = media_kind(message)
         if files == "skip":
             return {"file_status": "skipped_by_export_option", "file_kind": kind}
@@ -4344,7 +4392,8 @@ class Collector:
             finally:
                 slots.release()
         try:
-            while (self.running or owner and self.export_claim == owner) and not stopped.is_set():
+            while (not self.authorization_required and (self.running or owner and self.export_claim == owner)
+                   and not stopped.is_set()):
                 for task in [task for task in active if task.done()]:
                     active.discard(task)
                     task.result()
@@ -4425,6 +4474,9 @@ class Collector:
         client = self.client
         attempt = MediaAttempt(self.store, job)
         try:
+            if self.authorization_required:
+                attempt.finish(MediaOutcome("retry", {"reason": "Telegram authorization expired; durable job retained"}))
+                return True
             original = self.store.events(before=job["message_event"] + 1, limit=1)[0]
             if client_for_job is not None:
                 client = client_for_job(original)

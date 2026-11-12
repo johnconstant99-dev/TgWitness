@@ -1,5 +1,5 @@
 export function createHealthActions({node, tr, health, close, context}) {
-  const {getState, getSession, may, json, refreshStatus, toast, getSources, navigate} = context;
+  const {getState, getSession, may, json, refreshStatus, toast, getSources, navigate, saveBlob} = context;
   let pending = null;
   const buttons = new Map();
   function add(part, key, label, action) {
@@ -45,6 +45,12 @@ export function createHealthActions({node, tr, health, close, context}) {
     await json("targets/ignore-unconfirmed", {chat_ids: ids, ignored: true}, {profile});
     if (session === getSession()) toast(tr("Warnings are ignored until these sources appear in Telegram. Collection settings stay the same."));
   });
+  add("connection", "loss-report", "Download the account loss report", async (_, profile, session) => {
+    const value = await json("account/loss-report", undefined, {profile});
+    if (session !== getSession()) return;
+    saveBlob(new Blob([JSON.stringify(value, null, 2)], {type: "application/json"}), "tgwitness-account-loss.json");
+    toast(tr("Signed account loss report downloaded. Check it with verify.py."));
+  });
   add("media", "enable-media", "Enable downloads", async (status, profile, session) => {
     await json("capture", {...status.capture, download_media: true}, {profile});
     if (session === getSession()) toast(tr("Attachment downloads enabled."));
@@ -74,6 +80,7 @@ export function createHealthActions({node, tr, health, close, context}) {
     buttons.get("exclude-sources").hidden = !ids.length || !canSources || ids.length > 500 || status.chats_limited && (status.scope?.mode || "selected") !== "selected";
     buttons.get("exclude-sources").textContent = tr((status.scope?.mode || "selected") === "selected" ? "Pause these sources" : "Exclude from scope");
     buttons.get("ignore-sources").hidden = !ids.length || !canSources || ids.length > 500;
+    buttons.get("loss-report").hidden = status.demo || !may("export") || status.health?.connection?.reason !== "signed_out";
     buttons.get("enable-media").hidden = !canMedia || status.capture.download_media;
     const counts = status.health?.media?.counts || {};
     buttons.get("clear-queue").hidden = !canMedia || !(counts.pending || counts.retry);

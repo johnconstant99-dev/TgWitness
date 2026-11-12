@@ -20,7 +20,7 @@
 <p align="center"><strong>ZERO TRUST.</strong> TgWitness không đứng về phía nào: các bước kiểm tra như nhau áp dụng cho nhà vận hành, cho PhishDestroy và cho bất kỳ ai khác.<br>Chỉ những gì bên thứ ba hoặc toán học xác nhận mới được tính. <a href="../QUESTIONS-AND-CHECKS.md">Câu hỏi và kiểm tra</a></p>
 
 <p align="center">
-  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · bản tiền phát hành"></a>
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.3 · bản tiền phát hành"></a>
   <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
   <sub><a href="../VERIFICATION.md">Môi trường đã kiểm thử</a> · 25 ngôn ngữ giao diện · 26 ngôn ngữ hướng dẫn</sub>
 </p>

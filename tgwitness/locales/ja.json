@@ -6111,7 +6111,6 @@
   "Message number {n} exists in Telegram but uses a data type this TgWitness version cannot decode (constructor {c}); its content is not in this export.": "メッセージ番号 {n} は Telegram に存在しますが、この TgWitness のバージョンでは解読できないデータ型（コンストラクター {c}）を使っています。その内容はこのエクスポートに含まれていません。",
   "Numbers {a}–{b}, just below the oldest message the history listing returned, were also requested; messages found there: {n}.": "履歴一覧が返した最も古いメッセージのすぐ下にある番号 {a}–{b} も要求しました。そこで見つかったメッセージ: {n}。",
   "{n} absent numbers were not requested; they cannot be told apart from deleted ones.": "欠けている {n} 個の番号は要求していません。削除されたものと区別できません。",
-  "This snapshot holds only what Telegram returned at export. The journal of this workspace also holds deletions or earlier versions observed in this chat; export the evidence journal to include them.": "このスナップショットには、エクスポート時にTelegramから返された内容のみが含まれています。このワークスペースのログには、このチャットで確認された削除履歴や以前のバージョンも記録されています。それらを含めるには、証拠ログをエクスポートしてください。",
   "access lost: removed or no longer readable": "アクセス不可：削除されたか、読み取れなくなった",
   "The account was removed from every source or can no longer read them.": "そのアカウントはすべての情報源から削除されたか、またはそれらを読み取ることができなくなりました。",
   "The account was removed from some sources or can no longer read them; nothing arrives from those. The others continue.": "一部のソースからアカウントが削除されたか、またはそれらを読み取れなくなっており、それらからは何も届きません。その他のソースは引き続き機能しています。",
@@ -8528,5 +8527,16 @@
   "Resume export": "エクスポートを再開",
   "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}：停止前に {messages} 件のメッセージを保存済み、ID {low}–{high}。",
   "resumed": "再開済み",
-  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "停止したエクスポートで保存したメッセージを削除し、このチャットを最新のメッセージから読み直しますか？"
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "停止したエクスポートで保存したメッセージを削除し、このチャットを最新のメッセージから読み直しますか？",
+  "Deletions and earlier versions": "削除履歴および以前のバージョン",
+  "Messages of this chat that the observing account saw deleted, missing on recheck or edited. Every saved version comes from the workspace journal with its own hash and signature; Telegram's current history no longer shows these versions.": "このチャットにおいて、監視アカウントが削除された、再確認時に欠落していた、または編集されたと確認したメッセージです。保存された各バージョンは、独自のハッシュと署名を持つワークスペースのログから取得されたものであり、Telegramの現在の履歴にはこれらのバージョンは表示されません。",
+  "Saved text": "保存されたテキスト",
+  "Edits: {n}": "編集箇所：{n}",
+  "… and {n} more messages in journal-changes.jsonl.": "… さらに、journal-changes.jsonl には {n} 件のメッセージが含まれています。",
+  "This snapshot holds only what Telegram returned at export. Deletions and earlier versions observed in this chat are in journal-changes.jsonl, each record signed; the evidence journal export holds the complete hash chain.": "このスナップショットには、エクスポート時にTelegramから返された内容のみが含まれています。このチャットで確認された削除履歴や以前のバージョンは、journal-changes.jsonl に記録されており、各レコードには署名が付いています。証拠ジャーナルのエクスポートには、完全なハッシュチェーンが含まれています。",
+  "rechecking absent message numbers": "欠落しているメッセージ番号の再確認",
+  "packaging and signing the archive": "アーカイブのパッケージ化と署名",
+  "Download the account loss report": "アカウント喪失レポートをダウンロードしてください",
+  "Signed account loss report downloaded. Check it with verify.py.": "署名済みのアカウント喪失報告書をダウンロードしました。verify.py を使用して確認してください。",
+  "Another client lost its authorization": "別のクライアントが認証を失いました"
 }

@@ -9,7 +9,6 @@
   "local_language": "en",
   "legal_family": "common law",
   "checked_at": "2026-11-11",
-  "review": "machine-assisted research, not reviewed by local counsel",
   "expert_term": {
     "local": "expert witness",
     "en": "person with specialised knowledge based on training, study or experience (Evidence Act 1995 (Cth) s 79); party expert or Court expert (Federal Court Rules 2011 Pt 23)"
@@ -122,6 +121,7 @@
     }
   ],
   "declaration": {
+    "route": "civil",
     "basis": "Federal Court Rules 2011 r 23.13(1)(b) and (ga) require two acknowledgements; the exact wording prescribed by GPN-EXPT and the Harmonised Expert Witness Code of Conduct could not be verified, so the text below is composed from the rule.",
     "text_local": "I acknowledge that I have read, understood and complied with the Expert Evidence Practice Note (GPN-EXPT), including the Harmonised Expert Witness Code of Conduct, and I agree to be bound by it. My opinions in this report are based wholly or substantially on the specialised knowledge arising from my training, study or experience set out in this report.",
     "text_en": "I acknowledge that I have read, understood and complied with the Expert Evidence Practice Note (GPN-EXPT), including the Harmonised Expert Witness Code of Conduct, and I agree to be bound by it. My opinions in this report are based wholly or substantially on the specialised knowledge arising from my training, study or experience set out in this report.",

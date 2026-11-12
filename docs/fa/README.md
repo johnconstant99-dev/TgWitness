@@ -20,7 +20,7 @@
 <p align="center"><strong>اعتماد صفر.</strong> TgWitness طرف هیچ‌کس را نمی‌گیرد: همان بررسی‌ها برای اپراتور، برای PhishDestroy و برای هر کس دیگری اعمال می‌شود.<br>فقط چیزی معتبر است که شخص ثالث یا ریاضیات تأییدش کند. <a href="../QUESTIONS-AND-CHECKS.md">پرسش‌ها و بررسی‌ها</a></p>
 
 <p align="center">
-  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · پیش‌انتشار"></a>
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.3 · پیش‌انتشار"></a>
   <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
   <sub><a href="../VERIFICATION.md">محیط‌های آزموده‌شده</a> · 25 زبان رابط کاربری · 26 زبان راهنما</sub>
 </p>

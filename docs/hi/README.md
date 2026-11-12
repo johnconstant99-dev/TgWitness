@@ -20,7 +20,7 @@
 <p align="center"><strong>ZERO TRUST.</strong> TgWitness किसी का पक्ष नहीं लेता: ऑपरेटर, PhishDestroy और किसी भी अन्य पर एक जैसी जाँच लागू होती है।<br>मान्य वही है जिसकी पुष्टि कोई तीसरा पक्ष या गणित करे। <a href="../QUESTIONS-AND-CHECKS.md">प्रश्न और जाँच</a></p>
 
 <p align="center">
-  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · प्री-रिलीज़"></a>
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.3 · प्री-रिलीज़"></a>
   <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
   <sub><a href="../VERIFICATION.md">परीक्षित परिवेश</a> · 25 इंटरफ़ेस भाषाएँ · 26 गाइड भाषाएँ</sub>
 </p>

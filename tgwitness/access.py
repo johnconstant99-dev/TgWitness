@@ -171,6 +171,7 @@ POLICY = {
     "GET /api/mode": ("view", None),
     "GET /api/checkpoint": ("view", None),
     "GET /api/run-receipt": ("view", None),
+    "GET /api/account/loss-report": ("export", None),
     "POST /api/verify": ("view", None),
     "GET /api/exports/history": ("export", None),
     "GET /api/export/{fmt}": ("export", None),

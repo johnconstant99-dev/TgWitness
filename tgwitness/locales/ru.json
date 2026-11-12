@@ -6518,7 +6518,6 @@
   "Message number {n} exists in Telegram but uses a data type this TgWitness version cannot decode (constructor {c}); its content is not in this export.": "Сообщение № {n} есть в Telegram, но использует тип данных, который эта версия TgWitness не умеет разбирать (конструктор {c}); его содержимого нет в этом экспорте.",
   "Numbers {a}–{b}, just below the oldest message the history listing returned, were also requested; messages found there: {n}.": "Также запрошены номера {a}–{b} сразу ниже самого старого сообщения, которое отдала история; найдено там сообщений: {n}.",
   "{n} absent numbers were not requested; they cannot be told apart from deleted ones.": "{n} отсутствующих номеров не запрашивались; их нельзя отличить от удалённых.",
-  "This snapshot holds only what Telegram returned at export. The journal of this workspace also holds deletions or earlier versions observed in this chat; export the evidence journal to include them.": "Этот снимок содержит только то, что Telegram вернул при экспорте. Журнал этого рабочего пространства также содержит удалённые сообщения или более ранние версии, зафиксированные в этом чате; экспортируйте журнал доказательств, чтобы включить их.",
   "access lost: removed or no longer readable": "доступ утрачен: удалено или больше не читается",
   "The account was removed from every source or can no longer read them.": "Аккаунт был удалён из всех источников или больше не может их читать.",
   "The account was removed from some sources or can no longer read them; nothing arrives from those. The others continue.": "Аккаунт был удалён из некоторых источников или больше не может их читать; оттуда ничего не поступает. Остальные продолжают работать.",
@@ -8615,5 +8614,16 @@
   "Resume export": "Продолжить экспорт",
   "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}: до остановки сохранено сообщений — {messages}, номера {low}–{high}.",
   "resumed": "продолжен",
-  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "Удалить сообщения, сохранённые остановленным экспортом, и прочитать этот чат заново, начиная с самого нового сообщения?"
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "Удалить сообщения, сохранённые остановленным экспортом, и прочитать этот чат заново, начиная с самого нового сообщения?",
+  "Deletions and earlier versions": "Удалённые сообщения и более ранние версии",
+  "Messages of this chat that the observing account saw deleted, missing on recheck or edited. Every saved version comes from the workspace journal with its own hash and signature; Telegram's current history no longer shows these versions.": "Сообщения данного чата, которые наблюдаемая учетная запись зафиксировала как удалённые, отсутствующие при повторной проверке или отредактированные. Каждая сохраненная версия поступает из журнала рабочей области с собственным хешем и подписью; в текущей истории Telegram эти версии больше не отображаются.",
+  "Saved text": "Сохраненный текст",
+  "Edits: {n}": "Изменения: {n}",
+  "… and {n} more messages in journal-changes.jsonl.": "… и ещё {n} сообщений в файле journal-changes.jsonl.",
+  "This snapshot holds only what Telegram returned at export. Deletions and earlier versions observed in this chat are in journal-changes.jsonl, each record signed; the evidence journal export holds the complete hash chain.": "Данный снимок содержит только то, что Telegram вернул при экспорте. Удалённые сообщения и более ранние версии, зафиксированные в данном чате, находятся в файле `journal-changes.jsonl`, каждая запись которого подписана; экспорт журнала доказательств содержит полную цепочку хешей.",
+  "rechecking absent message numbers": "повторная проверка отсутствующих номеров сообщений",
+  "packaging and signing the archive": "упаковка и подпись архива",
+  "Download the account loss report": "Скачайте отчет о потере учетной записи",
+  "Signed account loss report downloaded. Check it with verify.py.": "Загружен подписанный отчет о потере учетной записи. Проверьте его с помощью verify.py.",
+  "Another client lost its authorization": "Ещё один клиент утратил авторизацию"
 }

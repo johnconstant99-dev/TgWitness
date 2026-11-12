@@ -4,7 +4,7 @@
 
 # Connection, proxies and data protection
 
-This document describes TgWitness 0.9.2 behavior and its limits. Authentication,
+This document describes TgWitness 0.9.3 behavior and its limits. Authentication,
 source access, network connectivity and capture completeness are separate states.
 For sign-in steps, file formats, and multiple accounts, start with
 [accounts and session formats](ACCOUNTS.md). For event policies and restart

@@ -534,6 +534,17 @@ the journal records the sign-out. The workspace still belongs to its account: on
 account can connect to it again. If Telegram does not answer, the session is still removed
 here and the panel says so; end it in Telegram under **Settings → Devices**.
 
+## When Telegram ends the session
+
+If Telegram bans, freezes or signs out the account, or ends the session from another device, the
+journal records the cause, the Telegram error, the route and the data centre. The account's
+health shows **Download the account loss report**: a signed JSON file with the journal records
+of the 24 hours before the loss, namely connections, routes, sessions, account notices and coverage
+gaps, each with its journal hash and signature. Check it with
+`python verify.py tgwitness-account-loss.json --fingerprint COLLECTOR_FP`; the evidence export
+holds the complete hash chain. A frozen account is also detected while observing, and its sending and joining
+actions are turned off.
+
 ## Keeping account files safe
 
 - Treat every `.session`, TData ZIP, StringSession, Auth Key and account JSON like a

@@ -25,7 +25,7 @@ def chapter_plan(design, kind="journal"):
             Chapter("case", "Case & examination question", ("case", "brief")),
             Chapter("assessment", "Findings & assessment", ("examination", "assessment", "case_board")),
             Chapter("scope", "Scope & coverage", ("selection", "minimisation", "source", "coverage", "message_numbers")),
-            Chapter("histories", "Change dossiers", ("histories",)),
+            Chapter("histories", "Change dossiers", ("histories", "journal_changes")),
             Chapter("activity", "Activity & observed accounts", ("analytics", "directory", "participants")),
             Chapter("journal", "Observation journal" if kind != "chat" else "Message transcript", ("journal",)),
             Chapter("artifacts", "Files, relationships & indicators", ("relations", "files", "indicators", "admin_log", "actions")),
@@ -38,7 +38,7 @@ def chapter_plan(design, kind="journal"):
             Chapter("scope", "Scope & acquisition conditions", ("selection", "minimisation", "source")),
             Chapter("activity", "Counts, activity & basis", ("analytics",)),
             Chapter("directory", "Chats & observed accounts", ("directory", "participants")),
-            Chapter("histories", "Message histories", ("histories",)),
+            Chapter("histories", "Message histories", ("histories", "journal_changes")),
             Chapter("relations", "Replies, threads & forwards", ("relations",)),
             Chapter("files", "Attachments & archive files", ("files",)),
             Chapter("coverage", "Coverage & absent identifiers", ("coverage", "message_numbers")),
@@ -252,6 +252,7 @@ SECTION_KEYS = {
     "standards": "standards", "limits": "limitations", "limitations": "limitations",
     "records": "journal", "messages": "journal", "source": "source", "people": "participants",
     "message-ids": "message_numbers", "ids": "message_numbers", "admin-log": "admin_log", "seal": "seal",
+    "journal-changes": "journal_changes",
 }
 
 

@@ -6111,7 +6111,6 @@
   "Message number {n} exists in Telegram but uses a data type this TgWitness version cannot decode (constructor {c}); its content is not in this export.": "Mesej nombor {n} wujud dalam Telegram tetapi menggunakan jenis data yang tidak dapat dinyahkod oleh versi TgWitness ini (pembina {c}); kandungannya tiada dalam eksport ini.",
   "Numbers {a}–{b}, just below the oldest message the history listing returned, were also requested; messages found there: {n}.": "Nombor {a}–{b}, betul-betul di bawah mesej tertua yang dipulangkan senarai sejarah, turut diminta; mesej yang ditemui di situ: {n}.",
   "{n} absent numbers were not requested; they cannot be told apart from deleted ones.": "{n} nombor yang tiada tidak diminta; ia tidak dapat dibezakan daripada yang dipadam.",
-  "This snapshot holds only what Telegram returned at export. The journal of this workspace also holds deletions or earlier versions observed in this chat; export the evidence journal to include them.": "Snapshot ini hanya mengandungi apa yang Telegram kembalikan semasa eksport. Jurnal ruang kerja ini juga merangkumi pemadaman atau versi terdahulu yang diperhatikan dalam sembang ini; eksport jurnal bukti untuk memasukkannya.",
   "access lost: removed or no longer readable": "akses hilang: dialih keluar atau tidak dapat dibaca lagi",
   "The account was removed from every source or can no longer read them.": "Akaun itu telah dialih keluar daripada setiap sumber atau tidak lagi dapat membacanya.",
   "The account was removed from some sources or can no longer read them; nothing arrives from those. The others continue.": "Akaun itu telah dialih keluar daripada beberapa sumber atau tidak lagi dapat membacanya; tiada apa-apa yang sampai daripadanya. Yang lain diteruskan.",
@@ -8528,5 +8527,16 @@
   "Resume export": "Sambung semula eksport",
   "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}: {messages} mesej disimpan sebelum berhenti, ID {low}–{high}.",
   "resumed": "disambung semula",
-  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "Padam mesej yang disimpan daripada eksport yang terhenti dan baca semula sembang ini bermula dari mesej terbaharu?"
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "Padam mesej yang disimpan daripada eksport yang terhenti dan baca semula sembang ini bermula dari mesej terbaharu?",
+  "Deletions and earlier versions": "Pembuangan dan versi terdahulu",
+  "Messages of this chat that the observing account saw deleted, missing on recheck or edited. Every saved version comes from the workspace journal with its own hash and signature; Telegram's current history no longer shows these versions.": "Mesej-mesej dalam sembang ini yang dilihat oleh akaun pemerhati telah dipadam, hilang semasa disemak semula atau disunting. Setiap versi yang disimpan berasal daripada jurnal ruang kerja dengan hash dan tandatangan tersendiri; sejarah semasa Telegram tidak lagi memaparkan versi-versi ini.",
+  "Saved text": "Teks yang disimpan",
+  "Edits: {n}": "Suntingan: {n}",
+  "… and {n} more messages in journal-changes.jsonl.": "… dan {n} mesej lagi dalam journal-changes.jsonl.",
+  "This snapshot holds only what Telegram returned at export. Deletions and earlier versions observed in this chat are in journal-changes.jsonl, each record signed; the evidence journal export holds the complete hash chain.": "Snepadang ini hanya mengandungi apa yang dikembalikan oleh Telegram semasa eksport. Pemadaman dan versi terdahulu yang diperhatikan dalam sembang ini terdapat dalam jurnal-perubahan.jsonl, setiap rekod ditandatangani; eksport jurnal bukti mengandungi rantaian hash lengkap.",
+  "rechecking absent message numbers": "meneliti semula nombor mesej yang tiada",
+  "packaging and signing the archive": "pembungkusan dan penandatanganan arkib",
+  "Download the account loss report": "Muat turun laporan kehilangan akaun",
+  "Signed account loss report downloaded. Check it with verify.py.": "Laporan kehilangan akaun yang ditandatangani telah dimuat turun. Semak ia dengan verify.py.",
+  "Another client lost its authorization": "Klien lain telah kehilangan kebenarannya"
 }

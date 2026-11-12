@@ -42,7 +42,7 @@ export function topologyExample(){
   });
   const event=(id,kind,component,host,extra={})=>({id,at,kind,workspace:'default',component,purpose:'Synthetic example',destination:{host,port:443,telegram_network:null,loopback:false},outcome:'attempt',...extra});
   return {schema:'tgwitness-topology-v1',generated_at:at,demo:true,
-    host:{kind:'server',place:'server',container:false,provider:'hetzner',tdx:false,hostname:'example-host',os:'Linux',machine:'x86_64',python:'3.12.7',version:'0.9.2',run_id:'synthetic-topology-example',started_at:at},
+    host:{kind:'server',place:'server',container:false,provider:'hetzner',tdx:false,hostname:'example-host',os:'Linux',machine:'x86_64',python:'3.12.7',version:'0.9.3',run_id:'synthetic-topology-example',started_at:at},
     ingress:{listener:{host:'127.0.0.1',port:8787},peer:'127.0.0.1',peer_trusted:false,via:'cloudflare',scheme:'https',forwarded_proto:'https',trusted_proxies:0,proxy_header:null,allowed_networks:0,
       token_source:'environment',published:{kind:'quick',host:'example.trycloudflare.com',tunnel_enabled:true},
       deployment:{provider:'hetzner',mode:'high-assurance',tunnel:'quick',panel_host:null,witness_host:null,ssh:'disabled'},

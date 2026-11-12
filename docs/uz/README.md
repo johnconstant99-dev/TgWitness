@@ -20,7 +20,7 @@
 <p align="center"><strong>NOL ISHONCH.</strong> TgWitness hech kimning tarafini olmaydi: operator, PhishDestroy va boshqa har kim bir xil tekshiruvlardan o‘tadi.<br>Faqat uchinchi tomon yoki matematika tasdiqlagan narsa hisobga olinadi. <a href="../QUESTIONS-AND-CHECKS.md">Savollar va tekshiruvlar</a></p>
 
 <p align="center">
-  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · dastlabki reliz"></a>
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.3 · dastlabki reliz"></a>
   <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
   <sub><a href="../VERIFICATION.md">Sinovdan o‘tgan muhitlar</a> · 25 ta interfeys tili · 26 ta qo‘llanma tili</sub>
 </p>

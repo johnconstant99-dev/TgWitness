@@ -207,6 +207,9 @@ collateral in the archive)». Какой код выполняла VM (compose, 
 Развёртывание, проверка с `--evidence`, перезапуски, сравнение образа ОС, запечатанный сертификат
 и удаление выполнены на самом Phala Cloud; см.
 [прогон 4 ноября 2026 года](../VERIFICATION.md#live-phala-cloud-deployment--4-november-2026).
+9 ноября развёртывание собирало данные с живого аккаунта Telegram; в одном прогоне ключ сессии
+был создан внутри VM. См. [прогон с живым аккаунтом](../VERIFICATION.md#phala-cloud-with-live-telegram-account--9-november-2026)
+и [ключ, созданный в VM](../VERIFICATION.md#session-key-created-inside-the-tdx-vm--9-november-2026).
 
 ## Перед началом
 

@@ -20,7 +20,7 @@
 <p align="center"><strong>ゼロトラスト。</strong>TgWitness はどの側にも立ちません。オペレーターにも、PhishDestroy にも、それ以外の誰にも同じ検証を適用します。<br>認められるのは、第三者または数学が裏付けるものだけです。<a href="../QUESTIONS-AND-CHECKS.md">質問と検証</a></p>
 
 <p align="center">
-  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · プレリリース"></a>
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.3 · プレリリース"></a>
   <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
   <sub><a href="../VERIFICATION.md">テスト済みの環境</a> · インターフェース 25 言語 · ガイド 26 言語</sub>
 </p>

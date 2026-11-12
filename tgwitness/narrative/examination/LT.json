@@ -9,7 +9,6 @@
   "local_language": "lt",
   "legal_family": "civil law",
   "checked_at": "2026-11-11",
-  "review": "machine-assisted research, not reviewed by local counsel",
   "expert_term": {
     "local": "ekspertas (teismo ekspertas)",
     "en": "court expert appointed by the pre-trial officer, prosecutor or court; experts on the List of Court Experts of the Republic of Lithuania take an oath on entry"
@@ -99,6 +98,7 @@
     }
   ],
   "declaration": {
+    "route": "civil",
     "basis": "CPK (article not verified): civil-procedure expert oath; when the examination is carried out outside a hearing the signed oath text is an integral part of the expert report",
     "text_local": "Aš, (vardas, pavardė), garbingai prisiekiu, kad sąžiningai vykdysiu savo pareigą remiantis visomis turimomis žiniomis pateikti objektyvią ir pagrįstą išvadą byloje",
     "text_en": "I, (name, surname), solemnly swear that I will honestly perform my duty to give, on the basis of all my knowledge, an objective and reasoned opinion in the case.",

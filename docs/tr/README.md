@@ -20,7 +20,7 @@
 <p align="center"><strong>SIFIR GÜVEN.</strong> TgWitness taraf tutmaz: aynı kontroller operatöre, PhishDestroy'a ve diğer herkese uygulanır.<br>Yalnızca üçüncü bir tarafın veya matematiğin doğruladığı şey geçerlidir. <a href="../QUESTIONS-AND-CHECKS.md">Sorular ve kontroller</a></p>
 
 <p align="center">
-  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · ön sürüm"></a>
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.3 · ön sürüm"></a>
   <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
   <sub><a href="../VERIFICATION.md">Test edilen ortamlar</a> · 25 arayüz dili · 26 kılavuz dili</sub>
 </p>

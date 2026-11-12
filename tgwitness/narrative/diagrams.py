@@ -2,6 +2,7 @@ from html import escape
 import hashlib
 
 from ..verify import ASSURANCE_TIERS, parse_time
+from .style import ref_label, time_span
 
 COLORS = {'pass': '#237546', 'absent': '#6b7280', 'fail': '#ae3030'}
 
@@ -17,9 +18,10 @@ def diagrams(model, text):
         x = 270 + 680 * (parse_time(scene['at_from']).timestamp() - earliest) / span
         right = 270 + 680 * (parse_time(scene['at_to']).timestamp() - earliest) / span
         refs = f"{scene['journal']} #{scene['from_seq']}..{scene['to_seq']} | {scene['at_from']} | {scene['at_to']}"
-        timeline.extend([('text', 12, y + 15, glossary[scene['kind']], '#163844', refs),
-                         ('rect', x, y, max(10, right - x), 24, '#f5d6a0' if scene['kind'] == 'gaps' else '#b8d5d0', refs),
-                         ('text', 270, y + 38, refs, '#374151', refs)])
+        label = ref_label(scene['journal'], scene['from_seq'], scene['to_seq']) + '  ·  ' + time_span(scene['at_from'], scene['at_to'])
+        timeline.extend([('text', 12, y + 17, glossary[scene['kind']], '#142c3b', refs),
+                         ('rect', x, y, max(10, right - x), 24, '#f5d6a0' if scene['kind'] == 'gaps' else '#9cc4bd', refs),
+                         ('text', 270, y + 40, label, '#596870', refs)])
         if scene['kind'] == 'gaps':
             for offset in range(0, int(max(10, right - x)), 8):
                 timeline.append(('line', x + offset, y, min(x + offset + 12, max(x + 10, right)), y + 24, '#9a6521', refs))
@@ -62,8 +64,8 @@ def diagrams(model, text):
     for index, tier in enumerate(ASSURANCE_TIERS):
         status = rows.get(tier, {}).get('status', 'absent')
         y = 35 + index * 48
-        ladder.extend([('rect', 20 + index * 24, y, 900 - index * 24, 35, '#eef3f3', ''),
-                       ('text', 32 + index * 24, y + 23, glossary[tier] + ': ' + glossary[status], COLORS[status], tier)])
+        ladder.extend([('rect', 20, y, 960, 35, '#f3f5f6', ''), ('rect', 20, y, 6, 35, COLORS[status], tier),
+                       ('text', 40, y + 23, glossary[tier] + ': ' + glossary[status], COLORS[status], tier)])
     result['ladder'] = (text('ladder.title'), 340, ladder)
 
     files, file_count = [], 0

@@ -2,6 +2,9 @@ from bisect import bisect_right
 from itertools import pairwise
 
 
+RECHECK_EDGE = 1000
+
+
 class MissingNumbers:
     def __init__(self, ordered):
         self.ranges = [(a + 1, b) for a, b in pairwise(ordered) if b - a > 1]

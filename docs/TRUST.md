@@ -68,12 +68,12 @@ After decrypting the handoff from [SEALED-ACTIONS](SEALED-ACTIONS.md), verify
 gh attestation verify evidence.zip --bundle attestation.jsonl \
   --repo OWNER/TgWitness \
   --signer-workflow phishdestroy/TgWitness/.github/workflows/sealed-collector.yml \
-  --signer-digest c4f734553f8de71350546aa73cc756714ee1d8a4 \
+  --signer-digest e8746b675e7d4f74d4317d634ad0ae838b128397 \
   --deny-self-hosted-runners
 ```
 
-Review the [pinned collector workflow](https://github.com/phishdestroy/TgWitness/blob/c4f734553f8de71350546aa73cc756714ee1d8a4/.github/workflows/sealed-collector.yml),
-which checks out collector commit `abce365085bf28667d07bdf5955f05e92edd5f62`. The reviewed workflow and
+Review the [pinned collector workflow](https://github.com/phishdestroy/TgWitness/blob/e8746b675e7d4f74d4317d634ad0ae838b128397/.github/workflows/sealed-collector.yml),
+which checks out collector commit `0a6a488fb35a8815cacad2e584fcfdefe7014fab`. The reviewed workflow and
 collector pairs are listed in [`tgwitness/sealed_policy.json`](../tgwitness/sealed_policy.json); use the
 pair that your fork's caller workflow pins.
 For journal, attachment, policy and coverage checks also run the verifier from an

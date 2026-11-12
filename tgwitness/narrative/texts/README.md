@@ -18,13 +18,5 @@ listed in [`text.py`](../text.py); this report module has its own language selec
 | [`glossary.en.json`](glossary.en.json) and `glossary.<language>.json` | Terms used in the report glossary |
 
 Keep keys and placeholders aligned with English. Plural templates use the bounded
-ICU-style syntax implemented in `text.py`. From the repository root, run:
-
-```sh
-python tools/check_narrative_texts.py
-```
-
-The check covers keys, placeholders, plural forms, text lengths and configured
-word lists. Release checks also enforce the requirements in
-[`review-policy.json`](../review-policy.json). The [narrative guide](../../../docs/NARRATIVE.md)
-records the outstanding review work.
+ICU-style syntax implemented in `text.py`. The [narrative guide](../../../docs/NARRATIVE.md)
+lists the languages.

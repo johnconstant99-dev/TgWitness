@@ -677,6 +677,9 @@ def register(app, ctx):
     router.get("/api/run-receipt", dependencies=[Depends(authenticate)])(
         routes_evidence.get_run_receipt
     )
+    router.get("/api/account/loss-report", dependencies=[Depends(authenticate)])(
+        routes_evidence.get_account_loss_report
+    )
     router.get("/api/assurance")(routes_evidence.assurance_statement)
     router.get("/api/anchor-request", dependencies=[Depends(authenticate)])(
         routes_evidence.anchor_request

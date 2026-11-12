@@ -20,7 +20,7 @@
 <p align="center"><strong>ZERO TRUST.</strong> TgWitness ergreift keine Partei: Für den Betreiber, für PhishDestroy und für alle anderen gelten dieselben Prüfungen.<br>Es zählt nur, was ein Dritter oder die Mathematik bestätigt. <a href="../QUESTIONS-AND-CHECKS.md">Fragen und Prüfungen</a></p>
 
 <p align="center">
-  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · Vorabversion"></a>
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.3 · Vorabversion"></a>
   <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
   <sub><a href="../VERIFICATION.md">Getestete Umgebungen</a> · 25 Oberflächensprachen · 26 Sprachen für Anleitungen</sub>
 </p>

@@ -20,7 +20,7 @@
 <p align="center"><strong>零信任。</strong>TgWitness 不偏袒任何一方：同样的检查适用于操作员、PhishDestroy 以及其他任何人。<br>只有第三方或数学能够证实的内容才算数。<a href="../QUESTIONS-AND-CHECKS.md">问题与核查</a></p>
 
 <p align="center">
-  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · 预发布版"></a>
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.3 · 预发布版"></a>
   <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
   <sub><a href="../VERIFICATION.md">已测试的环境</a> · 25 种界面语言 · 26 种指南语言</sub>
 </p>

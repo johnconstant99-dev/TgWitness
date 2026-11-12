@@ -6150,7 +6150,6 @@
   "Message number {n} exists in Telegram but uses a data type this TgWitness version cannot decode (constructor {c}); its content is not in this export.": "پیام شماره {n} در Telegram وجود دارد، اما از نوع داده‌ای استفاده می‌کند که این نسخه از TgWitness نمی‌تواند رمزگشایی کند (سازنده {c})؛ محتوای آن در این خروجی نیست.",
   "Numbers {a}–{b}, just below the oldest message the history listing returned, were also requested; messages found there: {n}.": "شماره‌های {a}–{b}، درست زیر قدیمی‌ترین پیامی که فهرست تاریخچه برگرداند، هم درخواست شدند؛ پیام‌های یافته‌شده در آنجا: {n}.",
   "{n} absent numbers were not requested; they cannot be told apart from deleted ones.": "{n} شمارهٔ غایب درخواست نشدند؛ نمی‌توان آن‌ها را از حذف‌شده‌ها تشخیص داد.",
-  "This snapshot holds only what Telegram returned at export. The journal of this workspace also holds deletions or earlier versions observed in this chat; export the evidence journal to include them.": "این اسنپ‌شات تنها شامل اطلاعاتی است که تلگرام در هنگام خروجی‌گیری بازگردانده است. مجلهٔ این فضای کاری نیز شامل حذف‌ها یا نسخه‌های قبلی مشاهده‌شده در این چت است؛ مجلهٔ شواهد را خروجی بگیرید تا آن‌ها را نیز دربرگیرد.",
   "access lost: removed or no longer readable": "دسترسی از دست رفته: حذف شده یا دیگر قابل خواندن نیست",
   "The account was removed from every source or can no longer read them.": "حساب از همه منابع حذف شده یا دیگر قادر به خواندن آن‌ها نیست.",
   "The account was removed from some sources or can no longer read them; nothing arrives from those. The others continue.": "حساب از برخی منابع حذف شده یا دیگر قابل خواندن نیست؛ از آن‌ها هیچ چیزی دریافت نمی‌شود. بقیه ادامه دارند.",
@@ -8567,5 +8566,16 @@
   "Resume export": "ادامهٔ صادرات",
   "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}: {messages} پیام پیش از توقف ذخیره شد، شناسه‌های {low}–{high}.",
   "resumed": "ازسرگرفته",
-  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "پیام‌های ذخیره‌شده از صادرات متوقف‌شده حذف شوند و این چت از جدیدترین پیام دوباره خوانده شود؟"
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "پیام‌های ذخیره‌شده از صادرات متوقف‌شده حذف شوند و این چت از جدیدترین پیام دوباره خوانده شود؟",
+  "Deletions and earlier versions": "حذف‌ها و نسخه‌های قبلی",
+  "Messages of this chat that the observing account saw deleted, missing on recheck or edited. Every saved version comes from the workspace journal with its own hash and signature; Telegram's current history no longer shows these versions.": "پیام‌های این چت که حساب ناظر مشاهده کرده بود حذف شده، در بازبینی مجدد مفقود یا ویرایش شده‌اند. هر نسخهٔ ذخیره شده از دفتر کار با هش و امضای مخصوص خود می‌آید؛ تاریخچهٔ فعلی تلگرام دیگر این نسخه‌ها را نشان نمی‌دهد.",
+  "Saved text": "متن ذخیره شده",
+  "Edits: {n}": "ویرایش‌ها: {n}",
+  "… and {n} more messages in journal-changes.jsonl.": " … و {n} پیام‌های بیشتر در journal-changes.jsonl.",
+  "This snapshot holds only what Telegram returned at export. Deletions and earlier versions observed in this chat are in journal-changes.jsonl, each record signed; the evidence journal export holds the complete hash chain.": "این اسنپ‌شات تنها شامل آنچه تلگرام در زمان خروجی بازگردانده است می‌باشد. حذف‌ها و نسخه‌های قبلی مشاهده‌شده در این چت در فایل journal-changes.jsonl قرار دارند، هر رکورد امضا شده است؛ خروجی ژورنال شواهد زنجیره کامل هش را در بر دارد.",
+  "rechecking absent message numbers": "بازبینی مجدد شماره‌های پیام‌های غایب",
+  "packaging and signing the archive": "بسته‌بندی و امضای آرشیو",
+  "Download the account loss report": "دانلود گزارش از دست دادن حساب",
+  "Signed account loss report downloaded. Check it with verify.py.": "گزارش از دست دادن حساب امضا شده دانلود شد. آن را با verify.py بررسی کنید.",
+  "Another client lost its authorization": "یک کلاینت دیگر مجوز دسترسی خود را از دست داد"
 }

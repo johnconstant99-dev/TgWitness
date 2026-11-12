@@ -21,7 +21,8 @@ from .common import (
     zipfile,
 )
 
-from .account import DISCLOSURE_FORMATS, account_export_lines, verify_account_disclosure, verify_account_export
+from .account import (DISCLOSURE_FORMATS, account_export_lines, verify_account_disclosure, verify_account_export,
+                      verify_account_loss)
 from .board import verify_board_document
 from .bundles import verify_bundle
 from .capture import bundle_format
@@ -338,11 +339,18 @@ def verification_json(args):
     if "statement" in data and "signature" in data:
         authenticate_statement(data, "public_key" if "public_key" in data["statement"] else "witness_public_key")
         known = {"tgwitness-board-selection-v1", "tgwitness-case-board-v1", "tgwitness-case-board-disclosure-v1",
-                 "tgwitness-case-board-handover-v1"}
+                 "tgwitness-case-board-handover-v1", "tgwitness-account-loss-v1"}
         if kind not in known and not any(is_format(kind, name) for name in (
                 "public-proof-v1", "history-report-v1", "dossier-v1")):
             raise VerifierTooOld("Unsupported signed JSON format")
-    if kind == "tgwitness-board-selection-v1":
+    if kind == "tgwitness-account-loss-v1":
+        shown, result = "account_loss", verify_account_loss(data, args.fingerprint)
+        pinned = bool(args.fingerprint)
+        notes.append("Account loss report: " + str(result["records"]) + " signed journal record(s) from "
+                     + str((result["window"] or {}).get("from")) + "; Telegram ended the session at "
+                     + str(result["loss"]["at"]) + " (" + str(result["loss"]["cause"]) + ")."
+                     + (" The report reached its record limit." if result["truncated"] else ""))
+    elif kind == "tgwitness-board-selection-v1":
         shown, result = "selection", verify_selection(args.bundle, args.fingerprint, args.evidence)
         pinned = bool(args.fingerprint)
         notes.append("Signed Case Board selection; exact records matched against the signed journal archive.")
@@ -626,6 +634,10 @@ def verification_output(args, checked, console, mode):
         verification_print("Message IDs " + str(ids["first_id"]) + "-" + str(ids["last_id"]) + ": " + str(ids["present"])
               + " present, " + str(ids["missing"]) + " absent in " + str(ids["missing_ranges"])
               + " range(s); message-ids.json matches chat.json.")
+    changes = result.get("journal_changes")
+    if changes:
+        verification_print("Journal records of deletions and earlier versions: " + str(changes["records"]) + " for "
+                           + str(changes["messages"]) + " message(s); each hash and signature checked.")
     if result.get("sha256sums"):
         verification_print("SHA256SUMS matches the signed manifest.")
     for line in notes:

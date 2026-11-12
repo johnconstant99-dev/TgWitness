@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tgwitness"
-version = "0.9.2"
+version = "0.9.3"
 description = "Telegram observation journal with version history and signed evidence exports"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -88,7 +88,7 @@ tgwitness = [
   "locales/tr.json", "locales/ar.json", "locales/fa.json", "locales/ur.json",
   "locales/hi.json", "locales/id.json", "locales/vi.json", "locales/zh.json",
   "guide_locales/*.json",
-  "narrative/texts/*.json", "narrative/jurisdictions/*.json", "narrative/examination/*.json", "narrative/review-policy.json",
+  "narrative/texts/*.json", "narrative/jurisdictions/*.json", "narrative/examination/*.json",
   "english_fallbacks.json", "public_proxies.json", "sealed_policy.json", "jurisdictions.json", "verifier_languages.json", "analysis_words.json",
   "schemas/board-*.json",
   "client_profiles.json", "client_profiles.LICENSE", "dstack_measurement.LICENSE",

@@ -10,17 +10,17 @@
 # Jurisdiction reference data
 
 Structured terminology and source references selected by the narrative CLI's
-`--jurisdiction` option. Each JSON file records its scope, check date and review
-status alongside the terms included in the report.
+`--jurisdiction` option. Each JSON file records its scope and check date
+alongside the terms included in the report.
 
 | Fields | Purpose |
 | --- | --- |
-| `code`, `scope`, `checked_at`, `review` | Catalog identity and review metadata |
+| `code`, `scope`, `checked_at` | Catalog identity and check date |
 | `expert_role`, `esig_regulation`, `data_access_basis` | Referenced terms and source material |
 | `timestamp_recognition`, `evidence_rules`, `dpa` | Additional reference entries, where supplied |
 | `sources` | Labels and URLs reproduced in the report |
 
 See [`DE.json`](DE.json) for the file structure and [`render.py`](../render.py)
-for its use in reports. Preserve source URLs and review metadata when updating
+for its use in reports. Preserve source URLs and check dates when updating
 a catalog. The [narrative guide](../../../docs/NARRATIVE.md) explains the scope
-of these references and the remaining review requirements.
+of these references.

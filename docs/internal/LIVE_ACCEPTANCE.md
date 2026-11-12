@@ -4,9 +4,12 @@
 
 # Live Telegram acceptance procedure
 
-TgWitness has already run on a real account: see the
-[live test](../VERIFICATION.md#live-telegram-test--27-to-29-october-2026). That test covered
-one account and one supergroup; the full procedure below has not been run yet.
+Live runs from 27 October to 10 November 2026 are listed in the
+[verification record](../VERIFICATION.md) and the [release notes](RELEASE.md). They covered
+authorization and session reuse, observation of groups, channels and private chats, history
+snapshots, interrupted and resumed exports, export verification and session-file import.
+Steps 4–8, QR confirmation on a phone (step 15), the proxy matrix (step 14) and backup
+restore (step 16) have not been run.
 Use test groups and accounts you are allowed to record.
 Do not use a personal investigation dataset as a release fixture.
 

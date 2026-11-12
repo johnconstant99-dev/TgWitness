@@ -6111,7 +6111,6 @@
   "Message number {n} exists in Telegram but uses a data type this TgWitness version cannot decode (constructor {c}); its content is not in this export.": "Tin nhắn số {n} có trong Telegram nhưng dùng kiểu dữ liệu mà phiên bản TgWitness này không giải mã được (constructor {c}); nội dung của nó không có trong bản xuất này.",
   "Numbers {a}–{b}, just below the oldest message the history listing returned, were also requested; messages found there: {n}.": "Các số {a}–{b} ngay dưới tin nhắn cũ nhất mà danh sách lịch sử trả về cũng đã được yêu cầu; tin nhắn tìm thấy ở đó: {n}.",
   "{n} absent numbers were not requested; they cannot be told apart from deleted ones.": "{n} số bị thiếu chưa được yêu cầu; không thể phân biệt chúng với các số đã bị xóa.",
-  "This snapshot holds only what Telegram returned at export. The journal of this workspace also holds deletions or earlier versions observed in this chat; export the evidence journal to include them.": "Bản chụp nhanh này chỉ chứa những gì Telegram trả về khi xuất dữ liệu. Nhật ký của không gian làm việc này cũng lưu giữ các nội dung đã bị xóa hoặc các phiên bản trước đó được ghi nhận trong cuộc trò chuyện này; hãy xuất nhật ký bằng chứng để bao gồm các nội dung đó.",
   "access lost: removed or no longer readable": "Mất quyền truy cập: đã bị xóa hoặc không còn đọc được",
   "The account was removed from every source or can no longer read them.": "Tài khoản đã bị xóa khỏi tất cả các nguồn hoặc không thể truy cập chúng nữa.",
   "The account was removed from some sources or can no longer read them; nothing arrives from those. The others continue.": "Tài khoản đã bị xóa khỏi một số nguồn hoặc không thể truy cập chúng nữa; không có thông tin nào đến từ những nguồn đó. Các nguồn khác vẫn tiếp tục hoạt động.",
@@ -8528,5 +8527,16 @@
   "Resume export": "Tiếp tục xuất",
   "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}: đã lưu {messages} tin nhắn trước khi dừng, ID {low}–{high}.",
   "resumed": "đã tiếp tục",
-  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "Xóa các tin nhắn đã lưu từ lần xuất bị dừng và đọc lại cuộc trò chuyện này từ tin nhắn mới nhất?"
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "Xóa các tin nhắn đã lưu từ lần xuất bị dừng và đọc lại cuộc trò chuyện này từ tin nhắn mới nhất?",
+  "Deletions and earlier versions": "Các nội dung đã xóa và các phiên bản trước đó",
+  "Messages of this chat that the observing account saw deleted, missing on recheck or edited. Every saved version comes from the workspace journal with its own hash and signature; Telegram's current history no longer shows these versions.": "Các tin nhắn trong cuộc trò chuyện này mà tài khoản quan sát thấy đã bị xóa, mất tích khi kiểm tra lại hoặc bị chỉnh sửa. Mỗi phiên bản đã lưu đều xuất phát từ nhật ký không gian làm việc với mã băm và chữ ký riêng; lịch sử hiện tại của Telegram không còn hiển thị các phiên bản này nữa.",
+  "Saved text": "Văn bản đã lưu",
+  "Edits: {n}": "Chỉnh sửa: {n}",
+  "… and {n} more messages in journal-changes.jsonl.": "… và {n} tin nhắn khác trong tệp journal-changes.jsonl.",
+  "This snapshot holds only what Telegram returned at export. Deletions and earlier versions observed in this chat are in journal-changes.jsonl, each record signed; the evidence journal export holds the complete hash chain.": "Bản chụp nhanh này chỉ chứa những gì Telegram trả về tại thời điểm xuất. Các nội dung đã bị xóa và các phiên bản trước đó được ghi nhận trong cuộc trò chuyện này nằm trong tệp `journal-changes.jsonl`, mỗi bản ghi đều được ký; tệp xuất nhật ký bằng chứng chứa chuỗi băm hoàn chỉnh.",
+  "rechecking absent message numbers": "kiểm tra lại số tin nhắn bị thiếu",
+  "packaging and signing the archive": "đóng gói và ký tệp lưu trữ",
+  "Download the account loss report": "Tải xuống báo cáo mất tài khoản",
+  "Signed account loss report downloaded. Check it with verify.py.": "Đã tải xuống báo cáo mất tài khoản đã ký. Kiểm tra báo cáo này bằng verify.py.",
+  "Another client lost its authorization": "Một khách hàng khác đã mất quyền truy cập"
 }

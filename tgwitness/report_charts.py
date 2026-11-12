@@ -96,10 +96,15 @@ def _unavailable(chart, say):
     return ''
 
 
+def axis_top(rows):
+    maximum = max(r["total"] for r in rows) or 1
+    return maximum + maximum % 2
+
+
 def activity_svg(rows, say):
     if not rows:
         return '<p>'+_e(say("No observations in this selection."))+'</p>'
-    maximum = max(r["total"] for r in rows) or 1
+    maximum = axis_top(rows)
     parts = ['<svg viewBox="0 0 720 245" role="img" aria-label="'+_e(say("Recorded activity over time"))+'">']
     for value in (0, maximum/2, maximum):
         y = 200-170*value/maximum
@@ -232,7 +237,7 @@ def pdf(lay, data):
             if pdf.get_y()+85 > pdf.page_break_trigger:
                 pdf.add_page()
             left, top, width, height = pdf.l_margin+10, pdf.get_y()+5, pdf.epw-12, 43
-            maximum = max(r["total"] for r in rows) or 1
+            maximum = axis_top(rows)
             with pdf.local_context(draw_color=(190,197,200)):
                 for frac in (0,.5,1):
                     pdf.line(left, top+height*frac, left+width, top+height*frac)

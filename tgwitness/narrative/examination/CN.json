@@ -9,7 +9,6 @@
   "local_language": "zh",
   "legal_family": "socialist law",
   "checked_at": "2026-11-11",
-  "review": "machine-assisted research, not reviewed by local counsel",
   "expert_term": {
     "local": "鉴定人；司法鉴定人",
     "en": "forensic expert (judicial appraiser) appointed or engaged by the investigating authority, procuratorate or court; registered judicial appraisers work within a registered judicial expertise institution"
@@ -141,6 +140,7 @@
     }
   ],
   "declaration": {
+    "route": "civil",
     "basis": "最高人民法院关于民事诉讼证据的若干规定 第33条第1款（承诺书，民事）；司法鉴定程序通则 第37条（签名）",
     "text_local": "本人保证客观、公正、诚实地进行鉴定，保证出庭作证，如作虚假鉴定，愿意承担法律责任。",
     "text_en": "I undertake to conduct the expertise objectively, impartially and honestly and to appear and testify in court; if I give a false expertise I will bear legal liability.",

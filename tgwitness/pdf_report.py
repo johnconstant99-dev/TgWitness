@@ -1279,6 +1279,7 @@ class ChatPDF:
                 "source": self.render_source,
                 "participants": self.render_participants,
                 "message_numbers": self.render_message_numbers,
+                "journal_changes": self.render_journal_changes,
                 "admin_log": self.render_admin_log,
                 "indicators": self.render_indicators,
                 "journal": self.render_journal,
@@ -1288,11 +1289,12 @@ class ChatPDF:
                 "files": self.render_files,
                 "limitations": self.render_limitations,
             }
-            default_order = ['brief', 'analytics', 'assessment', 'case', 'source', 'participants', 'message_numbers', 'admin_log', 'indicators', 'journal', 'integrity', 'custody', 'verify', 'files', 'limitations']
+            default_order = ['brief', 'analytics', 'assessment', 'case', 'source', 'participants', 'message_numbers', 'journal_changes', 'admin_log', 'indicators', 'journal', 'integrity', 'custody', 'verify', 'files', 'limitations']
             visible = {
                 "analytics": bool(self.context.get("analytics") and report.snapshot_analytics.selected(self.options)),
                 "source": bool(report.source_rows(say, self.meta, self.stats)), "message_numbers": bool(self.ids),
                 "admin_log": self.context.get("admin_events") is not None,
+                "journal_changes": self.context.get("journal_changes") is not None,
                 "indicators": bool(self.options.get("show_indicators", True) and (self.context.get("indicators") or {}).get("items")),
                 "files": bool(self.context.get("files")),
             }
@@ -1378,6 +1380,20 @@ class ChatPDF:
             else:
                 self.lay.text(say("In private chats and basic groups the numbers are shared by all of the account's chats, so "
                              "gaps say nothing about this chat."), size=9)
+
+    def render_journal_changes(self):
+        say = self.say
+        items = self.context.get("journal_changes")
+        if items is not None:
+            summary = self.meta.get("journal") or {}
+            self.lay.section(say("Deletions and earlier versions"), say(report.JOURNAL_LEAD))
+            self.lay.kv([(say("Messages"), summary.get("messages")), (say("Journal records"), summary.get("records")),
+                         (say("File"), "journal-changes.jsonl")])
+            self.lay.grid([say("Message"), say("Observed"), say("Saved text"), say("Journal records")],
+                          [list(row) for row in report.journal_change_rows(say, items)], (12, 26, 44, 18))
+            more = (summary.get("messages") or 0) - len(items)
+            if more > 0:
+                self.lay.text(say("… and {n} more messages in journal-changes.jsonl.", n=more), size=8)
 
     def render_admin_log(self):
         say = self.say

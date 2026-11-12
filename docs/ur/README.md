@@ -20,7 +20,7 @@
 <p align="center"><strong>زیرو ٹرسٹ۔</strong> TgWitness کسی کا فریق نہیں بنتا: یہی جانچ آپریٹر، PhishDestroy اور ہر دوسرے فرد پر یکساں لاگو ہوتی ہے۔<br>صرف وہی معتبر ہے جس کی تصدیق کوئی تیسرا فریق یا ریاضی کرے۔ <a href="../QUESTIONS-AND-CHECKS.md">سوالات اور جانچ</a></p>
 
 <p align="center">
-  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · پری ریلیز"></a>
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.3 · پری ریلیز"></a>
   <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
   <sub><a href="../VERIFICATION.md">آزمائے گئے ماحول</a> · انٹرفیس کی 25 زبانیں · رہنما کی 26 زبانیں</sub>
 </p>

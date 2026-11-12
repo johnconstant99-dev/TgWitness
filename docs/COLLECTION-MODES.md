@@ -14,6 +14,7 @@ choosing one does not silently start another or change the account's connection.
 | Add past history to the workspace | More tools → Sources → Chats in scope → Full history | Current visible messages, media outcomes and available Recent Actions in the signed journal | Pause observation first; choose Standard API or Takeout |
 | Create a separate account snapshot | Exports → Telegram account | Selected chats, files and optional account data in a separate signed archive | Requires an idle account; observation sources do not define this selection |
 | Export one chat | Chats → Export chat | Signed selected history and context, optionally split across eligible accounts | Every selected account must be idle and already have access |
+| Protect a valuable account | [Trusted Live](TRUSTED-LIVE.md) locally, or [official Web](OFFICIAL-WITNESS.md) in GitHub Actions | Video and signed observations of what the official Telegram client shows | TgWitness makes no Telegram API calls of its own and imports no session; the official client does the requests; preview |
 | Preserve an official-client session | More tools → Extras → Independent capture → Trusted Live | Guarded video, preserved native JSON and continuity artifacts | Separate recorder and manual official-client login; preview |
 | Capture with GitHub workflow provenance | Exports → Other formats & capture tools → GitHub Actions capture | Encrypted handoff and workflow attestation | Separate runner and explicitly authorized session; preview |
 

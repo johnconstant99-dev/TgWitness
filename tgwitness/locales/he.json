@@ -6189,7 +6189,6 @@
   "Message number {n} exists in Telegram but uses a data type this TgWitness version cannot decode (constructor {c}); its content is not in this export.": "הודעה מספר {n} קיימת ב-Telegram אך משתמשת בסוג נתונים שגרסה זו של TgWitness אינה יכולה לפענח (בנאי {c}); התוכן שלה אינו בייצוא הזה.",
   "Numbers {a}–{b}, just below the oldest message the history listing returned, were also requested; messages found there: {n}.": "התבקשו גם המספרים {a}–{b}, מתחת להודעה הוותיקה ביותר שרשימת ההיסטוריה החזירה; הודעות שנמצאו שם: {n}.",
   "{n} absent numbers were not requested; they cannot be told apart from deleted ones.": "{n} מספרים חסרים לא התבקשו; אי אפשר להבדיל ביניהם לבין מחוקים.",
-  "This snapshot holds only what Telegram returned at export. The journal of this workspace also holds deletions or earlier versions observed in this chat; export the evidence journal to include them.": "תמונת מצב זו מכילה רק את מה ש-Telegram החזיר בעת הייצוא. יומן סביבת העבודה הזו מכיל גם מחיקות או גרסאות קודמות שנצפו בצ'אט זה; ייצאו את יומן הראיות כדי לכלול אותן.",
   "access lost: removed or no longer readable": "אובדן גישה: הוסר או שאינו קריא עוד",
   "The account was removed from every source or can no longer read them.": "החשבון הוסר מכל המקורות או שאינו יכול עוד לקרוא אותם.",
   "The account was removed from some sources or can no longer read them; nothing arrives from those. The others continue.": "החשבון הוסר ממקורות מסוימים או שאינו יכול עוד לקרוא אותם; לא מגיע דבר מאותם מקורות. האחרים ממשיכים לפעול.",
@@ -8606,5 +8605,16 @@
   "Resume export": "המשך ייצוא",
   "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}: {messages} הודעות נשמרו לפני העצירה, מזהים {low}–{high}.",
   "resumed": "הומשך",
-  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "למחוק את ההודעות שנשמרו מהייצוא שנעצר ולקרוא את הצ'אט הזה מחדש החל מההודעה החדשה ביותר?"
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "למחוק את ההודעות שנשמרו מהייצוא שנעצר ולקרוא את הצ'אט הזה מחדש החל מההודעה החדשה ביותר?",
+  "Deletions and earlier versions": "מחיקות וגרסאות קודמות",
+  "Messages of this chat that the observing account saw deleted, missing on recheck or edited. Every saved version comes from the workspace journal with its own hash and signature; Telegram's current history no longer shows these versions.": "הודעות בצ'אט זה שהחשבון הצופה ראה שנמחקו, נעלמו בבדיקה חוזרת או עברו עריכה. כל גרסה שמורה מגיעה מיומן סביבת העבודה עם חתימה ו-hash משלה; ההיסטוריה הנוכחית של טלגרם כבר לא מציגה גרסאות אלה.",
+  "Saved text": "טקסט שנשמר",
+  "Edits: {n}": "עריכות: {n}",
+  "… and {n} more messages in journal-changes.jsonl.": "… ועוד {n} הודעות בקובץ journal-changes.jsonl.",
+  "This snapshot holds only what Telegram returned at export. Deletions and earlier versions observed in this chat are in journal-changes.jsonl, each record signed; the evidence journal export holds the complete hash chain.": "תמונת מצב זו מכילה רק את מה ש-Telegram החזיר בעת הייצוא. מחיקות וגרסאות קודמות שנצפו בצ'אט זה נמצאות בקובץ journal-changes.jsonl, כאשר כל רשומה חתומה; ייצוא יומן הראיות מכיל את שרשרת ההאש המלאה.",
+  "rechecking absent message numbers": "בדיקה חוזרת של מספרי הודעות חסרות",
+  "packaging and signing the archive": "אריזה וחתימה על הארכיון",
+  "Download the account loss report": "הורד את דוח אובדן החשבון",
+  "Signed account loss report downloaded. Check it with verify.py.": "דוח אובדן חשבון חתום הורד. בדוק אותו באמצעות verify.py.",
+  "Another client lost its authorization": "לקוח נוסף איבד את ההרשאה שלו"
 }

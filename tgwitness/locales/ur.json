@@ -6150,7 +6150,6 @@
   "Message number {n} exists in Telegram but uses a data type this TgWitness version cannot decode (constructor {c}); its content is not in this export.": "پیغام نمبر {n} Telegram میں موجود ہے، لیکن اس میں ایسی ڈیٹا قسم ہے جسے TgWitness کا یہ ورژن ڈی کوڈ نہیں کر سکتا (کنسٹرکٹر {c})؛ اس کا مواد اس ایکسپورٹ میں نہیں ہے۔",
   "Numbers {a}–{b}, just below the oldest message the history listing returned, were also requested; messages found there: {n}.": "تاریخ کی فہرست کے سب سے پرانے پیغام کے بالکل نیچے کے نمبر {a}–{b} بھی مانگے گئے؛ وہاں ملنے والے پیغامات: {n}۔",
   "{n} absent numbers were not requested; they cannot be told apart from deleted ones.": "{n} غیر موجود نمبر نہیں مانگے گئے؛ انہیں حذف شدہ نمبروں سے الگ نہیں کیا جا سکتا۔",
-  "This snapshot holds only what Telegram returned at export. The journal of this workspace also holds deletions or earlier versions observed in this chat; export the evidence journal to include them.": "یہ اسنیپ شاٹ صرف وہی معلومات رکھتا ہے جو ٹیلیگرام نے ایکسپورٹ میں واپس کیں۔ اس ورک اسپیس کا جرنل بھی اس چیٹ میں دیکھی گئی حذف شدہ یا پہلے کے ورژنز کو محفوظ کرتا ہے؛ انہیں شامل کرنے کے لیے ثبوت جرنل کو ایکسپورٹ کریں۔",
   "access lost: removed or no longer readable": "رسائی ختم: حذف شدہ یا اب قابلِ مطالعہ نہیں",
   "The account was removed from every source or can no longer read them.": "اکاؤنٹ کو ہر ذریعہ سے ہٹا دیا گیا ہے یا اب وہ انہیں پڑھ نہیں سکتا۔",
   "The account was removed from some sources or can no longer read them; nothing arrives from those. The others continue.": "کچھ ذرائع سے اکاؤنٹ ہٹا دیا گیا ہے یا اب وہ انہیں پڑھ نہیں سکتا؛ ان سے کچھ بھی نہیں آتا۔ باقی جاری ہیں۔",
@@ -8567,5 +8566,16 @@
   "Resume export": "ایکسپورٹ جاری رکھیں",
   "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}: رکنے سے پہلے {messages} پیغامات محفوظ ہوئے، شناختی نمبر {low}–{high}۔",
   "resumed": "دوبارہ شروع شدہ",
-  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "رکی ہوئی ایکسپورٹ سے محفوظ شدہ پیغامات حذف کر کے اس چیٹ کو تازہ ترین پیغام سے دوبارہ پڑھیں؟"
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "رکی ہوئی ایکسپورٹ سے محفوظ شدہ پیغامات حذف کر کے اس چیٹ کو تازہ ترین پیغام سے دوبارہ پڑھیں؟",
+  "Deletions and earlier versions": "مٹاؤ اور پہلے کے ورژنز",
+  "Messages of this chat that the observing account saw deleted, missing on recheck or edited. Every saved version comes from the workspace journal with its own hash and signature; Telegram's current history no longer shows these versions.": "اس چیٹ کے وہ پیغامات جو مشاہدہ کرنے والے اکاؤنٹ نے حذف شدہ، دوبارہ چیک کرنے پر غائب یا ترمیم شدہ دیکھے۔ ہر محفوظ شدہ ورژن ورک اسپیس جرنل سے آتا ہے جس کا اپنا ہیش اور دستخط ہوتا ہے؛ ٹیلیگرام کی موجودہ تاریخ اب ان ورژنز کو نہیں دکھاتی۔",
+  "Saved text": "محفوظ شدہ متن",
+  "Edits: {n}": "ترمیمات: {n}",
+  "… and {n} more messages in journal-changes.jsonl.": "… اور journal-changes.jsonl میں مزید {n} پیغامات۔",
+  "This snapshot holds only what Telegram returned at export. Deletions and earlier versions observed in this chat are in journal-changes.jsonl, each record signed; the evidence journal export holds the complete hash chain.": "یہ اسنیپ شاٹ صرف وہی معلومات رکھتا ہے جو ٹیلیگرام نے ایکسپورٹ کے دوران واپس کیں۔ اس چیٹ میں حذف شدہ مواد اور پہلے کے ورژنز journal-changes.jsonl میں موجود ہیں، ہر ریکارڈ پر دستخط شدہ ہے؛ ثبوت جرنل ایکسپورٹ مکمل ہیش چین رکھتا ہے۔",
+  "rechecking absent message numbers": "غائب پیغام نمبروں کی دوبارہ جانچ",
+  "packaging and signing the archive": "آرکائیو کی پیکیجنگ اور دستخط",
+  "Download the account loss report": "اکاؤنٹ کے نقصان کی رپورٹ ڈاؤن لوڈ کریں",
+  "Signed account loss report downloaded. Check it with verify.py.": "دستخط شدہ اکاؤنٹ نقصان کی رپورٹ ڈاؤن لوڈ ہو گئی ہے۔ verify.py کے ساتھ اس کی جانچ کریں۔",
+  "Another client lost its authorization": "ایک اور کلائنٹ نے اپنی اجازت کھو دی"
 }

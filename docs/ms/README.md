@@ -20,7 +20,7 @@
 <p align="center"><strong>ZERO TRUST.</strong> TgWitness tidak memihak: semakan yang sama terpakai kepada operator, PhishDestroy dan sesiapa sahaja.<br>Hanya perkara yang disahkan oleh pihak ketiga atau matematik diambil kira. <a href="../QUESTIONS-AND-CHECKS.md">Soalan dan semakan</a></p>
 
 <p align="center">
-  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · pra-keluaran"></a>
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.3 · pra-keluaran"></a>
   <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
   <sub><a href="../VERIFICATION.md">Persekitaran yang diuji</a> · 25 bahasa antara muka · 26 bahasa panduan</sub>
 </p>

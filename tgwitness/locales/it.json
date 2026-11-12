@@ -6150,7 +6150,6 @@
   "Message number {n} exists in Telegram but uses a data type this TgWitness version cannot decode (constructor {c}); its content is not in this export.": "Il messaggio numero {n} esiste in Telegram, ma usa un tipo di dati che questa versione di TgWitness non sa decodificare (costruttore {c}); il suo contenuto non è in questa esportazione.",
   "Numbers {a}–{b}, just below the oldest message the history listing returned, were also requested; messages found there: {n}.": "Sono stati richiesti anche i numeri {a}–{b}, appena sotto il messaggio più vecchio restituito dalla cronologia; messaggi trovati lì: {n}.",
   "{n} absent numbers were not requested; they cannot be told apart from deleted ones.": "{n} numeri assenti non sono stati richiesti; non si distinguono da quelli eliminati.",
-  "This snapshot holds only what Telegram returned at export. The journal of this workspace also holds deletions or earlier versions observed in this chat; export the evidence journal to include them.": "Questa istantanea contiene solo ciò che Telegram ha restituito al momento dell'esportazione. Il registro di questo spazio di lavoro contiene anche le eliminazioni o le versioni precedenti rilevate in questa chat; esporta il registro delle prove per includerle.",
   "access lost: removed or no longer readable": "accesso perso: rimosso o non più leggibile",
   "The account was removed from every source or can no longer read them.": "L'account è stato rimosso da tutte le fonti oppure non è più in grado di leggerle.",
   "The account was removed from some sources or can no longer read them; nothing arrives from those. The others continue.": "L'account è stato rimosso da alcune fonti o non è più in grado di leggerle; da quelle non arriva più nulla. Le altre continuano a funzionare.",
@@ -8567,5 +8566,16 @@
   "Resume export": "Riprendi l'esportazione",
   "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}: {messages} messaggi salvati prima dell'interruzione, ID {low}–{high}.",
   "resumed": "ripresa",
-  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "Eliminare i messaggi salvati dall'esportazione interrotta e rileggere questa chat dal messaggio più recente?"
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "Eliminare i messaggi salvati dall'esportazione interrotta e rileggere questa chat dal messaggio più recente?",
+  "Deletions and earlier versions": "Cancellazioni e versioni precedenti",
+  "Messages of this chat that the observing account saw deleted, missing on recheck or edited. Every saved version comes from the workspace journal with its own hash and signature; Telegram's current history no longer shows these versions.": "Messaggi di questa chat che l’account osservatore ha visto cancellati, mancanti al momento della ricontrollo o modificati. Ogni versione salvata proviene dal registro dell’area di lavoro con il proprio hash e la propria firma; la cronologia attuale di Telegram non mostra più queste versioni.",
+  "Saved text": "Testo salvato",
+  "Edits: {n}": "Modifiche: {n}",
+  "… and {n} more messages in journal-changes.jsonl.": "… e altri {n} messaggi nel file journal-changes.jsonl",
+  "This snapshot holds only what Telegram returned at export. Deletions and earlier versions observed in this chat are in journal-changes.jsonl, each record signed; the evidence journal export holds the complete hash chain.": "Questa istantanea contiene solo ciò che Telegram ha restituito al momento dell’esportazione. Le cancellazioni e le versioni precedenti rilevate in questa chat sono riportate nel file journal-changes.jsonl, dove ogni record è firmato; l’esportazione del registro delle prove contiene la catena di hash completa.",
+  "rechecking absent message numbers": "verifica del numero di messaggi mancanti",
+  "packaging and signing the archive": "creazione del pacchetto e firma dell’archivio",
+  "Download the account loss report": "Scarichi il rapporto sulla perdita dell’account",
+  "Signed account loss report downloaded. Check it with verify.py.": "È stato scaricato il rapporto firmato sulla perdita dell’account. Lo verifichi con verify.py.",
+  "Another client lost its authorization": "Un altro client ha perso l’autorizzazione"
 }

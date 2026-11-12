@@ -784,6 +784,7 @@ CSS = (
     ".versions>li{padding:4px 0 8px 14px}.vhead{font-size:12.5px;color:var(--muted)}"
     ".versions .text{white-space:pre-wrap;overflow-wrap:anywhere;margin:4px 0}.gone-step .gone{color:var(--bad);margin:4px 0;font-size:13.5px}"
     "del{background:var(--badtint);color:var(--bad)}ins{background:var(--oktint);color:var(--ok)}"
+    "del+ins,ins+del{margin-inline-start:.25em}"
     "del,ins{-webkit-print-color-adjust:exact;print-color-adjust:exact}"
     ".kbd-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.key{display:inline-flex;flex-direction:column;gap:2px;"
     "border:1px solid var(--line);border-radius:3px;padding:4px 10px;background:var(--bg2)}.key code{font-size:11.5px;color:var(--muted)}"
@@ -2725,6 +2726,9 @@ class ChatHTML:
                                                 say("Last message")], rows) + "</div>" + more + "</section>").encode("utf-8")
         if self.ids:
             yield message_ids_section(say, next(self.numbers), self.ids).encode("utf-8")
+        if self.context.get("journal_changes") is not None:
+            yield journal_changes_section(say, next(self.numbers), self.meta.get("journal") or {},
+                                          self.context["journal_changes"]).encode("utf-8")
         if self.context.get("admin_events") is not None:
             yield admin_log_section(say, next(self.numbers), self.meta, self.context["admin_events"]).encode("utf-8")
         if self.options.get("show_indicators", True) and (self.context.get("indicators") or {}).get("items"):
@@ -2918,6 +2922,37 @@ def admin_rows(say, events, limit=500):
             content = str(event.get("prev_value", "")) + "  →  " + str(event.get("new_value", ""))
         yield (utc_text(event.get("date")), "ID " + str(event.get("user_id")),
                say(ADMIN_ACTIONS.get(event.get("action"), str(event.get("action")))), message, content)
+
+
+JOURNAL_NOTICES = {"message.deleted": "Deleted", "message.missing_on_recheck": "Missing on recheck"}
+JOURNAL_LEAD = ("Messages of this chat that the observing account saw deleted, missing on recheck or edited. Every saved "
+                "version comes from the workspace journal with its own hash and signature; Telegram's current history no "
+                "longer shows these versions.")
+
+
+def journal_change_rows(say, items):
+    for item in items:
+        versions = [v for v in item["events"] if v["kind"] not in JOURNAL_NOTICES]
+        notices = [say(JOURNAL_NOTICES[v["kind"]]) + " · " + utc_text(v["observed_at"])
+                   for v in item["events"] if v["kind"] in JOURNAL_NOTICES]
+        edits = sum(1 for v in versions if v["kind"] == "message.edited")
+        if edits:
+            notices.append(say("Edits: {n}", n=edits))
+        texts = "  →  ".join((v["text"] or "—")[:300] for v in versions)
+        yield ("#" + str(item["message_id"]), "; ".join(notices), texts,
+               ", ".join("#" + str(v["seq"]) for v in item["events"]))
+
+
+def journal_changes_section(say, number, summary, items):
+    rows = [[e(ref), e(what), e(text), '<span class="mono">' + e(records) + "</span>"]
+            for ref, what, text, records in journal_change_rows(say, items)]
+    more = (summary.get("messages") or 0) - len(items)
+    return (section(number, "journal-changes", say("Deletions and earlier versions"), say(JOURNAL_LEAD))
+            + kv([(say("Messages"), num(summary.get("messages"))), (say("Journal records"), num(summary.get("records"))),
+                  (say("File"), "<code>journal-changes.jsonl</code>")])
+            + table([say("Message"), say("Observed"), say("Saved text"), say("Journal records")], rows)
+            + ('<p class="lead">' + e(say("… and {n} more messages in journal-changes.jsonl.", n=more)) + "</p>"
+               if more > 0 else "") + "</section>")
 
 
 def admin_log_section(say, number, meta, events):

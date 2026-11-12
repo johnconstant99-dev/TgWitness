@@ -10,7 +10,6 @@
   "local_language": "en",
   "legal_family": "common law",
   "checked_at": "2026-11-11",
-  "review": "machine-assisted research, not reviewed by local counsel",
   "expert_term": {
     "local": "expert witness",
     "en": "expert witness instructed by a party or appointed as a single joint expert, owing an overriding duty to the court"
@@ -128,6 +127,7 @@
     }
   ],
   "declaration": {
+    "route": "civil",
     "basis": "RHC O.38 r.37A and r.37C; Appendix D paras 5 and 7; O.41A rr.4–5 (form of statement of truth for an expert report)",
     "text_local": "I confirm that I have read the Code of Conduct for Expert Witnesses set out in Appendix D to the Rules of the High Court (Cap. 4A) and agree to be bound by it; I understand my duty to the Court; and I have complied with and will continue to comply with that duty. I believe that the facts stated in this expert report are true and (if applicable) the opinion expressed in it is honestly held.",
     "text_en": "I confirm that I have read the Code of Conduct for Expert Witnesses set out in Appendix D to the Rules of the High Court (Cap. 4A) and agree to be bound by it; I understand my duty to the Court; and I have complied with and will continue to comply with that duty. I believe that the facts stated in this expert report are true and (if applicable) the opinion expressed in it is honestly held.",

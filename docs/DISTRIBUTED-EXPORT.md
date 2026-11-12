@@ -57,7 +57,7 @@ One account runs one acquisition task. Monitoring, History, account export and c
 - **Messages that are replies** selects direct replies. **Messages that received a reply** selects originals with an observed direct incoming reply. Relationships are built before language/text filtering, so a Russian answer can qualify an English original. Merely posting into a forum topic does not count as a direct reply.
 - Replies can be sought within the selected period or through the acquisition start. The latter can require scanning later history too.
 - Bounded parent/reply context with a separate message cap. Context may fall outside the filters and is marked `selection.role=context`. Missing parents retain a reason; linked discussions outside the chosen source are not traversed. Context expands over acquired history and fetches missing same-source parents; it does not discover every reply outside the scanned period.
-- Literal text phrase; sender-ID filtering through the API. Optional attachments are fetched after selection under each account's capture policy. A changed message is not silently substituted during attachment retrieval.
+- Literal text phrase; sender-ID filtering through the API. Optional attachments are fetched after selection under the lead account's capture policy, whichever account reads them. A changed message is not silently substituted during attachment retrieval.
 
 ## Chunking and continuation
 

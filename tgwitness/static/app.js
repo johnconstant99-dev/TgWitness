@@ -313,6 +313,7 @@ const labels = {
   "session.exclusive_postponed": [tr("Only-session attempt postponed"), "clock", "system"],
   "account.forgotten": [tr("Session forgotten on this computer"), "account", "system"],
   "account.restricted": [tr("Telegram restricted the account"), "alert", "coverage"],
+  "account.authorization_error": [tr("Another client lost its authorization"), "alert", "system"],
   "account.restriction_expired": [tr("Account restriction ended"), "refresh", "system"],
   "account.read_only": [tr("Read-only for Telegram actions changed"), "lock", "system"],
   "connection.opened": [tr("Connected to Telegram"), "link", "system"],
@@ -1149,7 +1150,7 @@ function collectorLines(name,p){
 let healthUI=null;
 const healthReady=import("./components/health.js?v=layout1").then(({createHealthBar})=>{
   healthUI=createHealthBar({node,icon,tr,stateNames:healthStates,partNames:healthPartNames,lines:collectorLines,
-    actionContext:{getState:()=>state,getSession:()=>state.workspaceRevision+':'+state.profile,may,json,refreshStatus,toast,getSources:()=>sourcesReady,navigate},
+    actionContext:{getState:()=>state,getSession:()=>state.workspaceRevision+':'+state.profile,may,json,refreshStatus,toast,getSources:()=>sourcesReady,navigate,saveBlob},
     diagnose:openDiagnostics,canDiagnose:name=>viewAllowed(healthDiagnostics[name]?.view),workspace:$("workspace")});
   if(state.status)renderCollectorHealth(state.status.health);
   return healthUI;
@@ -2098,7 +2099,9 @@ function renderExportState(x){
   if(!x||x.phase==="unknown"){prog.textContent="";return;}
   const resumed=x.resumed?" ("+tr("resumed")+")":"";
   const counts={title:(x.title||tr("chat"))+resumed,captured:(x.captured||0).toLocaleString(),total:(x.total||0).toLocaleString(),percent};
-  if(running&&x.stage==="files")prog.textContent=tr("Exporting {title}: ",counts)+tr("{captured} messages saved; files: {done}/{total}",{captured:counts.captured,done:(x.files_done||0).toLocaleString(),total:(x.files_total||0).toLocaleString()})+
+  if(running&&x.stage==="recheck")prog.textContent=tr("Exporting {title}: ",counts)+tr("rechecking absent message numbers")+"…";
+  else if(running&&x.stage==="packaging")prog.textContent=tr("Exporting {title}: ",counts)+tr("packaging and signing the archive")+"…";
+  else if(running&&x.stage==="files")prog.textContent=tr("Exporting {title}: ",counts)+tr("{captured} messages saved; files: {done}/{total}",{captured:counts.captured,done:(x.files_done||0).toLocaleString(),total:(x.files_total||0).toLocaleString()})+
     (x.eta_seconds!==null&&x.eta_seconds!==undefined?" · "+tr("{time} left",{time:fmtDuration(x.eta_seconds)}):"")+"…";
   else if(running)prog.textContent=tr("Exporting {title}: ",counts)+tr(x.total?"{captured} of {total} messages ({percent}%)":"{captured} messages read",counts)+
     (x.eta_seconds!==null&&x.eta_seconds!==undefined?" · "+tr("{time} left",{time:fmtDuration(x.eta_seconds)}):"")+"…";

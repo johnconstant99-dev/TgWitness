@@ -20,7 +20,7 @@
 <p align="center"><strong>ZERO TRUST</strong> TgWitness ไม่เข้าข้างฝ่ายใด การตรวจสอบแบบเดียวกันใช้กับผู้ดำเนินการ กับ PhishDestroy และกับทุกคน<br>นับเฉพาะสิ่งที่บุคคลที่สามหรือคณิตศาสตร์ยืนยันได้ <a href="../QUESTIONS-AND-CHECKS.md">คำถามและการตรวจสอบ</a></p>
 
 <p align="center">
-  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · รุ่นก่อนเผยแพร่"></a>
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.3 · รุ่นก่อนเผยแพร่"></a>
   <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
   <sub><a href="../VERIFICATION.md">สภาพแวดล้อมที่ทดสอบแล้ว</a> · อินเทอร์เฟซ 25 ภาษา · คู่มือ 26 ภาษา</sub>
 </p>

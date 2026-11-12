@@ -32,7 +32,7 @@ DYNAMIC_SCRIPT_KEYS = (
     "Recheck", "Media", "People", "Notifications", "Exports", "Gaps", "Chat state", "Telegram", "MTProxy",
         "Metrics",
     "Photos", "Videos", "GIFs & animations", "Round video messages", "Voice messages", "Music & audio", "Stickers", "Files & documents",
-    "Show affected sources", "Exclude from scope", "Ignore until visible", "Enable downloads",
+    "Show affected sources", "Exclude from scope", "Ignore until visible", "Enable downloads", "Download the account loss report",
     "Clear waiting queue", "Skip download-disabled notices",
     "Install MCP support in this Python environment and restart TgWitness.",
     "MCP support is installed. Restart TgWitness to activate the endpoint.",

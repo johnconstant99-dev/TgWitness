@@ -62,7 +62,7 @@ CSS = """
 .assessment-review{padding:12px;border-inline-start:3px solid #697d99;margin-top:14px}
 .evidence-conditions{margin:18px 0}.evidence-conditions h3{margin:0 0 6px;font-size:17px}
 .evidence-conditions table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
-.evidence-conditions th,.evidence-conditions td{border-top:1px solid #8894a455;padding:8px;text-align:start;vertical-align:top;overflow-wrap:anywhere}
+.evidence-conditions th,.evidence-conditions td{border-top:1px solid #8894a455;padding:8px;text-align:start;vertical-align:top;overflow-wrap:break-word}
 .evidence-conditions tr.condition-role th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#697d99;padding-top:12px}
 .evidence-conditions tr[data-status="checked_locally"] strong{color:#2e9d5b}.evidence-conditions tr[data-status="not_included"] strong{color:#8894a4}
 .evidence-conditions code,.evidence-conditions pre{font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere}

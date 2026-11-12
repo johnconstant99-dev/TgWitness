@@ -20,7 +20,7 @@
 <p align="center"><strong>الثقة الصفرية.</strong> لا ينحاز TgWitness إلى أي طرف: تنطبق الفحوص نفسها على المشغّل وعلى PhishDestroy وعلى أي شخص آخر.<br>لا يُعتدّ إلا بما يؤكده طرف ثالث أو تؤكده الرياضيات. <a href="../QUESTIONS-AND-CHECKS.md">الأسئلة والتحقق</a></p>
 
 <p align="center">
-  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · إصدار تمهيدي"></a>
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.3 · إصدار تمهيدي"></a>
   <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
   <sub><a href="../VERIFICATION.md">البيئات المختبَرة</a> · 25 لغة للواجهة · 26 لغة للأدلة</sub>
 </p>

@@ -1,9 +1,12 @@
 from .common import (
     Ed25519PublicKey,
+    FIELDS,
     MAX_JSON_BYTES,
     VerifierTooOld,
     base64,
+    bounded_lines,
     datetime,
+    hashlib,
     member_digest,
     open_archive,
     read_manifest,
@@ -11,6 +14,39 @@ from .common import (
     safe_text,
     strict_json,
 )
+JOURNAL_KINDS = ("message.new", "message.snapshot", "message.recovered", "message.edited", "message.deleted",
+                 "message.missing_on_recheck")
+
+
+def check_journal_changes(archive, manifest, public):
+    from .chain import canonical
+    summary = manifest.get("journal") if isinstance(manifest.get("journal"), dict) else {}
+    key = Ed25519PublicKey.from_public_bytes(base64.b64decode(public, validate=True))
+    chat_id = (manifest.get("chat") or {}).get("id")
+    count, first, previous, messages = 0, None, 0, set()
+    with archive.open("journal-changes.jsonl") as stream:
+        for line in bounded_lines(stream):
+            event = strict_json(line)
+            if not isinstance(event, dict) or set(event) != set(FIELDS) | {"hash", "signature"}:
+                raise ValueError("Unexpected record in journal-changes.jsonl")
+            if type(event["seq"]) is not int or event["seq"] <= previous:
+                raise ValueError("journal-changes.jsonl is not in journal order")
+            if event["chat_id"] != chat_id or event["kind"] not in JOURNAL_KINDS or type(event["message_id"]) is not int:
+                raise ValueError("journal-changes.jsonl holds a record outside this chat's messages")
+            calculated = hashlib.sha256(canonical({k: event[k] for k in FIELDS})).hexdigest()
+            if event["hash"] != calculated:
+                raise ValueError("Changed journal record " + str(event["seq"]) + " in journal-changes.jsonl")
+            if not isinstance(event["signature"], str):
+                raise ValueError("Unsigned journal record " + str(event["seq"]) + " in journal-changes.jsonl")
+            key.verify(base64.b64decode(event["signature"], validate=True), bytes.fromhex(calculated))
+            first = event["seq"] if first is None else first
+            previous, count = event["seq"], count + 1
+            messages.add(event["message_id"])
+    if summary.get("records") != count or summary.get("messages") != len(messages):
+        raise ValueError("The signed journal summary disagrees with journal-changes.jsonl")
+    return {"records": count, "messages": len(messages), "first_seq": first, "last_seq": previous or None}
+
+
 def verify_chat_export(path, expected_fingerprint=None, max_gib=None):
     from .account import check_attachments, verify_parts
     from .chain import canonical, fingerprint, is_format
@@ -44,12 +80,14 @@ def verify_chat_export(path, expected_fingerprint=None, max_gib=None):
             raise ValueError("The report seal describes a different chat export")
         companions = report_companions(archive, manifest, public, describes)
         ids = check_message_ids(archive, manifest) if "message-ids.json" in manifest["files"] else None
+        journal = check_journal_changes(archive, manifest, public) if "journal-changes.jsonl" in manifest["files"] else None
         return {"format": manifest["format"], "fingerprint": fp,
                 "message_count": manifest.get("message_count"), "producer": manifest.get("producer"),
                 "chat": manifest.get("chat"), "key_pinned": bool(expected_fingerprint), "parts": parts,
                 "files_checked": len(manifest["files"]), "chat_json_sha256": manifest["files"].get("chat.json"),
                 "attachments": attachments, "sha256sums": sums, "report_seal": seal,
                 "report_parts": companions["parts"], "report_pdf": companions["pdf"], "message_ids": ids,
+                "journal_changes": journal,
                 "case": manifest.get("case") or {}}
 
 

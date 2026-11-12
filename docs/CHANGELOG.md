@@ -7,7 +7,7 @@
 <details>
 <summary>On this page</summary>
 
-- [Unreleased](#unreleased)
+- [0.9.3 preview · 11 November 2026](#093-preview--11-november-2026)
 - [0.9.2 preview · 10 November 2026](#092-preview--10-november-2026)
 - [0.9.1 preview · 5 November 2026](#091-preview--5-november-2026)
 - [0.9.0 preview · 4 November 2026](#090-preview--4-november-2026)
@@ -22,8 +22,12 @@
 
 </details>
 
-## Unreleased
+## 0.9.3 preview · 11 November 2026
 
+- Add the [expert examination protocol](NARRATIVE.md#expert-examination-protocol): `python -m tgwitness.narrative evidence.zip --jurisdiction PL --expert --procedure criminal` writes a draft of the expert's report as HTML, PDF and JSON from the examiner's own verification run. It holds blank fields for the case and the expert, the legal basis, the liability warning and any required declaration, the repeatable checks, findings in three groups and the questions the package can and cannot answer. The [examination catalog](../tgwitness/narrative/examination/README.md) covers 53 jurisdictions; each entry names its official sources and lists the points it could not confirm. The protocol and the narrative recommend filing the English original with a certified or sworn translation into the court language. Narrative reports are available in 39 languages.
+- The narrative and the expert protocol use the dossier layout: a header with the jurisdiction, the procedure, the court languages and the package SHA-256, status labels with text, times as `YYYY-MM-DD HH:MM:SS.mmm UTC` and record references shortened to ranges. The terms section and the declaration follow `--procedure`; a declaration that applies to civil proceedings is left out of a criminal protocol.
+- Reports: the activity chart axis shows whole numbers, words in the conditions table are no longer split inside a word, and removed and inserted words in an edit comparison are separated.
+- The operator notice links the [106-day GDPR file](TAYLOR-WESSING-GDPR-FILE.md), which is available in every documentation language. [Questions and checks](QUESTIONS-AND-CHECKS.md#built-in-api-pairs-identify-a-client-not-an-account) answers the built-in API pair, public MTProxy and deleted-message objections with the facts first.
 - Add `verify.py --bitcoin-source URL`: OpenTimestamps proofs are checked against block headers from your own node's Esplora API instead of the two public explorers.
 - Verifier, panel and documentation state what each check establishes: the line for an archive without checked external time names the options that add it, and the witness condition refers to the custodian's key-control record.
 - The website's reference pages, guides and homepage are translated in all 24 site languages; about 450 text blocks per language were still shown in English after the 0.9.2 documentation update. Translated with DeepL; markup, links and code are checked unchanged.

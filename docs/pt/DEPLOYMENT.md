@@ -119,7 +119,7 @@ O serviço acessa o coletor dentro da rede do Compose em `http://tgwitness:8787`
 Copie `deploy/env.example` para `.env`. Defina `TGWITNESS_IMAGE` com a versão publicada, usando o caminho do repositório **em minúsculas**, por exemplo:
 
 ```dotenv
-TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.9.2
+TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.9.3
 TGWITNESS_PORT=8787
 ```
 

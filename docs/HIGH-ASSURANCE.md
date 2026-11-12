@@ -199,6 +199,9 @@ source and network.
 Deploy, verify with `--evidence`, restarts, the OS image comparison, the sealed certificate and
 destroy have run on Phala Cloud itself; see
 [the 4 November 2026 run](VERIFICATION.md#live-phala-cloud-deployment--4-november-2026).
+On 9 November a deployment collected from a live Telegram account; one run used a session key
+created inside the VM. See [the live account run](VERIFICATION.md#phala-cloud-with-live-telegram-account--9-november-2026)
+and [the key created in the VM](VERIFICATION.md#session-key-created-inside-the-tdx-vm--9-november-2026).
 
 ## Before you start
 

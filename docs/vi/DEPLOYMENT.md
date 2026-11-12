@@ -119,7 +119,7 @@ Dịch vụ này kết nối tới trình thu thập trong mạng Compose tại 
 Sao chép `deploy/env.example` thành `.env`. Đặt `TGWITNESS_IMAGE` thành phiên bản đã phát hành, dùng đường dẫn kho mã nguồn viết **chữ thường**, ví dụ:
 
 ```dotenv
-TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.9.2
+TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.9.3
 TGWITNESS_PORT=8787
 ```
 

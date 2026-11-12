@@ -6228,7 +6228,6 @@
   "Message number {n} exists in Telegram but uses a data type this TgWitness version cannot decode (constructor {c}); its content is not in this export.": "Повідомлення № {n} є в Telegram, але використовує тип даних, який ця версія TgWitness не вміє розібрати (конструктор {c}); його вмісту немає в цьому експорті.",
   "Numbers {a}–{b}, just below the oldest message the history listing returned, were also requested; messages found there: {n}.": "Також запитано номери {a}–{b} одразу під найстарішим повідомленням, яке віддала історія; знайдено там повідомлень: {n}.",
   "{n} absent numbers were not requested; they cannot be told apart from deleted ones.": "{n} відсутніх номерів не запитувалися; їх не можна відрізнити від видалених.",
-  "This snapshot holds only what Telegram returned at export. The journal of this workspace also holds deletions or earlier versions observed in this chat; export the evidence journal to include them.": "Цей знімок містить лише те, що Telegram повернув під час експорту. Журнал цього робочого простору також містить видалені повідомлення або попередні версії, зафіксовані в цьому чаті; щоб включити їх, експортуйте журнал доказів.",
   "access lost: removed or no longer readable": "доступ втрачено: видалено або більше не читається",
   "The account was removed from every source or can no longer read them.": "Акаунт було видалено з усіх джерел або він більше не має доступу до них.",
   "The account was removed from some sources or can no longer read them; nothing arrives from those. The others continue.": "Акаунт було видалено з деяких джерел або він більше не може їх читати; з них нічого не надходить. Інші продовжують працювати.",
@@ -8645,5 +8644,16 @@
   "Resume export": "Продовжити експорт",
   "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}: до зупинки збережено повідомлень — {messages}, номери {low}–{high}.",
   "resumed": "продовжено",
-  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "Видалити повідомлення, збережені зупиненим експортом, і прочитати цей чат знову, починаючи з найновішого повідомлення?"
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "Видалити повідомлення, збережені зупиненим експортом, і прочитати цей чат знову, починаючи з найновішого повідомлення?",
+  "Deletions and earlier versions": "Видалені повідомлення та попередні версії",
+  "Messages of this chat that the observing account saw deleted, missing on recheck or edited. Every saved version comes from the workspace journal with its own hash and signature; Telegram's current history no longer shows these versions.": "Повідомлення цього чату, які обліковий запис спостерігача бачив видаленими, відсутніми під час повторної перевірки або відредагованими. Кожна збережена версія походить із журналу робочого простору з власним хешем та підписом; поточна історія Telegram більше не відображає ці версії.",
+  "Saved text": "Збережений текст",
+  "Edits: {n}": "Редагування: {n}",
+  "… and {n} more messages in journal-changes.jsonl.": "… та ще {n} повідомлень у файлі journal-changes.jsonl.",
+  "This snapshot holds only what Telegram returned at export. Deletions and earlier versions observed in this chat are in journal-changes.jsonl, each record signed; the evidence journal export holds the complete hash chain.": "Цей знімок містить лише те, що Telegram повернув під час експорту. Видалені повідомлення та попередні версії, зафіксовані в цьому чаті, містяться у файлі `journal-changes.jsonl`, кожен запис якого підписано; експорт журналу доказів містить повний ланцюжок хеш-кодів.",
+  "rechecking absent message numbers": "повторна перевірка номерів відсутніх повідомлень",
+  "packaging and signing the archive": "пакування та підписання архіву",
+  "Download the account loss report": "Завантажити звіт про втрату облікового запису",
+  "Signed account loss report downloaded. Check it with verify.py.": "Завантажено підписаний звіт про втрату облікового запису. Перевірте його за допомогою verify.py.",
+  "Another client lost its authorization": "Ще один клієнт втратив авторизацію"
 }

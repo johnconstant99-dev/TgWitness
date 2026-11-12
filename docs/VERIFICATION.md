@@ -594,8 +594,7 @@ The following items remain unqualified:
 Further controlled runs for role visibility, reaction actors, prolonged FloodWait,
 account bans, network and process interruption recovery, mobile QR confirmation,
 sustained high load and long-term archival follow the
-[live acceptance](internal/LIVE_ACCEPTANCE.md) matrix. Independent security review and
-forensic certification are external steps.
+[live acceptance](internal/LIVE_ACCEPTANCE.md) matrix.
 
 The [public audit directory](../website/validation/audit/README.md) contains only
 the signed report and aggregate measurements. Detailed operational receipts,

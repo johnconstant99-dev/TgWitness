@@ -3670,5 +3670,11 @@
   "Authoritative files and readable derivatives are kept apart; each result states its scope.",
   "Scope of the records",
   "Indicators are strings found in the recorded messages.",
-  "Trust assessment, coverage and verification instructions stay in every report. Display choices do not remove signed source records."
+  "Trust assessment, coverage and verification instructions stay in every report. Display choices do not remove signed source records.",
+  "Deletions and earlier versions",
+  "Messages of this chat that the observing account saw deleted, missing on recheck or edited. Every saved version comes from the workspace journal with its own hash and signature; Telegram's current history no longer shows these versions.",
+  "Saved text",
+  "Edits: {n}",
+  "… and {n} more messages in journal-changes.jsonl.",
+  "This snapshot holds only what Telegram returned at export. Deletions and earlier versions observed in this chat are in journal-changes.jsonl, each record signed; the evidence journal export holds the complete hash chain."
 ]

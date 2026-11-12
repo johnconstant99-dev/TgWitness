@@ -119,7 +119,7 @@ El servicio accede al recopilador dentro de la red de Compose en `http://tgwitne
 Copie `deploy/env.example` en `.env`. Establezca `TGWITNESS_IMAGE` en la versión publicada usando la ruta del repositorio **en minúsculas**, por ejemplo:
 
 ```dotenv
-TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.9.2
+TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.9.3
 TGWITNESS_PORT=8787
 ```
 

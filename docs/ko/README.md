@@ -20,7 +20,7 @@
 <p align="center"><strong>제로 트러스트.</strong> TgWitness는 어느 편도 들지 않습니다. 운영자에게도, PhishDestroy에도, 그 밖의 누구에게도 같은 검사를 적용합니다.<br>제3자나 수학이 확인해 주는 것만 인정됩니다. <a href="../QUESTIONS-AND-CHECKS.md">질문과 검증</a></p>
 
 <p align="center">
-  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · 사전 릴리스"></a>
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.3 · 사전 릴리스"></a>
   <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
   <sub><a href="../VERIFICATION.md">테스트된 환경</a> · 인터페이스 25개 언어 · 가이드 26개 언어</sub>
 </p>

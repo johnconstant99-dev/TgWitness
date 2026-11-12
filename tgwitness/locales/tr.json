@@ -6150,7 +6150,6 @@
   "Message number {n} exists in Telegram but uses a data type this TgWitness version cannot decode (constructor {c}); its content is not in this export.": "{n} numaralı mesaj Telegram’da var, ancak bu TgWitness sürümünün çözemediği bir veri türü kullanıyor (yapıcı {c}); içeriği bu dışa aktarımda yok.",
   "Numbers {a}–{b}, just below the oldest message the history listing returned, were also requested; messages found there: {n}.": "Geçmiş listesinin döndürdüğü en eski mesajın hemen altındaki {a}–{b} numaraları da istendi; orada bulunan mesajlar: {n}.",
   "{n} absent numbers were not requested; they cannot be told apart from deleted ones.": "{n} eksik numara istenmedi; bunlar silinenlerden ayırt edilemez.",
-  "This snapshot holds only what Telegram returned at export. The journal of this workspace also holds deletions or earlier versions observed in this chat; export the evidence journal to include them.": "Bu anlık görüntü, yalnızca Telegram'ın dışa aktarım sırasında döndürdüğü bilgileri içerir. Bu çalışma alanının günlüğü, bu sohbette gözlemlenen silme işlemlerini veya önceki sürümleri de içerir; bunları dahil etmek için kanıt günlüğünü dışa aktarın.",
   "access lost: removed or no longer readable": "erişim kaybedildi: kaldırıldı veya artık okunamıyor",
   "The account was removed from every source or can no longer read them.": "Hesap tüm kaynaklardan kaldırıldı veya artık bu kaynakları okuyamıyor.",
   "The account was removed from some sources or can no longer read them; nothing arrives from those. The others continue.": "Hesap bazı kaynaklardan kaldırıldı ya da artık bu kaynakları okuyamıyor; bu kaynaklardan hiçbir şey gelmiyor. Diğerleri devam ediyor.",
@@ -8567,5 +8566,16 @@
   "Resume export": "Dışa aktarmaya devam et",
   "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}: durmadan önce {messages} mesaj kaydedildi, kimlikler {low}–{high}.",
   "resumed": "devam ettirildi",
-  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "Durdurulan dışa aktarmadan kaydedilen mesajlar silinsin ve bu sohbet en yeni mesajdan itibaren yeniden okunsun mu?"
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "Durdurulan dışa aktarmadan kaydedilen mesajlar silinsin ve bu sohbet en yeni mesajdan itibaren yeniden okunsun mu?",
+  "Deletions and earlier versions": "Silinenler ve önceki sürümler",
+  "Messages of this chat that the observing account saw deleted, missing on recheck or edited. Every saved version comes from the workspace journal with its own hash and signature; Telegram's current history no longer shows these versions.": "Gözlemci hesabının silindiğini gördüğü, yeniden kontrol edildiğinde eksik olduğu veya düzenlendiği bu sohbetin mesajları. Kaydedilen her sürüm, kendi hash değeri ve imzasıyla çalışma alanı günlüğünden gelir; Telegram'ın güncel geçmişinde bu sürümler artık gösterilmez.",
+  "Saved text": "Kaydedilen metin",
+  "Edits: {n}": "Düzenlemeler: {n}",
+  "… and {n} more messages in journal-changes.jsonl.": "… ve journal-changes.jsonl dosyasında {n} adet daha mesaj bulunmaktadır.",
+  "This snapshot holds only what Telegram returned at export. Deletions and earlier versions observed in this chat are in journal-changes.jsonl, each record signed; the evidence journal export holds the complete hash chain.": "Bu anlık görüntü, yalnızca Telegram'ın dışa aktarım sırasında döndürdüğü verileri içerir. Bu sohbette gözlemlenen silme işlemleri ve önceki sürümler, her kaydı imzalanmış olan journal-changes.jsonl dosyasında bulunur; delil günlüğü dışa aktarımı ise eksiksiz hash zincirini içerir.",
+  "rechecking absent message numbers": "eksik mesaj numaralarının yeniden kontrol edilmesi",
+  "packaging and signing the archive": "arşivin paketlenmesi ve imzalanması",
+  "Download the account loss report": "Hesap kaybı raporunu indirin",
+  "Signed account loss report downloaded. Check it with verify.py.": "İmzalı hesap kaybı raporu indirildi. verify.py ile kontrol edin.",
+  "Another client lost its authorization": "Başka bir istemci yetkilendirme hakkını kaybetti"
 }

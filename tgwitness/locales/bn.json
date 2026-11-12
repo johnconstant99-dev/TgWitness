@@ -6150,7 +6150,6 @@
   "Message number {n} exists in Telegram but uses a data type this TgWitness version cannot decode (constructor {c}); its content is not in this export.": "বার্তা নম্বর {n} Telegram-এ আছে, কিন্তু এতে এমন ডেটা টাইপ আছে যা TgWitness-এর এই সংস্করণ পড়তে পারে না (কনস্ট্রাক্টর {c}); এর বিষয়বস্তু এই এক্সপোর্টে নেই।",
   "Numbers {a}–{b}, just below the oldest message the history listing returned, were also requested; messages found there: {n}.": "ইতিহাস তালিকা যে সবচেয়ে পুরোনো বার্তা দিয়েছে তার ঠিক নিচের {a}–{b} নম্বরগুলোও চাওয়া হয়েছিল; সেখানে পাওয়া বার্তা: {n}।",
   "{n} absent numbers were not requested; they cannot be told apart from deleted ones.": "{n}টি অনুপস্থিত নম্বর চাওয়া হয়নি; এগুলোকে মুছে ফেলা নম্বর থেকে আলাদা করা যায় না।",
-  "This snapshot holds only what Telegram returned at export. The journal of this workspace also holds deletions or earlier versions observed in this chat; export the evidence journal to include them.": "এই স্ন্যাপশটে শুধুমাত্র টেলিগ্রাম রপ্তানিতে ফেরত দেওয়া তথ্য রয়েছে। এই ওয়ার্কস্পেসের জার্নালেও এই চ্যাটে দেখা যাওয়া মুছে ফেলা অংশ বা পূর্ববর্তী সংস্করণগুলো রয়েছে; সেগুলো অন্তর্ভুক্ত করতে প্রমাণ জার্নাল রপ্তানি করুন।",
   "access lost: removed or no longer readable": "অ্যাক্সেস হারিয়ে গেছে: সরানো হয়েছে বা আর পড়া যাচ্ছে না",
   "The account was removed from every source or can no longer read them.": "অ্যাকাউন্টটি প্রতিটি উৎস থেকে মুছে ফেলা হয়েছে বা আর সেগুলো পড়তে পারবে না।",
   "The account was removed from some sources or can no longer read them; nothing arrives from those. The others continue.": "অ্যাকাউন্টটি কিছু উৎস থেকে সরিয়ে ফেলা হয়েছে বা আর সেগুলো পড়তে পারছে না; সেখান থেকে কিছুই আসছে না। বাকীগুলো চলছে।",
@@ -8567,5 +8566,16 @@
   "Resume export": "রপ্তানি আবার চালু করুন",
   "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}: থামার আগে {messages}টি বার্তা সংরক্ষিত হয়েছে, আইডি {low}–{high}।",
   "resumed": "পুনরায় চালু",
-  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "থেমে যাওয়া রপ্তানি থেকে সংরক্ষিত বার্তাগুলো মুছে এই চ্যাটটি সবচেয়ে নতুন বার্তা থেকে আবার পড়বেন?"
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "থেমে যাওয়া রপ্তানি থেকে সংরক্ষিত বার্তাগুলো মুছে এই চ্যাটটি সবচেয়ে নতুন বার্তা থেকে আবার পড়বেন?",
+  "Deletions and earlier versions": "মোছা অংশ এবং পূর্ববর্তী সংস্করণসমূহ",
+  "Messages of this chat that the observing account saw deleted, missing on recheck or edited. Every saved version comes from the workspace journal with its own hash and signature; Telegram's current history no longer shows these versions.": "এই চ্যাটের যেসব বার্তা পর্যবেক্ষক অ্যাকাউন্ট মুছে ফেলা, পুনরায় যাচাই করলে অনুপস্থিত বা সম্পাদিত দেখেছে। প্রতিটি সংরক্ষিত সংস্করণ ওয়ার্কস্পেস জার্নাল থেকে আসে, যার নিজস্ব হ্যাশ ও স্বাক্ষর রয়েছে; টেলিগ্রামের বর্তমান ইতিহাসে আর এই সংস্করণগুলো দেখা যায় না।",
+  "Saved text": "সংরক্ষিত টেক্সট",
+  "Edits: {n}": "সম্পাদনা: {n}",
+  "… and {n} more messages in journal-changes.jsonl.": "… এবং আরও {n}টি বার্তা journal-changes.jsonl-এ।",
+  "This snapshot holds only what Telegram returned at export. Deletions and earlier versions observed in this chat are in journal-changes.jsonl, each record signed; the evidence journal export holds the complete hash chain.": "এই স্ন্যাপশটে শুধুমাত্র টেলিগ্রাম এক্সপোর্ট করার সময় ফেরত দেওয়া তথ্য রয়েছে। এই চ্যাটে দেখা মুছে ফেলা অংশ এবং পূর্ববর্তী সংস্করণসমূহ journal-changes.jsonl-এ রয়েছে, প্রতিটি রেকর্ড স্বাক্ষরিত; প্রমাণ জার্নাল এক্সপোর্টে সম্পূর্ণ হ্যাশ চেইন অন্তর্ভুক্ত রয়েছে।",
+  "rechecking absent message numbers": "অনুপস্থিত মেসেজের নম্বরগুলো পুনরায় যাচাই করা হচ্ছে",
+  "packaging and signing the archive": "আর্কাইভ প্যাকেজিং এবং স্বাক্ষরকরণ",
+  "Download the account loss report": "অ্যাকাউন্ট ক্ষতি রিপোর্ট ডাউনলোড করুন",
+  "Signed account loss report downloaded. Check it with verify.py.": "স্বাক্ষরিত অ্যাকাউন্ট ক্ষতি রিপোর্ট ডাউনলোড করা হয়েছে। verify.py দিয়ে যাচাই করুন।",
+  "Another client lost its authorization": "আরেকটি ক্লায়েন্ট তার অনুমোদন হারিয়েছে"
 }

@@ -6111,7 +6111,6 @@
   "Message number {n} exists in Telegram but uses a data type this TgWitness version cannot decode (constructor {c}); its content is not in this export.": "第 {n} 號訊息存在於 Telegram，但使用了此 TgWitness 版本無法解碼的資料類型（建構子 {c}）；其內容不在此匯出中。",
   "Numbers {a}–{b}, just below the oldest message the history listing returned, were also requested; messages found there: {n}.": "也查詢了歷史清單回傳的最舊訊息正下方的編號 {a}–{b}；在那裡找到的訊息：{n}。",
   "{n} absent numbers were not requested; they cannot be told apart from deleted ones.": "有 {n} 個缺少的編號沒有查詢；無法與已刪除的區分。",
-  "This snapshot holds only what Telegram returned at export. The journal of this workspace also holds deletions or earlier versions observed in this chat; export the evidence journal to include them.": "此快照僅包含 Telegram 在匯出時所回傳的內容。此工作區的日誌中亦包含此聊天紀錄中曾出現的刪除內容或較早版本；若要納入這些內容，請匯出證據日誌。",
   "access lost: removed or no longer readable": "無法存取：已刪除或無法再讀取",
   "The account was removed from every source or can no longer read them.": "該帳號已從所有來源中移除，或無法再讀取這些內容。",
   "The account was removed from some sources or can no longer read them; nothing arrives from those. The others continue.": "該帳號已從某些來源中移除，或無法再讀取這些來源；這些來源已無任何訊息傳入。其餘來源則仍正常運作。",
@@ -8528,5 +8527,16 @@
   "Resume export": "繼續匯出",
   "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}：停止前已儲存 {messages} 則訊息，ID {low}–{high}。",
   "resumed": "已續傳",
-  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "刪除已停止的匯出所儲存的訊息，並從最新訊息開始重新讀取此聊天？"
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "刪除已停止的匯出所儲存的訊息，並從最新訊息開始重新讀取此聊天？",
+  "Deletions and earlier versions": "刪除項目與早期版本",
+  "Messages of this chat that the observing account saw deleted, missing on recheck or edited. Every saved version comes from the workspace journal with its own hash and signature; Telegram's current history no longer shows these versions.": "此聊天室中，觀察帳戶所見已刪除、重新檢查時遺失或遭編輯的訊息。每個儲存版本均來自工作區日誌，並具備專屬的雜湊值與簽名；Telegram 的當前歷史紀錄中已不再顯示這些版本。",
+  "Saved text": "儲存的文字",
+  "Edits: {n}": "編輯：{n}",
+  "… and {n} more messages in journal-changes.jsonl.": "… 以及 {n} 則更多訊息，詳見 journal-changes.jsonl 檔案。",
+  "This snapshot holds only what Telegram returned at export. Deletions and earlier versions observed in this chat are in journal-changes.jsonl, each record signed; the evidence journal export holds the complete hash chain.": "此快照僅包含 Telegram 在匯出時所回傳的內容。此聊天紀錄中觀察到的刪除內容及較早版本皆收錄於 `journal-changes.jsonl` 檔案中，每筆記錄均經簽署；證據日誌匯出檔則包含完整的雜湊鏈。",
+  "rechecking absent message numbers": "重新檢查缺失的訊息編號",
+  "packaging and signing the archive": "封裝及簽署壓縮檔",
+  "Download the account loss report": "下載帳戶遺失報告",
+  "Signed account loss report downloaded. Check it with verify.py.": "已下載經簽名的帳戶遺失報告。請使用 verify.py 進行驗證。",
+  "Another client lost its authorization": "另一位用戶的授權已失效"
 }

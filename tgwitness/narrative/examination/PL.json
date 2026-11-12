@@ -9,7 +9,6 @@
   "local_language": "pl",
   "legal_family": "civil law",
   "checked_at": "2026-11-11",
-  "review": "machine-assisted research, not reviewed by local counsel",
   "expert_term": {
     "local": "biegły (biegły sądowy when entered on a regional court list)",
     "en": "expert appointed by the procedural authority (court, prosecutor or, in pre-trial proceedings, the investigating body)"
@@ -128,6 +127,7 @@
     }
   ],
   "declaration": {
+    "route": "civil",
     "basis": "KPC art. 282 § 1^1: an expert ordered to give a written opinion may make the promise by signing the promise text and attaching it to the opinion (not required for listed court experts, art. 282 § 1^2)",
     "text_local": "Świadomy znaczenia mych słów i odpowiedzialności przed prawem przyrzekam uroczyście, że powierzone mi obowiązki biegłego wykonam z całą sumiennością i bezstronnością",
     "text_en": "Aware of the significance of my words and of my responsibility before the law, I solemnly promise that I will perform the duties of expert entrusted to me with all diligence and impartiality.",

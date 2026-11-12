@@ -6111,7 +6111,6 @@
   "Message number {n} exists in Telegram but uses a data type this TgWitness version cannot decode (constructor {c}); its content is not in this export.": "ข้อความหมายเลข {n} มีอยู่ใน Telegram แต่ใช้ชนิดข้อมูลที่ TgWitness เวอร์ชันนี้ถอดรหัสไม่ได้ (คอนสตรักเตอร์ {c}) เนื้อหาจึงไม่อยู่ในการส่งออกนี้",
   "Numbers {a}–{b}, just below the oldest message the history listing returned, were also requested; messages found there: {n}.": "ได้ขอหมายเลข {a}–{b} ที่อยู่ใต้ข้อความเก่าที่สุดที่รายการประวัติส่งกลับมาด้วย พบข้อความที่นั่น: {n}",
   "{n} absent numbers were not requested; they cannot be told apart from deleted ones.": "ไม่ได้ขอหมายเลขที่หายไป {n} หมายเลข จึงแยกไม่ออกจากหมายเลขที่ถูกลบ",
-  "This snapshot holds only what Telegram returned at export. The journal of this workspace also holds deletions or earlier versions observed in this chat; export the evidence journal to include them.": "ภาพถ่ายหน้าจอนี้มีเพียงข้อมูลที่ Telegram ส่งกลับมาเมื่อทำการส่งออกเท่านั้น บันทึกของพื้นที่ทำงานนี้ยังเก็บข้อมูลการลบหรือเวอร์ชันเก่ากว่าที่เคยปรากฏในบทสนทนานี้ด้วย; ให้ส่งออกบันทึกหลักฐานเพื่อรวมข้อมูลเหล่านั้นด้วย",
   "access lost: removed or no longer readable": "สูญเสียการเข้าถึง: ถูกลบหรือไม่สามารถอ่านได้อีกต่อไป",
   "The account was removed from every source or can no longer read them.": "บัญชีดังกล่าวถูกลบออกจากทุกแหล่งข้อมูล หรือไม่สามารถอ่านข้อมูลจากแหล่งเหล่านั้นได้อีกต่อไป",
   "The account was removed from some sources or can no longer read them; nothing arrives from those. The others continue.": "บัญชีดังกล่าวถูกลบออกจากบางแหล่งข้อมูล หรือไม่สามารถอ่านข้อมูลจากแหล่งเหล่านั้นได้อีกต่อไป; ไม่มีข้อมูลใดส่งมาจากแหล่งเหล่านั้น ส่วนแหล่งข้อมูลอื่นๆ ยังคงทำงานตามปกติ",
@@ -8528,5 +8527,16 @@
   "Resume export": "ส่งออกต่อ",
   "{title}: {messages} messages saved before the stop, IDs {low}–{high}.": "{title}: บันทึก {messages} ข้อความก่อนหยุด, ID {low}–{high}",
   "resumed": "ทำต่อแล้ว",
-  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "ลบข้อความที่บันทึกจากการส่งออกที่หยุดไว้ แล้วอ่านแชทนี้ใหม่ตั้งแต่ข้อความล่าสุดหรือไม่"
+  "Delete the messages saved from the stopped export and read this chat again from the newest message?": "ลบข้อความที่บันทึกจากการส่งออกที่หยุดไว้ แล้วอ่านแชทนี้ใหม่ตั้งแต่ข้อความล่าสุดหรือไม่",
+  "Deletions and earlier versions": "การลบและเวอร์ชันก่อนหน้า",
+  "Messages of this chat that the observing account saw deleted, missing on recheck or edited. Every saved version comes from the workspace journal with its own hash and signature; Telegram's current history no longer shows these versions.": "ข้อความในแชทนี้ที่บัญชีผู้สังเกตเห็นถูกลบไป, หายไปเมื่อตรวจสอบซ้ำ หรือถูกแก้ไข ทุกเวอร์ชันที่บันทึกไว้มาจากบันทึกพื้นที่ทำงาน (workspace journal) พร้อมด้วยแฮชและลายเซ็นเฉพาะตัว; ประวัติปัจจุบันของ Telegram ไม่แสดงเวอร์ชันเหล่านี้อีกต่อไป",
+  "Saved text": "ข้อความที่บันทึกไว้",
+  "Edits: {n}": "การแก้ไข: {n}",
+  "… and {n} more messages in journal-changes.jsonl.": "… และข้อความอีก{n} ข้อความในไฟล์journal-changes.jsonl",
+  "This snapshot holds only what Telegram returned at export. Deletions and earlier versions observed in this chat are in journal-changes.jsonl, each record signed; the evidence journal export holds the complete hash chain.": "ภาพถ่ายนี้เก็บไว้เฉพาะข้อมูลที่ Telegram ส่งกลับมาตอนส่งออกเท่านั้น การลบข้อความและเวอร์ชันก่อนหน้าในแชทนี้ถูกบันทึกไว้ในไฟล์journal-changes.jsonl โดยแต่ละบันทึกได้รับการลงนามแล้ว ส่วนไฟล์ส่งออกของบันทึกหลักฐานเก็บไว้ทั้งสายแฮชที่สมบูรณ์",
+  "rechecking absent message numbers": "ตรวจสอบใหม่จำนวนข้อความที่ยังไม่ได้ส่ง",
+  "packaging and signing the archive": "การแพ็กเกจและลงนามไฟล์อาร์ไคฟ์",
+  "Download the account loss report": "ดาวน์โหลดรายงานการสูญเสียบัญชี",
+  "Signed account loss report downloaded. Check it with verify.py.": "ดาวน์โหลดรายงานการสูญเสียบัญชีที่ลงนามแล้ว ตรวจสอบด้วย verify.py",
+  "Another client lost its authorization": "ลูกค้าอีกคนสูญเสียสิทธิ์การเข้าถึง"
 }

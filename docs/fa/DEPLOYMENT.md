@@ -205,7 +205,7 @@ HTTPS جمع‌آورنده تنظیم کنید؛ آن فایل فقط شاهد 
 **حروف کوچک** روی نسخهٔ منتشرشده تنظیم کنید، برای مثال:
 
 ```dotenv
-TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.9.2
+TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.9.3
 TGWITNESS_PORT=8787
 ```
 

@@ -20,7 +20,7 @@
 <p align="center"><strong>НУЛЕВОЕ ДОВЕРИЕ.</strong> TgWitness ни на чьей стороне: одни и те же проверки применяются к оператору, к PhishDestroy и к кому угодно ещё.<br>Значение имеет только то, что подтверждает третья сторона или математика. <a href="../QUESTIONS-AND-CHECKS.md">Вопросы и проверки</a></p>
 
 <p align="center">
-  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · предварительный выпуск"></a>
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.3 · предварительный выпуск"></a>
   <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
   <sub><a href="../VERIFICATION.md">Проверенные среды</a> · 25 языков интерфейса · 26 языков руководств</sub>
 </p>

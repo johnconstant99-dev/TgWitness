@@ -2,10 +2,10 @@
 
 ![Development](../assets/presentation/chapter-develop.svg)
 
-# Version 0.9.2 preview
+# Version 0.9.3 preview
 
 TgWitness is a self-hosted Telegram observation journal under the
-[MIT License](../../LICENSE). Version 0.9.2 is the 9 November 2026 preview candidate; its
+[MIT License](../../LICENSE). Version 0.9.3 is the 11 November 2026 preview candidate; its
 contents are listed in the [changelog](../CHANGELOG.md). The release packages are the
 Windows portable package, the wheel and the source archive, each with its SHA-256.
 
@@ -45,7 +45,7 @@ wheel, Windows portable and GHCR packages. Public source and wheel assets use al
 the public site includes only presentation assets. Publication checks and dependency auditing
 run in CI. See [publishing](PUBLISHING.md) for commands and deployment steps.
 
-Version 0.9.2 remains a preview. The release workflow publishes the exact Windows
+Version 0.9.3 remains a preview. The release workflow publishes the exact Windows
 portable artifact tested by the checks workflow, alongside the source archive
 and wheel. A final job downloads all three published packages, checks their
 SHA-256 sidecars and publishes `SHA256SUMS.txt` and `RELEASE-MANIFEST.json` with
@@ -60,9 +60,21 @@ limits. Check the release commit's Actions results and published package manifes
 for this build's acceptance. Live Telegram coverage and native-platform
 qualification are recorded from live runs.
 
-TgWitness has run on a real Telegram account: one supergroup from 27 to 29 October 2026,
-1,291 messages, 472 deletions and 12 edits, with the signatures of all 2,385 records
-verified. See the [live test](../VERIFICATION.md#live-telegram-test--27-to-29-october-2026).
+Live Telegram runs recorded in the [verification record](../VERIFICATION.md):
+
+| Date | Run | Scale |
+| --- | --- | --- |
+| 27–29 October | [One supergroup](../VERIFICATION.md#live-telegram-test--27-to-29-october-2026), then [the whole account](../VERIFICATION.md#live-telegram-test-whole-account--29-october-2026): messages, edits, deletion notices, attachments, rechecks and rate limits | 9,968 records over about 44 hours, every signature verified |
+| 6 November | [Release audit and fresh exports](../VERIFICATION.md#release-audit-and-fresh-exports--6-november-2026); [public-history qualification](../EXPORT-BENCHMARK-2026-11-06.md) | 27,030 and 29,299 records; 48 archives with 3,598,381 records from 40 workspaces |
+| 9 November | [Phala Intel TDX with a live account](../VERIFICATION.md#phala-cloud-with-live-telegram-account--9-november-2026), [a session key created inside the VM](../VERIFICATION.md#session-key-created-inside-the-tdx-vm--9-november-2026), [drand anchoring](../VERIFICATION.md#drand-checkpoint-anchoring-and-verify--9-november-2026), [parallel sessions](../VERIFICATION.md#parallel-session-and-session-integrity-tests--9-november-2026) | Quote, collector key binding and exports verified |
+| 10 November | [Account security and interrupted exports](../VERIFICATION.md#account-security-and-interrupted-exports--10-november-2026): new-session alerts, witness probe, `kill -9` and resume | 32 probes, 28 answered live; resumed exports verified |
+
+The collection code (`collector.py`, `telegram_client.py`, `store.py`,
+`distributed_export.py`, `history.py`, `anchoring.py`) is unchanged between 0.9.2 and
+0.9.3; the last revision used on 10 November differs from 0.9.2 by 14 added lines in these files. The
+0.9.3 verifier was run on three archives from the 9 November runs (387, 389 and 804
+records); every signature checked, with the same result as the verifier shipped
+inside those archives.
 
 ## Remaining validation
 
@@ -75,12 +87,23 @@ upstream advisory check. Use the release's Actions results for the current findi
 CJK PDFs require a suitable installed font or `TGWITNESS_FONT_DIR`; when PDF rendering
 is unavailable, the export keeps its HTML and JSON reports and records the limitation.
 
-- A complete live Telegram matrix covering QR confirmation, roles, update delivery, media,
-  rate limits, reconnects and sustained operation.
-- Successful checks for this candidate on Linux, Windows and macOS, including the portable package.
-  Prior platform results do not qualify a newer revision; use its Actions run and manifest.
-- Record independent security reviews and validate each capture mode's acquisition,
-  coverage and environment checks against the release revision.
+Not yet run against a live account:
+
+- Steps 4–8 of the [live acceptance](LIVE_ACCEPTANCE.md) procedure: sending, editing,
+  deleting, reactions and membership changes made by the test accounts themselves, and QR
+  sign-in confirmed from a phone.
+- GitHub Actions capture: no sealed run on the current revision is recorded.
+- MTProto frame matching against a captured PCAP, the S3-compatible off-site copy,
+  SOCKS5 and HTTP proxies, MTProxy as the chosen route, alert delivery, the automatic
+  only-session action and restoring a backup with an external vault key.
+- Export at the `sealed` tier, the witness tier with a separate witness process, a
+  Bitcoin-confirmed OpenTimestamps seal and Takeout throughput.
+
+Platforms:
+
+- Successful checks for this candidate on Linux, Windows and macOS, including the portable
+  package. Prior platform results do not qualify a newer revision; use its Actions run
+  and manifest.
 
 The main panel token controls all workspaces. Issue scoped tokens for reviewers and analysts; see [access and permissions](../ACCESS.md). Keep dedicated
 account credentials and collected data out of the repository. See [readiness](READINESS.md)

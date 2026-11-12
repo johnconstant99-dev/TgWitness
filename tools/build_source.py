@@ -29,6 +29,7 @@ FILES = [
     "deploy/installer/release-signing.pub",
     "deploy/installer/index.html", "deploy/installer/style.css", "deploy/installer/site.js", "deploy/installer/wrangler.toml",
     "deploy/media-worker/Dockerfile", "deploy/media-worker/worker.py",
+    ".clusterfuzzlite/project.yaml", ".clusterfuzzlite/Dockerfile", ".clusterfuzzlite/build.sh",
     "deploy/media-worker/requirements.in", "deploy/media-worker/requirements.lock",
     "integrations/webhook.schema.json", "integrations/n8n-tgwitness.json", "deploy/constraints-mcp.txt",
     "deploy/Dockerfile.sealed", "scripts/sealed_runner.py",
@@ -89,6 +90,7 @@ DIRECTORIES = {
     "docs": {".md", ".png", ".webp", ".svg", ".txt", ".gif", ".mp4"}, "tools": {".py", ".md"},
     "deploy": {".md", ".ps1", ".service", ".example", ".docker"},
     "scripts": {".md", ".cmd", ".sh"},
+    "fuzz": {".py", ".md"},
     ".github": {".md", ".yml", ".yaml"},
     "website": {".md", ".html", ".css", ".js", ".py", ".json"},
 }
@@ -105,8 +107,7 @@ EXAMINATION_CODES = ("AE", "AT", "AU", "BD", "BE", "BG", "BR", "CA", "CH", "CN",
                      "FR", "GR", "HK", "HU", "ID", "IE", "IL", "IN", "IR", "IT", "JP", "KR", "LT", "LV", "MX", "MY", "NL",
                      "NO", "PH", "PK", "PL", "PT", "RO", "RU", "SA", "SE", "SG", "SK", "TH", "TR", "TW", "UA", "UK",
                      "US-federal", "UZ", "VN")
-PACKAGE_JSON.update({"narrative/review-policy.json",
-                     *("narrative/texts/" + prefix + language + ".json"
+PACKAGE_JSON.update({                     *("narrative/texts/" + prefix + language + ".json"
                        for prefix in ("", "glossary.") for language in NARRATIVE_LANGUAGES),
                      *("narrative/jurisdictions/" + code + ".json" for code in
                        ("DE", "AT", "CH", "UK", "IE", "FR", "ES", "IT", "PL", "CZ", "UA", "NL", "BE", "US-federal")),

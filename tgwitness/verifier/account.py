@@ -475,6 +475,49 @@ class AccountExportCheck:
 
 
 
+LOSS_PREFIXES = ("connection.", "network.", "account.", "session.", "coverage.gap", "process.", "telegram.", "clock.",
+                 "collector.")
+LOSS_FIELDS = ("seq", "observed_at", "source_at", "kind", "chat_id", "message_id", "actor_id", "payload",
+               "previous_hash")
+
+
+def verify_account_loss(data, expected_fingerprint=None):
+    statement = data["statement"]
+    public = statement["public_key"]
+    fp = fingerprint(public)
+    if expected_fingerprint and fp != expected_fingerprint:
+        raise ValueError("Public key differs from the independently trusted fingerprint")
+    key = Ed25519PublicKey.from_public_bytes(base64.b64decode(public, validate=True))
+    if not isinstance(data.get("signature"), str):
+        raise ValueError("Unsigned account loss report")
+    key.verify(base64.b64decode(data["signature"], validate=True), canonical(statement))
+    records = statement.get("records")
+    if not isinstance(records, list) or not isinstance(statement.get("loss"), dict):
+        raise ValueError("Malformed account loss report")
+    previous = 0
+    for event in records:
+        if not isinstance(event, dict) or set(event) != set(LOSS_FIELDS) | {"hash", "signature"}:
+            raise ValueError("Unexpected record in the account loss report")
+        if type(event["seq"]) is not int or event["seq"] <= previous:
+            raise ValueError("Account loss report records are not in journal order")
+        if not isinstance(event["kind"], str) or not event["kind"].startswith(LOSS_PREFIXES):
+            raise ValueError("Account loss report holds a record of another kind")
+        calculated = hashlib.sha256(canonical({k: event[k] for k in LOSS_FIELDS})).hexdigest()
+        if event["hash"] != calculated:
+            raise ValueError("Changed journal record " + str(event["seq"]) + " in the account loss report")
+        if not isinstance(event["signature"], str):
+            raise ValueError("Unsigned journal record " + str(event["seq"]) + " in the account loss report")
+        key.verify(base64.b64decode(event["signature"], validate=True), bytes.fromhex(calculated))
+        previous = event["seq"]
+    loss = statement["loss"]
+    return {"format": statement["format"], "fingerprint": fp, "key_pinned": bool(expected_fingerprint),
+            "records": len(records), "truncated": bool(statement.get("truncated")), "window": statement.get("window"),
+            "generated_at": statement.get("generated_at"), "account": statement.get("account"),
+            "producer": statement.get("producer"), "loss": {key: loss.get(key) for key in ("cause", "at", "telegram_error", "dc_id")},
+            "route": (loss.get("route") or {}).get("kind") if isinstance(loss.get("route"), dict) else None,
+            "journal_head": statement.get("journal_head"), "meaning": statement.get("meaning")}
+
+
 def verify_account_export(path, expected_fingerprint=None, max_gib=None):
     with open_archive(path, max_gib=max_gib) as archive, tempfile.TemporaryDirectory() as temporary:
         checked = AccountExportCheck(archive, expected_fingerprint)

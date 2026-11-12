@@ -20,7 +20,7 @@
 <p align="center"><strong>ZERO TRUST.</strong> TgWitness কারও পক্ষ নেয় না: অপারেটর, PhishDestroy এবং অন্য সবার ক্ষেত্রে একই যাচাই প্রযোজ্য।<br>গণ্য হয় শুধু তা-ই, যা কোনো তৃতীয় পক্ষ বা গণিত নিশ্চিত করে। <a href="../QUESTIONS-AND-CHECKS.md">প্রশ্ন ও যাচাই</a></p>
 
 <p align="center">
-  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · প্রি-রিলিজ"></a>
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.3 · প্রি-রিলিজ"></a>
   <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
   <sub><a href="../VERIFICATION.md">পরীক্ষিত পরিবেশ</a> · ইন্টারফেসের 25টি ভাষা · নির্দেশিকার 26টি ভাষা</sub>
 </p>

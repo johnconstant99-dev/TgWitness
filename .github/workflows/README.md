@@ -25,6 +25,7 @@ maintained privately; these workflows do not run or attest that private suite.
 | [`installer-acceptance.yml`](installer-acceptance.yml) | Signed artifact authentication and installed-wheel smoke on Linux/Windows; on installer pull requests, two runs of `install.sh` and `install.ps1` against a local test site |
 | [`sealed-checks.yml`](sealed-checks.yml) | Sealed image build, imports and release caller/collector pin guard |
 | [`optional-capture.yml`](optional-capture.yml) | Capture image builds, installed recorder smoke and image vulnerability audits |
+| [`fuzz.yml`](fuzz.yml) | ClusterFuzzLite fuzzing of the verifier's archive, manifest and JSON parsing on verifier pull requests and weekly |
 | [`provenance.yml`](provenance.yml) | Public source archive, dependency SBOM and hosted build attestations |
 | [`wiki.yml`](wiki.yml) | Downloadable Wiki bundle; does not publish the separate GitHub Wiki |
 

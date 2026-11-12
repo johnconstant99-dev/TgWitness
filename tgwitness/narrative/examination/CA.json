@@ -10,7 +10,6 @@
   "local_language": "en",
   "legal_family": "mixed",
   "checked_at": "2026-11-11",
-  "review": "machine-assisted research, not reviewed by local counsel",
   "expert_term": {
     "local": "expert witness / témoin expert",
     "en": "expert witness, normally named by a party; court-appointed experts exist in civil procedure (e.g. Ontario r. 52.03)"
@@ -192,6 +191,7 @@
     }
   ],
   "declaration": {
+    "route": "civil",
     "basis": "Ontario Rules of Civil Procedure r. 53.03(2.1) paras. 6.1, 6.3 and 7; Form 53 'Acknowledgment of Expert's Duty' (RCP-E 53, version dated June 1, 2026, effective 1 September 2026), which must be attached to any expert report under r. 53.03(1) or (2) and any opinion evidence on a motion or application. Federal Court equivalent: Form 52.2 certificate (see liability). Criminal route: affidavit or solemn declaration under Cr.C. s. 657.3(1) (CEA s. 41 form, see liability).",
     "text_local": "ACKNOWLEDGMENT OF EXPERT'S DUTY\n1. My name is (name). I live at (city), in the (province/state) of (name of province/state).\n2. I have been engaged by or on behalf of (name of party/parties) to provide evidence in relation to the above-noted court proceeding.\n3. I acknowledge that it is my duty to provide evidence in relation to this proceeding as follows:\n(a) to provide opinion evidence that is fair, objective and non-partisan;\n(b) to provide opinion evidence that is related only to matters that are within my area of expertise; and\n(c) to provide such additional assistance as the court may reasonably require, to determine a matter in issue.\n4. I acknowledge that the duty referred to above prevails over any obligation which I may owe to any party by whom or on whose behalf I am engaged.\n5. I certify that I am satisfied as to the authenticity of every authority or other document or record to which I have referred in the expert report accompanying this form, other than:\n(a) documents and records provided to me by or on behalf of the party intending to call me as a witness and consisting of evidence or potential evidence in the court proceeding that I have analysed or interpreted in my report;\n(b) authorities and other documents and records to which I have referred in my report only in order to address how another expert witness in the same court proceeding has used them in their report; and\n(c) the following authorities, documents and records, for which I have doubts as to their authenticity as detailed within my report: [List authorities, documents and records.]\n6. I certify that I am satisfied that every quotation in this report accurately reproduces the text of the authority or other document or record from which the quotation is stated to be drawn.\nDate / Signature",
     "text_en": "Same as text_local (English is a court language). Paragraph lettering (a)-(c) is as rendered from the official Word form; the form's paragraph 5 refers to item '5.c.'",

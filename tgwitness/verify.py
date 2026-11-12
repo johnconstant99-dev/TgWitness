@@ -1,4 +1,4 @@
-# TgWitness verifier sources SHA-256: 7042f178a7c5b71ce14e5d75954215b5e87a5947885461c47104de00742fa84a
+# TgWitness verifier sources SHA-256: 867cc108ef4f08b080ef6ac43431ba391cce23f8a7c3703cd5ac9d7af59143f8
 """Standalone verifier"""
 import argparse
 import base64
@@ -203,6 +203,8 @@ def strict_json(data):
 
 def read_manifest(archive):
     manifest = strict_json(read_member(archive, "manifest.json", MAX_MANIFEST_BYTES))
+    if not isinstance(manifest, dict) or not isinstance(manifest.get("public_key"), str):
+        raise ValueError("manifest.json is not a signed bundle manifest")
     Ed25519PublicKey.from_public_bytes(base64.b64decode(manifest["public_key"], validate=True)).verify(
         base64.b64decode(read_member(archive, "manifest.sig"), validate=True), canonical(manifest))
     return manifest
@@ -3481,6 +3483,38 @@ def verify_distributed_work(directory, expected_fingerprint=None, max_gib=None):
                        "Unsigned tails are excluded. Keep receipt heads independently to detect removal of a suffix."}
 
 
+JOURNAL_KINDS = ("message.new", "message.snapshot", "message.recovered", "message.edited", "message.deleted",
+                 "message.missing_on_recheck")
+
+
+def check_journal_changes(archive, manifest, public):
+    summary = manifest.get("journal") if isinstance(manifest.get("journal"), dict) else {}
+    key = Ed25519PublicKey.from_public_bytes(base64.b64decode(public, validate=True))
+    chat_id = (manifest.get("chat") or {}).get("id")
+    count, first, previous, messages = 0, None, 0, set()
+    with archive.open("journal-changes.jsonl") as stream:
+        for line in bounded_lines(stream):
+            event = strict_json(line)
+            if not isinstance(event, dict) or set(event) != set(FIELDS) | {"hash", "signature"}:
+                raise ValueError("Unexpected record in journal-changes.jsonl")
+            if type(event["seq"]) is not int or event["seq"] <= previous:
+                raise ValueError("journal-changes.jsonl is not in journal order")
+            if event["chat_id"] != chat_id or event["kind"] not in JOURNAL_KINDS or type(event["message_id"]) is not int:
+                raise ValueError("journal-changes.jsonl holds a record outside this chat's messages")
+            calculated = hashlib.sha256(canonical({k: event[k] for k in FIELDS})).hexdigest()
+            if event["hash"] != calculated:
+                raise ValueError("Changed journal record " + str(event["seq"]) + " in journal-changes.jsonl")
+            if not isinstance(event["signature"], str):
+                raise ValueError("Unsigned journal record " + str(event["seq"]) + " in journal-changes.jsonl")
+            key.verify(base64.b64decode(event["signature"], validate=True), bytes.fromhex(calculated))
+            first = event["seq"] if first is None else first
+            previous, count = event["seq"], count + 1
+            messages.add(event["message_id"])
+    if summary.get("records") != count or summary.get("messages") != len(messages):
+        raise ValueError("The signed journal summary disagrees with journal-changes.jsonl")
+    return {"records": count, "messages": len(messages), "first_seq": first, "last_seq": previous or None}
+
+
 def verify_chat_export(path, expected_fingerprint=None, max_gib=None):
     with open_archive(path, max_gib=max_gib) as archive:
         names = archive.namelist()
@@ -3511,12 +3545,14 @@ def verify_chat_export(path, expected_fingerprint=None, max_gib=None):
             raise ValueError("The report seal describes a different chat export")
         companions = report_companions(archive, manifest, public, describes)
         ids = check_message_ids(archive, manifest) if "message-ids.json" in manifest["files"] else None
+        journal = check_journal_changes(archive, manifest, public) if "journal-changes.jsonl" in manifest["files"] else None
         return {"format": manifest["format"], "fingerprint": fp,
                 "message_count": manifest.get("message_count"), "producer": manifest.get("producer"),
                 "chat": manifest.get("chat"), "key_pinned": bool(expected_fingerprint), "parts": parts,
                 "files_checked": len(manifest["files"]), "chat_json_sha256": manifest["files"].get("chat.json"),
                 "attachments": attachments, "sha256sums": sums, "report_seal": seal,
                 "report_parts": companions["parts"], "report_pdf": companions["pdf"], "message_ids": ids,
+                "journal_changes": journal,
                 "case": manifest.get("case") or {}}
 
 
@@ -4208,6 +4244,49 @@ class AccountExportCheck:
                            "tasks and their observed outcomes."}
 
 
+
+
+LOSS_PREFIXES = ("connection.", "network.", "account.", "session.", "coverage.gap", "process.", "telegram.", "clock.",
+                 "collector.")
+LOSS_FIELDS = ("seq", "observed_at", "source_at", "kind", "chat_id", "message_id", "actor_id", "payload",
+               "previous_hash")
+
+
+def verify_account_loss(data, expected_fingerprint=None):
+    statement = data["statement"]
+    public = statement["public_key"]
+    fp = fingerprint(public)
+    if expected_fingerprint and fp != expected_fingerprint:
+        raise ValueError("Public key differs from the independently trusted fingerprint")
+    key = Ed25519PublicKey.from_public_bytes(base64.b64decode(public, validate=True))
+    if not isinstance(data.get("signature"), str):
+        raise ValueError("Unsigned account loss report")
+    key.verify(base64.b64decode(data["signature"], validate=True), canonical(statement))
+    records = statement.get("records")
+    if not isinstance(records, list) or not isinstance(statement.get("loss"), dict):
+        raise ValueError("Malformed account loss report")
+    previous = 0
+    for event in records:
+        if not isinstance(event, dict) or set(event) != set(LOSS_FIELDS) | {"hash", "signature"}:
+            raise ValueError("Unexpected record in the account loss report")
+        if type(event["seq"]) is not int or event["seq"] <= previous:
+            raise ValueError("Account loss report records are not in journal order")
+        if not isinstance(event["kind"], str) or not event["kind"].startswith(LOSS_PREFIXES):
+            raise ValueError("Account loss report holds a record of another kind")
+        calculated = hashlib.sha256(canonical({k: event[k] for k in LOSS_FIELDS})).hexdigest()
+        if event["hash"] != calculated:
+            raise ValueError("Changed journal record " + str(event["seq"]) + " in the account loss report")
+        if not isinstance(event["signature"], str):
+            raise ValueError("Unsigned journal record " + str(event["seq"]) + " in the account loss report")
+        key.verify(base64.b64decode(event["signature"], validate=True), bytes.fromhex(calculated))
+        previous = event["seq"]
+    loss = statement["loss"]
+    return {"format": statement["format"], "fingerprint": fp, "key_pinned": bool(expected_fingerprint),
+            "records": len(records), "truncated": bool(statement.get("truncated")), "window": statement.get("window"),
+            "generated_at": statement.get("generated_at"), "account": statement.get("account"),
+            "producer": statement.get("producer"), "loss": {key: loss.get(key) for key in ("cause", "at", "telegram_error", "dc_id")},
+            "route": (loss.get("route") or {}).get("kind") if isinstance(loss.get("route"), dict) else None,
+            "journal_head": statement.get("journal_head"), "meaning": statement.get("meaning")}
 
 
 def verify_account_export(path, expected_fingerprint=None, max_gib=None):
@@ -8011,11 +8090,18 @@ def verification_json(args):
     if "statement" in data and "signature" in data:
         authenticate_statement(data, "public_key" if "public_key" in data["statement"] else "witness_public_key")
         known = {"tgwitness-board-selection-v1", "tgwitness-case-board-v1", "tgwitness-case-board-disclosure-v1",
-                 "tgwitness-case-board-handover-v1"}
+                 "tgwitness-case-board-handover-v1", "tgwitness-account-loss-v1"}
         if kind not in known and not any(is_format(kind, name) for name in (
                 "public-proof-v1", "history-report-v1", "dossier-v1")):
             raise VerifierTooOld("Unsupported signed JSON format")
-    if kind == "tgwitness-board-selection-v1":
+    if kind == "tgwitness-account-loss-v1":
+        shown, result = "account_loss", verify_account_loss(data, args.fingerprint)
+        pinned = bool(args.fingerprint)
+        notes.append("Account loss report: " + str(result["records"]) + " signed journal record(s) from "
+                     + str((result["window"] or {}).get("from")) + "; Telegram ended the session at "
+                     + str(result["loss"]["at"]) + " (" + str(result["loss"]["cause"]) + ")."
+                     + (" The report reached its record limit." if result["truncated"] else ""))
+    elif kind == "tgwitness-board-selection-v1":
         shown, result = "selection", verify_selection(args.bundle, args.fingerprint, args.evidence)
         pinned = bool(args.fingerprint)
         notes.append("Signed Case Board selection; exact records matched against the signed journal archive.")
@@ -8299,6 +8385,10 @@ def verification_output(args, checked, console, mode):
         verification_print("Message IDs " + str(ids["first_id"]) + "-" + str(ids["last_id"]) + ": " + str(ids["present"])
               + " present, " + str(ids["missing"]) + " absent in " + str(ids["missing_ranges"])
               + " range(s); message-ids.json matches chat.json.")
+    changes = result.get("journal_changes")
+    if changes:
+        verification_print("Journal records of deletions and earlier versions: " + str(changes["records"]) + " for "
+                           + str(changes["messages"]) + " message(s); each hash and signature checked.")
     if result.get("sha256sums"):
         verification_print("SHA256SUMS matches the signed manifest.")
     for line in notes:

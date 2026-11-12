@@ -10,7 +10,6 @@
   "local_language": "en",
   "legal_family": "common law",
   "checked_at": "2026-11-11",
-  "review": "machine-assisted research, not reviewed by local counsel",
   "expert_term": {
     "local": "pakar",
     "en": "expert: a person specially skilled in foreign law, science or art, or in questions as to identity or genuineness of handwriting or finger impressions, whose opinion is a relevant fact (Evidence Act 1950 s. 45)"
@@ -119,6 +118,7 @@
     }
   ],
   "declaration": {
+    "route": "civil",
     "basis": "Rules of Court 2012 O. 40A r. 3(2)(g) (statement of belief of correctness) and r. 3(2)(h) (statement of understanding of overriding duty to the Court); O. 40A r. 3(1) (report exhibited in affidavit). The Rules prescribe the content of the statements, not their wording.",
     "text_local": "Saya percaya bahawa pendapat yang dinyatakan dalam laporan ini adalah betul. Saya faham bahawa dalam memberikan laporan ini kewajipan utama saya adalah kepada Mahkamah, dan saya mematuhi kewajipan tersebut.",
     "text_en": "I believe that the opinions expressed in this report are correct. I understand that in giving this report my overriding duty is to the Court, and I comply with that duty.",

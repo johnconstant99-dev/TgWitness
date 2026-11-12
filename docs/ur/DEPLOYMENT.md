@@ -203,7 +203,7 @@ docker compose logs witness                     # witness key fingerprint
 ریپوزیٹری کا راستہ **چھوٹے انگریزی حروف** میں لکھیں، مثلاً:
 
 ```dotenv
-TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.9.2
+TGWITNESS_IMAGE=ghcr.io/your-owner/your-repository:0.9.3
 TGWITNESS_PORT=8787
 ```
 

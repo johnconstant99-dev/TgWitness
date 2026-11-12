@@ -20,7 +20,7 @@
 <p align="center"><strong>אפס אמון.</strong> TgWitness אינו נוקט צד: אותן בדיקות חלות על המפעיל, על PhishDestroy ועל כל אחד אחר.<br>נחשב רק מה שצד שלישי או המתמטיקה מאשרים. <a href="../QUESTIONS-AND-CHECKS.md">שאלות ובדיקות</a></p>
 
 <p align="center">
-  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.2 · גרסה מקדימה"></a>
+  <a href="../CHANGELOG.md"><img src="../assets/presentation/identity-meta-version.svg" width="146" height="30" alt="v0.9.3 · גרסה מקדימה"></a>
   <a href="../../LICENSE"><img src="../assets/presentation/identity-meta-license.svg" width="60" height="30" alt="MIT"></a><br>
   <sub><a href="../VERIFICATION.md">סביבות שנבדקו</a> · 25 שפות ממשק · 26 שפות מדריך</sub>
 </p>

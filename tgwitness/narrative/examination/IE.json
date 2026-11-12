@@ -10,7 +10,6 @@
   "local_language": "en",
   "legal_family": "common law",
   "checked_at": "2026-11-11",
-  "review": "machine-assisted research, not reviewed by local counsel",
   "expert_term": {
     "local": "expert witness",
     "en": "expert witness retained by a party, or a single joint expert directed by the court"
@@ -109,6 +108,7 @@
     }
   ],
   "declaration": {
+    "route": "civil",
     "basis": "RSC Order 39 rule 57(2)(a): every expert report delivered under the Rules or a court order or direction must contain a statement acknowledging the duty in rule 57(1). The rule does not prescribe the wording.",
     "text_local": "I acknowledge that it is my duty to assist the Court as to matters within my field of expertise and that this duty overrides any obligation to any party paying my fee.",
     "text_en": "I acknowledge that it is my duty to assist the Court as to matters within my field of expertise and that this duty overrides any obligation to any party paying my fee.",

@@ -148,7 +148,7 @@ def build(events, verification, journal="collector", max_scene_records=2000):
         scene.facts[0].params['to'] = scene.at_to
         scene.facts[0].evidence.append(ref)
         scene.facts.append(Fact('record.field', {'field': 'event_kind', 'value': 'process.started'}, [ref]))
-    limits = [Limit("limit.truth"), Limit("limit.review")]
+    limits = [Limit("limit.truth")]
     for step in verification.get("assurance", {}).get("ladder", []):
         if step["status"] != "pass":
             limits.append(Limit("assurance.state", {"tier": step["tier"], "status": step["status"]}))
@@ -171,4 +171,4 @@ def build(events, verification, journal="collector", max_scene_records=2000):
             "source": {"fingerprint": verification.get("fingerprint"), "head_hash": verification.get("head_hash"),
                        "events": verification.get("events"), "journal": journal},
             "model_sha256": hashlib.sha256(canonical([asdict(s) for s in scenes])).hexdigest(),
-            "translation_review": "machine-assisted, not reviewed", "verified_anchors": anchors}
+            "verified_anchors": anchors}

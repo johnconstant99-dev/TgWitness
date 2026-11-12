@@ -410,6 +410,14 @@ async def get_checkpoint(*, ctx=Depends(current_context)):
     return checkpoint(ctx.app.state.store, ctx.app.state.vault)
 
 
+async def get_account_loss_report(*, ctx=Depends(current_context)):
+    from ..account_loss import build
+    try:
+        return await complete_in_thread(build, ctx.app.state.store, ctx.app.state.vault)
+    except ValueError as exc:
+        raise HTTPException(409, str(exc)) from exc
+
+
 async def get_run_receipt(*, ctx=Depends(current_context)):
     statement = {
         "format": "tgwitness-run-receipt-v1",

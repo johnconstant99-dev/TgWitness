@@ -41,8 +41,19 @@ EXPORT_LIMITS = [
     "names and usernames are mutable.",
     "Verify with the collector fingerprint you retained; any change to the export breaks its signature.",
 ]
-JOURNAL_LIMIT = ("This snapshot holds only what Telegram returned at export. The journal of this workspace also "
-                 "holds deletions or earlier versions observed in this chat; export the evidence journal to include them.")
+JOURNAL_LIMIT = ("This snapshot holds only what Telegram returned at export. Deletions and earlier versions observed "
+                 "in this chat are in journal-changes.jsonl, each record signed; the evidence journal export holds "
+                 "the complete hash chain.")
+JOURNAL_FILE = "journal-changes.jsonl"
+JOURNAL_KINDS = ("message.new", "message.snapshot", "message.recovered", "message.edited", "message.deleted",
+                 "message.missing_on_recheck")
+CHANGE_KINDS = ("message.deleted", "message.missing_on_recheck", "message.edited")
+JOURNAL_FIELDS = ("seq", "observed_at", "source_at", "kind", "chat_id", "message_id", "actor_id", "payload",
+                  "previous_hash", "hash", "signature")
+JOURNAL_MEANING = ("Records from this workspace's journal for the messages of this chat that were deleted, missing on "
+                   "recheck or edited while observed: every saved version and the notice. Each record keeps its "
+                   "journal hash and Ed25519 signature; the evidence export holds the complete hash chain.")
+JOURNAL_SHOWN = 300
 NAMES_MEANING = ("Sender names as the journal of this workspace recorded them: delivered with the message when it was "
                  "received live, otherwise the last name recorded before the message was sent. Messages not listed show "
                  "the name at export: from in chat.json, with its source in from_source.")
@@ -68,12 +79,42 @@ REUSED_MEANING = ("file_reused marks an attachment whose bytes were not download
                   "the workspace journal (media_event), were hashed again before reuse.")
 
 
-def journal_changes(store, chat_id):
+def journal_changes(store, chat_id, folder=None):
     deleted = store.count_events(chat_id=chat_id, kind="message.deleted,message.missing_on_recheck")
     edited = store.count_events(chat_id=chat_id, kind="message.edited")
     if not deleted and not edited:
         return None
-    return {"deleted": deleted, "edited": edited, "meaning": JOURNAL_LIMIT}
+    if folder is None:
+        return {"deleted": deleted, "edited": edited, "meaning": JOURNAL_LIMIT}
+    path, records, messages = Path(folder) / JOURNAL_FILE, 0, set()
+    kinds, changes = ",".join("?" * len(JOURNAL_KINDS)), ",".join("?" * len(CHANGE_KINDS))
+    with store.snapshot() as snapshot, path.open("wb") as output:
+        rows = snapshot.connection.execute(
+            "SELECT * FROM events WHERE chat_id=? AND kind IN (" + kinds + ") AND message_id IN (SELECT message_id "
+            "FROM events WHERE chat_id=? AND kind IN (" + changes + ") AND message_id IS NOT NULL) ORDER BY seq",
+            (chat_id, *JOURNAL_KINDS, chat_id, *CHANGE_KINDS))
+        for row in rows:
+            event = {**dict(row), "payload": json.loads(row["payload"])}
+            output.write(canonical({key: event[key] for key in JOURNAL_FIELDS}) + b"\n")
+            records += 1
+            messages.add(event["message_id"])
+    return {"deleted": deleted, "edited": edited, "records": records, "messages": len(messages),
+            "meaning": JOURNAL_MEANING, "path": str(path)}
+
+
+def journal_items(path, limit=JOURNAL_SHOWN):
+    items = {}
+    with Path(path).open(encoding="utf-8") as handle:
+        for line in handle:
+            event = json.loads(line)
+            number = event["message_id"]
+            if number not in items and len(items) >= limit:
+                continue
+            payload = event["payload"] if isinstance(event["payload"], dict) else {}
+            items.setdefault(number, {"message_id": number, "events": []})["events"].append({
+                "seq": event["seq"], "kind": event["kind"], "observed_at": event["observed_at"],
+                "text": payload.get("text") if isinstance(payload.get("text"), str) else None})
+    return list(items.values())
 
 
 def archive_name(store, chat_id, title):
@@ -333,6 +374,16 @@ def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES
             attachments = attachment_files(media_dir)
             if attachments:
                 meta["attachments"] = len(attachments)
+            journal, journal_shown = meta.get("journal"), None
+            if isinstance(journal, dict) and journal.get("path"):
+                kept = Path(journal.pop("path"))
+                try:
+                    with kept.open("rb") as incoming:
+                        write_member(JOURNAL_FILE, iter(lambda: incoming.read(1024 * 1024), b""))
+                    journal_shown = journal_items(kept)
+                finally:
+                    kept.unlink(missing_ok=True)
+                journal["file"] = JOURNAL_FILE
             chat_id = (meta.get("chat") or {}).get("id")
             attributed, at_export = sender_names(scratch_path, names, chat_id)
             meta["sender_names"] = {"file": "sender-names.json", "from_journal": len(attributed), "at_export": at_export,
@@ -371,7 +422,7 @@ def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES
                        "fingerprint": meta["fingerprint"], "meta": meta, "people": people,
                        "stats": stats, "analytics": analytics, "chat_json_sha256": hashes["chat.json"], "message_ids": ids,
                        "account": meta.get("account"), "sign": vault.sign, "indicators": found,
-                       "admin_events": admin_events}
+                       "admin_events": admin_events, "journal_changes": journal_shown}
             write_indicators(write_member, found, context)
             write_member("custody.json", [json.dumps(report.custody(context), ensure_ascii=False,
                                                      indent=1).encode("utf-8")])
@@ -391,7 +442,9 @@ def build_bundle(scratch_path, meta, vault, out_path, max_bytes=MAX_BUNDLE_BYTES
                 "authors.csv / authors.json list everyone who posted in the exported history,\n"
                 "with message counts and first/last message; names are the profile at export time.\n"
                 "sender-names.json gives the sender name the journal recorded at the time of each listed message.\n"
-                "custody.json records how the history was acquired and exported.\n"
+                + ("journal-changes.jsonl holds the signed journal records of deletions and earlier versions\n"
+                   "observed in this chat; verify.py checks each record's hash and signature.\n" if journal_shown is not None else "")
+                + "custody.json records how the history was acquired and exported.\n"
                 "media/ holds the attachments saved with the export, each named by its SHA-256; a message\n"
                 "without a file names the reason in file_status.\n"
                 "Exports above 4 GiB uncompressed also need --max-gib with their size in GiB.\n"

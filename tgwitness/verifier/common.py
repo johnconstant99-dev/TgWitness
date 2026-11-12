@@ -204,6 +204,8 @@ def strict_json(data):
 def read_manifest(archive):
     from .chain import canonical
     manifest = strict_json(read_member(archive, "manifest.json", MAX_MANIFEST_BYTES))
+    if not isinstance(manifest, dict) or not isinstance(manifest.get("public_key"), str):
+        raise ValueError("manifest.json is not a signed bundle manifest")
     Ed25519PublicKey.from_public_bytes(base64.b64decode(manifest["public_key"], validate=True)).verify(
         base64.b64decode(read_member(archive, "manifest.sig"), validate=True), canonical(manifest))
     return manifest
