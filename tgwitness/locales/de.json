@@ -8852,5 +8852,7 @@
   "Custom file limits are set in Parameters. Pick an option to replace them.": "Benutzerdefinierte Dateigrößenbeschränkungen werden unter „Parameter“ festgelegt. Wählen Sie eine Option aus, um diese zu überschreiben.",
   "Advanced connection options": "Erweiterte Verbindungsoptionen",
   "this device": "dieses Gerät",
-  "Undo of an earlier change": "Rückgängigmachen einer früheren Änderung"
+  "Undo of an earlier change": "Rückgängigmachen einer früheren Änderung",
+  "Data": "Daten",
+  "Always included": "Immer enthalten"
 }

@@ -18,7 +18,7 @@
 <link rel="stylesheet" href="/views/accounts.css?v=31">
 <link rel="stylesheet" href="/views/group.css?v=1">
 <link rel="stylesheet" href="/views/setup.css?v=4">
-<link rel="stylesheet" href="/views/settings-hub.css?v=5">
+<link rel="stylesheet" href="/views/settings-hub.css?v=7">
 <link rel="stylesheet" href="/views/connection.css?v=1">
 <link rel="stylesheet" href="/views/system-map.css?v=2">
 <link rel="stylesheet" href="/services.css?v=1">
@@ -28,7 +28,7 @@
 <link rel="stylesheet" href="/account-import.css?v=1">
 <link rel="stylesheet" href="/views/access.css?v=30">
 <link rel="stylesheet" href="/components/journal.css?v=6">
-<link rel="stylesheet" href="/views/chats.css?v=12">
+<link rel="stylesheet" href="/views/chats.css?v=14">
 <link rel="stylesheet" href="/views/chat-list.css?v=13">
 <link rel="stylesheet" href="/views/board.css?v=2">
 <link rel="stylesheet" href="/views/topology.css?v=2">
@@ -39,10 +39,10 @@
 <script defer src="/dialogs.js?v=2"></script>
 <script defer src="/privacy.js?v=1"></script>
 <script defer src="/chat-safety.js?v=1"></script>
-<script defer src="/app.js?v=0.9.1-evidence1-topology2-layout1-activity5-chat2"></script>
+<script defer src="/app.js?v=0.9.1-evidence1-topology2-layout1-activity5-chat2-wow4"></script>
 <script defer src="/services.js?v=1"></script>
 <script defer src="/independent-capture.js?v=2"></script>
-<script defer src="/investigate.js?v=9"></script>
+<script defer src="/investigate.js?v=11"></script>
 <script defer src="/account-import.js?v=2"></script>
 <script defer src="/integrations.js?v=5"></script>
 <script defer src="/analysis.js?v=5"></script>
@@ -59,6 +59,9 @@
 <link href="/components/forms.css?v=35" rel="stylesheet">
 <link href="/components/feedback.css?v=36" rel="stylesheet">
 <link href="/components/layout.css?v=9" rel="stylesheet">
+<link href="/components/polish.css?v=5" rel="stylesheet">
+<link href="/views/pulse.css?v=2" rel="stylesheet">
+<link href="/views/report-wizard.css?v=2" rel="stylesheet">
 </head>
 <body>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
@@ -1629,6 +1632,7 @@
                   <div class="chat-history-tools"><select aria-label="How many recent messages to load" id="chat-history-limit"><option value="100">Last 100</option><option value="250">Last 250</option><option value="500">Last 500</option></select><button class="quiet" id="chat-load-history" title="Download recent messages from Telegram into this view" type="button"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg> Load history</button></div>
                 </div>
                 <div id="chat-recording-options"></div>
+                <button class="quiet" id="chat-build-report" type="button"><svg aria-hidden="true" class="icon"><use href="#i-report"/></svg> Build report</button>
                 <button class="quiet" id="chat-pattern" type="button" aria-pressed="false"><svg aria-hidden="true" class="icon"><use href="#i-settings"/></svg> Dotted background</button>
               </div>
             </details>

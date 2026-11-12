@@ -99,9 +99,20 @@ Saved conversations, read-only by default.
   journal. **Join / open and observe** then joins the chat and adds it to your sources;
   opening a bot sends it `/start`.
 - The chat header counts messages **deleted, text kept**, **deleted before saving**
-  and **not found on recheck**. The chat list and notifications use the same
+  and **not found on recheck**. Each count is a button that shows only those messages;
+  press it again to show all. **Deleted** and **Not found at recheck** on a message open
+  a note with the time and what was observed. The chat list and notifications use the same
   definitions. A deleted message is red and keeps its saved text; an edited message
   keeps every saved version.
+- Between messages the chat shows two kinds of gap markers. **Message numbers not
+  observed** lists numbers the journal has no record for, in channels and supergroups
+  only: other chats share one account-wide numbering, so a jump there says nothing
+  about the chat. **Coverage gap** marks a period between a recorded interruption and
+  the next recorded resumption, with the reason when the journal has one. The markers
+  appear with all messages shown and hide while a message filter is on.
+- **Build report** in **Chat actions** opens the report studio with this chat selected.
+  The same button under a message author's details selects the chat and that author.
+  Both change only the draft; save it before exporting.
 - **Load history** brings the last 100, 250 or 500 messages into this view and the
   journal. Find it in **Chat actions**, alongside recording settings, read-only and
   secret-masking controls. The menu closes with Escape or a click outside it.

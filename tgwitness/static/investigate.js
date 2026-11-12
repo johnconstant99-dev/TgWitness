@@ -2312,5 +2312,15 @@
     toggle.hidden = !allowed();
     if (toggle.hidden && open()) hide();
   }
+  window.TgWitnessDocumentation = {openAccount: async () => {
+    mount();
+    if (!allowed() || !may('account')) return false;
+    if (owner !== key()) {owner = key(); reset();}
+    if (open() && drawer.querySelector('.doc-mark')) return false;
+    current = data = null; sessionTab = 'timeline'; homeTab = 'account';
+    await show();
+    drawer.querySelector('.doc-top button:last-child')?.focus();
+    return true;
+  }};
   document.addEventListener('DOMContentLoaded', () => {watch(); setInterval(watch, 2000);});
 })();

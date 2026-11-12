@@ -8944,5 +8944,7 @@
   "Custom file limits are set in Parameters. Pick an option to replace them.": "Niestandardowe limity plików ustawia się w sekcji „Parametry”. Wybierz opcję, aby je zastąpić.",
   "Advanced connection options": "Zaawansowane opcje połączenia",
   "this device": "to urządzenie",
-  "Undo of an earlier change": "Cofnięcie wcześniejszej zmiany"
+  "Undo of an earlier change": "Cofnięcie wcześniejszej zmiany",
+  "Data": "Dane",
+  "Always included": "Zawsze w raporcie"
 }

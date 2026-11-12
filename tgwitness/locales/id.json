@@ -8806,5 +8806,7 @@
   "Custom file limits are set in Parameters. Pick an option to replace them.": "Batas file khusus ditetapkan di bagian Parameter. Pilih opsi untuk menggantinya.",
   "Advanced connection options": "Opsi koneksi lanjutan",
   "this device": "perangkat ini",
-  "Undo of an earlier change": "Membatalkan perubahan sebelumnya"
+  "Undo of an earlier change": "Membatalkan perubahan sebelumnya",
+  "Data": "Data",
+  "Always included": "Selalu disertakan"
 }

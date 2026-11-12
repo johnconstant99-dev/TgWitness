@@ -8852,5 +8852,7 @@
   "Custom file limits are set in Parameters. Pick an option to replace them.": "कस्टम फ़ाइल सीमाएँ पैरामीटर में सेट की जाती हैं। उन्हें बदलने के लिए एक विकल्प चुनें।",
   "Advanced connection options": "उन्नत कनेक्शन विकल्प",
   "this device": "यह डिवाइस",
-  "Undo of an earlier change": "पहले किए गए परिवर्तन को वापस लेना"
+  "Undo of an earlier change": "पहले किए गए परिवर्तन को वापस लेना",
+  "Data": "डेटा",
+  "Always included": "हमेशा शामिल"
 }

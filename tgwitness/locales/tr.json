@@ -8852,5 +8852,7 @@
   "Custom file limits are set in Parameters. Pick an option to replace them.": "Özel dosya sınırları Parametreler bölümünde ayarlanır. Bunları değiştirmek için bir seçenek seçin.",
   "Advanced connection options": "Gelişmiş bağlantı seçenekleri",
   "this device": "bu cihaz",
-  "Undo of an earlier change": "Önceki bir değişikliği geri alma"
+  "Undo of an earlier change": "Önceki bir değişikliği geri alma",
+  "Data": "Veri",
+  "Always included": "Her zaman dahil"
 }

@@ -8859,5 +8859,7 @@
   "Custom file limits are set in Parameters. Pick an option to replace them.": "I limiti personalizzati per i file vengono impostati in \"Parametri\". Scegli un'opzione per sostituirli.",
   "Advanced connection options": "Opzioni di connessione avanzate",
   "this device": "questo dispositivo",
-  "Undo of an earlier change": "Annullamento di una modifica precedente"
+  "Undo of an earlier change": "Annullamento di una modifica precedente",
+  "Data": "Dati",
+  "Always included": "Sempre incluso"
 }

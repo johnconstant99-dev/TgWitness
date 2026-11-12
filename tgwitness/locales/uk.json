@@ -8944,5 +8944,7 @@
   "Custom file limits are set in Parameters. Pick an option to replace them.": "Налаштування обмежень розміру файлів встановлюються в розділі «Параметри». Оберіть опцію, щоб змінити їх.",
   "Advanced connection options": "Розширені параметри підключення",
   "this device": "цей пристрій",
-  "Undo of an earlier change": "Скасування попередньої зміни"
+  "Undo of an earlier change": "Скасування попередньої зміни",
+  "Data": "Дані",
+  "Always included": "Завжди включено"
 }

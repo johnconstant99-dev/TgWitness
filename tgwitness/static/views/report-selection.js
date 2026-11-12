@@ -1,4 +1,16 @@
-export function createReportSelection({root,tr,json,getOwner,ready,options,active}) {
+export function createReportSelection({root,tr,json,getOwner,ready,options,active,titles=()=>new Map()}) {
+  const people=new Map();
+  let peopleKey='';
+  function loadPeople(){
+    const chosen=ids(fields.chats),chats=(chosen.length?chosen:(catalog.chats||[]).map(row=>Number(row.id))).slice(0,5),key=getOwner()+':'+chats.join(',');
+    if(!chats.length||key===peopleKey)return;
+    peopleKey=key;
+    Promise.allSettled(chats.map(chat=>json('chats/'+encodeURIComponent(chat)+'/authors'))).then(results=>{
+      if(peopleKey!==key)return;
+      for(const result of results)for(const author of result.value?.authors||[])if(author.name||author.username)people.set(Number(author.id),author.name||'@'+author.username);
+      renderCatalog('senders');
+    });
+  }
   const find=id=>root.querySelector('#'+id), kinds=[...root.querySelectorAll('[data-report-kind]')];
   const make=(tag,text='',cls='')=>{const el=document.createElement(tag);el.textContent=String(text??'');if(cls)el.className=cls;return el;};
   const mask=text=>window.TgWitnessPrivacy?.preview(String(text??''))??tr('Message preview unavailable');
@@ -35,11 +47,13 @@ export function createReportSelection({root,tr,json,getOwner,ready,options,activ
     const selected=new Set(ids(fields[key])), query=searches[key].value.trim().toLowerCase();
     const all=new Map((catalog[key]||[]).map(row=>[Number(row.id),row]));
     for(const id of selected)if(!all.has(id))all.set(id,{id,count:null});
+    const known=key==='chats'?titles():people;
+    for(const row of all.values())if(!row.title&&known.get(Number(row.id)))row.title=known.get(Number(row.id));
     const rows=[...all.values()].filter(row=>String(row.id).includes(query)||String(row.title||'').toLowerCase().includes(query));
     const nodes=rows.map(row=>{
       const label=make('label','','report-catalog-row'),input=make('input');input.type='checkbox';input.checked=selected.has(Number(row.id));
       input.dataset.reportChoice=key;input.dataset.id=String(row.id);
-      const title=key==='chats'&&row.title?mask(row.title):tr(key==='chats'?'Chat {id}':'Account {id}',{id:row.id});
+      const title=row.title?mask(row.title):tr(key==='chats'?'Chat {id}':'Account {id}',{id:row.id});
       const info=make('span','','report-catalog-label');info.append(make('strong',title),make('small',String(row.id)));
       label.append(input,info,make('span',row.count===null?'—':count(row.count),'report-catalog-number'));
       input.addEventListener('change',()=>{
@@ -177,7 +191,7 @@ export function createReportSelection({root,tr,json,getOwner,ready,options,activ
   }
   async function preview(reveal=true){
     if(!ready()||pending)return;
-    const body=options();if(!root.reportValidity())return;
+    const body=options();window.TgWitnessReportWizard?.revealInvalid();if(!root.reportValidity())return;
     const mine=++request,owner=getOwner(),version=revision;
     controller?.abort();controller=new AbortController();pending=true;controls();
     find('report-preview-status').textContent=tr('Reading the selected journal records…');
@@ -187,11 +201,11 @@ export function createReportSelection({root,tr,json,getOwner,ready,options,activ
       const data=await json('report-preview',body,{signal:controller.signal});
       if(!current())return;
       if(version!==revision){find('report-preview-status').textContent=tr('Choices changed while the preview was running. Build it again.');find('report-preview-stale').hidden=false;return;}
-      response=data;stamp=JSON.stringify(body);catalog=data.catalog||{chats:[],senders:[]};
+      response=data;stamp=JSON.stringify(body);catalog=data.catalog||{chats:[],senders:[]};loadPeople();
       renderCatalog('chats');renderCatalog('senders');render(data);
       find('report-preview-stale').hidden=true;delete find('report-preview-result').dataset.stale;
       find('report-preview-status').textContent=tr('Preview ready. Save your choices before downloading the report.');
-      if(reveal){find('report-preview').scrollIntoView({block:'start',behavior:'instant'});find('report-preview-title').focus({preventScroll:true});}
+      if(reveal){window.TgWitnessReportWizard?.reveal(find('report-preview'));find('report-preview').scrollIntoView({block:'start',behavior:'instant'});find('report-preview-title').focus({preventScroll:true});}
     }catch(error){
       if(!current()||['AbortError','StaleView'].includes(error.name))return;
       find('report-preview-status').textContent=tr('Could not build the preview.')+' '+error.message;find('report-preview-retry').hidden=false;

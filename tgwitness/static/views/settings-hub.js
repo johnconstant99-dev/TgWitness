@@ -384,6 +384,7 @@ export function createSettingsHub(ctx) {
         cards(detail,goals,data.goal,async goal=>{if(goal===data.goal)return;await applyGoal(goal,{quiet:true});render();});
       }
       if(section==='connection')connectionForm(detail,false);
+      if(section==='telegram'&&signedIn()&&window.TgWitnessDocumentation)detail.append(button('Profile',async()=>{await closeSection();await window.TgWitnessDocumentation.openAccount();}));
       if(section==='telegram')move(ctx.authCard(),detail);
       if(section==='chats'){detail.append(message('Choose all chats, individual chats or a Telegram folder.'));
         const box=node('div','hub-chats');detail.append(box);void chatsForm(box,owner(),true).catch(e=>{if(e.name!=='StaleView')box.append(message(e.message,'notice warning'));});}

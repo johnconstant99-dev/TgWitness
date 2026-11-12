@@ -8806,5 +8806,7 @@
   "Custom file limits are set in Parameters. Pick an option to replace them.": "ขีดจำกัดไฟล์ที่กำหนดเองถูกตั้งค่าไว้ในส่วน Parameters (พารามิเตอร์) ให้เลือกตัวเลือกเพื่อแทนที่ค่าเดิม",
   "Advanced connection options": "ตัวเลือกการเชื่อมต่อขั้นสูง",
   "this device": "อุปกรณ์นี้",
-  "Undo of an earlier change": "การยกเลิกการเปลี่ยนแปลงก่อนหน้านี้"
+  "Undo of an earlier change": "การยกเลิกการเปลี่ยนแปลงก่อนหน้านี้",
+  "Data": "ข้อมูล",
+  "Always included": "รวมอยู่เสมอ"
 }

@@ -17,8 +17,11 @@ panel page; shared behavior belongs in [components](../components/README.md) or
 | --- | --- |
 | Accounts and connection | [`accounts.js`](accounts.js), [`connection.js`](connection.js) |
 | Chat navigation | [`chat-list.js`](chat-list.js), [`chats.css`](chats.css) |
+| Gap markers in the chat feed | [`chat-gaps.js`](chat-gaps.js) |
 | Case Board | [`board.js`](board.js), [`board.css`](board.css) |
+| Home overview and charts | [`pulse.js`](pulse.js), [`pulse.css`](pulse.css) |
 | Exports | [`exports.js`](exports.js), [`disclosure-preview.js`](disclosure-preview.js) |
+| Report studio steps and live preview | [`report-wizard.js`](report-wizard.js), [`report-wizard.css`](report-wizard.css), [`report-selection.js`](report-selection.js) |
 | Shared access | [`access.js`](access.js) |
 | Account groups | [`group.js`](group.js), [`group-settings.js`](group-settings.js) |
 

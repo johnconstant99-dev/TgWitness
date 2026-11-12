@@ -9036,5 +9036,7 @@
   "Custom file limits are set in Parameters. Pick an option to replace them.": "يتم تعيين حدود الملفات المخصصة في قسم «المعلمات». اختر خيارًا لاستبدالها.",
   "Advanced connection options": "خيارات الاتصال المتقدمة",
   "this device": "هذا الجهاز",
-  "Undo of an earlier change": "التراجع عن تغيير سابق"
+  "Undo of an earlier change": "التراجع عن تغيير سابق",
+  "Data": "البيانات",
+  "Always included": "مُضمَّن دائمًا"
 }

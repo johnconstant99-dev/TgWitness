@@ -8898,5 +8898,7 @@
   "Custom file limits are set in Parameters. Pick an option to replace them.": "מגבלות קבצים מותאמות אישית מוגדרות תחת \"פרמטרים\". בחר באפשרות כדי להחליף אותן.",
   "Advanced connection options": "אפשרויות חיבור מתקדמות",
   "this device": "מכשיר זה",
-  "Undo of an earlier change": "ביטול שינוי קודם"
+  "Undo of an earlier change": "ביטול שינוי קודם",
+  "Data": "נתונים",
+  "Always included": "נכלל תמיד"
 }

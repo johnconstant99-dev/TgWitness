@@ -8852,5 +8852,7 @@
   "Custom file limits are set in Parameters. Pick an option to replace them.": "محدودیت‌های سفارشی فایل‌ها در بخش پارامترها تنظیم می‌شوند. برای جایگزینی آن‌ها، یک گزینه را انتخاب کنید.",
   "Advanced connection options": "گزینه‌های پیشرفته اتصال",
   "this device": "این دستگاه",
-  "Undo of an earlier change": "ابطال یک تغییر قبلی"
+  "Undo of an earlier change": "ابطال یک تغییر قبلی",
+  "Data": "داده‌ها",
+  "Always included": "همیشه گنجانده می‌شود"
 }

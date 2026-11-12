@@ -5318,7 +5318,7 @@
   "Back up the workspace, move older files to your cloud, or retain an immutable evidence copy.": "Создайте резервную копию, перенесите старые файлы в своё облако или защитите доказательную копию от удаления.",
   "YOUR STORAGE": "ВАШЕ ХРАНИЛИЩЕ",
   "Backup": "Резервная копия",
-  "Free disk space": "Освободить место",
+  "Free disk space": "Свободно на диске",
   "Protect an evidence copy": "Защитить доказательную копию",
   "An encrypted copy of the journal, files, checkpoints and exports. Originals stay here.": "Зашифрованная копия журнала, файлов, контрольных точек и экспортов. Оригиналы остаются здесь.",
   "Move older files to your cloud after verifying every uploaded byte. Keep the journal and file hashes here.": "Перенесите старые файлы в своё облако после полной проверки загруженных данных. Журнал и хеши файлов остаются здесь.",
@@ -8914,5 +8914,7 @@
   "Custom file limits are set in Parameters. Pick an option to replace them.": "Пользовательские ограничения на размер файлов устанавливаются в разделе «Параметры». Выберите вариант, чтобы заменить их.",
   "Advanced connection options": "Расширенные настройки подключения",
   "this device": "это устройство",
-  "Undo of an earlier change": "Отмена предыдущего изменения"
+  "Undo of an earlier change": "Отмена предыдущего изменения",
+  "Data": "Данные",
+  "Always included": "Всегда включено"
 }

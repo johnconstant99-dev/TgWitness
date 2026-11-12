@@ -2,7 +2,7 @@ import json
 import sqlite3
 import time
 
-from .verify import CHANNEL_IDS_BELOW, GAP_DEFAULTS, MESSAGE_KINDS, Sequences
+from .verify import CHANNEL_IDS_BELOW, GAP_DEFAULTS, MESSAGE_KINDS, Sequences, missing_ranges, numbered_per_chat
 
 SCOPE_KINDS = ("scope.changed", "scope.applied", "deletion.unscoped", "observation.started",
                "observation.stopped", "process.started", "process.stopped")
@@ -12,6 +12,25 @@ SERVICE_KINDS = ("chat.service", "membership.service")
 def settings(store):
     from .tuning import value
     return {key: value(store, key) for key in GAP_DEFAULTS}
+
+
+def page_gaps(store, chat_id, numbers, *, before_id=None, after_id=None, limit=5000, budget=2):
+    if not numbers or not numbered_per_chat(chat_id) or not settings(store)["gap_analysis"]:
+        return []
+    low, high = min(numbers), max(numbers)
+    if before_id is not None:
+        high = max(high, before_id)
+    if after_id is not None:
+        low = min(low, after_id)
+    kinds = MESSAGE_KINDS + SERVICE_KINDS
+    try:
+        rows = store.bounded_read(
+            "SELECT DISTINCT message_id FROM events WHERE chat_id=? AND message_id BETWEEN ? AND ? AND kind IN ("
+            + ",".join("?" * len(kinds)) + ") ORDER BY message_id LIMIT ?", [chat_id, low, high, *kinds, limit], budget)
+    except TimeoutError:
+        return []
+    return [{"low": first, "high": last, "missing": last - first + 1}
+            for first, last in missing_ranges([row[0] for row in rows])]
 
 
 def capture_summary(store, chat_ids=None, *, chat_id=None, budget=4, titles=None):

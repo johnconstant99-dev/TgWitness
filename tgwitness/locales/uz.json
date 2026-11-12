@@ -8852,5 +8852,7 @@
   "Custom file limits are set in Parameters. Pick an option to replace them.": "Moslashtirilgan fayl limitlari Parametrlarda o'rnatilgan. Ularni almashtirish uchun variantni tanlang.",
   "Advanced connection options": "Rivojlangan ulanish opsiyalari",
   "this device": "bu qurilma",
-  "Undo of an earlier change": "Avvalgi o'zgartirishni bekor qilish"
+  "Undo of an earlier change": "Avvalgi o'zgartirishni bekor qilish",
+  "Data": "Maʼlumotlar",
+  "Always included": "Doim kiritiladi"
 }

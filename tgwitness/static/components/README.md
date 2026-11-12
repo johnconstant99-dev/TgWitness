@@ -20,6 +20,7 @@ status, notifications and common feedback.
 | [`notifications.js`](notifications.js), [`notifications.css`](notifications.css) | Notification UI |
 | [`account-state.js`](account-state.js), [`connection-notice.js`](connection-notice.js) | Account and connection state |
 | [`feedback.css`](feedback.css), [`shell.css`](shell.css) | Shared feedback and shell styling |
+| [`polish.css`](polish.css) | Depth, motion, icon tiles, dialogs and notifications; loaded after the other shared styles |
 
 Review a shared component on the screens that use it, in both themes and at a
 narrow width. Follow the [interface guide](../README.md) and keep visible strings

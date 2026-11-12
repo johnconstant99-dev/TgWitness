@@ -8806,5 +8806,7 @@
   "Custom file limits are set in Parameters. Pick an option to replace them.": "カスタムファイルの制限は「パラメータ」で設定されます。オプションを選択して、制限値を変更してください。",
   "Advanced connection options": "詳細な接続オプション",
   "this device": "このデバイス",
-  "Undo of an earlier change": "以前の変更を元に戻す"
+  "Undo of an earlier change": "以前の変更を元に戻す",
+  "Data": "データ",
+  "Always included": "常に含まれる項目"
 }

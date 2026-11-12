@@ -8806,5 +8806,7 @@
   "Custom file limits are set in Parameters. Pick an option to replace them.": "自訂檔案限制可在「參數」中設定。請選擇一個選項來取代現有設定。",
   "Advanced connection options": "進階連線選項",
   "this device": "此裝置",
-  "Undo of an earlier change": "撤銷先前所做的變更"
+  "Undo of an earlier change": "撤銷先前所做的變更",
+  "Data": "資料",
+  "Always included": "一律包含"
 }

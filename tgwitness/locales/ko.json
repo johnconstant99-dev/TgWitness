@@ -8806,5 +8806,7 @@
   "Custom file limits are set in Parameters. Pick an option to replace them.": "사용자 지정 파일 제한은 ‘매개변수’에서 설정됩니다. 옵션을 선택하여 제한값을 변경하십시오.",
   "Advanced connection options": "고급 연결 옵션",
   "this device": "이 장치",
-  "Undo of an earlier change": "이전 변경 사항의 실행 취소"
+  "Undo of an earlier change": "이전 변경 사항의 실행 취소",
+  "Data": "데이터",
+  "Always included": "항상 포함"
 }

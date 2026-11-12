@@ -8806,5 +8806,7 @@
   "Custom file limits are set in Parameters. Pick an option to replace them.": "Giới hạn tệp tùy chỉnh được thiết lập trong phần \"Tham số\". Chọn một tùy chọn để thay thế các giá trị này.",
   "Advanced connection options": "Các tùy chọn kết nối nâng cao",
   "this device": "thiết bị này",
-  "Undo of an earlier change": "Hoàn tác một thay đổi trước đó"
+  "Undo of an earlier change": "Hoàn tác một thay đổi trước đó",
+  "Data": "Dữ liệu",
+  "Always included": "Luôn được đưa vào"
 }

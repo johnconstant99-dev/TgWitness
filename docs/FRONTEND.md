@@ -82,6 +82,14 @@ keyboard. Keep selected journal filters visible outside the disclosure, preserve
 drafts when navigating, and reset action menus when the workspace or route changes.
 `components/layout.css` supplies the shared layout and responsive overrides.
 
+`components/polish.css` loads last and owns depth, motion, icon tiles, dialog and
+notification presentation. The page forbids inline styles, so charts set sizes through
+the CSS object model and SVG attributes. The counters and charts in `views/pulse.js` read
+the status counters and the chat list beside the overview from `views/home.js`.
+The report studio in
+`views/report-wizard.js` regroups the existing report form into steps beside the live
+preview and keeps every control id, so saving, drafts and previews work unchanged.
+
 ## Still to extract
 
 1. Request helpers into `core/api.js`, keeping their cancellation, timeout and error behavior.
