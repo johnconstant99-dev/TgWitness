@@ -8640,5 +8640,26 @@
   "Download observations": "Beobachtungen herunterladen",
   "Filter observations": "Beobachtungen filtern",
   "related": "verknüpft mit",
-  "in Telegram pool": "im Telegram-Pool"
+  "in Telegram pool": "im Telegram-Pool",
+  "Coverage gaps in the journal: {n}.": "Abdeckungslücken im Journal: {n}.",
+  "Show in the journal": "Im Journal anzeigen",
+  "Coverage gaps in the journal: {n}. Latest: {time}.": "Abdeckungslücken im Journal: {n}. Letzte: {time}.",
+  "Show {n} hidden section": "{n} ausgeblendeten Bereich anzeigen",
+  "Show {n} hidden sections": {
+    "one": "{n} ausgeblendeten Bereich anzeigen",
+    "other": "{n} ausgeblendete Bereiche anzeigen"
+  },
+  "Connection to Telegram lost": "Verbindung zu Telegram unterbrochen",
+  "The connection dropped during a check": "Die Verbindung brach während einer Prüfung ab",
+  "Updates are going to another session": "Updates gehen an eine andere Sitzung",
+  "Updates reach this session again": "Updates erreichen diese Sitzung wieder",
+  "The account lost access to a source": "Das Konto hat den Zugriff auf eine Quelle verloren",
+  "TgWitness was shut down": "TgWitness wurde beendet",
+  "Stopped from the panel": "Im Panel gestoppt",
+  "Stopped after an error": "Nach einem Fehler gestoppt",
+  "Chat history could not be read": "Der Chatverlauf konnte nicht gelesen werden",
+  "Some messages could not be confirmed on recheck": "Einige Nachrichten konnten bei der erneuten Prüfung nicht bestätigt werden",
+  "Some message numbers could not be read on recheck": "Einige Nachrichtennummern konnten bei der erneuten Prüfung nicht gelesen werden",
+  "A probe answer did not arrive live": "Eine Testantwort kam nicht live an",
+  "Probe answers arrive live again": "Testantworten kommen wieder live an"
 }

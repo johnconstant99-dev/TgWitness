@@ -318,7 +318,24 @@
   .journal-filter-row:has(> .journal-more-filters[open]) { flex-wrap: wrap; }
   .workspace[data-current-view="chats"] .chat-title p { white-space: normal; overflow: visible; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 }
-@media (max-width: 700px) {
-  #view-accounts .account-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  #view-accounts .account-value dd { text-align: start; overflow-wrap: break-word; }
+.notify-button b { background: var(--accent); }
+.notify-button b[data-tone="problem"] { background: var(--danger-solid); }
+.sidebar .nav-hidden-hint { display: block; width: 100%; min-height: 34px; margin-top: 6px; padding: 6px 12px; border: 0; border-radius: 8px; background: none; color: var(--accent-text); font-size: 12px; text-align: start; cursor: pointer; }
+.sidebar .nav-hidden-hint:hover { background: var(--rail-hover); }
+.sidebar .nav-hidden-hint[hidden] { display: none; }
+.event-row[data-category="system"] .event-title { font-weight: 500; color: var(--text-2); }
+.event-row[data-category="system"] .event-excerpt { color: var(--muted); font-size: 12px; }
+.event-row[data-category="system"] .event-icon { opacity: .6; }
+.journal .card-heading #journal-to-slice { font-size: 12px; border-color: var(--border); color: var(--text-2); }
+.workflow-status .workflow-gap { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-top: 8px; padding: 6px 10px; border-radius: 6px; background: var(--warning-soft); color: var(--text); font-size: 13px; }
+.workflow-status .workflow-gap[hidden] { display: none; }
+.workflow-status .workflow-gap .text-link { font-size: 13px; }
+#view-accounts .route-exit { display: block; margin-top: 2px; color: var(--muted); font-size: 11px; font-weight: 400; }
+@media (max-width: 1199px) {
+  #view-accounts .account-meta { grid-template-columns: minmax(0, 1fr); gap: 0; margin: 10px 0 12px; }
+  #view-accounts .account-meta > .account-task { padding-bottom: 10px; }
+  #view-accounts .account-meta > .account-value:not(.account-task) { display: grid; grid-template-columns: minmax(110px, 34%) minmax(0, 1fr); align-items: baseline; gap: 12px; padding: 8px 0; border-top: 1px solid var(--border-soft); }
+  #view-accounts .account-meta > .account-value:not(.account-task) dt { font-size: 12px; }
+  #view-accounts .account-meta > .account-value:not(.account-task) dd { margin: 0; text-align: start; font-size: 13px; font-weight: 550; overflow-wrap: break-word; }
+  #view-accounts .account-meta > .account-value:is([data-field="updated"], [data-field="attention"]) { display: none; }
 }

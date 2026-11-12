@@ -621,7 +621,7 @@
   },
   "Current workspace": "Текущая рабочая область",
   "Unavailable": "Недоступно",
-  "Collecting": "Сбор",
+  "Collecting": "Наблюдает",
   "Signed in": "Вход выполнен",
   "No account connected": "Аккаунт не подключён",
   "{n} workspace. Add as many as you need — each uses its own Telegram account.": "{n} рабочая область. Добавляйте столько, сколько необходимо — каждая из них использует собственный аккаунт в Telegram.",
@@ -8698,5 +8698,28 @@
   "Download observations": "Скачать наблюдения",
   "Filter observations": "Фильтр наблюдений",
   "related": "связано с",
-  "in Telegram pool": "в пуле Telegram"
+  "in Telegram pool": "в пуле Telegram",
+  "Coverage gaps in the journal: {n}.": "Пробелы в охвате в журнале: {n}.",
+  "Show in the journal": "Показать в журнале",
+  "Coverage gaps in the journal: {n}. Latest: {time}.": "Пробелы в охвате в журнале: {n}. Последний: {time}.",
+  "Show {n} hidden section": "Показать скрытый раздел ({n})",
+  "Show {n} hidden sections": {
+    "one": "Показать скрытые разделы ({n})",
+    "few": "Показать скрытые разделы ({n})",
+    "many": "Показать скрытые разделы ({n})",
+    "other": "Показать скрытые разделы ({n})"
+  },
+  "Connection to Telegram lost": "Связь с Telegram прервалась",
+  "The connection dropped during a check": "Связь прервалась во время проверки",
+  "Updates are going to another session": "Обновления уходят в другой сеанс",
+  "Updates reach this session again": "Обновления снова приходят в этот сеанс",
+  "The account lost access to a source": "Аккаунт потерял доступ к источнику",
+  "TgWitness was shut down": "TgWitness был остановлен",
+  "Stopped from the panel": "Остановлено из панели",
+  "Stopped after an error": "Остановлено из-за ошибки",
+  "Chat history could not be read": "Не удалось прочитать историю чата",
+  "Some messages could not be confirmed on recheck": "Часть сообщений не удалось подтвердить при перепроверке",
+  "Some message numbers could not be read on recheck": "Часть номеров сообщений не удалось прочитать при перепроверке",
+  "A probe answer did not arrive live": "Ответ на пробу не пришёл в реальном времени",
+  "Probe answers arrive live again": "Ответы на пробы снова приходят в реальном времени"
 }

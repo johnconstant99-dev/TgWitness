@@ -8728,5 +8728,28 @@
   "Download observations": "Завантажити спостереження",
   "Filter observations": "Фільтр спостережень",
   "related": "пов’язано з",
-  "in Telegram pool": "у пулі Telegram"
+  "in Telegram pool": "у пулі Telegram",
+  "Coverage gaps in the journal: {n}.": "Прогалини в охопленні в журналі: {n}.",
+  "Show in the journal": "Показати в журналі",
+  "Coverage gaps in the journal: {n}. Latest: {time}.": "Прогалини в охопленні в журналі: {n}. Остання: {time}.",
+  "Show {n} hidden section": "Показати прихований розділ ({n})",
+  "Show {n} hidden sections": {
+    "one": "Показати приховані розділи ({n})",
+    "few": "Показати приховані розділи ({n})",
+    "many": "Показати приховані розділи ({n})",
+    "other": "Показати приховані розділи ({n})"
+  },
+  "Connection to Telegram lost": "Зв’язок із Telegram перервався",
+  "The connection dropped during a check": "Зв’язок перервався під час перевірки",
+  "Updates are going to another session": "Оновлення йдуть в інший сеанс",
+  "Updates reach this session again": "Оновлення знову надходять у цей сеанс",
+  "The account lost access to a source": "Акаунт втратив доступ до джерела",
+  "TgWitness was shut down": "TgWitness було зупинено",
+  "Stopped from the panel": "Зупинено з панелі",
+  "Stopped after an error": "Зупинено через помилку",
+  "Chat history could not be read": "Не вдалося прочитати історію чату",
+  "Some messages could not be confirmed on recheck": "Частину повідомлень не вдалося підтвердити під час повторної перевірки",
+  "Some message numbers could not be read on recheck": "Частину номерів повідомлень не вдалося прочитати під час повторної перевірки",
+  "A probe answer did not arrive live": "Відповідь на пробу не надійшла в реальному часі",
+  "Probe answers arrive live again": "Відповіді на проби знову надходять у реальному часі"
 }

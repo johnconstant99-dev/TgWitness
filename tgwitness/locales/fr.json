@@ -8645,5 +8645,27 @@
   "Download observations": "Télécharger les observations",
   "Filter observations": "Filtrer les observations",
   "related": "lié à",
-  "in Telegram pool": "dans le pool Telegram"
+  "in Telegram pool": "dans le pool Telegram",
+  "Coverage gaps in the journal: {n}.": "Lacunes de couverture dans le journal : {n}.",
+  "Show in the journal": "Afficher dans le journal",
+  "Coverage gaps in the journal: {n}. Latest: {time}.": "Lacunes de couverture dans le journal : {n}. Dernière : {time}.",
+  "Show {n} hidden section": "Afficher {n} section masquée",
+  "Show {n} hidden sections": {
+    "one": "Afficher {n} section masquée",
+    "many": "Afficher {n} sections masquées",
+    "other": "Afficher {n} sections masquées"
+  },
+  "Connection to Telegram lost": "Connexion à Telegram perdue",
+  "The connection dropped during a check": "La connexion a été coupée pendant une vérification",
+  "Updates are going to another session": "Les mises à jour partent vers une autre session",
+  "Updates reach this session again": "Les mises à jour arrivent de nouveau dans cette session",
+  "The account lost access to a source": "Le compte a perdu l’accès à une source",
+  "TgWitness was shut down": "TgWitness a été arrêté",
+  "Stopped from the panel": "Arrêté depuis le panneau",
+  "Stopped after an error": "Arrêté après une erreur",
+  "Chat history could not be read": "Impossible de lire l’historique de la discussion",
+  "Some messages could not be confirmed on recheck": "Certains messages n’ont pas pu être confirmés lors de la revérification",
+  "Some message numbers could not be read on recheck": "Certains numéros de message n’ont pas pu être lus lors de la revérification",
+  "A probe answer did not arrive live": "Une réponse de sonde n’est pas arrivée en direct",
+  "Probe answers arrive live again": "Les réponses de sonde arrivent de nouveau en direct"
 }

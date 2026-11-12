@@ -8728,5 +8728,28 @@
   "Download observations": "Pobierz obserwacje",
   "Filter observations": "Filtruj obserwacje",
   "related": "powiązane z",
-  "in Telegram pool": "w puli Telegrama"
+  "in Telegram pool": "w puli Telegrama",
+  "Coverage gaps in the journal: {n}.": "Luki w pokryciu w dzienniku: {n}.",
+  "Show in the journal": "Pokaż w dzienniku",
+  "Coverage gaps in the journal: {n}. Latest: {time}.": "Luki w pokryciu w dzienniku: {n}. Ostatnia: {time}.",
+  "Show {n} hidden section": "Pokaż {n} ukrytą sekcję",
+  "Show {n} hidden sections": {
+    "one": "Pokaż {n} ukrytą sekcję",
+    "few": "Pokaż {n} ukryte sekcje",
+    "many": "Pokaż {n} ukrytych sekcji",
+    "other": "Pokaż {n} ukrytej sekcji"
+  },
+  "Connection to Telegram lost": "Utracono połączenie z Telegramem",
+  "The connection dropped during a check": "Połączenie zerwało się podczas sprawdzania",
+  "Updates are going to another session": "Aktualizacje trafiają do innej sesji",
+  "Updates reach this session again": "Aktualizacje znów docierają do tej sesji",
+  "The account lost access to a source": "Konto utraciło dostęp do źródła",
+  "TgWitness was shut down": "TgWitness został zamknięty",
+  "Stopped from the panel": "Zatrzymano z panelu",
+  "Stopped after an error": "Zatrzymano po błędzie",
+  "Chat history could not be read": "Nie udało się odczytać historii czatu",
+  "Some messages could not be confirmed on recheck": "Części wiadomości nie udało się potwierdzić przy ponownym sprawdzeniu",
+  "Some message numbers could not be read on recheck": "Części numerów wiadomości nie udało się odczytać przy ponownym sprawdzeniu",
+  "A probe answer did not arrive live": "Odpowiedź na próbę nie dotarła na żywo",
+  "Probe answers arrive live again": "Odpowiedzi na próby znów docierają na żywo"
 }

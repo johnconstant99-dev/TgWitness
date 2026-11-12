@@ -7,7 +7,7 @@
 <meta name="color-scheme" content="light dark">
 <title>TgWitness · Observation workspace</title>
 <link rel="icon" type="image/svg+xml" href="/mark.svg">
-<link rel="stylesheet" href="/style.css?v=0.8.0-evidence1">
+<link rel="stylesheet" href="/style.css?v=0.8.0-evidence2">
 <link rel="stylesheet" href="/components/shell.css?v=1">
 <link rel="stylesheet" href="/components/health.css?v=1">
 <link rel="stylesheet" href="/components/collection.css?v=1">
@@ -39,7 +39,7 @@
 <script defer src="/dialogs.js?v=2"></script>
 <script defer src="/privacy.js?v=1"></script>
 <script defer src="/chat-safety.js?v=1"></script>
-<script defer src="/app.js?v=0.9.1-evidence1-topology2-layout1-activity2"></script>
+<script defer src="/app.js?v=0.9.1-evidence1-topology2-layout1-activity3"></script>
 <script defer src="/services.js?v=1"></script>
 <script defer src="/independent-capture.js?v=2"></script>
 <script defer src="/investigate.js?v=9"></script>
@@ -58,7 +58,7 @@
 <link href="/views/disclosure-preview.css?v=1" rel="stylesheet">
 <link href="/components/forms.css?v=35" rel="stylesheet">
 <link href="/components/feedback.css?v=36" rel="stylesheet">
-<link href="/components/layout.css?v=3" rel="stylesheet">
+<link href="/components/layout.css?v=4" rel="stylesheet">
 </head>
 <body>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
@@ -171,6 +171,7 @@
     <button class="nav" data-view="system-log" hidden><svg aria-hidden="true" class="nav-icon"><use href="#i-activity"/></svg> System log</button>
     <button class="nav" data-view="integrations" hidden><svg aria-hidden="true" class="nav-icon"><use href="#i-link"/></svg> Integrations</button>
     </details>
+    <button class="nav-hidden-hint" hidden id="nav-hidden-hint" type="button"></button>
   </nav>
   <div class="sidebar-bottom">
     <details class="sidebar-help-menu"><summary><svg aria-hidden="true" class="nav-icon"><use href="#i-help"/></svg> Help</summary>
@@ -252,7 +253,7 @@
 <section class="view" hidden id="view-system-map" aria-label="System map"></section>
 <section class="view" hidden id="view-start">
   <div class="workflow-intro"><span class="eyebrow">YOUR WORKSPACE</span><h1>What would you like to do?</h1><p>Save a copy of your Telegram account, or keep a record of conversations as they change.</p></div>
-  <section class="card workflow-status" aria-label="Current workspace"><div><strong id="workflow-status-title"></strong><p id="workflow-status-copy"></p></div><button class="secondary" data-open="chats" type="button">Open saved chats</button><button class="quiet" data-open="accounts" type="button">Manage accounts</button><div class="workflow-accounts" hidden id="workflow-accounts"></div></section>
+  <section class="card workflow-status" aria-label="Current workspace"><div><strong id="workflow-status-title"></strong><p id="workflow-status-copy"></p><p class="workflow-gap" hidden id="workflow-gap"></p></div><button class="secondary" data-open="chats" type="button">Open saved chats</button><button class="quiet" data-open="accounts" type="button">Manage accounts</button><div class="workflow-accounts" hidden id="workflow-accounts"></div></section>
   <div class="workflow-choices">
     <article class="card workflow-card workflow-link" hidden id="workflow-link-card"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg><h2>Export a chat by link</h2><p>Choose a Telegram chat and review the export plan before starting.</p><form class="link-export-form" id="link-export-form"><label for="link-export-input">Chat link or @username</label><input autocomplete="off" id="link-export-input" maxlength="300" placeholder="@channel or https://t.me/…" spellcheck="false"><button class="primary" type="submit">Plan the export</button></form><div class="link-export-plan" hidden id="link-export-plan" role="status"></div><p class="hint">Checking briefly uses one permitted account. Starting an export requires a separate click.</p></article>
     <article class="card workflow-card" id="workflow-account-card"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg><h2>Export my account</h2><p>Download the chats and history your account can read now. Choose dates, messages and files before starting.</p><button class="primary" data-workflow="account" type="button">Export my account</button><p class="hint" id="workflow-account-hint">No continuous observation needed.</p></article>

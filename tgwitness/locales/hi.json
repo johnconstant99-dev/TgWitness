@@ -8640,5 +8640,26 @@
   "Download observations": "अवलोकन डाउनलोड करें",
   "Filter observations": "अवलोकन फ़िल्टर करें",
   "related": "संबंधित",
-  "in Telegram pool": "Telegram पूल में"
+  "in Telegram pool": "Telegram पूल में",
+  "Coverage gaps in the journal: {n}.": "जर्नल में कवरेज अंतराल: {n}।",
+  "Show in the journal": "जर्नल में दिखाएँ",
+  "Coverage gaps in the journal: {n}. Latest: {time}.": "जर्नल में कवरेज अंतराल: {n}। नवीनतम: {time}।",
+  "Show {n} hidden section": "{n} छिपा हुआ अनुभाग दिखाएँ",
+  "Show {n} hidden sections": {
+    "one": "{n} छिपा हुआ अनुभाग दिखाएँ",
+    "other": "{n} छिपे हुए अनुभाग दिखाएँ"
+  },
+  "Connection to Telegram lost": "Telegram से कनेक्शन टूट गया",
+  "The connection dropped during a check": "जाँच के दौरान कनेक्शन टूट गया",
+  "Updates are going to another session": "अपडेट किसी दूसरे सत्र में जा रहे हैं",
+  "Updates reach this session again": "अपडेट फिर से इस सत्र में आ रहे हैं",
+  "The account lost access to a source": "खाते ने एक स्रोत तक पहुँच खो दी",
+  "TgWitness was shut down": "TgWitness बंद कर दिया गया",
+  "Stopped from the panel": "पैनल से रोका गया",
+  "Stopped after an error": "त्रुटि के बाद रोका गया",
+  "Chat history could not be read": "चैट इतिहास पढ़ा नहीं जा सका",
+  "Some messages could not be confirmed on recheck": "पुनः जाँच में कुछ संदेशों की पुष्टि नहीं हो सकी",
+  "Some message numbers could not be read on recheck": "पुनः जाँच में कुछ संदेश संख्याएँ पढ़ी नहीं जा सकीं",
+  "A probe answer did not arrive live": "प्रोब का उत्तर लाइव नहीं पहुँचा",
+  "Probe answers arrive live again": "प्रोब के उत्तर फिर से लाइव आ रहे हैं"
 }

@@ -8645,5 +8645,27 @@
   "Download observations": "Scarica le osservazioni",
   "Filter observations": "Filtra le osservazioni",
   "related": "collegato a",
-  "in Telegram pool": "nel pool di Telegram"
+  "in Telegram pool": "nel pool di Telegram",
+  "Coverage gaps in the journal: {n}.": "Lacune di copertura nel registro: {n}.",
+  "Show in the journal": "Mostra nel registro",
+  "Coverage gaps in the journal: {n}. Latest: {time}.": "Lacune di copertura nel registro: {n}. Ultima: {time}.",
+  "Show {n} hidden section": "Mostra {n} sezione nascosta",
+  "Show {n} hidden sections": {
+    "one": "Mostra {n} sezione nascosta",
+    "many": "Mostra {n} sezioni nascoste",
+    "other": "Mostra {n} sezioni nascoste"
+  },
+  "Connection to Telegram lost": "Connessione a Telegram persa",
+  "The connection dropped during a check": "La connessione si è interrotta durante un controllo",
+  "Updates are going to another session": "Gli aggiornamenti vanno a un’altra sessione",
+  "Updates reach this session again": "Gli aggiornamenti arrivano di nuovo a questa sessione",
+  "The account lost access to a source": "L’account ha perso l’accesso a una fonte",
+  "TgWitness was shut down": "TgWitness è stato arrestato",
+  "Stopped from the panel": "Fermato dal pannello",
+  "Stopped after an error": "Fermato dopo un errore",
+  "Chat history could not be read": "Impossibile leggere la cronologia della chat",
+  "Some messages could not be confirmed on recheck": "Alcuni messaggi non sono stati confermati al ricontrollo",
+  "Some message numbers could not be read on recheck": "Alcuni numeri di messaggio non sono stati letti al ricontrollo",
+  "A probe answer did not arrive live": "Una risposta di prova non è arrivata in diretta",
+  "Probe answers arrive live again": "Le risposte di prova arrivano di nuovo in diretta"
 }

@@ -8640,5 +8640,26 @@
   "Download observations": "Kuzatuvlarni yuklab olish",
   "Filter observations": "Kuzatuvlarni saralash",
   "related": "bog‘liq",
-  "in Telegram pool": "Telegram pulida"
+  "in Telegram pool": "Telegram pulida",
+  "Coverage gaps in the journal: {n}.": "Jurnaldagi qamrov bo‘shliqlari: {n}.",
+  "Show in the journal": "Jurnalda ko‘rsatish",
+  "Coverage gaps in the journal: {n}. Latest: {time}.": "Jurnaldagi qamrov bo‘shliqlari: {n}. Oxirgisi: {time}.",
+  "Show {n} hidden section": "{n} ta yashirin bo‘limni ko‘rsatish",
+  "Show {n} hidden sections": {
+    "one": "{n} ta yashirin bo‘limni ko‘rsatish",
+    "other": "{n} ta yashirin bo‘limni ko‘rsatish"
+  },
+  "Connection to Telegram lost": "Telegram bilan aloqa uzildi",
+  "The connection dropped during a check": "Tekshiruv vaqtida aloqa uzildi",
+  "Updates are going to another session": "Yangilanishlar boshqa seansga ketmoqda",
+  "Updates reach this session again": "Yangilanishlar yana shu seansga kelmoqda",
+  "The account lost access to a source": "Akkaunt manbaga kirishni yo‘qotdi",
+  "TgWitness was shut down": "TgWitness to‘xtatildi",
+  "Stopped from the panel": "Paneldan to‘xtatildi",
+  "Stopped after an error": "Xatodan keyin to‘xtatildi",
+  "Chat history could not be read": "Chat tarixini o‘qib bo‘lmadi",
+  "Some messages could not be confirmed on recheck": "Qayta tekshiruvda ayrim xabarlarni tasdiqlab bo‘lmadi",
+  "Some message numbers could not be read on recheck": "Qayta tekshiruvda ayrim xabar raqamlarini o‘qib bo‘lmadi",
+  "A probe answer did not arrive live": "Sinov javobi jonli kelmadi",
+  "Probe answers arrive live again": "Sinov javoblari yana jonli kelmoqda"
 }

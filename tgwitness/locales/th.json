@@ -8596,5 +8596,25 @@
   "Download observations": "ดาวน์โหลดการสังเกต",
   "Filter observations": "กรองการสังเกต",
   "related": "เกี่ยวข้อง",
-  "in Telegram pool": "ในพูลของ Telegram"
+  "in Telegram pool": "ในพูลของ Telegram",
+  "Coverage gaps in the journal: {n}.": "ช่องว่างของการเก็บข้อมูลในบันทึก: {n}",
+  "Show in the journal": "แสดงในบันทึก",
+  "Coverage gaps in the journal: {n}. Latest: {time}.": "ช่องว่างของการเก็บข้อมูลในบันทึก: {n} ล่าสุด: {time}",
+  "Show {n} hidden section": "แสดงส่วนที่ซ่อน {n} ส่วน",
+  "Show {n} hidden sections": {
+    "other": "แสดงส่วนที่ซ่อน {n} ส่วน"
+  },
+  "Connection to Telegram lost": "การเชื่อมต่อกับ Telegram ขาดหาย",
+  "The connection dropped during a check": "การเชื่อมต่อขาดระหว่างการตรวจสอบ",
+  "Updates are going to another session": "การอัปเดตกำลังไปยังเซสชันอื่น",
+  "Updates reach this session again": "การอัปเดตกลับมาถึงเซสชันนี้แล้ว",
+  "The account lost access to a source": "บัญชีสูญเสียการเข้าถึงแหล่งข้อมูลหนึ่ง",
+  "TgWitness was shut down": "TgWitness ถูกปิด",
+  "Stopped from the panel": "หยุดจากแผงควบคุม",
+  "Stopped after an error": "หยุดหลังเกิดข้อผิดพลาด",
+  "Chat history could not be read": "อ่านประวัติแชทไม่ได้",
+  "Some messages could not be confirmed on recheck": "ยืนยันข้อความบางรายการไม่ได้ในการตรวจซ้ำ",
+  "Some message numbers could not be read on recheck": "อ่านหมายเลขข้อความบางรายการไม่ได้ในการตรวจซ้ำ",
+  "A probe answer did not arrive live": "คำตอบของการทดสอบไม่มาถึงแบบเรียลไทม์",
+  "Probe answers arrive live again": "คำตอบของการทดสอบกลับมาถึงแบบเรียลไทม์แล้ว"
 }

@@ -8640,5 +8640,26 @@
   "Download observations": "بارگیری مشاهدات",
   "Filter observations": "پالایش مشاهدات",
   "related": "مرتبط با",
-  "in Telegram pool": "در مخزن Telegram"
+  "in Telegram pool": "در مخزن Telegram",
+  "Coverage gaps in the journal: {n}.": "شکاف‌های پوشش در دفتر: {n}.",
+  "Show in the journal": "نمایش در دفتر",
+  "Coverage gaps in the journal: {n}. Latest: {time}.": "شکاف‌های پوشش در دفتر: {n}. آخرین: {time}.",
+  "Show {n} hidden section": "نمایش {n} بخش پنهان",
+  "Show {n} hidden sections": {
+    "one": "نمایش {n} بخش پنهان",
+    "other": "نمایش {n} بخش پنهان"
+  },
+  "Connection to Telegram lost": "اتصال به Telegram قطع شد",
+  "The connection dropped during a check": "اتصال هنگام بررسی قطع شد",
+  "Updates are going to another session": "به‌روزرسانی‌ها به نشست دیگری می‌روند",
+  "Updates reach this session again": "به‌روزرسانی‌ها دوباره به این نشست می‌رسند",
+  "The account lost access to a source": "حساب دسترسی به یک منبع را از دست داد",
+  "TgWitness was shut down": "TgWitness خاموش شد",
+  "Stopped from the panel": "از پنل متوقف شد",
+  "Stopped after an error": "پس از خطا متوقف شد",
+  "Chat history could not be read": "خواندن تاریخچهٔ گفتگو ممکن نشد",
+  "Some messages could not be confirmed on recheck": "برخی پیام‌ها در بررسی دوباره تأیید نشدند",
+  "Some message numbers could not be read on recheck": "برخی شماره‌های پیام در بررسی دوباره خوانده نشدند",
+  "A probe answer did not arrive live": "پاسخ آزمون به‌صورت زنده نرسید",
+  "Probe answers arrive live again": "پاسخ‌های آزمون دوباره زنده می‌رسند"
 }

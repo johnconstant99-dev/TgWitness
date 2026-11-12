@@ -8640,5 +8640,26 @@
   "Download observations": "পর্যবেক্ষণ ডাউনলোড করুন",
   "Filter observations": "পর্যবেক্ষণ ফিল্টার করুন",
   "related": "সম্পর্কিত",
-  "in Telegram pool": "Telegram পুলে"
+  "in Telegram pool": "Telegram পুলে",
+  "Coverage gaps in the journal: {n}.": "জার্নালে কভারেজের ফাঁক: {n}।",
+  "Show in the journal": "জার্নালে দেখান",
+  "Coverage gaps in the journal: {n}. Latest: {time}.": "জার্নালে কভারেজের ফাঁক: {n}। সর্বশেষ: {time}।",
+  "Show {n} hidden section": "{n}টি লুকানো বিভাগ দেখান",
+  "Show {n} hidden sections": {
+    "one": "{n}টি লুকানো বিভাগ দেখান",
+    "other": "{n}টি লুকানো বিভাগ দেখান"
+  },
+  "Connection to Telegram lost": "Telegram-এর সঙ্গে সংযোগ বিচ্ছিন্ন হয়েছে",
+  "The connection dropped during a check": "পরীক্ষার সময় সংযোগ বিচ্ছিন্ন হয়েছে",
+  "Updates are going to another session": "আপডেট অন্য সেশনে যাচ্ছে",
+  "Updates reach this session again": "আপডেট আবার এই সেশনে আসছে",
+  "The account lost access to a source": "অ্যাকাউন্টটি একটি উৎসে প্রবেশাধিকার হারিয়েছে",
+  "TgWitness was shut down": "TgWitness বন্ধ করা হয়েছে",
+  "Stopped from the panel": "প্যানেল থেকে থামানো হয়েছে",
+  "Stopped after an error": "ত্রুটির পরে থামানো হয়েছে",
+  "Chat history could not be read": "চ্যাটের ইতিহাস পড়া যায়নি",
+  "Some messages could not be confirmed on recheck": "পুনঃপরীক্ষায় কিছু বার্তা নিশ্চিত করা যায়নি",
+  "Some message numbers could not be read on recheck": "পুনঃপরীক্ষায় কিছু বার্তার নম্বর পড়া যায়নি",
+  "A probe answer did not arrive live": "প্রোবের উত্তর সরাসরি আসেনি",
+  "Probe answers arrive live again": "প্রোবের উত্তর আবার সরাসরি আসছে"
 }

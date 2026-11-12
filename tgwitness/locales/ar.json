@@ -8816,5 +8816,30 @@
   "Download observations": "تنزيل الملاحظات",
   "Filter observations": "تصفية الملاحظات",
   "related": "مرتبط بـ",
-  "in Telegram pool": "في مجموعة Telegram"
+  "in Telegram pool": "في مجموعة Telegram",
+  "Coverage gaps in the journal: {n}.": "فجوات التغطية في السجل: {n}.",
+  "Show in the journal": "عرض في السجل",
+  "Coverage gaps in the journal: {n}. Latest: {time}.": "فجوات التغطية في السجل: {n}. الأخيرة: {time}.",
+  "Show {n} hidden section": "إظهار {n} قسم مخفي",
+  "Show {n} hidden sections": {
+    "zero": "إظهار {n} قسم مخفي",
+    "one": "إظهار {n} قسم مخفي",
+    "two": "إظهار {n} قسمين مخفيين",
+    "few": "إظهار {n} أقسام مخفية",
+    "many": "إظهار {n} قسمًا مخفيًا",
+    "other": "إظهار {n} قسم مخفي"
+  },
+  "Connection to Telegram lost": "انقطع الاتصال بـ Telegram",
+  "The connection dropped during a check": "انقطع الاتصال أثناء فحص",
+  "Updates are going to another session": "تذهب التحديثات إلى جلسة أخرى",
+  "Updates reach this session again": "عادت التحديثات تصل إلى هذه الجلسة",
+  "The account lost access to a source": "فقد الحساب الوصول إلى مصدر",
+  "TgWitness was shut down": "تم إيقاف TgWitness",
+  "Stopped from the panel": "أُوقف من اللوحة",
+  "Stopped after an error": "أُوقف بعد خطأ",
+  "Chat history could not be read": "تعذّرت قراءة سجل الدردشة",
+  "Some messages could not be confirmed on recheck": "تعذّر تأكيد بعض الرسائل عند إعادة الفحص",
+  "Some message numbers could not be read on recheck": "تعذّرت قراءة بعض أرقام الرسائل عند إعادة الفحص",
+  "A probe answer did not arrive live": "لم يصل رد اختبار مباشرةً",
+  "Probe answers arrive live again": "عادت ردود الاختبار تصل مباشرةً"
 }

@@ -152,6 +152,7 @@ export function createNotifications(adapter) {
     if (scope !== nextScope) { close(); scope = nextScope; category = "all"; signature = ""; }
     const items = active() ? rows() : [], unreadCount = items.filter(unread).length;
     badge.textContent = unreadCount > 99 ? "99+" : String(unreadCount); badge.hidden = !unreadCount;
+    badge.dataset.tone = items.some(item => unread(item) && (item.level === "problem" || ["error", "warning"].includes(item.severity))) ? "problem" : "";
     toggle.setAttribute("aria-label", unreadCount ? trn("{n} unread notification", "{n} unread notifications", unreadCount) : tr("Notifications"));
     summary.textContent = unreadCount ? trn("{n} unread notification", "{n} unread notifications", unreadCount) : tr("All caught up");
     readAll.disabled = !unreadCount;

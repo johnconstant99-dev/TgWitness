@@ -8640,5 +8640,26 @@
   "Download observations": "مشاہدات ڈاؤن لوڈ کریں",
   "Filter observations": "مشاہدات فلٹر کریں",
   "related": "متعلقہ",
-  "in Telegram pool": "Telegram پول میں"
+  "in Telegram pool": "Telegram پول میں",
+  "Coverage gaps in the journal: {n}.": "جریدے میں کوریج کے خلا: {n}۔",
+  "Show in the journal": "جریدے میں دکھائیں",
+  "Coverage gaps in the journal: {n}. Latest: {time}.": "جریدے میں کوریج کے خلا: {n}۔ تازہ ترین: {time}۔",
+  "Show {n} hidden section": "{n} چھپا ہوا حصہ دکھائیں",
+  "Show {n} hidden sections": {
+    "one": "{n} چھپا ہوا حصہ دکھائیں",
+    "other": "{n} چھپے ہوئے حصے دکھائیں"
+  },
+  "Connection to Telegram lost": "Telegram سے رابطہ ٹوٹ گیا",
+  "The connection dropped during a check": "جانچ کے دوران رابطہ ٹوٹ گیا",
+  "Updates are going to another session": "اپ ڈیٹس دوسرے سیشن میں جا رہی ہیں",
+  "Updates reach this session again": "اپ ڈیٹس دوبارہ اس سیشن میں آ رہی ہیں",
+  "The account lost access to a source": "اکاؤنٹ ایک ماخذ تک رسائی کھو بیٹھا",
+  "TgWitness was shut down": "TgWitness بند کر دیا گیا",
+  "Stopped from the panel": "پینل سے روکا گیا",
+  "Stopped after an error": "خرابی کے بعد روکا گیا",
+  "Chat history could not be read": "چیٹ کی تاریخ پڑھی نہیں جا سکی",
+  "Some messages could not be confirmed on recheck": "دوبارہ جانچ میں کچھ پیغامات کی تصدیق نہیں ہو سکی",
+  "Some message numbers could not be read on recheck": "دوبارہ جانچ میں کچھ پیغام نمبر پڑھے نہیں جا سکے",
+  "A probe answer did not arrive live": "پروب کا جواب براہ راست نہیں پہنچا",
+  "Probe answers arrive live again": "پروب کے جواب دوبارہ براہ راست پہنچ رہے ہیں"
 }

@@ -8596,5 +8596,25 @@
   "Download observations": "観察記録をダウンロード",
   "Filter observations": "観察記録を絞り込む",
   "related": "関連",
-  "in Telegram pool": "Telegram プール内"
+  "in Telegram pool": "Telegram プール内",
+  "Coverage gaps in the journal: {n}.": "ジャーナル内のカバレッジの空白：{n}。",
+  "Show in the journal": "ジャーナルで表示",
+  "Coverage gaps in the journal: {n}. Latest: {time}.": "ジャーナル内のカバレッジの空白：{n}。最新：{time}。",
+  "Show {n} hidden section": "非表示のセクションを {n} 件表示",
+  "Show {n} hidden sections": {
+    "other": "非表示のセクションを {n} 件表示"
+  },
+  "Connection to Telegram lost": "Telegram との接続が切れました",
+  "The connection dropped during a check": "チェック中に接続が切れました",
+  "Updates are going to another session": "更新が別のセッションに送られています",
+  "Updates reach this session again": "更新が再びこのセッションに届いています",
+  "The account lost access to a source": "アカウントがソースへのアクセスを失いました",
+  "TgWitness was shut down": "TgWitness が停止しました",
+  "Stopped from the panel": "パネルから停止しました",
+  "Stopped after an error": "エラーのため停止しました",
+  "Chat history could not be read": "チャット履歴を読み取れませんでした",
+  "Some messages could not be confirmed on recheck": "再確認で一部のメッセージを確認できませんでした",
+  "Some message numbers could not be read on recheck": "再確認で一部のメッセージ番号を読み取れませんでした",
+  "A probe answer did not arrive live": "プローブの応答がリアルタイムで届きませんでした",
+  "Probe answers arrive live again": "プローブの応答が再びリアルタイムで届いています"
 }

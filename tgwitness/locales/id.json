@@ -8596,5 +8596,25 @@
   "Download observations": "Unduh pengamatan",
   "Filter observations": "Saring pengamatan",
   "related": "terkait",
-  "in Telegram pool": "di pool Telegram"
+  "in Telegram pool": "di pool Telegram",
+  "Coverage gaps in the journal: {n}.": "Celah cakupan di jurnal: {n}.",
+  "Show in the journal": "Tampilkan di jurnal",
+  "Coverage gaps in the journal: {n}. Latest: {time}.": "Celah cakupan di jurnal: {n}. Terbaru: {time}.",
+  "Show {n} hidden section": "Tampilkan {n} bagian tersembunyi",
+  "Show {n} hidden sections": {
+    "other": "Tampilkan {n} bagian tersembunyi"
+  },
+  "Connection to Telegram lost": "Koneksi ke Telegram terputus",
+  "The connection dropped during a check": "Koneksi terputus saat pemeriksaan",
+  "Updates are going to another session": "Pembaruan dikirim ke sesi lain",
+  "Updates reach this session again": "Pembaruan kembali sampai ke sesi ini",
+  "The account lost access to a source": "Akun kehilangan akses ke sebuah sumber",
+  "TgWitness was shut down": "TgWitness dimatikan",
+  "Stopped from the panel": "Dihentikan dari panel",
+  "Stopped after an error": "Dihentikan setelah galat",
+  "Chat history could not be read": "Riwayat obrolan tidak dapat dibaca",
+  "Some messages could not be confirmed on recheck": "Beberapa pesan tidak dapat dikonfirmasi saat pemeriksaan ulang",
+  "Some message numbers could not be read on recheck": "Beberapa nomor pesan tidak dapat dibaca saat pemeriksaan ulang",
+  "A probe answer did not arrive live": "Jawaban uji tidak tiba secara langsung",
+  "Probe answers arrive live again": "Jawaban uji kembali tiba secara langsung"
 }

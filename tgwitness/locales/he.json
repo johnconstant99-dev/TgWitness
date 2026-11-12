@@ -8684,5 +8684,27 @@
   "Download observations": "הורדת תצפיות",
   "Filter observations": "סינון תצפיות",
   "related": "קשור ל",
-  "in Telegram pool": "במאגר Telegram"
+  "in Telegram pool": "במאגר Telegram",
+  "Coverage gaps in the journal: {n}.": "פערי כיסוי ביומן: {n}.",
+  "Show in the journal": "הצגה ביומן",
+  "Coverage gaps in the journal: {n}. Latest: {time}.": "פערי כיסוי ביומן: {n}. האחרון: {time}.",
+  "Show {n} hidden section": "הצגת {n} מקטע מוסתר",
+  "Show {n} hidden sections": {
+    "one": "הצגת {n} מקטע מוסתר",
+    "two": "הצגת {n} מקטעים מוסתרים",
+    "other": "הצגת {n} מקטעים מוסתרים"
+  },
+  "Connection to Telegram lost": "החיבור ל-Telegram נותק",
+  "The connection dropped during a check": "החיבור נותק במהלך בדיקה",
+  "Updates are going to another session": "העדכונים נשלחים להפעלה אחרת",
+  "Updates reach this session again": "העדכונים מגיעים שוב להפעלה זו",
+  "The account lost access to a source": "החשבון איבד גישה למקור",
+  "TgWitness was shut down": "TgWitness כובה",
+  "Stopped from the panel": "נעצר מהלוח",
+  "Stopped after an error": "נעצר לאחר שגיאה",
+  "Chat history could not be read": "לא ניתן לקרוא את היסטוריית הצ׳אט",
+  "Some messages could not be confirmed on recheck": "חלק מההודעות לא אושרו בבדיקה החוזרת",
+  "Some message numbers could not be read on recheck": "חלק ממספרי ההודעות לא נקראו בבדיקה החוזרת",
+  "A probe answer did not arrive live": "תשובת בדיקה לא הגיעה בזמן אמת",
+  "Probe answers arrive live again": "תשובות בדיקה מגיעות שוב בזמן אמת"
 }

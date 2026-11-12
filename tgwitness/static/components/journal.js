@@ -273,7 +273,7 @@ export function createJournal(context){
     if(document.activeElement!==from)from.value=state.eventSince?.slice(0,16)||"";
     if(document.activeElement!==until)until.value=state.eventUntil?.slice(0,16)||"";
     chips.replaceChildren();
-    for(const value of values)chip(tr(TYPES.find(([key])=>key===value)?.[1]||value),()=>{values.delete(value);state.filter=[...values].join(",");});
+    for(const value of values)chip(TYPES.find(([key])=>key===value)?tr(TYPES.find(([key])=>key===value)[1]):value==="coverage.gap"?tr("Coverage gap"):value,()=>{values.delete(value);state.filter=[...values].join(",");});
     if(state.source)chip(title,()=>{state.source="";nativeSource.value="";});
     if(state.search)chip(tr("Search: {query}",{query:state.search}),()=>{state.search="";search.value="";});
     if(state.eventSince||state.eventUntil)chip(range==="custom"?tr("Custom period"):tr(ranges.find(([key])=>key===range)?.[1]||"Custom period"),()=>{state.eventSince=state.eventUntil="";custom.hidden=true;});

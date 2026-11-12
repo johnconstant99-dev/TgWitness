@@ -8640,5 +8640,26 @@
   "Download observations": "Gözlemleri indir",
   "Filter observations": "Gözlemleri filtrele",
   "related": "ilişkili",
-  "in Telegram pool": "Telegram havuzunda"
+  "in Telegram pool": "Telegram havuzunda",
+  "Coverage gaps in the journal: {n}.": "Günlükteki kapsam boşlukları: {n}.",
+  "Show in the journal": "Günlükte göster",
+  "Coverage gaps in the journal: {n}. Latest: {time}.": "Günlükteki kapsam boşlukları: {n}. Sonuncusu: {time}.",
+  "Show {n} hidden section": "{n} gizli bölümü göster",
+  "Show {n} hidden sections": {
+    "one": "{n} gizli bölümü göster",
+    "other": "{n} gizli bölümü göster"
+  },
+  "Connection to Telegram lost": "Telegram bağlantısı koptu",
+  "The connection dropped during a check": "Bağlantı bir kontrol sırasında koptu",
+  "Updates are going to another session": "Güncellemeler başka bir oturuma gidiyor",
+  "Updates reach this session again": "Güncellemeler yeniden bu oturuma geliyor",
+  "The account lost access to a source": "Hesap bir kaynağa erişimini kaybetti",
+  "TgWitness was shut down": "TgWitness kapatıldı",
+  "Stopped from the panel": "Panelden durduruldu",
+  "Stopped after an error": "Bir hatadan sonra durduruldu",
+  "Chat history could not be read": "Sohbet geçmişi okunamadı",
+  "Some messages could not be confirmed on recheck": "Yeniden kontrolde bazı mesajlar doğrulanamadı",
+  "Some message numbers could not be read on recheck": "Yeniden kontrolde bazı mesaj numaraları okunamadı",
+  "A probe answer did not arrive live": "Bir yoklama yanıtı canlı olarak gelmedi",
+  "Probe answers arrive live again": "Yoklama yanıtları yeniden canlı geliyor"
 }

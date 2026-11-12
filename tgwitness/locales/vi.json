@@ -8596,5 +8596,25 @@
   "Download observations": "Tải xuống các quan sát",
   "Filter observations": "Lọc các quan sát",
   "related": "liên quan",
-  "in Telegram pool": "trong nhóm Telegram"
+  "in Telegram pool": "trong nhóm Telegram",
+  "Coverage gaps in the journal: {n}.": "Khoảng trống phạm vi trong nhật ký: {n}.",
+  "Show in the journal": "Hiển thị trong nhật ký",
+  "Coverage gaps in the journal: {n}. Latest: {time}.": "Khoảng trống phạm vi trong nhật ký: {n}. Gần nhất: {time}.",
+  "Show {n} hidden section": "Hiện {n} mục bị ẩn",
+  "Show {n} hidden sections": {
+    "other": "Hiện {n} mục bị ẩn"
+  },
+  "Connection to Telegram lost": "Mất kết nối với Telegram",
+  "The connection dropped during a check": "Kết nối bị ngắt trong lúc kiểm tra",
+  "Updates are going to another session": "Cập nhật đang đi tới phiên khác",
+  "Updates reach this session again": "Cập nhật lại đến phiên này",
+  "The account lost access to a source": "Tài khoản mất quyền truy cập một nguồn",
+  "TgWitness was shut down": "TgWitness đã tắt",
+  "Stopped from the panel": "Đã dừng từ bảng điều khiển",
+  "Stopped after an error": "Đã dừng sau một lỗi",
+  "Chat history could not be read": "Không đọc được lịch sử trò chuyện",
+  "Some messages could not be confirmed on recheck": "Một số tin nhắn không xác nhận được khi kiểm tra lại",
+  "Some message numbers could not be read on recheck": "Một số số tin nhắn không đọc được khi kiểm tra lại",
+  "A probe answer did not arrive live": "Phản hồi thăm dò không đến trực tiếp",
+  "Probe answers arrive live again": "Phản hồi thăm dò lại đến trực tiếp"
 }

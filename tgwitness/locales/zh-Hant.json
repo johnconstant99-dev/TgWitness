@@ -8596,5 +8596,25 @@
   "Download observations": "下載觀察記錄",
   "Filter observations": "篩選觀察記錄",
   "related": "關聯",
-  "in Telegram pool": "在 Telegram 池中"
+  "in Telegram pool": "在 Telegram 池中",
+  "Coverage gaps in the journal: {n}.": "日誌中的涵蓋缺口：{n}。",
+  "Show in the journal": "在日誌中顯示",
+  "Coverage gaps in the journal: {n}. Latest: {time}.": "日誌中的涵蓋缺口：{n}。最近一次：{time}。",
+  "Show {n} hidden section": "顯示 {n} 個隱藏區段",
+  "Show {n} hidden sections": {
+    "other": "顯示 {n} 個隱藏區段"
+  },
+  "Connection to Telegram lost": "與 Telegram 的連線已中斷",
+  "The connection dropped during a check": "檢查期間連線中斷",
+  "Updates are going to another session": "更新正傳往另一個工作階段",
+  "Updates reach this session again": "更新重新到達此工作階段",
+  "The account lost access to a source": "帳戶失去了對某個來源的存取權",
+  "TgWitness was shut down": "TgWitness 已關閉",
+  "Stopped from the panel": "已從面板停止",
+  "Stopped after an error": "因錯誤而停止",
+  "Chat history could not be read": "無法讀取聊天記錄",
+  "Some messages could not be confirmed on recheck": "重新檢查時部分訊息無法確認",
+  "Some message numbers could not be read on recheck": "重新檢查時部分訊息編號無法讀取",
+  "A probe answer did not arrive live": "探測回覆未即時到達",
+  "Probe answers arrive live again": "探測回覆重新即時到達"
 }

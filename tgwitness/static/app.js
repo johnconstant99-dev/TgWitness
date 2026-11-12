@@ -860,6 +860,7 @@ function renderWorkflowControls(){
   $('workflow-status-title').closest('.workflow-status').dataset.state=demo?'demo':activity.kind;
   $('workflow-status-copy').textContent=[demo?'':current.label,trn('{n} saved record','{n} saved records',state.status.stats.total),
     trn('{n} selected chat','{n} selected chats',sources)].filter(Boolean).join(' · ');
+  renderWorkflowGaps(state.status.stats.counts?.['coverage.gap']||0);
   const exporter=viewQuery('start','[data-workflow="account"]');
   exporter.textContent=tr(!demo&&activity.observing?'Pause observation and export':'Export my account');
   $('workflow-account-hint').textContent=!demo&&activity.observing?
@@ -887,6 +888,24 @@ function renderWorkflowControls(){
   $('account-export-configure').textContent=tr(!state.status.demo&&!accountSignedIn()?
     info.needsSignIn?'Sign in again':'Connect account →':'Configure account export');
   }
+}
+let workflowGapKey='';
+function renderWorkflowGaps(gaps){
+  const box=$('workflow-gap'),key=state.workspaceRevision+':'+state.profile+':'+gaps;
+  box.hidden=!gaps||!viewAllowed('observations');
+  if(box.hidden||key===workflowGapKey)return;
+  workflowGapKey=key;
+  const copy=node('span','',tr('Coverage gaps in the journal: {n}.',{n:gaps.toLocaleString()}));
+  const open=node('button','text-link',tr('Show in the journal'));open.type='button';
+  open.addEventListener('click',()=>{
+    state.boardSlice=null;state.filter='coverage.gap';state.source='';state.search='';state.eventSince='';state.eventUntil='';
+    state.eventBefore=state.eventAfter=state.cursor=null;navigate('observations');
+  });
+  box.replaceChildren(copy,open);
+  json('events?kind=coverage.gap&limit=1').then(result=>{
+    const last=result.events?.[0];
+    if(last&&workflowGapKey===key)copy.textContent=tr('Coverage gaps in the journal: {n}. Latest: {time}.',{n:gaps.toLocaleString(),time:fmtTime(last.observed_at)});
+  }).catch(()=>{});
 }
 function renderWorkflowAccounts(){
   const box=$('workflow-accounts'),list=(state.profiles||[]).filter(p=>!p.error_type&&p.collector);
@@ -989,6 +1008,22 @@ async function loadQuickCatalog(){
 quickDialog.addEventListener('close',()=>{if(!quickDialog.open)cancelQuickCatalog();});
 window.addEventListener('tgwitness:lock',()=>{quickCatalog=[];quickCatalogKey='';cancelQuickCatalog();quickResults.replaceChildren();});
 $("quick-shortcut").textContent=/Mac|iPhone|iPad/.test(navigator.platform)?"⌘ K":"Ctrl K";
+for(const box of document.querySelectorAll(".sidebar-bottom > details")){
+  const key="tgwitness-sidebar-"+box.className;
+  try{box.open=localStorage.getItem(key)==="1";}catch{}
+  box.addEventListener("toggle",()=>{try{localStorage.setItem(key,box.open?"1":"0");}catch{}});
+}
+function syncHiddenNav(){
+  const level=document.documentElement.dataset.uiLevel,rank={simple:0,standard:1,expert:2},hint=$("nav-hidden-hint");
+  const hidden=level?[...document.querySelectorAll(".sidebar nav .nav[data-view]")].filter(nav=>!nav.hidden&&rank[nav.dataset.level]>rank[level]).length:0;
+  hint.hidden=!hidden;
+  if(hidden)hint.textContent=trn("Show {n} hidden section","Show {n} hidden sections",hidden);
+}
+new MutationObserver(syncHiddenNav).observe(document.documentElement,{attributes:true,attributeFilter:["data-ui-level"]});
+$("nav-hidden-hint").addEventListener("click",()=>{
+  const select=document.querySelector(".sidebar [data-ui-level]");if(!select)return;
+  select.value="expert";select.dispatchEvent(new Event("change"));
+});
 function selectQuick(index){
   const options=[...quickResults.children];
   if(!options.length){quickSearch.removeAttribute("aria-activedescendant");return;}
@@ -1499,7 +1534,9 @@ function renderAccounts(){
       const attention=!s.demo&&p.health?Object.keys(healthPartNames).filter(name=>needsLook(p.health[name]?.state)):[];
       if(attention.length)pair(tr("Needs attention"),attention.map(name=>healthPartNames[name]+" — "+healthStates[healthKnown(p.health[name].state)][0]).join(" · "),"attention");
       const restricted=c.account_restriction&&(!c.account_restriction.until||c.account_restriction.until*1000>Date.now())?c.account_restriction:null;
-      pair(tr("Route"),[routeText(c.network),exitText(c.network?.check)].filter(Boolean).join(" · ")||"—","route");
+      const route=routeText(c.network),exit=exitText(c.network?.check);
+      pair(tr("Route"),route||exit||"—","route");
+      if(route&&exit)meta.lastElementChild.lastElementChild.append(node("span","route-exit",exit));
       const sharing=exits.get(c.network?.check?.exit_ip)||0;
       if(sharing>1)meta.lastElementChild.lastElementChild.append(node("span","route-shared",tr("Same exit address as other accounts: {n}",{n:sharing-1})));
       if(restricted)pair(tr("Telegram restriction"),restrictionText(restricted.kind),"restriction");
@@ -1765,7 +1802,13 @@ function excerpt(e) {
     case "access.session_ended": return accessName(p)+" · "+(sessionEndReasons[p.reason]||p.reason||"");
     case "witness.seen": return (p.label||"")+" · "+String(p.witness_fingerprint||"").slice(0,16);
   }
-  if (p.reason) return p.reason;
+  if (p.reason) return ({transport_disconnected:tr("Connection to Telegram lost"),transport_connected:tr("Telegram connected"),
+    transport_interrupted:tr("The connection dropped during a check"),session_revoked_externally:tr("The session was ended from another device or by Telegram."),
+    updates_diverted:tr("Updates are going to another session"),updates_resumed:tr("Updates reach this session again"),
+    source_access_lost:tr("The account lost access to a source"),shutdown:tr("TgWitness was shut down"),operator:tr("Stopped from the panel"),
+    collector_error:tr("Stopped after an error"),history_unavailable:tr("Chat history could not be read"),
+    recheck_visibility_uncertain:tr("Some messages could not be confirmed on recheck"),recheck_unparsed:tr("Some message numbers could not be read on recheck"),
+    probe_ack_missed_live:tr("A probe answer did not arrive live"),probe_ack_live:tr("Probe answers arrive live again")})[p.reason]||p.reason;
   if (p.service_action) return p.service_action;
   if (p.action) return p.action._ || tr("Telegram service action");
   if (p.coverage) return tr(p.coverage);
@@ -1796,7 +1839,7 @@ function eventRow(e) {
     row.append(cell,source,time,open);
     row.addEventListener("click",()=>openDetail(e));
     row.addEventListener("keydown",event=>{ if(event.target===row&&(event.key==="Enter"||event.key===" ")){event.preventDefault();openDetail(e);} });
-    row.dataset.seq=String(e.seq);
+    row.dataset.seq=String(e.seq);row.dataset.category=label[2];
     boardView?.attach(row,e);
     return row;
 }
@@ -1853,7 +1896,7 @@ async function refreshRanked(request) {
   state.searchIndex=result.index;
   renderEvents();
 }
-const journalReady=import('./components/journal.js?v=layout2').then(({createJournal})=>{
+const journalReady=import('./components/journal.js?v=layout3').then(({createJournal})=>{
   window.TgWitnessJournal=createJournal({get:$,state,node,icon,tr,invalidate:()=>{state.request++;},error:message=>toast(message,true),
     request:(path,body)=>json(path,body),admin:()=>!!state.me?.admin,
     changed:async()=>{state.boardSlice=null;state.boardAdded=false;$('board-slice-context')?.remove();state.cursor=state.eventBefore=state.eventAfter=state.eventMatched=null;closeDetail({history:false});window.TgWitnessRouter?.record({seq:null});await refreshEvents();},
@@ -4120,7 +4163,7 @@ async function noticeAction(item,kind){
   }
   if(revision===state.workspaceRevision)return openRecord(item.seq);
 }
-const noticesReady=import("./components/notifications.js?v=1").then(({createNotifications})=>{
+const noticesReady=import("./components/notifications.js?v=2").then(({createNotifications})=>{
   noticeUI=createNotifications({workspace:$("workspace"),panel:$("notify-panel"),toggle:$("notify-toggle"),badge:$("notify-count"),list:$("notify-list"),
     readAll:$("notify-read"),rules:$("notify-rules"),closeButton:$("notify-close"),
     filters:[...document.querySelectorAll("[data-notice-filter]")],summary:$("notify-summary"),status:$("notify-status"),

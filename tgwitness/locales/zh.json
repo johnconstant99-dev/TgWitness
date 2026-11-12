@@ -8596,5 +8596,25 @@
   "Download observations": "下载观察记录",
   "Filter observations": "筛选观察记录",
   "related": "关联",
-  "in Telegram pool": "在 Telegram 池中"
+  "in Telegram pool": "在 Telegram 池中",
+  "Coverage gaps in the journal: {n}.": "日志中的覆盖缺口：{n}。",
+  "Show in the journal": "在日志中显示",
+  "Coverage gaps in the journal: {n}. Latest: {time}.": "日志中的覆盖缺口：{n}。最近一次：{time}。",
+  "Show {n} hidden section": "显示 {n} 个隐藏部分",
+  "Show {n} hidden sections": {
+    "other": "显示 {n} 个隐藏部分"
+  },
+  "Connection to Telegram lost": "与 Telegram 的连接已断开",
+  "The connection dropped during a check": "检查期间连接中断",
+  "Updates are going to another session": "更新正发往另一个会话",
+  "Updates reach this session again": "更新重新到达此会话",
+  "The account lost access to a source": "账户失去了对某个来源的访问权限",
+  "TgWitness was shut down": "TgWitness 已关闭",
+  "Stopped from the panel": "已从面板停止",
+  "Stopped after an error": "因错误而停止",
+  "Chat history could not be read": "无法读取聊天记录",
+  "Some messages could not be confirmed on recheck": "复查时部分消息无法确认",
+  "Some message numbers could not be read on recheck": "复查时部分消息编号无法读取",
+  "A probe answer did not arrive live": "探测回复未实时到达",
+  "Probe answers arrive live again": "探测回复重新实时到达"
 }
