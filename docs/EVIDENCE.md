@@ -740,10 +740,9 @@ it was checked. The collector checkpoint signature and journal must still be ver
 separately with the trusted collector fingerprint.
 
 Verification checks the response signature, checkpoint bytes and, when supplied,
-the original request under the specified CA trust. This manual procedure does not check
-revocation; for time stamps obtained in evidence mode, `verify.py` checks the stored OCSP or
-CRL evidence ([signing certificate revocation](TIMESTAMP.md#signing-certificate-revocation)).
-Long-term archival validation after certificate expiry is outside the current verifier.
+the original request under the specified CA trust. For time stamps obtained in evidence mode,
+`verify.py` also checks the stored OCSP or CRL evidence
+([signing certificate revocation](TIMESTAMP.md#signing-certificate-revocation)).
 See the [procedure](TIMESTAMP.md) and [validation results](VERIFICATION.md).
 
 ## Optional records in evidence mode: drand and Telegram devices
@@ -758,12 +757,12 @@ randomness of the League of Entropy (a round every 3 seconds), into the journal:
 `round`, `randomness`, `signature`, `round_time` and the `relay` that answered. A verified
 unpredictable round supplies a lower time reference for the subsequent hash-linked material.
 A verified timestamp on a later checkpoint supplies an upper time reference. These checks
-bound the linked material; collection coverage is assessed separately. The collector asks `drand.cloudflare.com`
+bound the linked material. The collector asks `drand.cloudflare.com`
 first, then the relays of Protocol Labs, through the workspace route, one request per pass.
 
 `verify.py` checks that each randomness is the SHA-256 of its signature and that the round
 time is right, and reports the rounds, the longest stretch without one and how far behind
-drand the collector's clock was. It does not check the BLS signature. `--check-drand`
+drand the collector's clock was. `--check-drand`
 compares the rounds with a Cloudflare relay and a Protocol Labs relay, all of them or a random
 sample of 100 in a long journal; a round that differs fails the verification.
 

@@ -4255,7 +4255,7 @@ function renderConnection(){
   const summary=$("protection-summary");summary.replaceChildren();
   for(const [title,value] of [[tr("Account & proxy secrets"),tr("Encrypted in the vault")],
     [tr("Vault key"),tr(p.vault_key_mode==="external"?"External master key; separate workspace keys":"Stored in the data directory")],
-    [tr("Messages & attachments"),tr("Not encrypted by TgWitness")],[tr("Evidence signatures"),tr("Ed25519 · integrity verification")]]){
+    [tr("Messages & attachments"),tr("Stored in the data directory")],[tr("Evidence signatures"),tr("Ed25519 · integrity verification")]]){
     const row=node("div");row.append(node("strong","",title),node("span","muted",value));summary.append(row);
   }
 }

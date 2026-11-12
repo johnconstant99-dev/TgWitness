@@ -3,7 +3,7 @@ import html as escaping
 
 from . import board
 
-MEANING = "Team notes and bookmarks — opinions of the investigation team, not observations"
+MEANING = "Team notes and bookmarks"
 
 
 def material(connection, statement, options):

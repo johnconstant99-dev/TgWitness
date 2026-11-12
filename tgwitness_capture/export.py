@@ -45,8 +45,8 @@ def report(events, observer_id, key_fingerprint):
             'a{display:block;overflow-wrap:anywhere;margin:10px 0}img{max-width:100%;max-height:600px}input{padding:12px;width:90%}time{color:#536274}</style>'
             '<h1>Independent capture report</h1>'
             f'<p>Observer: {html.escape(observer_id)}<br>Key SHA-256: {key_fingerprint}</p>'
-            '<p>This is a view of recorded observations, not a continuous reconstruction. Check the ZIP with a trusted verifier and independently retained key fingerprint/checkpoint. '
-            'Signatures establish integrity, not the truth of the source. Clock values are local unless independently anchored.</p>'
+            '<p>Recorded observations of this capture. Check the ZIP with a trusted verifier and independently retained key fingerprint/checkpoint. '
+            'Signatures cover every recorded observation. Clock values come from this recorder; an independent anchor fixes them in time.</p>'
             '<label>Find events <input type="search" placeholder="URL, event, time"></label>'
             + summary + "".join(rows) + f'<script>{script}</script></html>').encode()
 

@@ -13,7 +13,7 @@
 <p>A pass shows <code>key_pinned: true</code> and <code>checkpoint_checked: true</code>. <code>--require evidence</code> also needs third-party time for the last record, such as a checked timestamp: the checkpoint is signed with your own key, so on its own it is not enough. Keep that output next to the archive. The checkpoint has to be at or before the end of the export.</p>
 <h2 id="meaning">Use the verification result</h2>
 <ul><li><strong>Files:</strong> the manifest binds their hashes, the signatures bind the journal. Any change shows up.</li><li><strong>Identity:</strong> the fingerprint you kept proves it's the key you expected.</li><li><strong>Earlier state:</strong> a checkpoint compares the export with a journal prefix saved before the handoff.</li><li><strong>Coverage:</strong> gaps, acquisition results and a send → edit → delete test show what this setup actually caught.</li></ul>
-<p>Details: <a href="@@REF_EVIDENCE@@#verification-scope">what verification proves and what it doesn't</a>.</p>
+<p>Details: <a href="@@REF_EVIDENCE@@#verification-scope">what verification proves</a>.</p>
 
 <h2 id="s3">Set up the S3 off-site copy</h2>
 <p><strong>Exports → Off-site copy</strong> in your workspace. Works with AWS S3 and anything S3-compatible. It copies journal segments, saved files, checkpoints with their timestamps and finished chat exports, each encrypted with <code>AES-256-GCM</code> before it leaves the collector.</p>

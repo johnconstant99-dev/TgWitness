@@ -158,7 +158,7 @@ the encoder of whoever made it first.
 Telegram records when a file was uploaded to its servers and when the message
 carrying it was sent. A gap of more than two minutes is reported with the exact
 number of seconds, which is how a recording presented as live turns out to have
-existed beforehand. It does not say who made the file.
+existed beforehand.
 
 Telegram also sends hints about the other side for a chat, including the month
 the account was registered, the country of its phone number and the last time

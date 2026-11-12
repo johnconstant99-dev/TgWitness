@@ -42,10 +42,9 @@ STYLE_FIELDS = ("avg_len", "len_spread", "caps_ratio", "emoji_rate", "exclaim", 
                 "ellipsis", "newline", "paren_smile", "latin_ratio", "digit_ratio", "no_capital_start", "link_rate",
                 "word_len")
 LIMITS = (
-    "Each pair is a lead for an investigator, not identification. Similar accounts can belong to different people.",
+    "Each pair is a lead for an investigator.",
     "Signals are computed independently from observed messages in the chosen chats; the explanation shows which "
     "ones stood out.",
-    "Shared operators, scripts, templates and copied texts produce the same signals as one person with two accounts.",
     "Accounts with fewer authored messages than the minimum are not compared. Outgoing messages of this workspace "
     "are excluded.",
     "With fewer than 60 compared pairs fixed thresholds are used instead of ranking against the chat, and tiers are "

@@ -21,7 +21,7 @@
 
 
 
-It records what the connected account gets. Chats the account can't open and stuff that vanished before it was seen are out of reach.
+It records what the connected account gets.
 
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="../assets/presentation/readme-feature-history-static.svg"><img src="../assets/presentation/readme-feature-history.svg" width="420" alt="Illustrated workflow: captured versions remain in the journal."></picture></p>
 

@@ -322,7 +322,7 @@ BitLocker, LUKS, FileVault or a managed encrypted volume can protect storage und
 their respective threat models. An administrator of an unlocked running machine
 can still read data. Include SQLite WAL/SHM, media, temporary exports, swap, backups
 and browser downloads in storage planning. A Docker volume is not encrypted merely
-because it is a volume. TgWitness does not implement SQLCipher or object encryption.
+because it is a volume.
 
 ## External master key
 

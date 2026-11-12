@@ -147,9 +147,7 @@ def update_chat(update):
 
 
 DELETION_BATCH_MEANING = (
-    "Telegram reported several message IDs as deleted in one update. "
-    "This does not identify who deleted them, whether deletion applied to all participants, "
-    "or whether the entire chat history was cleared.")
+    "Telegram reported several message IDs as deleted in one update.")
 ACCESS_LOST_MEANING = ("The account was removed from this chat or can no longer read it. Observation of this chat "
                        "stopped at that moment; records saved before it remain in the journal.")
 UPDATES_CHECK_SECONDS = 120
@@ -3024,14 +3022,13 @@ class Collector:
         content = state["content"]
         payload = {"deleted_by": None, "deletion_time": None,
                    "deleted_content": {"seq": content["seq"], "hash": content["hash"]} if content else None,
-                   "meaning": "Telegram deletion notification; observation time is not deletion time"
-                              + ("" if content else "; this message was never observed, so no content is held"),
+                   "meaning": "Telegram deletion notification, recorded when it arrived"
+                              + ("" if content else "; the message ID is recorded"),
                    **({"batch": batch} if batch else {"raw": raw})}
         if resolution:
             payload["chat_resolution"] = resolution
         if state["content"] and state["content"].get("outgoing"):
             payload["deleted_message_was_outgoing"] = True
-            payload["deleter_visibility"] = "the message was sent by this account; who deleted it is not supplied"
         if timer := auto_delete(state["content"], utcnow()):
             payload["auto_delete"] = timer
         self.store.append("message.deleted", payload, chat_id, message_id)

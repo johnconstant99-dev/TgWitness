@@ -100,8 +100,7 @@ TgWitness is [MIT-licensed](../../LICENSE). Our
 [position on Taylor Wessing](Operator-Incompatibility.md) is a statement, not a licence condition.
 
 Use an account you can afford to lose. A session is full access to that account, so keep
-sessions, panel tokens and keys to yourself. Messages and files on disk aren't encrypted
-by TgWitness, use disk encryption.
+sessions, panel tokens and keys to yourself. Keep messages and files on an encrypted disk.
 
 Verify the signed archive with a key fingerprint and checkpoint kept elsewhere. It checks
 the saved records and files, and the archive reports the collection period and any gaps.

@@ -179,8 +179,7 @@ account asks for the usual confirmation.
   (up to 100), administrators with their rights and titles, and gifts shown on channels and
   user profiles (up to 100). Each record lists the differences from the previous snapshot:
   changed fields with before and after, pinned messages added or removed, administrators and
-  gifts added, changed or no longer listed. Telegram does not say who changed anything or
-  when between snapshots.
+  gifts added, changed or no longer listed.
   - A part Telegram refuses (for example the administrator list of a channel for a member
     who is not an administrator) is named in `errors`; its earlier value is kept and listed
     in `carried_forward`, never reported as removed.

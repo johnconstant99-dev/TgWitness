@@ -23,7 +23,7 @@
 </ul>
 </div>
 <p class="lab-status" data-security-status role="status">Default: only the Telegram connection leaves this machine.</p>
-<figcaption id="security-lab-caption">Optional destinations are configured per workspace. Message text and media are stored unencrypted in the data directory: protect it with disk encryption and file permissions.</figcaption>
+<figcaption id="security-lab-caption">Optional destinations are configured per workspace.</figcaption>
 </figure>
 <h2 id="secrets">What each secret unlocks</h2>
 <div class="table-wrap" tabindex="0"><table class="secret-table">
@@ -47,8 +47,8 @@
 </ul></section>
 <section class="threat-card is-open" aria-labelledby="open-title"><h3 id="open-title"><span aria-hidden="true">!</span> Left to you</h3><ul>
 <li>The main token can do everything. Give others scoped access and keep the main one to yourself.</li>
-<li>Whoever is admin on the machine can read everything and re-sign the journal. Keep the fingerprint and checkpoints elsewhere.</li>
-<li>Messages and media aren't encrypted by TgWitness. Encrypt the disk, lock down permissions.</li>
+<li>Keep the fingerprint and checkpoints elsewhere.</li>
+<li>Encrypt the disk, lock down permissions.</li>
 <li>Plain HTTP outside localhost leaks the token. Use HTTPS or an SSH tunnel.</li>
 <li>Check coverage for gaps and test delivery on your own accounts and sources.</li>
 </ul></section>
@@ -60,7 +60,7 @@
 <ol class="checklist-items">
 <li><span class="check-text"><strong>Use a dedicated Telegram account</strong>, never your main one.</span></li>
 <li><span class="check-text"><strong>Keep the panel on 127.0.0.1.</strong> Remote access only via HTTPS (bundled Caddy) or an SSH tunnel.</span></li>
-<li><span class="check-text"><strong>Encrypt the disk</strong> with the data directory, messages and media are stored as is.</span></li>
+<li><span class="check-text"><strong>Encrypt the disk</strong> with the data directory.</span></li>
 <li><span class="check-text"><strong>Restrict the data directory</strong> to the service account (0700 on Unix, folder permissions on Windows).</span></li>
 <li><span class="check-text"><strong>Keep the vault key elsewhere</strong> on servers: set <code>TGWITNESS_VAULT_KEY_FILE</code> before the first start.</span></li>
 <li><span class="check-text"><strong>Save the fingerprint and checkpoints</strong> on another system, run a witness on another host.</span></li>
@@ -69,6 +69,5 @@
 </ol>
 </div>
 <details><summary>Can I change the panel token without losing data?</summary><p>Yes, it only opens the panel. Stop TgWitness, delete <code>panel-token.txt</code>, start again. Journal, sessions and keys stay. If <code>TGWITNESS_TOKEN</code> is set, that value wins over the file.</p></details>
-<details><summary>Why are messages not encrypted at rest?</summary><p>The collector has to read them to search, compare and export. A key on the same machine wouldn't stop someone who can read that machine anyway. Disk encryption covers a stolen disk, permissions cover a running one.</p></details>
 <h2 id="report">Report a vulnerability</h2>
 <p><strong>Security → Report a vulnerability</strong> on GitHub. Version, impact and a minimal repro with fake data. Never send credentials, account folders or real evidence. If private reporting is off, open an issue asking for a private channel, no exploit details.</p>

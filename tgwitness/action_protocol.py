@@ -604,7 +604,7 @@ def sentence(step, say, clock=same):
         if found:
             line += " " + say("Found in them: {list}.", list=", ".join(
                 say(item.get("kind", "")) + " " + str(item.get("value", "")) for item in found))
-        return line + " " + say("The code text is what it encodes; who controls the address behind it is a separate question.")
+        return line + " " + say("The code text is what it encodes.")
     if kind == "presence":
         name = step.get("label") or ("@" + step["username"] if step.get("username") else say("Telegram ID {id}",
                                                                                              id=step.get("user_id", "?")))

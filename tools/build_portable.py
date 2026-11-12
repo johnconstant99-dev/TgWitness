@@ -71,8 +71,8 @@ prompt, right-click the ZIP, open Properties, tick Unblock, then extract.
 Your data
 ---------
 The data folder holds Telegram sessions, signing keys, the journal, media and
-exports. Keep it private and back it up while TgWitness is stopped. Message
-content and media are not encrypted by TgWitness; use an encrypted disk.
+exports. Keep it private on an encrypted disk and back it up while TgWitness is
+stopped.
 
 Update
 ------

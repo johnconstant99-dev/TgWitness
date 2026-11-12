@@ -99,14 +99,12 @@ input file had different whitespace.
 | Request | With `--request`, the original query and nonce are verified |
 | TSA signature | OpenSSL verifies the signature and chain to the explicit CA |
 | Collector signature | Separately verified by the journal verifier with a pinned key |
-| Revocation | Manual procedure: not checked. Evidence mode stores OCSP/CRL evidence that `verify.py` checks |
-| Long-term validity | No archival validation after certificate expiry |
+| Revocation | Evidence mode stores OCSP/CRL evidence that `verify.py` checks |
 | Scheduled submission | Evidence mode, off by default |
 
 `--request` is technically optional, but omitting it prevents verification of the
 original nonce. For this full procedure, the result's `request_checked` must be true.
 Certificate verification follows the installed OpenSSL's rules and verification time.
-Long-term preservation needs a separate certificate/revocation evidence policy.
 
 The TSA response anchors the submitted checkpoint bytes to its stated time.
 Review that result with the acquisition records and environment verification for

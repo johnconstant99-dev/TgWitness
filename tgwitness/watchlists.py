@@ -23,7 +23,7 @@ TEXT_KINDS = ("message.new", "message.edited")
 DERIVED_KINDS = ("media.qr_decoded", "media.analysed")
 RISKY = re.compile(r"(\([^)]*[+*]\)[+*{])|(\[[^\]]*\][+*]\s*[+*])")
 MEANING = ("A term the investigator put on a watchlist was found in a saved record. The match is in the text as it was "
-           "saved; it says nothing about who wrote it or what it means.")
+           "saved.")
 
 
 class Entry(BaseModel):

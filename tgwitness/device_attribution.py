@@ -9,14 +9,13 @@ VENDORS = (("libopus 1.5.1", "Telegram for iOS"), ("libopus unknown-fixed", "Tel
 PRE_EXISTING_SECONDS = 120
 MAX_HEADER = 65536
 BASIS = {
-    "round_video_filename": "The filename matches a configured pattern; filenames can be copied or changed.",
+    "round_video_filename": "The filename matches a configured pattern.",
     "round_video_size": "The dimensions match a configured pattern shared by possible encoders.",
-    "round_video_default_name": "A generic filename matches a configured pattern; it does not identify software.",
-    "voice_encoder": "Opus metadata matches a configured vendor-string pattern; metadata can be copied or changed.",
+    "round_video_default_name": "A generic filename matches a configured pattern.",
+    "voice_encoder": "Opus metadata matches a configured vendor-string pattern.",
 }
-MEANING = ("Metadata hypothesis about the client that encoded the file, read from the file itself. "
-           "A forwarded or re-uploaded file carries the encoder of whoever made it first, and clients change these "
-           "details between versions.")
+MEANING = ("Client that encoded the file, read from the file's own metadata. "
+           "A forwarded or re-uploaded file carries the encoder of whoever made it first.")
 PROVENANCE_MEANING = ("Difference between document and message dates in retained metadata. It shows how long "
                       "before sending the file already existed.")
 

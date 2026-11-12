@@ -33,7 +33,6 @@
   <p class="lab-status" data-journey-status role="status">All three received observations remain in the journal.</p>
   <figcaption id="journey-caption">Simplified path for one already selected source. Operational records also share the real journal. Capture depends on what the account can see and what Telegram delivers.</figcaption>
 </figure>
-<p>Telegram doesn't say who deleted a message or exactly when. TgWitness leaves those fields empty instead of guessing.</p>
 
 <h2 id="chain">Change a record. Follow the hash.</h2>
 <p>Every record contains the hash of the one before it. A checkpoint kept somewhere else pins the journal length and the last hash.</p>
@@ -60,5 +59,5 @@
 
 <h2 id="layers">Three questions, three different checks</h2>
 <div class="evidence-layers"><a href="@@GUIDE_EXPORTS@@"><span>01 / INTEGRITY</span><strong>Did this record change?</strong><p>Hashes and signatures against a key you trust.</p></a><a href="@@GUIDE_WITNESS@@"><span>02 / CONTINUITY</span><strong>What was retained earlier?</strong><p>Compare the export with checkpoints a witness kept.</p></a><a href="@@GUIDE_CASES@@"><span>03 / DELIVERY</span><strong>Did these test events arrive?</strong><p>Send, edit and delete test messages and see what each account caught.</p></a></div>
-<p class="callout">Signatures answer "was it changed", checkpoints answer "does it match what was there before", test messages answer "did we catch everything". <a href="@@REF_EVIDENCE@@#verification-scope">What verification proves and what it doesn't.</a></p>
+<p class="callout">Signatures answer "was it changed", checkpoints answer "does it match what was there before", test messages answer "did we catch everything". <a href="@@REF_EVIDENCE@@#verification-scope">What verification proves.</a></p>
 <p>Next: a <a href="@@GUIDE_CASES@@">whole-account investigation</a> from start to case package.</p>

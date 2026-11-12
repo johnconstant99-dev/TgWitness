@@ -80,7 +80,7 @@ The main administrator chooses the mode under **Journal → Filters → Search i
 for each workspace. `TGWITNESS_FULLTEXT=disk|memory|off` sets the default for
 workspaces without their own choice. Switching to memory or off deletes the file.
 The index file has the same protection as the journal: it sits in the private data
-directory. It is not encrypted, and is not part of backups or off-site copies.
+directory. Backups and off-site copies leave it out.
 
 New records are indexed in the background within seconds; a search also indexes a
 short backlog first, so a record saved a moment ago is found. An existing journal is

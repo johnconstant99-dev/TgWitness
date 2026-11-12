@@ -11,7 +11,7 @@ available workflows; this page records what has actually been checked.
 These are selected validation results from the
 [development history](OVERVIEW.md#testing-history-and-duration). Engineering tests,
 live acquisition, fault injection, recovery checks and artifact verification each
-have their stated scope; external certification is a separate status.
+have their stated scope.
 
 On 8 November, the published installer at `b35f8e18f3d1` was inspected without
 executing or installing it: wheel and dependency-lock SHA-256 and RSA signatures

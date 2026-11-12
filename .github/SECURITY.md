@@ -8,7 +8,6 @@ If that option is unavailable, open an issue asking for a private contact; leave
 exploit details. Never post credentials, Telegram sessions or real evidence archives.
 
 Fixes target the latest release. Older versions are not maintained separately.
-There is no guaranteed response time or independent security certification.
 
 ## Before you deploy
 

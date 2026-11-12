@@ -30,7 +30,7 @@ host-wide egress rules and kernel enforcement are checked on the host itself.
 ## Storage and independent records
 
 The storage view distinguishes encrypted credentials and signing-key files from the
-signed journal and media, which are not encrypted by the application. It shows whether
+signed journal and media. It shows whether
 the vault key is local or derived from an external master key. Keys themselves are never
 returned. Addresses and directory paths are hidden in the interface until requested.
 

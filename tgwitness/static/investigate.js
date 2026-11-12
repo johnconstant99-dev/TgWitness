@@ -1096,7 +1096,7 @@
 
   function fillCover(box) {
     box.replaceChildren(
-      el('div', 'doc-callout', icon('lock'), node('p', '', tr('What is recorded here goes into the undercover activity record: who the account pretends to be, under which authority, and who sent each message. TgWitness records and flags; it does not decide whether an authorisation was needed.'))),
+      el('div', 'doc-callout', icon('lock'), node('p', '', tr('What is recorded here goes into the undercover activity record: who the account pretends to be, under which authority, and who sent each message.'))),
       personaSection(box), authoritySection(box),
       el('div', 'doc-row-actions', current ? button('Open the undercover record', 'secondary', () => document_('undercover'), 'doc') : '',
         button('Reload', 'ghost', () => reloadCover(box), 'refresh')));

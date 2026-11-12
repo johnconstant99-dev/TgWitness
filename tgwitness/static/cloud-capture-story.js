@@ -43,7 +43,7 @@
       <section class="story-lab" aria-labelledby="story-lab-title"><div class="story-lab-heading"><div><span class="eyebrow">${t("TRY A CHANGE")}</span><h3 id="story-lab-title">${t("Detecting changes")}</h3></div><span class="story-demo-tag">${t("DEMO")}</span></div>
       <div class="story-scenarios" role="group" aria-label="${t("Verification example")}">${[["original",t("Unchanged")],["message",t("Edit a message")],["collector",t("Replace the collector")]].map(([id,label])=>`<button type="button" data-story-scenario="${id}" aria-pressed="false">${label}</button>`).join("")}</div><div class="story-lab-result" aria-live="polite" aria-atomic="true"></div>
       <p class="story-lab-note">${t("Demo only. Verify your downloaded archive with the command in step 4.")}</p></section>
-      <details class="story-details"><summary>${t("Privacy and trust")}</summary><p>${t("The key stays with you. Collection relies on GitHub, the collector and the HTTPS tunnel; the runner processes the chat in plaintext. Public metadata contains a hash and workflow details. Verification covers integrity and origin, not historical completeness or the truth of statements.")}</p></details></section>`;
+      <details class="story-details"><summary>${t("Privacy and trust")}</summary><p>${t("The key stays with you. Collection relies on GitHub, the collector and the HTTPS tunnel; the runner processes the chat in plaintext. Public metadata contains a hash and workflow details.")}</p></details></section>`;
   }
   function schedule() {
     clearTimeout(timer);

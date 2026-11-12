@@ -538,7 +538,7 @@ def export(root, out):
               "  python verify.py tgwitness-evidence.zip --witness witness.zip --witness-fingerprint WITNESS_SHA256 \\\n"
               "      --channel result.json\n"
               "Witness times come from the witness computer's clock; Telegram post dates in the channel are an\n"
-              "independent clock. A witness shows what the collector reported at those times, not message truth.\n"
+              "independent clock. A witness shows what the collector reported at those times.\n"
               "Produced by TgWitness (PhishDestroy, https://phishdestroy.io).\n").encode()
     files = {"events.jsonl": data, "verify.py": verifier, **verification_kit.files(),
              "README.txt": verification_kit.quickstart() + b"\n" + readme}

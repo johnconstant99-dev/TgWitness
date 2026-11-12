@@ -1,7 +1,7 @@
 def read_state(before_views, after_views):
     return {"already_viewed": None,
             "views_before": before_views, "views_after": after_views,
-            "meaning": "Aggregate counters do not identify viewers or establish prior viewing by an account."}
+            "meaning": "Aggregate post view counters before and after the request."}
 
 
 async def observe_post_views(client, peer, message_id):

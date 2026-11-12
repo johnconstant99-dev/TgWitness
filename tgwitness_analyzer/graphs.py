@@ -19,10 +19,10 @@ NODE_COLORS = {"account": "#2f6fc4", "source": "#8f4fb3", "mention": "#6b7b8b", 
 EDGE_COLORS = {"reply": "#2f6fc4", "forward": "#8f4fb3", "mention": "#8c96a0", "posted": "#c98a12"}
 COMMUNITY_COLORS = ("#2f6fc4", "#3d9a46", "#b03a14", "#8f4fb3", "#c98a12", "#1b8a8a", "#a0306a", "#5b6b7b")
 LIMITS = (
-    "Edges count observed messages in the chosen chats. A missing edge does not mean there was no contact.",
-    "A shared indicator means the same string appeared. Who controls it is a separate question.",
-    "Forward sources and mentions are what the messages show; hidden forwards and private chats are not visible.",
-    "Communities are a reading aid computed from replies and posting patterns, not proven groups or organisations.",
+    "Edges count observed messages in the chosen chats.",
+    "A shared indicator means the same string appeared.",
+    "Forward sources and mentions are what the messages show.",
+    "Communities are computed from replies and posting patterns.",
     "Only the newest records read for this analysis are included.",
 )
 

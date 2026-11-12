@@ -118,16 +118,16 @@ party for the last record, and compares the journal with checkpoints kept elsewh
 <details>
 <summary>What each observation keeps</summary>
 
-| Observation | Kept | Limits |
-| --- | --- | --- |
-| New message | Text, sender, reply, metadata, time seen | Only for selected sources |
-| Edit | A new version | Edits made while offline are lost |
-| Deletion | Message ID + everything saved before | Telegram rarely says who deleted and when |
-| Reactions | Counts and recent users if Telegram sends them | Snapshot, not a full log |
-| Membership | Service messages and participant updates | Not every join/leave arrives |
-| Attachment | File with SHA-256 (optional) | Can vanish before download, the outcome is recorded |
-| Coverage | Starts, stops, disconnects, heartbeats | Being online isn't proof nothing was missed |
-| History snapshot | Latest visible messages (500 by default) | Can't bring back missed edits or deletions |
+| Observation | Kept |
+| --- | --- |
+| New message | Text, sender, reply, metadata, time seen, for selected sources |
+| Edit | A new version |
+| Deletion | Message ID + everything saved before |
+| Reactions | Counts and recent users if Telegram sends them |
+| Membership | Service messages and participant updates |
+| Attachment | File with SHA-256 (optional) and the download outcome |
+| Coverage | Starts, stops, disconnects, heartbeats |
+| History snapshot | Latest visible messages (500 by default) |
 
 More in [collection](COLLECTION.md).
 

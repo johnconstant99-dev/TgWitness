@@ -110,7 +110,7 @@ def build(output, languages=('en', 'de', 'ru'), templates=False):
                     if templates:
                         options.update(review_question='Did the recorded delivery terms change?',
                             review_method='Compare the saved versions of message 408 in chat -100100001 in events.jsonl. Review coverage before drawing conclusions about the missing period.',
-                            review_findings='The first saved version names 20 November and 48,000. A later edit names 27 November and 64,000. A deletion notice is also recorded for message 409 in another chat; it does not identify who deleted it.',
+                            review_findings='The first saved version names 20 November and 48,000. A later edit names 27 November and 64,000. A deletion notice is also recorded for message 409 in another chat.',
                             review_conclusion='The saved versions differ, and both are kept with their observation times. All participants, messages and times here are fictional.')
                     bundle = evidence.export_file(store, vault, 'zip', options)
                     verified = verify_bundle(bundle, pin)

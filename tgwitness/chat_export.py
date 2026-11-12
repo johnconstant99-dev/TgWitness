@@ -67,8 +67,7 @@ PARTIAL_MEANING = ("Messages read before this export stopped. They stay in the w
                    "the collector key; the next export of this chat by the same account checks them and continues.")
 SET_ASIDE_MEANING = ("Messages kept from an earlier stopped export could not be continued and were moved aside unchanged; "
                      "this export starts from the newest message.")
-PARTIAL_SCOPE = ("Only messages numbered {low}-{high} were read before the export stopped. Numbers outside that range "
-                 "were not read, so their absence says nothing about deletion.")
+PARTIAL_SCOPE = "Messages numbered {low}-{high} were read before the export stopped."
 SESSIONS_LIMIT = ("This export continued an earlier stopped export of the same chat by the same account; "
                   "acquisition.sessions lists each session. Messages kept from an earlier session show the version "
                   "Telegram returned during that session.")

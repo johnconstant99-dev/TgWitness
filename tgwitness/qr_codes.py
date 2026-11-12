@@ -8,8 +8,7 @@ MAX_PIXELS = 50_000_000
 MAX_PAYLOAD = 4096
 MAX_SCAN = 200
 IMAGE_TYPES = ("image/png", "image/jpeg", "image/webp", "image/bmp")
-MEANING = ("Codes read from a saved image by this workspace. The text is what the code encodes; whether the address or "
-           "link behind it belongs to anyone in particular is a separate question.")
+MEANING = "Codes read from a saved image by this workspace. The text is what the code encodes."
 UNAVAILABLE = ("Reading codes needs OpenCV, which is not installed with TgWitness. Install the optional extra "
                "tgwitness[qr] on the collector host, or read the code in another tool and record the result by hand.")
 

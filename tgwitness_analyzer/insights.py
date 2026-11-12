@@ -20,7 +20,7 @@ LIMITS = (
     "clock when the notice arrived.",
     "A reply is the first message from the other side after one of this account's messages. In groups it may answer "
     "something else.",
-    "A deletion wave groups notices that arrived within a minute. What came before it is context, not a proven cause.",
+    "A deletion wave groups notices that arrived within a minute.",
     "Online observations exist only while presence recording is on and the person's privacy settings allow it.",
     "Counts cover the newest records read for this analysis, not necessarily the whole chat.",
 )

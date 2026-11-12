@@ -101,8 +101,7 @@ Saved conversations, read-only by default.
 - The chat header counts messages **deleted, text kept**, **deleted before saving**
   and **not found on recheck**. The chat list and notifications use the same
   definitions. A deleted message is red and keeps its saved text; an edited message
-  keeps every saved version. Each deletion says what is known: when it was seen, that
-  Telegram does not report who deleted it, or that only the notice arrived.
+  keeps every saved version.
 - **Load history** brings the last 100, 250 or 500 messages into this view and the
   journal. Find it in **Chat actions**, alongside recording settings, read-only and
   secret-masking controls. The menu closes with Escape or a click outside it.

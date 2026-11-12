@@ -36,7 +36,7 @@ def outbox_read_record(update, now=None):
     return {"kind": "forensics.outbox_read_watermark",
             "payload": {**peer_fields(getattr(update, "peer", None)), "max_id": getattr(update, "max_id", None),
                         "observed_at": time.time() if now is None else now,
-                        "meaning": "Observed outgoing read watermark; it does not identify the person using the account."}}
+                        "meaning": "Observed outgoing read watermark."}}
 
 
 BUILDERS = {"UpdatePeerSettings": peer_settings_record, "UpdateReadHistoryOutbox": outbox_read_record}

@@ -1074,7 +1074,7 @@ def render_html(model, say=action_protocol.plain_say, fixed=None, images=None, a
         toc.append('<a href="#found">' + icon("search") + e(say("Found in messages")) + "</a>")
         blocks.append('<section class="block" id="found"><h2>' + icon("search") + e(say("Found in messages"))
                       + '</h2><p class="lead">'
-                      + e(say("Strings found in the messages above. Who controls them is a separate question.")) + "</p>"
+                      + e(say("Strings found in the messages above.")) + "</p>"
                       "<table><tr><th>" + e(say("Kind")) + "</th><th>" + e(say("Value")) + "</th><th>" + e(say("Steps"))
                       + "</th></tr>" + "".join(
                           '<tr><td><span class="kind k-' + e(item["kind"]) + '">' + e(say(item["kind"])) + "</span>"
@@ -1351,7 +1351,7 @@ def render_slides(model, say=action_protocol.plain_say, fixed=None, images=None,
             + "</span></td></tr>" for item in found[:12]) + "</table>"
               + ('<p class="more">' + e(say("{n} more in the full report.", n=len(found) - 12)) + "</p>"
                  if len(found) > 12 else ""),
-              say("Strings found in the messages above. Who controls them is a separate question."))
+              say("Strings found in the messages above."))
     conclusions = model["conclusions"]
     for start in range(0, len(conclusions), 4):
         slide(say("Conclusions"), say("What the investigator concludes"), '<div class="concl">' + "".join(

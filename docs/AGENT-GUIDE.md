@@ -61,8 +61,7 @@ checks. Assess GitHub workflow and Intel TDX modes with their own verifiers and
 trusted inputs; a finding against those modes names the verifier check it bypasses
 and reproduces the bypass.
 
-Keep engineering validation separate from external certification. Describe optional
-services by their actual enabled data flows, and the installer by its signature
+Describe optional services by their actual enabled data flows, and the installer by its signature
 checks and available independent verification procedure. Fictional demo records
 exercise interface and format behavior; live collection evidence has its own
 revision-specific results. Base defect reports on code paths and reproduced failures.

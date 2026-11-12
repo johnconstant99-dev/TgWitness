@@ -306,7 +306,7 @@ def export_state(connection, vault):
     state = board_replay(records(connection), vault.public_key)
     statement = {"format": "tgwitness-case-board-v1", "public_key": vault.public_key,
                  "created_at": utcnow(), "journal_head": journal_head(connection), "state": state,
-                 "meaning": "Team notes and bookmarks — opinions of the investigation team, not observations"}
+                 "meaning": "Team notes and bookmarks"}
     return {"statement": statement, "signature": vault.sign(canonical(statement))}
 
 

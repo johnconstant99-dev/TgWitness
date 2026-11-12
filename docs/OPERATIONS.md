@@ -282,9 +282,9 @@ Four things are protected differently:
 
 | What | Protection |
 | --- | --- |
-| Export files without a password (the default) | Not encrypted. Signed, so changes are detectable, but anyone holding the file can read it |
+| Export files without a password (the default) | Signed, so changes are detectable; set a password to encrypt the export |
 | Export files with a password | If you set a password, the finished export goes unchanged into a WinZip AES-256 ZIP that 7-Zip and WinRAR open; the password is not stored ([evidence handling](EVIDENCE.md)) |
-| The journal database and saved attachments on disk | Not encrypted by TgWitness; use an encrypted disk or volume |
+| The journal database and saved attachments on disk | An encrypted disk or volume and folder permissions |
 | Telegram sessions and signing keys | Encrypted in the data directory (`credentials.enc`, `signing.enc`, `network.enc`) |
 
 A full service backup is the stopped data directory described above, not an export.

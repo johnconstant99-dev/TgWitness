@@ -74,9 +74,8 @@ Look at the witness log and the channel itself. "Last poll" in the collector onl
 
 ## Interpret the result
 
-A witness on the same server is a separate process and key, but the same person still runs
-it. The verifier sees only a second key; who controls it is up to your custody records.
-The witness journal is a supporting check. Its posts give external time: with
+A witness on another host, under another custodian, adds an independent key; custody
+records show who holds it. The witness journal is a supporting check. Its posts give external time: with
 `--channel https://t.me/s/CHANNEL` the verifier reads the date Telegram set on each post,
 skipping edited posts. Dates in a Telegram Desktop `result.json` are supplied metadata,
 not independent time.

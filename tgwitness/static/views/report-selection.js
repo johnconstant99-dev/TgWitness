@@ -145,7 +145,7 @@ export function createReportSelection({root,tr,json,getOwner,ready,options,activ
       if(rows.length>36)grid.append(make('p',tr('Showing the latest {n} recorded periods. The report includes the complete selected period.',{n:36}),'hint'));
     }
     if(analytics.participants){const block=chart('Participant activity',(analytics.participants.rows||[]).map(row=>({label:rowLabel(row),value:row.total})));
-      block.append(make('p',tr('Sender counts use new messages, history observations and recovered messages. They do not identify who edited or deleted a message.'),'hint'));grid.append(block);}
+      block.append(make('p',tr('Sender counts use new messages, history observations and recovered messages.'),'hint'));grid.append(block);}
     if(analytics.chats)grid.append(chart('Activity by chat',(analytics.chats.rows||[]).map(row=>({label:rowLabel(row),value:row.total}))));
     if(analytics.hourly){
       const block=make('section','','report-preview-chart report-preview-hours');block.append(make('h4',tr('Activity by weekday and hour')));
