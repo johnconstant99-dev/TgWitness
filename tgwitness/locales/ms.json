@@ -8786,5 +8786,25 @@
     "other": "{n} akaun menggunakan pelayan MTProxy awam: alamatnya berubah dan sambungan terputus, jadi mesej boleh terlepas."
   },
   "Move all accounts to WARP": "Pindahkan semua akaun ke WARP",
-  "Move to WARP": "Pindahkan ke WARP"
+  "Move to WARP": "Pindahkan ke WARP",
+  "Keep recording new messages and their changes after setup.": "Teruskan merakam mesej baru dan perubahan mereka selepas penyediaan.",
+  "Larger files are recorded without downloading their contents.": "Fail yang lebih besar direkodkan tanpa memuat turun kandungannya.",
+  "Sends a message when recording stops or needs attention.": "Menghantar mesej apabila rakaman berhenti atau memerlukan perhatian.",
+  "Keeps a copy of the journal in storage you choose.": "Menyimpan salinan jurnal di storan yang anda pilih.",
+  "Undo": "Batal",
+  "Change undone.": "Perubahan dibatalkan.",
+  "Recent changes": "Perubahan terkini",
+  "Not chosen": "Tidak dipilih",
+  "Some settings differ from the recommended ones": "Sesetengah tetapan berbeza daripada yang disyorkan",
+  "Recommended settings are on": "Tetapan yang disyorkan dihidupkan",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "Dipilih untuk \"{goal}\". Ubah hanya apa yang anda perlukan: setiap perubahan boleh dibatalkan.",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "Default selamat sedang digunakan. Ubah hanya apa yang anda perlukan: setiap perubahan boleh dibatalkan.",
+  "Return to recommended": "Kembali ke yang disyorkan",
+  "Undo last change": "Batalkan perubahan terakhir",
+  "Advanced settings": "Pilihan lanjutan",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "Satu matlamat menetapkan fail, cap masa dan pemberitahuan sekaligus. Anda boleh membatalkannya serta-merta selepas itu.",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "Had fail tersuai ditetapkan dalam Parameter. Pilih pilihan untuk menggantikannya.",
+  "Advanced connection options": "Pilihan sambungan lanjutan",
+  "this device": "peranti ini",
+  "Undo of an earlier change": "Membatalkan perubahan sebelumnya"
 }

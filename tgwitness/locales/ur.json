@@ -8832,5 +8832,25 @@
     "other": "{n} اکاؤنٹس عوامی MTProxy سرور استعمال کر رہے ہیں: پتہ بدلتا ہے اور رابطہ ٹوٹتا ہے، پیغامات چھوٹ سکتے ہیں۔"
   },
   "Move all accounts to WARP": "تمام اکاؤنٹس WARP پر منتقل کریں",
-  "Move to WARP": "WARP پر منتقل کریں"
+  "Move to WARP": "WARP پر منتقل کریں",
+  "Keep recording new messages and their changes after setup.": "سیٹ اپ کے بعد نئے پیغامات اور ان میں ہونے والی تبدیلیوں کی ریکارڈنگ جاری رکھیں۔",
+  "Larger files are recorded without downloading their contents.": "بڑی فائلیں ان کے مواد کو ڈاؤن لوڈ کیے بغیر ریکارڈ کی جاتی ہیں۔",
+  "Sends a message when recording stops or needs attention.": "جب ریکارڈنگ رکتی ہے یا توجہ درکار ہوتی ہے تو ایک پیغام بھیجتا ہے۔",
+  "Keeps a copy of the journal in storage you choose.": "آپ کے منتخب کردہ اسٹوریج میں جرنل کی ایک کاپی محفوظ رکھتا ہے۔",
+  "Undo": "واپس",
+  "Change undone.": "تبدیلی واپس کر دی گئی۔",
+  "Recent changes": "حالیہ تبدیلیاں",
+  "Not chosen": "منتخب نہیں",
+  "Some settings differ from the recommended ones": "کچھ ترتیبات تجویز کردہ ترتیبات سے مختلف ہیں۔",
+  "Recommended settings are on": "تجویز کردہ ترتیبات آن ہیں",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "\"{goal}\" کے لیے منتخب کیا گیا۔ صرف وہی تبدیلی کریں جس کی آپ کو ضرورت ہے: ہر تبدیلی کو واپس کیا جا سکتا ہے۔",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "محفوظ ڈیفالٹس استعمال ہو رہے ہیں۔ صرف وہی تبدیلی کریں جس کی آپ کو ضرورت ہو: ہر تبدیلی واپس کی جا سکتی ہے۔",
+  "Return to recommended": "تجویز کردہ پر واپس جائیں",
+  "Undo last change": "آخری تبدیلی کو واپس کریں",
+  "Advanced settings": "اعلیٰ ترتیبات",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "ایک گول ایک ساتھ فائلیں، ٹائم اسٹیمپ اور نوٹیفیکیشنز سیٹ کرتا ہے۔ آپ اسے فوراً بعد واپس کر سکتے ہیں۔",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "کسٹم فائل حدود پیرامیٹرز میں مقرر کی جاتی ہیں۔ انہیں تبدیل کرنے کے لیے ایک آپشن منتخب کریں۔",
+  "Advanced connection options": "متقدم کنکشن کے اختیارات",
+  "this device": "یہ آلہ",
+  "Undo of an earlier change": "پچھلی تبدیلی کو واپس کرنا"
 }

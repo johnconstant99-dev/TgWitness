@@ -8832,5 +8832,25 @@
     "other": "{n} ta akkaunt ochiq MTProxy serverlaridan foydalanmoqda: manzil o‘zgaradi va aloqa uziladi, xabarlar tushib qolishi mumkin."
   },
   "Move all accounts to WARP": "Barcha akkauntlarni WARPga o‘tkazish",
-  "Move to WARP": "WARPga o‘tkazish"
+  "Move to WARP": "WARPga o‘tkazish",
+  "Keep recording new messages and their changes after setup.": "Sozlamalardan so'ng yangi xabarlar va ularning o'zgarishlarini yozib borishni davom ettiring.",
+  "Larger files are recorded without downloading their contents.": "Katta hajmli fayllar mazmuni yuklab olinmasdan qayd etiladi.",
+  "Sends a message when recording stops or needs attention.": "Yozib olish to'xtaganida yoki e'tibor talab qilganda xabar yuboradi.",
+  "Keeps a copy of the journal in storage you choose.": "Jurnal nusxasini siz tanlagan saqlash joyida saqlaydi.",
+  "Undo": "Bekor qilish",
+  "Change undone.": "O'zgartirish bekor qilindi.",
+  "Recent changes": "So'nggi o'zgarishlar",
+  "Not chosen": "Tanlanmagan",
+  "Some settings differ from the recommended ones": "Ba'zi sozlamalar tavsiya etilganlardan farq qiladi",
+  "Recommended settings are on": "Tavsiya etilgan sozlamalar yoqilgan",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "\"{goal}\" uchun tanlandi. Faqat kerakli narsalarni o'zgartiring: har bir o'zgartirishni bekor qilish mumkin.",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "Xavfsiz standart sozlamalar qo'llanilmoqda. Faqat kerakli narsalarni o'zgartiring: har qanday o'zgartirishni bekor qilish mumkin.",
+  "Return to recommended": "Tavsiya etilgan bo'limga qaytish",
+  "Undo last change": "Oxirgi o'zgartirishni bekor qilish",
+  "Advanced settings": "Kengaytirilgan sozlamalar",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "Maqsad fayllarni, vaqt tamg'alarini va bildirishnomalarni bir vaqtda sozlaydi. Buni darhol bekor qilishingiz mumkin.",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "Moslashtirilgan fayl limitlari Parametrlarda o'rnatilgan. Ularni almashtirish uchun variantni tanlang.",
+  "Advanced connection options": "Rivojlangan ulanish opsiyalari",
+  "this device": "bu qurilma",
+  "Undo of an earlier change": "Avvalgi o'zgartirishni bekor qilish"
 }

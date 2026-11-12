@@ -8832,5 +8832,25 @@
     "other": "{n}টি অ্যাকাউন্ট সর্বজনীন MTProxy সার্ভার ব্যবহার করে: ঠিকানা বদলায় ও সংযোগ বিচ্ছিন্ন হয়, বার্তা হারাতে পারে।"
   },
   "Move all accounts to WARP": "সব অ্যাকাউন্ট WARP-এ সরান",
-  "Move to WARP": "WARP-এ সরান"
+  "Move to WARP": "WARP-এ সরান",
+  "Keep recording new messages and their changes after setup.": "সেটআপের পর নতুন বার্তা এবং সেগুলোর পরিবর্তন রেকর্ড করতে থাকুন।",
+  "Larger files are recorded without downloading their contents.": "বড় ফাইলগুলো তাদের বিষয়বস্তু ডাউনলোড না করেই রেকর্ড করা হয়।",
+  "Sends a message when recording stops or needs attention.": "রেকর্ডিং বন্ধ হলে বা মনোযোগের প্রয়োজন হলে একটি বার্তা পাঠায়।",
+  "Keeps a copy of the journal in storage you choose.": "আপনি নির্বাচিত স্টোরেজে জার্নালের একটি অনুলিপি সংরক্ষণ করে।",
+  "Undo": "বাতিল করুন",
+  "Change undone.": "পরিবর্তন বাতিল।",
+  "Recent changes": "সাম্প্রতিক পরিবর্তনসমূহ",
+  "Not chosen": "নির্বাচন করা হয়নি",
+  "Some settings differ from the recommended ones": "কিছু সেটিংস সুপারিশকৃত সেটিংস থেকে ভিন্ন",
+  "Recommended settings are on": "সুপারিশকৃত সেটিংস চালু আছে",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "\"{goal}\" এর জন্য নির্বাচিত। শুধুমাত্র প্রয়োজনীয় পরিবর্তন করুন: প্রতিটি পরিবর্তন বাতিল করা যায়।",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "নিরাপদ ডিফল্ট ব্যবহার করা হচ্ছে। শুধুমাত্র প্রয়োজনীয় পরিবর্তন করুন: প্রতিটি পরিবর্তন পূর্বাবস্থায় ফেরানো যাবে।",
+  "Return to recommended": "সুझाওনায় ফিরে যান",
+  "Undo last change": "শেষ পরিবর্তন বাতিল করুন",
+  "Advanced settings": "উন্নত সেটিংস",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "একটি গোল একসঙ্গে ফাইল, টাইমস্ট্যাম্প এবং বিজ্ঞপ্তি সেট করে। আপনি ঠিক পরেই এটি বাতিল করতে পারেন।",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "কাস্টম ফাইল সীমা প্যারামিটারে সেট করা হয়। সেগুলো প্রতিস্থাপন করতে একটি বিকল্প নির্বাচন করুন।",
+  "Advanced connection options": "উন্নত সংযোগ বিকল্পসমূহ",
+  "this device": "এই ডিভাইস",
+  "Undo of an earlier change": "আগে করা পরিবর্তনের আনডু"
 }

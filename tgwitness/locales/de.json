@@ -8832,5 +8832,25 @@
     "other": "{n} Konten nutzen öffentliche MTProxy-Server: Die Adresse wechselt und die Verbindung bricht ab, Nachrichten können fehlen."
   },
   "Move all accounts to WARP": "Alle Konten auf WARP umstellen",
-  "Move to WARP": "Auf WARP umstellen"
+  "Move to WARP": "Auf WARP umstellen",
+  "Keep recording new messages and their changes after setup.": "Zeichnen Sie nach der Einrichtung weiterhin neue Nachrichten und deren Änderungen auf.",
+  "Larger files are recorded without downloading their contents.": "Größere Dateien werden aufgezeichnet, ohne dass ihr Inhalt heruntergeladen wird.",
+  "Sends a message when recording stops or needs attention.": "Sendet eine Nachricht, wenn die Aufzeichnung beendet wird oder eine Aktion erforderlich ist.",
+  "Keeps a copy of the journal in storage you choose.": "Speichert eine Kopie des Protokolls auf einem Speicherort Ihrer Wahl.",
+  "Undo": "Rückgängig",
+  "Change undone.": "Änderung rückgängig gemacht.",
+  "Recent changes": "Letzte Änderungen",
+  "Not chosen": "Nicht ausgewählt",
+  "Some settings differ from the recommended ones": "Einige Einstellungen weichen von den empfohlenen ab",
+  "Recommended settings are on": "Die empfohlenen Einstellungen sind aktiviert",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "Ausgewählt für „{goal}“. Ändern Sie nur das, was Sie benötigen: Jede Änderung kann rückgängig gemacht werden.",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "Es werden sichere Standardeinstellungen verwendet. Ändern Sie nur das, was Sie benötigen: Jede Änderung kann rückgängig gemacht werden.",
+  "Return to recommended": "Zurück zu den Empfehlungen",
+  "Undo last change": "Letzte Änderung rückgängig machen",
+  "Advanced settings": "Erweiterte Einstellungen",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "Ein Ziel legt Dateien, Zeitstempel und Benachrichtigungen auf einmal fest. Sie können dies unmittelbar danach rückgängig machen.",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "Benutzerdefinierte Dateigrößenbeschränkungen werden unter „Parameter“ festgelegt. Wählen Sie eine Option aus, um diese zu überschreiben.",
+  "Advanced connection options": "Erweiterte Verbindungsoptionen",
+  "this device": "dieses Gerät",
+  "Undo of an earlier change": "Rückgängigmachen einer früheren Änderung"
 }

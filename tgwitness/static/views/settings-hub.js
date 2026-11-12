@@ -15,8 +15,17 @@ export function createSettingsHub(ctx) {
   let dialogs=null, moved=[], query='', reveal=new Set(), editing=false;
   let autoTried=false, routeDirty=false, checkFailure=null;
   let live=null, liveTimer=null, visited=0, recordedStep=null, shownSession=null, methodShown=false;
-  let shownStep=null, shownStage=null, levelChosen=false, moreOpen=false;
-  let groupScope=null, scopeDirty=false;
+  let shownStep=null, shownStage=null, levelChosen=false, moreOpen=false, moreConnection=false, advancedOpen=false;
+  let groupScope=null, scopeDirty=false, history=null, historyLoading=null, undo=null, undoTimer=null;
+  const mainSections=['telegram','chats','connection','appearance'];
+  const advancedSections=['goal','collection','protection','notifications','level'];
+  const hints={continuous:'Keep recording new messages and their changes after setup.',
+    files:'Larger files are recorded without downloading their contents.',
+    timestamps:'Independent services confirm when records existed.',
+    drand:'Adds a public randomness beacon to records so their recording time can be checked.',
+    notifications:'Sends a message when recording stops or needs attention.',
+    replica:'Keeps a copy of the journal in storage you choose.',
+    outside:'Timestamps, notifications and off-site copies contact services outside Telegram.'};
   const sections=['appearance','level','goal','connection','telegram','chats','collection','protection','notifications','group'];
   let preferencesQueue=Promise.resolve(), draftQueue=Promise.resolve(), preferencesSequence=0, draftSequence=0, checkSequence=0;
   const owner=()=>({generation,profile:state.profile,token:state.token,revision:state.workspaceRevision});
@@ -131,15 +140,70 @@ export function createSettingsHub(ctx) {
       data=result;if(sequence===draftSequence)draft={...result.wizard};
     });return draftQueue;
   }
-  async function applyGoal(goal,{first=false,keep=false}={},who=owner()){
+  async function applyGoal(goal,{first=false,keep=false,quiet=false}={},who=owner()){
     const plan=await request(who,'settings/goal/preview',{goal,keep_manual:keep});
     const text=plan.diff.map(row=>tr(data.fields.find(f=>f.key===row.key)?.label||row.key)+': '+describe(row.before)+' → '+describe(row.after)).join('\n');
-    if(!first&&!await confirm(who,tr('Change goal?')+'\n\n'+(text||tr('The settings already match.'))))return false;
+    if(!first&&!quiet&&!await confirm(who,tr('Change goal?')+'\n\n'+(text||tr('The settings already match.'))))return false;
+    const before={...data.values},goalBefore=data.goal;
     data=await request(who,'settings/goal',{goal,revision:plan.revision,keep_manual:keep});
+    if(quiet)saved(before,goalBefore);
     await refresh(who);return true;
   }
+  const fieldLabel=key=>key==='goal'?tr('Goal'):tr(data.fields.find(f=>f.key===key)?.label||key);
+  function saved(before,goalBefore){
+    history=null;
+    const keys=Object.keys(data.values).filter(k=>JSON.stringify(data.values[k])!==JSON.stringify(before[k]));
+    const parts=[...(goalBefore!==data.goal?[fieldLabel('goal')+': '+label(data.goal)]:[]),...keys.map(k=>fieldLabel(k)+': '+describe(data.values[k]))];
+    if(!parts.length)return;
+    showUndo(tr('Saved')+' · '+parts.slice(0,2).join(' · ')+(parts.length>2?' · +'+(parts.length-2):''),restoreLatest);
+  }
+  function showUndo(text,action){
+    undo={text,action};paintUndo();clearTimeout(undoTimer);
+    undoTimer=setTimeout(()=>{undo=null;paintUndo();},20000);
+  }
+  function paintUndo(){
+    let bar=root.querySelector('.hub-undo');
+    if(!undo||state.view!=='settings'){bar?.remove();return;}
+    if(!bar){bar=node('div','hub-undo');bar.setAttribute('role','status');root.append(bar);}
+    const act=button('Undo',async()=>{const action=undo?.action;undo=null;paintUndo();if(action)await action();},'hub-undo-action');
+    const close=button('✕',()=>{undo=null;paintUndo();},'hub-undo-close');close.setAttribute('aria-label',tr('Close'));
+    bar.replaceChildren(node('span','hub-undo-text',undo.text),act,close);
+  }
+  async function loadHistory(who=owner()){
+    if(history)return history;
+    if(!historyLoading)historyLoading=request(who,'settings/history').then(result=>{history=result.changes;return history;}).finally(()=>{historyLoading=null;});
+    return historyLoading;
+  }
+  async function restoreChange(seq,who=owner()){
+    data=await request(who,'settings/restore',{seq,revision:data.revision});draft={...data.wizard};editing=false;history=null;
+    await refresh(who);if(current(who)&&state.view==='settings')render();toast(tr('Change undone.'));
+  }
+  async function restoreLatest(){
+    const who=owner(),rows=await loadHistory(who);
+    if(rows?.length)await restoreChange(rows[0].seq,who);
+  }
+  function changeText(row){
+    const parts=row.changes.map(c=>fieldLabel(c.key)+': '+describe(c.before)+' → '+describe(c.after));
+    if('goal_after' in row)parts.unshift(fieldLabel('goal')+': '+(row.goal_before?label(row.goal_before):tr('Not chosen'))+' → '+(row.goal_after?label(row.goal_after):tr('Not chosen')));
+    return parts.join(' · ');
+  }
+  function historyCard(box){
+    const card=node('section','hub-history');card.hidden=true;box.append(card);
+    loadHistory().then(rows=>{
+      if(!card.isConnected||!rows?.length)return;
+      card.hidden=false;card.replaceChildren(node('h2','',tr('Recent changes')));
+      const list=node('ol','hub-history-list');
+      for(const row of rows.slice(0,5)){
+        const item=node('li','hub-history-row'),time=node('time','hint',new Date(row.at).toLocaleString(prefs.language,{timeZone:prefs.timezone,dateStyle:'medium',timeStyle:'short'}));
+        time.dateTime=row.at;
+        item.append(node('span','hub-history-text',(row.restored?tr('Undo of an earlier change')+' · ':'')+changeText(row)),time,button('Undo',()=>restoreChange(row.seq),'text-link'));
+        list.append(item);
+      }
+      card.append(list);
+    }).catch(()=>{});
+  }
   async function edit(key,value,who=owner()){
-    requireOwner(who);const revision=data.revision,values={...data.values};
+    requireOwner(who);const revision=data.revision,values={...data.values},goalBefore=data.goal;
     try{
       let allow_outside=false,disable_dependents=false;
       if(['timestamps','drand','notifications','replica'].includes(key)&&value&&!values.outside){
@@ -148,33 +212,40 @@ export function createSettingsHub(ctx) {
       if(key==='outside'&&!value&&(values.timestamps||values.drand||values.notifications||values.replica)){
         disable_dependents=await confirm(who,tr('Turn off the dependent features too?'));if(!disable_dependents)return;
       }
-      data=await request(who,'settings/edit',{key,value,allow_outside,disable_dependents,revision});await refresh(who);
+      data=await request(who,'settings/edit',{key,value,allow_outside,disable_dependents,revision});saved(values,goalBefore);await refresh(who);
     }finally{if(current(who)&&state.view==='settings')render();}
   }
   function preferencesForm(box,{language=true}={}){
     if(language)box.append(select('Language',Object.entries(ctx.languages),prefs.language,async value=>{const who=owner();await savePreferences({language:value},who);requireOwner(who);await ctx.changeLanguage(value);}));
-    box.append(select('Theme',[['system','System theme'],['light','Light theme'],['dark','Dark theme']],prefs.theme,value=>savePreferences({theme:value})));
-    const zones=[...new Set([prefs.timezone,Intl.DateTimeFormat().resolvedOptions().timeZone,'UTC',...(Intl.supportedValuesOf?.('timeZone')||[])])];
-    box.append(select('Time zone',zones.map(x=>[x,x]),prefs.timezone,value=>savePreferences({timezone:value})));
+    const remember=(patch,text)=>{const before=Object.fromEntries(Object.keys(patch).map(k=>[k,prefs[k]]));
+      return savePreferences(patch).then(()=>{if(state.view==='settings')showUndo(tr('Saved')+' · '+text,async()=>{await savePreferences(before);if(state.view==='settings')render();});});};
+    const themes=[['system','System theme'],['light','Light theme'],['dark','Dark theme']];
+    const theme=node('div','hub-choices');theme.setAttribute('role','group');theme.setAttribute('aria-label',tr('Theme'));
+    for(const [value,name] of themes){const b=button(name,async()=>{await remember({theme:value},tr(name));render();},'hub-choice');b.setAttribute('aria-pressed',String(prefs.theme===value));theme.append(b);}
+    const themeLabel=node('div','hub-label');themeLabel.append(node('span','',tr('Theme')),theme);box.append(themeLabel);
+    const device=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
+    const zones=[...new Set([prefs.timezone,device,'UTC',...(Intl.supportedValuesOf?.('timeZone')||[])])];
+    box.append(select('Time zone',zones.map(x=>[x,x===device?x+' · '+tr('this device'):x]),prefs.timezone,value=>remember({timezone:value},value)));
   }
   function fieldRow(f){
     const row=node('div','hub-field');row.dataset.level=f.level;row.dataset.setting=f.key;
-    const heading=node('div');heading.append(node('strong','',tr(f.label)));
-    const explanations={timestamps:'Independent services confirm when records existed.',drand:'Adds a public randomness beacon to records so their recording time can be checked.',outside:'Timestamps, notifications and off-site copies contact services outside Telegram.',files:'Files larger than the selected limit are recorded without downloading their contents.'};
-    if(prefs.level==='standard'&&explanations[f.key]){
-      const help=node('details','setting-help');help.append(node('summary','', '?'),message(explanations[f.key]));
-      help.querySelector('summary').setAttribute('aria-label',tr('Explain this setting'));heading.append(help);
-    }
+    const text=node('div','hub-field-text');text.append(node('strong','',tr(f.label)));
+    if(hints[f.key])text.append(node('span','hint',tr(hints[f.key])));
     const mark=inheritMark(f.key);
-    if(mark)heading.append(mark);else if(f.modified)heading.append(node('span','modified-tag',tr('Changed by you')));
-    row.append(heading);
+    if(mark)text.append(mark);else if(f.modified)text.append(node('span','modified-tag',tr('Changed by you')));
+    row.append(text);
     if(f.type==='bool'){
-      const control=node('input');control.type='checkbox';control.checked=f.value;control.setAttribute('aria-label',tr(f.label));
-      control.onchange=()=>run(()=>edit(f.key,control.checked),control);row.append(control);
+      const wrap=node('label','hub-switch'),control=node('input');control.type='checkbox';control.setAttribute('role','switch');control.checked=f.value;
+      control.setAttribute('aria-label',tr(f.label));control.onchange=()=>run(()=>edit(f.key,control.checked),control);
+      wrap.append(control,node('span','hub-switch-track'));row.append(wrap);
+    }else if(f.key==='files'){
+      row.classList.add('hub-field-wide');
+      const group=node('div','hub-choices');group.setAttribute('role','group');group.setAttribute('aria-label',tr(f.label));
+      for(const value of ['photos','short_media','all']){const b=button(label(value),()=>edit(f.key,value),'hub-choice');b.setAttribute('aria-pressed',String(f.value===value));group.append(b);}
+      row.append(group);
+      if(f.value==='custom')row.append(message('Custom file limits are set in Parameters. Pick an option to replace them.','hint hub-field-note'));
     }else{
-      const values=f.key==='files'?[...(f.value==='custom'?['custom']:[]),'photos','short_media','all']:['hide','auto'];
-      const field=select(f.label,values.map(v=>[v,label(v)]),f.value,v=>edit(f.key,v));
-      if(f.value==='custom')field.querySelector('option').disabled=true;row.append(field);
+      const field=select(f.label,['hide','auto'].map(v=>[v,label(v)]),f.value,v=>edit(f.key,v));row.append(field);
     }
     if(f.modified&&!mark)row.append(button('Restore goal value',async()=>{
       const who=owner(),plan=await request(who,'settings/goal/preview',{goal:data.goal});await edit(f.key,plan.values[f.key],who);
@@ -208,6 +279,48 @@ export function createSettingsHub(ctx) {
     const who=owner();data=await request(who,'settings');draft={...data.wizard};editing=false;scopeDirty=false;section=null;render();ctx.record?.();
     root.querySelector('.hub-summary[data-section]')?.focus({preventScroll:true});
   }
+  function summaryRows(){
+    const inheritance=data.inheritance,connected=fresh(data.connection);
+    const rows=[['telegram','Telegram account',signedIn()?tr('Connected'):tr('Not connected'),signedIn()?'ok':'warn','👤'],
+      ['chats','Which chats?',label(data.wizard.scope||'account')+(data.wizard.scope==='selected'?' · '+(data.wizard.chat_ids?.length||0):''),'ok','💬'],
+      ['connection','Connection',label(data.connection.mode)+(connected?' · '+tr('Working · {n} ms',{n:data.connection.check.latency_ms}):''),connected?'ok':'warn','🛡'],
+      ['appearance','Language, time and appearance',ctx.languages[prefs.language]+' · '+prefs.timezone+' · '+label(prefs.level),'none','🌐'],
+      ['goal','Goal',data.goal?label(data.goal):tr('Not chosen'),'none','🎯'],
+      ['collection','Collection and files',label(data.values.files),'none','📁'],
+      ['protection','Record protection',tr(data.values.timestamps?'On':'Off'),data.values.timestamps?'ok':'off','🔏'],
+      ['notifications','Notifications and off-site copy',tr(data.values.notifications?'On':'Off'),data.values.notifications?'ok':'off','🔔'],
+      ['level','Interface level',label(prefs.level),'none','🎚']];
+    if(inheritance){
+      const keys=Object.values(inheritance.keys),own=keys.filter(k=>k.source==='own').length;
+      rows.push(['group','Shared with the group',inheritance.group.label+' · '+(own?ctx.trn('{n} own value','{n} own values',own):tr('follows the group')),'none','🔗']);
+    }
+    return rows;
+  }
+  function summaryCard(box,[id,name,summary,tone,icon]){
+    const b=button('',()=>openSection(id),'hub-summary');b.dataset.section=id;b.dataset.tone=tone;
+    const top=node('span','hub-summary-top');top.append(node('span','hub-summary-icon',icon),node('strong','',tr(name)));
+    const line=node('span','hub-summary-value');if(tone!=='none')line.append(node('span','hub-dot'));line.append(document.createTextNode(summary));
+    b.append(top,line,node('span','hub-arrow','→'));box.append(b);
+  }
+  function autoCard(box){
+    const modified=data.fields.filter(f=>f.modified);
+    const card=node('section','hub-auto'+(modified.length?' changed':''));
+    const body=node('div','hub-auto-body');
+    body.append(node('strong','',tr(modified.length?'Some settings differ from the recommended ones':'Recommended settings are on')),
+      message(data.goal?tr('Chosen for “{goal}”. Change only what you need: every change can be undone.',{goal:label(data.goal)})
+        :tr('Safe defaults are in use. Change only what you need: every change can be undone.')));
+    const chips=node('div','hub-chips');
+    for(const [key,value] of [['files',label(data.values.files)],['timestamps',tr(data.values.timestamps?'On':'Off')],
+      ['notifications',tr(data.values.notifications?'On':'Off')],['outside',tr(data.values.outside?'On':'Off')]])
+      chips.append(node('span','hub-chip',fieldLabel(key)+': '+value));
+    body.append(chips);
+    const actions=node('div','hub-actions');
+    if(modified.length&&data.goal)actions.append(button('Return to recommended',()=>applyGoal(data.goal,{quiet:true}).then(()=>render()),'secondary'));
+    actions.append(button('Undo last change',restoreLatest,'quiet hub-undo-last'));
+    body.append(actions);card.append(node('span','hub-auto-icon',modified.length?'✏️':'✨'),body);box.append(card);
+    loadHistory().then(rows=>{const last=card.querySelector('.hub-undo-last');if(last)last.hidden=!rows?.length;}).catch(()=>{});
+    card.querySelector('.hub-undo-last').hidden=!history?.length;
+  }
   function render(){
     restoreMoved();if(!data||!prefs)return;
     if(groupScope&&groupView.data){groupView.render(root);return;}
@@ -224,18 +337,25 @@ export function createSettingsHub(ctx) {
     const search=node('input','hub-search');search.type='search';search.placeholder=tr('Search all settings, including hidden ones');search.setAttribute('aria-label',search.placeholder);search.value=query;
     search.oninput=()=>{query=search.value;renderResults(results);};root.append(search);
     const results=node('div','hub-results');root.append(results);renderResults(results);
-    const overview=node('div','hub-grid');overview.hidden=!!query||!!section;root.append(overview);
-    const summaries=[['appearance','Language, time and appearance',ctx.languages[prefs.language]+' · '+prefs.timezone],['level','Interface level',label(prefs.level)],
-      ['goal','Goal',data.goal?label(data.goal):tr('Choose a goal')],['connection','Connection',label(data.connection.mode)],
-      ['telegram','Telegram account',signedIn()?tr('Connected'):tr('Not connected')],
-      ['chats','Which chats?',label(data.wizard.scope||'account')],['collection','Collection and files',label(data.values.files)],
-      ['protection','Record protection',tr(data.values.timestamps?'On':'Off')],['notifications','Notifications and off-site copy',tr(data.values.notifications?'On':'Off')]];
-    if(inheritance){
-      const keys=Object.values(inheritance.keys),own=keys.filter(k=>k.source==='own').length;
-      summaries.push(['group','Shared with the group',inheritance.group.label+' · '+(own?ctx.trn('{n} own value','{n} own values',own):tr('follows the group'))]);
+    const summaries=summaryRows();
+    const overview=node('div','hub-overview');overview.hidden=!!query||!!section;root.append(overview);
+    if(!section){
+      autoCard(overview);
+      const main=node('div','hub-grid hub-main');overview.append(main);
+      for(const row of summaries.filter(r=>mainSections.includes(r[0])))summaryCard(main,row);
+      historyCard(overview);
+      const advanced=node('details','hub-advanced');advanced.open=advancedOpen;advanced.ontoggle=()=>{advancedOpen=advanced.open;};
+      advanced.append(node('summary','',tr('Advanced settings')));
+      const grid=node('div','hub-grid hub-secondary');advanced.append(grid);
+      for(const row of summaries.filter(r=>!mainSections.includes(r[0])&&r[0]!=='level'))summaryCard(grid,row);
+      const tools=node('div','hub-tools');tools.append(node('h3','',tr('More settings and expert tools')));
+      for(const [view,text] of [['sources','Recording rules'],['parameters','Parameters'],['access','Access'],['integrations','Integrations / MCP'],['system-log','System log'],['sealed','GitHub Actions']]){
+        const b=button(text,()=>openAdvanced(view),'quiet');b.dataset.level=navLevels[view];tools.append(b);
+      }
+      tools.append(button('Open first setup',async()=>{await saveDraft({step:1});await navigate('first-run');},'text-link'));
+      advanced.append(tools);overview.append(advanced);
+      if(data.recommendations.length)overview.append(message('Recommended: an off-site copy, a witness bot and a code check.','notice'));
     }
-    for(const [id,name,summary] of summaries){const b=button('',()=>openSection(id),'hub-summary');b.dataset.section=id;
-      b.append(node('strong','',tr(name)),node('span','hint',summary),node('span','hub-arrow','→'));overview.append(b);}
     const detail=node('section','hub-detail');detail.hidden=!section;root.append(detail);
     if(section){
       const bar=node('div','hub-detail-bar'), close=button('✕',closeSection,'icon-btn hub-close');
@@ -244,7 +364,11 @@ export function createSettingsHub(ctx) {
       bar.append(back,close);detail.append(bar);
       title(detail,summaries.find(s=>s[0]===section)?.[1]||'Settings');
       if(section==='appearance')preferencesForm(detail);
-      if(section==='level')cards(detail,levels,prefs.level,async level=>{await savePreferences({level});render();});
+      if(section==='appearance'||section==='level'){
+        if(section==='appearance')detail.append(node('h3','hub-subtitle',tr('Interface level')));
+        cards(detail,levels,prefs.level,async level=>{const before=prefs.level;await savePreferences({level});render();
+          showUndo(tr('Saved')+' · '+label(level),async()=>{await savePreferences({level:before});render();});});
+      }
       if(section==='group'&&inheritance){
         const keys=Object.keys(inheritance.keys).filter(k=>k!=='goal'&&!data.fields.some(f=>f.key===k));
         detail.append(message(keys.length?'Settings the group shares besides those in the other sections:':'The group shares only settings shown in the other sections.'));
@@ -256,33 +380,30 @@ export function createSettingsHub(ctx) {
       }
       if(section==='goal'){
         const goalMark=inheritMark('goal');if(goalMark)detail.append(goalMark);
-        const keep=node('input');keep.type='checkbox';const keepLabel=node('label','check-label');keepLabel.append(keep,document.createTextNode(tr('Keep my manual changes')));detail.append(keepLabel);
-        cards(detail,goals,data.goal,async goal=>{await applyGoal(goal,{keep:keep.checked});render();});
+        detail.append(message('A goal sets files, timestamps and notifications at once. You can undo it right after.'));
+        cards(detail,goals,data.goal,async goal=>{if(goal===data.goal)return;await applyGoal(goal,{quiet:true});render();});
       }
       if(section==='connection')connectionForm(detail,false);
       if(section==='telegram')move(ctx.authCard(),detail);
       if(section==='chats'){detail.append(message('Choose all chats, individual chats or a Telegram folder.'));
         const box=node('div','hub-chats');detail.append(box);void chatsForm(box,owner(),true).catch(e=>{if(e.name!=='StaleView')box.append(message(e.message,'notice warning'));});}
-      const fields=data.fields.filter(f=>f.section===section&&f.key!=='ip');
+      const fields=section==='connection'?[]:data.fields.filter(f=>f.section===section);
       const hidden=fields.filter(f=>rank[f.level]>rank[prefs.level]&&!reveal.has(section));
       for(const f of fields.filter(f=>!hidden.includes(f)))detail.append(fieldRow(f));
-      if(hidden.length)detail.append(button(tr('Show {n} more settings',{n:hidden.length}),()=>{reveal.add(section);render();},'text-link'));
+      if(hidden.length){const more=node('details','hub-more-options');more.append(node('summary','',tr('Show {n} more settings',{n:hidden.length})));
+        for(const f of hidden)more.append(fieldRow(f));detail.append(more);}
       if(section==='notifications'){
         if(data.needs_notification_destination)detail.append(message('Notifications are enabled. Add a destination to receive them.','notice warning'));
-        detail.append(button('Notification destinations',()=>openForm('alerts-form')),button('Off-site copy',()=>openForm('replica-form')));
+        const actions=node('div','hub-actions');actions.append(button('Notification destinations',()=>openForm('alerts-form')),button('Off-site copy',()=>openForm('replica-form')));detail.append(actions);
       }
-      if(section==='protection')detail.append(button('Advanced protection settings',()=>openForm('evidence-form')));
+      if(section==='protection'){const actions=node('div','hub-actions');actions.append(button('Advanced protection settings',()=>openForm('evidence-form')));detail.append(actions);}
       if(data.collection_problem&&section==='collection')detail.append(message('Collection could not start. Check the connection and selected chats.','notice warning'));
       if(data.outside_problem&&['connection','protection','notifications'].includes(section))detail.append(message('External services need a working SOCKS5 or WARP route.','notice warning'));
     }
-    const more=node('details','hub-more');more.hidden=!!section;more.append(node('summary','',tr('More settings and expert tools')));
-    for(const [view,text] of [['sources','Recording rules'],['parameters','Parameters'],['access','Access'],['integrations','Integrations / MCP'],['system-log','System log'],['sealed','GitHub Actions']]){
-      const b=button(text,()=>openAdvanced(view));b.dataset.level=navLevels[view];more.append(b);
-    }root.append(more,button('Open first setup',async()=>{await saveDraft({step:1});await navigate('first-run');},'text-link'));
-    if(data.recommendations.length)root.append(message('Recommended: an off-site copy, a witness bot and a code check.','notice'));
+    paintUndo();
   }
   function renderResults(box){
-    box.replaceChildren();root.querySelector('.hub-grid')?.toggleAttribute('hidden',!!query||!!section);
+    box.replaceChildren();root.querySelector('.hub-overview')?.toggleAttribute('hidden',!!query||!!section);
     if(!query.trim())return;
     const q=query.trim().toLocaleLowerCase();
     const all=[...data.fields,...data.parameters,...[...ctx.catalog()].map(f=>({...f,label:tr(f.label)}))];
@@ -332,21 +453,25 @@ export function createSettingsHub(ctx) {
       if(first)await saveDraft({step:4},who);requireOwner(who);updateRoutes();
       if(mode==='auto'||mode==='direct')await checkConnection(false,who);
     });
+      const extra=first?routeBox:node('details','hub-more-options');
+      if(!first){extra.append(node('summary','',tr('Advanced connection options')));extra.open=moreConnection;extra.ontoggle=()=>{moreConnection=extra.open;};}
       const protection=select('Can Telegram see this server’s address?',[['hide','No, hide it'],['allow','Only if nothing else works']],draft.allow_direct?'allow':'hide',async v=>{
         draft.allow_direct=v==='allow';draft.unchecked=false;routeDirty=true;if(!draft.allow_direct&&draft.route==='direct')draft.route='auto';
         if(first)await saveDraft({step:4});updateRoutes();updateNext();
-      });routeBox.append(protection);
+      });extra.append(protection);
       if(!first&&data.fields.find(f=>f.key==='ip')?.modified){
-        routeBox.append(message('Changed by you','modified-tag'),button('Restore goal value',async()=>{
+        extra.append(message('Changed by you','modified-tag'),button('Restore goal value',async()=>{
           const who=owner(),plan=await request(who,'settings/goal/preview',{goal:data.goal});editing=false;await edit('ip',plan.values.ip,who);
         },'text-link'));
       }
+      if(!first){for(const f of data.fields.filter(f=>f.section==='connection'&&f.key!=='ip'))extra.append(fieldRow(f));}
       if(draft.route==='proxy'){
         const input=node('input');input.type='password';input.id='hub-proxy';input.autocomplete='off';input.placeholder='tg://proxy, socks5://, http(s)://';input.setAttribute('aria-label',tr('Proxy address'));routeBox.append(input);
         input.oninput=()=>{routeDirty=true;updateNext();};
       }
       if(['auto','warp'].includes(draft.route))routeBox.append(message('Auto and WARP can download verified helpers and register this server with Cloudflare.'));
       routeBox.append(button(draft.route==='warp'?'Enable WARP':'Check connection',()=>checkConnection(draft.route==='warp')));
+      if(!first)routeBox.append(extra);
     }
     updateRoutes();
     const status=node('div','connection-result');status.id='hub-connection-result';status.setAttribute('role','status');box.append(status);
@@ -400,7 +525,7 @@ export function createSettingsHub(ctx) {
     box.append(message(ok?tr('Working · {n} ms',{n:connection.check.latency_ms}):'Connection has not been verified.'));
     if(!ok){
       if(connection?.pool?.listed&&connection.pool.healthy===0&&connection.pool.probed_at){openOptions();box.className='connection-result failed';box.prepend(message('No public proxy answers. Try WARP or your own proxy.'));}
-      box.append(button('Try WARP',async()=>{draft.route='warp';if(state.view==='first-run')await renderWizard();else render();}),button('Check again',checkConnection));
+      if(state.view==='first-run')box.append(button('Try WARP',async()=>{draft.route='warp';await renderWizard();}),button('Check again',checkConnection));
     }
   }
   function updateIndicator(connection){

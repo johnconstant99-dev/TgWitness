@@ -8924,5 +8924,25 @@
     "other": "{n} konta korzystają z publicznych serwerów MTProxy: adres się zmienia, połączenie się zrywa i wiadomości mogą przepaść."
   },
   "Move all accounts to WARP": "Przenieś wszystkie konta na WARP",
-  "Move to WARP": "Przenieś na WARP"
+  "Move to WARP": "Przenieś na WARP",
+  "Keep recording new messages and their changes after setup.": "Po skonfigurowaniu narzędzia kontynuuj rejestrowanie nowych wiadomości i ich zmian.",
+  "Larger files are recorded without downloading their contents.": "Pliki o większym rozmiarze są rejestrowane bez pobierania ich zawartości.",
+  "Sends a message when recording stops or needs attention.": "Wysyła komunikat, gdy nagrywanie się zatrzymuje lub wymaga uwagi.",
+  "Keeps a copy of the journal in storage you choose.": "Przechowuje kopię dziennika w wybranej przez Ciebie lokalizacji.",
+  "Undo": "Cofnij",
+  "Change undone.": "Czynność cofnięta.",
+  "Recent changes": "Ostatnie zmiany",
+  "Not chosen": "Nie wybrano",
+  "Some settings differ from the recommended ones": "Niektóre ustawienia odbiegają od zalecanych",
+  "Recommended settings are on": "Zalecane ustawienia są włączone",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "Wybrano dla „{goal}”. Zmieniaj tylko to, co konieczne: każdą zmianę można cofnąć.",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "Stosowane są bezpieczne ustawienia domyślne. Zmieniaj tylko to, co jest konieczne: każdą zmianę można cofnąć.",
+  "Return to recommended": "Powrót do zalecanych",
+  "Undo last change": "Cofnij ostatnią zmianę",
+  "Advanced settings": "Ustawienia zaawansowane",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "Cel pozwala jednorazowo ustawić pliki, sygnatury czasowe i powiadomienia. Można to cofnąć zaraz po wykonaniu.",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "Niestandardowe limity plików ustawia się w sekcji „Parametry”. Wybierz opcję, aby je zastąpić.",
+  "Advanced connection options": "Zaawansowane opcje połączenia",
+  "this device": "to urządzenie",
+  "Undo of an earlier change": "Cofnięcie wcześniejszej zmiany"
 }

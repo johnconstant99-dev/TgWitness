@@ -8839,5 +8839,25 @@
     "other": "{n} account usano server MTProxy pubblici: l’indirizzo cambia e la connessione cade, quindi alcuni messaggi possono andare persi."
   },
   "Move all accounts to WARP": "Passa tutti gli account a WARP",
-  "Move to WARP": "Passa a WARP"
+  "Move to WARP": "Passa a WARP",
+  "Keep recording new messages and their changes after setup.": "Continua a registrare i nuovi messaggi e le relative modifiche dopo la configurazione.",
+  "Larger files are recorded without downloading their contents.": "I file di grandi dimensioni vengono registrati senza scaricarne il contenuto.",
+  "Sends a message when recording stops or needs attention.": "Invia un messaggio quando la registrazione si interrompe o richiede attenzione.",
+  "Keeps a copy of the journal in storage you choose.": "Conserva una copia del registro nel supporto di archiviazione da te scelto.",
+  "Undo": "Annulla",
+  "Change undone.": "Modifica annullata.",
+  "Recent changes": "Modifiche recenti",
+  "Not chosen": "Non selezionato",
+  "Some settings differ from the recommended ones": "Alcune impostazioni differiscono da quelle consigliate",
+  "Recommended settings are on": "Le impostazioni consigliate sono attive",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "Selezionato per “{goal}”. Modifica solo ciò che ti serve: ogni modifica può essere annullata.",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "Sono in uso impostazioni predefinite sicure. Modifica solo ciò che è necessario: ogni modifica può essere annullata.",
+  "Return to recommended": "Torna ai consigliati",
+  "Undo last change": "Annulla l’ultima modifica",
+  "Advanced settings": "Impostazioni avanzate",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "Un obiettivo imposta contemporaneamente file, timestamp e notifiche. È possibile annullarlo subito dopo.",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "I limiti personalizzati per i file vengono impostati in \"Parametri\". Scegli un'opzione per sostituirli.",
+  "Advanced connection options": "Opzioni di connessione avanzate",
+  "this device": "questo dispositivo",
+  "Undo of an earlier change": "Annullamento di una modifica precedente"
 }

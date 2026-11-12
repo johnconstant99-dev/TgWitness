@@ -8839,5 +8839,25 @@
     "other": "{n} comptes utilisent des serveurs MTProxy publics : leur adresse change et la connexion se coupe, des messages peuvent manquer."
   },
   "Move all accounts to WARP": "Passer tous les comptes sur WARP",
-  "Move to WARP": "Passer sur WARP"
+  "Move to WARP": "Passer sur WARP",
+  "Keep recording new messages and their changes after setup.": "Continuez à enregistrer les nouveaux messages et leurs modifications après la configuration.",
+  "Larger files are recorded without downloading their contents.": "Les fichiers volumineux sont enregistrés sans que leur contenu ne soit téléchargé.",
+  "Sends a message when recording stops or needs attention.": "Envoie un message lorsque l'enregistrement s'arrête ou nécessite une intervention.",
+  "Keeps a copy of the journal in storage you choose.": "Conserve une copie du journal sur le support de stockage de votre choix.",
+  "Undo": "Annuler",
+  "Change undone.": "Modification annulée.",
+  "Recent changes": "Modifications récentes",
+  "Not chosen": "Non sélectionné",
+  "Some settings differ from the recommended ones": "Certains paramètres diffèrent de ceux recommandés",
+  "Recommended settings are on": "Les paramètres recommandés sont activés",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "Choisi pour « {goal} ». Ne modifiez que ce qui est nécessaire : chaque modification peut être annulée.",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "Des paramètres par défaut sécurisés sont utilisés. Ne modifiez que ce qui est nécessaire : chaque modification peut être annulée.",
+  "Return to recommended": "Retour aux recommandations",
+  "Undo last change": "Annuler la dernière modification",
+  "Advanced settings": "Paramètres avancés",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "Un objectif définit simultanément les fichiers, les horodatages et les notifications. Vous pouvez l'annuler immédiatement après.",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "Les limites de taille de fichier personnalisées sont définies dans les « Paramètres ». Sélectionnez une option pour les remplacer.",
+  "Advanced connection options": "Options de connexion avancées",
+  "this device": "cet appareil",
+  "Undo of an earlier change": "Annulation d’une modification antérieure"
 }

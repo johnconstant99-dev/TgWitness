@@ -8924,5 +8924,25 @@
     "other": "{n} акаунта працюють через публічні MTProxy: адреса змінюється, зв’язок рветься, повідомлення можуть загубитися."
   },
   "Move all accounts to WARP": "Перевести всі акаунти на WARP",
-  "Move to WARP": "Перевести на WARP"
+  "Move to WARP": "Перевести на WARP",
+  "Keep recording new messages and their changes after setup.": "Після налаштування продовжуйте записувати нові повідомлення та їхні зміни.",
+  "Larger files are recorded without downloading their contents.": "Великі файли записуються без завантаження їхнього вмісту.",
+  "Sends a message when recording stops or needs attention.": "Надсилає повідомлення, коли запис зупиняється або потребує уваги.",
+  "Keeps a copy of the journal in storage you choose.": "Зберігає копію журналу у вибраному вами сховищі.",
+  "Undo": "Скасувати",
+  "Change undone.": "Зміна скасована.",
+  "Recent changes": "Останні зміни",
+  "Not chosen": "Не обрано",
+  "Some settings differ from the recommended ones": "Деякі налаштування відрізняються від рекомендованих",
+  "Recommended settings are on": "Рекомендовані налаштування увімкнені",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "Обрано для «{goal}». Змінюйте лише те, що потрібно: кожну зміну можна скасувати.",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "Використовуються безпечні налаштування за замовчуванням. Змінюйте лише те, що потрібно: кожну зміну можна скасувати.",
+  "Return to recommended": "Повернутися до рекомендованих",
+  "Undo last change": "Скасувати останню зміну",
+  "Advanced settings": "Розширені налаштування",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "Завдання одночасно встановлює файли, мітки часу та сповіщення. Його можна скасувати одразу після створення.",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "Налаштування обмежень розміру файлів встановлюються в розділі «Параметри». Оберіть опцію, щоб змінити їх.",
+  "Advanced connection options": "Розширені параметри підключення",
+  "this device": "цей пристрій",
+  "Undo of an earlier change": "Скасування попередньої зміни"
 }

@@ -8839,5 +8839,25 @@
     "other": "{n} contas usam servidores MTProxy públicos: o endereço muda e a conexão cai, então mensagens podem se perder."
   },
   "Move all accounts to WARP": "Mover todas as contas para o WARP",
-  "Move to WARP": "Mover para o WARP"
+  "Move to WARP": "Mover para o WARP",
+  "Keep recording new messages and their changes after setup.": "Continue registrando novas mensagens e suas alterações após a configuração.",
+  "Larger files are recorded without downloading their contents.": "Arquivos maiores são registrados sem que seu conteúdo seja baixado.",
+  "Sends a message when recording stops or needs attention.": "Envia uma mensagem quando a gravação é interrompida ou requer atenção.",
+  "Keeps a copy of the journal in storage you choose.": "Mantém uma cópia do diário no armazenamento de sua escolha.",
+  "Undo": "Desfazer",
+  "Change undone.": "Alteração desfeita.",
+  "Recent changes": "Alterações recentes",
+  "Not chosen": "Não selecionado",
+  "Some settings differ from the recommended ones": "Algumas configurações diferem das recomendadas",
+  "Recommended settings are on": "As configurações recomendadas estão ativadas",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "Escolhido para “{goal}”. Altere apenas o que for necessário: toda alteração pode ser desfeita.",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "Estão em uso configurações padrão seguras. Altere apenas o que for necessário: toda alteração pode ser desfeita.",
+  "Return to recommended": "Voltar às recomendações",
+  "Undo last change": "Desfazer a última alteração",
+  "Advanced settings": "Configurações avançadas",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "Uma meta define arquivos, carimbos de data/hora e notificações de uma só vez. Você pode desfazer essa ação imediatamente depois.",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "Os limites personalizados de arquivos são definidos em “Parâmetros”. Escolha uma opção para substituí-los.",
+  "Advanced connection options": "Opções avançadas de conexão",
+  "this device": "este dispositivo",
+  "Undo of an earlier change": "Desfazer uma alteração anterior"
 }

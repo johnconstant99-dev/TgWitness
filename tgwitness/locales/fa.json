@@ -8832,5 +8832,25 @@
     "other": "{n} حساب از سرورهای عمومی MTProxy استفاده می‌کنند: نشانی عوض می‌شود و اتصال قطع می‌شود، ممکن است پیام‌ها از دست بروند."
   },
   "Move all accounts to WARP": "انتقال همهٔ حساب‌ها به WARP",
-  "Move to WARP": "انتقال به WARP"
+  "Move to WARP": "انتقال به WARP",
+  "Keep recording new messages and their changes after setup.": "پس از راه‌اندازی، ضبط پیام‌های جدید و تغییرات آن‌ها را ادامه دهید.",
+  "Larger files are recorded without downloading their contents.": "فایل‌های بزرگ‌تر بدون دانلود محتوای آن‌ها ضبط می‌شوند.",
+  "Sends a message when recording stops or needs attention.": "هنگام توقف ضبط یا نیاز به توجه، پیام ارسال می‌کند.",
+  "Keeps a copy of the journal in storage you choose.": "یک نسخه از دفترچه را در ذخیره‌ای که شما انتخاب می‌کنید نگه می‌دارد.",
+  "Undo": "ابطال",
+  "Change undone.": "تغییر انجام‌نشده.",
+  "Recent changes": "تغییرات اخیر",
+  "Not chosen": "انتخاب نشده",
+  "Some settings differ from the recommended ones": "برخی تنظیمات با موارد توصیه‌شده متفاوت هستند",
+  "Recommended settings are on": "تنظیمات پیشنهادی روشن هستند",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "برای «{goal}» انتخاب شده است. فقط آنچه لازم است را تغییر دهید: هر تغییری قابل بازگشت است.",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "تنظیمات پیش‌فرض امن در حال استفاده هستند. فقط آنچه را که نیاز دارید تغییر دهید: هر تغییری قابل بازگشت است.",
+  "Return to recommended": "بازگشت به موارد پیشنهادی",
+  "Undo last change": "لغو آخرین تغییر",
+  "Advanced settings": "تنظیمات پیشرفته",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "یک هدف به‌طور هم‌زمان فایل‌ها، زمان‌مهرها و اعلان‌ها را تنظیم می‌کند. می‌توانید بلافاصله بعد از آن آن را لغو کنید.",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "محدودیت‌های سفارشی فایل‌ها در بخش پارامترها تنظیم می‌شوند. برای جایگزینی آن‌ها، یک گزینه را انتخاب کنید.",
+  "Advanced connection options": "گزینه‌های پیشرفته اتصال",
+  "this device": "این دستگاه",
+  "Undo of an earlier change": "ابطال یک تغییر قبلی"
 }

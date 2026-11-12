@@ -8786,5 +8786,25 @@
     "other": "บัญชี {n} บัญชีใช้เซิร์ฟเวอร์ MTProxy สาธารณะ ที่อยู่จะเปลี่ยนและการเชื่อมต่อขาด อาจพลาดข้อความได้"
   },
   "Move all accounts to WARP": "ย้ายทุกบัญชีไปใช้ WARP",
-  "Move to WARP": "ย้ายไปใช้ WARP"
+  "Move to WARP": "ย้ายไปใช้ WARP",
+  "Keep recording new messages and their changes after setup.": "โปรดดำเนินการบันทึกข้อความใหม่และเปลี่ยนแปลงที่เกิดขึ้นอย่างต่อเนื่องหลังจากตั้งค่าเสร็จสิ้น",
+  "Larger files are recorded without downloading their contents.": "ไฟล์ที่มีขนาดใหญ่จะถูกบันทึกโดยไม่ดาวน์โหลดเนื้อหาภายใน",
+  "Sends a message when recording stops or needs attention.": "ส่งข้อความเมื่อการบันทึกหยุดลงหรือต้องการความสนใจ",
+  "Keeps a copy of the journal in storage you choose.": "เก็บสำเนาของบันทึกไว้ในพื้นที่จัดเก็บที่คุณเลือก",
+  "Undo": "ยกเลิก",
+  "Change undone.": "การแก้ไขถูกยกเลิก",
+  "Recent changes": "การเปลี่ยนแปลงล่าสุด",
+  "Not chosen": "ไม่ถูกเลือก",
+  "Some settings differ from the recommended ones": "การตั้งค่าบางอย่างอาจแตกต่างจากที่แนะนำ",
+  "Recommended settings are on": "การตั้งค่าที่แนะนำได้เปิดไว้แล้ว",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "ถูกเลือกสำหรับ “{goal}” เปลี่ยนแปลงเฉพาะส่วนที่จำเป็นเท่านั้น: การเปลี่ยนแปลงทุกครั้งสามารถย้อนกลับได้",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "ระบบใช้ค่าเริ่มต้นที่ปลอดภัยอยู่แล้ว โปรดปรับเปลี่ยนเฉพาะส่วนที่จำเป็นเท่านั้น: ทุกการปรับเปลี่ยนสามารถย้อนกลับได้",
+  "Return to recommended": "กลับไปยังหน้าแนะนำ",
+  "Undo last change": "ยกเลิกการเปลี่ยนแปลงครั้งล่าสุด",
+  "Advanced settings": "การตั้งค่าขั้นสูง",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "การตั้งเป้าหมายจะกำหนดไฟล์ เวลา และคำแจ้งเตือนพร้อมกัน คุณสามารถยกเลิกได้ทันทีหลังจากนั้น",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "ขีดจำกัดไฟล์ที่กำหนดเองถูกตั้งค่าไว้ในส่วน Parameters (พารามิเตอร์) ให้เลือกตัวเลือกเพื่อแทนที่ค่าเดิม",
+  "Advanced connection options": "ตัวเลือกการเชื่อมต่อขั้นสูง",
+  "this device": "อุปกรณ์นี้",
+  "Undo of an earlier change": "การยกเลิกการเปลี่ยนแปลงก่อนหน้านี้"
 }

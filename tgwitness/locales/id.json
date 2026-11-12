@@ -8786,5 +8786,25 @@
     "other": "{n} akun memakai server MTProxy publik: alamatnya berganti dan koneksi terputus, jadi pesan bisa terlewat."
   },
   "Move all accounts to WARP": "Pindahkan semua akun ke WARP",
-  "Move to WARP": "Pindahkan ke WARP"
+  "Move to WARP": "Pindahkan ke WARP",
+  "Keep recording new messages and their changes after setup.": "Terus rekam pesan baru dan perubahannya setelah pengaturan selesai.",
+  "Larger files are recorded without downloading their contents.": "Berkas berukuran besar direkam tanpa mengunduh isinya.",
+  "Sends a message when recording stops or needs attention.": "Mengirim pesan saat perekaman berhenti atau memerlukan perhatian.",
+  "Keeps a copy of the journal in storage you choose.": "Menyimpan salinan jurnal di penyimpanan yang Anda pilih.",
+  "Undo": "Batal",
+  "Change undone.": "Perubahan dibatalkan.",
+  "Recent changes": "Perubahan terbaru",
+  "Not chosen": "Tidak dipilih",
+  "Some settings differ from the recommended ones": "Beberapa pengaturan berbeda dari yang direkomendasikan",
+  "Recommended settings are on": "Pengaturan yang direkomendasikan telah diaktifkan",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "Dipilih untuk “{goal}”. Ubah hanya yang diperlukan: setiap perubahan dapat dibatalkan.",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "Pengaturan default yang aman sedang digunakan. Ubah hanya apa yang Anda butuhkan: setiap perubahan dapat dibatalkan.",
+  "Return to recommended": "Kembali ke rekomendasi",
+  "Undo last change": "Batalkan perubahan terakhir",
+  "Advanced settings": "Pengaturan lanjutan",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "Sebuah tujuan menetapkan berkas, cap waktu, dan pemberitahuan sekaligus. Anda dapat membatalkannya segera setelahnya.",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "Batas file khusus ditetapkan di bagian Parameter. Pilih opsi untuk menggantinya.",
+  "Advanced connection options": "Opsi koneksi lanjutan",
+  "this device": "perangkat ini",
+  "Undo of an earlier change": "Membatalkan perubahan sebelumnya"
 }

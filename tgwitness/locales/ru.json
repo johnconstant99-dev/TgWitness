@@ -8894,5 +8894,25 @@
     "other": "{n} аккаунта работают через публичные MTProxy: адрес меняется, связь рвётся, сообщения могут пропасть."
   },
   "Move all accounts to WARP": "Перевести все аккаунты на WARP",
-  "Move to WARP": "Перевести на WARP"
+  "Move to WARP": "Перевести на WARP",
+  "Keep recording new messages and their changes after setup.": "После настройки продолжайте записывать новые сообщения и их изменения.",
+  "Larger files are recorded without downloading their contents.": "Большие файлы записываются без загрузки их содержимого.",
+  "Sends a message when recording stops or needs attention.": "Отправляет сообщение, когда запись прекращается или требуется внимание.",
+  "Keeps a copy of the journal in storage you choose.": "Хранит копию журнала в выбранном вами хранилище.",
+  "Undo": "Отменить",
+  "Change undone.": "Изменение отменено.",
+  "Recent changes": "Последние изменения",
+  "Not chosen": "Не выбрано",
+  "Some settings differ from the recommended ones": "Некоторые настройки отличаются от рекомендуемых",
+  "Recommended settings are on": "Рекомендуемые настройки включены",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "Выбрано для «{goal}». Изменяйте только то, что необходимо: каждое изменение можно отменить.",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "Используются безопасные настройки по умолчанию. Изменяйте только то, что необходимо: любое изменение можно отменить.",
+  "Return to recommended": "Вернуться к рекомендациям",
+  "Undo last change": "Отменить последнее изменение",
+  "Advanced settings": "Расширенные настройки",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "Задача позволяет одновременно настроить файлы, временные метки и уведомления. Её можно отменить сразу же после этого.",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "Пользовательские ограничения на размер файлов устанавливаются в разделе «Параметры». Выберите вариант, чтобы заменить их.",
+  "Advanced connection options": "Расширенные настройки подключения",
+  "this device": "это устройство",
+  "Undo of an earlier change": "Отмена предыдущего изменения"
 }

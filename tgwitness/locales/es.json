@@ -8839,5 +8839,25 @@
     "other": "{n} cuentas usan servidores MTProxy públicos: su dirección cambia y la conexión se corta, así que pueden perderse mensajes."
   },
   "Move all accounts to WARP": "Pasar todas las cuentas a WARP",
-  "Move to WARP": "Pasar a WARP"
+  "Move to WARP": "Pasar a WARP",
+  "Keep recording new messages and their changes after setup.": "Sigue registrando los nuevos mensajes y sus cambios tras la configuración.",
+  "Larger files are recorded without downloading their contents.": "Los archivos de mayor tamaño se registran sin descargar su contenido.",
+  "Sends a message when recording stops or needs attention.": "Envía un mensaje cuando se detiene la grabación o se requiere atención.",
+  "Keeps a copy of the journal in storage you choose.": "Guarda una copia del registro en el almacenamiento que elijas.",
+  "Undo": "Deshacer",
+  "Change undone.": "Cambio deshecho.",
+  "Recent changes": "Cambios recientes",
+  "Not chosen": "No seleccionado",
+  "Some settings differ from the recommended ones": "Algunos ajustes difieren de los recomendados",
+  "Recommended settings are on": "La configuración recomendada está activada",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "Elegido para «{goal}». Cambia solo lo que necesites: cualquier cambio se puede deshacer.",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "Se utilizan valores predeterminados seguros. Cambia solo lo que necesites: cualquier cambio se puede deshacer.",
+  "Return to recommended": "Volver a las recomendaciones",
+  "Undo last change": "Deshacer el último cambio",
+  "Advanced settings": "Configuración avanzada",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "Un objetivo configura archivos, marcas de tiempo y notificaciones de una sola vez. Se puede deshacer inmediatamente después.",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "Los límites de archivos personalizados se configuran en «Parámetros». Elige una opción para sustituirlos.",
+  "Advanced connection options": "Opciones avanzadas de conexión",
+  "this device": "este dispositivo",
+  "Undo of an earlier change": "Deshacer un cambio anterior"
 }

@@ -8832,5 +8832,25 @@
     "other": "{n} खाते सार्वजनिक MTProxy सर्वर इस्तेमाल करते हैं: पता बदलता है और कनेक्शन टूटता है, संदेश छूट सकते हैं।"
   },
   "Move all accounts to WARP": "सभी खाते WARP पर ले जाएँ",
-  "Move to WARP": "WARP पर ले जाएँ"
+  "Move to WARP": "WARP पर ले जाएँ",
+  "Keep recording new messages and their changes after setup.": "सेटअप के बाद नए संदेशों और उनके परिवर्तनों को रिकॉर्ड करना जारी रखें।",
+  "Larger files are recorded without downloading their contents.": "बड़ी फ़ाइलों को उनकी सामग्री डाउनलोड किए बिना रिकॉर्ड किया जाता है।",
+  "Sends a message when recording stops or needs attention.": "रिकॉर्डिंग रुकने या ध्यान देने की आवश्यकता होने पर एक संदेश भेजता है।",
+  "Keeps a copy of the journal in storage you choose.": "आपके द्वारा चुने गए भंडारण में जर्नल की एक प्रति रखता है।",
+  "Undo": "रद्द करें",
+  "Change undone.": "बदलाव रद्द।",
+  "Recent changes": "हाल के बदलाव",
+  "Not chosen": "चुना नहीं गया",
+  "Some settings differ from the recommended ones": "कुछ सेटिंग्स अनुशंसित सेटिंग्स से भिन्न हैं",
+  "Recommended settings are on": "अनुशंसित सेटिंग्स चालू हैं",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "\"{goal}\" के लिए चुना गया। केवल वही बदलें जिसकी आपको आवश्यकता है: हर बदलाव को वापस किया जा सकता है।",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "सुरक्षित डिफ़ॉल्ट का उपयोग किया जा रहा है। केवल वही बदलें जिसकी आपको आवश्यकता है: हर बदलाव को वापस किया जा सकता है।",
+  "Return to recommended": "अनुशंसित पर लौटें",
+  "Undo last change": "पिछली परिवर्तन को रद्द करें",
+  "Advanced settings": "उन्नत सेटिंग्स",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "एक लक्ष्य एक साथ फ़ाइलें, टाइमस्टैम्प और सूचनाएँ निर्धारित करता है। आप इसे ठीक बाद रद्द कर सकते हैं।",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "कस्टम फ़ाइल सीमाएँ पैरामीटर में सेट की जाती हैं। उन्हें बदलने के लिए एक विकल्प चुनें।",
+  "Advanced connection options": "उन्नत कनेक्शन विकल्प",
+  "this device": "यह डिवाइस",
+  "Undo of an earlier change": "पहले किए गए परिवर्तन को वापस लेना"
 }

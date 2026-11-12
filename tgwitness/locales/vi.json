@@ -8786,5 +8786,25 @@
     "other": "{n} tài khoản dùng máy chủ MTProxy công cộng: địa chỉ thay đổi và kết nối bị ngắt, có thể bỏ lỡ tin nhắn."
   },
   "Move all accounts to WARP": "Chuyển tất cả tài khoản sang WARP",
-  "Move to WARP": "Chuyển sang WARP"
+  "Move to WARP": "Chuyển sang WARP",
+  "Keep recording new messages and their changes after setup.": "Tiếp tục ghi lại các tin nhắn mới và những thay đổi của chúng sau khi thiết lập.",
+  "Larger files are recorded without downloading their contents.": "Các tệp tin có dung lượng lớn hơn sẽ được ghi lại mà không cần tải xuống nội dung của chúng.",
+  "Sends a message when recording stops or needs attention.": "Gửi thông báo khi quá trình ghi lại dừng lại hoặc cần sự chú ý.",
+  "Keeps a copy of the journal in storage you choose.": "Lưu giữ một bản sao nhật ký trong bộ nhớ lưu trữ do bạn chọn.",
+  "Undo": "Hoàn tác",
+  "Change undone.": "Thay đổi đã bị hủy.",
+  "Recent changes": "Các thay đổi gần đây",
+  "Not chosen": "Chưa được chọn",
+  "Some settings differ from the recommended ones": "Một số cài đặt khác với các cài đặt được khuyến nghị",
+  "Recommended settings are on": "Các cài đặt được khuyến nghị đã được bật",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "Được chọn cho “{goal}”. Chỉ thay đổi những gì bạn cần: mọi thay đổi đều có thể được hoàn tác.",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "Các thiết lập mặc định an toàn đang được sử dụng. Chỉ thay đổi những gì bạn cần: mọi thay đổi đều có thể được hoàn tác.",
+  "Return to recommended": "Quay lại danh sách đề xuất",
+  "Undo last change": "Hoàn tác thay đổi cuối cùng",
+  "Advanced settings": "Cài đặt nâng cao",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "Một mục tiêu cho phép thiết lập đồng thời các tệp, dấu thời gian và thông báo. Bạn có thể hoàn tác ngay sau đó.",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "Giới hạn tệp tùy chỉnh được thiết lập trong phần \"Tham số\". Chọn một tùy chọn để thay thế các giá trị này.",
+  "Advanced connection options": "Các tùy chọn kết nối nâng cao",
+  "this device": "thiết bị này",
+  "Undo of an earlier change": "Hoàn tác một thay đổi trước đó"
 }

@@ -35,6 +35,7 @@ FIELDS = [
         ("ip", "Can Telegram see this server's address?", "connection", "simple", "ip"),
     )
 ]
+KEYS = tuple(field["key"] for field in FIELDS)
 
 
 class Draft(BaseModel):
@@ -55,6 +56,12 @@ class GoalChange(BaseModel):
     goal: Goal
     revision: str | None = None
     keep_manual: bool = False
+
+
+class Restore(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    seq: int = Field(ge=1)
+    revision: str
 
 
 class Edit(BaseModel):
@@ -186,6 +193,24 @@ def validate_collection_scope(store):
         raise ValueError("On your main account only chosen chats can be recorded. Choose chats, or use a separate account.")
 
 
+def changes(store, limit=20):
+    rows = []
+    for event in store.events_of(["settings.changed"], limit=200):
+        payload = event["payload"]
+        before, after = payload.get("before") or {}, payload.get("after") or {}
+        diff = [{"key": key, "before": before.get(key), "after": after.get(key)} for key in KEYS
+                if key in before and key in after and before[key] != after[key]]
+        goal = "goal_after" in payload and payload.get("goal_before") != payload["goal_after"]
+        if not diff and not goal:
+            continue
+        rows.append({"seq": event["seq"], "at": event["observed_at"], "changes": diff,
+                     **({"goal_before": payload.get("goal_before"), "goal_after": payload["goal_after"]} if goal else {}),
+                     **({"restored": payload["restored"]} if payload.get("restored") else {})})
+        if len(rows) >= limit:
+            break
+    return rows
+
+
 def save_goal(store, goal):
     with store.transaction():
         store.set_setting("goal_preset", {"goal": goal, "version": 1, "values": PRESETS[goal], "at": utcnow()})
@@ -226,9 +251,9 @@ def register(app, authenticate, require_live, operation, save_evidence, save_cap
     async def goal_preview(body: GoalChange):
         return preview(app, body)
 
-    async def apply_values(desired):
+    async def apply_values(desired, note=None, capture=None):
         s, c = app.state.store, app.state.collector
-        before = values(app)
+        before, before_capture = values(app), capture_settings(app.state.store)
         if desired["continuous"]:
             try:
                 validate_collection_scope(s)
@@ -276,12 +301,15 @@ def register(app, authenticate, require_live, operation, save_evidence, save_cap
                 s.set_setting("resume", False)
             if desired["files"] != "custom":
                 save_capture(s, file_policy(desired["files"]))
+            elif capture is not None:
+                save_capture(s, capture)
             evidence = {**evidence_settings(s), "enabled": desired["timestamps"], "drand": desired["drand"]}
             save_evidence(s, EvidenceMode(**evidence))
             notification = {**alerts.alert_settings(s), "enabled": desired["notifications"], "problems": True}
             s.set_setting("alerts", notification)
             s.set_setting("replica", {**replica.replica_settings(s), "enabled": desired["replica"]})
-            s.append("settings.changed", {"before": before, "after": desired})
+            capture = {"capture_before": before_capture} if desired["files"] != before["files"] else {}
+            s.append("settings.changed", {"before": before, "after": desired, **capture, **(note or {})})
         c.media_wakeup.set()
         app.state.anchor_wakeup.set()
         app.state.alert_wakeup.set()
@@ -304,8 +332,45 @@ def register(app, authenticate, require_live, operation, save_evidence, save_cap
             if body.revision != revision(app):
                 raise HTTPException(409, "Settings changed. Review the differences again.")
             proposed = preview(app, body)
-            await apply_values(proposed["values"])
+            goal = (app.state.store.get_setting("goal_preset", None) or {}).get("goal")
+            await apply_values(proposed["values"], {"goal_before": goal, "goal_after": body.goal})
             save_goal(app.state.store, body.goal)
+        return state(app)
+
+    @app.get("/api/settings/history", dependencies=deps)
+    async def history():
+        return {"changes": changes(app.state.store)}
+
+    @app.post("/api/settings/restore", dependencies=deps)
+    async def restore(body: Restore):
+        require_live()
+        async with app.state.operation_lock:
+            if body.revision != revision(app):
+                raise HTTPException(409, "Settings changed. Review the differences again.")
+            found = app.state.store.events_of(["settings.changed"], limit=1, after=body.seq - 1, before=body.seq + 1)
+            if not found:
+                raise HTTPException(404, "This change is not in the journal.")
+            payload = found[0]["payload"]
+            current = values(app)
+            desired = {**current, **{key: value for key, value in (payload.get("before") or {}).items() if key in KEYS}}
+            capture = payload.get("capture_before") if desired["files"] == "custom" else None
+            if capture is not None:
+                try:
+                    capture = Capture.model_validate(capture).model_dump()
+                except ValueError:
+                    capture = None
+            if desired["files"] == "custom" and capture is None:
+                desired["files"] = current["files"]
+            goal = (app.state.store.get_setting("goal_preset", None) or {}).get("goal")
+            note = {"restored": body.seq}
+            if "goal_after" in payload:
+                note.update(goal_before=goal, goal_after=payload.get("goal_before"))
+            await apply_values(desired, note, capture)
+            if "goal_after" in payload:
+                if payload.get("goal_before") in PRESETS:
+                    save_goal(app.state.store, payload["goal_before"])
+                else:
+                    app.state.store.set_setting("goal_preset", None)
         return state(app)
 
     app.state.settings_apply = apply_values

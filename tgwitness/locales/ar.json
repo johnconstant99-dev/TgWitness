@@ -9016,5 +9016,25 @@
     "other": "{n} حسابات تستخدم خوادم MTProxy عامة: يتغير العنوان وينقطع الاتصال، وقد تفوت رسائل."
   },
   "Move all accounts to WARP": "نقل كل الحسابات إلى WARP",
-  "Move to WARP": "النقل إلى WARP"
+  "Move to WARP": "النقل إلى WARP",
+  "Keep recording new messages and their changes after setup.": "استمر في تسجيل الرسائل الجديدة والتغييرات التي تطرأ عليها بعد الإعداد.",
+  "Larger files are recorded without downloading their contents.": "يتم تسجيل الملفات الكبيرة دون تنزيل محتوياتها.",
+  "Sends a message when recording stops or needs attention.": "يرسل رسالة عند توقف التسجيل أو عند الحاجة إلى الانتباه.",
+  "Keeps a copy of the journal in storage you choose.": "يحتفظ بنسخة من السجل في وحدة التخزين التي تختارها.",
+  "Undo": "تراجع",
+  "Change undone.": "تم التراجع عن التغيير.",
+  "Recent changes": "التغييرات الأخيرة",
+  "Not chosen": "لم يتم الاختيار",
+  "Some settings differ from the recommended ones": "تختلف بعض الإعدادات عن الإعدادات الموصى بها",
+  "Recommended settings are on": "الإعدادات الموصى بها قيد التشغيل",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "تم الاختيار من أجل «{goal}». قم بتغيير ما تحتاج إليه فقط: يمكن التراجع عن كل تغيير.",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "يتم استخدام إعدادات افتراضية آمنة. قم بتغيير ما تحتاج إليه فقط: يمكن التراجع عن كل تغيير.",
+  "Return to recommended": "العودة إلى الموصى به",
+  "Undo last change": "التراجع عن التغيير الأخير",
+  "Advanced settings": "الإعدادات المتقدمة",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "يُعيّن الهدف الملفات والطوابع الزمنية والإشعارات دفعة واحدة. يمكنك التراجع عن ذلك فورًا بعد ذلك.",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "يتم تعيين حدود الملفات المخصصة في قسم «المعلمات». اختر خيارًا لاستبدالها.",
+  "Advanced connection options": "خيارات الاتصال المتقدمة",
+  "this device": "هذا الجهاز",
+  "Undo of an earlier change": "التراجع عن تغيير سابق"
 }

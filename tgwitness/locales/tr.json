@@ -8832,5 +8832,25 @@
     "other": "{n} hesap herkese açık MTProxy sunucuları kullanıyor: adres değişiyor ve bağlantı kopuyor, mesajlar kaçabilir."
   },
   "Move all accounts to WARP": "Tüm hesapları WARP'a geçir",
-  "Move to WARP": "WARP'a geçir"
+  "Move to WARP": "WARP'a geçir",
+  "Keep recording new messages and their changes after setup.": "Kurulumdan sonra yeni mesajları ve bunlardaki değişiklikleri kaydetmeye devam edin.",
+  "Larger files are recorded without downloading their contents.": "Daha büyük dosyalar, içerikleri indirilmeden kaydedilir.",
+  "Sends a message when recording stops or needs attention.": "Kayıt durduğunda veya dikkat gerektiren bir durum olduğunda bir mesaj gönderir.",
+  "Keeps a copy of the journal in storage you choose.": "Günlüğün bir kopyasını seçtiğiniz depolama alanında saklar.",
+  "Undo": "Geri al",
+  "Change undone.": "Değişiklik geri alındı.",
+  "Recent changes": "Son değişiklikler",
+  "Not chosen": "Seçilmedi",
+  "Some settings differ from the recommended ones": "Bazı ayarlar önerilenlerden farklıdır",
+  "Recommended settings are on": "Önerilen ayarlar etkindir",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "\"{goal}\" için seçildi. Yalnızca ihtiyacınız olanı değiştirin: her değişiklik geri alınabilir.",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "Güvenli varsayılan ayarlar kullanılmaktadır. Yalnızca gerekli olanları değiştirin: her değişiklik geri alınabilir.",
+  "Return to recommended": "Önerilenlere dön",
+  "Undo last change": "Son değişikliği geri al",
+  "Advanced settings": "Gelişmiş ayarlar",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "Bir hedef, dosyaları, zaman damgalarını ve bildirimleri tek seferde ayarlar. Hemen ardından bu işlemi geri alabilirsiniz.",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "Özel dosya sınırları Parametreler bölümünde ayarlanır. Bunları değiştirmek için bir seçenek seçin.",
+  "Advanced connection options": "Gelişmiş bağlantı seçenekleri",
+  "this device": "bu cihaz",
+  "Undo of an earlier change": "Önceki bir değişikliği geri alma"
 }

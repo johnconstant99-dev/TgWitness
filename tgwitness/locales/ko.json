@@ -8786,5 +8786,25 @@
     "other": "계정 {n}개가 공개 MTProxy 서버를 사용합니다. 주소가 바뀌고 연결이 끊겨 메시지를 놓칠 수 있습니다."
   },
   "Move all accounts to WARP": "모든 계정을 WARP로 전환",
-  "Move to WARP": "WARP로 전환"
+  "Move to WARP": "WARP로 전환",
+  "Keep recording new messages and their changes after setup.": "설정이 완료된 후에는 새로운 메시지와 그 변경 사항을 계속 기록하십시오.",
+  "Larger files are recorded without downloading their contents.": "용량이 큰 파일은 내용을 다운로드하지 않고 기록됩니다.",
+  "Sends a message when recording stops or needs attention.": "기록이 중단되거나 주의가 필요한 경우 메시지를 전송합니다.",
+  "Keeps a copy of the journal in storage you choose.": "사용자가 선택한 저장소에 저널의 사본을 보관합니다.",
+  "Undo": "실행 취소",
+  "Change undone.": "변경 사항이 취소되었습니다.",
+  "Recent changes": "최근 변경 사항",
+  "Not chosen": "선택되지 않음",
+  "Some settings differ from the recommended ones": "일부 설정은 권장 설정과 다릅니다.",
+  "Recommended settings are on": "권장 설정이 활성화되어 있습니다.",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "“{goal}”을 위해 선택되었습니다. 필요한 부분만 변경하세요: 모든 변경 사항은 되돌릴 수 있습니다.",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "안전한 기본 설정이 적용되어 있습니다. 필요한 부분만 변경하십시오. 모든 변경 사항은 되돌릴 수 있습니다.",
+  "Return to recommended": "추천 항목으로 돌아가기",
+  "Undo last change": "마지막 변경 사항 취소",
+  "Advanced settings": "고급 설정",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "목표(Goal)를 설정하면 파일, 타임스탬프 및 알림을 한 번에 설정할 수 있습니다. 설정 직후에 취소할 수 있습니다.",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "사용자 지정 파일 제한은 ‘매개변수’에서 설정됩니다. 옵션을 선택하여 제한값을 변경하십시오.",
+  "Advanced connection options": "고급 연결 옵션",
+  "this device": "이 장치",
+  "Undo of an earlier change": "이전 변경 사항의 실행 취소"
 }

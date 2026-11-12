@@ -8786,5 +8786,25 @@
     "other": "{n} 件のアカウントが公開 MTProxy サーバーを使っています。アドレスが変わり接続が切れるため、メッセージを取りこぼすことがあります。"
   },
   "Move all accounts to WARP": "すべてのアカウントを WARP に切り替える",
-  "Move to WARP": "WARP に切り替える"
+  "Move to WARP": "WARP に切り替える",
+  "Keep recording new messages and their changes after setup.": "設定後は、新しいメッセージとその変更内容を記録し続けてください。",
+  "Larger files are recorded without downloading their contents.": "大容量のファイルは、その内容をダウンロードすることなく記録されます。",
+  "Sends a message when recording stops or needs attention.": "記録が停止したときや注意が必要なときにメッセージを送信します。",
+  "Keeps a copy of the journal in storage you choose.": "選択したストレージにジャーナルのコピーを保存します。",
+  "Undo": "元に戻す",
+  "Change undone.": "変更を元に戻しました。",
+  "Recent changes": "最近の変更点",
+  "Not chosen": "未選択",
+  "Some settings differ from the recommended ones": "一部の設定は推奨設定とは異なります",
+  "Recommended settings are on": "推奨設定は有効になっています",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "「{goal}」用に選択されました。必要な部分のみを変更してください。すべての変更は元に戻すことができます。",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "安全なデフォルト設定が適用されています。必要な部分のみを変更してください。すべての変更は元に戻すことができます。",
+  "Return to recommended": "推奨ページに戻る",
+  "Undo last change": "直前の変更を元に戻す",
+  "Advanced settings": "詳細設定",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "「目標」を設定すると、ファイル、タイムスタンプ、通知が一度に設定されます。設定直後に元に戻すことができます。",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "カスタムファイルの制限は「パラメータ」で設定されます。オプションを選択して、制限値を変更してください。",
+  "Advanced connection options": "詳細な接続オプション",
+  "this device": "このデバイス",
+  "Undo of an earlier change": "以前の変更を元に戻す"
 }

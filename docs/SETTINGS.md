@@ -31,6 +31,15 @@ settings**, the close button, Escape and the browser's Back button return to the
 of sections. **Which chats?** is edited in place and kept with **Save chat
 selection**; leaving with unsaved changes asks first.
 
+The settings page opens with what is in use now: a card that says whether the
+recommended values are on, with the main values and **Undo last change**; the everyday
+sections **Telegram account**, **Which chats?**, **Connection** and **Language, time
+and appearance**; and **Recent changes**. The expert tools and the sections **Goal**,
+**Collection and files**, **Record protection** and **Notifications and off-site
+copy** are under **Advanced settings**. Every change shows **Undo** for 20 seconds,
+and each entry in **Recent changes** can be undone later. An undo is a new
+`settings.changed` record in the journal, and it also brings back custom file limits.
+
 | Level | Fields | Sidebar |
 | --- | --- | --- |
 | Simple | Only the essentials | Home, Chats, Journal, Exports, Accounts and Settings |

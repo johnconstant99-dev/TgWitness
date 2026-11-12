@@ -8786,5 +8786,25 @@
     "other": "{n} 個帳戶使用公共 MTProxy 伺服器：位址會變動，連線會中斷，可能漏掉訊息。"
   },
   "Move all accounts to WARP": "將所有帳戶切換到 WARP",
-  "Move to WARP": "切換到 WARP"
+  "Move to WARP": "切換到 WARP",
+  "Keep recording new messages and their changes after setup.": "設定完成後，請持續記錄新訊息及其變更。",
+  "Larger files are recorded without downloading their contents.": "較大的檔案會在未下載其內容的情況下進行記錄。",
+  "Sends a message when recording stops or needs attention.": "當記錄停止或需要處理時，系統會發送訊息。",
+  "Keeps a copy of the journal in storage you choose.": "將日誌副本儲存於您選擇的儲存空間中。",
+  "Undo": "撤銷",
+  "Change undone.": "撤銷變更。",
+  "Recent changes": "近期變更",
+  "Not chosen": "未選取",
+  "Some settings differ from the recommended ones": "部分設定與建議設定有所不同",
+  "Recommended settings are on": "建議設定已啟用",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "已針對「{goal}」進行選取。請僅修改所需內容：所有變更皆可撤銷。",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "系統採用安全的預設設定。請僅修改您所需的項目：任何變更皆可撤銷。",
+  "Return to recommended": "返回推薦項目",
+  "Undo last change": "撤銷上一次變更",
+  "Advanced settings": "進階設定",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "「目標」可一次設定檔案、時間戳記和通知。您可在設定後立即撤銷該設定。",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "自訂檔案限制可在「參數」中設定。請選擇一個選項來取代現有設定。",
+  "Advanced connection options": "進階連線選項",
+  "this device": "此裝置",
+  "Undo of an earlier change": "撤銷先前所做的變更"
 }

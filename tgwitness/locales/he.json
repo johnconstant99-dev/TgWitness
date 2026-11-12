@@ -8878,5 +8878,25 @@
     "other": "{n} חשבונות משתמשים בשרתי MTProxy ציבוריים: הכתובת משתנה והחיבור נקטע, ולכן הודעות עלולות להיחסר."
   },
   "Move all accounts to WARP": "העברת כל החשבונות ל-WARP",
-  "Move to WARP": "העברה ל-WARP"
+  "Move to WARP": "העברה ל-WARP",
+  "Keep recording new messages and their changes after setup.": "המשך להקליט הודעות חדשות ואת השינויים בהן לאחר ההגדרה.",
+  "Larger files are recorded without downloading their contents.": "קבצים גדולים יותר מוקלטים מבלי להוריד את תוכנם.",
+  "Sends a message when recording stops or needs attention.": "שולח הודעה כאשר ההקלטה נפסקת או דורשת תשומת לב.",
+  "Keeps a copy of the journal in storage you choose.": "שומר עותק של היומן במאגר אחסון שתבחר.",
+  "Undo": "בטל",
+  "Change undone.": "השינוי בוטל.",
+  "Recent changes": "שינויים אחרונים",
+  "Not chosen": "לא נבחר",
+  "Some settings differ from the recommended ones": "חלק מההגדרות שונות מההגדרות המומלצות",
+  "Recommended settings are on": "ההגדרות המומלצות מופעלות",
+  "Chosen for “{goal}”. Change only what you need: every change can be undone.": "נבחר עבור \"{goal}\". שנו רק את מה שאתם צריכים: כל שינוי ניתן לביטול.",
+  "Safe defaults are in use. Change only what you need: every change can be undone.": "הגדרות ברירת המחדל הבטוחות נמצאות בשימוש. שנו רק את מה שאתם צריכים: ניתן לבטל כל שינוי.",
+  "Return to recommended": "חזרה להמלצות",
+  "Undo last change": "בטל את השינוי האחרון",
+  "Advanced settings": "הגדרות מתקדמות",
+  "A goal sets files, timestamps and notifications at once. You can undo it right after.": "מטרה מגדירה קבצים, חותמות זמן והודעות בבת אחת. ניתן לבטל אותה מיד לאחר מכן.",
+  "Custom file limits are set in Parameters. Pick an option to replace them.": "מגבלות קבצים מותאמות אישית מוגדרות תחת \"פרמטרים\". בחר באפשרות כדי להחליף אותן.",
+  "Advanced connection options": "אפשרויות חיבור מתקדמות",
+  "this device": "מכשיר זה",
+  "Undo of an earlier change": "ביטול שינוי קודם"
 }
