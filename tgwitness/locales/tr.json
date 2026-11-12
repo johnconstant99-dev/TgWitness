@@ -5144,11 +5144,11 @@
   "2. Prepare and check": "2. Hazırlayın ve kontrol edin",
   "3. Review and apply": "3. Gözden geçirin ve uygulayın",
   "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\">Cloudflare application terms</a>. Setup reveals this machine's IP to those services. Helpers are checked against SHA-256 hashes bundled with TgWitness. Existing helpers and WARP registration are reused.": "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\"> Cloudflare uygulama şartları </a>. Kurulum, bu makinenin IP adresini söz konusu hizmetlere açıklar. Yardımcılar, SHA-256 hash'leriyle karşılaştırılarak TgWitness ile birlikte paketlenir. Mevcut yardımcılar ve WARP kaydı yeniden kullanılır.",
-  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>Direct</strong><span>Bu makinenin IP adresi</span>",
+  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>Doğrudan</strong><span>Bu makinenin IP adresi</span>",
   "<strong>My proxy</strong><span>Server or proxy URL</span>": "<strong>Proxy'm</strong><span>Sunucu veya proxy URL'si</span>",
-  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong> Genel MTProxy </strong> <span> Otomatik havuz </span>",
+  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong>Genel MTProxy</strong><span>Otomatik havuz</span>",
   "<strong>VPN</strong><span>Import WireGuard</span>": "<strong> VPN </strong> <span> WireGuard'ı içe aktar </span>",
-  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong> WARP </strong> <span> Yönetilen yerel tünel </span>",
+  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong>WARP</strong><span>Yönetilen yerel tünel</span>",
   "Account group": "Hesap grubu",
   "All accounts": "Tüm hesaplar",
   "Allow direct setup connections to download the pinned helpers from GitHub and, for WARP, register a device with Cloudflare under its terms.": "GitHub'dan sabitlenmiş yardımcı programları indirmek için doğrudan kurulum bağlantılarına izin verin ve WARP için, Cloudflare'ın şartları uyarınca bir cihazı kaydettirin.",
@@ -8825,5 +8825,12 @@
   "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "\"Insights\", günlüğü okur: canlı olarak gözlemlenen mesajlar ve TgWitness'a yüklenen geçmiş. İmzalı dışa aktarımlar ayrı dosyalardır ve burada okunmaz. Sohbet geçmişini yükleyin veya gözlemi devam ettirin, ardından bu sohbeti tekrar açın.",
   "No chats selected": "Seçili sohbet yok",
   "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "Kaynaklar bölümünden sohbetleri seçin. İstatistikler, bir sohbet için yanıt sürelerini, etkinlik saatlerini, silinen mesajları ve çevrimiçi olma durumunu gösterir.",
-  "Leave without saving the chat selection?": "Sohbet seçimini kaydetmeden çıkmak mı istiyorsunuz?"
+  "Leave without saving the chat selection?": "Sohbet seçimini kaydetmeden çıkmak mı istiyorsunuz?",
+  "{n} account uses public MTProxy servers: its address changes and the connection drops, so messages can be missed.": "{n} hesap herkese açık MTProxy sunucuları kullanıyor: adres değişiyor ve bağlantı kopuyor, mesajlar kaçabilir.",
+  "{n} accounts use public MTProxy servers: their address changes and the connection drops, so messages can be missed.": {
+    "one": "{n} hesap herkese açık MTProxy sunucuları kullanıyor: adres değişiyor ve bağlantı kopuyor, mesajlar kaçabilir.",
+    "other": "{n} hesap herkese açık MTProxy sunucuları kullanıyor: adres değişiyor ve bağlantı kopuyor, mesajlar kaçabilir."
+  },
+  "Move all accounts to WARP": "Tüm hesapları WARP'a geçir",
+  "Move to WARP": "WARP'a geçir"
 }

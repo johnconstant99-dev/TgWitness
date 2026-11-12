@@ -5198,11 +5198,11 @@
   "2. Prepare and check": "2. Przygotuj i sprawdź",
   "3. Review and apply": "3. Sprawdź i zastosuj",
   "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\">Cloudflare application terms</a>. Setup reveals this machine's IP to those services. Helpers are checked against SHA-256 hashes bundled with TgWitness. Existing helpers and WARP registration are reused.": "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\"> Warunki korzystania z aplikacji Cloudflare </a>. Konfiguracja ujawnia adres IP tego urządzenia tym usługom. Pomocnicy są sprawdzani pod kątem zgodności z skrótami SHA-256 dołączonymi do TgWitness. Istniejący pomocnicy i rejestracja WARP są ponownie wykorzystywane.",
-  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>Direct</strong><span>Adres IP tego urządzenia</span>",
+  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>Bezpośrednio</strong><span>Adres IP tego urządzenia</span>",
   "<strong>My proxy</strong><span>Server or proxy URL</span>": "<strong> Mój serwer proxy </strong> <span> Adres URL serwera lub serwera proxy </span>",
-  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong> Publiczny MTProxy </strong> <span> Automatyczna pula </span>",
+  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong>Publiczny MTProxy</strong><span>Automatyczna pula</span>",
   "<strong>VPN</strong><span>Import WireGuard</span>": "<strong> VPN </strong> <span> Importuj WireGuard </span>",
-  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong> WARP </strong> <span> Zarządzany tunel lokalny </span>",
+  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong>WARP</strong><span>Zarządzany tunel lokalny</span>",
   "Account group": "Grupa kont",
   "All accounts": "Wszystkie konta",
   "Allow direct setup connections to download the pinned helpers from GitHub and, for WARP, register a device with Cloudflare under its terms.": "Umożliw bezpośrednie połączenia konfiguracyjne w celu pobrania przypiętych narzędzi pomocniczych z serwisu GitHub oraz, w przypadku WARP, zarejestruj urządzenie w serwisie Cloudflare zgodnie z jego warunkami.",
@@ -8915,5 +8915,14 @@
   "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Funkcja „Insights” odczytuje dziennik: wiadomości obserwowane na żywo oraz historię załadowaną do TgWitness. Podpisane eksporty są oddzielnymi plikami i nie są tutaj odczytywane. Załaduj historię czatu lub kontynuuj obserwację, a następnie otwórz ten czat ponownie.",
   "No chats selected": "Nie wybrano żadnych czatów",
   "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "Wybierz czaty w sekcji „Źródła”. W sekcji „Statystyki” wyświetlane są czasy odpowiedzi, godziny aktywności, usunięte wiadomości oraz obecność użytkowników w danym czacie.",
-  "Leave without saving the chat selection?": "Czy chcesz wyjść bez zapisania wybranego czatu?"
+  "Leave without saving the chat selection?": "Czy chcesz wyjść bez zapisania wybranego czatu?",
+  "{n} account uses public MTProxy servers: its address changes and the connection drops, so messages can be missed.": "{n} konto korzysta z publicznych serwerów MTProxy: adres się zmienia, połączenie się zrywa i wiadomości mogą przepaść.",
+  "{n} accounts use public MTProxy servers: their address changes and the connection drops, so messages can be missed.": {
+    "one": "{n} konto korzysta z publicznych serwerów MTProxy: adres się zmienia, połączenie się zrywa i wiadomości mogą przepaść.",
+    "few": "{n} konta korzystają z publicznych serwerów MTProxy: adres się zmienia, połączenie się zrywa i wiadomości mogą przepaść.",
+    "many": "{n} kont korzysta z publicznych serwerów MTProxy: adres się zmienia, połączenie się zrywa i wiadomości mogą przepaść.",
+    "other": "{n} konta korzystają z publicznych serwerów MTProxy: adres się zmienia, połączenie się zrywa i wiadomości mogą przepaść."
+  },
+  "Move all accounts to WARP": "Przenieś wszystkie konta na WARP",
+  "Move to WARP": "Przenieś na WARP"
 }

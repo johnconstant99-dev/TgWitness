@@ -5117,11 +5117,11 @@
   "2. Prepare and check": "2. Persiapkan dan periksa",
   "3. Review and apply": "3. Tinjau dan terapkan",
   "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\">Cloudflare application terms</a>. Setup reveals this machine's IP to those services. Helpers are checked against SHA-256 hashes bundled with TgWitness. Existing helpers and WARP registration are reused.": "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\"> Ketentuan aplikasi Cloudflare </a>. Pengaturan ini mengungkapkan alamat IP mesin ini kepada layanan-layanan tersebut. Helper diverifikasi berdasarkan hash SHA-256 yang disertakan dalam TgWitness. Helper yang sudah ada dan pendaftaran WARP digunakan kembali.",
-  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>Direct</strong><span>IP mesin ini</span>",
+  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>Langsung</strong><span>IP mesin ini</span>",
   "<strong>My proxy</strong><span>Server or proxy URL</span>": "<strong>Proksi saya</strong><span>URL server atau proksi</span>",
-  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong> Publik MTProxy </strong> <span> Pool otomatis </span>",
+  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong>Publik MTProxy</strong><span>Pool otomatis</span>",
   "<strong>VPN</strong><span>Import WireGuard</span>": "<strong> VPN </strong> <span> Impor WireGuard </span>",
-  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong> WARP </strong> <span> Terowongan lokal yang dikelola </span>",
+  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong>WARP</strong><span>Terowongan lokal yang dikelola</span>",
   "Account group": "Grup akun",
   "All accounts": "Semua akun",
   "Allow direct setup connections to download the pinned helpers from GitHub and, for WARP, register a device with Cloudflare under its terms.": "Izinkan pengaturan koneksi langsung untuk mengunduh helper yang disematkan dari GitHub dan, untuk WARP, daftarkan perangkat ke Cloudflare sesuai dengan ketentuannya.",
@@ -8780,5 +8780,11 @@
   "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Wawasan membaca jurnal: pesan yang diamati secara langsung dan riwayat yang dimuat ke dalam TgWitness. Ekspor yang ditandatangani adalah berkas terpisah dan tidak dibaca di sini. Muat riwayat obrolan atau biarkan pengamatan tetap berjalan, lalu buka obrolan ini lagi.",
   "No chats selected": "Tidak ada obrolan yang dipilih",
   "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "Pilih obrolan di bagian \"Sumber\". Bagian \"Wawasan\" menampilkan waktu balasan, jam aktivitas, pesan yang dihapus, dan status kehadiran untuk satu obrolan.",
-  "Leave without saving the chat selection?": "Apakah ingin keluar tanpa menyimpan pilihan obrolan?"
+  "Leave without saving the chat selection?": "Apakah ingin keluar tanpa menyimpan pilihan obrolan?",
+  "{n} account uses public MTProxy servers: its address changes and the connection drops, so messages can be missed.": "{n} akun memakai server MTProxy publik: alamatnya berganti dan koneksi terputus, jadi pesan bisa terlewat.",
+  "{n} accounts use public MTProxy servers: their address changes and the connection drops, so messages can be missed.": {
+    "other": "{n} akun memakai server MTProxy publik: alamatnya berganti dan koneksi terputus, jadi pesan bisa terlewat."
+  },
+  "Move all accounts to WARP": "Pindahkan semua akun ke WARP",
+  "Move to WARP": "Pindahkan ke WARP"
 }

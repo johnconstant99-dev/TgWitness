@@ -5144,7 +5144,7 @@
   "2. Prepare and check": "2. Tayyorlang va tekshiring",
   "3. Review and apply": "3. Ko'rib chiqing va qo'llang",
   "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\">Cloudflare application terms</a>. Setup reveals this machine's IP to those services. Helpers are checked against SHA-256 hashes bundled with TgWitness. Existing helpers and WARP registration are reused.": "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\"> Cloudflare ilovasi shartlari</a>. Sozlamalar ushbu mashina IP-manzilini o'sha xizmatlarga oshkor qiladi. Yordamchilar SHA-256 bilan birga taqdim etilgan TgWitness hashlariga qarshi tekshiriladi. Mavjud yordamchilar va WARP ro'yxatdan o'tkazilishi qayta ishlatiladi.",
-  "<strong>Direct</strong><span>This machine's IP</span>": "<strong></strong><span>Ushbu mashina IP manzili</span>",
+  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>To'g'ridan-to'g'ri</strong><span>Ushbu mashina IP manzili</span>",
   "<strong>My proxy</strong><span>Server or proxy URL</span>": "<strong> mening proksim</strong><span> server yoki proksi URL</span>",
   "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong>Jamoat MTProxy</strong><span>Avtomatik pool</span>",
   "<strong>VPN</strong><span>Import WireGuard</span>": "<strong>VPN</strong><span>Import WireGuard</span>",
@@ -8825,5 +8825,12 @@
   "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Insights jurnalni o'qiydi: jonli kuzatilgan xabarlar va TgWitnessga yuklangan tarix. Imzolangan eksportlar alohida fayllar bo'lib, bu yerda o'qilmaydi. Suhbat tarixini yuklang yoki kuzatuvni davom ettiring, so'ng bu suhbatni yana oching.",
   "No chats selected": "Suhbatlar tanlanmagan",
   "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "Manbalar bo'limida suhbatlarni tanlang. Insights javob berish vaqtlari, faoliyat soatlari, o'chirilgan xabarlar va mavjudlikni bir suhbat bo'yicha ko'rsatadi.",
-  "Leave without saving the chat selection?": "Suhbat tanlovini saqlamasdan chiqib ketish?"
+  "Leave without saving the chat selection?": "Suhbat tanlovini saqlamasdan chiqib ketish?",
+  "{n} account uses public MTProxy servers: its address changes and the connection drops, so messages can be missed.": "{n} ta akkaunt ochiq MTProxy serverlaridan foydalanmoqda: manzil o‘zgaradi va aloqa uziladi, xabarlar tushib qolishi mumkin.",
+  "{n} accounts use public MTProxy servers: their address changes and the connection drops, so messages can be missed.": {
+    "one": "{n} ta akkaunt ochiq MTProxy serverlaridan foydalanmoqda: manzil o‘zgaradi va aloqa uziladi, xabarlar tushib qolishi mumkin.",
+    "other": "{n} ta akkaunt ochiq MTProxy serverlaridan foydalanmoqda: manzil o‘zgaradi va aloqa uziladi, xabarlar tushib qolishi mumkin."
+  },
+  "Move all accounts to WARP": "Barcha akkauntlarni WARPga o‘tkazish",
+  "Move to WARP": "WARPga o‘tkazish"
 }

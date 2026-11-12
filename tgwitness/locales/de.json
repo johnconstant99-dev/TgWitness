@@ -5144,11 +5144,11 @@
   "2. Prepare and check": "2. Vorbereiten und prüfen",
   "3. Review and apply": "3. Überprüfen und anwenden",
   "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\">Cloudflare application terms</a>. Setup reveals this machine's IP to those services. Helpers are checked against SHA-256 hashes bundled with TgWitness. Existing helpers and WARP registration are reused.": "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\">Cloudflare-Nutzungsbedingungen</a>. Bei der Einrichtung wird die IP-Adresse dieses Geräts an diese Dienste weitergegeben. Helper werden anhand der SHA-256-Hashes überprüft, die mit TgWitness gebündelt sind. Vorhandene Helper und die WARP-Registrierung werden wiederverwendet.",
-  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>Direct</strong><span>IP-Adresse dieses Rechners</span>",
+  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>Direkt</strong><span>IP-Adresse dieses Rechners</span>",
   "<strong>My proxy</strong><span>Server or proxy URL</span>": "<strong> Mein Proxy </strong> <span> Server- oder Proxy-URL </span>",
-  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong> Öffentliches MTProxy </strong> <span> Automatischer Pool </span>",
+  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong>Öffentliches MTProxy</strong><span>Automatischer Pool</span>",
   "<strong>VPN</strong><span>Import WireGuard</span>": "<strong> VPN </strong> <span> Import WireGuard </span>",
-  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong> WARP </strong> <span> Verwalteter lokaler Tunnel </span>",
+  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong>WARP</strong><span>Verwalteter lokaler Tunnel</span>",
   "Account group": "Kontengruppe",
   "All accounts": "Alle Konten",
   "Allow direct setup connections to download the pinned helpers from GitHub and, for WARP, register a device with Cloudflare under its terms.": "Ermöglichen Sie direkte Setup-Verbindungen, um die angehefteten Helfer von GitHub herunterzuladen, und registrieren Sie für WARP ein Gerät bei Cloudflare gemäß dessen Nutzungsbedingungen.",
@@ -8825,5 +8825,12 @@
   "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "„Insights“ lesen das Protokoll aus: live beobachtete Nachrichten und in TgWitness geladene Verlaufsdaten. Signierte Exporte sind separate Dateien und werden hier nicht gelesen. Laden Sie den Chat-Verlauf oder lassen Sie die Beobachtung weiterlaufen, und öffnen Sie diesen Chat anschließend erneut.",
   "No chats selected": "Es wurden keine Chats ausgewählt",
   "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "Wählen Sie Chats unter „Quellen“ aus. Die Einblicke zeigen Antwortzeiten, Aktivitätszeiten, gelöschte Nachrichten und die Anwesenheit für einen Chat an.",
-  "Leave without saving the chat selection?": "Möchten Sie die Chat-Auswahl verlassen, ohne sie zu speichern?"
+  "Leave without saving the chat selection?": "Möchten Sie die Chat-Auswahl verlassen, ohne sie zu speichern?",
+  "{n} account uses public MTProxy servers: its address changes and the connection drops, so messages can be missed.": "{n} Konto nutzt öffentliche MTProxy-Server: Die Adresse wechselt und die Verbindung bricht ab, Nachrichten können fehlen.",
+  "{n} accounts use public MTProxy servers: their address changes and the connection drops, so messages can be missed.": {
+    "one": "{n} Konto nutzt öffentliche MTProxy-Server: Die Adresse wechselt und die Verbindung bricht ab, Nachrichten können fehlen.",
+    "other": "{n} Konten nutzen öffentliche MTProxy-Server: Die Adresse wechselt und die Verbindung bricht ab, Nachrichten können fehlen."
+  },
+  "Move all accounts to WARP": "Alle Konten auf WARP umstellen",
+  "Move to WARP": "Auf WARP umstellen"
 }

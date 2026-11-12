@@ -5117,11 +5117,11 @@
   "2. Prepare and check": "2. Chuẩn bị và kiểm tra",
   "3. Review and apply": "3. Kiểm tra và áp dụng",
   "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\">Cloudflare application terms</a>. Setup reveals this machine's IP to those services. Helpers are checked against SHA-256 hashes bundled with TgWitness. Existing helpers and WARP registration are reused.": "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\"> Điều khoản ứng dụng Cloudflare </a>. Quá trình thiết lập sẽ tiết lộ địa chỉ IP của máy này cho các dịch vụ đó. Các trình trợ giúp được kiểm tra dựa trên các giá trị băm SHA-256 được gói cùng với TgWitness. Các trình trợ giúp hiện có và đăng ký WARP sẽ được tái sử dụng.",
-  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>Direct</strong><span>Địa chỉ IP của máy này</span>",
+  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>Trực tiếp</strong><span>Địa chỉ IP của máy này</span>",
   "<strong>My proxy</strong><span>Server or proxy URL</span>": "<strong>Proxy của tôi</strong><span>URL máy chủ hoặc proxy</span>",
-  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong> Công khai MTProxy </strong> <span> Bể tự động </span>",
+  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong>Công khai MTProxy</strong><span>Nhóm tự động</span>",
   "<strong>VPN</strong><span>Import WireGuard</span>": "<strong> VPN </strong> <span> Nhập WireGuard </span>",
-  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong> WARP </strong> <span> Đường hầm cục bộ được quản lý </span>",
+  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong>WARP</strong><span>Đường hầm cục bộ được quản lý</span>",
   "Account group": "Nhóm tài khoản",
   "All accounts": "Tất cả tài khoản",
   "Allow direct setup connections to download the pinned helpers from GitHub and, for WARP, register a device with Cloudflare under its terms.": "Cho phép thiết lập kết nối trực tiếp để tải xuống các công cụ hỗ trợ đã được ghim từ GitHub và, đối với WARP, đăng ký thiết bị với Cloudflare theo các điều khoản của họ.",
@@ -8780,5 +8780,11 @@
   "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Chức năng \"Insights\" đọc nhật ký: các tin nhắn được theo dõi trực tiếp và lịch sử cuộc trò chuyện đã được tải vào TgWitness. Các tệp xuất có chữ ký là các tệp riêng biệt và không được đọc tại đây. Hãy tải lịch sử cuộc trò chuyện hoặc tiếp tục quá trình theo dõi, sau đó mở lại cuộc trò chuyện này.",
   "No chats selected": "Chưa chọn cuộc trò chuyện nào",
   "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "Chọn các cuộc trò chuyện trong phần \"Nguồn\". Phần \"Thông tin chi tiết\" hiển thị thời gian trả lời, giờ hoạt động, tin nhắn đã xóa và trạng thái trực tuyến của một cuộc trò chuyện.",
-  "Leave without saving the chat selection?": "Bạn có muốn thoát mà không lưu lựa chọn cuộc trò chuyện không?"
+  "Leave without saving the chat selection?": "Bạn có muốn thoát mà không lưu lựa chọn cuộc trò chuyện không?",
+  "{n} account uses public MTProxy servers: its address changes and the connection drops, so messages can be missed.": "{n} tài khoản dùng máy chủ MTProxy công cộng: địa chỉ thay đổi và kết nối bị ngắt, có thể bỏ lỡ tin nhắn.",
+  "{n} accounts use public MTProxy servers: their address changes and the connection drops, so messages can be missed.": {
+    "other": "{n} tài khoản dùng máy chủ MTProxy công cộng: địa chỉ thay đổi và kết nối bị ngắt, có thể bỏ lỡ tin nhắn."
+  },
+  "Move all accounts to WARP": "Chuyển tất cả tài khoản sang WARP",
+  "Move to WARP": "Chuyển sang WARP"
 }

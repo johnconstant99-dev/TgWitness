@@ -5117,11 +5117,11 @@
   "2. Prepare and check": "2. 準備與檢查",
   "3. Review and apply": "3. 審閱並套用",
   "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\">Cloudflare application terms</a>. Setup reveals this machine's IP to those services. Helpers are checked against SHA-256 hashes bundled with TgWitness. Existing helpers and WARP registration are reused.": "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\"> Cloudflare 應用程式條款 </a>。設定過程會向這些服務揭露本機器的 IP 位址。輔助程式會根據 SHA-256 哈希值進行驗證，該哈希值已與 TgWitness 捆綁。現有的輔助程式及 WARP 註冊資訊將被重複利用。",
-  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>Direct</strong><span>本機的 IP</span>",
+  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>直接</strong><span>本機的 IP</span>",
   "<strong>My proxy</strong><span>Server or proxy URL</span>": "<strong> 我的代理 </strong> <span> 伺服器或代理 URL </span>",
-  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong> 公開 MTProxy </strong> <span> 自動池 </span>",
+  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong>公開 MTProxy</strong><span>自動池</span>",
   "<strong>VPN</strong><span>Import WireGuard</span>": "<strong> VPN </strong> <span> 匯入 WireGuard </span>",
-  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong> WARP </strong> <span> 受管本地隧道 </span>",
+  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong>WARP</strong><span>受管本地隧道</span>",
   "Account group": "帳戶群組",
   "All accounts": "所有帳戶",
   "Allow direct setup connections to download the pinned helpers from GitHub and, for WARP, register a device with Cloudflare under its terms.": "允許直接設定連線，以從 GitHub 下載已釘選的輔助程式；至於 WARP，則需依照其條款向 Cloudflare 註冊裝置。",
@@ -8780,5 +8780,11 @@
   "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "「Insights」功能用於讀取日誌：包含即時監測的訊息以及載入至 TgWitness 的聊天紀錄。簽名匯出檔為獨立檔案，此處不會讀取。請先載入聊天紀錄或保持監測狀態，然後再次開啟此聊天室。",
   "No chats selected": "未選取任何聊天記錄",
   "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "在「來源」中選取聊天室。洞察功能會顯示單一聊天室的回覆時間、活躍時段、已刪除訊息及在線狀態。",
-  "Leave without saving the chat selection?": "要離開而不儲存當前的聊天選取範圍嗎？"
+  "Leave without saving the chat selection?": "要離開而不儲存當前的聊天選取範圍嗎？",
+  "{n} account uses public MTProxy servers: its address changes and the connection drops, so messages can be missed.": "{n} 個帳戶使用公共 MTProxy 伺服器：位址會變動，連線會中斷，可能漏掉訊息。",
+  "{n} accounts use public MTProxy servers: their address changes and the connection drops, so messages can be missed.": {
+    "other": "{n} 個帳戶使用公共 MTProxy 伺服器：位址會變動，連線會中斷，可能漏掉訊息。"
+  },
+  "Move all accounts to WARP": "將所有帳戶切換到 WARP",
+  "Move to WARP": "切換到 WARP"
 }

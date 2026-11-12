@@ -5226,11 +5226,11 @@
   "2. Prepare and check": "2. Подготовка и проверка",
   "3. Review and apply": "3. Проверьте и примените",
   "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\">Cloudflare application terms</a>. Setup reveals this machine's IP to those services. Helpers are checked against SHA-256 hashes bundled with TgWitness. Existing helpers and WARP registration are reused.": "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\"> Условия использования приложения Cloudflare </a>. При настройке IP-адрес этого устройства раскрывается указанным сервисам. Помощники проверяются по хешам SHA-256, входящим в пакет TgWitness. Существующие помощники и регистрация в WARP используются повторно.",
-  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>Direct</strong><span>IP-адрес этого компьютера</span>",
+  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>Напрямую</strong><span>IP-адрес этого компьютера</span>",
   "<strong>My proxy</strong><span>Server or proxy URL</span>": "<strong>Мой прокси</strong><span>URL-адрес сервера или прокси</span>",
-  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong>Public MTProxy</strong><span>Автоматический пул</span>",
+  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong>Публичные MTProxy</strong><span>Автоматический пул</span>",
   "<strong>VPN</strong><span>Import WireGuard</span>": "<strong> VPN </strong> <span> Импорт WireGuard </span>",
-  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong> WARP </strong> <span> Управляемый локальный туннель </span>",
+  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong>WARP</strong><span>Управляемый локальный туннель</span>",
   "Account group": "Группа аккаунтов",
   "All accounts": "Все аккаунты",
   "Allow direct setup connections to download the pinned helpers from GitHub and, for WARP, register a device with Cloudflare under its terms.": "Разрешить прямые настройки подключений для загрузки закрепленных вспомогательных программ с GitHub, а для WARP — зарегистрировать устройство в Cloudflare в соответствии с его условиями.",
@@ -8885,5 +8885,14 @@
   "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Инсайтс считывает журнал: сообщения, наблюдаемые в режиме реального времени, и историю, загруженную в TgWitness. Подписанные экспорты представляют собой отдельные файлы и здесь не считываются. Загрузите историю чата или оставьте наблюдение в работе, а затем снова откройте этот чат.",
   "No chats selected": "Чаты не выбраны",
   "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "Выберите чаты в разделе «Источники». В разделе «Аналитика» отображаются время ответа, часы активности, удалённые сообщения и статус присутствия для одного чата.",
-  "Leave without saving the chat selection?": "Уйти, не сохранив выбранный чат?"
+  "Leave without saving the chat selection?": "Уйти, не сохранив выбранный чат?",
+  "{n} account uses public MTProxy servers: its address changes and the connection drops, so messages can be missed.": "{n} аккаунт работает через публичные MTProxy: адрес меняется, связь рвётся, сообщения могут пропасть.",
+  "{n} accounts use public MTProxy servers: their address changes and the connection drops, so messages can be missed.": {
+    "one": "{n} аккаунт работает через публичные MTProxy: адрес меняется, связь рвётся, сообщения могут пропасть.",
+    "few": "{n} аккаунта работают через публичные MTProxy: адрес меняется, связь рвётся, сообщения могут пропасть.",
+    "many": "{n} аккаунтов работают через публичные MTProxy: адрес меняется, связь рвётся, сообщения могут пропасть.",
+    "other": "{n} аккаунта работают через публичные MTProxy: адрес меняется, связь рвётся, сообщения могут пропасть."
+  },
+  "Move all accounts to WARP": "Перевести все аккаунты на WARP",
+  "Move to WARP": "Перевести на WARP"
 }

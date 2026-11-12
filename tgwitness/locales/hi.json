@@ -8825,5 +8825,12 @@
   "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Insights जर्नल पढ़ता है: लाइव देखे गए संदेश और इतिहास जो TgWitness में लोड किए गए हैं। हस्ताक्षरित एक्सपोर्ट्स अलग फ़ाइलें होती हैं और यहाँ नहीं पढ़ी जातीं। चैट इतिहास लोड करें या अवलोकन जारी रखें, फिर इस चैट को फिर से खोलें।",
   "No chats selected": "चैट नहीं चुने गए",
   "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "Sources में चैट्स चुनें। Insights एक चैट के लिए प्रतिक्रिया समय, गतिविधि घंटे, हटाए गए संदेश और उपस्थिति दिखाते हैं।",
-  "Leave without saving the chat selection?": "चैट चयन को सहेजे बिना छोड़ें?"
+  "Leave without saving the chat selection?": "चैट चयन को सहेजे बिना छोड़ें?",
+  "{n} account uses public MTProxy servers: its address changes and the connection drops, so messages can be missed.": "{n} खाता सार्वजनिक MTProxy सर्वर इस्तेमाल करता है: पता बदलता है और कनेक्शन टूटता है, संदेश छूट सकते हैं।",
+  "{n} accounts use public MTProxy servers: their address changes and the connection drops, so messages can be missed.": {
+    "one": "{n} खाता सार्वजनिक MTProxy सर्वर इस्तेमाल करता है: पता बदलता है और कनेक्शन टूटता है, संदेश छूट सकते हैं।",
+    "other": "{n} खाते सार्वजनिक MTProxy सर्वर इस्तेमाल करते हैं: पता बदलता है और कनेक्शन टूटता है, संदेश छूट सकते हैं।"
+  },
+  "Move all accounts to WARP": "सभी खाते WARP पर ले जाएँ",
+  "Move to WARP": "WARP पर ले जाएँ"
 }

@@ -5198,11 +5198,11 @@
   "2. Prepare and check": "2. Підготуйте та перевірте",
   "3. Review and apply": "3. Переглянути та застосувати",
   "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\">Cloudflare application terms</a>. Setup reveals this machine's IP to those services. Helpers are checked against SHA-256 hashes bundled with TgWitness. Existing helpers and WARP registration are reused.": "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\"> Умови використання додатка Cloudflare </a>. Під час налаштування цим сервісам розкривається IP-адреса даного пристрою. Допоміжні програми перевіряються за хешами SHA-256, що входять до складу TgWitness. Існуючі допоміжні програми та реєстрація WARP використовуються повторно.",
-  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>Direct</strong><span>IP-адреса цього комп'ютера</span>",
+  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>Напряму</strong><span>IP-адреса цього комп'ютера</span>",
   "<strong>My proxy</strong><span>Server or proxy URL</span>": "<strong> Мій проксі </strong> <span> URL-адреса сервера або проксі </span>",
-  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong> Публічний MTProxy </strong> <span> Автоматичний пул </span>",
+  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong>Публічний MTProxy</strong><span>Автоматичний пул</span>",
   "<strong>VPN</strong><span>Import WireGuard</span>": "<strong> VPN </strong> <span> Імпорт WireGuard </span>",
-  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong> WARP </strong> <span> Керуваний локальний тунель </span>",
+  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong>WARP</strong><span>Керуваний локальний тунель</span>",
   "Account group": "Група облікових записів",
   "All accounts": "Усі облікові записи",
   "Allow direct setup connections to download the pinned helpers from GitHub and, for WARP, register a device with Cloudflare under its terms.": "Дозволити прямі налаштування з’єднань для завантаження закріплених допоміжних програм з GitHub, а для WARP — зареєструвати пристрій у Cloudflare відповідно до його умов.",
@@ -8915,5 +8915,14 @@
   "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Функція «Аналітика» зчитує журнал: повідомлення, що спостерігаються в режимі реального часу, та історію, завантажену в TgWitness. Підписані експортовані файли є окремими файлами і тут не зчитуються. Завантажте історію чату або продовжуйте спостереження, а потім знову відкрийте цей чат.",
   "No chats selected": "Чатів не вибрано",
   "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "Виберіть чати в розділі «Джерела». У розділі «Аналітика» відображаються час відповідей, години активності, видалені повідомлення та присутність у одному чаті.",
-  "Leave without saving the chat selection?": "Вийти, не збереживши вибрані чати?"
+  "Leave without saving the chat selection?": "Вийти, не збереживши вибрані чати?",
+  "{n} account uses public MTProxy servers: its address changes and the connection drops, so messages can be missed.": "{n} акаунт працює через публічні MTProxy: адреса змінюється, зв’язок рветься, повідомлення можуть загубитися.",
+  "{n} accounts use public MTProxy servers: their address changes and the connection drops, so messages can be missed.": {
+    "one": "{n} акаунт працює через публічні MTProxy: адреса змінюється, зв’язок рветься, повідомлення можуть загубитися.",
+    "few": "{n} акаунта працюють через публічні MTProxy: адреса змінюється, зв’язок рветься, повідомлення можуть загубитися.",
+    "many": "{n} акаунтів працюють через публічні MTProxy: адреса змінюється, зв’язок рветься, повідомлення можуть загубитися.",
+    "other": "{n} акаунта працюють через публічні MTProxy: адреса змінюється, зв’язок рветься, повідомлення можуть загубитися."
+  },
+  "Move all accounts to WARP": "Перевести всі акаунти на WARP",
+  "Move to WARP": "Перевести на WARP"
 }

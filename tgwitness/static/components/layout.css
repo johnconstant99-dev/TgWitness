@@ -366,3 +366,8 @@ button.tip-toggle { width: 20px !important; height: 20px !important; min-height:
   .workspace-status[data-state="warn"] > summary::after { background: var(--status-warn); }
   .workspace-status[data-state="demo"] > summary::after { background: var(--accent); }
 }
+.route-advice { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin: 0 0 18px; padding: 12px 16px; border: 1px solid var(--warning-border); border-radius: 10px; background: var(--warning-soft); }
+.route-advice[hidden] { display: none; }
+.route-advice > span { flex: 1 1 280px; display: flex; align-items: center; gap: 10px; font-size: 13px; line-height: 1.5; }
+.route-advice > span::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--status-warn); }
+.route-advice > button { min-height: 36px; }

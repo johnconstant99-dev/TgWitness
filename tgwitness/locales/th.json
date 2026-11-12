@@ -5117,9 +5117,9 @@
   "2. Prepare and check": "2. เตรียมและตรวจสอบ",
   "3. Review and apply": "3. ตรวจสอบและนำไปใช้",
   "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\">Cloudflare application terms</a>. Setup reveals this machine's IP to those services. Helpers are checked against SHA-256 hashes bundled with TgWitness. Existing helpers and WARP registration are reused.": "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\"> เงื่อนไขการใช้งาน Cloudflare</a>. การตั้งค่าจะเปิดเผยที่อยู่ IP ของเครื่องนี้ให้กับบริการดังกล่าว ผู้ช่วยจะถูกตรวจสอบกับแฮช SHA-256 ที่รวมอยู่ใน TgWitness ผู้ช่วยที่มีอยู่และการลงทะเบียน WARP จะถูกนำกลับมาใช้ใหม่",
-  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>Direct</strong><span>IP ของเครื่องนี้</span>",
+  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>โดยตรง</strong><span>IP ของเครื่องนี้</span>",
   "<strong>My proxy</strong><span>Server or proxy URL</span>": "<strong>My proxy</strong><span>Server หรือ proxy URL</span>",
-  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong>Public MTProxy</strong><span>Automatic pool</span>",
+  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong>MTProxy สาธารณะ</strong><span>พูลอัตโนมัติ</span>",
   "<strong>VPN</strong><span>Import WireGuard</span>": "<strong>VPN</strong><span>นำเข้า WireGuard</span>",
   "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong>WARP</strong><span>อุโมงค์ท้องถิ่นที่จัดการ</span>",
   "Account group": "กลุ่มบัญชี",
@@ -8780,5 +8780,11 @@
   "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Insights อ่านบันทึก: ข้อความที่สังเกตแบบเรียลไทม์และประวัติที่โหลดเข้าTgWitness การส่งออกที่มีลายเซ็นเป็นไฟล์แยกต่างหากและไม่ถูกอ่านที่นี่ ให้โหลดประวัติการสนทนาหรือรักษาการสังเกตให้ทำงานต่อไป แล้วเปิดการสนทนานี้อีกครั้ง",
   "No chats selected": "ไม่มีการเลือกการสนทนาใด",
   "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "เลือกการสนทนาในส่วน Sources (แหล่งข้อมูล) ส่วน Insights (ข้อมูลเชิงลึก) แสดงเวลาตอบกลับ ชั่วโมงกิจกรรม ข้อความที่ถูกลบ และสถานะการออนไลน์ สำหรับการสนทนาหนึ่งครั้ง",
-  "Leave without saving the chat selection?": "จะออกจากหน้าโดยไม่บันทึกการเลือกการสนทนาหรือไม่?"
+  "Leave without saving the chat selection?": "จะออกจากหน้าโดยไม่บันทึกการเลือกการสนทนาหรือไม่?",
+  "{n} account uses public MTProxy servers: its address changes and the connection drops, so messages can be missed.": "บัญชี {n} บัญชีใช้เซิร์ฟเวอร์ MTProxy สาธารณะ ที่อยู่จะเปลี่ยนและการเชื่อมต่อขาด อาจพลาดข้อความได้",
+  "{n} accounts use public MTProxy servers: their address changes and the connection drops, so messages can be missed.": {
+    "other": "บัญชี {n} บัญชีใช้เซิร์ฟเวอร์ MTProxy สาธารณะ ที่อยู่จะเปลี่ยนและการเชื่อมต่อขาด อาจพลาดข้อความได้"
+  },
+  "Move all accounts to WARP": "ย้ายทุกบัญชีไปใช้ WARP",
+  "Move to WARP": "ย้ายไปใช้ WARP"
 }

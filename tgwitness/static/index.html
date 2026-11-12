@@ -39,7 +39,7 @@
 <script defer src="/dialogs.js?v=2"></script>
 <script defer src="/privacy.js?v=1"></script>
 <script defer src="/chat-safety.js?v=1"></script>
-<script defer src="/app.js?v=0.9.1-evidence1-topology2-layout1-activity4-chat2"></script>
+<script defer src="/app.js?v=0.9.1-evidence1-topology2-layout1-activity5-chat2"></script>
 <script defer src="/services.js?v=1"></script>
 <script defer src="/independent-capture.js?v=2"></script>
 <script defer src="/investigate.js?v=9"></script>
@@ -58,7 +58,7 @@
 <link href="/views/disclosure-preview.css?v=1" rel="stylesheet">
 <link href="/components/forms.css?v=35" rel="stylesheet">
 <link href="/components/feedback.css?v=36" rel="stylesheet">
-<link href="/components/layout.css?v=8" rel="stylesheet">
+<link href="/components/layout.css?v=9" rel="stylesheet">
 </head>
 <body>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
@@ -1713,6 +1713,7 @@
     <ol class="fleet-results" id="fleet-results"></ol>
   </section>
   <div class="accounts-overview" id="accounts-overview" aria-label="Workspace totals"></div>
+  <div class="route-advice" hidden id="accounts-route-advice" role="status"><span id="accounts-route-advice-copy"></span><button class="primary" id="accounts-route-advice-apply" type="button"></button></div>
   <div class="accounts-tools">
     <label>Find workspace<input id="accounts-search" type="search" placeholder="Name, username or account ID"></label>
     <label>Show<select id="accounts-filter"><option value="all">All workspaces</option><option value="attention">Needs attention</option><option value="collecting">Collecting</option><option value="offline">Offline or paused</option><option value="empty">Not connected</option></select></label>

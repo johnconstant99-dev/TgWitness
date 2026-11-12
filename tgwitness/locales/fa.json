@@ -5144,11 +5144,11 @@
   "2. Prepare and check": "۲. آماده‌سازی و بررسی",
   "3. Review and apply": "۳. بازبینی و اعمال",
   "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\">Cloudflare application terms</a>. Setup reveals this machine's IP to those services. Helpers are checked against SHA-256 hashes bundled with TgWitness. Existing helpers and WARP registration are reused.": "شرایط استفاده از Cloudflare برای <a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\"> و </a>. راه‌اندازی، آدرس IP این دستگاه را برای آن سرویس‌ها آشکار می‌کند. کمک‌کننده‌ها با هش‌های SHA-256 که همراه با TgWitness بسته‌بندی شده‌اند، بررسی می‌شوند. کمک‌کننده‌های موجود و ثبت‌نام WARP مجدداً استفاده می‌شوند.",
-  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>راست‌</strong><span>IP این دستگاه </span>",
+  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>مستقیم</strong><span>IP این دستگاه</span>",
   "<strong>My proxy</strong><span>Server or proxy URL</span>": "<strong>پراکسی من</strong><span>URL سرور یا پراکسی</span>",
-  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong>MTProxy عمومی </strong><span>استخر خودکار </span>",
+  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong>MTProxy عمومی</strong><span>مجموعهٔ خودکار</span>",
   "<strong>VPN</strong><span>Import WireGuard</span>": "<strong>VPN</strong><span>واردات WireGuard</span>",
-  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong>WARP </strong><span> تونل محلی مدیریت‌شده </span>",
+  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong>WARP</strong><span>تونل محلی مدیریت‌شده</span>",
   "Account group": "گروه حساب‌ها",
   "All accounts": "تمام حساب‌ها",
   "Allow direct setup connections to download the pinned helpers from GitHub and, for WARP, register a device with Cloudflare under its terms.": "امکان برقراری اتصالات مستقیم برای دانلود کمک‌کننده‌های سنجاق‌شده از GitHub را فراهم می‌کند و برای WARP، ثبت دستگاه را نزد Cloudflare طبق شرایط آن انجام می‌دهد.",
@@ -8825,5 +8825,12 @@
   "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Insights مجله را می‌خواند: پیام‌های مشاهده‌شده به‌صورت زنده و تاریخچه بارگذاری‌شده در TgWitness. خروجی‌های امضا‌شده فایل‌های جداگانه‌ای هستند و در اینجا خوانده نمی‌شوند. تاریخچه چت را بارگذاری کنید یا مشاهده را ادامه دهید، سپس این چت را دوباره باز کنید.",
   "No chats selected": "هیچ چتی انتخاب نشده است",
   "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "در بخش منابع، گفتگوها را انتخاب کنید. Insights زمان‌های پاسخ، ساعات فعالیت، پیام‌های حذف‌شده و وضعیت حضور را برای یک گفتگو نشان می‌دهد.",
-  "Leave without saving the chat selection?": "خروج بدون ذخیرهٔ انتخاب چت؟"
+  "Leave without saving the chat selection?": "خروج بدون ذخیرهٔ انتخاب چت؟",
+  "{n} account uses public MTProxy servers: its address changes and the connection drops, so messages can be missed.": "{n} حساب از سرورهای عمومی MTProxy استفاده می‌کند: نشانی عوض می‌شود و اتصال قطع می‌شود، ممکن است پیام‌ها از دست بروند.",
+  "{n} accounts use public MTProxy servers: their address changes and the connection drops, so messages can be missed.": {
+    "one": "{n} حساب از سرورهای عمومی MTProxy استفاده می‌کند: نشانی عوض می‌شود و اتصال قطع می‌شود، ممکن است پیام‌ها از دست بروند.",
+    "other": "{n} حساب از سرورهای عمومی MTProxy استفاده می‌کنند: نشانی عوض می‌شود و اتصال قطع می‌شود، ممکن است پیام‌ها از دست بروند."
+  },
+  "Move all accounts to WARP": "انتقال همهٔ حساب‌ها به WARP",
+  "Move to WARP": "انتقال به WARP"
 }

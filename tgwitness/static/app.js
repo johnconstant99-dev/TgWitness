@@ -1527,6 +1527,10 @@ const groupViewReady=import("./views/group.js?v=2").then(({createGroupView})=>{
   return groupView;
 }).catch(error=>toast(error.message,true));
 function openGroup(id){state.groupId=id;return navigate('group');}
+$("accounts-route-advice-apply").addEventListener("click",event=>busy(event.currentTarget,async()=>{
+  await navigate('connection');await connectionViewReady;
+  connectionView.preset({scope:(state.profiles||[]).length>1?'all':'account',mode:'warp'});
+}));
 window.TgWitnessOpenGroup=openGroup;
 async function openChatIn(profileId,chatId){
   if(state.profile!==profileId&&await switchProfile(profileId)===false)return false;
@@ -1549,6 +1553,13 @@ function renderAccounts(){
   $("accounts-limit").textContent=trn("{n} workspace. Add as many as you need — each uses its own Telegram account.",
     "{n} workspaces. Add as many as you need — each uses its own Telegram account.",list.length);
   $("account-add-form").querySelector("button").disabled=s.demo;
+  const publicRoutes=list.filter(p=>!p.error_type&&p.collector?.network?.kind==="mtproxy_auto").length,advice=$("accounts-route-advice");
+  advice.hidden=!publicRoutes||s.demo||!state.me?.admin||!viewAllowed('connection');
+  if(!advice.hidden){
+    $("accounts-route-advice-copy").textContent=trn("{n} account uses public MTProxy servers: its address changes and the connection drops, so messages can be missed.",
+      "{n} accounts use public MTProxy servers: their address changes and the connection drops, so messages can be missed.",publicRoutes);
+    $("accounts-route-advice-apply").textContent=tr(list.length>1?"Move all accounts to WARP":"Move to WARP");
+  }
   const exits=new Map();
   for(const value of list){const net=value.collector?.network,ip=net?.check?.exit_ip;if(ip&&net.managed!=="warp")exits.set(ip,(exits.get(ip)||0)+1);}
   for(const value of list){

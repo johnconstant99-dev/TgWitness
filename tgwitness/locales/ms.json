@@ -8780,5 +8780,11 @@
   "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Insights membaca jurnal: mesej yang diperhatikan secara langsung dan sejarah yang dimuatkan ke dalam TgWitness. Eksport bermassa tandatangan adalah fail berasingan dan tidak dibaca di sini. Muatkan sejarah sembang atau teruskan pemantauan, kemudian buka semula sembang ini.",
   "No chats selected": "Tiada sembang dipilih",
   "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "Pilih sembang dalam Sumber. Wawasan memaparkan masa balasan, jam aktiviti, mesej yang dipadam dan kehadiran untuk satu sembang.",
-  "Leave without saving the chat selection?": "Meninggalkan tanpa menyimpan pilihan sembang?"
+  "Leave without saving the chat selection?": "Meninggalkan tanpa menyimpan pilihan sembang?",
+  "{n} account uses public MTProxy servers: its address changes and the connection drops, so messages can be missed.": "{n} akaun menggunakan pelayan MTProxy awam: alamatnya berubah dan sambungan terputus, jadi mesej boleh terlepas.",
+  "{n} accounts use public MTProxy servers: their address changes and the connection drops, so messages can be missed.": {
+    "other": "{n} akaun menggunakan pelayan MTProxy awam: alamatnya berubah dan sambungan terputus, jadi mesej boleh terlepas."
+  },
+  "Move all accounts to WARP": "Pindahkan semua akaun ke WARP",
+  "Move to WARP": "Pindahkan ke WARP"
 }

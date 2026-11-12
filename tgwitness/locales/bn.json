@@ -5144,7 +5144,7 @@
   "2. Prepare and check": "২. প্রস্তুত করুন এবং যাচাই করুন",
   "3. Review and apply": "৩. পর্যালোচনা করুন এবং প্রয়োগ করুন",
   "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\">Cloudflare application terms</a>. Setup reveals this machine's IP to those services. Helpers are checked against SHA-256 hashes bundled with TgWitness. Existing helpers and WARP registration are reused.": "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\"> Cloudflare অ্যাপ্লিকেশন শর্তাবলী</a>। সেটআপ এই মেশিনের IP ঠিকানা উন্মোচন করে ঐ পরিষেবাগুলোর কাছে। হেল্পারগুলো SHA-256 হ্যাশগুলোর বিরুদ্ধে যাচাই করা হয়, যা TgWitness-এর সাথে বান্ডিল করা হয়েছে। বিদ্যমান হেল্পার এবং WARP রেজিস্ট্রেশন পুনর্ব্যবহৃত হয়।",
-  "<strong>Direct</strong><span>This machine's IP</span>": "<strong></strong><span>এই মেশিনের IP</span>",
+  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>সরাসরি</strong><span>এই মেশিনের IP</span>",
   "<strong>My proxy</strong><span>Server or proxy URL</span>": "<strong>আমার প্রক্সি</strong><span>সার্ভার বা প্রক্সি URL</span>",
   "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong>পাবলিক MTProxy</strong><span>স্বয়ংক্রিয় পুল</span>",
   "<strong>VPN</strong><span>Import WireGuard</span>": "<strong>VPN</strong><span>WireGuard আমদানি</span>",
@@ -8825,5 +8825,12 @@
   "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "Insights জার্নাল পড়ে: সরাসরি পর্যবেক্ষিত বার্তা এবং TgWitness-এ লোড করা ইতিহাস। স্বাক্ষরিত রপ্তানি আলাদা ফাইল এবং এখানে পড়া হয় না। চ্যাট ইতিহাস লোড করুন অথবা পর্যবেক্ষণ চালিয়ে রাখুন, তারপর এই চ্যাটটি আবার খুলুন।",
   "No chats selected": "কোনও চ্যাট নির্বাচিত নয়",
   "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "সোর্সেস-এ চ্যাটগুলো নির্বাচন করুন। ইনসাইটস একটি চ্যাটের জন্য উত্তর দেওয়ার সময়, কার্যকলাপের সময়, মুছে ফেলা বার্তা এবং উপস্থিতি দেখায়।",
-  "Leave without saving the chat selection?": "চ্যাট নির্বাচন সংরক্ষণ না করেই ছেড়ে যাব?"
+  "Leave without saving the chat selection?": "চ্যাট নির্বাচন সংরক্ষণ না করেই ছেড়ে যাব?",
+  "{n} account uses public MTProxy servers: its address changes and the connection drops, so messages can be missed.": "{n}টি অ্যাকাউন্ট সর্বজনীন MTProxy সার্ভার ব্যবহার করে: ঠিকানা বদলায় ও সংযোগ বিচ্ছিন্ন হয়, বার্তা হারাতে পারে।",
+  "{n} accounts use public MTProxy servers: their address changes and the connection drops, so messages can be missed.": {
+    "one": "{n}টি অ্যাকাউন্ট সর্বজনীন MTProxy সার্ভার ব্যবহার করে: ঠিকানা বদলায় ও সংযোগ বিচ্ছিন্ন হয়, বার্তা হারাতে পারে।",
+    "other": "{n}টি অ্যাকাউন্ট সর্বজনীন MTProxy সার্ভার ব্যবহার করে: ঠিকানা বদলায় ও সংযোগ বিচ্ছিন্ন হয়, বার্তা হারাতে পারে।"
+  },
+  "Move all accounts to WARP": "সব অ্যাকাউন্ট WARP-এ সরান",
+  "Move to WARP": "WARP-এ সরান"
 }

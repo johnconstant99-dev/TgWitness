@@ -5146,9 +5146,9 @@
   "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\">Cloudflare application terms</a>. Setup reveals this machine's IP to those services. Helpers are checked against SHA-256 hashes bundled with TgWitness. Existing helpers and WARP registration are reused.": "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\">Termos de uso do aplicativo Cloudflare</a>. A configuração revela o IP desta máquina a esses serviços. Os auxiliares são verificados em relação aos hashes SHA-256 incluídos no TgWitness. Os auxiliares existentes e o registro no WARP são reutilizados.",
   "<strong>Direct</strong><span>This machine's IP</span>": "<strong>Direto</strong><span>IP desta máquina</span>",
   "<strong>My proxy</strong><span>Server or proxy URL</span>": "<strong>Meu proxy</strong><span>URL do servidor ou proxy</span>",
-  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong> MTProxy Público </strong> <span> Pool automático </span>",
+  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong>MTProxy Público</strong><span>Pool automático</span>",
   "<strong>VPN</strong><span>Import WireGuard</span>": "<strong> VPN </strong> <span> Importar WireGuard </span>",
-  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong> WARP </strong> <span> Túnel local gerenciado </span>",
+  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong>WARP</strong><span>Túnel local gerenciado</span>",
   "Account group": "Grupo de contas",
   "All accounts": "Todas as contas",
   "Allow direct setup connections to download the pinned helpers from GitHub and, for WARP, register a device with Cloudflare under its terms.": "Permitir conexões diretas de configuração para baixar os auxiliares fixados do GitHub e, para o WARP, registrar um dispositivo no Cloudflare de acordo com os termos de serviço do serviço.",
@@ -8831,5 +8831,13 @@
   "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "O recurso “Insights” lê o diário: mensagens observadas em tempo real e histórico carregado no TgWitness. As exportações assinadas são arquivos separados e não são lidas aqui. Carregue o histórico do chat ou mantenha a observação em andamento e, em seguida, abra esse chat novamente.",
   "No chats selected": "Nenhum chat selecionado",
   "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "Selecione as conversas em “Fontes”. As análises mostram tempos de resposta, horários de atividade, mensagens excluídas e presença para uma conversa.",
-  "Leave without saving the chat selection?": "Sair sem salvar a seleção de conversas?"
+  "Leave without saving the chat selection?": "Sair sem salvar a seleção de conversas?",
+  "{n} account uses public MTProxy servers: its address changes and the connection drops, so messages can be missed.": "{n} conta usa servidores MTProxy públicos: o endereço muda e a conexão cai, então mensagens podem se perder.",
+  "{n} accounts use public MTProxy servers: their address changes and the connection drops, so messages can be missed.": {
+    "one": "{n} conta usa servidores MTProxy públicos: o endereço muda e a conexão cai, então mensagens podem se perder.",
+    "many": "{n} contas usam servidores MTProxy públicos: o endereço muda e a conexão cai, então mensagens podem se perder.",
+    "other": "{n} contas usam servidores MTProxy públicos: o endereço muda e a conexão cai, então mensagens podem se perder."
+  },
+  "Move all accounts to WARP": "Mover todas as contas para o WARP",
+  "Move to WARP": "Mover para o WARP"
 }

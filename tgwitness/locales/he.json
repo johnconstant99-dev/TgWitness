@@ -5171,11 +5171,11 @@
   "2. Prepare and check": "2. הכנה ובדיקה",
   "3. Review and apply": "3. סקירה ויישום",
   "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\">Cloudflare application terms</a>. Setup reveals this machine's IP to those services. Helpers are checked against SHA-256 hashes bundled with TgWitness. Existing helpers and WARP registration are reused.": "<a href=\"https://www.cloudflare.com/application/terms/\" target=\"_blank\" rel=\"noopener noreferrer\"> תנאי השימוש ביישום Cloudflare </a>. ההתקנה חושפת את כתובת ה-IP של מחשב זה לשירותים אלה. עוזרים נבדקים מול חתימות ה-SHA-256 המצורפות ל-TgWitness. עוזרים קיימים ורישום WARP משמשים שוב.",
-  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>Direct</strong><span>כתובת ה-IP של מחשב זה</span>",
+  "<strong>Direct</strong><span>This machine's IP</span>": "<strong>ישיר</strong><span>כתובת ה-IP של מחשב זה</span>",
   "<strong>My proxy</strong><span>Server or proxy URL</span>": "<strong>הפרוקסי שלי</strong><span>כתובת ה-URL של השרת או הפרוקסי</span>",
-  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong> Public MTProxy </strong> <span> Automatic pool </span>",
+  "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong>MTProxy ציבורי</strong><span>מאגר אוטומטי</span>",
   "<strong>VPN</strong><span>Import WireGuard</span>": "<strong> VPN </strong> <span> ייבוא WireGuard </span>",
-  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong> WARP </strong> <span> מנהרה מקומית מנוהלת </span>",
+  "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong>WARP</strong><span>מנהרה מקומית מנוהלת</span>",
   "Account group": "קבוצת חשבונות",
   "All accounts": "כל החשבונות",
   "Allow direct setup connections to download the pinned helpers from GitHub and, for WARP, register a device with Cloudflare under its terms.": "אפשר חיבורים ישירים להגדרה כדי להוריד את העזרים המוצמדים מ-GitHub, ובמקרה של WARP, לרשום מכשיר ב-Cloudflare בהתאם לתנאיו.",
@@ -8870,5 +8870,13 @@
   "Insights read the journal: messages observed live and history loaded into TgWitness. Signed exports are separate files and are not read here. Load the chat history or keep observation running, then open this chat again.": "תובנות קוראות את היומן: הודעות שנצפו בזמן אמת והיסטוריית צ'אטים שהוטענה ל-TgWitness. ייצואים חתומים הם קבצים נפרדים ואינם נקראים כאן. טען את היסטוריית הצ'אט או המשך את התצפית, ואז פתח את הצ'אט הזה שוב.",
   "No chats selected": "לא נבחרו צ'אטים",
   "Select chats in Sources. Insights show reply times, activity hours, deleted messages and presence for one chat.": "בחר צ'אטים תחת \"מקורות\". תובנות מציגות זמני תגובה, שעות פעילות, הודעות שנמחקו ונוכחות עבור צ'אט אחד.",
-  "Leave without saving the chat selection?": "לעזוב מבלי לשמור את בחירת הצ'אטים?"
+  "Leave without saving the chat selection?": "לעזוב מבלי לשמור את בחירת הצ'אטים?",
+  "{n} account uses public MTProxy servers: its address changes and the connection drops, so messages can be missed.": "{n} חשבון משתמש בשרתי MTProxy ציבוריים: הכתובת משתנה והחיבור נקטע, ולכן הודעות עלולות להיחסר.",
+  "{n} accounts use public MTProxy servers: their address changes and the connection drops, so messages can be missed.": {
+    "one": "{n} חשבון משתמש בשרתי MTProxy ציבוריים: הכתובת משתנה והחיבור נקטע, ולכן הודעות עלולות להיחסר.",
+    "two": "{n} חשבונות משתמשים בשרתי MTProxy ציבוריים: הכתובת משתנה והחיבור נקטע, ולכן הודעות עלולות להיחסר.",
+    "other": "{n} חשבונות משתמשים בשרתי MTProxy ציבוריים: הכתובת משתנה והחיבור נקטע, ולכן הודעות עלולות להיחסר."
+  },
+  "Move all accounts to WARP": "העברת כל החשבונות ל-WARP",
+  "Move to WARP": "העברה ל-WARP"
 }
