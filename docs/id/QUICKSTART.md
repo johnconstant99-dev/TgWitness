@@ -104,9 +104,9 @@ Pesan demo bersifat fiktif. Mode demo tidak dapat menghubungkan akun Telegram su
    Pilih **Unduh saja**, **Pantau chat**, atau **Bukti dalam suatu perkara**.
 3. Tinjau hasil pemeriksaan koneksi. Atur proxy Anda sendiri jika perlu; pengaturan koneksi
    tetap tersedia setelah penyiapan.
-4. Di layar **Hubungkan Telegram**, pindai kode QR atau masukkan nomor telepon Anda. Impor berkas
-   dan kunci otorisasi lengkap ada di **Metode masuk lainnya**.
-   Selesaikan konfirmasi Telegram, kode, dan kata sandi dua langkah jika diminta.
+4. Pada **Connect Telegram**, pilih nomor telepon, kode QR, berkas akun (TData, `.session`,
+   StringSession, JSON akun), atau kunci otorisasi lengkap. Lengkapi konfirmasi Telegram, kode,
+   dan kata sandi dua langkah saat diminta.
 5. Periksa akun yang ditampilkan, pilih obrolan, dan tinjau pengaturan Anda. Selesaikan dari layar
    terakhir. Untuk **Unduh saja**, **Mulai ekspor** memulai ekspor satu kali dan membuka bagian Ekspor
    untuk menampilkan progresnya; ini tidak mengaktifkan pemantauan berkelanjutan.

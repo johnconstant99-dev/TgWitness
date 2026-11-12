@@ -63,6 +63,25 @@ async def demo_access(request: Request, *, ctx=Depends(current_context)):
     return {"available": True, "token": ctx.app.state.local_demo_token}
 
 
+async def overview_activity(days: int = 60, *, ctx=Depends(current_context)):
+    from datetime import datetime, timedelta, timezone
+
+    days = max(7, min(366, days))
+    since = (datetime.now(timezone.utc) - timedelta(days=days - 1)).date().isoformat()
+    store = ctx.app.state.store
+    groups = {"message.new": "messages", "message.snapshot": "messages", "message.recovered": "messages",
+              "message.edited": "edits", "message.deleted": "deletions", "message.missing_on_recheck": "deletions"}
+    with store.lock:
+        rows = store.db.execute(
+            "SELECT substr(observed_at,1,10),kind,count(*) FROM events WHERE observed_at>=? AND kind IN ("
+            + ",".join("?" * len(groups)) + ") GROUP BY 1,2", (since, *groups)).fetchall()
+    series = {}
+    for day, kind, count in rows:
+        item = series.setdefault(day, {"day": day, "messages": 0, "edits": 0, "deletions": 0})
+        item[groups[kind]] += count
+    return {"since": since, "days": days, "series": [series[day] for day in sorted(series)]}
+
+
 async def status(request: Request, *, ctx=Depends(current_context)):
     from .. import ai, media_analysis
     from ..operator_privacy import connection_details, status_parts, without_diagnostics

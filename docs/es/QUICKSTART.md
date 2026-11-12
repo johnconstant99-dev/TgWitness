@@ -77,7 +77,10 @@ Los mensajes de la demo son ficticios. El modo demo no puede conectar una cuenta
 1. Si la demo nativa está en ejecución, deténgala y ejecute **Start.cmd** o `sh start.sh`. De lo contrario, mantenga en ejecución la instalación real iniciada antes.
 2. Inicie sesión con el token del panel. Un espacio de trabajo nuevo abre la [configuración inicial](../SETTINGS.md). Elija **Solo descargar**, **Seguir chats** o **Pruebas para un caso**.
 3. Revise la comprobación de conexión. Configure su propio proxy si es necesario; la configuración de conexión sigue disponible después de la configuración inicial.
-4. En **Conectar Telegram**, escanee el código QR o introduzca su número de teléfono. La importación de archivos y la clave de autenticación completa están en **Otros métodos de inicio de sesión**. Complete la confirmación de Telegram, el código y la contraseña de verificación en dos pasos cuando se le soliciten.
+4. En **Connect Telegram**, elige un número de teléfono, un código QR, archivos de cuenta
+   (TData, `.session`, StringSession, JSON de la cuenta) o una clave de autorización completa.
+   Completa la confirmación de Telegram, el código y la contraseña de dos pasos cuando se te
+   solicite.
 5. Compruebe la cuenta mostrada, elija los chats y revise la configuración. Termine desde la pantalla final. Con **Solo descargar**, **Iniciar exportación** inicia una exportación única y abre Exportaciones para mostrar su progreso; no activa la observación continua.
 
 Tras la configuración, **Chats → Seleccione** cambia los chats seleccionados. **Configuración** controla la recopilación y los archivos; **Más herramientas → Fuentes** ofrece la lista detallada de fuentes en el nivel Estándar o Experto. La [guía del panel](../PANEL.md) describe las seis secciones principales y sus controles contextuales.

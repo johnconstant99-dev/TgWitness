@@ -222,6 +222,7 @@ class ReplicaUpdate(replica.ReplicaSettings):
 class Snapshot(BaseModel):
     chat_id: int
     limit: int = Field(default=100, ge=1, le=10000)
+    pause_observation: bool = False
 
 
 class ParametersUpdate(BaseModel):

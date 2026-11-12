@@ -106,6 +106,22 @@ const connectionViewReady=import('./views/connection.js?v=2').then(({createConne
 });
 const accountStateReady=import('./components/account-state.js?v=2').then(module=>{
   accountState=module.accountState;accountActivity=module.accountActivity;});
+let homeView,homeTask;
+const homeReady=Promise.all([import('./views/home.js?v=2'),accountStateReady]).then(([module])=>{
+  homeTask=module.taskInfo;
+  homeView=module.createHome({root:$('home-dashboard'),tr,node,getState:()=>state,accountState,switchProfile,navigate,json,
+    refresh:async()=>{await refreshStatus();await loadProfiles();renderWorkflowControls();},formatTime,busy,toast});
+});
+function busyExplanation(detail,profile){
+  if(typeof detail!=='string'||!detail.startsWith('This account is busy'))return null;
+  const collector=(state.profiles||[]).find(p=>p.id===profile)?.collector||(profile===state.profile?state.status?.collector:null);
+  const info=homeTask?.(collector?.activity);
+  if(!info)return null;
+  const d=collector.activity.detail;
+  const now=collector.activity.task==='chat_export'&&d?tr('Exporting {chat}',{chat:d.title||('#'+d.chat_id)}):tr(info.label);
+  return tr('This account is busy: {task}.',{task:now})+' '+tr('Not available now: {list}',{list:tr(info.blocks)})+'. '
+    +tr('Still available: {list}',{list:tr(info.allows)})+'.'+(info.action?' '+tr('To free it: {action} on the Overview page.',{action:tr(info.action)}):'');
+}
 let disclosurePreview;
 const disclosurePreviewReady=import('./views/disclosure-preview.js?v=2').then(({createDisclosurePreview})=>{
   disclosurePreview=createDisclosurePreview({root:$('view-evidence'),tr,formatTime:accountExportTime});
@@ -177,7 +193,7 @@ async function loadPanelView(view){
   if(view==='system-map'){await systemMapReady;await systemMapView.enter();return;}
   if(view==='board'){await boardReady;await boardView.load();return;}
   if(view==='settings'||view==='first-run'){await settingsHubReady;await settingsHub.load();}
-  else if(view==='start')renderWorkflowControls();
+  else if(view==='start'){await homeReady;await loadProfiles().catch(()=>{});renderWorkflowControls();}
   else if(view==='sources'){await sourcesReady;sourcesView.enter();renderTargets();await loadScope();}
   else if(view==='witness')await loadExtras();
   else if(view==='parameters')await loadParameters();
@@ -584,7 +600,7 @@ async function api(path, body, options={}) {
     if(!allowStale&&revision!==state.workspaceRevision)throw new StaleView();
     if (response.status === 401 && revision===state.workspaceRevision && token===state.token && !$("workspace").hidden) lock();
     if(fetchOptions.signal?.aborted)throw new StaleView();
-    const error=new Error(tr(detail));error.status=response.status;if(parameter)error.parameter=parameter;throw error;
+    const error=new Error(busyExplanation(detail,profile)||tr(detail));error.status=response.status;if(parameter)error.parameter=parameter;throw error;
   }
   return response;
 }
@@ -854,6 +870,7 @@ function renderWorkflowControls(){
   show('workflow-link-card',!state.status.demo&&may('export'));
   show('workflow-account-card',canExport);
   show('workflow-investigation-card',viewAllowed('sources')&&viewAllowed('connection')&&may('collect'));
+  homeView?.render();
   const sources=state.status.targets.filter(target=>target.enabled).length,current=profileEntry()||{};
   const activity=accountActivityText({...current,collector:state.status.collector,sources_enabled:sources}),demo=state.status.demo;
   $('workflow-status-title').textContent=demo?tr('Demo workspace'):activity.title;
@@ -861,8 +878,8 @@ function renderWorkflowControls(){
   $('workflow-status-copy').textContent=[demo?'':current.label,trn('{n} saved record','{n} saved records',state.status.stats.total),
     trn('{n} selected chat','{n} selected chats',sources)].filter(Boolean).join(' · ');
   renderWorkflowGaps(state.status.stats.counts?.['coverage.gap']||0);
-  const exporter=viewQuery('start','[data-workflow="account"]');
-  exporter.textContent=tr(!demo&&activity.observing?'Pause observation and export':'Export my account');
+  const exporter=viewQuery('start','[data-workflow="account-all"]');
+  exporter.textContent=tr(!demo&&activity.observing?'Pause observation and export':'Export everything');
   $('workflow-account-hint').textContent=!demo&&activity.observing?
     tr('Observation pauses for the export. Start it again in Accounts when the export finishes.'):
     !demo&&activity.busy?tr('{task}. The export can start when it finishes.',{task:activity.title}):tr('No continuous observation needed.');
@@ -960,6 +977,19 @@ function importedKeyNotice(id){
   open.addEventListener('click',()=>{void openIndependentSignIn();});
   box.append(node('span','',tr("This workspace's Telegram session key was imported. Copies of it can exist outside Telegram's session list."))," ",open);
 }
+async function exportEverything(){
+  if(!state.me?.admin||!viewAllowed('evidence'))return;
+  if(!state.status.demo&&!accountSignedIn()){state.workflow={profile:state.profile,kind:'account'};await openWorkflowSignIn();return;}
+  const observing=state.status.collector?.activity?.task==='observation';
+  const message=tr("Export everything this account can read: all chats and files, profile photos, stories, contacts and other account data, in every format. The automatic method uses Takeout, or the regular session if Takeout must wait.")
+    +(observing?' '+tr("Observation pauses while the export runs."):'');
+  if(!(await askConfirm(message,{confirmText:tr("Export everything")})))return;
+  if(observing)await json("collector/stop",{});
+  const language=Object.keys(PANEL_LANGUAGES).includes(LANG)?LANG:'en';
+  await json("account-export/start",{...accountExportFallback,report_language:language});
+  selectExportTask('account');await navigate('evidence');exportsView?.select('downloads');await loadAccountExport();
+  toast(tr("Account export started. Progress and omissions appear here; you can leave this page and return."));
+}
 async function openAccountWorkflow(){
   if(!state.me?.admin||!viewAllowed('evidence'))return;
   if(!state.status.demo&&state.status.collector?.running&&!(await pauseForExport(state.profile)))return;
@@ -973,6 +1003,7 @@ async function openAccountWorkflow(){
 }
 panelQueries('[data-workflow]').forEach(button=>button.addEventListener('click',()=>busy(button,async()=>{
   if(button.dataset.workflow==='account'){await openAccountWorkflow();return;}
+  if(button.dataset.workflow==='account-all'){await exportEverything();return;}
   state.workflow=null;
   if(!viewAllowed('sources')||!viewAllowed('connection')||!may('collect'))return;
   if(!accountSignedIn()&&!state.status.demo){await openWorkflowSignIn();return;}
@@ -2088,16 +2119,20 @@ function renderHistory(){
     $("history-workers").value=String(h.options.media_workers);
     $("history-admin").checked=h.options.admin_log;
     $("history-compare").checked=h.options.compare_saved;
+    $("history-observe").checked=!!h.options.observe_after;
   }
   show("history-card",may("sources")&&!s?.chats_limited);
   show("history-start",!active&&!paused);show("history-pause",active);
   show("history-resume",paused);show("history-cancel",active||paused);
   show("history-report",exists&&may("export"));
-  $("history-start").disabled=!!s?.demo||!s?.collector.has_session||!s?.collector.available_for_export||!s?.targets.some(x=>x.enabled);
-  $("history-resume").disabled=!!s?.demo||!s?.collector.has_session||!s?.collector.available_for_export;
+  const observing=s?.collector?.activity?.task==="observation";
+  $("history-start").disabled=!!s?.demo||!s?.collector.has_session||!(s?.collector.available_for_export||observing)||!s?.targets.some(x=>x.enabled);
+  $("history-resume").disabled=!!s?.demo||!s?.collector.has_session||!(s?.collector.available_for_export||observing);
   const busyAccount=!s?.demo&&!!s?.collector.has_session&&!s?.collector.available_for_export&&!active;
   show("history-availability",busyAccount);
-  $("history-availability").textContent=busyAccount?tr("This account is busy. Pause observation or its current task before loading history."):"";
+  $("history-availability").textContent=!busyAccount?"":observing?
+    tr("Observation is running. Loading history pauses it; with the option above it starts again when the history is loaded."):
+    busyExplanation("This account is busy",state.profile)||tr("This account is busy. Pause observation or its current task before loading history.");
   const labels={running:tr("Loading history"),paused:tr("History paused"),complete:tr("History reading finished"),
     incomplete:tr("History finished with gaps"),cancelled:tr("History run ended")};
   const counts=h.sources_by_phase||{},finished=(counts.complete||0)+(counts.failed||0)+(counts.skipped||0);
@@ -2129,7 +2164,11 @@ for(const action of ["start","pause","resume","cancel"]){
   $("history-"+action).addEventListener("click",e=>busy(e.currentTarget,async()=>{
     const options=action==="start"?{transport:$("history-transport").value,
       media_workers:Number($("history-workers").value),admin_log:$("history-admin").checked,
-      compare_saved:$("history-compare").checked}:{};
+      compare_saved:$("history-compare").checked,observe_after:$("history-observe").checked}:{};
+    if(["start","resume"].includes(action)&&state.status?.collector?.activity?.task==="observation"){
+      if(!(await askConfirm(tr("Observation is running on this account. Loading history pauses it. Updates that arrive meanwhile are requested again from the saved position when observation starts. Continue?"),{confirmText:tr("Pause and load history")})))return;
+      await json("collector/stop",{});
+    }
     await json("history/"+action,options);await refreshStatus();await refreshEvents();
   }));
 }
@@ -2305,11 +2344,11 @@ $("chat-export-partial-download").addEventListener("click",e=>saveExport(e.curre
 const accountExportKinds=["private","bot","group","supergroup","channel"];
 const accountExportMedia=["photo","video","video_message","voice","audio","document","sticker","animation"];
 const accountExportFallback={purpose:"",chat_kinds:accountExportKinds,from_utc:null,to_utc:null,chat_ids:[],
-  report_language:'en',export_format:'tgwitness',budget_exhausted:'hashes_only',
+  report_language:'en',export_format:'telegram_both',budget_exhausted:'hashes_only',
   sender_ids:[],text_contains:[],own_messages_only:false,
   include_archived:true,media_types:accountExportMedia,max_media_file_mib:512,max_total_gib:16,
-  include_profile:true,include_contacts:true,include_profile_photos:false,include_stories:false,
-  include_session_metadata:false,include_other_data:false,transport:"takeout"};
+  include_profile:true,include_contacts:true,include_profile_photos:true,include_stories:true,
+  include_session_metadata:true,include_other_data:true,transport:"auto"};
 let accountExportRead=null,accountExportRequest=0,accountExportJobStamp=null;
 for(const id of ['account-export-language','account-disclosure-language']){
   for(const [code,name] of Object.entries(PANEL_LANGUAGES)){
@@ -2336,7 +2375,7 @@ function accountExportDefaults(options){
   const saved={...accountExportFallback,...options};
   $("account-export-purpose").value=saved.purpose||"";
   $('account-export-language').value=saved.report_language||'en';
-  $('account-export-format').value=saved.export_format||'tgwitness';
+  $('account-export-format').value=saved.export_format||'telegram_both';
   for(const input of $("account-export-kinds").querySelectorAll('input[type="checkbox"]'))
     input.checked=saved.chat_kinds.includes(input.value);
   for(const input of $("account-export-media").querySelectorAll('input[type="checkbox"]'))
@@ -2424,7 +2463,7 @@ function renderAccountExportPreview(){
       ['include_profile_photos',tr('Profile photos')],['include_stories',tr('Stories')],
       ['include_session_metadata',tr('Session metadata')],['include_other_data',tr('Other available data')]];
     const other=extras.filter(([key])=>x[key]).map(([,label])=>label).join(', ')||tr('none');
-    const transport=tr(x.transport==='regular'?'Regular session':'Telegram Takeout session');
+    const transport=tr(x.transport==='regular'?'Regular session':x.transport==='auto'?'Automatic':'Telegram Takeout session');
     $('account-export-advanced-summary').textContent=other+' · '+transport;
     box.textContent=tr(all?"All accessible chats of {n} selected types, including Saved Messages when private chats are selected.":
       "{n} selected chat IDs of the chosen types.",{n:all?x.chat_kinds.length:x.chat_ids.length})+" "+
@@ -4256,8 +4295,6 @@ function setAuthMethod(method){
     $("import-result").textContent="";
   }
   authMethod=method;
-  const otherMethods=$("credentials-form").querySelector(".other-sign-in");
-  if(otherMethods&&["files","key"].includes(method))otherMethods.open=true;
   panelQueries("[data-auth-method]").forEach(button=>{
     const selected=button.dataset.authMethod===method;
     button.classList.toggle("active",selected);button.setAttribute("aria-pressed",String(selected));
@@ -5696,12 +5733,19 @@ async function loadHistory(button,limit){
   const chat=state.chat,profile=state.profile,revision=state.workspaceRevision,generation=chatGeneration;
   const current=()=>profile===state.profile&&revision===state.workspaceRevision&&chat===state.chat&&generation===chatGeneration;
   const work=async()=>{
+    let pause=false;
+    if(state.status?.collector?.activity?.task==="observation"){
+      if(!(await askConfirm(tr("Observation is running on this account. Loading messages pauses it for a moment and starts it again right after. Updates from that moment are requested again from the saved position. Continue?"),{confirmText:tr("Load messages")})))return;
+      pause=true;
+    }
     toast(tr("Loading the last {n} messages from Telegram…",{n:limit}));
     try{
-      const r=await json("snapshot",{chat_id:chat,limit},{profile});
+      const r=await json("snapshot",{chat_id:chat,limit,pause_observation:pause},{profile});
       if(!current())return;
       $("chat-history-feedback")?.remove();
-      toast(tr("Loaded {n} messages.",{n:r.captured}));await refreshStatus();await refreshChats();
+      if(r.observation_resumed===false)toast(tr("Messages loaded, but observation did not start again. Start it from the account page."),true);
+      else toast(tr("Loaded {n} messages.",{n:r.captured}));
+      await refreshStatus();await refreshChats();
     }catch(error){
       if(!current()||error instanceof StaleView)return;
       $("chat-history-feedback")?.remove();
@@ -6273,7 +6317,8 @@ async function pollWorkspace(){
     if(!window.TgWitnessLive?.active()&&state.view==="observations" && state.drawerSeq===null && state.eventBefore===null && state.events.length<=200&&window.TgWitnessJournal?.canRefresh()!==false
         && state.status.stats.head?.seq!==head) await refreshEvents();
     if(!window.TgWitnessLive?.active()&&state.view==="chats" && state.status.stats.head?.seq!==head) await refreshChats(true);
-    if(state.view==="accounts"||state.view==="group"||state.view==="start") await loadProfiles();
+    if(state.view==="accounts"||state.view==="group") await loadProfiles();
+    if(state.view==="start") await loadProfiles().catch(()=>{});
     if(state.view==="witness") await loadExtras();
     if(state.view==="access") await loadAccess(true);
     if(state.view==="system-log") await loadConsole();

@@ -144,6 +144,7 @@ POLICY = {
     "PATCH /api/analysis/reports/{report_id}": ("view", "root"),
     "GET /api/analysis/reports/{report_id}/download": ("export", "root"),
     "GET /api/status": ("view", "filter"),
+    "GET /api/overview/activity": ("view", None),
     "GET /api/profiles": ("view", "root"),
     "GET /api/profile-groups": ("view", "root"),
     "GET /api/events": ("view", "filter"),

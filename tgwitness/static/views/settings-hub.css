@@ -50,8 +50,6 @@
 .first-run-body .auth-card .import-formats{display:none}
 .level-pick{max-width:110px;font-size:12px}
 .hub-back-link{display:none}
-html[data-ui-level=simple] .sidebar .nav[data-level=standard],html[data-ui-level=simple] .sidebar .nav[data-level=expert],html[data-ui-level=standard] .sidebar .nav[data-level=expert]{display:none!important}
-html[data-ui-level=simple] #nav-more,html[data-ui-level=simple] .nav-section{display:none!important}
 html[data-ui-level=simple] #setup-start,html[data-ui-level=simple] #mode-onboarding{display:none!important}
 [data-current-view=first-run] #setup-card,[data-current-view=settings] #setup-card{display:none!important}
 .hub-back-link{display:inline-flex}
@@ -81,14 +79,6 @@ html[data-ui-level=simple] #setup-start,html[data-ui-level=simple] #mode-onboard
 #mode-onboarding{display:none!important}
 [data-current-view=first-run] .health-toolbar,[data-current-view=first-run] #mode-switch{display:none!important}
 html[data-ui-level=simple] #mode-switch,html[data-ui-level=standard] #mode-switch{display:none!important}
-.other-sign-in{margin:16px 0;padding:12px;border:1px solid var(--border);border-radius:10px}
-.other-sign-in summary{cursor:pointer;color:var(--muted);font-size:13px}
-.other-sign-in .login-methods{margin-top:12px}
-#credentials-form:has(>.other-sign-in)>.login-methods,.other-sign-in .login-methods{grid-template-columns:repeat(2,minmax(0,1fr))}
-@media(max-width:600px) {
-  .other-sign-in { margin:10px 0; padding:8px; }
-  .other-sign-in .login-methods { margin:8px 0; }
-}
 
 
 .setting-help { display:inline-block; margin-inline-start:8px; position:relative; }

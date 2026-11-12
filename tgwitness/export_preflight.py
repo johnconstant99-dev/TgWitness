@@ -28,6 +28,9 @@ def assess(options, free_bytes):
     if options["transport"] == "takeout":
         issues.append({"code": "approval_not_checked", "severity": "information",
                        "message": "Telegram may require export approval. This preview does not start Takeout or determine its waiting period."})
+    if options["transport"] == "auto":
+        issues.append({"code": "automatic_transport", "severity": "information",
+                       "message": "Takeout is tried first. If Telegram asks to wait for approval, the export continues with the regular session."})
     return {"settings_valid": True, "can_start": not any(i["severity"] == "error" for i in issues),
             "fit": "unknown", "free_disk_bytes": free_bytes, "working_reserve_bytes": RESERVE,
             "media_budget_bytes": options["max_total_gib"] * 1024**3,

@@ -105,9 +105,9 @@ Demo mesajları kurgusaldır. Demo modunda gerçek bir Telegram hesabı bağlana
    **Sadece indir**, **Sohbetleri izle** veya **Bir davaya ilişkin deliller** seçeneğini seçin.
 3. Bağlantı kontrolünün sonucunu inceleyin. Gerekirse kendi proxy'nizi yapılandırın; bağlantı
    ayarlarına kurulumdan sonra da erişebilirsiniz.
-4. **Telegram'ı bağla** adımında QR kodunu tarayın veya telefon numaranızı girin. Dosyadan içe
-   aktarma ve tam yetkilendirme anahtarı **Diğer oturum açma yöntemleri** altındadır.
-   İstendiğinde Telegram onayını tamamlayın, kodu ve iki aşamalı şifreyi girin.
+4. **Connect Telegram** adımında bir telefon numarası, bir QR kodu, hesap dosyaları (TData,
+   `.session`, StringSession, hesap JSON) veya tam bir yetkilendirme anahtarı seçin.
+   İstenildiğinde Telegram onayını, kodu ve iki aşamalı şifreyi girin.
 5. Görüntülenen hesabı kontrol edin, sohbetleri seçin ve ayarlarınızı gözden geçirin. Kurulumu
    son ekrandan tamamlayın. **Sadece indir** seçeneğinde **Dışa aktarmaya başla** düğmesi tek
    seferlik bir dışa aktarma başlatır ve ilerlemesini göstermek için Dışa aktarımlar sayfasını açar;

@@ -4,7 +4,7 @@ import {accountState} from '../components/account-state.js';
 export function createSettingsHub(ctx) {
   const {root, wizardRoot, state, json, tr, node, toast, navigate, askConfirm, $, refreshStatus} = ctx;
   const rank = {simple:0, standard:1, expert:2};
-  const goals = [['copy','📥','Just download','Save chats and files once. Nothing keeps running in the background. The archive shows integrity only and does not meet the minimum for evidence for other people.'],['watch','👁','Follow chats','Keep new messages and their changes, with independent timestamps from a third party that the recipient checks. Needs requests outside Telegram.'],['evidence','⚖','Evidence for a case','Record continuously with independent timestamps from a third party that the recipient checks. Needs requests outside Telegram.']];
+  const goals = [['copy','📥','Just download','Save chats and files once. Nothing keeps running in the background. The archive is signed, and verify.py checks every file in it.'],['watch','👁','Follow chats','Keep new messages and their changes, with independent timestamps from a third party that the recipient checks. Needs requests outside Telegram.'],['evidence','⚖','Evidence for a case','Record continuously with independent timestamps from a third party that the recipient checks. Needs requests outside Telegram.']];
   const goalLevels = {copy:'simple',watch:'standard',evidence:'standard'};
   const routes = [['auto','✨','Automatic','Try WARP, then public proxies.'],['warp','🛡','Cloudflare WARP','Connect through a local tunnel.'],['proxy','🔌','My proxy','Paste one proxy address.'],['direct','🌐','Direct','Telegram will see this server’s address.']];
   const levels = [['simple','🙂','Simple','Only the essentials.'],['standard','⚙','Standard','Common settings and explanations.'],['expert','🛠','Expert','All fields, limits and technical details.']];
@@ -14,7 +14,7 @@ export function createSettingsHub(ctx) {
   let data=null, prefs=null, draft=null, section=null, generation=0, connectionBusy=false, checkTimer=null, statusTimer=null;
   let dialogs=null, moved=[], query='', reveal=new Set(), editing=false;
   let autoTried=false, routeDirty=false, checkFailure=null;
-  let live=null, liveTimer=null, visited=0, recordedStep=null, shownSession=null;
+  let live=null, liveTimer=null, visited=0, recordedStep=null, shownSession=null, methodShown=false;
   let shownStep=null, shownStage=null, levelChosen=false, moreOpen=false;
   let groupScope=null;
   let preferencesQueue=Promise.resolve(), draftQueue=Promise.resolve(), preferencesSequence=0, draftSequence=0, checkSequence=0;
@@ -33,13 +33,6 @@ export function createSettingsHub(ctx) {
     requireOwner(who);const accepted=await askConfirm(message);requireOwner(who);return accepted;
   }
   async function refresh(who){requireOwner(who);await refreshStatus();requireOwner(who);}
-  const auth=ctx.authCard(), primary=auth.querySelector('[data-auth-method="phone"]').parentElement;
-  primary.prepend(auth.querySelector('[data-auth-method="qr"]'));
-  const other=node('details','other-sign-in'), otherTitle=node('summary','',tr('Other sign-in methods'));
-  other.append(otherTitle);
-  const otherMethods=node('div','login-methods');
-  for(const id of ['files','key'])otherMethods.append(auth.querySelector('[data-auth-method="'+id+'"]'));
-  other.append(otherMethods);primary.after(other);other.append($('api-details'));
   const label=(value)=>tr({copy:'Just download',watch:'Follow chats',evidence:'Evidence',photos:'Photos up to 20 MB',
     short_media:'Photos and videos up to 60 seconds / 20 MB',all:'All files up to 1 GB',custom:'Custom file limits',
     auto:'Automatic',hide:'No, hide it',simple:'Simple',standard:'Standard',expert:'Expert',
@@ -257,7 +250,7 @@ export function createSettingsHub(ctx) {
         cards(detail,goals,data.goal,async goal=>{await applyGoal(goal,{keep:keep.checked});render();});
       }
       if(section==='connection')connectionForm(detail,false);
-      if(section==='telegram'){move(ctx.authCard(),detail);ctx.authMethod('qr');}
+      if(section==='telegram')move(ctx.authCard(),detail);
       if(section==='chats'){detail.append(message('Choose all chats, individual chats or a Telegram folder.'));
         detail.append(button('Choose chats',async()=>{await saveDraft({step:6,unchecked:true});await navigate('first-run');}));}
       const fields=data.fields.filter(f=>f.section===section&&f.key!=='ip');
@@ -475,9 +468,10 @@ export function createSettingsHub(ctx) {
     if(draft.step===4)connectionForm(body,true);
     if(draft.step===5){
       shownSession=signedIn();
+      accountQuestion(body);
       if(shownSession)body.append(message('Telegram is connected.','notice success'));
-      move(ctx.authCard(),body);if(!shownSession)ctx.authMethod('qr');
-      if(draft.goal!=='copy')accountQuestion(body);
+      move(ctx.authCard(),body);
+      if(!shownSession&&!methodShown){methodShown=true;ctx.authMethod(draft.account_kind==='main'?'qr':'files');}
     }
     if(draft.step===6){
       const main=draft.goal!=='copy'&&draft.account_kind==='main';
@@ -543,15 +537,18 @@ export function createSettingsHub(ctx) {
   }
   function accountQuestion(box){
     box.append(node('h2','',tr('Is this a separate account or your main one?')));
-    cards(box,[['dedicated','🧪','A separate account','Made for recording: it joins only the chats you want to keep.'],
-      ['main','👤','My main account','The account you use every day.']],draft.account_kind,async kind=>{
+    cards(box,[['dedicated','🧪','A separate account','Recommended. Made for recording: it joins only the chats you want to keep, and losing it costs nothing.'],
+      ['main','👤','My main account','Not recommended: the account you use every day.']],draft.account_kind,async kind=>{
       draft.account_kind=kind;if(kind==='main'&&draft.scope!=='selected')draft.scope='selected';
       await saveDraft();await renderWizard();
     });
     const why=node('details','setting-help-block');why.append(node('summary','',tr('Why a separate account?')),
       message('Recording sees everything the account sees, including private chats of other people. A separate account keeps your own chats out of the journal and does not risk your main account.'));
     box.append(why);
-    if(draft.account_kind==='main')box.append(message('Your own private chats can end up in the journal and in exports. Only chosen chats can be recorded on a main account; the whole account and folders stay off. The protection scale counts a main account as a penalty.','notice warning'));
+    if(draft.account_kind==='main'){
+      box.append(message('Telegram can restrict, freeze or ban an account that works through an unofficial API client, and a main account is hard to replace. Your own private chats can also end up in the journal and in exports. Only chosen chats can be recorded on a main account; the whole account and folders stay off. The protection scale counts a main account as a penalty.','notice warning'));
+      box.append(message('For an account you cannot lose, use Official Web or Trusted Live under Independent capture: they record through the official Telegram client and make no API calls of their own.'));
+    }
   }
   function liveParts(){const h=state.status?.health||{};return ['connection','intake','sources','media'].map(name=>({name,...(h[name]||{state:'unknown'})}));}
   function renderLive(page){
@@ -603,7 +600,7 @@ export function createSettingsHub(ctx) {
       if(state.view==='first-run'&&draft?.step===5&&!live&&shownSession!==null&&session!==shownSession)void renderWizard();
       shownSession=session;
     },
-    reset(){generation++;checkSequence++;clearTimeout(checkTimer);clearTimeout(statusTimer);clearTimeout(liveTimer);restoreMoved();data=prefs=draft=dialogs=null;live=null;groupScope=null;groupView.reset();visited=0;recordedStep=shownSession=shownStep=shownStage=null;levelChosen=moreOpen=false;connectionBusy=false;editing=false;autoTried=routeDirty=false;checkFailure=null;preferencesQueue=draftQueue=Promise.resolve();},
+    reset(){generation++;checkSequence++;clearTimeout(checkTimer);clearTimeout(statusTimer);clearTimeout(liveTimer);restoreMoved();data=prefs=draft=dialogs=null;live=null;groupScope=null;groupView.reset();visited=0;recordedStep=shownSession=shownStep=shownStage=null;levelChosen=moreOpen=methodShown=false;connectionBusy=false;editing=false;autoTried=routeDirty=false;checkFailure=null;preferencesQueue=draftQueue=Promise.resolve();},
     async refreshPreferences(patch){if(prefs)await savePreferences(patch);},
   };
 }

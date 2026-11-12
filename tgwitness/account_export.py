@@ -21,19 +21,21 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from telethon import errors
 from telethon.tl import types
 
-from . import account_export_transport as transport, account_report, file_hashes, account_attachment_cache
+from . import account_export_transport as transport, account_report, activity_maps, file_hashes, account_attachment_cache
 from .evidence import producer
 from . import verification_kit
 from .monitoring import MediaRule
 from .security import private_write
 from .store import ZERO, canonical, utcnow
-from .verify import fingerprint, validate_server_hashes
+from .verify import MessageGaps, fingerprint, gap_scope, validate_server_hashes
 from .workers import complete_in_thread
 from .telegram_client import FLOOD_ERRORS
 
 KINDS = ("private", "bot", "group", "supergroup", "channel")
 MEDIA = ("photo", "video", "video_message", "voice", "audio", "document", "sticker", "animation")
 JOB_ID = re.compile(r"[a-f0-9]{32}")
+CATEGORY_OPTIONS = {"profile": "include_profile", "contacts": "include_contacts", "sessions": "include_session_metadata",
+                    "profile_photos": "include_profile_photos", "stories": "include_stories", "other_data": "include_other_data"}
 LIMITATIONS = [
     "A snapshot of the data Telegram returned to this account during the recorded acquisition intervals, signed with the collector key in the manifest.",
     "Messages appear in the version Telegram returned at acquisition; live recording keeps earlier versions and deletion notices, and Sources → Pseudo-secret keeps Secret Chats.",
@@ -45,9 +47,9 @@ LIMITATIONS = [
 
 class AccountExportOptions(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    transport: Literal["takeout", "regular"] = "takeout"
+    transport: Literal["auto", "takeout", "regular"] = "auto"
     messages_first: bool = True
-    export_format: Literal["tgwitness", "telegram_json", "telegram_html", "telegram_both"] = "tgwitness"
+    export_format: Literal["tgwitness", "telegram_json", "telegram_html", "telegram_both"] = "telegram_both"
     chat_kinds: list[Literal[KINDS]] = Field(default_factory=lambda: list(KINDS), max_length=len(KINDS))
     chat_ids: list[int] = Field(default_factory=list, max_length=10000)
     sender_ids: list[int] = Field(default_factory=list, max_length=10000)
@@ -69,10 +71,10 @@ class AccountExportOptions(BaseModel):
     budget_exhausted: Literal["stop_files", "hashes_only"] = "hashes_only"
     include_profile: bool = True
     include_contacts: bool = True
-    include_profile_photos: bool = False
-    include_stories: bool = False
-    include_session_metadata: bool = False
-    include_other_data: bool = False
+    include_profile_photos: bool = True
+    include_stories: bool = True
+    include_session_metadata: bool = True
+    include_other_data: bool = True
 
     @field_validator("report_language")
     @classmethod
@@ -316,7 +318,7 @@ class AccountExport:
             raise ValueError(" ".join(item["message"] for item in assessment["issues"] if item["severity"] == "error"))
         if self.busy():
             raise ValueError("An account export is already running. Pause it first.")
-        if options["transport"] == "takeout":
+        if options["transport"] in ("auto", "takeout"):
             for job in self.list_jobs():
                 if not self.vault.read("account-export-" + job["id"]).get("takeout_id"):
                     continue
@@ -414,7 +416,7 @@ class AccountExport:
 
     def complete(self):
         coverage = self.current.get("coverage", {})
-        return bool(coverage.get("inventory_complete") and not coverage.get("failures")
+        return bool(coverage.get("inventory_complete") and not coverage.get("failures") and not coverage.get("omitted")
                     and coverage.get("tasks_done") == coverage.get("tasks_total"))
 
     def packaging_reserve(self, extra_records=0, extra_media=0):
@@ -638,10 +640,14 @@ class AccountExport:
                 status[1] += bool(page and page["terminal"] and page["outcome"] == "ok")
         self.current["counts"] = {**self.counts, "chats_discovered": discovered, "chats_selected": len(selected),
             "chats_done": sum(total == done for total, done in chat_tasks.values())}
+        options = self.current.get("options") or {}
+        omitted = sum(1 for chat in selected if not any(task.get("chat_id") == chat["id"] for task in tasks)) + sum(
+            1 for category, option in CATEGORY_OPTIONS.items()
+            if options.get(option) is True and not any(task["category"] == category for task in tasks))
         self.current["coverage"] = {"inventory_complete": self.inventory["discovery_complete"],
             "tasks_total": len(tasks), "tasks_done": sum(bool(p["terminal"]) and p["outcome"] == "ok"
                                                           for p in self.progress.values()),
-            "failures": self.failures + len(self.inventory["gaps"]),
+            "failures": self.failures + len(self.inventory["gaps"]), "omitted": omitted,
             "scope": "visible to this account during the recorded acquisition intervals"}
         self.current["omissions"] = self.inventory["gaps"][:100]
 
@@ -812,19 +818,46 @@ class AccountExport:
         self.update_counts()
         self.persist()
 
+    def transport_mode(self, job):
+        chosen = job["options"]["transport"]
+        if chosen != "auto":
+            return chosen
+        recorded = (self.inventory or {}).get("transport")
+        if recorded in ("takeout", "regular"):
+            return recorded
+        return "regular" if self.vault.read("account-export-" + job["job_id"]).get("takeout_declined") else "takeout"
+
     async def run(self, job):
-        directory, options = self.directory(job["job_id"]), job["options"]
-        network = self.transport_factory(self.collector, self.vault, job["job_id"], options)
+        directory, network = self.directory(job["job_id"]), None
         try:
             await complete_in_thread(self.recover, job)
-            await self.retry(network.open)
+            mode = self.transport_mode(job)
+            options = {**job["options"], "transport": mode}
+            network = self.transport_factory(self.collector, self.vault, job["job_id"], options)
+            try:
+                await self.retry(network.open)
+            except errors.TakeoutInitDelayError as exc:
+                if job["options"]["transport"] != "auto" or self.inventory is not None:
+                    raise
+                secret = self.vault.read("account-export-" + job["job_id"])
+                self.vault.save("account-export-" + job["job_id"], {**secret, "takeout_declined": exc.seconds})
+                self.store.append("account_export.transport", {"job_id": job["job_id"], "transport": "regular",
+                    "reason": "takeout_approval_wait", "takeout_wait_seconds": exc.seconds,
+                    "meaning": "Telegram asked to wait before a Takeout export; the automatic method continued with "
+                               "the regular session instead."})
+                options = {**job["options"], "transport": "regular"}
+                network = self.transport_factory(self.collector, self.vault, job["job_id"], options)
+                await self.retry(network.open)
             self.transport_generation = getattr(network, "secret", {}).get("generation", 0)
             if network.account_id != job["account_id"]:
                 raise ValueError("The connected account differs from this export's signed account.")
             if self.inventory is None:
                 chats, tasks, gaps = await self.retry(network.discover)
+                if job["options"]["transport"] == "auto" and options["transport"] == "regular":
+                    gaps = ["Telegram asked to wait before a Takeout export; this export used the regular session."] + gaps
                 inventory = {"format": "tgwitness-account-export-inventory-v1", "public_key": self.vault.public_key,
                     "job_id": job["job_id"], "account_id": job["account_id"], "options_sha256": job["options_sha256"],
+                    "transport": options["transport"],
                     "observed_at": utcnow(), "chats": chats, "tasks": tasks, "discovery_complete": True, "gaps": gaps,
                     "discovery_counts": getattr(network, "discovery_counts", {"chats_discovered": len(chats), "chats_excluded": 0})}
                 durable_write(directory / "inventory.json", canonical(self.signed(inventory)))
@@ -835,7 +868,7 @@ class AccountExport:
             self.persist()
             if options.get("messages_first", False):
                 from .account_acquisition import StagedTransport
-                network = StagedTransport(network, self, job)
+                network = StagedTransport(network, self, {**job, "options": options})
                 await network.prepare()
             for task in self.inventory["tasks"]:
                 previous = self.progress.get(task["id"])
@@ -905,7 +938,7 @@ class AccountExport:
             self.store.append("account_export.completed", {"job_id": job["job_id"], "receipt_head_sha256": self.head,
                 "counts": self.counts, "complete_within_scope": self.current["phase"] == "done"})
         except errors.TakeoutInvalidError:
-            if hasattr(network, "invalidate"):
+            if network is not None and hasattr(network, "invalidate"):
                 network.invalidate()
             self.current.update(phase="paused", error="Telegram ended the Takeout session. Resume creates a new "
                 "Takeout session with the same options and checks that the saved pagination ranges still apply.")
@@ -1003,6 +1036,16 @@ class AccountExport:
                     if hashes[name] != name.removeprefix("media/"):
                         raise ValueError("An attachment changed while packaging.")
                 selected = [c for c in self.inventory["chats"] if c["selected"]]
+                gap_scan, activity = MessageGaps(gap_scope(job["options"], self.inventory)), activity_maps.ActivityMap()
+                for chat in selected:
+                    for data_file in message_pages.get(chat["id"], ()):
+                        with (directory / data_file).open("rb") as stream:
+                            for raw in stream:
+                                row = json.loads(raw)
+                                gap_scan.add(chat["id"], chat.get("kind"), row)
+                                activity.add(chat["id"], chat.get("kind"), row)
+                gap_map = gap_scan.result()
+                write("message-gaps.json", [canonical(gap_map)])
                 report_context = {"report_language": job["options"].get("report_language", "en"), "archive": True,
                     "presentation": job["options"].get("report_presentation", {}),
                     "archive_reference": job["job_id"], "requested_at": job["created_at"],
@@ -1022,12 +1065,16 @@ class AccountExport:
                     for row in message_rows():
                         analytics.snapshot(row, chat)
                         chat_analytics.snapshot(row, chat)
-                    context = {**report_context, "analytics": account_report.snapshot_analytics.project(chat_analytics.result(), report_context["presentation"])}
                     display_chat = {**chat, "message_count": chat_counts.get(chat["id"], 0)}
+                    context = {**report_context, "analytics": account_report.snapshot_analytics.project(chat_analytics.result(), report_context["presentation"]),
+                               "chat_map": account_report.chat_map(report_context, activity, gap_map, display_chat),
+                               "gap_markers": activity_maps.MarkerPlacer(activity_maps.markers(gap_map, chat["id"], chat.get("kind")))}
                     for name, content in account_report.account_chat_pages(context, display_chat, message_rows):
                         write(name, content)
                 report_context["analytics"] = account_report.snapshot_analytics.project(analytics.result(), report_context["presentation"])
                 write("analytics.json", [canonical(report_context["analytics"])])
+                write("map.html", account_report.account_map_page(report_context, activity, gap_map, selected))
+                report_context["activity_map"] = "map.html"
                 write("index.html", account_report.account_index(report_context,
                     ({**chat, "message_count": chat_counts.get(chat["id"], 0)} for chat in selected)))
                 if job["options"].get("export_format", "tgwitness") != "tgwitness":

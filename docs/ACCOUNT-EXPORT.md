@@ -11,7 +11,9 @@ As the installation administrator, choose **Home → Export my account**, or **E
 
 Sender and text filters expand under **Filter by sender or message text**. **Account data & connection method** contains optional account categories and the Takeout/regular-session choice; its summary shows the active choices even when closed. Closing these sections keeps their settings. Export and report drafts remain in the current panel session while changing views; they are not saved through a browser reload. Existing jobs remain reachable from either export choice.
 
-This workflow exports data currently accessible to the connected account. The default uses [Telegram Takeout](https://core.telegram.org/api/takeout), which returns the accessible history in its current state. Secret Chats are recorded live by the [Secret Chat module](PSEUDO-SECRET.md), and edits by live observation. Telegram can impose a waiting period before Takeout starts. The panel displays that wait; it does not silently switch transport. The explicit regular-API option has different coverage and records unsupported categories.
+This workflow exports data currently accessible to the connected account. The default **Automatic** method starts with [Telegram Takeout](https://core.telegram.org/api/takeout), which returns the accessible history in its current state, including left channels, saved contacts and other account data. If Telegram imposes a waiting period before Takeout starts, Automatic continues at once with the regular session; the journal records `account_export.transport` and the signed inventory names the method used and lists the change as an omission. **Telegram Takeout session only** waits for the approval instead, and **Regular session only** never asks for Takeout. Secret Chats are recorded live by the [Secret Chat module](PSEUDO-SECRET.md), and edits by live observation. The regular session has different coverage and records unsupported categories.
+
+**Home → Export everything** starts an export with every chat kind, every attachment type, the profile, contacts, profile photos, stories, session metadata and other account data, in all formats: the signed TgWitness archive with Telegram Desktop JSON and HTML views. **Choose what to export** opens the form below with the same defaults.
 
 Takeout is the official export API also used by Telegram Desktop. TgWitness can write
 Desktop-compatible JSON directly from its own acquisition; importing someone else's
@@ -52,9 +54,27 @@ and API credentials are not rotated to bypass a rate limit. No Premium purchase 
 
 The **Minimize collection** preset disables files and account metadata. Sender/content filters apply before retained message pages and media downloads. Telegram still transmits API history pages containing messages needed to evaluate those filters: filtering is not a promise that unselected messages never enter process memory. Other ongoing observation in the workspace has its own scope and retention settings.
 
-Profile-photo history and stories are not selected by default. Disable profile and contacts as well when the case needs messages only. If attachments or metadata are unnecessary, excluding them during acquisition avoids retaining another private copy in this export.
+Profile-photo history, stories, session metadata and other account data are selected by default. Disable them, and the profile and contacts, when the case needs messages only. If attachments or metadata are unnecessary, excluding them during acquisition avoids retaining another private copy in this export.
 
 Photo payloads use the still-image variant identified in their metadata and hash manifests, including photos with an animated avatar variant. That animation is not substituted for the selected still image. A shorter or longer payload than the observed size is recorded as a failed attachment, and a changed representation during file-reference renewal is rejected. These failures leave the archive partial while retaining the message records. Independent verification also rejects saved attachments whose signed length contradicts their observed size or representation, including in older archives.
+
+## Message numbers and activity map
+
+Every account archive contains `message-gaps.json` and `map.html`. Channels and supergroups
+number their messages per chat, so each absent number between the first and last exported
+message is a message of that chat. Private chats, bots and basic groups share one number
+sequence for the whole account: an absent number there belonged to some chat. Its chat is
+proven when an exported reply or pin points at the number; otherwise it is estimated from
+which chats were active in the time between the neighbouring messages, and the remainder is
+attributed to chats not in the export. Each run carries its time window, neighbours, the
+shares per chat and a confidence label. A limited scope (filters, unselected chats) is
+stated, because absent numbers then include messages outside the selection.
+
+`map.html` shows a calendar, chats over time and weekday-by-hour grids for messages and for
+absent numbers, with tables of every chat and the largest runs. Chat pages show their own
+calendar, participants over time for groups, and a mark in the transcript where messages are
+absent. `verify.py` recomputes `message-gaps.json` from the signed pages and rejects a
+changed file.
 
 ## Resume, coverage and verification
 

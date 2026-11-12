@@ -77,7 +77,10 @@ As mensagens da demonstração são fictícias. O modo de demonstração não co
 1. Se a demonstração nativa estiver em execução, interrompa-a e execute **Start.cmd** ou `sh start.sh`. Caso contrário, mantenha em execução a instalação real iniciada acima.
 2. Entre com o token do painel. Um espaço de trabalho novo abre a [configuração inicial](../SETTINGS.md). Escolha **Só baixar**, **Acompanhar chats** ou **Provas para um caso**.
 3. Revise a verificação de conexão. Configure seu próprio proxy, se necessário; as configurações de conexão continuam disponíveis após a configuração inicial.
-4. Em **Conectar o Telegram**, escaneie o código QR ou digite seu número de telefone. A importação de arquivos e a chave de autenticação completa ficam em **Outros métodos de login**. Conclua a confirmação no Telegram, o código e a senha de verificação em duas etapas quando solicitados.
+4. Em **Conectar Telegram**, escolha um número de telefone, um código QR, arquivos de conta
+   (TData, `.session`, StringSession, JSON da conta) ou uma chave de autorização completa.
+   Conclua a confirmação do Telegram, insira o código e a senha de duas etapas quando
+   solicitado.
 5. Confira a conta exibida, escolha os chats e revise suas configurações. Conclua na tela final. Em **Só baixar**, **Iniciar exportação** inicia uma exportação única e abre Exportações para mostrar o progresso; isso não ativa a observação contínua.
 
 Depois da configuração, **Conversas → Escolha** altera os chats selecionados. **Configurações** controla a coleta e os arquivos; **Mais ferramentas → Fontes** traz a lista detalhada de fontes no nível Padrão ou Especialista. O [guia do painel](../PANEL.md) descreve as seis seções principais e seus controles contextuais.

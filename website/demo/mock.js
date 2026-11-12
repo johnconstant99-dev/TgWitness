@@ -70,6 +70,25 @@
       matched: counted ? matches.length : null, count_exact: counted};
   }
 
+  function activity(all) {
+    const groups = {"message.new": "messages", "message.snapshot": "messages", "message.recovered": "messages",
+      "message.edited": "edits", "message.deleted": "deletions", "message.missing_on_recheck": "deletions"};
+    const known = new Map(), days = new Map();
+    for (const [key, answer] of Object.entries(all)) {
+      if (!/\/api\/events(\?|$)/.test(key)) continue;
+      for (const event of JSON.parse(answer.text).events) known.set(event.seq, event);
+    }
+    const last = Math.max(Date.now(), ...[...known.values()].map(e => Date.parse(e.observed_at) || 0));
+    const since = new Date(last - 59 * 86400000).toISOString().slice(0, 10);
+    for (const event of known.values()) {
+      const group = groups[event.kind], day = (event.observed_at || "").slice(0, 10);
+      if (!group || day < since) continue;
+      const item = days.get(day) || {day, messages: 0, edits: 0, deletions: 0};
+      item[group]++; days.set(day, item);
+    }
+    return {since, days: 60, series: [...days.values()].sort((a, b) => a.day.localeCompare(b.day))};
+  }
+
   function chatMessages(all, path, params) {
     const known = new Map(); let included = false;
     for (const [key, answer] of Object.entries(all)) {
@@ -118,6 +137,7 @@
     }
     if (all[path + url.search]) return recorded(all[path + url.search]);
     if (path.endsWith("/api/events")) return json(200, events(all, url.searchParams));
+    if (path.endsWith("/api/overview/activity")) return json(200, activity(all));
     if (all[path]) return recorded(all[path]);
     return json(404, {detail: MISSING});
   };

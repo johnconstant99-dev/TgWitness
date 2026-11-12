@@ -1,5 +1,6 @@
 from .chain import canonical, fingerprint
 from .coverage import parse_time
+from .gaps import MessageGaps, gap_lines, gap_scope, gaps_match
 from .reports import check_sums
 from .common import (
     Ed25519PublicKey,
@@ -281,6 +282,7 @@ class AccountExportCheck:
         seen.execute("CREATE TABLE messages (chat INTEGER, id INTEGER, PRIMARY KEY (chat, id)) WITHOUT ROWID")
         self.data_files, self.media_files, self.failed_attachments, self.failed_pages, self.messages_seen = set(), set(), 0, 0, 0
         self.previous = "0" * 64
+        self.gaps = MessageGaps(gap_scope(self.options, self.inventory))
         self.since = account_export_timestamp(self.options["from_utc"], "from_utc") if self.options.get("from_utc") else None
         self.until = account_export_timestamp(self.options["to_utc"], "to_utc") if self.options.get("to_utc") else None
         try:
@@ -365,6 +367,7 @@ class AccountExportCheck:
             except sqlite3.IntegrityError:
                 raise ValueError("Duplicate account export message") from None
             self.counts["messages"] += 1
+            self.gaps.add(task["chat_id"], self.chats[task["chat_id"]].get("kind"), record)
         self.verify_attachments(record)
         return last_id
 
@@ -441,6 +444,17 @@ class AccountExportCheck:
             raise ValueError("Account export seen-message summary mismatch")
         if "media_hashed" in declared_counts:
             self.counts["media_hashed"] = self.media_hashed
+        gaps = None
+        if "message-gaps.json" in self.files:
+            computed = self.gaps.result()
+            if not gaps_match(strict_json(read_member(self.archive, "message-gaps.json", MAX_JSON_BYTES)), computed,
+                              self.gaps.borderline):
+                raise ValueError("message-gaps.json differs from the message numbers in the signed pages")
+            shared = computed["shared"]
+            gaps = {"scope": computed["scope"], "lines": gap_lines(computed),
+                    "shared": {key: shared[key] for key in ("messages", "absent", "runs", "proven", "below_first")},
+                    "anomalies": shared["conflicts"]["count"] + shared["time_inversions"]["count"],
+                    "channels_absent": sum(chat["absent"] for chat in computed["chats"])}
         done = sum(state["terminal"] and state["ok"] for state in self.tasks.values())
         failed_tasks = [name for name, state in self.tasks.items() if not state["ok"]]
         coverage = self.manifest["coverage"]
@@ -468,7 +482,7 @@ class AccountExportCheck:
                     "failed_pages": self.failed_pages, "failed_attachments": self.failed_attachments,
                     "gaps": self.inventory["gaps"] + self.inventory_omissions},
                 "complete_within_scope": complete, "source_completeness_established": False,
-                "html_index_signed_by_manifest": "index.html" in self.files,
+                "html_index_signed_by_manifest": "index.html" in self.files, "message_gaps": gaps,
                 "meaning": "Integrity is checked relative to the signing key. Completion covers the frozen selected "
                            "tasks and their observed outcomes."}
 
@@ -538,6 +552,8 @@ def account_export_lines(result):
         lines.append("Failed pages: " + str(coverage["failed_pages"]) + "; failed attachments: "
                      + str(coverage["failed_attachments"]) + ".")
     lines += ["Inventory gap: " + str(gap) for gap in coverage["gaps"]]
+    if result.get("message_gaps"):
+        lines += ["Message numbers: " + line for line in result["message_gaps"]["lines"]]
     if result["html_index_signed_by_manifest"]:
         lines.append("The HTML index is protected by the signed archive manifest; a separate browser printout is not signed.")
     return lines

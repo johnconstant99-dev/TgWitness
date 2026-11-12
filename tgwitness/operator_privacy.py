@@ -33,7 +33,7 @@ COLLECTOR_FIELDS = frozenset((
     "phase", "running", "connected", "has_session", "authorization_required", "account",
     "last_heartbeat", "media_pending", "media_jobs", "oldest_pending_media_at", "source_status",
     "last_update_at", "chat_export", "recheck", "storage_low", "scope", "rpc_backoff_until",
-    "reconnect_attempts", "next_reconnect_at", "recheck_enabled", "recheck_interval_minutes",
+    "reconnect_attempts", "next_reconnect_at", "recheck_enabled", "recheck_interval_minutes", "activity",
 ))
 HEALTH_FIELDS = frozenset((
     "state", "reason", "phase", "attempts", "next_reconnect_at", "telegram_pause_until", "telegram_pause_method",

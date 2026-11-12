@@ -9,7 +9,7 @@ function goalName(tr, goal) {
 
 function goalNote(tr, goal) {
   return {
-    personal: () => tr("For yourself the signed journal is usually enough. Without independent timestamps it shows integrity only and does not meet the minimum for evidence for other people. Turning them on later fixes that for new exports. They are free, and only checkpoint hashes are sent to timestamp services."),
+    personal: () => tr("For yourself the signed journal is usually enough. Independent timestamps add a time proof from a third party; they are free, and only checkpoint hashes are sent to timestamp services."),
     investigation: () => tr("Independent timestamps from a third party date what you collected, and the recipient checks them. This needs requests outside Telegram. The device list shows whether anyone else used the account. Notifications and an off-site copy keep collection going and the record safe."),
     evidence: () => tr("Everything an outsider can check is on, including independent timestamps from a third party that the recipient checks. This needs requests outside Telegram. For the strongest record, collect on a sealed server around the clock and keep a locked off-site copy."),
   }[goal]?.() || "";

@@ -137,8 +137,26 @@ class History:
             for target in targets:
                 history_cursor.seal(self.store, run_id, target["chat_id"])
         self.task = asyncio.create_task(self.run(run_id))
-        self.task.add_done_callback(lambda _: self.collector.release_export("history:" + run_id))
+        self.task.add_done_callback(lambda task: self.finished(run_id, task))
         return self.status()
+
+    def finished(self, run_id, task):
+        self.collector.release_export("history:" + run_id)
+        run = self.current()
+        if (task.cancelled() or not run or run["id"] != run_id or run["phase"] not in ("complete", "incomplete")
+                or not options_of(run).observe_after or self.collector.running):
+            return
+        self.observe_task = asyncio.create_task(self.observe_after(run_id))
+
+    async def observe_after(self, run_id):
+        try:
+            await self.collector.start()
+        except Exception as exc:
+            self.store.append("history.observation_not_started", {
+                "history_run_id": run_id, "error": str(exc) if isinstance(exc, ValueError) else type(exc).__name__})
+            return
+        self.store.append("history.observation_started", {"history_run_id": run_id,
+            "meaning": "Observation started automatically after the history run, as chosen at its start."})
 
     def transition(self, run_id, phase, reason=None):
         with self.store.transaction():
@@ -162,7 +180,7 @@ class History:
             self.store.recover_media()
             self.transition(run["id"], "running", "operator_resume")
             self.task = asyncio.create_task(self.run(run["id"]))
-            self.task.add_done_callback(lambda _: self.collector.release_export(owner))
+            self.task.add_done_callback(lambda task, run_id=run["id"]: self.finished(run_id, task))
         except BaseException:
             self.collector.release_export(owner)
             raise

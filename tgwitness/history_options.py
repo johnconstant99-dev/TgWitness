@@ -9,6 +9,7 @@ class HistoryOptions(BaseModel):
     media_workers: int = Field(default=2, ge=1, le=5)
     admin_log: bool = True
     compare_saved: bool = True
+    observe_after: bool = False
 
 
 def options_of(run):

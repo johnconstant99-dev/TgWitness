@@ -77,7 +77,9 @@ Tin nhắn trong bản demo là hư cấu. Chế độ demo không thể kết n
 1. Nếu bản demo chạy trực tiếp (native) đang chạy, hãy dừng nó rồi chạy **Start.cmd** hoặc `sh start.sh`. Nếu không, hãy để bản cài đặt thực đã khởi động ở trên tiếp tục chạy.
 2. Dùng mã thông báo bảng điều khiển để đăng nhập. Một không gian làm việc mới sẽ mở phần [thiết lập ban đầu](../SETTINGS.md). Chọn **Chỉ tải xuống**, **Theo dõi cuộc trò chuyện** hoặc **Bằng chứng cho một vụ án**.
 3. Xem lại kết quả kiểm tra kết nối. Nếu cần, hãy cấu hình proxy của riêng bạn; cài đặt kết nối vẫn khả dụng sau khi hoàn tất thiết lập.
-4. Ở bước **Kết nối Telegram**, quét mã QR hoặc nhập số điện thoại. Nhập từ tệp và khóa xác thực đầy đủ nằm trong **Cách đăng nhập khác**. Hoàn tất bước xác nhận của Telegram, mã xác thực và mật khẩu xác thực hai bước khi được yêu cầu.
+4. Tại **Connect Telegram**, hãy chọn số điện thoại, mã QR, tệp tài khoản (TData, `.session`,
+   StringSession, tệp JSON tài khoản) hoặc khóa ủy quyền hoàn chỉnh. Hoàn tất xác nhận
+   Telegram, nhập mã và mật khẩu xác thực hai bước khi được yêu cầu.
 5. Kiểm tra tài khoản được hiển thị, chọn các cuộc trò chuyện và xem lại cài đặt. Hoàn tất ở màn hình cuối cùng. Với **Chỉ tải xuống**, **Bắt đầu xuất** sẽ chạy một lần xuất duy nhất và mở mục Xuất dữ liệu để hiển thị tiến độ; thao tác này không bật quan sát liên tục.
 
 Sau khi thiết lập, **Cuộc trò chuyện → Chọn** dùng để thay đổi các cuộc trò chuyện đã chọn. **Cài đặt** điều khiển việc thu thập và tệp; **Các công cụ khác → Nguồn** cung cấp danh sách nguồn chi tiết ở cấp Tiêu chuẩn hoặc Chuyên gia. [Hướng dẫn bảng điều khiển](../PANEL.md) mô tả sáu mục chính và các điều khiển theo ngữ cảnh của chúng.

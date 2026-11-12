@@ -310,6 +310,10 @@ def connection_change(call):
     return guarded
 
 
+ACTIVITY_CLAIMS = (("snapshot:", "loading_messages"), ("scale:", "measuring_chat"), ("avatar:", "profile_photo"),
+                   ("manual:", "panel_action"), ("plan:", "planning_export"), ("export-preflight-", "checking_export"))
+
+
 def recovered_source(update):
     return "update_recovery" if getattr(update, "pts", None) == 0 else None
 
@@ -655,6 +659,7 @@ class Collector:
             "reconnect_attempts": self.reconnect_attempts,
             "next_reconnect_at": self.next_reconnect_at,
             "chat_export": dict(self.export_state) if self.export_state else None,
+            "activity": self.activity(),
             "recheck": self.recheck_state,
             "storage_low": self.storage_low,
             "media_min_free_bytes": self.param("media_min_free_mb") * 1024**2,
@@ -3640,6 +3645,21 @@ class Collector:
                 result["missing"] += 1
         return result
 
+    async def snapshot_paused(self, chat_id, limit):
+        resume, resumed = self.running, None
+        if resume:
+            await self.stop()
+        try:
+            result = await self.snapshot(chat_id, limit)
+        finally:
+            if resume:
+                try:
+                    await self.start()
+                    resumed = True
+                except Exception:
+                    resumed = False
+        return {**result, "observation_resumed": resumed}
+
     async def snapshot(self, chat_id, limit, entity=None, origin=None):
         owner = None
         if origin is None:
@@ -3682,6 +3702,29 @@ class Collector:
 
     def export_busy(self):
         return bool(self.export_task and not self.export_task.done())
+
+    def activity(self):
+        claim, detail = self.export_claim or "", None
+        if self.authorization_required:
+            task = "sign_in_required"
+        elif self.connection_change_task is not None:
+            task = "connection_change"
+        elif self.observation_starting:
+            task = "starting_observation"
+        elif self.running:
+            task = "observation"
+        elif self.history.busy or claim.startswith("history:"):
+            task = "history"
+        elif self.export_busy() or self.export_state and claim == self.export_state.get("id"):
+            task = "chat_export"
+            detail = {key: self.export_state.get(key) for key in ("id", "chat_id", "title", "phase", "captured", "total",
+                                                                  "eta_seconds", "stage")} if self.export_state else None
+        elif claim:
+            task = next((kind for prefix, kind in ACTIVITY_CLAIMS if claim.startswith(prefix)), "export")
+        else:
+            task = None
+        until = self.store.get_setting("rpc_backoff_until", 0)
+        return {"task": task, "detail": detail, "telegram_pause_until": until if until > time.time() else None}
 
     def reserve_export(self, owner):
         if (self.running or self.observation_starting or self.history.busy or self.export_busy()
@@ -4312,6 +4355,9 @@ class Collector:
         cached = self.store.root / "avatars" / (str(peer_id) + ".jpg")
         if cached.is_file():
             return cached
+        if (self.client and self.client.is_connected() and not self.authorization_required
+                and (self.running or self.export_claim or self.export_busy() or self.history.busy)):
+            return await self._avatar(peer_id)
         owner = "avatar:" + secrets.token_hex(8)
         if not self.reserve_export(owner):
             return None

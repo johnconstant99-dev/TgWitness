@@ -39,7 +39,8 @@ def index(context, chats):
         'coverage': lambda: view.coverage_section(context, say),
         'analytics': lambda: (view.stats(context.get('counts', {}), say),
             snapshot_analytics.html_section(context.get('analytics'), context.get('presentation', {}), say)),
-        'directory': lambda: view.chats_section(chats, say),
+        'directory': lambda: (view.encoded('<p>' + view.map_link(context, say) + '</p>') if context.get('activity_map') else b'',
+                              *view.chats_section(chats, say)),
         'limitations': lambda: view.omissions_section(context, say),
         'verify': lambda: (view.verification(context, say),),
     }
@@ -64,6 +65,8 @@ def transcript(context, rows, *, chat=None, sharing=False):
             yield '<p><a href="../index.html">← ' + view.e(say('Account export')) + '</a></p>'
             yield '<p>' + view.e(say('Message records are shown in captured page order. Signed JSONL remains authoritative.')) + '</p>'
             yield '<p>' + view.e(say('Cite the archive reference, the file path and the record reference beside a message. Record numbers apply only to this copy.')) + '</p>'
+            if (context.get('pagination') or {}).get('page', 1) == 1 and context.get('chat_map'):
+                yield context['chat_map']
 
     def messages():
         yield '<section id="messages"><h2>' + view.e(say('Messages')) + '</h2>'
@@ -76,9 +79,12 @@ def transcript(context, rows, *, chat=None, sharing=False):
         seen = False
         for number, row in enumerate(rows, pagination.get('first_record', 1)):
             seen = True
-            yield view.message_card(row, say, prefix='' if sharing else '../', sharing=sharing, number=number, page_path=path)
+            marks = '' if sharing else view.gap_marks(context, say, row.get('id'))
+            yield marks + view.message_card(row, say, prefix='' if sharing else '../', sharing=sharing, number=number, page_path=path)
         if not seen:
             yield '<p>' + view.e(say('No message records are included in this view. Check the scope and omissions before drawing conclusions.')) + '</p>'
+        if not sharing and pagination.get('page', 1) == pagination.get('pages', 1):
+            yield view.gap_marks(context, say, last=True)
         if not sharing:
             yield view.page_navigation(context, say)
         yield '</section>'

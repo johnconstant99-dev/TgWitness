@@ -8,7 +8,7 @@
 
 A new workspace opens `/first-run`. The first screen asks what you want to do:
 **Just download**, **Follow chats** or **Evidence for a case**. The choice sets the
-goal and the interface level: Simple for Just download, Standard for the other two.
+goal and the interface level: Simple for Just download, Standard for the other two. The level sets how many fields each form shows; every page stays in the menu.
 **More options** on the same screen sets the level, theme and time zone explicitly;
 the language list is in the wizard header. The next screens cover the connection,
 Telegram and chats. Connection routes stay folded while the automatic check works

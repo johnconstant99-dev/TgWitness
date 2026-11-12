@@ -101,8 +101,8 @@ Demo messages are fictional. Demo mode cannot connect a real Telegram account.
    Choose **Just download**, **Follow chats** or **Evidence for a case**.
 3. Review the connection check. Configure your own proxy if needed; connection
    settings remain available after setup.
-4. At **Connect Telegram**, scan the QR code or enter your phone number. File import
-   and a complete authorization key are under **Other sign-in methods**.
+4. At **Connect Telegram**, choose a phone number, a QR code, account files (TData,
+   `.session`, StringSession, account JSON) or a complete authorization key.
    Complete the Telegram confirmation, code and two-step password when requested.
 5. Check the displayed account, choose the chats and review your settings. Finish
    from the final screen. For **Just download**, **Start export** starts a one-time

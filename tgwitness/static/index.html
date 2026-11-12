@@ -54,7 +54,7 @@
 <script defer src="/live.js?v=3"></script>
 <script defer src="/cloud-capture-locales.js?v=1"></script><script defer src="/cloud-capture-story.js?v=4"></script><script defer src="/cloud-capture.js?v=6"></script>
 <link href="/views/exports.css?v=32" rel="stylesheet">
-<link href="/views/workflows.css?v=3" rel="stylesheet">
+<link href="/views/workflows.css?v=6" rel="stylesheet">
 <link href="/views/disclosure-preview.css?v=1" rel="stylesheet">
 <link href="/components/forms.css?v=35" rel="stylesheet">
 <link href="/components/feedback.css?v=36" rel="stylesheet">
@@ -252,11 +252,13 @@
 
 <section class="view" hidden id="view-system-map" aria-label="System map"></section>
 <section class="view" hidden id="view-start">
-  <div class="workflow-intro"><span class="eyebrow">YOUR WORKSPACE</span><h1>What would you like to do?</h1><p>Save a copy of your Telegram account, or keep a record of conversations as they change.</p></div>
-  <section class="card workflow-status" aria-label="Current workspace"><div><strong id="workflow-status-title"></strong><p id="workflow-status-copy"></p><p class="workflow-gap" hidden id="workflow-gap"></p></div><button class="secondary" data-open="chats" type="button">Open saved chats</button><button class="quiet" data-open="accounts" type="button">Manage accounts</button><div class="workflow-accounts" hidden id="workflow-accounts"></div></section>
+  <div class="workflow-intro"><span class="eyebrow">YOUR WORKSPACE</span><h1>Overview</h1><p>Accounts, what each one is doing now and what you can start next.</p></div>
+  <div class="home-dashboard" id="home-dashboard"></div>
+  <p class="workflow-gap" hidden id="workflow-gap"></p>
+  <section class="card workflow-status" hidden aria-label="Current workspace"><div><strong id="workflow-status-title"></strong><p id="workflow-status-copy"></p></div><button class="secondary" data-open="chats" type="button">Open saved chats</button><button class="quiet" data-open="accounts" type="button">Manage accounts</button><div class="workflow-accounts" hidden id="workflow-accounts"></div></section>
   <div class="workflow-choices">
     <article class="card workflow-card workflow-link" hidden id="workflow-link-card"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg><h2>Export a chat by link</h2><p>Choose a Telegram chat and review the export plan before starting.</p><form class="link-export-form" id="link-export-form"><label for="link-export-input">Chat link or @username</label><input autocomplete="off" id="link-export-input" maxlength="300" placeholder="@channel or https://t.me/…" spellcheck="false"><button class="primary" type="submit">Plan the export</button></form><div class="link-export-plan" hidden id="link-export-plan" role="status"></div><p class="hint">Checking briefly uses one permitted account. Starting an export requires a separate click.</p></article>
-    <article class="card workflow-card" id="workflow-account-card"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg><h2>Export my account</h2><p>Download the chats and history your account can read now. Choose dates, messages and files before starting.</p><button class="primary" data-workflow="account" type="button">Export my account</button><p class="hint" id="workflow-account-hint">No continuous observation needed.</p></article>
+    <article class="card workflow-card" id="workflow-account-card"><svg aria-hidden="true" class="icon"><use href="#i-download"/></svg><h2>Export my account</h2><p>Download the chats and history your account can read now. Choose dates, messages and files before starting.</p><div class="workflow-buttons"><button class="primary" data-workflow="account-all" type="button">Export everything</button><button class="secondary" data-workflow="account" type="button">Choose what to export</button></div><p class="hint" id="workflow-account-hint">No continuous observation needed.</p></article>
     <article class="card workflow-card" id="workflow-investigation-card"><svg aria-hidden="true" class="icon"><use href="#i-journal"/></svg><h2>Follow an investigation</h2><p>Keep new messages, observed edits and deletion notices from the chats you choose.</p><button class="secondary" data-workflow="investigation" type="button">Set up observation</button><p class="hint">Previously saved records stay available when observation is paused.</p></article>
   </div>
   <section class="setup-start" hidden id="setup-start" aria-labelledby="setup-start-title">
@@ -396,6 +398,7 @@
       <label>Attachment workers <select id="history-workers"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option></select></label>
       <label class="check-label"><input id="history-admin" type="checkbox" checked> Preserve available edits and deletions from Recent Actions</label>
       <label class="check-label"><input id="history-compare" type="checkbox" checked> Compare with previously saved message versions</label>
+      <label class="check-label"><input id="history-observe" type="checkbox" checked> Start observation when the history is loaded</label>
       <p class="hint">Takeout may require approval in Telegram and a server-specified wait. Recent Actions requires administrator access. These choices stay fixed when you resume.</p>
     </fieldset>
     <div class="chat-export-actions">
@@ -510,7 +513,7 @@
       <p class="hint">For a personal backup, describe that purpose. You can prepare a separate sharing copy after the export finishes.</p>
       <p class="hint" hidden id="account-export-imported-key"></p>
       <div class="export-language"><label for="account-export-language">Report language</label><select id="account-export-language" data-no-translate></select><p class="hint">Report labels use this language. Original messages stay unchanged.</p></div>
-      <div class="export-language"><label for="account-export-format">Export format</label><select id="account-export-format"><option value="tgwitness">TgWitness signed archive</option><option value="telegram_json">Telegram Desktop compatible JSON</option><option value="telegram_html">Telegram Desktop compatible HTML</option><option value="telegram_both">Telegram Desktop compatible JSON and HTML</option></select><p class="hint">Compatible views include the signed source records and file hash references. TgWitness generates these views; Telegram Desktop does not.</p></div>
+      <div class="export-language"><label for="account-export-format">Export format</label><select id="account-export-format"><option value="telegram_both">All formats: TgWitness signed archive with Telegram Desktop JSON and HTML</option><option value="tgwitness">TgWitness signed archive only</option><option value="telegram_json">TgWitness archive with Telegram Desktop JSON</option><option value="telegram_html">TgWitness archive with Telegram Desktop HTML</option></select><p class="hint">Compatible views include the signed source records and file hash references. TgWitness generates these views; Telegram Desktop does not.</p></div>
       <div class="account-export-purpose"><label for="account-export-purpose">Collection purpose</label><textarea id="account-export-purpose" rows="2" maxlength="1000" required placeholder="Why this account snapshot is being collected"></textarea><p class="hint">The purpose is included in the signed export. Describe the specific investigation or request.</p><button class="secondary account-export-preset" id="account-export-minimize" type="button">Minimize collection</button><p class="hint">Turns off media and optional account data. Chat and sender filters remain yours to set.</p></div>
       <fieldset class="account-export-fieldset"><legend>Chats</legend>
         <div class="account-export-choices" id="account-export-kinds" tabindex="-1">
@@ -540,7 +543,7 @@
         <label><input id="account-export-profile-photos" type="checkbox"> Profile photos</label><label><input id="account-export-stories" type="checkbox"> Stories</label>
         <label><input id="account-export-session-metadata" type="checkbox"> Session metadata</label><label><input id="account-export-other-data" type="checkbox"> Other available data</label>
       </div><p class="hint">The signed manifest lists unavailable or failed sections. Session keys and passwords are never included.</p></fieldset>
-      <fieldset class="account-export-fieldset"><legend>Telegram transport</legend><div class="account-export-fields"><div><label for="account-export-transport">Acquisition method</label><select id="account-export-transport"><option value="takeout">Telegram Takeout session</option><option value="regular">Regular session</option></select></div></div><p class="hint">Takeout may have a delay or be unavailable for this account. Choose regular explicitly if you want to use the ordinary session.</p></fieldset>
+      <fieldset class="account-export-fieldset"><legend>Telegram transport</legend><div class="account-export-fields"><div><label for="account-export-transport">Acquisition method</label><select id="account-export-transport"><option value="auto">Automatic: Takeout, or the regular session if Takeout must wait</option><option value="takeout">Telegram Takeout session only</option><option value="regular">Regular session only</option></select></div></div><p class="hint">Takeout also reads left channels, saved contacts and other account data. If Telegram asks to wait before a Takeout export, Automatic continues at once with the regular session and the archive records which method was used.</p></fieldset>
       </details>
       <p class="account-export-preview" id="account-export-preview" role="status"></p>
       <button class="secondary" id="account-export-preflight" type="button">Check settings and size</button>

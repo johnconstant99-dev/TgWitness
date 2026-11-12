@@ -60,6 +60,9 @@ def register(app, ctx):
     router.get("/api/status", dependencies=[Depends(authenticate)])(
         routes_system.status
     )
+    router.get("/api/overview/activity", dependencies=[Depends(authenticate)])(
+        routes_system.overview_activity
+    )
     router.get("/api/topology", dependencies=[Depends(authenticate)])(topology)
     router.get("/api/system-map", dependencies=[Depends(authenticate)])(system_map)
     app.include_router(router)
