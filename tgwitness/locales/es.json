@@ -1728,7 +1728,6 @@
   "Connect a run to an approved software version and keep an extra copy of its proofs.": "Vincule una ejecución a una versión aprobada del software y conserve una copia adicional de sus pruebas.",
   "Design ready · connection not available yet": "Diseño listo · conexión aún no disponible",
   "Explore the plan": "Ver el plan",
-  "Only the option you choose opens its settings. Nothing is connected automatically.": "Solo la opción que elija abre su configuración. Nada se conecta automáticamente.",
   "TELEGRAM BOT": "BOT DE TELEGRAM",
   "Your bot, in three steps.": "Su bot, en tres pasos.",
   "A separate witness checks the journal and your bot publishes the result.": "Un testigo independiente comprueba el registro y su bot publica el resultado.",
@@ -4181,7 +4180,6 @@
   "Yes": "Sí",
   "Your account is connected. Continue to choose what to export.": "Tu cuenta está conectada. Continúa para elegir qué exportar.",
   "visible to this account during the recorded acquisition intervals": "visible para esta cuenta durante los intervalos de adquisición registrados",
-  "{records} saved records · {sources} selected sources": "{records} registros guardados · {sources} fuentes seleccionadas",
   "matrixs://user:password@matrix.example.org/#room": "matrixs://user:password@matrix.example.org/#room",
   "A snapshot of data visible to this account during the recorded acquisition intervals.": "Instantánea de los datos visibles para esta cuenta durante los intervalos de adquisición registrados.",
   "This panel is reached over a network, so it does not take cloud tokens. Create servers from TgWitness on your own computer, or run the commands below.": "Este panel se abre a través de una red, por eso no acepta tokens de la nube. Crea servidores desde TgWitness en tu propio ordenador o ejecuta los comandos de abajo.",
@@ -6644,7 +6642,6 @@
   "A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.": "Un paquete de contexto local con citas y un manifiesto firmado. No se contacta con ningún servicio de IA. La selección puede ser parcial.",
   "A local file could not be read. Keep its recovery receipt and retry before changing the storage destination.": "No se ha podido leer un archivo local. Conserva su recibo de recuperación y vuelve a intentarlo antes de cambiar el destino de almacenamiento.",
   "A local file differs from its recorded hash. Restore or repair it before changing the storage destination.": "Un archivo local difiere de su hash registrado. Restaurarlo o repararlo antes de cambiar el destino de almacenamiento.",
-  "A mode changes the panel view. It does not activate services or certify evidence. Check the status of each layer below.": "Un modo cambia la vista del panel. No activa servicios ni certifica pruebas. Comprueba el estado de cada capa a continuación.",
   "A participating account or signing identity has changed.": "Ha cambiado una cuenta participante o una identidad firmante.",
   "A quick switch from online to offline can itself be noticed. Hiding last seen in privacy settings is stronger.": "El propio cambio rápido de en línea a fuera de línea puede detectarse. Ocultar la última vez que se vio en la configuración de privacidad ofrece mayor seguridad.",
   "A reply is the first message from the other side after one of this account's messages. In groups it may answer something else.": "Una respuesta es el primer mensaje de la otra parte tras uno de los mensajes de esta cuenta. En los grupos, puede responder a otra cosa.",
@@ -8604,5 +8601,49 @@
   "To export this account, pause observation.": "Para exportar esta cuenta, pause la observación.",
   "Updating profile photos": "Actualizando fotos de perfil",
   "{task}. Pause observation to start the export; start it again in Accounts afterwards.": "{task}. Pause la observación para iniciar la exportación; vuelva a iniciarla en Cuentas después.",
-  "{task}. The export can start when it finishes.": "{task}. La exportación podrá empezar cuando termine."
+  "{task}. The export can start when it finishes.": "{task}. La exportación podrá empezar cuando termine.",
+  "{n} saved record": "{n} registro guardado",
+  "{n} saved records": {
+    "one": "{n} registro guardado",
+    "many": "{n} registros guardados",
+    "other": "{n} registros guardados"
+  },
+  "{n} selected chat": "{n} chat seleccionado",
+  "{n} selected chats": {
+    "one": "{n} chat seleccionado",
+    "many": "{n} chats seleccionados",
+    "other": "{n} chats seleccionados"
+  },
+  "{n} connected": {
+    "one": "{n} conectada",
+    "many": "{n} conectadas",
+    "other": "{n} conectadas"
+  },
+  "{n} service type": "{n} tipo de servicio",
+  "{n} service types": {
+    "one": "{n} tipo de servicio",
+    "many": "{n} tipos de servicio",
+    "other": "{n} tipos de servicio"
+  },
+  "A mode changes the panel view. The status of each layer is below.": "Un modo cambia la vista del panel. El estado de cada capa aparece abajo.",
+  "Map layer": "Capa del mapa",
+  "Find account": "Buscar cuenta",
+  "Refresh snapshot": "Actualizar instantánea",
+  "Expand map": "Ampliar mapa",
+  "Zoom out": "Alejar",
+  "Fit map": "Ajustar mapa",
+  "Zoom in": "Acercar",
+  "Node details": "Detalles del nodo",
+  "Close details": "Cerrar detalles",
+  "host": "host",
+  "pending": "pendiente",
+  "healthy at last check": "en buen estado en la última comprobación",
+  "in cooldown": "en pausa",
+  "A session target prefix is not a firewall allowlist. Source ports are assigned by the operating system.": "Un prefijo de destino de sesión no es una lista de permitidos del cortafuegos. El sistema operativo asigna los puertos de origen.",
+  "Interactive system topology": "Topología interactiva del sistema",
+  "System details": "Detalles del sistema",
+  "Download observations": "Descargar observaciones",
+  "Filter observations": "Filtrar observaciones",
+  "related": "relacionado con",
+  "in Telegram pool": "en el grupo de Telegram"
 }

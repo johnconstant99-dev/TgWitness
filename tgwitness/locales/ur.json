@@ -1728,7 +1728,6 @@
   "Connect a run to an approved software version and keep an extra copy of its proofs.": "کسی رن کو منظور شدہ سافٹ ویئر ورژن سے جوڑیں اور اس کے ثبوتوں کی ایک اضافی کاپی رکھیں۔",
   "Design ready · connection not available yet": "ڈیزائن تیار · کنکشن ابھی دستیاب نہیں",
   "Explore the plan": "منصوبہ دیکھیں",
-  "Only the option you choose opens its settings. Nothing is connected automatically.": "صرف آپ کا منتخب کردہ آپشن اپنی ترتیبات کھولتا ہے۔ کچھ بھی خودکار طور پر منسلک نہیں ہوتا۔",
   "TELEGRAM BOT": "ٹیلیگرام بوٹ",
   "Your bot, in three steps.": "آپ کا بوٹ، تین مراحل میں۔",
   "A separate witness checks the journal and your bot publishes the result.": "ایک الگ گواہ جرنل کی جانچ کرتا ہے اور آپ کا بوٹ نتیجہ شائع کرتا ہے۔",
@@ -4181,7 +4180,6 @@
   "Yes": "جی ہاں",
   "Your account is connected. Continue to choose what to export.": "آپ کا اکاؤنٹ منسلک ہے۔ برآمد کرنے کے لیے انتخاب جاری رکھیں۔",
   "visible to this account during the recorded acquisition intervals": "ریکارڈ شدہ حصول کے وقفوں کے دوران اس اکاؤنٹ کے لیے قابلِ دید",
-  "{records} saved records · {sources} selected sources": "{records} محفوظ شدہ ریکارڈز · {sources} منتخب ذرائع",
   "matrixs://user:password@matrix.example.org/#room": "matrixs://user:password@matrix.example.org/#room",
   "A snapshot of data visible to this account during the recorded acquisition intervals.": "اس اکاؤنٹ کے لیے ریکارڈ شدہ حصولی وقفوں کے دوران دکھائی دینے والے ڈیٹا کا ایک اسنیپ شاٹ۔",
   "This panel is reached over a network, so it does not take cloud tokens. Create servers from TgWitness on your own computer, or run the commands below.": "یہ پینل نیٹ ورک کے ذریعے کھولا گیا ہے، اس لیے یہ کلاؤڈ ٹوکن قبول نہیں کرتا۔ سرور اپنے کمپیوٹر پر TgWitness سے بنائیں، یا نیچے دی گئی کمانڈز چلائیں۔",
@@ -5449,7 +5447,7 @@
   "Choose your data": "اپنا ڈیٹا منتخب کریں",
   "Configure and preview": "تشکیل دیں اور پیش نظارہ کریں",
   "Could not build the preview.": "پریویو تیار نہیں کیا جا سکا۔",
-  "Downloads use your saved report choices. Save changes in Build report before downloading.": "ڈاؤن لوڈ آپ کی محفوظ کردہ رپورٹ کے انتخاب استعمال کرتے ہیں۔ ڈاؤن لوڈ کرنے سے پہلے بلڈ رپورٹ میں تبدیلیاں محفوظ کریں۔",
+  "Downloads use your saved report choices. Save changes in Build report before downloading.": "ڈاؤن لوڈ آپ کی محفوظ کردہ رپورٹ کے انتخاب استعمال کرتے ہیں۔ ڈاؤن لوڈ کرنے سے پہلے «رپورٹ بنائیں» میں تبدیلیاں محفوظ کریں۔",
   "Enter whole Telegram IDs separated by commas.": "Telegram کی تمام آئی ڈیز کو اعداد و شمار کے ذریعے الگ کر کے درج کریں۔",
   "Find a recorded chat": "ایک ریکارڈ شدہ چیٹ تلاش کریں",
   "Find an account ID": "اکاؤنٹ آئی ڈی تلاش کریں",
@@ -6644,7 +6642,6 @@
   "A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.": "حوالہ جات اور ایک دستخط شدہ مینیفیسٹ کے ساتھ ایک مقامی سیاق و سباق کا پیک۔ کسی بھی AI سروس سے رابطہ نہیں کیا جاتا۔ انتخاب جزوی ہو سکتا ہے۔",
   "A local file could not be read. Keep its recovery receipt and retry before changing the storage destination.": "ایک مقامی فائل پڑھی نہیں جا سکی۔ اس کی بحالی کی رسید رکھیں اور اسٹوریج کے مقام کو تبدیل کرنے سے پہلے دوبارہ کوشش کریں۔",
   "A local file differs from its recorded hash. Restore or repair it before changing the storage destination.": "ایک مقامی فائل اس کے ریکارڈ شدہ ہیش سے مختلف ہوتی ہے۔ اسے ذخیرہ کرنے کی منزل تبدیل کرنے سے پہلے بحال یا مرمت کریں۔",
-  "A mode changes the panel view. It does not activate services or certify evidence. Check the status of each layer below.": "ایک موڈ پینل کا منظر تبدیل کرتا ہے۔ یہ خدمات کو فعال نہیں کرتا اور شواہد کی تصدیق نہیں کرتا۔ نیچے دی گئی ہر پرت کی حیثیت چیک کریں۔",
   "A participating account or signing identity has changed.": "ایک شریک اکاؤنٹ یا دستخط کرنے والی شناخت تبدیل ہو گئی ہے۔",
   "A quick switch from online to offline can itself be noticed. Hiding last seen in privacy settings is stronger.": "آن لائن سے آف لائن میں تیز سوئچ خود قابلِ مشاہدہ ہو سکتا ہے۔ پرائیویسی سیٹنگز میں آخری بار دیکھنے کی معلومات چھپانا زیادہ مضبوط ہے۔",
   "A reply is the first message from the other side after one of this account's messages. In groups it may answer something else.": "جواب اس اکاؤنٹ کے کسی پیغام کے بعد دوسری جانب سے موصول ہونے والا پہلا پیغام ہوتا ہے۔ گروپس میں یہ کسی اور چیز کا جواب بھی ہو سکتا ہے۔",
@@ -8603,5 +8600,45 @@
   "To export this account, pause observation.": "یہ اکاؤنٹ ایکسپورٹ کرنے کے لیے مشاہدہ معطل کریں۔",
   "Updating profile photos": "پروفائل تصاویر اپ ڈیٹ ہو رہی ہیں",
   "{task}. Pause observation to start the export; start it again in Accounts afterwards.": "{task}۔ ایکسپورٹ شروع کرنے کے لیے مشاہدہ معطل کریں؛ بعد میں اسے اکاؤنٹس میں دوبارہ شروع کریں۔",
-  "{task}. The export can start when it finishes.": "{task}۔ اس کے مکمل ہونے پر ایکسپورٹ شروع ہو سکتا ہے۔"
+  "{task}. The export can start when it finishes.": "{task}۔ اس کے مکمل ہونے پر ایکسپورٹ شروع ہو سکتا ہے۔",
+  "{n} saved record": "{n} محفوظ ریکارڈ",
+  "{n} saved records": {
+    "one": "{n} محفوظ ریکارڈ",
+    "other": "{n} محفوظ ریکارڈز"
+  },
+  "{n} selected chat": "{n} منتخب چیٹ",
+  "{n} selected chats": {
+    "one": "{n} منتخب چیٹ",
+    "other": "{n} منتخب چیٹس"
+  },
+  "{n} connected": {
+    "one": "{n} منسلک",
+    "other": "{n} منسلک"
+  },
+  "{n} service type": "{n} سروس کی قسم",
+  "{n} service types": {
+    "one": "{n} سروس کی قسم",
+    "other": "{n} سروس کی اقسام"
+  },
+  "A mode changes the panel view. The status of each layer is below.": "موڈ پینل کا منظر بدلتا ہے۔ ہر پرت کی حالت نیچے ہے۔",
+  "Map layer": "نقشے کی پرت",
+  "Find account": "اکاؤنٹ تلاش کریں",
+  "Refresh snapshot": "اسنیپ شاٹ تازہ کریں",
+  "Expand map": "نقشہ پھیلائیں",
+  "Zoom out": "چھوٹا کریں",
+  "Fit map": "نقشہ فٹ کریں",
+  "Zoom in": "بڑا کریں",
+  "Node details": "نوڈ کی تفصیلات",
+  "Close details": "تفصیلات بند کریں",
+  "host": "ہوسٹ",
+  "pending": "زیر التوا",
+  "healthy at last check": "آخری جانچ پر درست",
+  "in cooldown": "وقفے میں",
+  "A session target prefix is not a firewall allowlist. Source ports are assigned by the operating system.": "سیشن ہدف کا سابقہ فائر وال کی اجازت فہرست نہیں ہے۔ سورس پورٹس آپریٹنگ سسٹم تفویض کرتا ہے۔",
+  "Interactive system topology": "سسٹم کی انٹرایکٹو ٹوپولوجی",
+  "System details": "سسٹم کی تفصیلات",
+  "Download observations": "مشاہدات ڈاؤن لوڈ کریں",
+  "Filter observations": "مشاہدات فلٹر کریں",
+  "related": "متعلقہ",
+  "in Telegram pool": "Telegram پول میں"
 }

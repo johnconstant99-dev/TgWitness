@@ -1728,7 +1728,6 @@
   "Connect a run to an approved software version and keep an extra copy of its proofs.": "Bir çalıştırmayı onaylı bir yazılım sürümüne bağlayın ve kanıtlarının ek bir kopyasını saklayın.",
   "Design ready · connection not available yet": "Tasarım hazır · bağlantı henüz kullanılamıyor",
   "Explore the plan": "Planı inceleyin",
-  "Only the option you choose opens its settings. Nothing is connected automatically.": "Yalnızca seçtiğiniz seçenek ayarlarını açar. Hiçbir şey otomatik olarak bağlanmaz.",
   "TELEGRAM BOT": "TELEGRAM BOTU",
   "Your bot, in three steps.": "Üç adımda botunuz.",
   "A separate witness checks the journal and your bot publishes the result.": "Ayrı bir tanık günlüğü denetler ve botunuz sonucu yayımlar.",
@@ -4181,7 +4180,6 @@
   "Yes": "Evet",
   "Your account is connected. Continue to choose what to export.": "Hesabınız bağlandı. Neyi dışa aktaracağınızı seçin.",
   "visible to this account during the recorded acquisition intervals": "kaydedilen toplama aralıkları sırasında bu hesap tarafından görülebilen",
-  "{records} saved records · {sources} selected sources": "{records} kaydedilen kayıtlar · {sources} seçilen kaynaklar",
   "matrixs://user:password@matrix.example.org/#room": "matrixs://user:password@matrix.example.org/#room",
   "A snapshot of data visible to this account during the recorded acquisition intervals.": "Kaydedilen toplama aralıklarında bu hesabın görebildiği verilerin anlık görüntüsüdür.",
   "This panel is reached over a network, so it does not take cloud tokens. Create servers from TgWitness on your own computer, or run the commands below.": "Bu panele bir ağ üzerinden erişiliyor, bu yüzden bulut belirteçlerini kabul etmez. Sunucuları kendi bilgisayarınızdaki TgWitness ile oluşturun veya aşağıdaki komutları çalıştırın.",
@@ -6644,7 +6642,6 @@
   "A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.": "Alıntılar ve imzalı bir bildirim içeren yerel bir bağlam paketi. Hiçbir yapay zeka hizmetiyle bağlantı kurulmaz. Seçim kısmi olabilir.",
   "A local file could not be read. Keep its recovery receipt and retry before changing the storage destination.": "Yerel bir dosya okunamadı. Depolama hedefini değiştirmeden önce kurtarma makbuzunu saklayın ve yeniden deneyin.",
   "A local file differs from its recorded hash. Restore or repair it before changing the storage destination.": "Yerel bir dosya, kaydedilmiş hash değerinden farklıdır. Depolama hedefini değiştirmeden önce dosyayı geri yükleyin veya onarın.",
-  "A mode changes the panel view. It does not activate services or certify evidence. Check the status of each layer below.": "Bir mod, panel görünümünü değiştirir. Hizmetleri etkinleştirmez veya kanıtları onaylamaz. Aşağıdaki her katmanın durumunu kontrol edin.",
   "A participating account or signing identity has changed.": "Katılımcı bir hesap veya imzalayan kimlik değişmiştir.",
   "A quick switch from online to offline can itself be noticed. Hiding last seen in privacy settings is stronger.": "Çevrimiçi durumdan çevrimdışı duruma hızlı bir geçişin kendisi fark edilebilir. Gizlilik ayarlarında en son görülme bilgisini gizlemek daha etkili bir yöntemdir.",
   "A reply is the first message from the other side after one of this account's messages. In groups it may answer something else.": "Yanıt, bu hesabın mesajlarından birinin ardından karşı taraftan gelen ilk mesajdır. Gruplarda ise başka bir şeye yanıt olabilir.",
@@ -8603,5 +8600,45 @@
   "To export this account, pause observation.": "Bu hesabı dışa aktarmak için gözlemi duraklatın.",
   "Updating profile photos": "Profil fotoğrafları güncelleniyor",
   "{task}. Pause observation to start the export; start it again in Accounts afterwards.": "{task}. Dışa aktarmayı başlatmak için gözlemi duraklatın; ardından Hesaplar bölümünden yeniden başlatın.",
-  "{task}. The export can start when it finishes.": "{task}. Dışa aktarma bu iş bitince başlayabilir."
+  "{task}. The export can start when it finishes.": "{task}. Dışa aktarma bu iş bitince başlayabilir.",
+  "{n} saved record": "{n} kayıtlı kayıt",
+  "{n} saved records": {
+    "one": "{n} kayıtlı kayıt",
+    "other": "{n} kayıtlı kayıt"
+  },
+  "{n} selected chat": "{n} seçili sohbet",
+  "{n} selected chats": {
+    "one": "{n} seçili sohbet",
+    "other": "{n} seçili sohbet"
+  },
+  "{n} connected": {
+    "one": "{n} bağlı",
+    "other": "{n} bağlı"
+  },
+  "{n} service type": "{n} hizmet türü",
+  "{n} service types": {
+    "one": "{n} hizmet türü",
+    "other": "{n} hizmet türü"
+  },
+  "A mode changes the panel view. The status of each layer is below.": "Mod, panelin görünümünü değiştirir. Her katmanın durumu aşağıdadır.",
+  "Map layer": "Harita katmanı",
+  "Find account": "Hesap bul",
+  "Refresh snapshot": "Anlık görüntüyü yenile",
+  "Expand map": "Haritayı genişlet",
+  "Zoom out": "Uzaklaştır",
+  "Fit map": "Haritayı sığdır",
+  "Zoom in": "Yakınlaştır",
+  "Node details": "Düğüm ayrıntıları",
+  "Close details": "Ayrıntıları kapat",
+  "host": "ana makine",
+  "pending": "bekliyor",
+  "healthy at last check": "son kontrolde sağlıklı",
+  "in cooldown": "beklemede",
+  "A session target prefix is not a firewall allowlist. Source ports are assigned by the operating system.": "Oturum hedef öneki bir güvenlik duvarı izin listesi değildir. Kaynak bağlantı noktalarını işletim sistemi atar.",
+  "Interactive system topology": "Etkileşimli sistem topolojisi",
+  "System details": "Sistem ayrıntıları",
+  "Download observations": "Gözlemleri indir",
+  "Filter observations": "Gözlemleri filtrele",
+  "related": "ilişkili",
+  "in Telegram pool": "Telegram havuzunda"
 }

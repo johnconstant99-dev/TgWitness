@@ -1057,7 +1057,6 @@
   "Only the app that pressed: the bot's popup, notice or link": "해당 버튼을 누른 앱만: 봇의 팝업, 알림 또는 링크",
   "Only the app that typed: the list of results": "입력한 앱만: 결과 목록",
   "Only the message, if you send a result": "결과를 전송할 경우, 메시지 내용만 표시됩니다.",
-  "Only the option you choose opens its settings. Nothing is connected automatically.": "사용자가 선택한 옵션에 대해서만 해당 설정이 열립니다. 자동으로 연결되는 항목은 없습니다.",
   "Only the view changes": "변경되는 것은 보기만입니다",
   "Only your account sees which app it is": "어떤 앱인지 확인할 수 있는 것은 오직 귀하의 계정뿐입니다",
   "Open": "열기",
@@ -4154,7 +4153,6 @@
   "Yes": "예",
   "Your account is connected. Continue to choose what to export.": "계정이 연결되었습니다. 내보낼 항목을 선택하세요.",
   "visible to this account during the recorded acquisition intervals": "수집 기간 동안 이 계정에서 볼 수 있었던 내용",
-  "{records} saved records · {sources} selected sources": "{records} 저장된 기록 · {sources} 선택된 소스",
   "matrixs://user:password@matrix.example.org/#room": "matrixs://user:password@matrix.example.org/#room",
   "A snapshot of data visible to this account during the recorded acquisition intervals.": "기록된 수집 기간 동안 이 계정에서 볼 수 있었던 데이터의 스냅샷입니다.",
   "This panel is reached over a network, so it does not take cloud tokens. Create servers from TgWitness on your own computer, or run the commands below.": "이 패널은 네트워크를 통해 열려 있으므로 클라우드 토큰을 받지 않습니다. 본인 컴퓨터의 TgWitness에서 서버를 만들거나 아래 명령을 실행하세요.",
@@ -6605,7 +6603,6 @@
   "A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.": "인용 정보와 서명된 매니페스트가 포함된 로컬 컨텍스트 팩입니다. AI 서비스와는 연결되지 않습니다. 선택된 내용은 일부일 수 있습니다.",
   "A local file could not be read. Keep its recovery receipt and retry before changing the storage destination.": "로컬 파일을 읽을 수 없습니다. 저장 위치를 변경하기 전에 복구 영수증을 보관하고 다시 시도하십시오.",
   "A local file differs from its recorded hash. Restore or repair it before changing the storage destination.": "로컬 파일은 기록된 해시와 다릅니다. 저장 위치를 변경하기 전에 파일을 복원하거나 복구하십시오.",
-  "A mode changes the panel view. It does not activate services or certify evidence. Check the status of each layer below.": "모드는 패널 보기를 변경합니다. 서비스를 활성화하거나 증거를 인증하지는 않습니다. 아래 각 계층의 상태를 확인하십시오.",
   "A participating account or signing identity has changed.": "참여 계정 또는 서명 주체가 변경되었습니다.",
   "A quick switch from online to offline can itself be noticed. Hiding last seen in privacy settings is stronger.": "온라인에서 오프라인으로의 급격한 전환 자체도 감지될 수 있습니다. 개인정보 설정에서 ‘마지막 접속 시간’을 숨기는 것이 더 강력한 보안 조치입니다.",
   "A reply is the first message from the other side after one of this account's messages. In groups it may answer something else.": "'답장'은 이 계정의 메시지 중 하나에 대한 상대방의 첫 번째 메시지를 의미합니다. 그룹 채팅에서는 다른 내용에 대한 답장일 수도 있습니다.",
@@ -8563,5 +8560,41 @@
   "To export this account, pause observation.": "이 계정을 내보내려면 관찰을 일시 중지하세요.",
   "Updating profile photos": "프로필 사진 업데이트 중",
   "{task}. Pause observation to start the export; start it again in Accounts afterwards.": "{task}. 내보내기를 시작하려면 관찰을 일시 중지하고, 이후 계정에서 다시 시작하세요.",
-  "{task}. The export can start when it finishes.": "{task}. 이 작업이 끝나면 내보내기를 시작할 수 있습니다."
+  "{task}. The export can start when it finishes.": "{task}. 이 작업이 끝나면 내보내기를 시작할 수 있습니다.",
+  "{n} saved record": "저장된 기록 {n}개",
+  "{n} saved records": {
+    "other": "저장된 기록 {n}개"
+  },
+  "{n} selected chat": "선택한 채팅 {n}개",
+  "{n} selected chats": {
+    "other": "선택한 채팅 {n}개"
+  },
+  "{n} connected": {
+    "other": "{n}개 연결됨"
+  },
+  "{n} service type": "서비스 유형 {n}개",
+  "{n} service types": {
+    "other": "서비스 유형 {n}개"
+  },
+  "A mode changes the panel view. The status of each layer is below.": "모드는 패널 보기를 바꿉니다. 각 계층의 상태는 아래에 있습니다.",
+  "Map layer": "지도 계층",
+  "Find account": "계정 찾기",
+  "Refresh snapshot": "스냅샷 새로 고침",
+  "Expand map": "지도 펼치기",
+  "Zoom out": "축소",
+  "Fit map": "지도 맞추기",
+  "Zoom in": "확대",
+  "Node details": "노드 세부 정보",
+  "Close details": "세부 정보 닫기",
+  "host": "호스트",
+  "pending": "대기 중",
+  "healthy at last check": "마지막 확인 시 정상",
+  "in cooldown": "휴지 중",
+  "A session target prefix is not a firewall allowlist. Source ports are assigned by the operating system.": "세션 대상 접두사는 방화벽 허용 목록이 아닙니다. 소스 포트는 운영 체제가 할당합니다.",
+  "Interactive system topology": "대화형 시스템 토폴로지",
+  "System details": "시스템 세부 정보",
+  "Download observations": "관찰 기록 다운로드",
+  "Filter observations": "관찰 기록 필터",
+  "related": "관련",
+  "in Telegram pool": "Telegram 풀 내"
 }

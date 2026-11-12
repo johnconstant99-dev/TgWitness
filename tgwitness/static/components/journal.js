@@ -163,10 +163,12 @@ export function createJournal(context){
   systemLabel.append(system,node("span","",tr("Show system records")));
   systemLine.append(systemLabel,node("small","",tr("Routine records stay in the signed journal.")));
   system.addEventListener("change",()=>{state.eventSystem=system.checked;change();});
-  const more=node('details','journal-more-filters'),moreTitle=node('summary','',tr('Filters'));
+  const more=node('details','journal-more-filters'),moreTitle=node('summary'),moreCount=node('b');
+  moreTitle.append(icon("settings"),node('span','',tr('Filters')),moreCount);
   const searchOptions=node('details','journal-search-options');searchOptions.append(node('summary','',tr('Search options')),ranking,indexBox);
-  more.append(moreTitle,types,dates,custom,systemLine,searchOptions);
-  root.replaceChildren(controls,more,error,chips);
+  more.append(moreTitle,dates,custom,systemLine,searchOptions);
+  const filterRow=node('div','journal-filter-row');filterRow.append(types,more);
+  root.replaceChildren(controls,filterRow,error,chips);
   const older=$("load-more"),footer=older.closest(".table-footer"),shown=$("shown-count"),range=node("span","journal-window-range");
   const pager=node("div","journal-pager"),newer=button("Newer records","quiet"),latest=button("Latest","quiet");
   newer.id="journal-newer";latest.id="journal-latest";older.textContent=tr("Older records");older.hidden=false;
@@ -267,6 +269,7 @@ export function createJournal(context){
     const age=state.eventSince?Date.now()-Date.parse(state.eventSince):null;
     const range=!state.eventSince&&!state.eventUntil?"":!state.eventUntil&&ranges.find(([, ,duration])=>duration&&Math.abs(age-duration)<120000)?.[0]||"custom";
     for(const b of dates.children){b.classList.toggle("active",b.dataset.range===range);b.setAttribute("aria-pressed",String(b.dataset.range===range));}
+    const advanced=(range?1:0)+(state.eventSystem?1:0)+(state.searchMode?1:0);moreCount.textContent=advanced?String(advanced):"";
     if(document.activeElement!==from)from.value=state.eventSince?.slice(0,16)||"";
     if(document.activeElement!==until)until.value=state.eventUntil?.slice(0,16)||"";
     chips.replaceChildren();

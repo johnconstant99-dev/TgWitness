@@ -1,4 +1,4 @@
-export function createWorkspaceSafety({state,find,tr,avatar,switchProfile,refreshStatus,confirm}) {
+export function createWorkspaceSafety({state,find,tr,avatar,switchProfile,refreshStatus,confirm,describe=()=>''}) {
   const bar=document.createElement('aside'),copy=document.createElement('p'),resolve=document.createElement('button');
   bar.id='workspace-context-alert';bar.className='workspace-context-alert';bar.hidden=true;bar.setAttribute('role','alert');
   resolve.type='button';resolve.className='secondary';resolve.textContent=tr('Switch to the account in this link');bar.append(copy,resolve);
@@ -20,9 +20,10 @@ export function createWorkspaceSafety({state,find,tr,avatar,switchProfile,refres
     if(mismatch){copy.textContent=tr('You are viewing {shown}, but {selected} is selected. Actions are paused until the account is confirmed.',
       {shown:name(statusMismatch||state.status?.workspace_id||state.profile),selected:name(selected!==state.profile?selected:wanted)})+' '+
       tr('Account in this link: {account}.',{account:name(wanted)});return false;}
-    const account=state.status?.collector?.account,key=state.profile+':'+(account?.id||'')+':'+(account?.username||'');
+    const account=state.status?.collector?.account,handle=account?.username?'@'+account.username:account?.id?'ID '+account.id:'';
+    const text=[handle,describe()].filter(Boolean).join(' · ')||name(state.profile),key=state.profile+':'+(account?.id||'')+':'+(account?.username||'')+':'+text;
     if(key!==avatarKey){
-      avatarKey=key;const label=document.createElement('span');label.textContent=name(state.profile);
+      avatarKey=key;const label=document.createElement('span');label.textContent=text;
       label.title=account?.id?'ID '+account.id:tr('No account connected');
       identity.replaceChildren(avatar(account?.id,account?.username||name(state.profile),'sm',state.profile),label);
     }

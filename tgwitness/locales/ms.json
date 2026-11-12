@@ -1057,7 +1057,6 @@
   "Only the app that pressed: the bot's popup, notice or link": "Hanya aplikasi yang menekan: pop timbul bot, pemberitahuan atau pautan",
   "Only the app that typed: the list of results": "Hanya aplikasi yang menaip: senarai keputusan",
   "Only the message, if you send a result": "Hanya mesej, jika anda menghantar keputusan",
-  "Only the option you choose opens its settings. Nothing is connected automatically.": "Hanya pilihan yang anda pilih akan membuka tetapan. Tiada apa yang disambungkan secara automatik.",
   "Only the view changes": "Hanya pandangan yang berubah",
   "Only your account sees which app it is": "Hanya akaun anda yang dapat melihat aplikasi mana ia",
   "Open": "Buka",
@@ -4154,7 +4153,6 @@
   "Yes": "Ya",
   "Your account is connected. Continue to choose what to export.": "Akaun anda disambungkan. Teruskan memilih apa yang hendak dieksport.",
   "visible to this account during the recorded acquisition intervals": "boleh dilihat oleh akaun ini semasa selang pemerolehan yang direkodkan",
-  "{records} saved records · {sources} selected sources": "{records} rekod yang disimpan · {sources} sumber terpilih",
   "matrixs://user:password@matrix.example.org/#room": "matrixs://user:password@matrix.example.org/#room",
   "A snapshot of data visible to this account during the recorded acquisition intervals.": "Satu snapshot data yang boleh dilihat oleh akaun ini semasa selang pemerolehan yang direkodkan.",
   "This panel is reached over a network, so it does not take cloud tokens. Create servers from TgWitness on your own computer, or run the commands below.": "Panel ini dicapai melalui rangkaian, jadi ia tidak menerima token awan. Cipta pelayan daripada TgWitness pada komputer anda sendiri, atau jalankan arahan di bawah.",
@@ -5422,7 +5420,7 @@
   "Choose your data": "Pilih data anda",
   "Configure and preview": "Konfigurasikan dan pratonton",
   "Could not build the preview.": "Tidak dapat membina pratonton.",
-  "Downloads use your saved report choices. Save changes in Build report before downloading.": "Muat turun menggunakan pilihan laporan yang telah anda simpan. Simpan perubahan dalam bina laporan sebelum memuat turun.",
+  "Downloads use your saved report choices. Save changes in Build report before downloading.": "Muat turun menggunakan pilihan laporan yang telah anda simpan. Simpan perubahan dalam «Bina laporan» sebelum memuat turun.",
   "Enter whole Telegram IDs separated by commas.": "Masukkan semua ID Telegram secara keseluruhan, dipisahkan dengan koma.",
   "Find a recorded chat": "Cari sembang yang direkod",
   "Find an account ID": "Cari ID akaun",
@@ -5693,7 +5691,7 @@
   "02 · Statistics & charts": "02 · Statistik & carta",
   "03 · Document details": "03 · Butiran dokumen",
   "<strong>Activity by chat</strong><small>Compare included conversations.</small>": "<strong>Aktiviti melalui sembang</strong><small>Bandingkan perbualan yang disertakan.</small>",
-  "<strong>Activity by participant</strong><small>Sender counts with unknowns kept visible.</small>": "<strong>Aktiviti oleh peserta</strong>Pengira penghantar <small>dengan nilai tidak diketahui dipaparkan.</small>",
+  "<strong>Activity by participant</strong><small>Sender counts with unknowns kept visible.</small>": "<strong>Aktiviti oleh peserta</strong><small>Kiraan penghantar dengan nilai tidak diketahui tetap dipaparkan.</small>",
   "<strong>Activity over time</strong><small>Daily counts or equal date intervals.</small>": "<strong>Aktiviti dari masa ke masa</strong><small>Jumlah harian atau selang tarikh sama.</small>",
   "<strong>Preview</strong><span>Cover &amp; charts · current journal</span>": "<strong>Pratonton</strong><span>Tutup &amp;grafik · jurnal semasa</span>",
   "<strong>Record composition</strong><small>New, historical, recovered, edited, deleted and missing observations.</small>": "<strong>Komposisi rekod</strong><small>Perhatian baharu, bersejarah, dipulihkan, disunting, dipadam dan hilang.</small>",
@@ -6605,7 +6603,6 @@
   "A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.": "Sekumpulan konteks tempatan dengan petikan dan manifest yang disahkan. Tiada perkhidmatan AI dihubungi. Pilihan mungkin tidak lengkap.",
   "A local file could not be read. Keep its recovery receipt and retry before changing the storage destination.": "Fail tempatan tidak dapat dibaca. Simpan resit pemulihannya dan cuba semula sebelum menukar destinasi penyimpanan.",
   "A local file differs from its recorded hash. Restore or repair it before changing the storage destination.": "Fail tempatan berbeza daripada hash yang direkodkannya. Pulihkan atau baiki ia sebelum menukar destinasi penyimpanan.",
-  "A mode changes the panel view. It does not activate services or certify evidence. Check the status of each layer below.": "Mod mengubah paparan panel. Ia tidak mengaktifkan perkhidmatan atau mengesahkan bukti. Semak status setiap lapisan di bawah.",
   "A participating account or signing identity has changed.": "Akaun yang mengambil bahagian atau identiti penandatangan telah berubah.",
   "A quick switch from online to offline can itself be noticed. Hiding last seen in privacy settings is stronger.": "Peralihan pantas daripada dalam talian ke luar talian boleh dikesan. Menyembunyikan 'terakhir dilihat' dalam tetapan privasi lebih kukuh.",
   "A reply is the first message from the other side after one of this account's messages. In groups it may answer something else.": "Balasan ialah mesej pertama daripada pihak lain selepas salah satu mesej akaun ini. Dalam kumpulan ia mungkin menjawab sesuatu yang lain.",
@@ -8563,5 +8560,41 @@
   "To export this account, pause observation.": "Untuk mengeksport akaun ini, jeda pemerhatian.",
   "Updating profile photos": "Mengemas kini foto profil",
   "{task}. Pause observation to start the export; start it again in Accounts afterwards.": "{task}. Jeda pemerhatian untuk memulakan eksport; mulakan semula di Akaun selepas itu.",
-  "{task}. The export can start when it finishes.": "{task}. Eksport boleh bermula apabila ia selesai."
+  "{task}. The export can start when it finishes.": "{task}. Eksport boleh bermula apabila ia selesai.",
+  "{n} saved record": "{n} rekod disimpan",
+  "{n} saved records": {
+    "other": "{n} rekod disimpan"
+  },
+  "{n} selected chat": "{n} sembang dipilih",
+  "{n} selected chats": {
+    "other": "{n} sembang dipilih"
+  },
+  "{n} connected": {
+    "other": "{n} bersambung"
+  },
+  "{n} service type": "{n} jenis perkhidmatan",
+  "{n} service types": {
+    "other": "{n} jenis perkhidmatan"
+  },
+  "A mode changes the panel view. The status of each layer is below.": "Mod menukar paparan panel. Status setiap lapisan ada di bawah.",
+  "Map layer": "Lapisan peta",
+  "Find account": "Cari akaun",
+  "Refresh snapshot": "Muat semula petikan",
+  "Expand map": "Kembangkan peta",
+  "Zoom out": "Zum keluar",
+  "Fit map": "Muatkan peta",
+  "Zoom in": "Zum masuk",
+  "Node details": "Butiran nod",
+  "Close details": "Tutup butiran",
+  "host": "hos",
+  "pending": "belum selesai",
+  "healthy at last check": "sihat pada semakan terakhir",
+  "in cooldown": "dalam rehat",
+  "A session target prefix is not a firewall allowlist. Source ports are assigned by the operating system.": "Awalan sasaran sesi bukan senarai benar tembok api. Port sumber ditetapkan oleh sistem pengendalian.",
+  "Interactive system topology": "Topologi sistem interaktif",
+  "System details": "Butiran sistem",
+  "Download observations": "Muat turun pemerhatian",
+  "Filter observations": "Tapis pemerhatian",
+  "related": "berkaitan",
+  "in Telegram pool": "dalam kumpulan Telegram"
 }

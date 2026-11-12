@@ -1717,7 +1717,6 @@
   "Connect a run to an approved software version and keep an extra copy of its proofs.": "将一次运行与已批准的软件版本关联，并额外保存一份其证明副本。",
   "Design ready · connection not available yet": "设计已就绪 · 连接尚不可用",
   "Explore the plan": "了解计划",
-  "Only the option you choose opens its settings. Nothing is connected automatically.": "只有您选择的选项才会打开其设置。不会自动连接任何内容。",
   "TELEGRAM BOT": "TELEGRAM 机器人",
   "Your bot, in three steps.": "三步设置您的机器人。",
   "A separate witness checks the journal and your bot publishes the result.": "独立的见证人检查日志，由您的机器人发布结果。",
@@ -4154,7 +4153,6 @@
   "Yes": "是",
   "Your account is connected. Continue to choose what to export.": "您的账户已连接。继续选择要导出的内容。",
   "visible to this account during the recorded acquisition intervals": "在记录的采集时间段内，该账户可见的内容",
-  "{records} saved records · {sources} selected sources": "{records} 已保存的记录 · {sources} 已选定的来源",
   "matrixs://user:password@matrix.example.org/#room": "matrixs://user:password@matrix.example.org/#room",
   "A snapshot of data visible to this account during the recorded acquisition intervals.": "这是该账户在记录的采集时间段内可见数据的快照。",
   "This panel is reached over a network, so it does not take cloud tokens. Create servers from TgWitness on your own computer, or run the commands below.": "此面板通过网络访问，因此不接受云服务令牌。请在您自己电脑上的 TgWitness 中创建服务器，或运行下面的命令。",
@@ -6605,7 +6603,6 @@
   "A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.": "包含引用和签名清单的本地上下文包。不与任何 AI 服务进行交互。所选内容可能不完整。",
   "A local file could not be read. Keep its recovery receipt and retry before changing the storage destination.": "无法读取本地文件。请保留其恢复凭证，并在更改存储目标之前重试。",
   "A local file differs from its recorded hash. Restore or repair it before changing the storage destination.": "本地文件与其记录的哈希值不一致。在更改存储目标之前，请先恢复或修复该文件。",
-  "A mode changes the panel view. It does not activate services or certify evidence. Check the status of each layer below.": "模式用于切换面板视图，不激活服务也不对证据进行认证。请检查下方各层的状态。",
   "A participating account or signing identity has changed.": "某个参与账户或签名身份已发生变更。",
   "A quick switch from online to offline can itself be noticed. Hiding last seen in privacy settings is stronger.": "从在线状态快速切换至离线状态这一行为本身即可被察觉。在隐私设置中隐藏最后上线时间能提供更强的保护。",
   "A reply is the first message from the other side after one of this account's messages. In groups it may answer something else.": "回复是指本账户发送消息后，对方发来的第一条消息。在群组中，它可能是在回应其他内容。",
@@ -8563,5 +8560,41 @@
   "To export this account, pause observation.": "要导出此账户，请暂停观察。",
   "Updating profile photos": "正在更新头像",
   "{task}. Pause observation to start the export; start it again in Accounts afterwards.": "{task}。暂停观察即可开始导出；之后请在“账户”中重新开始观察。",
-  "{task}. The export can start when it finishes.": "{task}。完成后即可开始导出。"
+  "{task}. The export can start when it finishes.": "{task}。完成后即可开始导出。",
+  "{n} saved record": "{n} 条已保存记录",
+  "{n} saved records": {
+    "other": "{n} 条已保存记录"
+  },
+  "{n} selected chat": "{n} 个已选聊天",
+  "{n} selected chats": {
+    "other": "{n} 个已选聊天"
+  },
+  "{n} connected": {
+    "other": "{n} 个已连接"
+  },
+  "{n} service type": "{n} 种服务",
+  "{n} service types": {
+    "other": "{n} 种服务"
+  },
+  "A mode changes the panel view. The status of each layer is below.": "模式会改变面板的显示。各层状态见下方。",
+  "Map layer": "地图图层",
+  "Find account": "查找账户",
+  "Refresh snapshot": "刷新快照",
+  "Expand map": "展开地图",
+  "Zoom out": "缩小",
+  "Fit map": "适应地图",
+  "Zoom in": "放大",
+  "Node details": "节点详情",
+  "Close details": "关闭详情",
+  "host": "主机",
+  "pending": "待定",
+  "healthy at last check": "上次检查时正常",
+  "in cooldown": "冷却中",
+  "A session target prefix is not a firewall allowlist. Source ports are assigned by the operating system.": "会话目标前缀不是防火墙允许列表。源端口由操作系统分配。",
+  "Interactive system topology": "交互式系统拓扑",
+  "System details": "系统详情",
+  "Download observations": "下载观察记录",
+  "Filter observations": "筛选观察记录",
+  "related": "关联",
+  "in Telegram pool": "在 Telegram 池中"
 }

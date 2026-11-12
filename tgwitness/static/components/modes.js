@@ -194,7 +194,7 @@ export function createModes({node, tr, json, may, status, query, go, toast}) {
     change.addEventListener('click', () => show());
     head.append(title, change);
     card.append(head);
-    card.append(node('p', 'hint', tr('A mode changes the panel view. It does not activate services or certify evidence. Check the status of each layer below.')));
+    card.append(node('p', 'hint', tr('A mode changes the panel view. The status of each layer is below.')));
     level(card);
     const details = node('details', 'protection-details'), summary = node('summary', '', tr('The {total} protection layers', {total: data.total}));
     details.append(summary); layerList(details);

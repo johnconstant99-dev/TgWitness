@@ -1717,7 +1717,6 @@
   "Connect a run to an approved software version and keep an extra copy of its proofs.": "Hubungkan sebuah eksekusi dengan versi perangkat lunak yang disetujui dan simpan salinan tambahan buktinya.",
   "Design ready · connection not available yet": "Desain siap · koneksi belum tersedia",
   "Explore the plan": "Lihat rencananya",
-  "Only the option you choose opens its settings. Nothing is connected automatically.": "Hanya opsi yang Anda pilih yang membuka pengaturannya. Tidak ada yang terhubung otomatis.",
   "TELEGRAM BOT": "BOT TELEGRAM",
   "Your bot, in three steps.": "Bot Anda, dalam tiga langkah.",
   "A separate witness checks the journal and your bot publishes the result.": "Saksi terpisah memeriksa jurnal dan bot Anda menerbitkan hasilnya.",
@@ -4154,7 +4153,6 @@
   "Yes": "Ya",
   "Your account is connected. Continue to choose what to export.": "Akun Anda telah terhubung. Lanjutkan untuk memilih apa yang akan diekspor.",
   "visible to this account during the recorded acquisition intervals": "terlihat oleh akun ini selama interval pengumpulan yang terekam",
-  "{records} saved records · {sources} selected sources": "{records} catatan yang disimpan · {sources} sumber yang dipilih",
   "matrixs://user:password@matrix.example.org/#room": "matrixs://user:password@matrix.example.org/#room",
   "A snapshot of data visible to this account during the recorded acquisition intervals.": "Cuplikan data yang terlihat oleh akun ini selama interval pengumpulan yang terekam.",
   "This panel is reached over a network, so it does not take cloud tokens. Create servers from TgWitness on your own computer, or run the commands below.": "Panel ini dibuka melalui jaringan, jadi tidak menerima token cloud. Buat server dari TgWitness di komputer Anda sendiri, atau jalankan perintah di bawah.",
@@ -5039,7 +5037,7 @@
   "Report contents": "Isi laporan",
   "This chat has {n} messages, exceeding the PDF transcript limit of {limit}. Every message remains in chat.json and the HTML viewer.": "Obrolan ini berisi pesan-pesan {n}, yang melebihi batas transkrip PDF sebesar {limit}. Setiap pesan tetap tersimpan di chat.json dan penampil HTML.",
   "This journal has {n} records, exceeding the PDF transcript limit of {limit}. Every record remains in the signed source files and the HTML viewer.": "Jurnal ini memiliki catatan {n}, yang melebihi batas transkrip PDF dari {limit}. Setiap catatan tetap ada dalam berkas sumber yang ditandatangani dan penampil HTML.",
-  "<strong>Keep browser details private</strong><span>User-Agent strings are not stored. IP addresses are hidden in the panel's process log.</span>": "<strong>Jaga kerahasiaan detail browser</strong>String <span>dan User-Agent tidak disimpan. Alamat IP disembunyikan dalam log proses panel.</span>",
+  "<strong>Keep browser details private</strong><span>User-Agent strings are not stored. IP addresses are hidden in the panel's process log.</span>": "<strong>Jaga kerahasiaan detail browser</strong><span>String User-Agent tidak disimpan. Alamat IP disembunyikan dalam log proses panel.</span>",
   "<strong>Share the case</strong><span>Reviewers see the workspaces and chats you choose. Connection details require account-management permission.</span>": "<strong>Bagikan kasus </strong><span>Peninjau dapat melihat ruang kerja dan obrolan yang Anda pilih. Rincian koneksi memerlukan izin pengelolaan akun. </span>",
   "Access privacy": "Akses privasi",
   "Administrator key": "Kunci administrator",
@@ -6605,7 +6603,6 @@
   "A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.": "Paket konteks lokal dengan kutipan dan manifes yang ditandatangani. Tidak ada layanan AI yang dihubungi. Pemilihan mungkin bersifat parsial.",
   "A local file could not be read. Keep its recovery receipt and retry before changing the storage destination.": "File lokal tidak dapat dibaca. Simpan tanda terima pemulihannya dan coba lagi sebelum mengubah tujuan penyimpanan.",
   "A local file differs from its recorded hash. Restore or repair it before changing the storage destination.": "File lokal berbeda dari hash yang tercatat. Pulihkan atau perbaiki file tersebut sebelum mengubah tujuan penyimpanan.",
-  "A mode changes the panel view. It does not activate services or certify evidence. Check the status of each layer below.": "Sebuah mode mengubah tampilan panel. Mode ini tidak mengaktifkan layanan atau mengesahkan bukti. Periksa status setiap lapisan di bawah ini.",
   "A participating account or signing identity has changed.": "Akun peserta atau identitas penandatangan telah berubah.",
   "A quick switch from online to offline can itself be noticed. Hiding last seen in privacy settings is stronger.": "Peralihan cepat dari mode daring ke luring dapat terdeteksi dengan sendirinya. Menyembunyikan status terakhir terlihat di pengaturan privasi memberikan perlindungan yang lebih kuat.",
   "A reply is the first message from the other side after one of this account's messages. In groups it may answer something else.": "Balasan adalah pesan pertama dari pihak lain setelah salah satu pesan dari akun ini. Dalam grup, balasan tersebut mungkin menanggapi hal lain.",
@@ -8563,5 +8560,41 @@
   "To export this account, pause observation.": "Untuk mengekspor akun ini, jeda pengamatan.",
   "Updating profile photos": "Memperbarui foto profil",
   "{task}. Pause observation to start the export; start it again in Accounts afterwards.": "{task}. Jeda pengamatan untuk memulai ekspor; mulai lagi di Akun setelahnya.",
-  "{task}. The export can start when it finishes.": "{task}. Ekspor dapat dimulai setelah selesai."
+  "{task}. The export can start when it finishes.": "{task}. Ekspor dapat dimulai setelah selesai.",
+  "{n} saved record": "{n} catatan tersimpan",
+  "{n} saved records": {
+    "other": "{n} catatan tersimpan"
+  },
+  "{n} selected chat": "{n} obrolan terpilih",
+  "{n} selected chats": {
+    "other": "{n} obrolan terpilih"
+  },
+  "{n} connected": {
+    "other": "{n} terhubung"
+  },
+  "{n} service type": "{n} jenis layanan",
+  "{n} service types": {
+    "other": "{n} jenis layanan"
+  },
+  "A mode changes the panel view. The status of each layer is below.": "Mode mengubah tampilan panel. Status setiap lapisan ada di bawah.",
+  "Map layer": "Lapisan peta",
+  "Find account": "Cari akun",
+  "Refresh snapshot": "Muat ulang cuplikan",
+  "Expand map": "Perluas peta",
+  "Zoom out": "Perkecil",
+  "Fit map": "Sesuaikan peta",
+  "Zoom in": "Perbesar",
+  "Node details": "Detail node",
+  "Close details": "Tutup detail",
+  "host": "host",
+  "pending": "tertunda",
+  "healthy at last check": "sehat saat pemeriksaan terakhir",
+  "in cooldown": "sedang jeda",
+  "A session target prefix is not a firewall allowlist. Source ports are assigned by the operating system.": "Prefiks tujuan sesi bukan daftar izin firewall. Port sumber ditetapkan oleh sistem operasi.",
+  "Interactive system topology": "Topologi sistem interaktif",
+  "System details": "Detail sistem",
+  "Download observations": "Unduh pengamatan",
+  "Filter observations": "Saring pengamatan",
+  "related": "terkait",
+  "in Telegram pool": "di pool Telegram"
 }

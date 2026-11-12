@@ -29,13 +29,14 @@ const state = {token: sessionStorage.getItem("tgwitness-token") || "",
   accountDisclosureJob: null, accountDisclosurePreview: null, accountDisclosureDirty: false,
   accountDisclosures: {}, exportTask: 'journal', workflow: null};
 let workspaceSafety;
-const workspaceSafetyReady=import('./core/workspace-safety.js?v=1').then(({createWorkspaceSafety})=>{
-  workspaceSafety=createWorkspaceSafety({state,find:$,tr,avatar:avatarNode,switchProfile,refreshStatus,confirm:askConfirm});
+const workspaceSafetyReady=import('./core/workspace-safety.js?v=2').then(({createWorkspaceSafety})=>{
+  workspaceSafety=createWorkspaceSafety({state,find:$,tr,avatar:avatarNode,switchProfile,refreshStatus,confirm:askConfirm,
+    describe:()=>!state.status||!accountActivity?'':state.status.demo?tr('Sample data'):accountActivityText(profileEntry()||{collector:state.status.collector}).title});
   window.TgWitnessWorkspace=workspaceSafety;
 });
 let accountState,accountActivity;
 let boardView;
-const boardReady=import('./views/board.js?v=2').then(({createCaseBoard})=>{
+const boardReady=import('./views/board.js?v=3').then(({createCaseBoard})=>{
   boardView=createCaseBoard({root:$('view-board'),state,json,tr,trn,node,toast,may,download,media:mediaNode,
     openEvidence:async(event,range)=>{
       const revision=state.workspaceRevision;
@@ -857,8 +858,8 @@ function renderWorkflowControls(){
   const activity=accountActivityText({...current,collector:state.status.collector,sources_enabled:sources}),demo=state.status.demo;
   $('workflow-status-title').textContent=demo?tr('Demo workspace'):activity.title;
   $('workflow-status-title').closest('.workflow-status').dataset.state=demo?'demo':activity.kind;
-  $('workflow-status-copy').textContent=[demo?'':current.label,tr('{records} saved records · {sources} selected sources',
-    {records:state.status.stats.total.toLocaleString(),sources})].filter(Boolean).join(' · ');
+  $('workflow-status-copy').textContent=[demo?'':current.label,trn('{n} saved record','{n} saved records',state.status.stats.total),
+    trn('{n} selected chat','{n} selected chats',sources)].filter(Boolean).join(' · ');
   const exporter=viewQuery('start','[data-workflow="account"]');
   exporter.textContent=tr(!demo&&activity.observing?'Pause observation and export':'Export my account');
   $('workflow-account-hint').textContent=!demo&&activity.observing?
@@ -1210,7 +1211,7 @@ const collectionReady=import("./components/collection.js?v=2").then(({createColl
 collectionReady.catch(error=>toast(error.message,true));
 let modesUI=null;
 const modeSession=()=>state.workspaceRevision+":"+state.profile;
-const modesReady=import("./components/modes.js?v=1").then(({createModes})=>{
+const modesReady=import("./components/modes.js?v=2").then(({createModes})=>{
   modesUI=createModes({node,tr,json,may,status:()=>state.status,query:panelQueries,go:goPlace,toast});
   if(state.status&&!$("workspace").hidden)modesUI.sync(modeSession());
   return modesUI;
@@ -1852,7 +1853,7 @@ async function refreshRanked(request) {
   state.searchIndex=result.index;
   renderEvents();
 }
-const journalReady=import('./components/journal.js?v=layout1').then(({createJournal})=>{
+const journalReady=import('./components/journal.js?v=layout2').then(({createJournal})=>{
   window.TgWitnessJournal=createJournal({get:$,state,node,icon,tr,invalidate:()=>{state.request++;},error:message=>toast(message,true),
     request:(path,body)=>json(path,body),admin:()=>!!state.me?.admin,
     changed:async()=>{state.boardSlice=null;state.boardAdded=false;$('board-slice-context')?.remove();state.cursor=state.eventBefore=state.eventAfter=state.eventMatched=null;closeDetail({history:false});window.TgWitnessRouter?.record({seq:null});await refreshEvents();},
@@ -6132,7 +6133,7 @@ const topologyReady=import('./views/topology.js?v=2').then(({createTopology})=>{
 topologyReady.catch(error=>toast(error.message,true));
 let accessView=null,systemLogView=null;
 let systemMapView=null;
-const systemMapReady=import('./views/system-map.js?v=2').then(({createSystemMap})=>{
+const systemMapReady=import('./views/system-map.js?v=3').then(({createSystemMap})=>{
   systemMapView=createSystemMap({root:$('view-system-map'),tr,json,getState:()=>state,
     options:()=>viewOptions('system-map'),
     openSettings:async (profile,card)=>{

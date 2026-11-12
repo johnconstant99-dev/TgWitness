@@ -1057,7 +1057,6 @@
   "Only the app that pressed: the bot's popup, notice or link": "押されたアプリのみ：ボットのポップアップ、通知、またはリンク",
   "Only the app that typed: the list of results": "「入力したアプリのみ」：検索結果の一覧",
   "Only the message, if you send a result": "結果を送信する場合、メッセージのみ",
-  "Only the option you choose opens its settings. Nothing is connected automatically.": "選択したオプションのみ、その設定画面が開きます。自動的に関連付けられるものはありません。",
   "Only the view changes": "表示のみが変更されます",
   "Only your account sees which app it is": "どのアプリであるかは、ご自身のアカウントでのみ確認できます",
   "Open": "開く",
@@ -4154,7 +4153,6 @@
   "Yes": "はい",
   "Your account is connected. Continue to choose what to export.": "アカウントが接続されました。次に、エクスポートする項目を選択してください。",
   "visible to this account during the recorded acquisition intervals": "記録された取得期間中にこのアカウントから閲覧可能だったもの",
-  "{records} saved records · {sources} selected sources": "{records} 保存された記録 · {sources} 選択されたソース",
   "matrixs://user:password@matrix.example.org/#room": "matrixs://user:password@matrix.example.org/#room",
   "A snapshot of data visible to this account during the recorded acquisition intervals.": "記録された取得期間中にこのアカウントから閲覧可能だったデータのスナップショットです。",
   "This panel is reached over a network, so it does not take cloud tokens. Create servers from TgWitness on your own computer, or run the commands below.": "このパネルはネットワーク経由で開かれているため、クラウドのトークンを受け付けません。ご自身のコンピューター上の TgWitness からサーバーを作成するか、下のコマンドを実行してください。",
@@ -6605,7 +6603,6 @@
   "A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.": "引用と署名付きマニフェストを含むローカルコンテキストパック。AIサービスへのアクセスは一切行われません。選択内容は不完全である場合があります。",
   "A local file could not be read. Keep its recovery receipt and retry before changing the storage destination.": "ローカルファイルを読み取ることができませんでした。保存先を変更する前に、その回復レシートを保持し、再試行してください。",
   "A local file differs from its recorded hash. Restore or repair it before changing the storage destination.": "ローカルファイルは、記録されたハッシュ値と異なります。保存先を変更する前に、ファイルを復元または修復してください。",
-  "A mode changes the panel view. It does not activate services or certify evidence. Check the status of each layer below.": "モードはパネルの表示を変更します。サービスの起動や証拠の認証は行いません。以下の各レイヤーのステータスを確認してください。",
   "A participating account or signing identity has changed.": "参加アカウントまたは署名主体が変更されました。",
   "A quick switch from online to offline can itself be noticed. Hiding last seen in privacy settings is stronger.": "オンラインからオフラインへの急な切り替えは、それ自体が検知される可能性があります。プライバシー設定で「最終アクセス時刻」を非表示にする方が、より強力な対策となります。",
   "A reply is the first message from the other side after one of this account's messages. In groups it may answer something else.": "「返信」とは、このアカウントからのメッセージに対して相手側から送られてくる最初のメッセージのことです。グループ内では、他のメッセージに対する返信である場合もあります。",
@@ -8563,5 +8560,41 @@
   "To export this account, pause observation.": "このアカウントをエクスポートするには、観察を一時停止してください。",
   "Updating profile photos": "プロフィール写真を更新中",
   "{task}. Pause observation to start the export; start it again in Accounts afterwards.": "{task}。エクスポートを開始するには観察を一時停止し、その後「アカウント」で再開してください。",
-  "{task}. The export can start when it finishes.": "{task}。完了するとエクスポートを開始できます。"
+  "{task}. The export can start when it finishes.": "{task}。完了するとエクスポートを開始できます。",
+  "{n} saved record": "保存済みの記録 {n} 件",
+  "{n} saved records": {
+    "other": "保存済みの記録 {n} 件"
+  },
+  "{n} selected chat": "選択したチャット {n} 件",
+  "{n} selected chats": {
+    "other": "選択したチャット {n} 件"
+  },
+  "{n} connected": {
+    "other": "{n} 件接続中"
+  },
+  "{n} service type": "サービスの種類 {n} 件",
+  "{n} service types": {
+    "other": "サービスの種類 {n} 件"
+  },
+  "A mode changes the panel view. The status of each layer is below.": "モードはパネルの表示を変更します。各レイヤーの状態は下に表示されます。",
+  "Map layer": "マップのレイヤー",
+  "Find account": "アカウントを検索",
+  "Refresh snapshot": "スナップショットを更新",
+  "Expand map": "マップを拡大表示",
+  "Zoom out": "縮小",
+  "Fit map": "マップを合わせる",
+  "Zoom in": "拡大",
+  "Node details": "ノードの詳細",
+  "Close details": "詳細を閉じる",
+  "host": "ホスト",
+  "pending": "保留中",
+  "healthy at last check": "前回のチェックで正常",
+  "in cooldown": "クールダウン中",
+  "A session target prefix is not a firewall allowlist. Source ports are assigned by the operating system.": "セッションの宛先プレフィックスはファイアウォールの許可リストではありません。送信元ポートはオペレーティングシステムが割り当てます。",
+  "Interactive system topology": "インタラクティブなシステムトポロジー",
+  "System details": "システムの詳細",
+  "Download observations": "観察記録をダウンロード",
+  "Filter observations": "観察記録を絞り込む",
+  "related": "関連",
+  "in Telegram pool": "Telegram プール内"
 }

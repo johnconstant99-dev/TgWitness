@@ -1059,7 +1059,6 @@
   "Only the app that pressed: the bot's popup, notice or link": "Nur die App, die den Aufruf ausgelöst hat: das Popup, die Benachrichtigung oder der Link des Bots",
   "Only the app that typed: the list of results": "Nur die App, die Folgendes eingegeben hat: die Liste der Ergebnisse",
   "Only the message, if you send a result": "Nur die Nachricht, falls Sie ein Ergebnis senden",
-  "Only the option you choose opens its settings. Nothing is connected automatically.": "Nur die von Ihnen ausgewählte Option öffnet ihre Einstellungen. Es wird nichts automatisch verknüpft.",
   "Only the view changes": "Es ändert sich lediglich die Darstellung",
   "Only your account sees which app it is": "Nur Ihr Konto erkennt, um welche App es sich handelt",
   "Open": "Öffnen",
@@ -4181,7 +4180,6 @@
   "Yes": "Ja",
   "Your account is connected. Continue to choose what to export.": "Ihr Konto ist verbunden. Wählen Sie nun aus, was exportiert werden soll.",
   "visible to this account during the recorded acquisition intervals": "für dieses Konto während der aufgezeichneten Erfassungsintervalle sichtbar",
-  "{records} saved records · {sources} selected sources": "{records} Gespeicherte Datensätze · {sources} Ausgewählte Quellen",
   "matrixs://user:password@matrix.example.org/#room": "matrixs://user:password@matrix.example.org/#room",
   "A snapshot of data visible to this account during the recorded acquisition intervals.": "Ein Snapshot der Daten, die für dieses Konto während der aufgezeichneten Erfassungsintervalle sichtbar waren.",
   "This panel is reached over a network, so it does not take cloud tokens. Create servers from TgWitness on your own computer, or run the commands below.": "Dieses Panel wird über ein Netzwerk erreicht und nimmt daher keine Cloud-Token an. Erstellen Sie Server mit TgWitness auf Ihrem eigenen Computer oder führen Sie die Befehle unten aus.",
@@ -6662,7 +6660,6 @@
   "A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.": "Ein lokales Kontextpaket mit Zitaten und einem signierten Manifest. Es wird kein KI-Dienst kontaktiert. Die Auswahl kann unvollständig sein.",
   "A local file could not be read. Keep its recovery receipt and retry before changing the storage destination.": "Eine lokale Datei konnte nicht gelesen werden. Bewahren Sie die Wiederherstellungsbestätigung auf und versuchen Sie es erneut, bevor Sie das Speicherziel ändern.",
   "A local file differs from its recorded hash. Restore or repair it before changing the storage destination.": "Eine lokale Datei weicht von ihrem aufgezeichneten Hash ab. Stellen Sie sie wieder her oder reparieren Sie sie, bevor Sie das Speicherziel ändern.",
-  "A mode changes the panel view. It does not activate services or certify evidence. Check the status of each layer below.": "Ein Modus ändert die Ansicht des Panels. Er aktiviert keine Dienste und zertifiziert keine Beweise. Überprüfen Sie den Status jeder der folgenden Ebenen.",
   "A participating account or signing identity has changed.": "Ein teilnehmendes Konto oder eine signierende Identität hat sich geändert.",
   "A quick switch from online to offline can itself be noticed. Hiding last seen in privacy settings is stronger.": "Ein schneller Wechsel von online zu offline kann selbst bemerkt werden. Das Ausblenden der Zuletzt gesehen-Angabe in den Datenschutzeinstellungen bietet einen stärkeren Schutz.",
   "A reply is the first message from the other side after one of this account's messages. In groups it may answer something else.": "Eine Antwort ist die erste Nachricht der Gegenseite nach einer Nachricht dieses Kontos. In Gruppen kann sie sich auf etwas anderes beziehen.",
@@ -8603,5 +8600,45 @@
   "To export this account, pause observation.": "Um dieses Konto zu exportieren, unterbrechen Sie die Beobachtung.",
   "Updating profile photos": "Profilfotos werden aktualisiert",
   "{task}. Pause observation to start the export; start it again in Accounts afterwards.": "{task}. Unterbrechen Sie die Beobachtung, um den Export zu starten; starten Sie sie danach unter Konten erneut.",
-  "{task}. The export can start when it finishes.": "{task}. Der Export kann beginnen, sobald das abgeschlossen ist."
+  "{task}. The export can start when it finishes.": "{task}. Der Export kann beginnen, sobald das abgeschlossen ist.",
+  "{n} saved record": "{n} gespeicherter Eintrag",
+  "{n} saved records": {
+    "one": "{n} gespeicherter Eintrag",
+    "other": "{n} gespeicherte Einträge"
+  },
+  "{n} selected chat": "{n} ausgewählter Chat",
+  "{n} selected chats": {
+    "one": "{n} ausgewählter Chat",
+    "other": "{n} ausgewählte Chats"
+  },
+  "{n} connected": {
+    "one": "{n} verbunden",
+    "other": "{n} verbunden"
+  },
+  "{n} service type": "{n} Diensttyp",
+  "{n} service types": {
+    "one": "{n} Diensttyp",
+    "other": "{n} Diensttypen"
+  },
+  "A mode changes the panel view. The status of each layer is below.": "Ein Modus ändert die Ansicht des Panels. Den Status jeder Ebene sehen Sie unten.",
+  "Map layer": "Kartenebene",
+  "Find account": "Konto suchen",
+  "Refresh snapshot": "Momentaufnahme aktualisieren",
+  "Expand map": "Karte erweitern",
+  "Zoom out": "Verkleinern",
+  "Fit map": "Karte einpassen",
+  "Zoom in": "Vergrößern",
+  "Node details": "Knotendetails",
+  "Close details": "Details schließen",
+  "host": "Host",
+  "pending": "ausstehend",
+  "healthy at last check": "bei der letzten Prüfung funktionsfähig",
+  "in cooldown": "pausiert",
+  "A session target prefix is not a firewall allowlist. Source ports are assigned by the operating system.": "Ein Zielpräfix der Sitzung ist keine Firewall-Freigabeliste. Quellports vergibt das Betriebssystem.",
+  "Interactive system topology": "Interaktive Systemtopologie",
+  "System details": "Systemdetails",
+  "Download observations": "Beobachtungen herunterladen",
+  "Filter observations": "Beobachtungen filtern",
+  "related": "verknüpft mit",
+  "in Telegram pool": "im Telegram-Pool"
 }

@@ -1061,7 +1061,6 @@
   "Only the app that pressed: the bot's popup, notice or link": "רק האפליקציה שלחצה: חלון קופץ, הודעה או קישור של הבוט",
   "Only the app that typed: the list of results": "רק האפליקציה שהקלידה: רשימת התוצאות",
   "Only the message, if you send a result": "רק ההודעה, אם אתה שולח תוצאה",
-  "Only the option you choose opens its settings. Nothing is connected automatically.": "רק האפשרות שתבחר תפתח את הגדרותיה. שום דבר לא מחובר באופן אוטומטי.",
   "Only the view changes": "רק התצוגה משתנה",
   "Only your account sees which app it is": "רק החשבון שלכם רואה באיזו אפליקציה מדובר",
   "Open": "פתח",
@@ -4208,7 +4207,6 @@
   "Yes": "כן",
   "Your account is connected. Continue to choose what to export.": "החשבון מחובר. המשך בבחירת מה לייצא.",
   "visible to this account during the recorded acquisition intervals": "נראות לחשבון זה במהלך פרקי הזמן שבהם בוצע האיסוף",
-  "{records} saved records · {sources} selected sources": "{records} רשומות שנשמרו · {sources} מקורות שנבחרו",
   "matrixs://user:password@matrix.example.org/#room": "matrixs://user:password@matrix.example.org/#room",
   "A snapshot of data visible to this account during the recorded acquisition intervals.": "תמונת מצב של הנתונים שהיו גלויים לחשבון זה במהלך פרקי הזמן שבהם נערך האיסוף.",
   "This panel is reached over a network, so it does not take cloud tokens. Create servers from TgWitness on your own computer, or run the commands below.": "ללוח הזה ניגשים דרך רשת, ולכן הוא אינו מקבל אסימוני ענן. צרו שרתים מ-TgWitness במחשב שלכם, או הריצו את הפקודות שלמטה.",
@@ -6683,7 +6681,6 @@
   "A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.": "חבילת הקשר מקומית הכוללת ציטוטים ומניפסט חתום. לא מתבצע קשר עם אף שירות בינה מלאכותית. הבחירה עשויה להיות חלקית.",
   "A local file could not be read. Keep its recovery receipt and retry before changing the storage destination.": "לא ניתן היה לקרוא קובץ מקומי. שמרו את אישור השחזור שלו ונסו שוב לפני שתשנו את יעד האחסון.",
   "A local file differs from its recorded hash. Restore or repair it before changing the storage destination.": "קובץ מקומי שונה מה-hash המתועד שלו. יש לשחזר או לתקן אותו לפני שינוי יעד האחסון.",
-  "A mode changes the panel view. It does not activate services or certify evidence. Check the status of each layer below.": "מצב משנה את תצוגת הלוח. הוא אינו מפעיל שירותים ואינו מאשר ראיות. בדקו את הסטטוס של כל שכבה להלן.",
   "A participating account or signing identity has changed.": "חשבון משתתף או זהות חותמת השתנו.",
   "A quick switch from online to offline can itself be noticed. Hiding last seen in privacy settings is stronger.": "מעבר מהיר ממצב מקוון למצב לא מקוון עשוי להבחין כשלעצמו. הסתרת נראה לאחרונה בהגדרות הפרטיות מספקת הגנה חזקה יותר.",
   "A reply is the first message from the other side after one of this account's messages. In groups it may answer something else.": "תשובה היא ההודעה הראשונה מהצד השני לאחר אחת מההודעות של חשבון זה. בקבוצות היא עשויה להתייחס למשהו אחר.",
@@ -8643,5 +8640,49 @@
   "To export this account, pause observation.": "כדי לייצא את החשבון, השהו את התצפית.",
   "Updating profile photos": "מעדכן תמונות פרופיל",
   "{task}. Pause observation to start the export; start it again in Accounts afterwards.": "{task}. השהו את התצפית כדי להתחיל בייצוא; אחר כך הפעילו אותה מחדש בחשבונות.",
-  "{task}. The export can start when it finishes.": "{task}. הייצוא יוכל להתחיל בסיום."
+  "{task}. The export can start when it finishes.": "{task}. הייצוא יוכל להתחיל בסיום.",
+  "{n} saved record": "{n} רשומה שמורה",
+  "{n} saved records": {
+    "one": "{n} רשומה שמורה",
+    "two": "{n} רשומות שמורות",
+    "other": "{n} רשומות שמורות"
+  },
+  "{n} selected chat": "{n} צ׳אט נבחר",
+  "{n} selected chats": {
+    "one": "{n} צ׳אט נבחר",
+    "two": "{n} צ׳אטים נבחרים",
+    "other": "{n} צ׳אטים נבחרים"
+  },
+  "{n} connected": {
+    "one": "{n} מחובר",
+    "two": "{n} מחוברים",
+    "other": "{n} מחוברים"
+  },
+  "{n} service type": "{n} סוג שירות",
+  "{n} service types": {
+    "one": "{n} סוג שירות",
+    "two": "{n} סוגי שירות",
+    "other": "{n} סוגי שירות"
+  },
+  "A mode changes the panel view. The status of each layer is below.": "מצב משנה את תצוגת הלוח. המצב של כל שכבה מופיע למטה.",
+  "Map layer": "שכבת מפה",
+  "Find account": "חיפוש חשבון",
+  "Refresh snapshot": "רענון תמונת מצב",
+  "Expand map": "הרחבת המפה",
+  "Zoom out": "הקטנה",
+  "Fit map": "התאמת המפה",
+  "Zoom in": "הגדלה",
+  "Node details": "פרטי צומת",
+  "Close details": "סגירת הפרטים",
+  "host": "מארח",
+  "pending": "ממתין",
+  "healthy at last check": "תקינים בבדיקה האחרונה",
+  "in cooldown": "בהשהיה",
+  "A session target prefix is not a firewall allowlist. Source ports are assigned by the operating system.": "קידומת יעד של הפעלה אינה רשימת היתרים של חומת אש. מערכת ההפעלה מקצה את יציאות המקור.",
+  "Interactive system topology": "טופולוגיית מערכת אינטראקטיבית",
+  "System details": "פרטי המערכת",
+  "Download observations": "הורדת תצפיות",
+  "Filter observations": "סינון תצפיות",
+  "related": "קשור ל",
+  "in Telegram pool": "במאגר Telegram"
 }

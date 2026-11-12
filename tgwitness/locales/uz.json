@@ -1059,7 +1059,6 @@
   "Only the app that pressed: the bot's popup, notice or link": "Faqat bosilgan ilova: botning pop-up oynasi, bildirishnoma yoki havolasi",
   "Only the app that typed: the list of results": "Faqat yozgan ilova: natijalar ro'yxati",
   "Only the message, if you send a result": "Faqat xabar, agar natija yuborsangiz",
-  "Only the option you choose opens its settings. Nothing is connected automatically.": "Faqat siz tanlagan variant sozlamalarini ochadi. Hech narsa avtomatik ulanmaydi.",
   "Only the view changes": "Faqat ko'rinish o'zgaradi",
   "Only your account sees which app it is": "Faqat sizning hisobingiz qaysi ilova ekanligini ko'radi",
   "Open": "Ochish",
@@ -4181,7 +4180,6 @@
   "Yes": "Ha",
   "Your account is connected. Continue to choose what to export.": "Hisobingiz ulangan. Eksport qilishni tanlashni davom ettiring.",
   "visible to this account during the recorded acquisition intervals": "yozib olingan olish oraliklarida ushbu hisobga ko'rinadi",
-  "{records} saved records · {sources} selected sources": "{records} saqlangan yozuvlar · {sources} tanlangan manbalar",
   "matrixs://user:password@matrix.example.org/#room": "matrixs://user:password@matrix.example.org/#room",
   "A snapshot of data visible to this account during the recorded acquisition intervals.": "Qayd etilgan yig‘ish oraliqlarida ushbu hisobga ko‘ringan ma’lumotlar nusxasi.",
   "This panel is reached over a network, so it does not take cloud tokens. Create servers from TgWitness on your own computer, or run the commands below.": "Bu panel tarmoq orqali ochilgan, shuning uchun bulut tokenlarini qabul qilmaydi. Serverlarni o‘z kompyuteringizdagi TgWitness’dan yarating yoki quyidagi buyruqlarni bajaring.",
@@ -5452,7 +5450,7 @@
   "Configure and preview": "Sozlash va ko'rinish",
   "Context outside the report filters": "Hisobot filtrlari tashqarisidagi kontekst",
   "Could not build the preview.": "Ko'rinishni yaratib bo'lmadi.",
-  "Downloads use your saved report choices. Save changes in Build report before downloading.": "Yuklab olishlar siz saqlagan hisobot tanlovlaringizni ishlatadi. Yuklab olishdan oldin Build reportda o'zgarishlarni saqlang.",
+  "Downloads use your saved report choices. Save changes in Build report before downloading.": "Yuklab olishlar siz saqlagan hisobot sozlamalaridan foydalanadi. Yuklab olishdan oldin «Hisobot tuzish» bo‘limida o‘zgarishlarni saqlang.",
   "Enter whole Telegram IDs separated by commas.": "Telegram identifikatorlarini vergul bilan ajratilgan holda to'liq kiriting.",
   "Find a recorded chat": "Yozib olingan suhbatni toping",
   "Find an account ID": "Hisob ID sini toping",
@@ -6644,7 +6642,6 @@
   "A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.": "Iqtiboslar va imzolangan manifest bilan mahalliy kontekst to'plami. Hech qanday sun'iy intellekt xizmati bilan bog'lanmaydi. Tanlov qisman bo'lishi mumkin.",
   "A local file could not be read. Keep its recovery receipt and retry before changing the storage destination.": "Mahalliy fayl o'qilolmadi. Saqlash manzilini o'zgartirishdan oldin uning tiklash kvitansiyasini saqlang va qayta urinish qiling.",
   "A local file differs from its recorded hash. Restore or repair it before changing the storage destination.": "Mahalliy fayl uning yozib olingan xeshidan farq qiladi. Saqlash manzilini o'zgartirishdan oldin uni tiklang yoki tuzating.",
-  "A mode changes the panel view. It does not activate services or certify evidence. Check the status of each layer below.": "Rejim paneldagi ko'rinishni o'zgartiradi. U xizmatlarni ishga tushirmaydi yoki dalillarni tasdiqlamaydi. Quyidagi har bir qatlamning holatini tekshiring.",
   "A participating account or signing identity has changed.": "Ishtirok etuvchi hisob yoki imzolovchi identifikator o'zgardi.",
   "A quick switch from online to offline can itself be noticed. Hiding last seen in privacy settings is stronger.": "Onlayn rejimdan oflayn rejimga tezda o'tish ham o'zida sezilishi mumkin. Maxfiylik sozlamalarida oxirgi ko'rilgan vaqtini yashirish esa yanada kuchliroq.",
   "A reply is the first message from the other side after one of this account's messages. In groups it may answer something else.": "Javob – bu ushbu hisobdagi xabarlardan biridan keyin qarama tomondan kelgan birinchi xabar. Guruhlarda u boshqa narsaga javob bo'lishi mumkin.",
@@ -8603,5 +8600,45 @@
   "To export this account, pause observation.": "Bu hisobni eksport qilish uchun kuzatuvni to'xtating.",
   "Updating profile photos": "Profil rasmlari yangilanmoqda",
   "{task}. Pause observation to start the export; start it again in Accounts afterwards.": "{task}. Eksportni boshlash uchun kuzatuvni to'xtating; keyin uni Hisoblar bo'limida qayta ishga tushiring.",
-  "{task}. The export can start when it finishes.": "{task}. Bu tugagach, eksportni boshlash mumkin."
+  "{task}. The export can start when it finishes.": "{task}. Bu tugagach, eksportni boshlash mumkin.",
+  "{n} saved record": "{n} ta saqlangan yozuv",
+  "{n} saved records": {
+    "one": "{n} ta saqlangan yozuv",
+    "other": "{n} ta saqlangan yozuv"
+  },
+  "{n} selected chat": "{n} ta tanlangan chat",
+  "{n} selected chats": {
+    "one": "{n} ta tanlangan chat",
+    "other": "{n} ta tanlangan chat"
+  },
+  "{n} connected": {
+    "one": "{n} ta ulangan",
+    "other": "{n} ta ulangan"
+  },
+  "{n} service type": "{n} xil xizmat",
+  "{n} service types": {
+    "one": "{n} xil xizmat",
+    "other": "{n} xil xizmat"
+  },
+  "A mode changes the panel view. The status of each layer is below.": "Rejim panel ko‘rinishini o‘zgartiradi. Har bir qatlam holati quyida.",
+  "Map layer": "Xarita qatlami",
+  "Find account": "Akkauntni topish",
+  "Refresh snapshot": "Suratni yangilash",
+  "Expand map": "Xaritani kengaytirish",
+  "Zoom out": "Kichiklashtirish",
+  "Fit map": "Xaritani sig‘dirish",
+  "Zoom in": "Kattalashtirish",
+  "Node details": "Tugun tafsilotlari",
+  "Close details": "Tafsilotlarni yopish",
+  "host": "xost",
+  "pending": "kutilmoqda",
+  "healthy at last check": "oxirgi tekshiruvda soz",
+  "in cooldown": "tanaffusda",
+  "A session target prefix is not a firewall allowlist. Source ports are assigned by the operating system.": "Seans manzili prefiksi xavfsizlik devorining ruxsat ro‘yxati emas. Manba portlarini operatsion tizim tayinlaydi.",
+  "Interactive system topology": "Tizimning interaktiv topologiyasi",
+  "System details": "Tizim tafsilotlari",
+  "Download observations": "Kuzatuvlarni yuklab olish",
+  "Filter observations": "Kuzatuvlarni saralash",
+  "related": "bog‘liq",
+  "in Telegram pool": "Telegram pulida"
 }

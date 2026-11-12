@@ -142,6 +142,8 @@ def all_script_keys(package=PACKAGE):
             keys += [js_literal(match.group(2)) for match in LITERAL.finditer(source)
                      if re.match(r"^[A-Z][A-Za-z]", match.group(2))
                      and not re.search(r"[<>{}\n]", match.group(2))]
+            keys += [js_literal(match.group(2)) for match in re.finditer(r"(?<![\w.$])t\((['\"])((?:\\[\s\S]|(?!\1)[^\\\r\n])*)\1\)", source)
+                     if re.search(r"[A-Za-z]{2}", match.group(2))]
     observer = ast.parse((package / "network_observer.py").read_text(encoding="utf-8"))
     keys += [item.value for item in ast.walk(observer) if isinstance(item, ast.Constant)
              and isinstance(item.value, str) and re.match(r"^[A-Z][a-z]+ ", item.value)]

@@ -1728,7 +1728,6 @@
   "Connect a run to an approved software version and keep an extra copy of its proofs.": "किसी रन को स्वीकृत सॉफ़्टवेयर संस्करण से जोड़ें और उसके प्रमाणों की एक अतिरिक्त प्रति रखें।",
   "Design ready · connection not available yet": "डिज़ाइन तैयार · कनेक्शन अभी उपलब्ध नहीं",
   "Explore the plan": "योजना देखें",
-  "Only the option you choose opens its settings. Nothing is connected automatically.": "केवल आपका चुना हुआ विकल्प अपनी सेटिंग्स खोलता है। कुछ भी अपने-आप कनेक्ट नहीं होता।",
   "TELEGRAM BOT": "टेलीग्राम बॉट",
   "Your bot, in three steps.": "तीन चरणों में आपका बॉट।",
   "A separate witness checks the journal and your bot publishes the result.": "एक अलग गवाह जर्नल की जाँच करता है और आपका बॉट परिणाम प्रकाशित करता है।",
@@ -4181,7 +4180,6 @@
   "Yes": "हाँ",
   "Your account is connected. Continue to choose what to export.": "आपका खाता जुड़ा हुआ है। यह चुनना जारी रखें कि क्या निर्यात करना है।",
   "visible to this account during the recorded acquisition intervals": "रिकॉर्ड किए गए अधिग्रहण अंतरालों के दौरान इस खाते के लिए दृश्यमान",
-  "{records} saved records · {sources} selected sources": "{records} सहेजे गए रिकॉर्ड · {sources} चयनित स्रोत",
   "matrixs://user:password@matrix.example.org/#room": "matrixs://user:password@matrix.example.org/#room",
   "A snapshot of data visible to this account during the recorded acquisition intervals.": "रिकॉर्ड किए गए अधिग्रहण अंतरालों के दौरान इस खाते को दिखाई देने वाले डेटा का एक स्नैपशॉट।",
   "This panel is reached over a network, so it does not take cloud tokens. Create servers from TgWitness on your own computer, or run the commands below.": "यह पैनल नेटवर्क के ज़रिए खोला गया है, इसलिए यह क्लाउड टोकन स्वीकार नहीं करता। अपने कंप्यूटर पर TgWitness से सर्वर बनाएँ, या नीचे दिए कमांड चलाएँ।",
@@ -6644,7 +6642,6 @@
   "A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.": "उद्धरणों और एक हस्ताक्षरित मैनिफेस्ट के साथ एक स्थानीय संदर्भ पैक। किसी भी एआई सेवा से संपर्क नहीं किया जाता है। चयन आंशिक हो सकता है।",
   "A local file could not be read. Keep its recovery receipt and retry before changing the storage destination.": "एक स्थानीय फ़ाइल पढ़ी नहीं जा सकी। इसकी रिकवरी रसीद रखें और भंडारण गंतव्य बदलने से पहले दोबारा प्रयास करें।",
   "A local file differs from its recorded hash. Restore or repair it before changing the storage destination.": "एक स्थानीय फ़ाइल अपने दर्ज किए गए हैश से भिन्न होती है। भंडारण गंतव्य को बदलने से पहले इसे पुनर्स्थापित या ठीक करें।",
-  "A mode changes the panel view. It does not activate services or certify evidence. Check the status of each layer below.": "एक मोड पैनल दृश्य को बदलता है। यह सेवाओं को सक्रिय नहीं करता है या साक्ष्य को प्रमाणित नहीं करता है। नीचे प्रत्येक परत की स्थिति की जाँच करें।",
   "A participating account or signing identity has changed.": "एक सहभागी खाते या हस्ताक्षर करने वाली पहचान बदल गई है।",
   "A quick switch from online to offline can itself be noticed. Hiding last seen in privacy settings is stronger.": "ऑनलाइन से ऑफ़लाइन पर एक त्वरित स्विच को स्वयं देखा जा सकता है। प्राइवेसी सेटिंग्स में 'अंतिम बार देखा गया' को छिपाना अधिक मजबूत है।",
   "A reply is the first message from the other side after one of this account's messages. In groups it may answer something else.": "एक उत्तर इस खाते के किसी संदेश के बाद दूसरी तरफ से आने वाला पहला संदेश है। समूहों में यह किसी और चीज़ का उत्तर दे सकता है।",
@@ -8603,5 +8600,45 @@
   "To export this account, pause observation.": "इस खाते को निर्यात करने के लिए निरीक्षण रोकें।",
   "Updating profile photos": "प्रोफ़ाइल फ़ोटो अपडेट हो रही हैं",
   "{task}. Pause observation to start the export; start it again in Accounts afterwards.": "{task}। निर्यात शुरू करने के लिए निरीक्षण रोकें; बाद में इसे खाते अनुभाग में फिर से शुरू करें।",
-  "{task}. The export can start when it finishes.": "{task}। इसके पूरा होने पर निर्यात शुरू हो सकता है।"
+  "{task}. The export can start when it finishes.": "{task}। इसके पूरा होने पर निर्यात शुरू हो सकता है।",
+  "{n} saved record": "{n} सहेजा गया रिकॉर्ड",
+  "{n} saved records": {
+    "one": "{n} सहेजा गया रिकॉर्ड",
+    "other": "{n} सहेजे गए रिकॉर्ड"
+  },
+  "{n} selected chat": "{n} चुनी गई चैट",
+  "{n} selected chats": {
+    "one": "{n} चुनी गई चैट",
+    "other": "{n} चुनी गई चैट"
+  },
+  "{n} connected": {
+    "one": "{n} कनेक्टेड",
+    "other": "{n} कनेक्टेड"
+  },
+  "{n} service type": "{n} सेवा प्रकार",
+  "{n} service types": {
+    "one": "{n} सेवा प्रकार",
+    "other": "{n} सेवा प्रकार"
+  },
+  "A mode changes the panel view. The status of each layer is below.": "मोड पैनल का दृश्य बदलता है। हर परत की स्थिति नीचे है।",
+  "Map layer": "मानचित्र परत",
+  "Find account": "खाता खोजें",
+  "Refresh snapshot": "स्नैपशॉट रीफ़्रेश करें",
+  "Expand map": "मानचित्र बड़ा करें",
+  "Zoom out": "ज़ूम आउट",
+  "Fit map": "मानचित्र फ़िट करें",
+  "Zoom in": "ज़ूम इन",
+  "Node details": "नोड विवरण",
+  "Close details": "विवरण बंद करें",
+  "host": "होस्ट",
+  "pending": "लंबित",
+  "healthy at last check": "पिछली जाँच में ठीक",
+  "in cooldown": "विराम में",
+  "A session target prefix is not a firewall allowlist. Source ports are assigned by the operating system.": "सत्र लक्ष्य प्रीफ़िक्स फ़ायरवॉल अनुमति सूची नहीं है। स्रोत पोर्ट ऑपरेटिंग सिस्टम तय करता है।",
+  "Interactive system topology": "इंटरैक्टिव सिस्टम टोपोलॉजी",
+  "System details": "सिस्टम विवरण",
+  "Download observations": "अवलोकन डाउनलोड करें",
+  "Filter observations": "अवलोकन फ़िल्टर करें",
+  "related": "संबंधित",
+  "in Telegram pool": "Telegram पूल में"
 }

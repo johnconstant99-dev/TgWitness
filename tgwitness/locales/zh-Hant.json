@@ -1057,7 +1057,6 @@
   "Only the app that pressed: the bot's popup, notice or link": "僅限觸發該操作的應用程式：機器人的彈出視窗、通知或連結",
   "Only the app that typed: the list of results": "僅顯示輸入「app」的結果清單",
   "Only the message, if you send a result": "若您傳送結果，則僅顯示該訊息",
-  "Only the option you choose opens its settings. Nothing is connected automatically.": "僅您所選的選項才會開啟其設定。系統不會自動連結任何項目。",
   "Only the view changes": "僅介面顯示內容會變更",
   "Only your account sees which app it is": "僅您的帳戶能識別該應用程式是哪一款",
   "Open": "開啟",
@@ -4154,7 +4153,6 @@
   "Yes": "是",
   "Your account is connected. Continue to choose what to export.": "帳戶已連線。請選擇要匯出的內容。",
   "visible to this account during the recorded acquisition intervals": "在记录的抓取时段内，此账号可见的内容",
-  "{records} saved records · {sources} selected sources": "{records} 已儲存的記錄 · {sources} 已選取的來源",
   "matrixs://user:password@matrix.example.org/#room": "matrixs://user:password@matrix.example.org/#room",
   "A snapshot of data visible to this account during the recorded acquisition intervals.": "此為該帳號在記錄的擷取時間段內可見資料的快照。",
   "This panel is reached over a network, so it does not take cloud tokens. Create servers from TgWitness on your own computer, or run the commands below.": "此面板透過網路存取，因此不接受雲端權杖。請在您自己電腦上的 TgWitness 中建立伺服器，或執行下方的指令。",
@@ -6605,7 +6603,6 @@
   "A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.": "包含引用資訊與簽名清單的本地上下文包。不會聯繫任何 AI 服務。選取內容可能不完整。",
   "A local file could not be read. Keep its recovery receipt and retry before changing the storage destination.": "無法讀取本機檔案。請保留其恢復收據，並在變更儲存目的地之前重新嘗試。",
   "A local file differs from its recorded hash. Restore or repair it before changing the storage destination.": "若本機檔案與其記錄的雜湊值不符，請在變更儲存目的地之前先還原或修復該檔案。",
-  "A mode changes the panel view. It does not activate services or certify evidence. Check the status of each layer below.": "模式會變更面板檢視。它不會啟動服務或認證證據。請檢查下方各層的狀態。",
   "A participating account or signing identity has changed.": "某個參與帳戶或簽署身分已變更。",
   "A quick switch from online to offline can itself be noticed. Hiding last seen in privacy settings is stronger.": "從線上快速切換至離線的狀態本身即可被察覺。在隱私設定中隱藏「最後出現時間」能提供更強的保護。",
   "A reply is the first message from the other side after one of this account's messages. In groups it may answer something else.": "「回覆」是指本帳號發送訊息後，對方傳來的第一則訊息。在群組中，該訊息可能是在回應其他內容。",
@@ -8563,5 +8560,41 @@
   "To export this account, pause observation.": "若要匯出此帳戶，請暫停觀察。",
   "Updating profile photos": "正在更新大頭貼",
   "{task}. Pause observation to start the export; start it again in Accounts afterwards.": "{task}。暫停觀察即可開始匯出；之後請在「帳戶」中重新開始觀察。",
-  "{task}. The export can start when it finishes.": "{task}。完成後即可開始匯出。"
+  "{task}. The export can start when it finishes.": "{task}。完成後即可開始匯出。",
+  "{n} saved record": "{n} 筆已儲存記錄",
+  "{n} saved records": {
+    "other": "{n} 筆已儲存記錄"
+  },
+  "{n} selected chat": "{n} 個已選聊天",
+  "{n} selected chats": {
+    "other": "{n} 個已選聊天"
+  },
+  "{n} connected": {
+    "other": "{n} 個已連線"
+  },
+  "{n} service type": "{n} 種服務",
+  "{n} service types": {
+    "other": "{n} 種服務"
+  },
+  "A mode changes the panel view. The status of each layer is below.": "模式會改變面板的顯示。各層狀態見下方。",
+  "Map layer": "地圖圖層",
+  "Find account": "尋找帳戶",
+  "Refresh snapshot": "重新整理快照",
+  "Expand map": "展開地圖",
+  "Zoom out": "縮小",
+  "Fit map": "符合地圖",
+  "Zoom in": "放大",
+  "Node details": "節點詳細資料",
+  "Close details": "關閉詳細資料",
+  "host": "主機",
+  "pending": "待定",
+  "healthy at last check": "上次檢查時正常",
+  "in cooldown": "冷卻中",
+  "A session target prefix is not a firewall allowlist. Source ports are assigned by the operating system.": "工作階段目標前綴不是防火牆允許清單。來源連接埠由作業系統指派。",
+  "Interactive system topology": "互動式系統拓撲",
+  "System details": "系統詳細資料",
+  "Download observations": "下載觀察記錄",
+  "Filter observations": "篩選觀察記錄",
+  "related": "關聯",
+  "in Telegram pool": "在 Telegram 池中"
 }

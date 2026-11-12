@@ -1728,7 +1728,6 @@
   "Connect a run to an approved software version and keep an extra copy of its proofs.": "یک اجرا را به نسخهٔ تأییدشدهٔ نرم‌افزار پیوند دهید و یک نسخهٔ اضافی از اثبات‌هایش نگه دارید.",
   "Design ready · connection not available yet": "طراحی آماده است · اتصال هنوز در دسترس نیست",
   "Explore the plan": "مشاهدهٔ برنامه",
-  "Only the option you choose opens its settings. Nothing is connected automatically.": "فقط گزینه‌ای که انتخاب می‌کنید تنظیماتش را باز می‌کند. هیچ چیز خودکار متصل نمی‌شود.",
   "TELEGRAM BOT": "ربات تلگرام",
   "Your bot, in three steps.": "ربات شما، در سه گام.",
   "A separate witness checks the journal and your bot publishes the result.": "یک شاهد جداگانه دفترچه را بررسی می‌کند و ربات شما نتیجه را منتشر می‌کند.",
@@ -4181,7 +4180,6 @@
   "Yes": "بله",
   "Your account is connected. Continue to choose what to export.": "حساب شما متصل است. ادامه دهید تا انتخاب کنید چه چیزی را صادر کنید.",
   "visible to this account during the recorded acquisition intervals": "مشهود برای این حساب در بازه‌های زمانی ضبط‌شده",
-  "{records} saved records · {sources} selected sources": "{records} سوابق ذخیره شده · {sources} منابع انتخاب شده",
   "matrixs://user:password@matrix.example.org/#room": "matrixs://user:password@matrix.example.org/#room",
   "A snapshot of data visible to this account during the recorded acquisition intervals.": "یک نمای کلی از داده‌های قابل مشاهده برای این حساب در بازه‌های زمانی ضبط‌شده.",
   "This panel is reached over a network, so it does not take cloud tokens. Create servers from TgWitness on your own computer, or run the commands below.": "این پنل از طریق شبکه باز شده است، بنابراین توکن‌های ابری را نمی‌پذیرد. سرورها را از TgWitness روی رایانهٔ خودتان بسازید یا دستورهای زیر را اجرا کنید.",
@@ -5149,7 +5147,7 @@
   "<strong>Direct</strong><span>This machine's IP</span>": "<strong>راست‌</strong><span>IP این دستگاه </span>",
   "<strong>My proxy</strong><span>Server or proxy URL</span>": "<strong>پراکسی من</strong><span>URL سرور یا پراکسی</span>",
   "<strong>Public MTProxy</strong><span>Automatic pool</span>": "<strong>MTProxy عمومی </strong><span>استخر خودکار </span>",
-  "<strong>VPN</strong><span>Import WireGuard</span>": "VPN <strong>، </strong>، <span>، واردات WireGuard </span>",
+  "<strong>VPN</strong><span>Import WireGuard</span>": "<strong>VPN</strong><span>واردات WireGuard</span>",
   "<strong>WARP</strong><span>Managed local tunnel</span>": "<strong>WARP </strong><span> تونل محلی مدیریت‌شده </span>",
   "Account group": "گروه حساب‌ها",
   "All accounts": "تمام حساب‌ها",
@@ -6644,7 +6642,6 @@
   "A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.": "یک بسته زمینه محلی با ارجاعات و یک مانیفست امضا شده. هیچ سرویس هوش مصنوعی درگیر نمی‌شود. انتخاب ممکن است ناقص باشد.",
   "A local file could not be read. Keep its recovery receipt and retry before changing the storage destination.": "یک فایل محلی قابل خواندن نبود. رسید بازیابی آن را نگه دارید و قبل از تغییر مقصد ذخیره‌سازی، دوباره تلاش کنید.",
   "A local file differs from its recorded hash. Restore or repair it before changing the storage destination.": "یک فایل محلی با هش ثبت‌شده‌ی خود متفاوت است. قبل از تغییر مقصد ذخیره‌سازی، آن را بازیابی یا تعمیر کنید.",
-  "A mode changes the panel view. It does not activate services or certify evidence. Check the status of each layer below.": "یک حالت نمای پنل را تغییر می‌دهد. این کار سرویس‌ها را فعال یا شواهد را تأیید نمی‌کند. وضعیت هر لایه را در زیر بررسی کنید.",
   "A participating account or signing identity has changed.": "یک حساب شرکت‌کننده یا هویت امضاکننده تغییر کرده است.",
   "A quick switch from online to offline can itself be noticed. Hiding last seen in privacy settings is stronger.": "یک تغییر سریع از آنلاین به آفلاین می‌تواند خود قابل تشخیص باشد. پنهان کردن آخرین مشاهده در تنظیمات حریم خصوصی قوی‌تر است.",
   "A reply is the first message from the other side after one of this account's messages. In groups it may answer something else.": "پاسخ، اولین پیام از طرف مقابل پس از یکی از پیام‌های این حساب است. در گروه‌ها ممکن است به چیز دیگری پاسخ دهد.",
@@ -8603,5 +8600,45 @@
   "To export this account, pause observation.": "برای صادرات این حساب، مشاهده را متوقف کنید.",
   "Updating profile photos": "در حال به‌روزرسانی عکس‌های نمایه",
   "{task}. Pause observation to start the export; start it again in Accounts afterwards.": "{task}. برای شروع صادرات، مشاهده را متوقف کنید و بعد آن را دوباره از بخش حساب‌ها شروع کنید.",
-  "{task}. The export can start when it finishes.": "{task}. صادرات پس از پایان آن می‌تواند شروع شود."
+  "{task}. The export can start when it finishes.": "{task}. صادرات پس از پایان آن می‌تواند شروع شود.",
+  "{n} saved record": "{n} رکورد ذخیره‌شده",
+  "{n} saved records": {
+    "one": "{n} رکورد ذخیره‌شده",
+    "other": "{n} رکورد ذخیره‌شده"
+  },
+  "{n} selected chat": "{n} گفتگوی انتخاب‌شده",
+  "{n} selected chats": {
+    "one": "{n} گفتگوی انتخاب‌شده",
+    "other": "{n} گفتگوی انتخاب‌شده"
+  },
+  "{n} connected": {
+    "one": "{n} متصل",
+    "other": "{n} متصل"
+  },
+  "{n} service type": "{n} نوع سرویس",
+  "{n} service types": {
+    "one": "{n} نوع سرویس",
+    "other": "{n} نوع سرویس"
+  },
+  "A mode changes the panel view. The status of each layer is below.": "حالت، نمای پنل را تغییر می‌دهد. وضعیت هر لایه در پایین آمده است.",
+  "Map layer": "لایهٔ نقشه",
+  "Find account": "یافتن حساب",
+  "Refresh snapshot": "به‌روزرسانی نما",
+  "Expand map": "بزرگ کردن نقشه",
+  "Zoom out": "کوچک‌نمایی",
+  "Fit map": "جا دادن نقشه",
+  "Zoom in": "بزرگ‌نمایی",
+  "Node details": "جزئیات گره",
+  "Close details": "بستن جزئیات",
+  "host": "میزبان",
+  "pending": "در انتظار",
+  "healthy at last check": "سالم در آخرین بررسی",
+  "in cooldown": "در وقفه",
+  "A session target prefix is not a firewall allowlist. Source ports are assigned by the operating system.": "پیشوند مقصد نشست، فهرست مجاز دیوار آتش نیست. درگاه‌های مبدأ را سیستم‌عامل تعیین می‌کند.",
+  "Interactive system topology": "توپولوژی تعاملی سیستم",
+  "System details": "جزئیات سیستم",
+  "Download observations": "بارگیری مشاهدات",
+  "Filter observations": "پالایش مشاهدات",
+  "related": "مرتبط با",
+  "in Telegram pool": "در مخزن Telegram"
 }

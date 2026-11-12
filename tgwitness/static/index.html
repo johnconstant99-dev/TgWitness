@@ -30,7 +30,7 @@
 <link rel="stylesheet" href="/components/journal.css?v=6">
 <link rel="stylesheet" href="/views/chats.css?v=11">
 <link rel="stylesheet" href="/views/chat-list.css?v=12">
-<link rel="stylesheet" href="/views/board.css?v=1">
+<link rel="stylesheet" href="/views/board.css?v=2">
 <link rel="stylesheet" href="/views/topology.css?v=2">
 <link rel="stylesheet" href="/cloud-capture.css?v=5"><link rel="stylesheet" href="/cloud-capture-story.css?v=3">
 <script src="/theme.js?v=0.7.0"></script>
@@ -39,7 +39,7 @@
 <script defer src="/dialogs.js?v=2"></script>
 <script defer src="/privacy.js?v=1"></script>
 <script defer src="/chat-safety.js?v=1"></script>
-<script defer src="/app.js?v=0.9.1-evidence1-topology2-layout1-activity1"></script>
+<script defer src="/app.js?v=0.9.1-evidence1-topology2-layout1-activity2"></script>
 <script defer src="/services.js?v=1"></script>
 <script defer src="/independent-capture.js?v=2"></script>
 <script defer src="/investigate.js?v=9"></script>
@@ -58,7 +58,7 @@
 <link href="/views/disclosure-preview.css?v=1" rel="stylesheet">
 <link href="/components/forms.css?v=35" rel="stylesheet">
 <link href="/components/feedback.css?v=36" rel="stylesheet">
-<link href="/components/layout.css?v=2" rel="stylesheet">
+<link href="/components/layout.css?v=3" rel="stylesheet">
 </head>
 <body>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
@@ -163,7 +163,6 @@
     <button class="nav" data-view="board"><svg aria-hidden="true" class="nav-icon"><use href="#i-layers"/></svg> Case Board <b id="board-unread" hidden>0</b></button>
     <button class="nav" data-view="sources"><svg aria-hidden="true" class="nav-icon"><use href="#i-sources"/></svg> Sources</button>
     <button class="nav" data-view="system-map"><svg aria-hidden="true" class="nav-icon"><use href="#i-layers"/></svg> System map</button>
-    <button class="nav" data-view="topology"><svg aria-hidden="true" class="nav-icon"><use href="#i-activity"/></svg> Network topology</button>
     <button class="nav" data-view="witness"><svg aria-hidden="true" class="nav-icon"><use href="#i-sparkle"/></svg> Extras</button>
     <button class="nav" data-view="analysis"><svg aria-hidden="true" class="nav-icon"><use href="#i-search"/></svg> Ask the archive</button>
     <button class="nav" data-view="parameters"><svg aria-hidden="true" class="nav-icon"><use href="#i-settings"/></svg> Parameters</button>
@@ -1209,7 +1208,6 @@
       <button class="secondary" id="extras-open-github" data-extra="github" aria-expanded="false" aria-controls="extras-github" type="button">Configure <span id="extra-github-arrow" aria-hidden="true">→</span></button>
     </article>
   </div>
-  <p class="extras-footnote">Only the option you choose opens its settings. Nothing is connected automatically.</p>
   </div>
 
   <div class="extra-panel" id="extras-capture" hidden role="region" aria-labelledby="extras-capture-title">

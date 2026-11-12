@@ -1057,7 +1057,6 @@
   "Only the app that pressed: the bot's popup, notice or link": "เฉพาะแอปที่กด: หน้าต่างป๊อปอัพ, การแจ้งเตือน หรือลิงก์ของบอท",
   "Only the app that typed: the list of results": "เฉพาะแอปที่พิมพ์: รายชื่อผลลัพธ์",
   "Only the message, if you send a result": "เฉพาะข้อความเท่านั้น หากคุณส่งผลลัพธ์",
-  "Only the option you choose opens its settings. Nothing is connected automatically.": "เพียงตัวเลือกที่คุณเลือกเท่านั้นที่จะเปิดหน้าตั้งค่าของมัน ไม่มีอะไรที่เชื่อมต่อกันโดยอัตโนมัติ",
   "Only the view changes": "มีเพียงส่วนที่แสดงผลเท่านั้นที่เปลี่ยนแปลง",
   "Only your account sees which app it is": "มีเพียงบัญชีของคุณเท่านั้นที่เห็นว่าเป็นแอปใด",
   "Open": "เปิด",
@@ -4154,7 +4153,6 @@
   "Yes": "ใช่",
   "Your account is connected. Continue to choose what to export.": "บัญชีของคุณได้เชื่อมต่อแล้ว โปรดดำเนินการต่อเพื่อเลือกข้อมูลที่จะส่งออก",
   "visible to this account during the recorded acquisition intervals": "ที่บัญชีนี้สามารถเห็นได้ในช่วงเวลาการเก็บข้อมูลที่บันทึกไว้",
-  "{records} saved records · {sources} selected sources": "{records} บันทึกที่เก็บ · {sources} แหล่งข้อมูลที่เลือก",
   "matrixs://user:password@matrix.example.org/#room": "matrixs://user:password@matrix.example.org/#room",
   "A snapshot of data visible to this account during the recorded acquisition intervals.": "ภาพถ่ายข้อมูลที่บัญชีนี้สามารถเห็นได้ในช่วงเวลาการเก็บข้อมูลที่บันทึกไว้",
   "This panel is reached over a network, so it does not take cloud tokens. Create servers from TgWitness on your own computer, or run the commands below.": "แผงนี้เปิดผ่านเครือข่าย จึงไม่รับโทเค็นคลาวด์ สร้างเซิร์ฟเวอร์จาก TgWitness บนคอมพิวเตอร์ของคุณเอง หรือรันคำสั่งด้านล่าง",
@@ -6605,7 +6603,6 @@
   "A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.": "แพ็กบริบทท้องถิ่นที่มีคำอ้างอิงและแมนิเฟสต์ที่ลงนามแล้ว ไม่มีการติดต่อกับบริการ AI ใดทั้งสิ้น การเลือกอาจไม่ครบถ้วน",
   "A local file could not be read. Keep its recovery receipt and retry before changing the storage destination.": "ไม่สามารถอ่านไฟล์ท้องถิ่นได้ ให้เก็บใบรับการกู้คืนไว้และลองอีกครั้งก่อนที่จะเปลี่ยนจุดหมายปลายทางของการจัดเก็บ",
   "A local file differs from its recorded hash. Restore or repair it before changing the storage destination.": "ไฟล์ท้องถิ่นอาจแตกต่างจากค่าแฮชที่บันทึกไว้ ให้กู้คืนหรือซ่อมแซมไฟล์ก่อนที่จะเปลี่ยนจุดหมายปลายทางของการจัดเก็บ",
-  "A mode changes the panel view. It does not activate services or certify evidence. Check the status of each layer below.": "โหมด (mode) เปลี่ยนมุมมองของแผงควบคุม (panel view) แต่ไม่เปิดใช้งานบริการหรือรับรองหลักฐาน ตรวจสอบสถานะของแต่ละชั้นด้านล่าง",
   "A participating account or signing identity has changed.": "บัญชีผู้เข้าร่วมหรือตัวตนผู้ลงนามได้เปลี่ยนแปลงแล้ว",
   "A quick switch from online to offline can itself be noticed. Hiding last seen in privacy settings is stronger.": "การเปลี่ยนจากออนไลน์เป็นออฟไลน์อย่างรวดเร็วสามารถถูกสังเกตได้เอง การซ่อนข้อมูล ครั้งสุดท้ายที่เห็น ในตั้งค่าความเป็นส่วนตัวจะมีความปลอดภัยมากขึ้น",
   "A reply is the first message from the other side after one of this account's messages. In groups it may answer something else.": "การตอบกลับคือข้อความแรกจากฝ่ายตรงข้ามหลังจากข้อความใดข้อความหนึ่งของบัญชีนี้ ในกลุ่ม มันอาจตอบกลับสิ่งอื่นได้",
@@ -8563,5 +8560,41 @@
   "To export this account, pause observation.": "หากต้องการส่งออกบัญชีนี้ ให้หยุดการสังเกตชั่วคราว",
   "Updating profile photos": "กำลังอัปเดตรูปโปรไฟล์",
   "{task}. Pause observation to start the export; start it again in Accounts afterwards.": "{task} หยุดการสังเกตชั่วคราวเพื่อเริ่มส่งออก แล้วเริ่มใหม่ในหน้าบัญชีภายหลัง",
-  "{task}. The export can start when it finishes.": "{task} การส่งออกจะเริ่มได้เมื่องานนี้เสร็จ"
+  "{task}. The export can start when it finishes.": "{task} การส่งออกจะเริ่มได้เมื่องานนี้เสร็จ",
+  "{n} saved record": "บันทึกที่เก็บไว้ {n} รายการ",
+  "{n} saved records": {
+    "other": "บันทึกที่เก็บไว้ {n} รายการ"
+  },
+  "{n} selected chat": "แชทที่เลือก {n} รายการ",
+  "{n} selected chats": {
+    "other": "แชทที่เลือก {n} รายการ"
+  },
+  "{n} connected": {
+    "other": "เชื่อมต่อแล้ว {n}"
+  },
+  "{n} service type": "บริการ {n} ประเภท",
+  "{n} service types": {
+    "other": "บริการ {n} ประเภท"
+  },
+  "A mode changes the panel view. The status of each layer is below.": "โหมดจะเปลี่ยนมุมมองของแผงควบคุม สถานะของแต่ละชั้นอยู่ด้านล่าง",
+  "Map layer": "ชั้นแผนที่",
+  "Find account": "ค้นหาบัญชี",
+  "Refresh snapshot": "รีเฟรชสแนปช็อต",
+  "Expand map": "ขยายแผนที่",
+  "Zoom out": "ซูมออก",
+  "Fit map": "ปรับแผนที่ให้พอดี",
+  "Zoom in": "ซูมเข้า",
+  "Node details": "รายละเอียดโหนด",
+  "Close details": "ปิดรายละเอียด",
+  "host": "โฮสต์",
+  "pending": "รอดำเนินการ",
+  "healthy at last check": "ปกติเมื่อตรวจสอบครั้งล่าสุด",
+  "in cooldown": "อยู่ในช่วงพัก",
+  "A session target prefix is not a firewall allowlist. Source ports are assigned by the operating system.": "คำนำหน้าเป้าหมายของเซสชันไม่ใช่รายการอนุญาตของไฟร์วอลล์ ระบบปฏิบัติการเป็นผู้กำหนดพอร์ตต้นทาง",
+  "Interactive system topology": "โทโพโลยีระบบแบบโต้ตอบ",
+  "System details": "รายละเอียดระบบ",
+  "Download observations": "ดาวน์โหลดการสังเกต",
+  "Filter observations": "กรองการสังเกต",
+  "related": "เกี่ยวข้อง",
+  "in Telegram pool": "ในพูลของ Telegram"
 }

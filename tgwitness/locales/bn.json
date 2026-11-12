@@ -1059,7 +1059,6 @@
   "Only the app that pressed: the bot's popup, notice or link": "শুধুমাত্র যে অ্যাপটি চাপানো হয়েছে: বটের পপআপ, বিজ্ঞপ্তি বা লিঙ্ক",
   "Only the app that typed: the list of results": "শুধুমাত্র সেই অ্যাপ যা টাইপ করেছিল: ফলাফলের তালিকা",
   "Only the message, if you send a result": "শুধুমাত্র বার্তা, যদি আপনি একটি ফলাফল পাঠান",
-  "Only the option you choose opens its settings. Nothing is connected automatically.": "আপনি যে অপশনটি নির্বাচন করবেন শুধুমাত্র সেটির সেটিংসই খোলে। কিছুই স্বয়ংক্রিয়ভাবে সংযুক্ত হয় না।",
   "Only the view changes": "শুধুমাত্র ভিউ পরিবর্তন হয়",
   "Only your account sees which app it is": "শুধুমাত্র আপনার অ্যাকাউন্টই দেখতে পায় এটি কোন অ্যাপ",
   "Open": "খোলা",
@@ -4181,7 +4180,6 @@
   "Yes": "হ্যাঁ",
   "Your account is connected. Continue to choose what to export.": "আপনার অ্যাকাউন্ট সংযুক্ত। রপ্তানি করার জন্য নির্বাচন চালিয়ে যান।",
   "visible to this account during the recorded acquisition intervals": "রেকর্ডকৃত অধিগ্রহণ ইন্টারভালগুলির সময় এই অ্যাকাউন্টের কাছে দৃশ্যমান",
-  "{records} saved records · {sources} selected sources": "{records} সংরক্ষিত রেকর্ড · {sources} নির্বাচিত উৎস",
   "matrixs://user:password@matrix.example.org/#room": "matrixs://user:password@matrix.example.org/#room",
   "A snapshot of data visible to this account during the recorded acquisition intervals.": "রেকর্ডকৃত অধিগ্রহণ ইন্টারভালগুলির সময় এই অ্যাকাউন্টে দৃশ্যমান ডেটার একটি স্ন্যাপশট।",
   "This panel is reached over a network, so it does not take cloud tokens. Create servers from TgWitness on your own computer, or run the commands below.": "এই প্যানেলটি নেটওয়ার্কের মাধ্যমে খোলা হয়েছে, তাই এটি ক্লাউড টোকেন গ্রহণ করে না। নিজের কম্পিউটারে TgWitness থেকে সার্ভার তৈরি করুন, অথবা নিচের কমান্ডগুলো চালান।",
@@ -6644,7 +6642,6 @@
   "A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.": "উদ্ধৃতিসহ একটি স্থানীয় প্রসঙ্গ প্যাক এবং একটি স্বাক্ষরিত ম্যানিফেস্ট। কোনো এআই পরিষেবার সাথে যোগাযোগ করা হয় না। নির্বাচন আংশিক হতে পারে।",
   "A local file could not be read. Keep its recovery receipt and retry before changing the storage destination.": "একটি স্থানীয় ফাইল পড়া যায়নি। স্টোরেজ গন্তব্য পরিবর্তন করার আগে এর পুনরুদ্ধার রসিদ রাখুন এবং পুনরায় চেষ্টা করুন।",
   "A local file differs from its recorded hash. Restore or repair it before changing the storage destination.": "একটি স্থানীয় ফাইল তার রেকর্ডকৃত হ্যাশ থেকে ভিন্ন হতে পারে। স্টোরেজ গন্তব্য পরিবর্তন করার আগে এটি পুনরুদ্ধার বা মেরামত করুন।",
-  "A mode changes the panel view. It does not activate services or certify evidence. Check the status of each layer below.": "একটি মোড প্যানেল ভিউ পরিবর্তন করে। এটি কোনো সেবা সক্রিয় করে না বা প্রমাণ প্রত্যয়ন করে না। নিচের প্রতিটি স্তরের অবস্থা পরীক্ষা করুন।",
   "A participating account or signing identity has changed.": "অংশগ্রহণকারী অ্যাকাউন্ট বা স্বাক্ষরকারী পরিচয় পরিবর্তিত হয়েছে।",
   "A quick switch from online to offline can itself be noticed. Hiding last seen in privacy settings is stronger.": "অনলাইন থেকে অফলাইনে দ্রুত পরিবর্তন নিজেই লক্ষ্যযোগ্য। গোপনীয়তা সেটিংসে শেষ দেখা লুকিয়ে রাখা আরও শক্তিশালী।",
   "A reply is the first message from the other side after one of this account's messages. In groups it may answer something else.": "একটি উত্তর হল এই অ্যাকাউন্টের কোনো মেসেজের পর অন্য পক্ষের প্রথম মেসেজ। গ্রুপে এটি অন্য কোনো কিছুর উত্তর হতে পারে।",
@@ -8603,5 +8600,45 @@
   "To export this account, pause observation.": "এই অ্যাকাউন্ট রপ্তানি করতে পর্যবেক্ষণ বিরতি দিন।",
   "Updating profile photos": "প্রোফাইল ছবি হালনাগাদ হচ্ছে",
   "{task}. Pause observation to start the export; start it again in Accounts afterwards.": "{task}। রপ্তানি শুরু করতে পর্যবেক্ষণ বিরতি দিন; পরে হিসাবসমূহ বিভাগে এটি আবার চালু করুন।",
-  "{task}. The export can start when it finishes.": "{task}। এটি শেষ হলে রপ্তানি শুরু হতে পারবে।"
+  "{task}. The export can start when it finishes.": "{task}। এটি শেষ হলে রপ্তানি শুরু হতে পারবে।",
+  "{n} saved record": "{n}টি সংরক্ষিত রেকর্ড",
+  "{n} saved records": {
+    "one": "{n}টি সংরক্ষিত রেকর্ড",
+    "other": "{n}টি সংরক্ষিত রেকর্ড"
+  },
+  "{n} selected chat": "{n}টি নির্বাচিত চ্যাট",
+  "{n} selected chats": {
+    "one": "{n}টি নির্বাচিত চ্যাট",
+    "other": "{n}টি নির্বাচিত চ্যাট"
+  },
+  "{n} connected": {
+    "one": "{n}টি সংযুক্ত",
+    "other": "{n}টি সংযুক্ত"
+  },
+  "{n} service type": "{n} ধরনের পরিষেবা",
+  "{n} service types": {
+    "one": "{n} ধরনের পরিষেবা",
+    "other": "{n} ধরনের পরিষেবা"
+  },
+  "A mode changes the panel view. The status of each layer is below.": "মোড প্যানেলের দৃশ্য বদলায়। প্রতিটি স্তরের অবস্থা নিচে দেখানো আছে।",
+  "Map layer": "মানচিত্রের স্তর",
+  "Find account": "অ্যাকাউন্ট খুঁজুন",
+  "Refresh snapshot": "স্ন্যাপশট রিফ্রেশ করুন",
+  "Expand map": "মানচিত্র বড় করুন",
+  "Zoom out": "জুম আউট",
+  "Fit map": "মানচিত্র মানানসই করুন",
+  "Zoom in": "জুম ইন",
+  "Node details": "নোডের বিবরণ",
+  "Close details": "বিবরণ বন্ধ করুন",
+  "host": "হোস্ট",
+  "pending": "অপেক্ষমাণ",
+  "healthy at last check": "শেষ পরীক্ষায় সুস্থ",
+  "in cooldown": "বিরতিতে",
+  "A session target prefix is not a firewall allowlist. Source ports are assigned by the operating system.": "সেশনের লক্ষ্য প্রিফিক্স ফায়ারওয়ালের অনুমতি তালিকা নয়। উৎস পোর্ট অপারেটিং সিস্টেম নির্ধারণ করে।",
+  "Interactive system topology": "ইন্টারঅ্যাক্টিভ সিস্টেম টপোলজি",
+  "System details": "সিস্টেমের বিবরণ",
+  "Download observations": "পর্যবেক্ষণ ডাউনলোড করুন",
+  "Filter observations": "পর্যবেক্ষণ ফিল্টার করুন",
+  "related": "সম্পর্কিত",
+  "in Telegram pool": "Telegram পুলে"
 }

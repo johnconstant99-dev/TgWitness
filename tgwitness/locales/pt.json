@@ -1728,7 +1728,6 @@
   "Connect a run to an approved software version and keep an extra copy of its proofs.": "Vincule uma execução a uma versão aprovada do software e guarde uma cópia extra das suas provas.",
   "Design ready · connection not available yet": "Design pronto · conexão ainda indisponível",
   "Explore the plan": "Conhecer o plano",
-  "Only the option you choose opens its settings. Nothing is connected automatically.": "Só a opção escolhida abre as configurações. Nada é conectado automaticamente.",
   "TELEGRAM BOT": "BOT DO TELEGRAM",
   "Your bot, in three steps.": "Seu bot, em três passos.",
   "A separate witness checks the journal and your bot publishes the result.": "Uma testemunha separada verifica o diário e seu bot publica o resultado.",
@@ -4181,7 +4180,6 @@
   "Yes": "Sim",
   "Your account is connected. Continue to choose what to export.": "Sua conta está conectada. Continue para escolher o que exportar.",
   "visible to this account during the recorded acquisition intervals": "visível para esta conta durante os intervalos de aquisição registrados",
-  "{records} saved records · {sources} selected sources": "{records} registros salvos · {sources} fontes selecionadas",
   "matrixs://user:password@matrix.example.org/#room": "matrixs://user:password@matrix.example.org/#room",
   "A snapshot of data visible to this account during the recorded acquisition intervals.": "Instantâneo dos dados visíveis para esta conta nos intervalos de aquisição registrados.",
   "This panel is reached over a network, so it does not take cloud tokens. Create servers from TgWitness on your own computer, or run the commands below.": "Este painel é acessado por uma rede, por isso não aceita tokens de nuvem. Crie servidores pelo TgWitness no seu próprio computador ou execute os comandos abaixo.",
@@ -6644,7 +6642,6 @@
   "A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.": "Um pacote de contexto local com citações e um manifesto assinado. Nenhum serviço de IA é acionado. A seleção pode ser parcial.",
   "A local file could not be read. Keep its recovery receipt and retry before changing the storage destination.": "Não foi possível ler um arquivo local. Guarde o comprovante de recuperação e tente novamente antes de alterar o destino de armazenamento.",
   "A local file differs from its recorded hash. Restore or repair it before changing the storage destination.": "Um arquivo local difere de seu hash registrado. Restaure-o ou repare-o antes de alterar o destino de armazenamento.",
-  "A mode changes the panel view. It does not activate services or certify evidence. Check the status of each layer below.": "Um modo altera a visualização do painel. Ele não ativa serviços nem certifica evidências. Verifique o status de cada camada abaixo.",
   "A participating account or signing identity has changed.": "Uma conta participante ou identidade de assinatura foi alterada.",
   "A quick switch from online to offline can itself be noticed. Hiding last seen in privacy settings is stronger.": "A própria mudança rápida do modo online para o offline pode ser percebida. Ocultar a última vez que foi visto nas configurações de privacidade oferece maior proteção.",
   "A reply is the first message from the other side after one of this account's messages. In groups it may answer something else.": "Uma resposta é a primeira mensagem enviada pelo outro lado após uma das mensagens desta conta. Em grupos, ela pode responder a outra mensagem.",
@@ -8604,5 +8601,49 @@
   "To export this account, pause observation.": "Para exportar esta conta, pause a observação.",
   "Updating profile photos": "Atualizando fotos de perfil",
   "{task}. Pause observation to start the export; start it again in Accounts afterwards.": "{task}. Pause a observação para iniciar a exportação; inicie-a novamente em Contas depois.",
-  "{task}. The export can start when it finishes.": "{task}. A exportação poderá começar quando terminar."
+  "{task}. The export can start when it finishes.": "{task}. A exportação poderá começar quando terminar.",
+  "{n} saved record": "{n} registro salvo",
+  "{n} saved records": {
+    "one": "{n} registro salvo",
+    "many": "{n} registros salvos",
+    "other": "{n} registros salvos"
+  },
+  "{n} selected chat": "{n} chat selecionado",
+  "{n} selected chats": {
+    "one": "{n} chat selecionado",
+    "many": "{n} chats selecionados",
+    "other": "{n} chats selecionados"
+  },
+  "{n} connected": {
+    "one": "{n} conectada",
+    "many": "{n} conectadas",
+    "other": "{n} conectadas"
+  },
+  "{n} service type": "{n} tipo de serviço",
+  "{n} service types": {
+    "one": "{n} tipo de serviço",
+    "many": "{n} tipos de serviço",
+    "other": "{n} tipos de serviço"
+  },
+  "A mode changes the panel view. The status of each layer is below.": "Um modo muda a visualização do painel. O status de cada camada está abaixo.",
+  "Map layer": "Camada do mapa",
+  "Find account": "Encontrar conta",
+  "Refresh snapshot": "Atualizar instantâneo",
+  "Expand map": "Expandir mapa",
+  "Zoom out": "Diminuir zoom",
+  "Fit map": "Ajustar mapa",
+  "Zoom in": "Aumentar zoom",
+  "Node details": "Detalhes do nó",
+  "Close details": "Fechar detalhes",
+  "host": "host",
+  "pending": "pendente",
+  "healthy at last check": "íntegros na última verificação",
+  "in cooldown": "em pausa",
+  "A session target prefix is not a firewall allowlist. Source ports are assigned by the operating system.": "Um prefixo de destino da sessão não é uma lista de permissões do firewall. As portas de origem são atribuídas pelo sistema operacional.",
+  "Interactive system topology": "Topologia interativa do sistema",
+  "System details": "Detalhes do sistema",
+  "Download observations": "Baixar observações",
+  "Filter observations": "Filtrar observações",
+  "related": "relacionado a",
+  "in Telegram pool": "no pool do Telegram"
 }

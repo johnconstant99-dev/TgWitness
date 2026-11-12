@@ -1717,7 +1717,6 @@
   "Connect a run to an approved software version and keep an extra copy of its proofs.": "Liên kết một lần chạy với phiên bản phần mềm đã phê duyệt và giữ thêm một bản sao bằng chứng của nó.",
   "Design ready · connection not available yet": "Thiết kế đã sẵn sàng · kết nối chưa khả dụng",
   "Explore the plan": "Xem kế hoạch",
-  "Only the option you choose opens its settings. Nothing is connected automatically.": "Chỉ tùy chọn quý vị chọn mới mở phần cài đặt của nó. Không có gì được kết nối tự động.",
   "TELEGRAM BOT": "BOT TELEGRAM",
   "Your bot, in three steps.": "Bot của quý vị, trong ba bước.",
   "A separate witness checks the journal and your bot publishes the result.": "Một nhân chứng riêng kiểm tra sổ nhật ký và bot của quý vị công bố kết quả.",
@@ -4154,7 +4153,6 @@
   "Yes": "Có",
   "Your account is connected. Continue to choose what to export.": "Tài khoản của bạn đã được kết nối. Tiếp tục để chọn những gì cần xuất.",
   "visible to this account during the recorded acquisition intervals": "có thể nhìn thấy đối với tài khoản này trong các khoảng thời gian thu thập được ghi lại",
-  "{records} saved records · {sources} selected sources": "{records} bản ghi đã lưu · {sources} nguồn đã chọn",
   "matrixs://user:password@matrix.example.org/#room": "matrixs://user:password@matrix.example.org/#room",
   "A snapshot of data visible to this account during the recorded acquisition intervals.": "Bản chụp nhanh dữ liệu mà tài khoản này có thể nhìn thấy trong các khoảng thời gian thu thập được ghi lại.",
   "This panel is reached over a network, so it does not take cloud tokens. Create servers from TgWitness on your own computer, or run the commands below.": "Bảng điều khiển này được mở qua mạng nên không nhận token đám mây. Hãy tạo máy chủ từ TgWitness trên máy tính của bạn, hoặc chạy các lệnh bên dưới.",
@@ -6605,7 +6603,6 @@
   "A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.": "Một gói bối cảnh cục bộ kèm theo các trích dẫn và bản kê khai đã được ký. Không liên hệ với bất kỳ dịch vụ AI nào. Việc lựa chọn có thể chỉ là một phần.",
   "A local file could not be read. Keep its recovery receipt and retry before changing the storage destination.": "Không thể đọc được tệp cục bộ. Giữ lại biên nhận khôi phục và thử lại trước khi thay đổi đích lưu trữ.",
   "A local file differs from its recorded hash. Restore or repair it before changing the storage destination.": "Một tệp cục bộ khác với giá trị băm đã được ghi lại của nó. Hãy khôi phục hoặc sửa chữa tệp đó trước khi thay đổi đích lưu trữ.",
-  "A mode changes the panel view. It does not activate services or certify evidence. Check the status of each layer below.": "Một chế độ thay đổi giao diện bảng điều khiển. Chế độ này không kích hoạt các dịch vụ hoặc xác thực bằng chứng. Kiểm tra trạng thái của từng lớp bên dưới.",
   "A participating account or signing identity has changed.": "Một tài khoản tham gia hoặc danh tính ký đã thay đổi.",
   "A quick switch from online to offline can itself be noticed. Hiding last seen in privacy settings is stronger.": "Việc chuyển đổi nhanh từ chế độ trực tuyến sang ngoại tuyến có thể tự nó bị phát hiện. Việc ẩn thông tin lần cuối truy cập trong cài đặt quyền riêng tư mang lại mức độ bảo mật cao hơn.",
   "A reply is the first message from the other side after one of this account's messages. In groups it may answer something else.": "Một reply là tin nhắn đầu tiên từ phía bên kia sau một trong các tin nhắn của tài khoản này. Trong các nhóm, nó có thể trả lời một nội dung khác.",
@@ -8563,5 +8560,41 @@
   "To export this account, pause observation.": "Để xuất tài khoản này, hãy tạm dừng quan sát.",
   "Updating profile photos": "Đang cập nhật ảnh hồ sơ",
   "{task}. Pause observation to start the export; start it again in Accounts afterwards.": "{task}. Tạm dừng quan sát để bắt đầu xuất; sau đó bật lại trong Tài khoản.",
-  "{task}. The export can start when it finishes.": "{task}. Có thể bắt đầu xuất khi việc này xong."
+  "{task}. The export can start when it finishes.": "{task}. Có thể bắt đầu xuất khi việc này xong.",
+  "{n} saved record": "{n} bản ghi đã lưu",
+  "{n} saved records": {
+    "other": "{n} bản ghi đã lưu"
+  },
+  "{n} selected chat": "{n} cuộc trò chuyện đã chọn",
+  "{n} selected chats": {
+    "other": "{n} cuộc trò chuyện đã chọn"
+  },
+  "{n} connected": {
+    "other": "{n} đã kết nối"
+  },
+  "{n} service type": "{n} loại dịch vụ",
+  "{n} service types": {
+    "other": "{n} loại dịch vụ"
+  },
+  "A mode changes the panel view. The status of each layer is below.": "Chế độ thay đổi cách hiển thị bảng điều khiển. Trạng thái của từng lớp ở bên dưới.",
+  "Map layer": "Lớp bản đồ",
+  "Find account": "Tìm tài khoản",
+  "Refresh snapshot": "Làm mới ảnh chụp",
+  "Expand map": "Mở rộng bản đồ",
+  "Zoom out": "Thu nhỏ",
+  "Fit map": "Vừa khung bản đồ",
+  "Zoom in": "Phóng to",
+  "Node details": "Chi tiết nút",
+  "Close details": "Đóng chi tiết",
+  "host": "máy chủ",
+  "pending": "đang chờ",
+  "healthy at last check": "hoạt động tốt ở lần kiểm tra gần nhất",
+  "in cooldown": "đang tạm nghỉ",
+  "A session target prefix is not a firewall allowlist. Source ports are assigned by the operating system.": "Tiền tố đích của phiên không phải là danh sách cho phép của tường lửa. Cổng nguồn do hệ điều hành cấp.",
+  "Interactive system topology": "Cấu trúc liên kết hệ thống tương tác",
+  "System details": "Chi tiết hệ thống",
+  "Download observations": "Tải xuống các quan sát",
+  "Filter observations": "Lọc các quan sát",
+  "related": "liên quan",
+  "in Telegram pool": "trong nhóm Telegram"
 }

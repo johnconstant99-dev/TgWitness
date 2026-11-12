@@ -1059,7 +1059,6 @@
   "Only the app that pressed: the bot's popup, notice or link": "Uniquement l'application qui a déclenché l'action : la fenêtre contextuelle, la notification ou le lien du bot",
   "Only the app that typed: the list of results": "Uniquement l’application qui a saisi : la liste des résultats",
   "Only the message, if you send a result": "Uniquement le message, si vous envoyez un résultat",
-  "Only the option you choose opens its settings. Nothing is connected automatically.": "Seule l'option que vous sélectionnez ouvre ses paramètres. Aucune option n'est activée automatiquement.",
   "Only the view changes": "Seule l’affichage change",
   "Only your account sees which app it is": "Seul votre compte peut identifier de quelle application il s’agit",
   "Open": "Ouvrir",
@@ -4181,7 +4180,6 @@
   "Yes": "Oui",
   "Your account is connected. Continue to choose what to export.": "Votre compte est connecté. Continuez pour choisir ce que vous souhaitez exporter.",
   "visible to this account during the recorded acquisition intervals": "visibles pour ce compte pendant les intervalles d’acquisition enregistrés",
-  "{records} saved records · {sources} selected sources": "{records} enregistrements sauvegardés · {sources} sources sélectionnées",
   "matrixs://user:password@matrix.example.org/#room": "matrixs://user:password@matrix.example.org/#room",
   "A snapshot of data visible to this account during the recorded acquisition intervals.": "Instantané des données visibles par ce compte pendant les intervalles d’acquisition enregistrés.",
   "This panel is reached over a network, so it does not take cloud tokens. Create servers from TgWitness on your own computer, or run the commands below.": "Ce panneau est atteint par le réseau, il n’accepte donc pas de jetons cloud. Créez des serveurs depuis TgWitness sur votre propre ordinateur ou exécutez les commandes ci-dessous.",
@@ -6644,7 +6642,6 @@
   "A local context pack with citations and a signed manifest. No AI service is contacted. The selection may be partial.": "Un pack de contexte local comprenant des citations et un manifeste signé. Aucun service d’IA n’est sollicité. La sélection peut être partielle.",
   "A local file could not be read. Keep its recovery receipt and retry before changing the storage destination.": "Un fichier local n’a pas pu être lu. Conservez son reçu de récupération et réessayez avant de modifier la destination de stockage.",
   "A local file differs from its recorded hash. Restore or repair it before changing the storage destination.": "Un fichier local diffère de son hachage enregistré. Restaurez-le ou réparez-le avant de modifier la destination de stockage.",
-  "A mode changes the panel view. It does not activate services or certify evidence. Check the status of each layer below.": "Un mode modifie l’affichage du panneau. Il n’active pas les services et ne certifie pas les preuves. Vérifiez l’état de chaque couche ci-dessous.",
   "A participating account or signing identity has changed.": "Un compte participant ou une identité signataire a changé.",
   "A quick switch from online to offline can itself be noticed. Hiding last seen in privacy settings is stronger.": "Le passage rapide du mode en ligne au mode hors ligne peut lui-même être détecté. Masquer la dernière connexion dans les paramètres de confidentialité offre une protection plus efficace.",
   "A reply is the first message from the other side after one of this account's messages. In groups it may answer something else.": "Une réponse est le premier message envoyé par l’autre partie après l’un des messages de ce compte. Dans les groupes, elle peut répondre à autre chose.",
@@ -8604,5 +8601,49 @@
   "To export this account, pause observation.": "Pour exporter ce compte, mettez l’observation en pause.",
   "Updating profile photos": "Mise à jour des photos de profil",
   "{task}. Pause observation to start the export; start it again in Accounts afterwards.": "{task}. Mettez l’observation en pause pour lancer l’exportation ; relancez-la ensuite dans Comptes.",
-  "{task}. The export can start when it finishes.": "{task}. L’exportation pourra commencer une fois terminé."
+  "{task}. The export can start when it finishes.": "{task}. L’exportation pourra commencer une fois terminé.",
+  "{n} saved record": "{n} enregistrement sauvegardé",
+  "{n} saved records": {
+    "one": "{n} enregistrement sauvegardé",
+    "many": "{n} enregistrements sauvegardés",
+    "other": "{n} enregistrements sauvegardés"
+  },
+  "{n} selected chat": "{n} discussion sélectionnée",
+  "{n} selected chats": {
+    "one": "{n} discussion sélectionnée",
+    "many": "{n} discussions sélectionnées",
+    "other": "{n} discussions sélectionnées"
+  },
+  "{n} connected": {
+    "one": "{n} connecté",
+    "many": "{n} connectés",
+    "other": "{n} connectés"
+  },
+  "{n} service type": "{n} type de service",
+  "{n} service types": {
+    "one": "{n} type de service",
+    "many": "{n} types de service",
+    "other": "{n} types de service"
+  },
+  "A mode changes the panel view. The status of each layer is below.": "Un mode change l’affichage du panneau. L’état de chaque niveau figure ci-dessous.",
+  "Map layer": "Couche de la carte",
+  "Find account": "Rechercher un compte",
+  "Refresh snapshot": "Actualiser l’instantané",
+  "Expand map": "Agrandir la carte",
+  "Zoom out": "Zoom arrière",
+  "Fit map": "Ajuster la carte",
+  "Zoom in": "Zoom avant",
+  "Node details": "Détails du nœud",
+  "Close details": "Fermer les détails",
+  "host": "hôte",
+  "pending": "en attente",
+  "healthy at last check": "opérationnels au dernier contrôle",
+  "in cooldown": "en pause",
+  "A session target prefix is not a firewall allowlist. Source ports are assigned by the operating system.": "Un préfixe de destination de session n’est pas une liste d’autorisation de pare-feu. Le système d’exploitation attribue les ports source.",
+  "Interactive system topology": "Topologie interactive du système",
+  "System details": "Détails du système",
+  "Download observations": "Télécharger les observations",
+  "Filter observations": "Filtrer les observations",
+  "related": "lié à",
+  "in Telegram pool": "dans le pool Telegram"
 }
